@@ -88,7 +88,7 @@
     "react-native-reanimated-carousel": "^5.0.0-beta.5",
     "react-native-safe-area-context": "^5.7.0",
     "react-native-svg": "^15.15.5",
-    "react-native-worklets": "^0.8.3",
+    "react-native-worklets": "0.9.1",
     "release-it": "^19.2.4",
     "turbo": "^2.8.21",
     "typescript": "^6.0.2"
@@ -103,7 +103,7 @@
     "react-native-reanimated-carousel": ">=5.0.0-beta.0",
     "react-native-safe-area-context": ">=5",
     "react-native-svg": ">=15",
-    "react-native-worklets": ">=0.8"
+    "react-native-worklets": ">=0.9"
   },
   "workspaces": [
     "example"
