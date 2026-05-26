@@ -2,11 +2,18 @@ import { StyleSheet } from 'react-native';
 import { r, type ColorTokens } from '../../../theme';
 import type { ThumbnailSize } from './types';
 
-/** Thumbnail 静态 base —— 占位色,Image 加载中 / 失败时不至于空白。 */
+/** Thumbnail 静态样式 ——
+ *  - `base`:Image 占位色,加载中 / 失败时不至于空白
+ *  - `ring`:`selected` 态的外圈品牌色描边,padding 抵消 ring 与 image 之间留 1pt gap */
 export const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({
     base: {
       backgroundColor: c.surfaceContainer,
+    },
+    ring: {
+      borderWidth: 2,
+      borderColor: c.primary,
+      padding: 1,
     },
   });
 

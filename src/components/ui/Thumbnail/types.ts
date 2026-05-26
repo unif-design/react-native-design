@@ -13,6 +13,9 @@ export type ThumbnailProps = {
   source?: ImageSourcePropType;
   /** 视觉尺寸阶梯,默认 'md'。 */
   size?: ThumbnailSize;
+  /** 选中态:在缩略图外侧画 2pt 品牌色 ring。
+   *  用于"图片多选 / picker 选中" —— 不再需要 caller 自行套 TouchableOpacity + borderColor。 */
+  selected?: boolean;
   /** 自定义样式覆盖(尺寸 / 圆角 / bg 由 size 决定,style 仅做微调如 marginLeft)。 */
   style?: StyleProp<ImageStyle>;
   /** Image.resizeMode,默认 'cover'(裁切撑满)。 */
