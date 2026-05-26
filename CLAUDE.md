@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 仓库定位
 
-`@unif/react-native-design` —— React Native 设计系统,包含 theme + ~99 个 icons + utils + ~37 个 UI 组件 + 少量通用业务复合组件。目标运行时:**RN 0.85 新架构**(Fabric + concurrent React)、React 19、TypeScript 6。
+`@unif/react-native-design` —— React Native 设计系统,包含 theme + icons + utils + UI 组件 + 少量通用业务复合组件。目标运行时:**RN 0.85 新架构**(Fabric + concurrent React)、React 19、TypeScript 6。
 
 yarn workspaces 单仓库:库本体在根目录,`example/` 是宿主 RN app,通过 `react-native-monorepo-config` 接入 Metro 直读 `src/`,所以改库的 JS 代码在 example 里热更新,不用重新构建原生。
 
@@ -17,9 +17,9 @@ yarn                  # 安装(yarn 4.11,node ≥ 24.13,见 .nvmrc)
 yarn typecheck        # tsc(noEmit,strict + noUncheckedIndexedAccess)
 yarn lint             # eslint **/*.{js,ts,tsx}
 yarn lint --fix       # 自动修复
-yarn test             # jest(当前 --passWithNoTests;暂无测试)
-yarn test path/to/file.test.ts        # 跑单文件
-yarn test -t "pattern"                # 按测试名过滤
+yarn test             # jest(跑根目录 __tests__/ 下的纯逻辑 utility 测试)
+yarn test __tests__/theme/scale.test.ts   # 跑单文件
+yarn test -t "pattern"                    # 按测试名过滤
 yarn prepare          # react-native-builder-bob → lib/module + lib/typescript
 yarn clean            # 清 lib/ + example 构建产物
 
@@ -79,13 +79,20 @@ ComponentName/
 
 ### Icons
 
-- `src/icons/data.ts` 头部标注 `AUTO-GENERATED — DO NOT EDIT BY HAND`,**不要手改**。原始 SVG 在 `src/icons/svg/`,`IconName` 联合类型是闭集。
-- `Icon.tsx` 把 `fill: 'currentColor'` 替换为当前 stroke 色,这样生成的 path 能继承主题色。
+- `src/icons/data.ts` 由 `scripts/build-icons.js` 从 `src/icons/svg/*.svg` 生成,**不要手改**(头部有 `AUTO-GENERATED — DO NOT EDIT BY HAND`)。脚本零依赖纯 regex,只识别 `<path>` / `<rect>` / `<circle>` 元素 + `fill="currentColor"`,其它(polyline / polygon)请先在 SVG 里转 path。
+- 加图标流程:扔 SVG 到 `src/icons/svg/` → `node scripts/build-icons.js` → `yarn lint --fix`(prettier 把 `IconName` union 从单行拆成分行,符合现有风格)→ `yarn typecheck`。`IconName` 是闭集,组件 prop `IconName` 类型会自动同步。
+- SVG 规范:`viewBox="0 0 24 24"`、`stroke="currentColor"`、`stroke-width="1.75"`、`stroke-linecap="round"`、`stroke-linejoin="round"`。`Icon.tsx` 把 `fill: 'currentColor'` 替换为当前 stroke 色,使生成的 path 继承主题色。
 
 ### Utils
 
 - **`createLogger(scope)`** —— 每个模块一次(`const log = createLogger('Icon')`)。level:`debug | info | warn | error`。默认 `__DEV__` 下 `debug`、生产 `warn`。自定义 transport 通过 `addTransport(t)` 接入(每个 transport 带 `id`,再次 add 时按 id 去重)。**transport 抛错由调用方静默吞掉** —— 日志不能拖累业务。
 - **`childTestID(parent, id, override?)`** —— 列表型组件(Tabs、Segmented、Grid……)拼 `parent-childId` 的标准助手。用它替代 inline 的 `?? \`${parent}-${id}\`` 三元。
+
+### 测试
+
+- 测试文件放在仓库根 `__tests__/`,**不**与源码 colocate,目录结构镜像 `src/`(`__tests__/theme/`、`__tests__/utils/`……)。
+- 当前只覆盖**纯逻辑 utility**(`scale` / `logger` / `childTestID`)。**design 层不重复测组件行为** —— 组件用法由消费者层(portal)的集成测试 cover,在这里写组件 snapshot 是冗余。新增测试时遵循这条边界,只补纯函数 / hook 逻辑。
+- `package.json` 的 `jest.testEnvironment: 'node'` 显式覆盖 `@react-native/jest-preset` 默认的 RN env —— 原因:RN 0.85 preset 内置 `jest-environment-node@29` 跟顶层 `jest@30` mismatch,`resetModules` 时报 `clearMocksOnScope is not a function`。等真要测 RN 组件时再考虑切回 / 隔离 preset。
 
 ### TypeScript 严格度
 
