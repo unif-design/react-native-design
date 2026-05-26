@@ -1,0 +1,26 @@
+import { StyleSheet } from 'react-native';
+import { r, type ColorTokens } from '@/theme';
+import type { ThumbnailSize } from './types';
+
+/** Thumbnail 静态 base —— 占位色,Image 加载中 / 失败时不至于空白。 */
+export const makeStyles = (c: ColorTokens) =>
+  StyleSheet.create({
+    base: {
+      backgroundColor: c.surfaceContainer,
+    },
+  });
+
+/** Thumbnail size 阶梯 —— width / height / borderRadius 全 r() 缩放。
+ *  新增 size 在 types.ts 加 union + 这里加 case,两处同步。 */
+export const sizingFor = (size: ThumbnailSize) => {
+  switch (size) {
+    case 'sm':
+      return { width: r(64), height: r(40), borderRadius: r(6) };
+    case 'lg':
+      return { width: r(160), height: r(96), borderRadius: r(10) };
+    case 'md':
+    default:
+      // 113×67 与 NewsList / NewsArea 历史一致,16:9.5 接近视频宽高比
+      return { width: r(113), height: r(67), borderRadius: r(8) };
+  }
+};
