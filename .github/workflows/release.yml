@@ -1,0 +1,61 @@
+name: Release
+
+# 手动触发的发版工作流 —— 在 GitHub Actions 页面点 "Run workflow" 选版本类型即可。
+# 内部跑 `release-it --ci`:bump 版本号 → 生成 changelog → git commit + tag →
+# `npm publish`(走 npm Trusted Publishing / OIDC)→ 创建 GitHub Release。
+#
+# 前置条件 —— 在 npmjs.com 包 Settings → Publishing access → Trusted Publishers 配置:
+#   Publisher: GitHub Actions
+#   Org / Repo: unif-design / react-native-design
+#   Workflow filename: release.yml
+# 配置后,GitHub Actions 通过 OIDC 拿临时 id-token 换 publish 权限,
+# 不需要 long-lived NPM_TOKEN —— 没有静态凭据可泄露。
+
+on:
+  workflow_dispatch:
+    inputs:
+      increment:
+        description: '版本类型'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write       # release-it 要 push commit / tag、创建 GitHub Release
+  id-token: write       # npm Trusted Publishing(OIDC)+ provenance attestations
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0  # release-it 要全历史算 conventional-changelog
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Verify
+        run: |
+          yarn lint
+          yarn typecheck
+          yarn test --maxWorkers=2
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      # npm CLI 在 GitHub Actions OIDC 环境下(id-token: write + 包配过 Trusted Publisher)
+      # 自动用临时 token publish,不需要写 ~/.npmrc。
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INCREMENT: ${{ inputs.increment }}
+        run: npx release-it "$INCREMENT" --ci
