@@ -9,6 +9,8 @@ export type { ShadowTokens } from './shadow';
 export { ThemeProvider, ThemeContext } from './ThemeProvider';
 export type { ColorScheme, ThemeContextValue } from './ThemeProvider';
 
+export { getCurrentScheme } from './getCurrentScheme';
+
 export { useTheme, useColors, useShadow } from './useTheme';
 export { useThemedStyles } from './useThemedStyles';
 export type { StylesMaker } from './useThemedStyles';
