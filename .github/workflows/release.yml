@@ -41,6 +41,10 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
+      # npm Trusted Publishing 需要 npm CLI ≥ 11.5.1;.nvmrc 的 node 24 自带的 npm 可能不够新。
+      - name: Upgrade npm CLI (required for OIDC)
+        run: npm install -g npm@latest
+
       - name: Verify
         run: |
           yarn lint
