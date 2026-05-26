@@ -47,14 +47,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/qq382724935/react-native-designdd.git"
+    "url": "git+https://github.com/unif-design/react-native-design.git"
   },
-  "author": "dream-god1 <382724935@qq.com> (https://github.com/qq382724935)",
+  "author": "unif-design <382724935@qq.com> (https://github.com/unif-design)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/qq382724935/react-native-designdd/issues"
+    "url": "https://github.com/unif-design/react-native-design/issues"
   },
-  "homepage": "https://github.com/qq382724935/react-native-designdd#readme",
+  "homepage": "https://github.com/unif-design/react-native-design#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
