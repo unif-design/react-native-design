@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { useThemedStyles } from '@/theme';
+import { useThemedStyles } from '../../../theme';
 import { makeStyles } from './styles';
 import type { ChipProps } from './types';
 

@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import type { ColorTokens } from '@/theme';
-import { fw, r, radius, space, type as t } from '@/theme';
+import type { ColorTokens } from '../../../theme';
+import { fw, r, radius, space, type as t } from '../../../theme';
 import type { ToastKind } from './types';
 
 export const makeStyles = (c: ColorTokens) =>

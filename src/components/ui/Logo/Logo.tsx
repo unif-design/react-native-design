@@ -4,7 +4,7 @@ import type { LogoProps } from './types';
 
 // Native/Metro:require() 返回 asset 数字 ID;Web/webpack:返回 URL 字符串,
 // 但 RN-Web Image 不解析 webpack URL,所以走 docusaurus 镜像的 `/img/logo.png` 公开路径。
-const RAW_SOURCE = require('@/assets/logo.png');
+const RAW_SOURCE = require('../../../assets/logo.png');
 const SOURCE: number | { uri: string } =
   typeof RAW_SOURCE === 'string' ? { uri: '/img/logo.png' } : RAW_SOURCE;
 

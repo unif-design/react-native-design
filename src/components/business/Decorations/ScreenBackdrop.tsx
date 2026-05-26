@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
-import { useColors, useTheme, warmOrangePalette } from '@/theme';
+import { useColors, useTheme, warmOrangePalette } from '../../../theme';
 import { GradientWash } from './GradientWash';
 import { RadialHalo } from './RadialHalo';
 import type {

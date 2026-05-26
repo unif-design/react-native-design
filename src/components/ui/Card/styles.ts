@@ -1,5 +1,5 @@
 import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
-import type { ColorTokens, ShadowTokens } from '@/theme';
+import type { ColorTokens, ShadowTokens } from '../../../theme';
 import type { CardVariant } from './types';
 
 export const makeStyles = (c: ColorTokens) =>

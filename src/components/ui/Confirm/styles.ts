@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { fw, space, type as t } from '@/theme';
-import type { ColorTokens } from '@/theme';
+import { fw, space, type as t } from '../../../theme';
+import type { ColorTokens } from '../../../theme';
 
 /** Confirm 对话框 styles —— title/message 走 BottomSheetView 顶部段,
  *  actions 走 BottomSheetFooter 自动浮到 sheet 底部。 */

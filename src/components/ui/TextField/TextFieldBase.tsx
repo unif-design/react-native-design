@@ -1,6 +1,6 @@
 import React, { forwardRef, useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
-import { control, space, useColors, useThemedStyles } from '@/theme';
+import { control, space, useColors, useThemedStyles } from '../../../theme';
 import { makeStyles } from './styles';
 import type { TextFieldBaseProps } from './types';
 

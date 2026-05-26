@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { radius, space, useShadow, useThemedStyles } from '@/theme';
+import { radius, space, useShadow, useThemedStyles } from '../../../theme';
 import { makeStyles, variantToStyle } from './styles';
 import type { CardProps } from './types';
 

@@ -1,5 +1,12 @@
 import { StyleSheet } from 'react-native';
-import { fontMono, r, radius, space, type, type ColorTokens } from '@/theme';
+import {
+  fontMono,
+  r,
+  radius,
+  space,
+  type,
+  type ColorTokens,
+} from '../../../theme';
 
 /** VersionPill 样式工厂 —— hairline 描边 + surface 底胶囊。
  *  字号走 type.microPlus(11.5),与 SplashScreen / profileCard / carousel 共用。 */

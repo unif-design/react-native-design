@@ -1,5 +1,12 @@
 import { StyleSheet } from 'react-native';
-import { fw, r, radius, space, type as t, type ColorTokens } from '@/theme';
+import {
+  fw,
+  r,
+  radius,
+  space,
+  type as t,
+  type ColorTokens,
+} from '../../../theme';
 
 /**
  * 预生成 1..6 列的宽度规则，避免 render 时创建 `{ width: pct }` 内联对象

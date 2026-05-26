@@ -7,7 +7,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { useColors, useThemedStyles, motion } from '@/theme';
+import { useColors, useThemedStyles, motion } from '../../../theme';
 import { dotColorFor, makeStyles } from './styles';
 import { _subs } from './toast';
 import type { Subscriber, ToastEntry, ToastHostProps } from './types';

@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { fontMono, fw, radius, rf, space, type as t } from '@/theme';
-import type { ColorTokens, ShadowTokens } from '@/theme';
+import { fontMono, fw, radius, rf, space, type as t } from '../../../theme';
+import type { ColorTokens, ShadowTokens } from '../../../theme';
 
 /** 玻璃质感数据条 styles。
  *

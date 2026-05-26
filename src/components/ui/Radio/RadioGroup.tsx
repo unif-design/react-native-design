@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { useThemedStyles } from '@/theme';
+import { useThemedStyles } from '../../../theme';
 import { RadioContext } from './RadioContext';
 import { makeStyles } from './styles';
 import type { GroupProps } from './types';

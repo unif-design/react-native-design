@@ -1,8 +1,8 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { icon, useColors, useThemedStyles } from '@/theme';
-import { childTestID } from '@/utils/testID';
+import { icon, useColors, useThemedStyles } from '../../../theme';
+import { childTestID } from '../../../utils/testID';
 import { Icon } from '../Icon';
 import { makeStyles } from './styles';
 import type { TabBarProps } from './types';

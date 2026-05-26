@@ -6,7 +6,7 @@
  *
  *  用法:
  *  ```ts
- *  import { useTheme, warmOrangePalette } from '@/theme';
+ *  import { useTheme, warmOrangePalette } from './';
  *  const { scheme } = useTheme();
  *  const stops = scheme === 'dark' ? warmOrangePalette.dark : warmOrangePalette.light;
  *  ```

@@ -9,7 +9,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { motion, r, useColors, useThemedStyles } from '@/theme';
+import { motion, r, useColors, useThemedStyles } from '../../../theme';
 import { INSET, makeStyles, THUMB, TRACK_W } from './styles';
 import type { SwitchProps } from './types';
 

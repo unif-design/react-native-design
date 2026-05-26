@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { r, type ColorTokens } from '@/theme';
+import { r, type ColorTokens } from '../../../theme';
 import type { ThumbnailSize } from './types';
 
 /** Thumbnail 静态 base —— 占位色,Image 加载中 / 失败时不至于空白。 */

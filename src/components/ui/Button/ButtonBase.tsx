@@ -6,7 +6,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { useColors, useThemedStyles } from '@/theme';
+import { useColors, useThemedStyles } from '../../../theme';
 import { makeStyles, paletteFor, sizingFor } from './styles';
 import type {
   ButtonBaseRenderContext,

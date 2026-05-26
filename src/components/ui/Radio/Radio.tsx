@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { useColors, useThemedStyles } from '@/theme';
-import { createLogger } from '@/utils/logger';
+import { useColors, useThemedStyles } from '../../../theme';
+import { createLogger } from '../../../utils/logger';
 import { RadioContext } from './RadioContext';
 import { RadioGroup } from './RadioGroup';
 import { makeStyles } from './styles';

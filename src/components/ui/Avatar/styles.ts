@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { avatar, fw, type ColorTokens } from '@/theme';
+import { avatar, fw, type ColorTokens } from '../../../theme';
 import type { AvatarSize, AvatarVariant } from './types';
 
 /** Avatar 静态 base —— 圆形容器(borderRadius / 尺寸由 sizingFor 派生)。 */

@@ -7,8 +7,8 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import { useColors } from '@/theme';
-import { createLogger } from '@/utils/logger';
+import { useColors } from '../../../theme';
+import { createLogger } from '../../../utils/logger';
 import type { SpinnerProps } from './types';
 
 const log = createLogger('Spinner');

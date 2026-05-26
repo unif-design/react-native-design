@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleProp, Text, TextStyle, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { useColors, useThemedStyles } from '@/theme';
+import { useColors, useThemedStyles } from '../../../theme';
 import { Icon } from '../Icon';
 import { useListVariant } from './context';
 import { Leading } from './Leading';

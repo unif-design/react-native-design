@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import { useColors, useThemedStyles } from '@/theme';
+import { useColors, useThemedStyles } from '../../../theme';
 import { Icon } from '../Icon';
 import { makeStyles } from './styles';
 import type { EmptyProps } from './types';

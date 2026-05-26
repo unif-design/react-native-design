@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Pressable } from 'react-native-gesture-handler';
 import { Icon } from '../Icon';
 import { Input } from '../Input';
-import { useColors } from '@/theme';
+import { useColors } from '../../../theme';
 import { styles } from './styles';
 import type { PasswordInputProps } from './types';
 

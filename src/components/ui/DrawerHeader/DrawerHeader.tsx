@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Image, Text, View } from 'react-native';
-import { useThemedStyles } from '@/theme';
+import { useThemedStyles } from '../../../theme';
 import { makeStyles } from './styles';
 import type { DrawerHeaderProps } from './types';
 

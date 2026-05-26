@@ -6,7 +6,7 @@ import Svg, {
   Rect,
   Stop,
 } from 'react-native-svg';
-import { avatarGradient, useTheme } from '@/theme';
+import { avatarGradient, useTheme } from '../../../theme';
 import { makeAvatarStyles } from './styles';
 import type { AvatarWithRingProps } from './types';
 

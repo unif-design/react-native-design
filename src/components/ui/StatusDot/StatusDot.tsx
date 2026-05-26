@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { useColors } from '@/theme';
+import { useColors } from '../../../theme';
 import { Icon } from '../Icon';
 import { PulseDot } from '../Pulse';
 import { paletteFor, styles } from './styles';

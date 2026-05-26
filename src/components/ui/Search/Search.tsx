@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react';
 import type { TextInput } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
 
-import { useColors } from '@/theme';
+import { useColors } from '../../../theme';
 import { Icon } from '../Icon';
 import { Input } from '../Input';
 import type { SearchProps } from './types';

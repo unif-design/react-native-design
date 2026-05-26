@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { r, type ColorTokens } from '@/theme';
+import { r, type ColorTokens } from '../../../theme';
 import type { StatusDotStatus, StatusDotTone } from './types';
 
 /**

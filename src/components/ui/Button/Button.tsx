@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text } from 'react-native';
-import { useThemedStyles } from '@/theme';
+import { useThemedStyles } from '../../../theme';
 import { Icon } from '../Icon';
 import { ButtonBase } from './ButtonBase';
 import { makeStyles } from './styles';

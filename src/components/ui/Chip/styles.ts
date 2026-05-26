@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { fw, radius, space, type as t, type ColorTokens } from '@/theme';
+import { fw, radius, space, type as t, type ColorTokens } from '../../../theme';
 
 export const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({

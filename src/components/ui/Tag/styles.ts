@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { fw, radius, type ColorTokens } from '@/theme';
+import { fw, radius, type ColorTokens } from '../../../theme';
 import type { TagSize, TagVariant } from './types';
 
 /** Tag 静态 base —— alignSelf 防 flex 父容器拉伸,radius 走 token。 */

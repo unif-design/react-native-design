@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { control, fw, r, radius, type as t } from '@/theme';
-import type { ColorTokens } from '@/theme';
+import { control, fw, r, radius, type as t } from '../../../theme';
+import type { ColorTokens } from '../../../theme';
 import type { StepperSize } from './types';
 
 /** Stepper 静态 + themed base —— btn / value 容器共用 cell 基底,radius / border 走 token。

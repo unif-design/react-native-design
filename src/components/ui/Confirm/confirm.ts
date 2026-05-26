@@ -6,7 +6,7 @@
  *
  * 同一时间只允许 1 个 confirm 活跃;若已有正在显示,新请求立即 resolve(false) 并 warn。
  */
-import { createLogger } from '@/utils/logger';
+import { createLogger } from '../../../utils/logger';
 import type { ConfirmOptions, ConfirmEntry, Subscriber } from './types';
 
 const log = createLogger('confirm');

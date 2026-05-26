@@ -1,6 +1,6 @@
 import React, { type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { r, useColors } from '@/theme';
+import { r, useColors } from '../../../theme';
 import { Icon, type IconName } from '../Icon';
 import { useListVariant } from './context';
 

@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { r, radius } from '@/theme';
-import type { ColorTokens } from '@/theme';
+import { r, radius } from '../../../theme';
+import type { ColorTokens } from '../../../theme';
 
 /** 轨道宽 32 / 高 20、把手 16×16、轨道内边距 2 —— Unif 自有 Switch 物理尺寸。
  *  导出常量给 Switch.tsx interpolate translateX 复用(走 r() 保证多设备一致缩放)。 */

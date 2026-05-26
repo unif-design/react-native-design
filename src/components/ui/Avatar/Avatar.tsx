@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Image, Text, View } from 'react-native';
-import { useColors } from '@/theme';
+import { useColors } from '../../../theme';
 import { paletteFor, sizingFor, styles } from './styles';
 import type { AvatarProps } from './types';
 

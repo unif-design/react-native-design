@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import { useColors } from '@/theme';
+import { useColors } from '../../../theme';
 import { paletteFor, sizingFor, styles } from './styles';
 import type { TagProps } from './types';
 

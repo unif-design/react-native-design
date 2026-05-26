@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import type { ColorTokens } from '@/theme';
-import { fixed, icon, r, type as t } from '@/theme';
+import type { ColorTokens } from '../../../theme';
+import { fixed, icon, r, type as t } from '../../../theme';
 
 export const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({

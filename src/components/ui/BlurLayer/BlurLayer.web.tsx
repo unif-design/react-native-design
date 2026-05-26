@@ -8,7 +8,7 @@
  */
 import React from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
-import { blur as blurTokens, useColors, useTheme } from '@/theme';
+import { blur as blurTokens, useColors, useTheme } from '../../../theme';
 import type { BlurLayerProps } from './types';
 
 export function BlurLayer({

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Image } from 'react-native';
-import { useThemedStyles } from '@/theme';
+import { useThemedStyles } from '../../../theme';
 import { makeStyles, sizingFor } from './styles';
 import type { ThumbnailProps } from './types';
 

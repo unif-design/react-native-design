@@ -2,8 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "@unif/react-native-design": ["./src/index"],
-      "@/*": ["./src/*"]
+      "@unif/react-native-design": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

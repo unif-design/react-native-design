@@ -1,8 +1,8 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { fw, useTheme, useThemedStyles } from '@/theme';
-import { childTestID } from '@/utils/testID';
+import { fw, useTheme, useThemedStyles } from '../../../theme';
+import { childTestID } from '../../../utils/testID';
 import { makeStyles } from './styles';
 import type { SegmentedProps } from './types';
 

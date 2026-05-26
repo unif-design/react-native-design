@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { BlurView } from '@sbaiahmed1/react-native-blur';
-import { blur as blurTokens, useColors, useTheme } from '@/theme';
+import { blur as blurTokens, useColors, useTheme } from '../../../theme';
 import type { BlurLayerProps } from './types';
 
 /** Blur backdrop 双层 —— BlurView + tint。

@@ -4,7 +4,7 @@ import ReanimatedCarousel, {
   Pagination,
 } from 'react-native-reanimated-carousel';
 import { useSharedValue } from 'react-native-reanimated';
-import { space, useThemedStyles } from '@/theme';
+import { space, useThemedStyles } from '../../../theme';
 import { makeCarouselStyles } from './styles';
 import type { CarouselProps } from './types';
 

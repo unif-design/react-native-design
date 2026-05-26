@@ -1,5 +1,5 @@
 import { StyleSheet, type ViewStyle } from 'react-native';
-import { fw, r, type ColorTokens } from '@/theme';
+import { fw, r, type ColorTokens } from '../../../theme';
 
 /**
  * 头像样式工厂 —— **非标 maker 签名**:`(size, ringColor, shadowStyle, c)` 4 参,

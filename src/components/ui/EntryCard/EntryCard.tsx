@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
 import { Icon } from '../Icon';
-import { useColors, useThemedStyles } from '@/theme';
+import { useColors, useThemedStyles } from '../../../theme';
 import { makeStyles } from './styles';
 import type { EntryCardProps } from './types';
 

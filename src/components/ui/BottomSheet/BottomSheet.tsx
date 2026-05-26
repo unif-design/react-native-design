@@ -6,7 +6,7 @@ import GorhomBottomSheet, {
   type BottomSheetBackdropProps,
 } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useThemedStyles } from '@/theme';
+import { useThemedStyles } from '../../../theme';
 import { BlurLayer } from '../BlurLayer';
 import { makeStyles } from './styles';
 import type { BottomSheetProps } from './types';

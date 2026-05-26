@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { fw, radius, space, type as t } from '@/theme';
-import type { ColorTokens } from '@/theme';
+import { fw, radius, space, type as t } from '../../../theme';
+import type { ColorTokens } from '../../../theme';
 
 /** TextField primitive styles —— Input + Textarea 共享。 */
 export const makeStyles = (c: ColorTokens) =>

@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { r, radius, space, type ColorTokens } from '@/theme';
+import { r, radius, space, type ColorTokens } from '../../../theme';
 
 export const makeCarouselStyles = (c: ColorTokens) =>
   StyleSheet.create({

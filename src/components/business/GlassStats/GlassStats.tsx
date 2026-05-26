@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import { BlurLayer } from '@/components/ui';
-import { useThemedStyles } from '@/theme';
+import { BlurLayer } from '../../ui';
+import { useThemedStyles } from '../../../theme';
 import { makeGlassStatsStyles } from './styles';
 import type { GlassStatsProps } from './types';
 

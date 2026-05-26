@@ -1,5 +1,5 @@
 import type { StyleProp, ViewStyle } from 'react-native';
-import type { BlurIntensity } from '@/theme';
+import type { BlurIntensity } from '../../../theme';
 
 export type BlurLayerProps = {
   /** 模糊强度,对齐设计稿 token:

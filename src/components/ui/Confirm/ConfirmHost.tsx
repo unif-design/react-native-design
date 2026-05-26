@@ -14,7 +14,7 @@ import {
   type BottomSheetBackdropProps,
   type BottomSheetFooterProps,
 } from '@gorhom/bottom-sheet';
-import { useThemedStyles } from '@/theme';
+import { useThemedStyles } from '../../../theme';
 import { Button } from '../Button';
 import { _subs } from './confirm';
 import { makeStyles } from './styles';

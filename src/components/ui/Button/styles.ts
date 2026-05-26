@@ -7,7 +7,7 @@ import {
   space,
   type as t,
   type ColorTokens,
-} from '@/theme';
+} from '../../../theme';
 import type {
   ButtonPalette,
   ButtonSize,

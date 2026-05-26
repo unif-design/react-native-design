@@ -1,6 +1,6 @@
 import React from 'react';
 import Animated from 'react-native-reanimated';
-import { useColors } from '@/theme';
+import { useColors } from '../../../theme';
 import { usePulse } from './usePulse';
 import type { PulseDotProps } from './types';
 

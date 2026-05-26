@@ -1,9 +1,9 @@
 import React from 'react';
 import { View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
-import { ICONS, type IconDef } from '@/icons';
-import { useColors } from '@/theme';
-import { createLogger } from '@/utils/logger';
+import { ICONS, type IconDef } from '../../../icons';
+import { useColors } from '../../../theme';
+import { createLogger } from '../../../utils/logger';
 import type { IconProps } from './types';
 
 const log = createLogger('Icon');

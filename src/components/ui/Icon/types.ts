@@ -1,5 +1,5 @@
 import type { StyleProp, ViewStyle } from 'react-native';
-import type { IconName } from '@/icons';
+import type { IconName } from '../../../icons';
 
 export type { IconName };
 

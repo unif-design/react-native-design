@@ -1,7 +1,7 @@
 import React from 'react';
 import Animated from 'react-native-reanimated';
-import { usePulse } from '@/components/ui/Pulse';
-import { useColors } from '@/theme';
+import { usePulse } from '../Pulse';
+import { useColors } from '../../../theme';
 import type { SkeletonProps } from './types';
 
 /**
