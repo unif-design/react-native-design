@@ -2,28 +2,26 @@ import React from 'react';
 import { Image } from 'react-native';
 import type { LogoProps } from './types';
 
-// Native/Metro:require() 返回 asset 数字 ID;Web/webpack:返回 URL 字符串,
-// 但 RN-Web Image 不解析 webpack URL,所以走 docusaurus 镜像的 `/img/logo.png` 公开路径。
-const RAW_SOURCE = require('../../../assets/logo.png');
-const SOURCE: number | { uri: string } =
-  typeof RAW_SOURCE === 'string' ? { uri: '/img/logo.png' } : RAW_SOURCE;
-
 /**
- * Unif 主品牌标 —— 1024×1024 RGBA PNG。
+ * 品牌 logo 容器组件 —— 提供尺寸 / 圆角 / a11y 标准化包装。
  *
- * **不要重画 / 改色 / 描边 / 加阴影**,品牌标准图。
- * 最小尺寸 24×24,更小请改用 `static/img/favicon.svg`。
+ * 不持有任何品牌资产。consumer 通过 `source` prop 传入自己品牌的图片
+ * (推荐 1024×1024 RGBA PNG / SVG 转 png)。
+ *
+ * @example
+ * <Logo source={require('@/assets/logo.png')} size={64} label="Unif" />
  */
 export function Logo({
+  source,
   size = 64,
   borderRadius,
-  label = 'Unif',
+  label = 'Logo',
   style,
   testID,
 }: LogoProps): React.JSX.Element {
   return (
     <Image
-      source={SOURCE}
+      source={source}
       accessibilityLabel={label}
       style={[
         {
