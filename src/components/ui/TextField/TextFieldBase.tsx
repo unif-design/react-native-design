@@ -1,8 +1,12 @@
-import React, { forwardRef, useState } from 'react';
+import React, { type ComponentRef, forwardRef, useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import { control, space, useColors, useThemedStyles } from '../../../theme';
 import { makeStyles } from './styles';
 import type { TextFieldBaseProps } from './types';
+
+/** `TextInput` 在 react-native-strict-api 下是组件类型(`TextInputType`),
+ *  ref 实例类型走 `ComponentRef<typeof TextInput>`(对应内部 `_TextInputInstance`)。 */
+export type TextInputRef = ComponentRef<typeof TextInput>;
 
 /**
  * Input / Textarea 共享 primitive —— internal,不在主 barrel 导出。
@@ -17,7 +21,7 @@ import type { TextFieldBaseProps } from './types';
  *
  * 公开 API 是 Input / Textarea(本组件不直接给业务用)。
  */
-export const TextFieldBase = forwardRef<TextInput, TextFieldBaseProps>(
+export const TextFieldBase = forwardRef<TextInputRef, TextFieldBaseProps>(
   function TextFieldBase(
     {
       multiline = false,

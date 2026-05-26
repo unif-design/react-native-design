@@ -1,6 +1,5 @@
-import React, { forwardRef } from 'react';
-import type { TextInput } from 'react-native';
-import { TextFieldBase } from '../TextField/TextFieldBase';
+import { forwardRef } from 'react';
+import { TextFieldBase, type TextInputRef } from '../TextField/TextFieldBase';
 import type { InputProps } from './types';
 
 /**
@@ -13,7 +12,7 @@ import type { InputProps } from './types';
  *
  * Ref:forwardRef<TextInput> —— 业务表单调 `inputRef.current?.focus()` 聚焦错误字段。
  */
-export const Input = forwardRef<TextInput, InputProps>(
+export const Input = forwardRef<TextInputRef, InputProps>(
   function Input(props, ref) {
     return <TextFieldBase ref={ref} multiline={false} {...props} />;
   }

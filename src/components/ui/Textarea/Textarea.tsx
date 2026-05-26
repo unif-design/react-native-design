@@ -1,6 +1,5 @@
-import React, { forwardRef } from 'react';
-import type { TextInput } from 'react-native';
-import { TextFieldBase } from '../TextField/TextFieldBase';
+import { forwardRef } from 'react';
+import { TextFieldBase, type TextInputRef } from '../TextField/TextFieldBase';
 import type { TextareaProps } from './types';
 
 /**
@@ -15,7 +14,7 @@ import type { TextareaProps } from './types';
  *
  * Ref:forwardRef<TextInput>,业务可调 `ref.current?.focus()`。
  */
-export const Textarea = forwardRef<TextInput, TextareaProps>(
+export const Textarea = forwardRef<TextInputRef, TextareaProps>(
   function Textarea(props, ref) {
     return <TextFieldBase ref={ref} multiline {...props} />;
   }

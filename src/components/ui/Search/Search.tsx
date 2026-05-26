@@ -1,10 +1,10 @@
 import React, { forwardRef } from 'react';
-import type { TextInput } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
 
 import { useColors } from '../../../theme';
 import { Icon } from '../Icon';
 import { Input } from '../Input';
+import type { TextInputRef } from '../TextField/TextFieldBase';
 import type { SearchProps } from './types';
 
 /**
@@ -13,7 +13,7 @@ import type { SearchProps } from './types';
  *
  * Ref 透传到 Input 内部 TextInput，业务可调 `searchRef.current?.focus()`。
  */
-export const Search = forwardRef<TextInput, SearchProps>(function Search(
+export const Search = forwardRef<TextInputRef, SearchProps>(function Search(
   { onSubmit, placeholder = '搜索…', value, onChangeText, ...rest },
   ref
 ): React.JSX.Element {

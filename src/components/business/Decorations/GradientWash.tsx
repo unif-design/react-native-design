@@ -27,10 +27,12 @@ import type { GradientWashProps } from './types';
  *  (stopColor 只解析 RGB,需要 stopOpacity 分离),拆分后跨平台一致。 */
 function parseRgba(color: string): { color: string; opacity: number } {
   const m = color.match(/^rgba\(([^)]+)\)$/);
-  if (!m) return { color, opacity: 1 };
+  if (!m || !m[1]) return { color, opacity: 1 };
   const parts = m[1].split(',').map((s) => s.trim());
   if (parts.length !== 4) return { color, opacity: 1 };
-  const alpha = parseFloat(parts[3]);
+  const alphaStr = parts[3];
+  if (alphaStr === undefined) return { color, opacity: 1 };
+  const alpha = parseFloat(alphaStr);
   if (Number.isNaN(alpha)) return { color, opacity: 1 };
   return { color: `rgb(${parts.slice(0, 3).join(',')})`, opacity: alpha };
 }
