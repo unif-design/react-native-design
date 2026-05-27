@@ -1,9 +1,11 @@
 # @unif/react-native-design
 
-Unif 设计系统 —— theme + icons + utils + components,面向 React Native 0.85 新架构(Fabric + concurrent React)。
+[![npm](https://img.shields.io/npm/v/@unif/react-native-design.svg?color=cb3837&logo=npm)](https://www.npmjs.com/package/@unif/react-native-design)
+[![CI](https://github.com/unif-design/react-native-design/actions/workflows/ci.yml/badge.svg)](https://github.com/unif-design/react-native-design/actions/workflows/ci.yml)
+[![License](https://img.shields.io/npm/l/@unif/react-native-design.svg?color=blue)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-unif--design.github.io-orange.svg)](https://unif-design.github.io/react-native-design/)
 
-📖 **文档站**:[unif-design.github.io/react-native-design](https://unif-design.github.io/react-native-design/)
-📦 **npm**:[@unif/react-native-design](https://www.npmjs.com/package/@unif/react-native-design)
+Unif 设计系统 —— theme + icons + utils + components,面向 React Native 0.85 新架构(Fabric + concurrent React)。
 
 ## 安装
 
