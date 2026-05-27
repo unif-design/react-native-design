@@ -1,0 +1,99 @@
+---
+sidebar_position: 5
+title: Switch 开关
+description: 开关 · 灰底关 / 主橙底开
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Cell, List, Switch } from '@unif/react-native-design';
+import { useState } from 'react';
+
+# Switch 开关
+
+布尔开关——32×20 轨道 + 16×16 圆形 thumb，关时灰底 thumb 在左，开时主橙底 thumb 在右，200ms 动画。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Switch/Switch.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点（reanimated 4 worklet 驱动动画）。
+
+export const SwitchDemo = () => {
+  const [a, setA] = useState(false);
+  const [b, setB] = useState(true);
+  const [notify, setNotify] = useState(true);
+  const [team, setTeam] = useState(false);
+  const [voice, setVoice] = useState(true);
+  return (
+    <LiveDemo>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <Switch value={a} onChange={setA} />
+            <span style={{ fontFamily: 'Menlo', fontSize: 11, color: 'var(--ifm-color-emphasis-600)' }}>关</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <Switch value={b} onChange={setB} />
+            <span style={{ fontFamily: 'Menlo', fontSize: 11, color: 'var(--ifm-color-emphasis-600)' }}>开</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <Switch value={true} onChange={() => {}} disabled />
+            <span style={{ fontFamily: 'Menlo', fontSize: 11, color: 'var(--ifm-color-emphasis-600)' }}>禁用</span>
+          </div>
+        </div>
+        <List>
+          <Cell title="拜访提醒" desc="按计划自动推送提醒" extra={<Switch value={notify} onChange={setNotify} />} />
+          <Cell title="同步给团队" desc="拜访完成后通知主管" extra={<Switch value={team} onChange={setTeam} />} />
+          <Cell title="语音输入" desc="长按说话输入消息" extra={<Switch value={voice} onChange={setVoice} />} />
+        </List>
+      </div>
+    </LiveDemo>
+  );
+};
+
+<SwitchDemo />
+
+## 状态
+
+| 状态 | 视觉 |
+|---|---|
+| 关 | 32×20 灰底 `#E0E0E0`，16×16 白圆 thumb 在左 |
+| 开 | 32×20 主橙底 `#EB6E00`，16×16 白圆 thumb 在右 |
+| 禁用 | `opacity: 0.5` |
+
+切换动画：thumb 水平移动 12px，背景颜色插值，200ms ease。
+
+## 用法
+
+```tsx
+import { Switch, Cell, List } from '@unif/react-native-design';
+
+{/* 独立使用 */}
+<Switch value={enabled} onChange={setEnabled} />
+
+{/* 设置场景 — 配 Cell 使用，Switch 作为 extra */}
+<List>
+  <Cell
+    title="拜访提醒"
+    desc="按计划自动推送提醒"
+    extra={<Switch value={notify} onChange={setNotify} />}
+  />
+  <Cell
+    title="语音输入"
+    desc="长按说话输入消息"
+    extra={<Switch value={voice} onChange={setVoice} />}
+  />
+</List>
+```
+
+## API
+
+| Prop | Type | 说明 |
+|---|---|---|
+| `value` | `boolean` | 当前状态 |
+| `onChange` | `(value) => void` | 切换回调 |
+| `disabled` | `boolean?` | 禁用 |
+
+## 不要
+
+- ❌ 不要换其它颜色——开必须是主橙（这是品牌一致性）
+- ❌ 不要在 Switch 上加 label——配 [Cell](./cell) 把 label 放左侧、Switch 放 `extra` slot
+- ❌ 不要做"中间态"——Switch 只有开/关，三态用 [Radio](./radio)

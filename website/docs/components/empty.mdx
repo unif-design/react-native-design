@@ -1,0 +1,49 @@
+---
+sidebar_position: 5
+title: Empty 空态
+description: 圆形 illust + 大字标题 + 小字描述
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Empty } from '@unif/react-native-design';
+
+# Empty 空态
+
+无内容状态——圆形 illust（橙色 spark）+ 大字标题 + 小字描述。可附带建议 chips。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Empty/Empty.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+<LiveDemo>
+  <Empty title="你好，我是 AI 助手" desc="告诉我你今天的工作目标，我来帮你规划" />
+</LiveDemo>
+
+## 用法
+
+```tsx
+import { Empty } from '@unif/react-native-design';
+
+<Empty
+  title="你好，我是 AI 助手"
+  desc="告诉我你今天的工作目标，我来帮你规划"
+/>
+```
+
+通常在空态下方再渲染一组建议 chips（由业务侧实现），给用户初始话术。
+
+## API
+
+| Prop | Type | 说明 |
+|---|---|---|
+| `title` | `string` | 大字标题（15px / 600） |
+| `desc` | `string?` | 小字描述（13px / 400 / `fg-3`） |
+
+## 视觉规范
+
+| 元素 | 规则 |
+|---|---|
+| illust | 56×56 圆，背景 `primary-0 #FFF5EB`，spark 图标 28px 主橙色 |
+| title | 15px / 600 / `fg-1` |
+| desc | 13px / 400 / `fg-3`，居中 |
+| 间距 | gap 10，整体居中 |

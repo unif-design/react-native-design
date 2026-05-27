@@ -1,0 +1,106 @@
+---
+sidebar_position: 1
+title: Decorations 装饰图元
+description: GradientWash 渐变条 · RadialHalo 径向光晕 · ScreenBackdrop 沉浸背景预设
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { GradientWash, RadialHalo, ScreenBackdrop } from '@unif/react-native-design';
+
+# Decorations 装饰图元
+
+3 个用于沉浸式屏 / hero 区的视觉装饰原子,全部基于 `react-native-svg` 渲染,可与任何容器组合用。**它们是 absolute 定位的纯装饰,不接管 hit area / 布局,放在屏底部图层即可。**
+
+| 组件 | 用途 |
+|---|---|
+| `GradientWash` | 线性渐变带 —— 屏顶 / 屏底 的颜色淡入淡出 |
+| `RadialHalo` | 圆 / 椭圆径向光晕 —— hero 区点缀光斑 |
+| `ScreenBackdrop` | 整屏沉浸式预设 —— 渐变底 + 多个 halo 组合(如 `warmOrange`) |
+
+## 实时预览
+
+下方渲染的就是 `src/components/business/Decorations/*.tsx` 本体。
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">GradientWash · 单色顶部 wash</span>
+      <div style={{ height: 120, position: 'relative', background: '#fff', borderRadius: 8, overflow: 'hidden' }}>
+        <GradientWash height={120} color="#EB6E00" fromOpacity={0.15} toOpacity={0} />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">RadialHalo · 单光晕</span>
+      <div style={{ height: 160, position: 'relative', background: '#fff', borderRadius: 8, overflow: 'hidden' }}>
+        <RadialHalo size={200} color="#EB6E00" maxOpacity={0.25} style={{ position: 'absolute', top: -20, left: 60 }} />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">ScreenBackdrop warmOrange · 整屏预设(在 ScreenBackdrop 内层叠加 wash + 3 个 halo)</span>
+      <div style={{ height: 240, width: 320, position: 'relative', borderRadius: 8, overflow: 'hidden' }}>
+        <ScreenBackdrop preset="warmOrange" />
+      </div>
+    </div>
+  </div>
+</LiveDemo>
+
+## 用法
+
+```tsx
+import { GradientWash, RadialHalo, ScreenBackdrop } from '@unif/react-native-design';
+
+{/* 名片屏整屏沉浸式背景(预设) */}
+<View style={{ flex: 1 }}>
+  <ScreenBackdrop preset="warmOrange" />
+  {/* 真实内容 */}
+</View>
+
+{/* 自定义 hero 区:屏顶橙色 wash + 右上 halo 点缀 */}
+<View style={{ height: 220, position: 'relative' }}>
+  <GradientWash height={220} color={c.primary} fromOpacity={0.18} toOpacity={0} />
+  <RadialHalo
+    size={180}
+    color={c.primary}
+    maxOpacity={0.20}
+    style={{ position: 'absolute', top: -30, right: -30 }}
+  />
+  <View>{/* hero 内容 */}</View>
+</View>
+```
+
+## GradientWash API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `height` | `number` | — | 渐变带高度 |
+| `color` | `string` | — | 单色模式必填(顶 fromOpacity → 底 toOpacity) |
+| `fromOpacity` | `number?` | `0.1` | 顶部透明度(单色模式) |
+| `toOpacity` | `number?` | `0` | 底部透明度(单色模式) |
+| `stops` | `ReadonlyArray<GradientStop>?` | — | 完全自定义 stops(与 color/fromOpacity 互斥) |
+| `gradientId` | `string?` | 自动 | 同屏多 GradientWash 需要不同 id |
+| `style` | `StyleProp<ViewStyle>` | — | 容器附加样式 |
+
+## RadialHalo API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `size` | `number` | — | 宽(圆模式即直径) |
+| `height` | `number?` | `size` | 椭圆高度,不传 = 圆 |
+| `color` | `string` | — | 中心颜色 |
+| `maxOpacity` | `number?` | `0.16` | 简化用法的中心最大透明度,自动生成 3 stop |
+| `stops` | `ReadonlyArray<{offset, opacity}>?` | — | 完全自定义透明度分布(覆盖 maxOpacity) |
+| `gradientId` | `string?` | 自动 | 同屏多 halo 需要不同 id |
+| `style` | `StyleProp<ViewStyle>` | — | absolute 定位用 |
+
+## ScreenBackdrop API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `preset` | `ScreenBackdropPreset?` | `'warmOrange'` | 预设名,目前只有 `'warmOrange'`(暖橙渐变 + 3 halo) |
+
+## 不要
+
+- 不要在装饰组件上挂 onPress —— 它们是纯视觉图层,加交互会拦截真内容的 hit
+- 不要在屏内放超过 3 个 RadialHalo —— SVG 太多影响渲染性能,真要多就考虑 Image 静态导出
+- 不要把 ScreenBackdrop 用在普通业务屏 —— 用于品牌 hero(名片 / Splash / 扫码屏);普通 ScreenLayout 自带白底就够了
+- 不要忘传 `gradientId` —— 同屏多 GradientWash / RadialHalo 共享一个默认 id,SVG defs 互覆盖导致后一个生效

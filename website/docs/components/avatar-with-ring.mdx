@@ -1,0 +1,84 @@
+---
+sidebar_position: 1
+title: AvatarWithRing 圆环头像
+description: 文字 / 字母头像 · ring 边 + 品牌 shadow · 默认 64 直径
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { AvatarWithRing } from '@unif/react-native-design';
+
+# AvatarWithRing 圆环头像
+
+中心字符(userName 首字)+ 外圈 ring + brand shadow,用于个人名片 / 头像区。比 `<Avatar>` 多一圈强调边,适合视觉重心。
+
+label 字号约 `size * 0.40`,ring 宽度约 `size * 0.0625`(自适应 size 缩放)。
+
+## 实时预览
+
+下方渲染的就是 `src/components/business/AvatarWithRing/AvatarWithRing.tsx` 本体。
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">默认 · 64 直径 · c.primary ring</span>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <AvatarWithRing label="刘" />
+        <AvatarWithRing label="A" />
+        <AvatarWithRing label="张" />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">size · 48 / 64 / 88 / 120</span>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'flex-end' }}>
+        <AvatarWithRing label="刘" size={48} />
+        <AvatarWithRing label="刘" size={64} />
+        <AvatarWithRing label="刘" size={88} />
+        <AvatarWithRing label="刘" size={120} />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">ringColor · 自定义 hex</span>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <AvatarWithRing label="A" ringColor="#3775F6" />
+        <AvatarWithRing label="B" ringColor="#22A56E" />
+        <AvatarWithRing label="C" ringColor="#8C8C8C" />
+      </div>
+    </div>
+  </div>
+</LiveDemo>
+
+## 用法
+
+```tsx
+import { AvatarWithRing } from '@unif/react-native-design';
+
+{/* 个人名片屏 hero 头像 */}
+<AvatarWithRing label={userName.charAt(0)} size={96} />
+
+{/* 自定义品牌色 ring */}
+<AvatarWithRing label="A" ringColor="#3775F6" size={64} />
+```
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `label` | `string` | — | 中心文字(通常 1 字符,姓名首字) |
+| `size` | `number?` | `64` | 总直径(含 ring),r() 缩放在内部处理 |
+| `ringColor` | `string?` | `c.primary` | ring + 填充背景色,hex 字符串 |
+| `style` | `StyleProp<ViewStyle>` | — | 容器附加样式(margin / position) |
+
+## 视觉规范
+
+| 元素 | 比例 |
+|---|---|
+| label 字号 | `size × 0.40` |
+| ring 宽度 | `size × 0.0625` |
+| label 色 | `c.onPrimary`(ringColor 为深色时)/ `c.foreground` |
+| shadow | `s.brandLg`(品牌橙 elevation) |
+
+## 不要
+
+- 不要塞多字符 label —— 设计是单字符(姓名首字 / 字母),多了会溢出
+- 不要替代 `<Avatar>` —— Avatar 是基础原子(无 ring),AvatarWithRing 是装饰强化版,仅用于视觉重心场景
+- 不要把 `ringColor` 当随机调色板 —— 优先复用 token(`c.primary` / `c.info` / `c.success`)

@@ -1,0 +1,120 @@
+---
+sidebar_position: 1
+title: Input 输入框
+description: 单行 · idle / focus / filled / error
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Input } from '@unif/react-native-design';
+import { useState } from 'react';
+
+# Input 输入框
+
+单行输入。**44px** 高（`dim.controlLg`），**8px** 圆角，灰底无边框，focus 时显橙色描边。
+
+> 多行内容请用 [`<Textarea />`](./textarea)。Input 不接受 `multiline` / `numberOfLines`。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Input/Input.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+export const InputDemo = () => {
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('1581234');
+  const [pwd, setPwd] = useState('');
+  const phoneError = phone.length > 0 && phone.length < 11 ? '请输入 11 位手机号' : undefined;
+  return (
+    <LiveDemo>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <span className="demo-label">idle / filled / error / focus</span>
+        <Input value={name} onChangeText={setName} placeholder="客户名称" />
+        <Input value={phone} onChangeText={setPhone} placeholder="手机号" error={phoneError} />
+        <Input value={pwd} onChangeText={setPwd} placeholder="密码" secureTextEntry />
+      </div>
+    </LiveDemo>
+  );
+};
+
+<InputDemo />
+
+## 状态
+
+| 状态 | 背景 | 边框 |
+|---|---|---|
+| `idle` | `#F5F5F5` (bg-input) | 透明 |
+| `focus` | `#FFFFFF` | 1px 主橙 `#EB6E00` |
+| `filled` | `#FFFFFF` | 1px 默认 hairline `#EDEDED` |
+| `error` | `#FFFFFF` | 1px 错误色 `#F4511E` |
+
+## 视觉规范
+
+| 元素 | 规则 |
+|---|---|
+| 高度 | 44px（`dim.controlLg`，可用 `height` prop 覆盖） |
+| 圆角 | 8px |
+| 内边距 | `0 12px` |
+| 字号 | 15px (`body`) |
+| 占位文字 | `fg-3 #999999` |
+| 输入文字 | `fg-1 #333333` |
+| 左/右图标 | 18px，`fg-3 #999999` |
+| 清除按钮 | 16px 圆形，点击清空 |
+
+## 用法
+
+```tsx
+import { Input, Icon } from '@unif/react-native-design';
+import { useColors } from '@unif/react-native-design';
+
+<Input value={text} onChangeText={setText} placeholder="搜索…" />
+
+{/* 密码：直接透传 RN TextInput 的 secureTextEntry */}
+<Input
+  value={pwd}
+  onChangeText={setPwd}
+  secureTextEntry
+  placeholder="密码"
+/>
+
+{/* 多行：用 Textarea，不要再用 Input multiline */}
+<Textarea
+  value={text}
+  onChangeText={setText}
+  minHeight={88}
+  placeholder="详细说明…"
+/>
+
+{/* 错误态 */}
+<Input
+  value={text}
+  onChangeText={setText}
+  error="格式不正确"
+/>
+
+{/* 自定义前后插槽 —— 颜色走 hook */}
+function MyForm() {
+  const c = useColors();
+  return (
+    <Input
+      value={text}
+      onChangeText={setText}
+      leading={<Icon name="search" size={18} color={c.foregroundSubtle} />}
+      trailing={text ? <Icon name="close" size={14} color={c.foregroundSubtle} /> : null}
+    />
+  );
+}
+```
+
+## API
+
+`InputProps` = **`Omit<TextInputProps, 'style' | 'multiline' | 'numberOfLines'>`** + 这 6 个扩展。所有 RN [`TextInput` props](https://reactnative.dev/docs/textinput)（`value` / `onChangeText` / `placeholder` / `secureTextEntry` / `keyboardType` / `returnKeyType` / `autoCapitalize` 等）都直接可用。
+
+| Prop | Type | 说明 |
+|---|---|---|
+| `leading` | `ReactNode?` | 前置插槽（图标、label 等） |
+| `trailing` | `ReactNode?` | 后置插槽（清除按钮、显示密码切换等） |
+| `error` | `string?` | 错误文字 —— 容器进入 error 态（红描边）并在下方显示 |
+| `height` | `number?` | 覆盖容器高度，默认 `dim.controlLg`（44） |
+| `disabled` | `boolean?` | 整体禁用 + 视觉变灰，优先级高于 `editable` |
+| `containerStyle` | `StyleProp<ViewStyle>?` | 容器外层样式（不是 TextInput 的 style） |
+
+> 没有内置的 `clearable` / `leadingIcon` —— 自己组合 `<Icon>` 给 `leading`/`trailing` 即可。`Search` 组件就是基于这种组合的预设。多行文本请用 [`<Textarea />`](./textarea)。

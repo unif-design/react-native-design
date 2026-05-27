@@ -1,0 +1,94 @@
+---
+sidebar_position: 11
+title: EntryCard 入口卡
+description: 横向小卡 · 30×30 灰底 icon tile + title/sub · 适合 grid 双列入口
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { EntryCard } from '@unif/react-native-design';
+
+# EntryCard 入口卡
+
+入口小卡 —— 横向 row,左 30×30 灰底 icon tile + 右 title/sub column。
+
+跟 [Cell](./cell) 的区别:
+- **独立 surface 小卡视觉**(bg + radius 14 + padding 12/14),不依赖 List 容器
+- icon tile **灰底**(`surfaceContainer`)+ `foregroundMuted` icon,语义弱化
+- **无 arrow / extra**,纯入口语义,适合放在 grid 双列里靠 caller `style={{flex:1}}` 撑等宽
+
+retail biz2 设计稿 v7:Me 屏底部"设置 / 关于"两个入口从纵向 CellList 退化成 2×1 grid 横向小卡,省纵向空间。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/EntryCard/EntryCard.tsx` 本体,通过 `react-native-web` 翻译成浏览器节点。
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexDirection: 'row', gap: 10, maxWidth: 360 }}>
+    <EntryCard
+      icon="settings"
+      title="设置"
+      sub="账号 / 通知 / 权限"
+      onPress={() => {}}
+      style={{ flex: 1 }}
+    />
+    <EntryCard
+      icon="info"
+      title="关于 Unif"
+      sub="V 2.6.0"
+      onPress={() => {}}
+      style={{ flex: 1 }}
+    />
+  </div>
+</LiveDemo>
+
+## 视觉规范
+
+| 元素 | 规则 |
+|---|---|
+| 容器 | `bg: surface`,radius 14,padding `12px 14px` |
+| 排布 | flex row + align center,gap 10 |
+| icon tile | 30×30,radius 9,`bg: surfaceContainer`,内部 icon 16px `foregroundMuted` |
+| title | 13.5 / medium / letterSpacing -0.2,`foreground` |
+| sub | 11,`foregroundMuted`,可选省略 |
+| 按下 | opacity 0.7(仅 `onPress` 存在时) |
+
+## 用法
+
+```tsx
+import { EntryCard } from '@unif/react-native-design';
+import { View } from 'react-native';
+
+{/* grid 双列入口 —— Me 屏底部"设置 / 关于" */}
+<View style={{ flexDirection: 'row', gap: 10 }}>
+  <EntryCard
+    icon="settings"
+    title="设置"
+    sub="账号 / 通知 / 权限"
+    onPress={() => navigation.navigate('Setting')}
+    style={{ flex: 1 }}
+  />
+  <EntryCard
+    icon="info"
+    title={`关于 ${env.appName}`}
+    sub={`V ${APP_VERSION}`}
+    onPress={() => navigation.navigate('About')}
+    style={{ flex: 1 }}
+  />
+</View>
+```
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `icon` | `IconName` | — | 左侧 icon tile 内的图标 |
+| `title` | `string` | — | 主标题(13.5 medium) |
+| `sub` | `string?` | — | 副标题(11 muted),省略不渲染该行 |
+| `onPress` | `() => void` 可选 | — | 点击回调;不传时不挂 Pressable,静态展示 |
+| `style` | `ViewStyle?` | — | 外层附加样式,常用于 grid 列设 `flex: 1` |
+
+## 不要
+
+- ❌ 不要在 EntryCard 内放 arrow —— 它的语义是"独立入口卡",不是 List 行。需要 chevron 用 [Cell](./cell)。
+- ❌ 不要把 title 拉长到换行 —— 单卡是紧凑入口,设计上只 numberOfLines=1。长文本用 [Card](./card) + 自渲。
+- ❌ 不要做超过 4 张并排 —— 4 张以上信息密度过高,改用 [Grid](./grid) + ModernAppCell。

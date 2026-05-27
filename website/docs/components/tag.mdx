@@ -1,0 +1,53 @@
+---
+sidebar_position: 3
+title: Tag 标签
+description: 状态标签 · 5 种语义 · 2 种尺寸
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Tag } from '@unif/react-native-design';
+
+# Tag 标签
+
+状态标签 · 5 种语义 · 2 种尺寸。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Tag/Tag.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+      <Tag label="VIP 客户" variant="brand" />
+      <Tag label="已完成" variant="success" />
+      <Tag label="已取消" variant="error" />
+      <Tag label="新单" variant="info" />
+      <Tag label="待跟进" variant="neutral" />
+      <Tag label="描边" variant="outline" />
+    </div>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+      <Tag label="Lg" variant="brand" size="lg" />
+      <Tag label="Md" variant="brand" size="md" />
+    </div>
+  </div>
+</LiveDemo>
+
+## 用法
+
+```tsx
+import { Tag } from '@unif/react-native-design';
+
+<Tag label="VIP 客户" variant="brand" />
+<Tag label="已完成" variant="success" />
+<Tag label="已取消" variant="error" />
+<Tag label="新单" variant="info" />
+<Tag label="待跟进" variant="neutral" />
+```
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `label` | `string` | — | 标签文字 |
+| `variant` | `'brand' \| 'success' \| 'error' \| 'info' \| 'neutral' \| 'outline'` | `'neutral'` | 语义变体 |
+| `size` | `'md' \| 'lg'` | `'md'` | 高度 22 / 26 |

@@ -1,0 +1,80 @@
+---
+sidebar_position: 5
+title: 图标
+description: 24×24 描边 SVG 规则 · 全部语义图标
+---
+
+import IconCatalog from '@site/src/components/IconCatalog';
+
+# 图标
+
+手绘 24×24 描边 SVG。所有图标遵守同一组绘制规则。**无 icon font、无 Unicode 承载 UI、无装饰 emoji。**
+
+按业务语义分 15 类堆栈展示,顶部搜索框 `⌘K` 聚焦,点击 cell 复制图标语义名。
+
+<IconCatalog />
+
+## 在 RN 中使用
+
+```tsx
+import { Icon } from '@unif/react-native-design';
+import { useColors } from '@unif/react-native-design';
+
+function Demo() {
+  const c = useColors();
+  return (
+    <>
+      <Icon name="send" size={20} />
+      <Icon name="check" size={18} color={c.success} />
+      <Icon name="close" size={14} color={c.foregroundSubtle} strokeWidth={2} />
+    </>
+  );
+}
+```
+
+`name` 是 TypeScript 字面量联合类型——所有图标名都有自动补全；`IconName` 由 `src/assets/icons/data.ts` 生成。
+
+## 绘制规则
+
+每个新图标必须满足：
+
+| 属性 | 值 |
+|---|---|
+| `viewBox` | `0 0 24 24` |
+| `stroke-width` | `1.75`（加粗变体 `2`，仅 `check`） |
+| `stroke-linecap` | `round` |
+| `stroke-linejoin` | `round` |
+| `fill` | `none`（实心填充用 `fill="currentColor"`） |
+| `color` | 通过 `currentColor` 继承 |
+| 默认尺寸 | 16–20px 内联，24px 独立 |
+
+## 添加新图标
+
+1. 在 `src/assets/icons/svg/<name>.svg` 加新文件,遵守上面的绘制规则
+2. 编辑 `src/assets/icons/data.ts`,加一条 `<name>: {svg: () => <Svg ...>...</Svg>}`(参考已有 entry;`types.ts` 是稳定类型)
+3. 文档站走的 `website/src/components/iconsCatalog.ts` 是从 `@/assets/icons` re-export 的薄壳,自动同步,无需再生成
+4. `IconName` TypeScript 字面量类型自动包含新名字,IDE 立即给出补全
+5. 若新图标属于某个语义类别,把它加进 `website/src/components/IconCatalog.tsx` 的 `CATEGORIES` 数组对应组里;若它是某个 appId 的图标,补 `APP_MAPPINGS`
+
+## 实现细节
+
+`src/components/ui/Icon/Icon.tsx` 用 `react-native-svg` 渲染——`<Svg>` + `<Path>` / `<Circle>` / `<Rect>`，路径数据来自 `src/assets/icons/data.ts`。`color` prop 传给 `stroke`，`strokeWidth` 走每图标默认值或可覆盖。
+
+```tsx
+// 摘录
+import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { ICONS } from '@unif/react-native-design';
+
+<Svg width={size} height={size} viewBox="0 0 24 24"
+     fill="none" stroke={color}
+     strokeWidth={def.strokeWidth}
+     strokeLinecap="round" strokeLinejoin="round">
+  {def.elements.map((el, i) => /* path/circle/rect */)}
+</Svg>
+```
+
+## 头像
+
+头像不是图标，是实体。所有头像都是**单字符 monogram**（`我` / `AI` / 客户首字母）放在彩色圆盘上。**绝不**在头像里放图片或多于 1 个字符。
+
+详见 [Avatar 组件](/docs/components/avatar)。

@@ -54,8 +54,10 @@ export default function App() {
 
 ## 下一步
 
-- [Button 示例](./button) —— 在浏览器里实时渲染 RN 组件
-- 完整组件文档将在后续 Phase 中迁入
+- [UNIF-DESIGN 总览](./UNIF-DESIGN.md) —— 设计系统的整体哲学与定位
+- [设计原则](./design/intro.md) —— 风格、声音、不要做什么
+- [Design Tokens](./design/tokens/colors.mdx) —— 颜色 / 字体 / 间距 / 动效
+- [组件总览](./components/overview.md) —— 38 个组件的索引与分类
 
 ## 版本
 
