@@ -7,11 +7,14 @@ const config: Config = {
   tagline: '@unif/react-native-design · 移动优先设计系统',
   favicon: 'img/logo.png',
 
-  url: 'https://unif.design',
-  baseUrl: '/',
+  // 部署到 GitHub Pages 默认域名:https://unif-design.github.io/react-native-design/
+  // 后续接自定义域名只需把 url 改成新域名 + baseUrl 改为 '/' + 加 static/CNAME 文件。
+  url: 'https://unif-design.github.io',
+  baseUrl: '/react-native-design/',
 
   organizationName: 'unif-design',
   projectName: 'react-native-design',
+  trailingSlash: false,
 
   onBrokenLinks: 'warn',
   markdown: {
