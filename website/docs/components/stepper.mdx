@@ -1,0 +1,111 @@
+---
+sidebar_position: 6
+title: Stepper 步进器
+description: 数字步进 · 限制 min / max
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Stepper } from '@/components/ui';
+import { Text, View } from 'react-native';
+import { useState } from 'react';
+
+# Stepper 步进器
+
+数字步进控件——`[−][ N ][+]` 三段拼接，到达 min/max 自动禁用对应按钮。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Stepper/Stepper.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+export const StepperDemo = () => {
+  const [a, setA] = useState(12);
+  const [b, setB] = useState(0);
+  const [c, setC] = useState(50);
+  const total = a + b + c;
+  const amount = a * 120 + b * 96 + c * 48;
+  return (
+    <LiveDemo>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <span className="demo-label">独立</span>
+          <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+            <Stepper value={a} onChange={setA} min={1} max={99} />
+            <Text style={{ fontSize: 13, color: 'var(--ifm-color-emphasis-600)' }}>min=1, max=99</Text>
+          </View>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <span className="demo-label">下单清单</span>
+          <View style={{ backgroundColor: 'var(--ifm-background-surface-color)', borderRadius: 10, paddingHorizontal: 14 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: 'var(--ifm-color-emphasis-200)' }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: '500', color: 'var(--ifm-color-emphasis-800)' }}>统一冰红茶</Text>
+                <Text style={{ fontSize: 12, color: 'var(--ifm-color-emphasis-600)' }}>¥120 / 箱 · 库存 50</Text>
+              </View>
+              <Stepper value={a} onChange={setA} min={0} max={50} />
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: 'var(--ifm-color-emphasis-200)' }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: '500', color: 'var(--ifm-color-emphasis-800)' }}>阿萨姆奶茶</Text>
+                <Text style={{ fontSize: 12, color: 'var(--ifm-color-emphasis-600)' }}>¥96 / 箱 · 库存 80</Text>
+              </View>
+              <Stepper value={b} onChange={setB} min={0} max={80} />
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: '500', color: 'var(--ifm-color-emphasis-800)' }}>老坛酸菜面</Text>
+                <Text style={{ fontSize: 12, color: 'var(--ifm-color-emphasis-600)' }}>¥48 / 箱 · 库存 30</Text>
+              </View>
+              <Stepper value={c} onChange={setC} min={0} max={30} />
+            </View>
+          </View>
+        </div>
+        <span style={{ fontSize: 13, color: 'var(--ifm-color-emphasis-600)' }}>合计 {total} 箱 · ¥{amount.toLocaleString()}</span>
+      </div>
+    </LiveDemo>
+  );
+};
+
+<StepperDemo />
+
+## 视觉规范
+
+| 元素 | 规则 |
+|---|---|
+| 高度 | 32px（默认）/ 28px（sm） |
+| 圆角 | 8px（外层），中间数字框无独立圆角 |
+| 按钮 | 32×32 描边，`±` 18px |
+| 数字框 | min-width 48，1px 上下边线，无左右边线 |
+| 描边 | 1px `#EDEDED` |
+| 禁用 | 按钮 `opacity: 0.4`（达到 min/max 时） |
+
+## 用法
+
+```tsx
+import { Stepper } from '@/components/ui';
+
+const [qty, setQty] = useState(12);
+
+<Stepper value={qty} onChange={setQty} min={1} max={99} />
+
+{/* 自定义步长 */}
+<Stepper value={packs} onChange={setPacks} step={6} min={0} max={120} />
+
+{/* 小尺寸 */}
+<Stepper size="sm" value={n} onChange={setN} min={0} max={9} />
+```
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `value` | `number` | — | 当前值 |
+| `onChange` | `(n) => void` | — | 变更回调 |
+| `min` | `number?` | `0` | 下限（达到时 `−` 禁用） |
+| `max` | `number?` | `99` | 上限（达到时 `+` 禁用） |
+| `step` | `number?` | `1` | 步长 |
+| `size` | `'sm' \| 'md'` | `'md'` | 高度 28 / 32 |
+
+## 不要
+
+- ❌ 不要在 Stepper 中间放可输入的 TextInput——下单场景请用专门的 InputNumber 控件（待规划）
+- ❌ 不要去掉描边或圆角——Stepper 必须看起来"可点击"

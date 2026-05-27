@@ -1,0 +1,70 @@
+---
+sidebar_position: 1
+title: Toast 轻提示
+description: 全局轻提示 · 自动消失
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Button, toast, ToastHost } from '@/components/ui';
+
+# Toast 轻提示
+
+非阻塞反馈——3 秒后自动消失，居中或底部出现。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Toast/ToastHost.tsx` 本体（reanimated 4 worklet 驱动 fade + slide），通过 `react-native-web` 翻译成浏览器节点。点按钮触发。
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+    <Button label="信息" variant="secondary" onPress={() => toast.info('已切换到日报模式')} />
+    <Button label="成功" variant="secondary" onPress={() => toast.success('订单提交成功')} />
+    <Button label="失败" variant="secondary" onPress={() => toast.error('网络异常，请重试')} />
+    <Button label="长文" variant="secondary" onPress={() => toast('正在同步最近 30 天的拜访记录…')} />
+  </div>
+  <ToastHost />
+</LiveDemo>
+
+## 视觉规范
+
+| 元素 | 规则 |
+|---|---|
+| 形态 | 圆角 8 黑底（`rgba(51,51,51,0.92)`），白字 |
+| 高度 | min-height 36px |
+| 宽度 | max-width 80%，水平居中 |
+| 字号 | 14px / 500 |
+| 出现 | 200ms fade + 8px slide-up |
+| 停留 | 默认 3000ms |
+| 退出 | 200ms fade |
+
+## 状态变体
+
+```text
+✓ 成功 · 绿色 #52C41A 圆点
+✕ 失败 · 红色 #F4511E 圆点
+ℹ 信息 · 默认无前缀图标
+```
+
+## 用法
+
+```tsx
+import { toast, ToastHost } from '@/components/ui';
+
+// 在应用根放一次 ToastHost
+<ToastHost />
+
+// 任意位置触发
+toast('已保存');
+toast.success('订单提交成功');
+toast.error('网络异常，请重试');
+toast.info('已切换到日报模式');
+
+// 自定义时长
+toast({ message: '正在同步…', duration: 5000 });
+```
+
+## 不要
+
+- ❌ 不要在 Toast 里放按钮——需要交互的反馈用内联 [Confirmation](/docs/chat/confirmation) 或 BottomSheet
+- ❌ 不要堆叠多个 Toast——同一时间最多 1 条，新的把旧的替换
+- ❌ 不要超过 50 字——超过就用 BottomSheet 内含 Confirmation 模板

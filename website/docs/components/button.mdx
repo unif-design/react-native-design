@@ -1,20 +1,19 @@
 ---
-sidebar_position: 2
+sidebar_position: 1
 title: Button 按钮
-description: 主 / 次 / ghost / 中性 / 描边 / 危险 / 文字 · 3 种尺寸 · 块级 / 内联
-slug: /button
+description: 主 / 次 / 描边 / 文字 · 3 种尺寸 · 块级 / 内联
 ---
 
-import LiveDemo from '@site/src/components/LiveDemo';
-import { Button } from '@unif/react-native-design';
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Button } from '@/components/ui';
 
 # Button 按钮
 
-主 / 次 / ghost / 中性 / 描边 / 危险 / 文字 · 3 种尺寸 · 块级 / 内联。
+主 / 次 / 描边 / 文字 · 3 种尺寸 · 块级 / 内联。
 
 ## 实时预览
 
-下方渲染的就是 `src/components/ui/Button/Button.tsx` 本体,通过 `react-native-web` 翻译成浏览器节点。
+下方渲染的就是 `src/components/ui/Button/Button.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
 
 <LiveDemo>
   <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -24,7 +23,6 @@ import { Button } from '@unif/react-native-design';
         <Button label="主按钮" variant="primary" />
         <Button label="次按钮" variant="secondary" />
         <Button label="ghost" variant="ghost" />
-        <Button label="中性" variant="neutral" />
         <Button label="描边" variant="outline" />
         <Button label="危险" variant="danger" />
         <Button label="文字" variant="text" />
@@ -51,7 +49,7 @@ import { Button } from '@unif/react-native-design';
 ## 用法
 
 ```tsx
-import { Button } from '@unif/react-native-design';
+import { Button } from '@/components/ui';
 
 <Button label="确认" variant="primary" onPress={...} />
 <Button label="取消" variant="secondary" />
@@ -65,11 +63,9 @@ import { Button } from '@unif/react-native-design';
 | Prop | Type | 默认 | 说明 |
 |---|---|---|---|
 | `label` | `string` | — | 按钮文字 |
-| `variant` | `'primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'danger' \| 'text'` | `'primary'` | 视觉变体 |
+| `variant` | `'primary' \| 'secondary' \| 'ghost' \| 'outline' \| 'danger' \| 'text'` | `'primary'` | 视觉变体 |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | 高度 28 / 36 / 44 |
-| `block` | `boolean` | `false` | 是否块级(`flexGrow: 1`) |
-| `disabled` | `boolean` | `false` | 禁用(opacity 0.5) |
+| `block` | `boolean` | `false` | 是否块级（`flexGrow: 1`） |
+| `disabled` | `boolean` | `false` | 禁用（opacity 0.5） |
 | `loading` | `boolean` | `false` | 显示 spinner |
-| `leftIcon` | `IconName` | — | 左侧图标 |
-| `rightIcon` | `IconName` | — | 右侧图标 |
 | `onPress` | `() => void` | — | 点击回调 |

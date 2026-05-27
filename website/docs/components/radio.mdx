@@ -1,0 +1,97 @@
+---
+sidebar_position: 4
+title: Radio 单选
+description: 单选组 · 同时只能选一个
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Radio } from '@/components/ui';
+import { useState } from 'react';
+
+# Radio 单选
+
+单选控件——20×20 圆，未选透明描边、已选主橙描边 + 中心 8×8 主橙圆点。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Radio/Radio.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+export const RadioDemo = () => {
+  const [report, setReport] = useState('day');
+  const [tier, setTier] = useState('vip');
+  return (
+    <LiveDemo>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <span className="demo-label">报表周期</span>
+          <Radio.Group value={report} onChange={setReport}>
+            <Radio value="day"    label="日报" />
+            <Radio value="week"   label="周报" />
+            <Radio value="month"  label="月报" />
+            <Radio value="custom" label="自定义（暂未开放）" disabled />
+          </Radio.Group>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <span className="demo-label">客户等级</span>
+          <Radio.Group value={tier} onChange={setTier}>
+            <Radio value="vip"     label="VIP 客户" />
+            <Radio value="normal"  label="普通客户" />
+            <Radio value="pending" label="待审核客户" />
+          </Radio.Group>
+        </div>
+        <span style={{ fontSize: 13, color: 'var(--ifm-color-emphasis-600)', marginTop: 6 }}>
+          当前：{report === 'day' ? '日报' : report === 'week' ? '周报' : '月报'} · {tier === 'vip' ? 'VIP' : tier === 'normal' ? '普通' : '待审'}
+        </span>
+      </div>
+    </LiveDemo>
+  );
+};
+
+<RadioDemo />
+
+## 状态
+
+| 状态 | 视觉 |
+|---|---|
+| 未选 | 20×20 圆，1.5px 描边 `#EDEDED` |
+| 已选 | 20×20 圆，1.5px 主橙描边 + 中心 8×8 主橙圆点 |
+| 禁用 | `opacity: 0.5` |
+
+## 用法
+
+```tsx
+import { Radio } from '@/components/ui';
+
+<Radio.Group value={tier} onChange={setTier}>
+  <Radio value="vip"     label="VIP 客户" />
+  <Radio value="normal"  label="普通客户" />
+  <Radio value="pending" label="待审核客户" />
+</Radio.Group>
+```
+
+## API
+
+### `<Radio.Group>`
+
+| Prop | Type | 说明 |
+|---|---|---|
+| `value` | `string \| number` | 当前选中值 |
+| `onChange` | `(value) => void` | 切换回调 |
+| `children` | `ReactNode` | `<Radio>` 列表 |
+
+### `<Radio>`
+
+| Prop | Type | 说明 |
+|---|---|---|
+| `value` | `string \| number` | 此项的值 |
+| `label` | `string` | 右侧文字 |
+| `disabled` | `boolean?` | 禁用 |
+
+## 与 Checkbox 的区别
+
+| Radio | Checkbox |
+|---|---|
+| 同组只能选一个 | 多选 |
+| 圆形指示器 | 方形指示器 |
+| 用 `<Radio.Group>` 包裹 | 独立使用，多个 `<Checkbox>` |
+| 适合"在 N 个选项中选一个"| 适合"勾选若干项" |

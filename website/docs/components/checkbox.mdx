@@ -1,0 +1,81 @@
+---
+sidebar_position: 3
+title: Checkbox 复选框
+description: 多选 · 三种状态：未选 / 已选 / 禁用
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Checkbox } from '@/components/ui';
+import { useState } from 'react';
+
+# Checkbox 复选框
+
+多选控件——20×20 方框，未选透明描边、已选主橙实心 + 白勾、禁用半透明。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Checkbox/Checkbox.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+export const CheckboxDemo = () => {
+  const [agree, setAgree] = useState(false);
+  const [skus, setSkus] = useState({ a: true, b: true, c: false, d: false });
+  const toggle = (id) => setSkus((p) => ({ ...p, [id]: !p[id] }));
+  const picked = Object.values(skus).filter(Boolean).length;
+  return (
+    <LiveDemo>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <span className="demo-label">单个</span>
+          <Checkbox checked={agree} onChange={setAgree} label="同意接收提醒" />
+          <Checkbox checked={true} onChange={() => {}} label="禁用 · 已选" disabled />
+          <Checkbox checked={false} onChange={() => {}} label="禁用 · 未选" disabled />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <span className="demo-label">多项 · 选客户</span>
+          <Checkbox checked={skus.a} onChange={() => toggle('a')} label="东方便利店" />
+          <Checkbox checked={skus.b} onChange={() => toggle('b')} label="明珠超市" />
+          <Checkbox checked={skus.c} onChange={() => toggle('c')} label="优家便利" />
+          <Checkbox checked={skus.d} onChange={() => toggle('d')} label="悦家" />
+          <span style={{ fontSize: 13, color: 'var(--ifm-color-emphasis-600)', marginTop: 6 }}>已选：{picked} / 4</span>
+        </div>
+      </div>
+    </LiveDemo>
+  );
+};
+
+<CheckboxDemo />
+
+## 状态
+
+| 状态 | 视觉 |
+|---|---|
+| 未选 | 20×20 方框，1.5px 描边 `#EDEDED`，透明背景 |
+| 已选 | 20×20 主橙背景 + 白勾 |
+| 禁用 | `opacity: 0.5` |
+
+## 用法
+
+```tsx
+import { Checkbox } from '@/components/ui';
+
+<Checkbox checked={agree} onChange={setAgree} label="同意服务条款" />
+
+{/* 多项选择 */}
+{customers.map(c => (
+  <Checkbox
+    key={c.id}
+    checked={picked.includes(c.id)}
+    onChange={() => togglePick(c.id)}
+    label={c.name}
+  />
+))}
+```
+
+## API
+
+| Prop | Type | 说明 |
+|---|---|---|
+| `checked` | `boolean` | 当前是否选中 |
+| `onChange` | `(checked) => void` | 状态变更回调 |
+| `label` | `string` | 右侧文字 |
+| `disabled` | `boolean?` | 禁用 |

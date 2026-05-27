@@ -1,0 +1,56 @@
+---
+sidebar_position: 24
+title: Thumbnail 缩略图
+description: 列表 / 卡片 / chat 通用 16:9.5 小图 — sm / md / lg 三档尺寸
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Thumbnail } from '@/components/ui';
+
+# Thumbnail 缩略图
+
+列表 / 卡片右侧、chat 行内、Detail 头图 通用的小型预览图。固定 16:9.5 视频比,提供 `sm / md / lg` 三档尺寸。bg 占位 `c.surfaceContainer`,图未加载 / 失败时不出现空白闪烁。
+
+| Size | 尺寸 | 用法 |
+|---|---|---|
+| `sm` | 64×40 | chat 行内、列表二级缩略 |
+| `md`(默认)| 113×67 | `NewsList` / `NewsArea` 公告右侧 |
+| `lg` | 160×96 | 详情页 hero 小图、卡片头图 |
+
+## 用法
+
+```tsx
+import { Thumbnail } from '@/components/ui';
+
+// 远程 URL —— 列表行最常见
+<Thumbnail uri={item.coverUrl} />
+
+// 自定义尺寸
+<Thumbnail uri={item.coverUrl} size="lg" />
+
+// 本地图片(降级 / placeholder)
+<Thumbnail source={require('./fallback.png')} />
+
+// 无图(uri / source 都空)→ 返回 null,不占布局
+<Thumbnail uri={maybeEmpty} />
+```
+
+## API
+
+| Prop | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `uri` | `string` | — | 远程 URL,优先于 `source` |
+| `source` | `ImageSourcePropType` | — | RN Image source(本地 `require` / 完整对象) |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | 尺寸阶梯 |
+| `resizeMode` | `'cover' \| 'contain' \| 'stretch' \| 'center'` | `'cover'` | RN Image.resizeMode |
+| `style` | `StyleProp<ImageStyle>` | — | 微调样式(marginLeft 等),不覆盖 size 尺寸 |
+| `accessibilityLabel` | `string` | — | SR 描述。不传 RN Image 默认 hidden |
+| `testID` | `string` | — | 测试 |
+
+## 内部使用
+
+- [NewsList / NewsArea](/docs/components/cell) —— `newsToCellItem` 共享 mapper 内 `extra: <Thumbnail uri={images[0]} />`,两屏渲染一致
+
+## 设计原则
+
+新增"列表 / 卡片右侧缩略图 / chat 内嵌图片预览"场景请直接用 `Thumbnail`,不要自画 `<Image style={{width, height, borderRadius, bg}}>`。尺寸阶梯不够覆盖时来这里加 size,不要 inline 写死。

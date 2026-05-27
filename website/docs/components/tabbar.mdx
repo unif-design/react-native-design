@@ -1,0 +1,79 @@
+---
+sidebar_position: 2
+title: TabBar 底部 tab 栏
+description: 固定底部 · 50px 高 · icon + 文字
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { TabBar } from '@/components/ui';
+import { Text, View } from 'react-native';
+import { useState } from 'react';
+
+# TabBar 底部 tab 栏
+
+固定底部主导航 · 50px 高 · 各 tab `icon + 文字` 垂直居中。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/TabBar/TabBar.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+export const items = [
+  { id: 'home',     icon: 'home',     label: '首页' },
+  { id: 'visits',   icon: 'location', label: '拜访', badge: '3' },
+  { id: 'agent',    icon: 'spark',    label: 'AI' },
+  { id: 'me',       icon: 'user',     label: '我的' },
+];
+
+export const TabBarDemo = () => {
+  const [active, setActive] = useState('home');
+  const current = items.find((i) => i.id === active);
+  return (
+    <LiveDemo>
+      <View style={{ borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: 'var(--ifm-color-emphasis-200)', backgroundColor: 'var(--ifm-background-surface-color)' }}>
+        <View style={{ height: 200, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ fontSize: 13, color: 'var(--ifm-color-emphasis-600)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>当前页面</Text>
+          <Text style={{ fontSize: 28, fontWeight: '700', color: 'var(--ifm-color-emphasis-800)' }}>{current.label}</Text>
+        </View>
+        <TabBar active={active} onChange={setActive} items={items} />
+      </View>
+    </LiveDemo>
+  );
+};
+
+<TabBarDemo />
+
+## 视觉规范
+
+| 元素 | 规则 |
+|---|---|
+| 高度 | 50px |
+| 背景 | `#FFFFFF` |
+| 顶部边线 | 1px hairline `#EDEDED` |
+| Tab 项 | `flex: 1`，垂直居中 icon + 文字 |
+| Icon | 22×22，`fg-3 #999` (默认) / `primary-300 #EB6E00` (active) |
+| 文字 | 10px / 500，与 icon 同色 |
+| Badge | 小红点或数字徽章，叠在 icon 右上 |
+| 安全区 | bottom inset (iOS home indicator 34px) 不计入 50px |
+
+## 用法
+
+```tsx
+import { TabBar } from '@/components/ui';
+
+<TabBar
+  active="home"
+  onChange={setActive}
+  items={[
+    { id: 'home',     icon: 'home',     label: '首页' },
+    { id: 'visits',   icon: 'location', label: '拜访', badge: 3 },
+    { id: 'agent',    icon: 'spark',    label: 'AI' },
+    { id: 'me',       icon: 'user',     label: '我的' },
+  ]}
+/>
+```
+
+## 不要
+
+- ❌ 不要做 5 个以上 tab——超过就用左侧 [Drawer](./drawer)
+- ❌ 不要在 active 状态用其他颜色——必须主橙
+- ❌ 不要在 TabBar 里加按钮（"发布"等）——用单独的 FAB 或 NavBar 右槽

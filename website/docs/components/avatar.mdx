@@ -1,0 +1,73 @@
+---
+sidebar_position: 2
+title: Avatar 头像
+description: 单字符 monogram · brand / info / soft / neutral · 18 / 28 / 32 / 40 / 56
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Avatar } from '@/components/ui';
+
+# Avatar 头像
+
+单字符 monogram 头像。`brand` / `info` / `soft` / `neutral` · `xs` 18 / `sm` 28 / `md` 32 / `lg` 40 / `xl` 56。
+
+:::warning 蓝色规则
+`info` 变体（蓝底 `#3775F6`）**专用于用户头像**。其它头像用 `brand` / `soft` / `neutral`。
+:::
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Avatar/Avatar.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">变体</span>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+        <Avatar label="AI" variant="brand" size="lg" />
+        <Avatar label="我" variant="info" size="lg" />
+        <Avatar label="王" variant="soft" size="lg" />
+        <Avatar label="P" variant="neutral" size="lg" />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">尺寸</span>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+        <Avatar label="1" variant="neutral" size="xs" />
+        <Avatar label="A" variant="brand" size="sm" />
+        <Avatar label="A" variant="brand" size="md" />
+        <Avatar label="A" variant="brand" size="lg" />
+        <Avatar label="A" variant="brand" size="xl" />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">xs（脚注引用 / 列表序号专用）</span>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+        <Avatar label="1" variant="neutral" size="xs" />
+        <Avatar label="2" variant="neutral" size="xs" />
+        <Avatar label="3" variant="neutral" size="xs" />
+      </div>
+    </div>
+  </div>
+</LiveDemo>
+
+## 用法
+
+```tsx
+import { Avatar } from '@/components/ui';
+
+<Avatar label="AI" variant="brand" size="lg" />
+<Avatar label="我" variant="info" size="md" />
+<Avatar label="王" variant="soft" />
+<Avatar label="P" variant="neutral" size="sm" />
+```
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `label` | `string` | — | 单个字符 |
+| `variant` | `'brand' \| 'info' \| 'soft' \| 'neutral'` | `'neutral'` | 颜色变体 |
+| `size` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | 18 / 28 / 32 / 40 / 56 |
+
+`xs`（18px）专为内联序号 / 脚注引用使用 —— 例如 [Sources](/docs/chat/sources) 列表里的来源编号 badge。

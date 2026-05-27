@@ -1,0 +1,115 @@
+---
+sidebar_position: 2
+title: Textarea 多行输入
+description: 多行内容输入 · 复用 Input 视觉系统 · idle / focus / filled / error
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Textarea } from '@/components/ui';
+import { useState } from 'react';
+
+# Textarea 多行输入
+
+多行文本输入框，视觉与 [Input](./input) 完全一致，但内置 `multiline=true` + 顶对齐 + `[minHeight, maxHeight]` 自适应。
+
+> 单行内容请用 [`<Input />`](./input)。Textarea 内部固定 multiline=true，不可关闭。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Textarea/Textarea.tsx` 本体。
+
+export const TextareaDemo = () => {
+  const [note, setNote] = useState('');
+  const [comment, setComment] = useState('客户对产品反馈很积极…');
+  return (
+    <LiveDemo>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">idle · 默认 minHeight 96，约 5 行</span>
+          <Textarea value={note} onChangeText={setNote} placeholder="拜访备注…" />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">filled · 已有内容</span>
+          <Textarea value={comment} onChangeText={setComment} placeholder="客户反馈…" />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">error · 校验未通过</span>
+          <Textarea value="嗯" onChangeText={() => {}} error="字数太少（≥10 字）" />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">disabled · 整体灰化、不可编辑</span>
+          <Textarea value="只读不可编辑" onChangeText={() => {}} disabled />
+        </div>
+      </div>
+    </LiveDemo>
+  );
+};
+
+<TextareaDemo />
+
+## 状态
+
+跟 Input 一致：`idle / focus / filled / error / disabled`。状态由 props 隐式驱动，无需业务管。
+
+## 视觉规范
+
+| 元素 | 规则 |
+|---|---|
+| 最小高度 | 96px (约 5 行；可用 `minHeight` 覆盖) |
+| 最大高度 | 不限 (传 `maxHeight` 后超出滚动) |
+| 圆角 | 8px |
+| 内边距 | `10 12px` (左右 12px，上下 10px) |
+| 字号 | 15px (`body`) |
+| 文本对齐 | 顶部 (`textAlignVertical='top'`，跨平台统一) |
+
+## 用法
+
+```tsx
+import { Textarea } from '@/components/ui';
+
+{/* 默认 minHeight=96 */}
+<Textarea value={note} onChangeText={setNote} placeholder="详细说明…" />
+
+{/* 固定区间高度（超出滚动） */}
+<Textarea
+  value={text}
+  onChangeText={setText}
+  minHeight={120}
+  maxHeight={240}
+  placeholder="可拖动滚动的长文本…"
+/>
+
+{/* 错误态 */}
+<Textarea value={text} onChangeText={setText} error="字数太少（≥10字）" />
+
+{/* 禁用 */}
+<Textarea value={text} onChangeText={setText} disabled />
+
+{/* forwardRef + focus */}
+const textareaRef = useRef<TextInput>(null);
+<Textarea ref={textareaRef} placeholder="内容" />
+{/* 业务调 textareaRef.current?.focus() 主动聚焦 */}
+```
+
+## API
+
+`TextareaProps` = **`Omit<TextInputProps, 'style' | 'multiline' | 'numberOfLines'>`** + 这 7 个扩展。`multiline` 已内置无需传；`numberOfLines` 故意 omit（用 `minHeight` / `maxHeight` 表达更直观）。
+
+| Prop | Type | 说明 |
+|---|---|---|
+| `leading` | `ReactNode?` | 前置插槽（顶对齐渲染） |
+| `trailing` | `ReactNode?` | 后置插槽（如字符计数器） |
+| `error` | `string?` | 错误文字 —— 容器进入 error 态并在下方显示 |
+| `minHeight` | `number?` | 最小高度，默认 96。业务传 &lt;20 时内部已 `Math.max` 保护 |
+| `maxHeight` | `number?` | 最大高度，超过后内部滚动；不传则不限 |
+| `disabled` | `boolean?` | 整体禁用 + 视觉变灰，优先级高于 `editable` |
+| `containerStyle` | `StyleProp<ViewStyle>?` | 容器外层样式 |
+
+## 跟 Input 的区别
+
+| 维度 | Input | Textarea |
+|---|---|---|
+| 行数 | 单行（`multiline` 已 omit） | 多行（内置 `multiline=true`） |
+| 高度策略 | `height` 固定，默认 44 | `[minHeight, maxHeight]` 自适应，默认 96 |
+| 文本对齐 | 居中 | 顶对齐（跨平台统一） |
+| 适用场景 | 短文本（用户名 / 手机号 / 验证码） | 长文本（备注 / 评论 / 反馈） |

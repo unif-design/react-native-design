@@ -1,0 +1,74 @@
+---
+sidebar_position: 2
+title: Search 搜索栏
+description: 搜索栏 · 带 search 图标 + clear
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Search } from '@/components/ui';
+import { Text, View } from 'react-native';
+import { useState } from 'react';
+
+# Search 搜索栏
+
+`Input` 的搜索预设——左侧带 search 图标，输入后右侧出现 clear。常放在页面顶部或 NavBar 下方。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Search/Search.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+export const ALL = ['东方便利店', '明珠超市', '优家便利', '悦家', '王经理', '李经理'];
+
+export const SearchDemo = () => {
+  const [q, setQ] = useState('');
+  const matches = q ? ALL.filter((n) => n.includes(q)) : ALL;
+  return (
+    <LiveDemo>
+      <Search value={q} onChangeText={setQ} placeholder="搜索客户" />
+      <View style={{ marginTop: 14, gap: 4 }}>
+        {matches.map((name) => (
+          <View key={name} style={{ paddingVertical: 10, paddingHorizontal: 12, backgroundColor: 'var(--ifm-background-surface-color)', borderRadius: 8 }}>
+            <Text style={{ fontSize: 14, color: 'var(--ifm-color-emphasis-800)' }}>{name}</Text>
+          </View>
+        ))}
+        {matches.length === 0 ? (
+          <Text style={{ fontSize: 13, color: 'var(--ifm-color-emphasis-600)', paddingVertical: 12 }}>没有匹配项</Text>
+        ) : null}
+      </View>
+    </LiveDemo>
+  );
+};
+
+<SearchDemo />
+
+## 视觉规范
+
+| 元素 | 规则 |
+|---|---|
+| 高度 | 36px (略矮于普通 Input) |
+| 圆角 | 8px |
+| 背景 | `#F5F5F5` (bg-input) |
+| 左图标 | search · 18px · `fg-3` |
+| 占位 | `搜索…` 或具体场景 `搜索客户` |
+| Clear | 16px × 圆，输入非空时出现，点击清空 |
+
+## 用法
+
+```tsx
+import { Search } from '@/components/ui';
+
+<Search
+  value={q}
+  onChangeText={setQ}
+  placeholder="搜索客户"
+  onSubmit={handleSearch}
+/>
+```
+
+## 与 Input 的区别
+
+`Search` 是 `Input` 的常用预设：
+- 默认 `leadingIcon="search"`
+- 默认 `clearable=true`
+- 高度 36px (Input 默认 44px)
+- 提交回调 `onSubmit`，键盘 return 类型 `search`

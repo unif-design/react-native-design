@@ -1,0 +1,138 @@
+---
+sidebar_position: 5
+title: Pulse · PulseDot · usePulse
+description: reanimated 4 worklet 通用脉冲原语 — opacity 循环 hook + 包装组件 + 圆点
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Pulse, PulseDot, Icon } from '@/components/ui';
+
+# Pulse · PulseDot · usePulse
+
+通用脉冲原语，基于 `react-native-reanimated@4` worklet 实现 —— UI 线程驱动、原生 driver、不占 JS 桥。三个 API：
+
+- **`usePulse(options)`** — 钩子，返回 `useAnimatedStyle`，可直接拼到 `Animated.View` 上
+- **`<Pulse>{children}</Pulse>`** — 把 children 包进一个 opacity 循环动画
+- **`<PulseDot />`** — 一个固定的圆点（默认 6×6 主橙），用于"思考中"等指示器
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Pulse/PulseDot.tsx` 与 `Pulse.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。worklet 在 web 端走 reanimated 的 web 实现，效果跟 RN 端一致。
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">PulseDot · 默认 6×6 主橙</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <PulseDot />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">PulseDot · 自定义 size / color</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <PulseDot size={6} />
+        <PulseDot size={10} color="#3775F6" />
+        <PulseDot size={14} color="#52C41A" />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">PulseDot · delay 错峰（打字中三连点）</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <PulseDot delay={0} />
+        <PulseDot delay={200} />
+        <PulseDot delay={400} />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">{'<Pulse>'} 包装 · spark 图标</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <Pulse from={0.4} duration={500}>
+          <Icon name="spark" size={20} color="#EB6E00" />
+        </Pulse>
+        <Pulse from={0.3} duration={800}>
+          <Icon name="thinking" size={20} color="#3775F6" />
+        </Pulse>
+      </div>
+    </div>
+  </div>
+</LiveDemo>
+
+## 用法
+
+### `usePulse` hook
+
+```tsx
+import Animated from 'react-native-reanimated';
+import { usePulse } from '@/components/ui';
+
+export function MyShimmerLine({ width }) {
+  const animatedStyle = usePulse({ from: 0.6, to: 1, duration: 700 });
+  return (
+    <Animated.View style={[
+      { width, height: 11, borderRadius: 3, backgroundColor: '#EDEDED' },
+      animatedStyle,
+    ]} />
+  );
+}
+```
+
+### `<Pulse>` 包装组件
+
+```tsx
+import { Pulse, Icon } from '@/components/ui';
+
+<Pulse from={0.4} duration={500}>
+  <Icon name="spark" size={14} color="#EB6E00" />
+</Pulse>
+```
+
+### `<PulseDot>`
+
+```tsx
+import { PulseDot } from '@/components/ui';
+
+<PulseDot />                                  // 默认 6×6 主橙
+<PulseDot size={10} color="#3775F6" />        // 自定义
+<PulseDot delay={200} />                      // 错峰开始（多个排成一行做"打字中"）
+```
+
+## API
+
+### `usePulse(options?)`
+
+| Option | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `from` | `number` | `0.6` | 透明度下界 |
+| `to` | `number` | `1` | 透明度上界 |
+| `duration` | `number` | `700` | 半周期时长（ms），完整一圈 = `2 × duration` |
+| `delay` | `number` | `0` | 首次开始之前的延迟（ms） |
+
+返回 `useAnimatedStyle(() => ({ opacity }))`，可直接传给 `Animated.View` 的 `style`。
+
+### `<Pulse>`
+
+接受 `usePulse` 全部 options + `children`。把 children 渲在一个 `<Animated.View>` 里，opacity 走脉冲循环。
+
+### `<PulseDot>`
+
+| Prop | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `size` | `number` | `6` | 圆点直径（px） |
+| `color` | `string` | `c.primary`（运行期 hook 取） | 填充色 |
+| `from` / `to` / `duration` / `delay` | 同上 | from=0.5 / to=1 / duration=700 / delay=0 | 透传给 `usePulse` |
+
+## 内部使用
+
+| 消费者 | 做什么 |
+|---|---|
+| [Skeleton](./skeleton) Line/Rect/Circle | `usePulse({ from: 0.5 })` 驱动 opacity 闪烁 |
+| [Shimmer](/docs/chat/shimmer) ShimmerLine / Dot | 同上，参数定制 |
+| [Reasoning](/docs/chat/reasoning) | `<Pulse from={0.4} duration={motion.pulse / 2}>` 包裹 spark 图标 |
+| [Task](/docs/chat/task) / [ChainOfThought](/docs/chat/chain-of-thought) | 通过 `<StatusDot>` 间接 —— active 状态内嵌 `<PulseDot>` |
+| [Message](/docs/chat/message) BlinkCursor | `usePulse({ from: 0, to: 1, duration: 400 })` |
+
+## 不要
+
+- ❌ 不要自己 `new Animated.Value` + `Animated.loop` 实现脉冲 —— 老 RN Animated API 在 RN 0.85 + 新架构下被迫走 JS 桥；用 `usePulse`。
+- ❌ 不要在 `useAnimatedStyle` 里引用 React state（worklet 闭包只能读 SharedValue）。
+- ❌ 不要传非 primitive 的 options 对象（每次 render 都新身份会触发 effect 重启）—— 直接传 `from`/`to`/`duration`/`delay`。

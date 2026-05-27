@@ -1,0 +1,79 @@
+---
+sidebar_position: 1
+title: 颜色
+description: 主色 + 语义色 + 中性色，点击色块复制 HEX
+---
+
+import { Swatches } from '@site/src/components/Swatches';
+
+# 颜色
+
+单一主色 + 极简语义色 + 纯净中性色。**点击色块复制 HEX 值**。
+
+## 主色 / Primary（橙色阶）
+
+<Swatches items={[
+  { name: 'primary-0', hex: '#FFF5EB', desc: '高亮背景' },
+  { name: 'primary-100', hex: '#FFC18A', desc: '渐变起色' },
+  { name: 'primary-200', hex: '#EF8B33', desc: '渐变中色' },
+  { name: 'primary-300', hex: '#EB6E00', desc: '★ 主品牌色' },
+  { name: 'primary-400', hex: '#E96C00', desc: '渐变结束' },
+  { name: 'primary-500', hex: '#D06200', desc: 'Hover / Pressed' },
+  { name: 'primary-600', hex: '#B35400', desc: '深按压态' },
+]} />
+
+**品牌渐变**（135°，仅用于 logo 圆 + drawer header）：
+`linear-gradient(135deg, #EB6E00 0%, #E96C00 100%)`
+
+平铺橙色 `#EB6E00` 在 90% 场景下足够。**不要引入新的渐变。**
+
+## 语义色 / Semantic
+
+<Swatches items={[
+  { name: 'success-300', hex: '#52C41A', desc: '成功 / 完成' },
+  { name: 'error-300', hex: '#F4511E', desc: '错误 / 销毁' },
+  { name: 'info-300', hex: '#3775F6', desc: '⚠ 仅用于用户头像' },
+]} />
+
+:::warning 蓝色规则
+`#3775F6` **专属于用户头像**。不要在按钮、提示、链接等任何其它地方使用蓝色——这会破坏 user vs AI 的视觉区分。
+:::
+
+## 中性色 / Neutrals
+
+<Swatches items={[
+  { name: 'bg-page', hex: '#F5F5F5', desc: '页面背景' },
+  { name: 'bg-card', hex: '#FFFFFF', desc: '卡片背景' },
+  { name: 'bg-muted', hex: '#F0F0F0', desc: '次按钮 / 取消' },
+  { name: 'bg-pill', hex: '#E0E0E0', desc: '禁用按钮' },
+  { name: 'fg-1', hex: '#333333', desc: '主要文字' },
+  { name: 'fg-2', hex: '#666666', desc: '次要文字' },
+  { name: 'fg-3', hex: '#999999', desc: '占位 / 三级' },
+  { name: 'border', hex: '#EDEDED', desc: '默认边线' },
+]} />
+
+**规则。** 无近黑、无米白、无染色灰。中性色保持纯净。
+
+## 在代码中使用
+
+颜色 token 跟随主题暗亮切换，**必须**通过 `useColors()` / `useTheme().colors` 在组件内拿；不要在模块顶层 `import { colors }`（顶层导出已删）。
+
+```tsx
+import { StyleSheet } from 'react-native';
+import { useColors, useThemedStyles } from '@/theme';
+import type { ColorTokens } from '@/theme';
+
+const makeStyles = (c: ColorTokens) =>
+  StyleSheet.create({
+    primary:   { backgroundColor: c.primary },        // 亮:#EB6E00 / 暗 同
+    text:      { color: c.foreground },               // 亮:#333333 / 暗:#FFFFFF
+    border:    { borderColor: c.outline },            // 亮:#EDEDED / 暗:#3A3A3C
+    errorTint: { color: c.error },                    // 亮:#F4511E / 暗:#FF6B40
+  });
+
+function MyView() {
+  const styles = useThemedStyles(makeStyles);
+  const c = useColors(); // 也可拿来做 inline 计算的颜色 fallback
+  // ...
+}
+```

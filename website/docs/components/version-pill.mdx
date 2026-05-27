@@ -1,0 +1,68 @@
+---
+sidebar_position: 1
+title: VersionPill 版本号药丸
+description: 状态点 + 版本号 + 可选 build · 圆角胶囊
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { VersionPill } from '@/components/business';
+
+# VersionPill 版本号药丸
+
+About / Splash / 调试面板等显版本号的小药丸。左侧状态点 + 版本号 + 可选 build 后缀,圆角胶囊。
+
+## 实时预览
+
+下方渲染的就是 `src/components/business/VersionPill/VersionPill.tsx` 本体。
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">基础 · 仅版本号</span>
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <VersionPill version="2.8.0" />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">带 build 号</span>
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <VersionPill version="2.8.0" build="20260525" />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">statusColor · 自定义状态点</span>
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <VersionPill version="2.8.0" statusColor="#22A56E" />
+        <VersionPill version="2.8.0-beta" statusColor="#EB6E00" />
+        <VersionPill version="2.8.0-rc1" statusColor="#3775F6" />
+      </div>
+    </div>
+  </div>
+</LiveDemo>
+
+## 用法
+
+```tsx
+import { VersionPill } from '@/components/business';
+import { APP_VERSION } from '@/config/brand';
+
+{/* About 屏底 */}
+<VersionPill version={APP_VERSION} />
+
+{/* 内测版本醒目 */}
+<VersionPill version="2.8.0-beta" statusColor="#EB6E00" build="20260525" />
+```
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `version` | `string` | — | 版本号字串(`'2.8.0'`) |
+| `build` | `string?` | — | build 号;为空时省略分点与 build 字 |
+| `statusColor` | `string?` | `c.success` | 左侧 4×4 圆点颜色 |
+| `style` | `StyleProp<ViewStyle>` | — | 容器附加样式 |
+
+## 不要
+
+- 不要硬编码 `version` —— 走 `@/config/brand` 的 `APP_VERSION`(package.json 派生),build 走 react-native-device-info `getBuildNumber()`
+- 不要把 statusColor 滥用成"主题色徽章" —— 它的语义是"状态指示",通常 `c.success`(正常)/ `c.warning`(beta)/ `c.danger`(已废)

@@ -1,0 +1,120 @@
+---
+sidebar_position: 4
+title: Carousel 轮播
+description: 包装 react-native-reanimated-carousel · 8 prop · 自带 dot indicator · autoPlay
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Carousel } from '@/components/ui';
+import { Text, View } from 'react-native';
+
+# Carousel 轮播
+
+包装 `react-native-reanimated-carousel@5.0.0-beta.5` 的薄壳层,收口 8 个 prop 屏蔽库内部 30+ 内部 prop,同时:
+
+1. dot indicator 走 `c.primary` token,使用库内置 `Pagination.Basic`(`useSharedValue` + `onProgressChange` 驱动,无需自己跟 active state)
+2. `indicatorPosition` 控制指示器位置:`'bottom'` 独立行(占额外 16px 高度) / `'overlay-bottom-right'` 浮在 banner 右下角
+3. 类型泛型 `<T>` 让 caller 拿 typed item(库默认 `unknown`)
+4. **后续库 v5 stable / 换其他库,只改本文件 caller 0 改动**
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Carousel/Carousel.tsx` 本体,通过 `react-native-web` 翻译成浏览器节点。
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 360 }}>
+    <span className="demo-label">3 张色块 · autoPlay 3.5s · 底部 dot 指示器</span>
+    <Carousel
+      items={[
+        { id: '1', color: '#EB6E00', label: 'A' },
+        { id: '2', color: '#3775F6', label: 'B' },
+        { id: '3', color: '#52C41A', label: 'C' },
+      ]}
+      height={120}
+      itemWidth={360}
+      autoPlay={3500}
+      showIndicator
+      renderItem={(item) => (
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: item.color,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 12,
+            margin: 4,
+          }}
+        >
+          <Text style={{ color: '#fff', fontSize: 32, fontWeight: '600' }}>
+            {item.label}
+          </Text>
+        </View>
+      )}
+    />
+  </div>
+</LiveDemo>
+
+## 用法
+
+```tsx
+import { Carousel } from '@/components/ui';
+import { Image } from 'react-native';
+
+type Banner = { id: string; imageUrl: string; linkUrl?: string };
+
+const banners: Banner[] = [/* … */];
+
+<Carousel<Banner>
+  items={banners}
+  height={140}
+  autoPlay={3500}
+  showIndicator
+  indicatorPosition="overlay-bottom-right"
+  onPressItem={item => {
+    if (item.linkUrl) openWebview(item.linkUrl);
+  }}
+  getAccessibilityLabel={item => item.title ?? 'Banner'}
+  renderItem={item => (
+    <Image source={{ uri: item.imageUrl }} style={{ flex: 1 }} />
+  )}
+  testID="dashboard-carousel"
+/>
+```
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `items` | `ReadonlyArray<T>` | — | 数据数组;空数组建议 caller 自行 `return null` |
+| `renderItem` | `(item: T, index: number) => ReactNode` | — | 单项渲染 |
+| `height` | `number` | — | 每张高度(宽度默认 = 屏宽,被 `itemWidth` 覆盖) |
+| `itemWidth` | `number?` | `useWindowDimensions().width` | 每张宽度;caller 外层有 `marginHorizontal`(例如 Dashboard banner inset 16)时必须传 `屏宽 - 左右 margin*2`,否则 slide 撑满全屏宽,右侧被裁掉 |
+| `autoPlay` | `number?` | — | 自动播放间隔 ms,`undefined` / `0` 不自动 |
+| `showIndicator` | `boolean?` | `true` | 是否显示底部 dot indicator |
+| `indicatorPosition` | `'bottom' \| 'overlay-bottom-right'` | `'bottom'` | `'bottom'` 独立行 +16px / `'overlay-bottom-right'` 浮层不占高 |
+| `onPressItem` | `(item: T, index: number) => void` | — | 单项点击回调 |
+| `getAccessibilityLabel` | `(item: T, index: number) => string` | — | 单项 a11y label 解析器,**仅 `onPressItem` 存在时启用**(Pressable 自动声明 `accessibilityRole='button'`,纯展示型轮播不声明 button 语义);未传 fallback `第 N 项` |
+| `style` | `StyleProp<ViewStyle>?` | — | 外层 View 附加样式 |
+| `testID` | `string?` | — | E2E / 测试定位,子项自动加 `${testID}-item-${i}` |
+
+## 视觉规范
+
+| 元素 | 规则 |
+|---|---|
+| Dot · 默认 | 6px 圆,`c.foregroundFaint` |
+| Dot · active | 6px 圆,`c.primary` |
+| `'bottom'` 占位 | 容器高度 = `height + 16` |
+| `'overlay-bottom-right'` | dot 浮层 absolute 在右下角,不占额外高度 |
+| `loop` | 默认开启 —— 最后一张滑回第一张 |
+
+## 备注
+
+- 内部用了 `useSharedValue` + `onProgressChange`,re-render 全在 worklet 里走,JS 线程不掉帧
+- 库版本固定 `5.0.0-beta.5`(`package.json` 锁版本),v5 stable 发布后内部 API 可能有 break change —— 改动收敛在 `Carousel.tsx`,caller 不受影响
+- 测试中 `react-native-reanimated-carousel` 走 jest mock(参考 `jest.setup.ts`),`testID` 自动生成子项 testID `carousel-item-${i}` 可用于断言
+
+## 不要
+
+- 不要把 Carousel 当 `<ScrollView horizontal>` 用 —— 简单横滚列表请用原生 `<ScrollView>` 即可
+- 不要传 `items.length <= 1` —— 单张直接渲染 `<Image>`,不必上 Carousel
+- 不要忘了 `itemWidth` —— 一旦外层加了 `marginHorizontal`,默认全屏宽会让 slide 右侧被裁。`屏宽 - margin*2` 是稳妥值,`useWindowDimensions()` 拿屏宽

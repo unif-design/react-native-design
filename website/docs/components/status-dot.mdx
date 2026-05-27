@@ -1,0 +1,93 @@
+---
+sidebar_position: 6
+title: StatusDot 状态点
+description: done / active / pending 圆点 — 任务列表与推理链共用
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { StatusDot } from '@/components/ui';
+
+# StatusDot 状态点
+
+任务列表 / 推理链通用的状态圆点。三态（done / active / pending）× 两风格（flat / soft）。
+
+| 状态 | 视觉 | 内部 |
+|---|---|---|
+| `done` | 绿底 + 白勾 | `success` 填充 + `<Icon name="check" />` |
+| `active` | 边框 + 内嵌 `<PulseDot>` | `primary` 边框 + 跳动 |
+| `pending` | 仅边框 | `outline` 灰边 |
+
+`tone='flat'`（默认）—— pending/active 底色透明，用于 [Task](/docs/chat/task)。
+`tone='soft'` —— pending = `surface`、active = `primaryContainer`，用于 [ChainOfThought](/docs/chat/chain-of-thought)（推理链气氛更柔）。
+
+## 实时预览
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">flat（任务列表风格）</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <StatusDot status="done" size={16} />
+          <span>done</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <StatusDot status="active" size={16} />
+          <span>active</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <StatusDot status="pending" size={16} />
+          <span>pending</span>
+        </div>
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">soft（推理链风格）</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <StatusDot status="done" size={18} tone="soft" />
+          <span>done</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <StatusDot status="active" size={18} tone="soft" />
+          <span>active</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <StatusDot status="pending" size={18} tone="soft" />
+          <span>pending</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</LiveDemo>
+
+## 用法
+
+```tsx
+import { StatusDot } from '@/components/ui';
+
+// 任务列表风格
+<StatusDot status="done" size={16} />
+<StatusDot status="active" size={16} />
+<StatusDot status="pending" size={16} />
+
+// 推理链风格（柔色）
+<StatusDot status="active" size={18} tone="soft" />
+```
+
+## API
+
+| Prop | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `status` | `'done' \| 'active' \| 'pending'` | — | 当前状态 |
+| `size` | `number` | `16` | 圆点直径 |
+| `tone` | `'flat' \| 'soft'` | `'flat'` | flat 透明底；soft 柔色底（pending=bgCard、active=primary0） |
+
+## 内部使用
+
+- [Task](/docs/chat/task) `TaskRow` —— `<StatusDot status={mapped} size={16} />`（todo→pending、running→active、done→done）
+- [ChainOfThought](/docs/chat/chain-of-thought) `Step` —— `<StatusDot status={step.status} size={18} tone="soft" />`
+
+## 设计原则
+
+设计上的"做完了 / 在做 / 还没做"在 Unif 系统里只有这一种视觉表达，新组件需要状态指示请直接用 `StatusDot`，不要自画。
