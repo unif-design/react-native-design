@@ -12,14 +12,25 @@ name: Release
 # 不需要 long-lived NPM_TOKEN —— 没有静态凭据可泄露。
 
 on:
+  push:
+    branches: [main]
+    paths:
+      # 只在源码 / 脚本 / 包配置改动时触发;改 docs / example / CI 配置不发版。
+      # release-it 看 conventional commits 自己决定要不要发 + bump 类型,
+      # 这层 paths 过滤只是省 CI 资源,不是行为兜底。
+      - 'src/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'yarn.lock'
   workflow_dispatch:
     inputs:
       increment:
-        description: '版本类型'
-        required: true
-        default: 'patch'
+        description: '强制版本类型(留空走 conventional commits 自动推断)'
+        required: false
+        default: ''
         type: choice
         options:
+          - ''
           - patch
           - minor
           - major
@@ -58,8 +69,15 @@ jobs:
 
       # npm CLI 在 GitHub Actions OIDC 环境下(id-token: write + 包配过 Trusted Publisher)
       # 自动用临时 token publish,不需要写 ~/.npmrc。
+      # INCREMENT 空 → release-it 根据 conventional-changelog 插件推断 bump;
+      # 非空 → 走 workflow_dispatch 强制指定的 patch / minor / major。
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          INCREMENT: ${{ inputs.increment }}
-        run: npx release-it "$INCREMENT" --ci
+          INCREMENT: ${{ inputs.increment || '' }}
+        run: |
+          if [ -n "$INCREMENT" ]; then
+            npx release-it "$INCREMENT" --ci
+          else
+            npx release-it --ci
+          fi
