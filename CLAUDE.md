@@ -110,6 +110,14 @@ ComponentName/
 
 `package.json#exports` 把 `.` 映射到 `source: src/index.tsx`(workspace 消费者)+ `default: lib/module/index.js` + `types: lib/typescript/src/index.d.ts`。不要破坏这个三元组。
 
+## 自动化流程标准
+
+CI / 发版 / 依赖管理 / PR review / branch protection 全套自动化的配置 + 排查 SOP,**集中维护在 org 共享文档**:
+
+→ https://github.com/unif-design/.github/blob/main/AUTOMATION.md
+
+本仓库是该文档的参考实例(具体路径、ruleset 勾选项、release-it 配置都以这个 repo 为标本)。
+
 ## 仓库内注释风格
 
 现有代码用中文记录非显而易见决策的 **why** —— 比如某 token 为什么亮暗 alpha 不同、为什么暗色把多数 shadow 置零、为什么 `toast.ts` 用小写文件名(APFS 大小写冲突)、为什么 memoization 依赖列表恰好是这几项。保持这个标准:能不写注释就不写,但当读者会想"为什么要这样写"时,就写一句把 why 讲清楚。
