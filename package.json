@@ -55,7 +55,7 @@
   "bugs": {
     "url": "https://github.com/unif-design/react-native-design/issues"
   },
-  "homepage": "https://github.com/unif-design/react-native-design#readme",
+  "homepage": "https://unif-design.github.io/react-native-design/",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
