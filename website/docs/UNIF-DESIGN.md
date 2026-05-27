@@ -595,32 +595,6 @@ export function MyCard({ title }: { title: string }) {
 
 字面量颜色（`'#fff'` / `'#000'` / `'rgba(...)'`）在组件层禁止，必须经 token。如需要 inline 取色（如 prop fallback、状态映射），用 `useColors()` hook 拿 `c`。`shadow.card` / `shadow.brandMd` 也是 themed——暗色下 shadowOpacity / elevation 自动趋零（layered surface 替代 shadow）。
 
-### Render a chat message
-```tsx
-import { Message } from '@/components/chat';
-
-<Message role="user" text="你好" meta="14:02 · 已送达" />
-<Message role="ai" text="您好，有什么可以帮您？" meta="已思考 2.3s" />
-```
-
-### Stream-with-cursor
-```tsx
-<Message role="ai" text="正在为你拉取数据" streaming meta="AI 回复中…" />
-```
-
-### Inline confirmation (high-risk action)
-```tsx
-import { Confirmation } from '@/components/chat';
-
-<Confirmation
-  status="pending"
-  title="操作确认"
-  body="将提交订单。确认继续？"
-  onConfirm={…}
-  onCancel={…}
-/>
-```
-
 ### Imperative toast
 Mount once near the root (`<ToastHost />` is already in `App.tsx`), then call from anywhere:
 ```tsx
