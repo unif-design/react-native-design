@@ -559,8 +559,8 @@ src/app/                  ← Boot / SplashScreen
 ```ts
 // styles.ts —— 工厂函数，接收 (c, s) 注入主题
 import { StyleSheet } from 'react-native';
-import type { ColorTokens, ShadowTokens } from '@/theme';
-import { type as t, fw, space, radius } from '@/theme';
+import type { ColorTokens, ShadowTokens } from '@unif/react-native-design';
+import { type as t, fw, space, radius } from '@unif/react-native-design';
 
 export const makeStyles = (c: ColorTokens, s: ShadowTokens) =>
   StyleSheet.create({
@@ -580,7 +580,7 @@ export const makeStyles = (c: ColorTokens, s: ShadowTokens) =>
 
 ```tsx
 // Component.tsx —— 入口加 hook，组件代码消费 styles
-import { useThemedStyles } from '@/theme';
+import { useThemedStyles } from '@unif/react-native-design';
 import { makeStyles } from './styles';
 
 export function MyCard({ title }: { title: string }) {
@@ -624,7 +624,7 @@ import { Confirmation } from '@/components/chat';
 ### Imperative toast
 Mount once near the root (`<ToastHost />` is already in `App.tsx`), then call from anywhere:
 ```tsx
-import { toast } from '@/components/ui';
+import { toast } from '@unif/react-native-design';
 
 toast('已保存');
 toast.success('订单提交成功');

@@ -5,7 +5,7 @@ description: reanimated 4 worklet 通用脉冲原语 — opacity 循环 hook + �
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
-import { Pulse, PulseDot, Icon } from '@/components/ui';
+import { Pulse, PulseDot, Icon } from '@unif/react-native-design';
 
 # Pulse · PulseDot · usePulse
 
@@ -63,7 +63,7 @@ import { Pulse, PulseDot, Icon } from '@/components/ui';
 
 ```tsx
 import Animated from 'react-native-reanimated';
-import { usePulse } from '@/components/ui';
+import { usePulse } from '@unif/react-native-design';
 
 export function MyShimmerLine({ width }) {
   const animatedStyle = usePulse({ from: 0.6, to: 1, duration: 700 });
@@ -79,7 +79,7 @@ export function MyShimmerLine({ width }) {
 ### `<Pulse>` 包装组件
 
 ```tsx
-import { Pulse, Icon } from '@/components/ui';
+import { Pulse, Icon } from '@unif/react-native-design';
 
 <Pulse from={0.4} duration={500}>
   <Icon name="spark" size={14} color="#EB6E00" />
@@ -89,7 +89,7 @@ import { Pulse, Icon } from '@/components/ui';
 ### `<PulseDot>`
 
 ```tsx
-import { PulseDot } from '@/components/ui';
+import { PulseDot } from '@unif/react-native-design';
 
 <PulseDot />                                  // 默认 6×6 主橙
 <PulseDot size={10} color="#3775F6" />        // 自定义
