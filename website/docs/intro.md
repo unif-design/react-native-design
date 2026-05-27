@@ -54,10 +54,10 @@ export default function App() {
 
 ## 下一步
 
-- [UNIF-DESIGN 总览](./UNIF-DESIGN) —— 设计系统的整体哲学与定位
-- [设计原则](./design/intro) —— 风格、声音、不要做什么
-- [Design Tokens](./design/tokens/colors) —— 颜色 / 字体 / 间距 / 动效
-- [组件总览](./components/overview) —— 38 个组件的索引与分类
+- [UNIF-DESIGN 总览](./UNIF-DESIGN.md) —— 设计系统的整体哲学与定位
+- [设计原则](./design/intro.md) —— 风格、声音、不要做什么
+- [Design Tokens](./design/tokens/colors.mdx) —— 颜色 / 字体 / 间距 / 动效
+- [组件总览](./components/overview.md) —— 38 个组件的索引与分类
 
 ## 版本
 

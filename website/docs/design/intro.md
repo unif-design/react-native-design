@@ -19,7 +19,7 @@ Unif Design 的设计师视角——原则、令牌、组件视觉契约。
 | [设计令牌 · 字体](./tokens/typography.md) | 系统字体栈、字号阶梯 |
 | [设计令牌 · 间距/圆角/阴影](./tokens/spacing-radii-shadows.md) | 4px 网格、圆角 token、唯一卡片阴影 |
 | [设计令牌 · 动效](./tokens/motion.md) | 时长、缓动函数 |
-| [设计令牌 · 图标](./tokens/icons.mdx) | 24×24 stroked SVG 规则 |
+| [设计令牌 · 图标](../components/icons.mdx) | 24×24 stroked SVG 规则 |
 | [不要这样做](./donts.md) | 硬性禁忌 |
 
 ## 一句话说明
@@ -30,4 +30,4 @@ Unif Design 的设计师视角——原则、令牌、组件视觉契约。
 - **图标** 24×24 stroked SVG，`stroke-width: 1.75`，`linecap: round`
 - **字体** 仅系统栈，CJK 走 PingFang SC / Microsoft YaHei
 
-继续浏览 → [组件](/docs/components) · [研发](/docs/engineering)
+继续浏览 → [组件](/docs/components) · 研发
