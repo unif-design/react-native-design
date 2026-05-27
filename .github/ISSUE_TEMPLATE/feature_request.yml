@@ -1,0 +1,69 @@
+name: ✨ Feature request
+description: 已有具体 scope 的功能需求 / API 改进。**模糊 idea 请先开 Discussion 讨论。**
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Feature request
+
+        👋 Hi!
+
+        这个 template 用于**已经想清楚 scope 的 feature**(具体哪个组件、要加什么 props、怎么用)。
+
+        如果还是模糊 idea / 想征求意见,请走 [Discussion](https://github.com/unif-design/react-native-design/discussions/new?category=ideas) 先讨论。
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: 动机
+      description: 你想解决什么问题?现在的 workaround 是什么?为什么 workaround 不够?
+      placeholder: 例如:Empty 组件现在 hard-code spark icon,在相机权限拒绝场景需要传 camera-off icon...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 具体提议
+      description: 想加什么 API?props 名称 / 类型?用法示例?
+      placeholder: |
+        例如:Empty 加 icon?: IconName prop,默认 'spark',允许传任何 IconName。
+
+        ```tsx
+        <Empty icon="camera-off" title="无法访问相机" desc="..." />
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 考虑过的备选
+      description: 有没有其他方案?(可选)
+      placeholder: 例如:不加 prop,让消费者自己用 View + Icon 组合 — 但每个空态都要写一遍样板代码,不如组件层支持
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 影响范围
+      description: 这个 feature 会破坏现有 API 吗?
+      options:
+        - 完全向后兼容(只加新 props / 新组件)
+        - 修改默认行为(可能影响现有用法)
+        - Breaking change(major bump)
+      default: 0
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: 我搜过 [existing issues + discussions](https://github.com/unif-design/react-native-design/issues?q=is%3Aissue)
+          required: true
+        - label: 这是个**具体可实施**的需求(不是模糊 idea)
+          required: true
+        - label: 我已经看过 [AUTOMATION.md](https://github.com/unif-design/.github/blob/main/AUTOMATION.md) 的发版流程
+          required: false
