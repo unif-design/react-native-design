@@ -2,6 +2,9 @@
 
 Unif 设计系统 —— theme + icons + utils + components,面向 React Native 0.85 新架构(Fabric + concurrent React)。
 
+📖 **文档站**:[unif-design.github.io/react-native-design](https://unif-design.github.io/react-native-design/)
+📦 **npm**:[@unif/react-native-design](https://www.npmjs.com/package/@unif/react-native-design)
+
 ## 安装
 
 ```sh
