@@ -5,7 +5,7 @@ description: 单选组 · 同时只能选一个
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
-import { Radio } from '@unif/react-native-design';
+import { Radio } from '@/components/ui';
 import { useState } from 'react';
 
 # Radio 单选
@@ -60,7 +60,7 @@ export const RadioDemo = () => {
 ## 用法
 
 ```tsx
-import { Radio } from '@unif/react-native-design';
+import { Radio } from '@/components/ui';
 
 <Radio.Group value={tier} onChange={setTier}>
   <Radio value="vip"     label="VIP 客户" />

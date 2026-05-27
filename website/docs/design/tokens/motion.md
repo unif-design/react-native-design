@@ -42,7 +42,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { motion } from '@unif/react-native-design';
+import { motion } from '@/theme';
 
 function FadeIn({ children }) {
   const op = useSharedValue(0);
@@ -57,8 +57,8 @@ function FadeIn({ children }) {
 ### 脉冲（思考中 / shimmer / blink cursor 全部走这个）
 
 ```tsx
-import { Pulse, PulseDot, usePulse } from '@unif/react-native-design';
-import { motion } from '@unif/react-native-design';
+import { Pulse, PulseDot, usePulse } from '@/components/ui';
+import { motion } from '@/theme';
 
 // 包裹任意 children
 <Pulse from={0.4} duration={motion.pulse / 2}>
@@ -79,7 +79,7 @@ const animatedStyle = usePulse({ from: 0.5, duration: 700 });
 
 ```tsx
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { motion } from '@unif/react-native-design';
+import { motion } from '@/theme';
 
 {open ? (
   <Animated.View entering={FadeIn.duration(motion.base)} exiting={FadeOut.duration(motion.base)}>

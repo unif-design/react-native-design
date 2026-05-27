@@ -74,19 +74,20 @@ const config: Config = {
       items: [
         {
           type: 'docSidebar',
-          sidebarId: 'docsSidebar',
+          sidebarId: 'designSidebar',
           position: 'left',
-          label: '文档',
+          label: '设计',
         },
         {
-          href: 'https://www.npmjs.com/package/@unif/react-native-design',
-          label: 'npm',
-          position: 'right',
+          type: 'docSidebar',
+          sidebarId: 'componentsSidebar',
+          position: 'left',
+          label: '组件',
         },
         {
-          href: 'https://github.com/unif-design/react-native-design',
-          label: 'GitHub',
+          type: 'html',
           position: 'right',
+          value: '<span class="navbar-version">v0.2.0</span>',
         },
       ],
     },
@@ -94,10 +95,20 @@ const config: Config = {
       style: 'light',
       links: [
         {
-          title: '文档',
+          title: '设计',
           items: [
-            { label: '简介', to: '/docs/intro' },
+            { label: '设计原则', to: '/docs/design/principles' },
+            { label: '设计令牌', to: '/docs/design/tokens/colors' },
+            { label: '不要这样做', to: '/docs/design/donts' },
+          ],
+        },
+        {
+          title: '组件',
+          items: [
+            { label: '概览', to: '/docs/components' },
             { label: 'Button', to: '/docs/components/button' },
+            { label: 'NavBar', to: '/docs/components/navbar' },
+            { label: 'Cell · List', to: '/docs/components/cell' },
           ],
         },
         {
@@ -108,7 +119,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: '@unif/react-native-design · MIT',
+      copyright: '@unif/react-native-design · MIT · v0.2.0',
     },
     prism: {
       theme: prismThemes.github,

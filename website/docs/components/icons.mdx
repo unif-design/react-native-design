@@ -17,8 +17,8 @@ import IconCatalog from '@site/src/components/IconCatalog';
 ## 在 RN 中使用
 
 ```tsx
-import { Icon } from '@unif/react-native-design';
-import { useColors } from '@unif/react-native-design';
+import { Icon } from '@/components/ui';
+import { useColors } from '@/theme';
 
 function Demo() {
   const c = useColors();
@@ -63,7 +63,7 @@ function Demo() {
 ```tsx
 // 摘录
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
-import { ICONS } from '@unif/react-native-design';
+import { ICONS } from '@/assets/icons';
 
 <Svg width={size} height={size} viewBox="0 0 24 24"
      fill="none" stroke={color}

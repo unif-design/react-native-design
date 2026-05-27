@@ -5,7 +5,7 @@ description: 固定底部 · 50px 高 · icon + 文字
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
-import { TabBar } from '@unif/react-native-design';
+import { TabBar } from '@/components/ui';
 import { Text, View } from 'react-native';
 import { useState } from 'react';
 
@@ -58,7 +58,7 @@ export const TabBarDemo = () => {
 ## 用法
 
 ```tsx
-import { TabBar } from '@unif/react-native-design';
+import { TabBar } from '@/components/ui';
 
 <TabBar
   active="home"
@@ -74,6 +74,6 @@ import { TabBar } from '@unif/react-native-design';
 
 ## 不要
 
-- ❌ 不要做 5 个以上 tab——超过就用左侧 Drawer
+- ❌ 不要做 5 个以上 tab——超过就用左侧 [Drawer](./drawer)
 - ❌ 不要在 active 状态用其他颜色——必须主橙
 - ❌ 不要在 TabBar 里加按钮（"发布"等）——用单独的 FAB 或 NavBar 右槽

@@ -5,7 +5,7 @@ description: 单行 · idle / focus / filled / error
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
-import { Input } from '@unif/react-native-design';
+import { Input } from '@/components/ui';
 import { useState } from 'react';
 
 # Input 输入框
@@ -62,8 +62,8 @@ export const InputDemo = () => {
 ## 用法
 
 ```tsx
-import { Input, Icon } from '@unif/react-native-design';
-import { useColors } from '@unif/react-native-design';
+import { Input, Icon } from '@/components/ui';
+import { useColors } from '@/theme';
 
 <Input value={text} onChangeText={setText} placeholder="搜索…" />
 

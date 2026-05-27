@@ -5,7 +5,7 @@ description: 状态点 + 版本号 + 可选 build · 圆角胶囊
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
-import { VersionPill } from '@unif/react-native-design';
+import { VersionPill } from '@/components/business';
 
 # VersionPill 版本号药丸
 
@@ -43,10 +43,11 @@ About / Splash / 调试面板等显版本号的小药丸。左侧状态点 + 版
 ## 用法
 
 ```tsx
-import { VersionPill } from '@unif/react-native-design';
+import { VersionPill } from '@/components/business';
+import { APP_VERSION } from '@/config/brand';
 
 {/* About 屏底 */}
-<VersionPill version="0.2.0" />
+<VersionPill version={APP_VERSION} />
 
 {/* 内测版本醒目 */}
 <VersionPill version="2.8.0-beta" statusColor="#EB6E00" build="20260525" />

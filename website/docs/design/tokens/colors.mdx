@@ -60,8 +60,8 @@ import { Swatches } from '@site/src/components/Swatches';
 
 ```tsx
 import { StyleSheet } from 'react-native';
-import { useColors, useThemedStyles } from '@unif/react-native-design';
-import type { ColorTokens } from '@unif/react-native-design';
+import { useColors, useThemedStyles } from '@/theme';
+import type { ColorTokens } from '@/theme';
 
 const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({

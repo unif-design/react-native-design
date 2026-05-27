@@ -5,7 +5,7 @@ description: 全局轻提示 · 自动消失
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
-import { Button, toast, ToastHost } from '@unif/react-native-design';
+import { Button, toast, ToastHost } from '@/components/ui';
 
 # Toast 轻提示
 
@@ -48,7 +48,7 @@ import { Button, toast, ToastHost } from '@unif/react-native-design';
 ## 用法
 
 ```tsx
-import { toast, ToastHost } from '@unif/react-native-design';
+import { toast, ToastHost } from '@/components/ui';
 
 // 在应用根放一次 ToastHost
 <ToastHost />
@@ -65,6 +65,6 @@ toast({ message: '正在同步…', duration: 5000 });
 
 ## 不要
 
-- ❌ 不要在 Toast 里放按钮——需要交互的反馈用内联 Confirmation 或 BottomSheet
+- ❌ 不要在 Toast 里放按钮——需要交互的反馈用内联 [Confirmation](/docs/chat/confirmation) 或 BottomSheet
 - ❌ 不要堆叠多个 Toast——同一时间最多 1 条，新的把旧的替换
 - ❌ 不要超过 50 字——超过就用 BottomSheet 内含 Confirmation 模板

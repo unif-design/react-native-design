@@ -5,7 +5,7 @@ description: 横向小卡 · 30×30 灰底 icon tile + title/sub · 适合 grid 
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
-import { EntryCard } from '@unif/react-native-design';
+import { EntryCard } from '@/components/ui';
 
 # EntryCard 入口卡
 
@@ -55,7 +55,7 @@ retail biz2 设计稿 v7:Me 屏底部"设置 / 关于"两个入口从纵向 Cell
 ## 用法
 
 ```tsx
-import { EntryCard } from '@unif/react-native-design';
+import { EntryCard } from '@/components/ui';
 import { View } from 'react-native';
 
 {/* grid 双列入口 —— Me 屏底部"设置 / 关于" */}
@@ -91,4 +91,4 @@ import { View } from 'react-native';
 
 - ❌ 不要在 EntryCard 内放 arrow —— 它的语义是"独立入口卡",不是 List 行。需要 chevron 用 [Cell](./cell)。
 - ❌ 不要把 title 拉长到换行 —— 单卡是紧凑入口,设计上只 numberOfLines=1。长文本用 [Card](./card) + 自渲。
-- ❌ 不要做超过 4 张并排 —— 4 张以上信息密度过高,改用 [Grid](./grid) + ModernAppCell。
+- ❌ 不要做超过 4 张并排 —— 4 张以上信息密度过高,改用 [Grid](./grid) + [ModernAppCell](./modern-app-cell)。

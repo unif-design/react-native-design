@@ -5,7 +5,7 @@ description: done / active / pending 圆点 — 任务列表与推理链共用
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
-import { StatusDot } from '@unif/react-native-design';
+import { StatusDot } from '@/components/ui';
 
 # StatusDot 状态点
 
@@ -17,8 +17,8 @@ import { StatusDot } from '@unif/react-native-design';
 | `active` | 边框 + 内嵌 `<PulseDot>` | `primary` 边框 + 跳动 |
 | `pending` | 仅边框 | `outline` 灰边 |
 
-`tone='flat'`（默认）—— pending/active 底色透明，用于 Task。
-`tone='soft'` —— pending = `surface`、active = `primaryContainer`，用于 ChainOfThought（推理链气氛更柔）。
+`tone='flat'`（默认）—— pending/active 底色透明，用于 [Task](/docs/chat/task)。
+`tone='soft'` —— pending = `surface`、active = `primaryContainer`，用于 [ChainOfThought](/docs/chat/chain-of-thought)（推理链气氛更柔）。
 
 ## 实时预览
 
@@ -64,7 +64,7 @@ import { StatusDot } from '@unif/react-native-design';
 ## 用法
 
 ```tsx
-import { StatusDot } from '@unif/react-native-design';
+import { StatusDot } from '@/components/ui';
 
 // 任务列表风格
 <StatusDot status="done" size={16} />
@@ -85,8 +85,8 @@ import { StatusDot } from '@unif/react-native-design';
 
 ## 内部使用
 
-- Task `TaskRow` —— `<StatusDot status={mapped} size={16} />`（todo→pending、running→active、done→done）
-- ChainOfThought `Step` —— `<StatusDot status={step.status} size={18} tone="soft" />`
+- [Task](/docs/chat/task) `TaskRow` —— `<StatusDot status={mapped} size={16} />`（todo→pending、running→active、done→done）
+- [ChainOfThought](/docs/chat/chain-of-thought) `Step` —— `<StatusDot status={step.status} size={18} tone="soft" />`
 
 ## 设计原则
 

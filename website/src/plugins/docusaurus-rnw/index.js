@@ -18,6 +18,8 @@ module.exports = function reactNativeWebPlugin(context) {
   const projectRoot = path.resolve(context.siteDir, '..');
   const srcDir = path.join(projectRoot, 'src');
   const rnghPressableShim = path.join(__dirname, 'shims/RnghPressable.js');
+  const chatStub = path.join(__dirname, 'shims/chatStub.js');
+  const uiDocsOverride = path.join(__dirname, 'shims/uiDocsOverride.js');
 
   // 几个 ESM-shipped 且带 Flow / TS 注解的 RN 库要让 babel-loader 处理（默认 node_modules 不走 babel）。
   // 用 regex 匹配，因为这些包同时在 root 和 website/ 两份 node_modules 下都可能存在。
@@ -81,6 +83,18 @@ module.exports = function reactNativeWebPlugin(context) {
             //    barrel,也得让 webpack 解析到源码本体而非编译产物。
             //  - `$` 精确匹配,不影响 `@unif/react-native-design/<subpath>` 写法。
             '@unif/react-native-design$': path.resolve(srcDir, 'index.tsx'),
+            // portal mdx 在 empty.mdx / UNIF-DESIGN.md 等里 import `@/components/chat`
+            // (SuggestionList 等 chat 业务组件 LiveDemo 用),design 包不含 chat 业务模块,
+            // 这里把 `@/components/chat` 单独 alias 到 docs-only stub,保住 1:1 mdx 但不进 publish API。
+            // 注意:必须放在 `@` 通配 alias 之前(webpack 短路 first-match)。
+            '@/components/chat$': chatStub,
+            // logo.mdx 写 `<Logo />` 不传 source prop,design 包的 Logo 又把 source 设为 required
+            // (品牌资产由 consumer 自带原则),mdx 直接渲染会出空 Image。docs-only 包一层默认
+            // 资产,让示例视觉成立。仅作用于 mdx 引用路径,不进 publish API。
+            '@/components/ui$': uiDocsOverride,
+            // 让 mdx 等不经过我们 babel-loader 的文件也能解析 @/ 别名（webpack 直接走）。
+            // `@` 不影响 `@docusaurus/*` / `@site/*` / `@theme/*` —— webpack 按完整段匹配。
+            '@': srcDir,
           },
           // RNW / 多平台库会用 .web.js / .web.tsx 等后缀提供 web-specific 实现。
           extensions: [
