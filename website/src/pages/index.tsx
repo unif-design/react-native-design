@@ -19,7 +19,7 @@ export default function Home(): React.JSX.Element {
             <Link to="/docs/intro" className="unif-hero__cta unif-hero__cta--primary">
               开始使用 →
             </Link>
-            <Link to="/docs/button" className="unif-hero__cta unif-hero__cta--ghost">
+            <Link to="/docs/components/button" className="unif-hero__cta unif-hero__cta--ghost">
               Button 示例
             </Link>
           </div>

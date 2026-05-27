@@ -1,0 +1,103 @@
+---
+sidebar_position: 3
+title: Tabs 标签页
+description: 下划线 / 分段控件
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Tabs, Segmented } from '@unif/react-native-design';
+import { useState } from 'react';
+
+# Tabs 标签页
+
+页面内分类切换 · 两种风格：**下划线 Tabs**（页面级）/ **分段控件 Segmented**（局部分组）。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Tabs/Tabs.tsx` 与 `src/components/ui/Segmented/Segmented.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+export const TabsDemo = () => {
+  const [tab, setTab] = useState('all');
+  const [range, setRange] = useState('week');
+  return (
+    <LiveDemo>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">下划线 Tabs · 页面级</span>
+          <Tabs
+            value={tab}
+            onChange={setTab}
+            items={[
+              { id: 'all',     label: '全部' },
+              { id: 'pending', label: '待跟进' },
+              { id: 'done',    label: '已完成' },
+            ]}
+          />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">分段控件 · 局部</span>
+          <Segmented
+            value={range}
+            onChange={setRange}
+            items={[
+              { id: 'day',   label: '日' },
+              { id: 'week',  label: '周' },
+              { id: 'month', label: '月' },
+            ]}
+          />
+        </div>
+      </div>
+    </LiveDemo>
+  );
+};
+
+<TabsDemo />
+
+## 下划线 Tabs
+
+页面级分类切换，全宽分布。
+
+| 元素 | 规则 |
+|---|---|
+| 容器 | 高 44px，背景 `#fff`，底部 1px hairline |
+| Tab 项 | `flex: 1` 平分，`14px / 500`，激活态主橙 + 字重 600 |
+| 下划线 | 2px 主橙，宽度同 label，200ms 滑动 |
+| 内边距 | `0 16` |
+
+## 分段控件
+
+局部分组（如 Filter "全部 / 已完成 / 待跟进"）。
+
+| 元素 | 规则 |
+|---|---|
+| 容器 | 高 32px，背景 `#F0F0F0`，圆角 8 |
+| 项 | 平分宽度，`13px / 500` |
+| 激活 | 白底 thumb，圆角 6，1px 浅色阴影，200ms 平移 |
+
+## 用法
+
+```tsx
+import { Tabs, Segmented } from '@unif/react-native-design';
+
+{/* 页面级 */}
+<Tabs
+  value={tab}
+  onChange={setTab}
+  items={[
+    { id: 'all',       label: '全部' },
+    { id: 'pending',   label: '待跟进' },
+    { id: 'done',      label: '已完成' },
+  ]}
+/>
+
+{/* 局部分段 */}
+<Segmented
+  value={range}
+  onChange={setRange}
+  items={[
+    { id: 'day',   label: '日' },
+    { id: 'week',  label: '周' },
+    { id: 'month', label: '月' },
+  ]}
+/>
+```

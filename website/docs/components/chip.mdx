@@ -1,0 +1,131 @@
+---
+sidebar_position: 4
+title: Chip 标签
+description: 胶囊形可点击 pill · 默认 / 选中 / 按下三态
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Chip, Icon } from '@unif/react-native-design';
+import { useState } from 'react';
+
+# Chip 标签
+
+胶囊形（pill）标签：圆角 999、可点击、可选中。Suggestion / 多选筛选 / 内联标记等场景的底层组件。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Chip/Chip.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+export const ChipDemo = () => {
+  const [filter, setFilter] = useState('pending');
+  const [tags, setTags] = useState(['王经理', '张组长', '李区域']);
+  return (
+    <LiveDemo>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">单选 · selected 切换</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <Chip label="待跟进" selected={filter === 'pending'} onPress={() => setFilter('pending')} />
+            <Chip label="已完成" selected={filter === 'done'} onPress={() => setFilter('done')} />
+            <Chip label="已取消" selected={filter === 'cancelled'} onPress={() => setFilter('cancelled')} />
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">leading icon · 建议气泡</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <Chip label="今天的安排" leading={<Icon name="spark" size={12} />} onPress={() => {}} />
+            <Chip label="新建拜访" leading={<Icon name="plus" size={12} />} onPress={() => {}} />
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">trailing close · 多选 token</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {tags.map(name => (
+              <Chip
+                key={name}
+                label={name}
+                selected
+                trailing={<Icon name="close" size={12} />}
+                onPress={() => setTags(tags.filter(x => x !== name))}
+              />
+            ))}
+            {tags.length === 0 && (
+              <button
+                style={{ fontSize: 12, color: '#999', background: 'none', border: 'none', cursor: 'pointer' }}
+                onClick={() => setTags(['王经理', '张组长', '李区域'])}
+              >
+                重置
+              </button>
+            )}
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">静态展示（无 onPress · 不响应按压）</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <Chip label="VIP" />
+            <Chip label="拜访周期 7 天" />
+          </div>
+        </div>
+      </div>
+    </LiveDemo>
+  );
+};
+
+<ChipDemo />
+
+## 状态
+
+| 状态 | 视觉 |
+|---|---|
+| 默认 | 白底 + 细线边框 (`#EDEDED`)，文本 `fg-1` (`#333`) |
+| 选中 (`selected`) | 主色边框 (`#EB6E00`) + 主色文本 |
+| 按下 | 透明度 0.7（仅当传 `onPress` 时） |
+| 非交互（无 `onPress`） | 不响应按压、不显示按压态 |
+
+## 用法
+
+```tsx
+import { Chip, Icon } from '@unif/react-native-design';
+
+{/* 单个可选中 chip */}
+<Chip
+  label="待跟进"
+  selected={filter === 'pending'}
+  onPress={() => setFilter('pending')}
+/>
+
+{/* 带 leading icon */}
+<Chip
+  label="今天的安排"
+  leading={<Icon name="spark" size={12} />}
+  onPress={onSuggestion}
+/>
+
+{/* 静态展示（消息气泡里附带的 meta 标签等） */}
+<Chip label="VIP" />
+
+{/* 带 trailing 关闭按钮（多选 token 风格） */}
+<Chip
+  label="王经理"
+  selected
+  trailing={<Icon name="close" size={12} />}
+  onPress={() => removeFilter('manager-wang')}
+/>
+```
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `label` | `string` | — | 显示文本 |
+| `selected` | `boolean?` | `false` | 选中态（主色边框 + 文本） |
+| `onPress` | `() => void` 可选 | — | 点击回调；不传时 chip 渲染为静态 `<View>`，不响应按压 |
+| `leading` | `ReactNode?` | — | 前置插槽（图标 / 小圆点等） |
+| `trailing` | `ReactNode?` | — | 后置插槽（关闭按钮等） |
+| `style` | `ViewStyle?` | — | 附加样式 |
+
+## 不要
+
+- ❌ 不要把 `<Chip>` 当成"按钮的小号版" —— 实际按钮（包括小号）走 [Button](./button) `size="sm"`。Chip 的视觉重心在"可选状态"，不在"主操作"。
+- ❌ 不要在 Chip 内嵌长文本 —— 单行 numberOfLines=1 截断；超过两个字的多选项考虑用 [Cell](./cell) 列表。
+- ❌ 不要用 Chip 表达状态语义（`done`/`error`）—— 那是 [Tag](./tag) 的领域。

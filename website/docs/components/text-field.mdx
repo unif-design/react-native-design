@@ -1,0 +1,46 @@
+---
+sidebar_position: 1
+title: TextField 输入框 base(internal)
+description: Input / Textarea 共享的内部 base · 业务层请用 Input / Textarea / PasswordInput / Search
+---
+
+# TextField 输入框 base(internal)
+
+`src/components/ui/TextField/` 是 `Input` / `Textarea` / `PasswordInput` / `Search` 这些公开输入组件共享的**内部 base**,处理:
+
+- TextInput 基础 props 透传
+- `leading` / `trailing` slot(图标 / 按钮槽位)
+- `error` 文案 + border 红色态切换
+- `disabled` 整体半透明 + editable 锁
+- 单行 / 多行布局切换(`multiline` prop)
+
+**业务层不应直接 import `TextField`**。所有调用方场景都有更精准的封装:
+
+| 场景 | 用 |
+|---|---|
+| 单行输入 | [`<Input>`](./input.mdx) |
+| 密码 / 隐显切换 | [`<PasswordInput>`](./password-input.mdx) |
+| 搜索栏(图标 + 占位) | [`<Search>`](./search.mdx) |
+| 多行输入 | `<Textarea>` |
+
+## 设计意图
+
+TextField 抽出来是为了消除 Input / Textarea 之间 50%+ 重复代码(focus 态 border 切换 / disabled 灰化 / error 文案下挂 / leading-trailing slot 布局)。**它是实现细节,不是稳定 API**,后续重构可能换内部结构。
+
+如果你正在调用 TextField,99% 的可能性是该用 Input / Textarea。
+
+## 实现路径
+
+```
+src/components/ui/
+├── TextField/        ← 共享 base(本组件,internal)
+├── Input/            ← multiline=false 单行封装
+├── Textarea/         ← multiline=true 多行封装
+├── PasswordInput/    ← Input + trailing 眼睛 toggle + secureTextEntry
+└── Search/           ← Input + leading 搜索图标 + 圆角胶囊预设
+```
+
+## 不要
+
+- 不要 `import { TextField } from '@unif/react-native-design'` —— 用对应高层组件,见上表
+- 不要把 TextField 当公共 API 写测试 —— 测 Input / Textarea / PasswordInput / Search 的行为,TextField 实现细节会变

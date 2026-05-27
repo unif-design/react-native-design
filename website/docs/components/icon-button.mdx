@@ -1,0 +1,96 @@
+---
+sidebar_position: 1
+title: IconButton 图标按钮
+description: icon-only 按钮 · 28/36/44 三档方形 · variant palette · 必填 accessibilityLabel
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { IconButton } from '@unif/react-native-design';
+
+# IconButton 图标按钮
+
+只放 icon 的方形按钮,常用于 NavBar 左右 slot、卡片右上 action、列表行 trailing。区别于 Button,IconButton 没文本,**必须显式传 `accessibilityLabel`** 给 SR 用户。
+
+`size` 走 `ButtonSize`(sm/md/lg = 28/36/44),`variant` 走 `ButtonVariant`(默认 `'ghost'` 透明底)。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/IconButton/IconButton.tsx` 本体。
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">size · sm 28 / md 36 / lg 44</span>
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <IconButton icon="bell" size="sm" accessibilityLabel="通知" />
+        <IconButton icon="bell" size="md" accessibilityLabel="通知" />
+        <IconButton icon="bell" size="lg" accessibilityLabel="通知" />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">variant · neutral 灰底 / brand 橙底 / ghost 透明</span>
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <IconButton icon="scan" variant="neutral" accessibilityLabel="扫码" />
+        <IconButton icon="scan" variant="primary" accessibilityLabel="扫码" />
+        <IconButton icon="scan" variant="ghost" accessibilityLabel="扫码" />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">disabled · opacity 0.5 + 不响应</span>
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <IconButton icon="check" variant="primary" accessibilityLabel="确认" disabled />
+      </div>
+    </div>
+  </div>
+</LiveDemo>
+
+## 用法
+
+```tsx
+import { IconButton } from '@unif/react-native-design';
+
+{/* NavBar 右侧扫码按钮 */}
+<IconButton
+  icon="scan"
+  size="md"
+  variant="neutral"
+  accessibilityLabel="扫码"
+  accessibilityHint="打开二维码扫描"
+  onPress={() => navigation.navigate('Scanner')}
+/>
+
+{/* 卡片右上关闭 */}
+<IconButton
+  icon="close"
+  size="sm"
+  variant="ghost"
+  accessibilityLabel="关闭"
+  onPress={onClose}
+/>
+```
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `icon` | `IconName` | — | 图标名(来自 `@/components/ui/Icon` catalog) |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | 方形边长 28 / 36 / 44 |
+| `variant` | `ButtonVariant` | `'ghost'` | 视觉变体,跟 Button 同一套 palette |
+| `color` | `string?` | variant fg | icon 描色 override(仅 icon 色,bg/border 仍由 variant 决定) |
+| `disabled` | `boolean` | `false` | 不响应 + opacity 0.5 |
+| `accessibilityLabel` | `string` | — | **必填** —— icon-only 按钮 SR 用户唯一信息源 |
+| `accessibilityHint` | `string?` | — | 行为不显然时填(如"打开扫描器") |
+| `onPress` | `() => void` | — | 点击回调 |
+| `style` | `StyleProp<ViewStyle>` | — | 容器附加样式 |
+| `testID` | `string?` | — | E2E / 测试定位 |
+
+## a11y
+
+- `accessibilityLabel` 是 TS 强制必填,缺会编译错。
+- 行为有副作用 / 不显然时加 `accessibilityHint`(如"切换密码可见"),普通"确认 / 取消 / 返回"不必加(label 已显然)。
+- `disabled` 自动透传 `accessibilityState={{ disabled }}`。
+
+## 不要
+
+- 不要把 icon 当装饰用 IconButton —— 装饰用 `<Icon>` 即可,没 hit area 浪费
+- 不要在 IconButton 内文字 + icon 混搭 —— 用 [Button](./button.mdx) 的 `rightIcon` / `leftIcon` prop

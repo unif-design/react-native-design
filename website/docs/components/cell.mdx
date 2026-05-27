@@ -1,0 +1,104 @@
+---
+sidebar_position: 1
+title: Cell · List 列表行
+description: 白卡 + gap 分组 · 不用 border
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Cell, List } from '@unif/react-native-design';
+
+# Cell · List 列表行
+
+每行独立白卡，行间 8px gap。**不用 border-bottom 分隔**——这是 Unif 列表的核心规则（与 iOS 17 / 微信新版一致）。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Cell/Cell.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <span className="demo-label" style={{ paddingLeft: 8 }}>设置</span>
+      <List>
+        <Cell leading="settings" title="主题" extra="跟随系统" arrow onPress={() => {}} />
+        <Cell leading="bell" title="通知" arrow onPress={() => {}} />
+        <Cell leading="lock" title="隐私" desc="位置 / 相机 / 麦克风" arrow onPress={() => {}} />
+        <Cell leading="info" title="关于" extra="v1.0" arrow onPress={() => {}} />
+      </List>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <span className="demo-label" style={{ paddingLeft: 8 }}>客户</span>
+      <List>
+        <Cell title="东方便利店" desc="浦东 · 1.2 km" extra="¥12,480" arrow onPress={() => {}} />
+        <Cell title="明珠超市" desc="浦东 · 2.8 km" extra="¥8,960" arrow onPress={() => {}} />
+        <Cell title="优家便利" desc="浦东 · 4.1 km" extra="¥3,200" arrow onPress={() => {}} />
+      </List>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <span className="demo-label" style={{ paddingLeft: 8 }}>disabled · 不可点击 / 视觉变灰</span>
+      <List>
+        <Cell leading="lock" title="云同步" desc="未登录" arrow disabled />
+        <Cell leading="bell" title="通知（开发中）" extra="即将开放" disabled />
+      </List>
+    </div>
+  </div>
+</LiveDemo>
+
+## 视觉规范
+
+| 元素 | 规则 |
+|---|---|
+| 整组容器 | `bg-page #F5F5F5` 浅灰底（视觉分组），`padding: 8`，`borderRadius: 12`，`gap: 8` |
+| 单行 | `bg-card #fff`，`borderRadius: 10`，`min-height: 56`，`padding: 12 14` |
+| 行内布局 | 左 icon (22) + 中 (title 15/500 + desc 13/3rd) + 右 extra (13/3rd) + arrow (16/3rd) |
+| **绝不** | `border-bottom`、`hairline` 分隔 |
+
+## 用法
+
+```tsx
+import { Cell, List } from '@unif/react-native-design';
+
+<List>
+  <Cell title="主题" extra="跟随系统" arrow leading="settings" onPress={...} />
+  <Cell title="通知" arrow leading="bell" />
+  <Cell title="拜访提醒" desc="按计划自动推送" extra={<Switch value={...} onChange={...} />} />
+</List>
+
+{/* 平铺式（无浅灰背景容器，用于嵌套在其它白卡内）*/}
+<List flush>
+  <Cell title="客户名" desc="地址" extra="¥1,200" arrow />
+</List>
+```
+
+## API
+
+### `<Cell>`
+
+| Prop | Type | 说明 |
+|---|---|---|
+| `title` | `string \| ReactNode` | 主标题 |
+| `desc` | `string \| ReactNode?` | 副标题 / 描述 |
+| `leading` | `IconName \| ReactNode?` | 左侧 icon 名（自动渲染为 22px Icon）或自定义节点（如 Avatar） |
+| `extra` | `ReactNode?` | 右侧 slot — 文字、Tag、Switch 等 |
+| `arrow` | `boolean?` | 显示右侧 chevron |
+| `onPress` | `() => void?` | 点击回调（提供时启用按压态） |
+| `disabled` | `boolean?` | 仅对带 `onPress` 的 cell 有效，true 时 onPress 不触发 + 整体半透明 + a11y disabled |
+| `danger` | `boolean?` | 危险态：icon 盒子 + 标题用 error 红，且不渲染 arrow（常用于退出登录 / 删除等） |
+| `style` | `StyleProp<ViewStyle>?` | 额外样式覆盖（合并到 cell 容器的 style 数组） |
+| `testID` | `string?` | E2E / 测试定位 |
+
+### `<List>`
+
+| Prop | Type | 说明 |
+|---|---|---|
+| `flush` | `boolean?` | 透明背景（嵌套用）；省略则白卡 + 8px gap + 浅灰底容器 |
+| `divider` | `'full' \| 'none'?` | flush 模式下行间分隔线样式，默认 `'full'`（铺满全宽 hairline）；`'none'` 表示不画分隔线 |
+| `style` | `StyleProp<ViewStyle>?` | 额外样式覆盖 |
+| `testID` | `string?` | E2E / 测试定位 |
+
+## 与 Form 的区别
+
+| 用途 | 选哪个 |
+|---|---|
+| 数据展示 / 跳转 | **Cell · List** — 白卡 + gap |
+| 数据录入 / 表单 | [Form](./form) — 白卡 + 行间 hairline |

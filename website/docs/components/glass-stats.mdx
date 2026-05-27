@@ -1,0 +1,78 @@
+---
+sidebar_position: 1
+title: GlassStats 玻璃数据条
+description: 多列数字 + 标签 · 玻璃质感胶囊容器 · 个人 / 业绩 / 统计页用
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { GlassStats } from '@unif/react-native-design';
+
+# GlassStats 玻璃数据条
+
+横向多列数据展示条,每格显示一个数字 + 标签。玻璃质感(半透明 + blur),适合放在沉浸式背景上(名片屏 / 数据汇总卡)。
+
+数据格式是元组 `[count, label]`,count 已经格式化好(如 `'12'` / `'¥2,016'` / `'99+'`),组件不做格式化。
+
+## 实时预览
+
+下方渲染的就是 `src/components/business/GlassStats/GlassStats.tsx` 本体。
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">2 列</span>
+      <GlassStats items={[['12', '今日'], ['86', '本月']]} />
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">3 列 · 个人业绩</span>
+      <GlassStats items={[['¥2,016', '销售额'], ['28', '订单'], ['12', '客户']]} />
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">4 列 · 综合统计</span>
+      <GlassStats
+        items={[
+          ['256', '总数'],
+          ['18', '本周'],
+          ['¥12.3万', '金额'],
+          ['98%', '完成率'],
+        ]}
+      />
+    </div>
+  </div>
+</LiveDemo>
+
+## 用法
+
+```tsx
+import { GlassStats } from '@unif/react-native-design';
+
+{/* 个人名片屏业绩 */}
+<GlassStats
+  items={[
+    [String(visitCount), '本月拜访'],
+    [`¥${formatAmount(amount)}`, '销售额'],
+    [String(orderCount), '订单'],
+  ]}
+/>
+```
+
+## API
+
+| Prop | Type | 必填 | 说明 |
+|---|---|---|---|
+| `items` | `ReadonlyArray<[count: string, label: string]>` | ✓ | 数据列,2~4 列均可。`count` 已格式化字串,`label` 是中文标签 |
+
+## 视觉规范
+
+| 元素 | 规则 |
+|---|---|
+| count 字号 | `t.heroMd`(20),`fw.bold`,`c.foreground` |
+| label 字号 | `t.xs`(12),`c.foregroundMuted` |
+| 列间分隔 | 1px 竖线,`c.outline` 30% 透明 |
+| 容器 | 圆角 16,半透明 surface + `s.subtle` shadow,跟 BlurLayer 配套用 |
+
+## 不要
+
+- 不要在组件内做数字格式化 —— 业务层(`@/utils/format`)做好再传入,避免 i18n / 千分位 / 单位逻辑散落
+- 不要超过 4 列 —— 屏宽限制,5 列以上 label 会挤换行,改用 [Cell](./cell.mdx) 列表
+- 不要单列用 —— 单数字直接用 `<Text>` + `t.heroLg`,没必要套 GlassStats 的胶囊容器

@@ -97,7 +97,7 @@ const config: Config = {
           title: '文档',
           items: [
             { label: '简介', to: '/docs/intro' },
-            { label: 'Button', to: '/docs/button' },
+            { label: 'Button', to: '/docs/components/button' },
           ],
         },
         {

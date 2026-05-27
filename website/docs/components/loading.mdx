@@ -1,0 +1,79 @@
+---
+sidebar_position: 4
+title: Loading 加载
+description: 旋转 spinner · 3 种尺寸
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Spinner } from '@unif/react-native-design';
+
+# Loading 加载
+
+旋转加载指示器。`width / height` 可调，`thickness` 可调，`color` 默认主橙。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Spinner/Spinner.tsx` 本体（reanimated 4 worklet 驱动旋转动画），通过 `react-native-web` 翻译成浏览器节点。
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">尺寸</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <Spinner size={14} />
+        <Spinner size={18} />
+        <Spinner size={24} />
+        <Spinner size={32} />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">颜色</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <Spinner color="#EB6E00" />
+        <Spinner color="#52C41A" />
+        <Spinner color="#3775F6" />
+        <Spinner color="#999" />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">thickness · 描边粗细</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <Spinner thickness={1} />
+        <Spinner thickness={2} />
+        <Spinner thickness={3} />
+      </div>
+    </div>
+  </div>
+</LiveDemo>
+
+## 用法
+
+```tsx
+import { Spinner } from '@unif/react-native-design';
+import { useColors } from '@unif/react-native-design';
+
+function Demo() {
+  const c = useColors();
+  return (
+    <>
+      <Spinner />                                       {/* 默认 18px 主橙 */}
+      <Spinner size={24} />                             {/* 24px */}
+      <Spinner color={c.success} />                     {/* 绿色 */}
+      <Spinner color={c.foregroundSubtle} thickness={1.5} />  {/* 细线灰 */}
+    </>
+  );
+}
+```
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `size` | `number` | `18` | 直径 |
+| `color` | `string` | `c.primary`（运行期 hook 取） | 旋转弧颜色 |
+| `thickness` | `number` | `2` | 描边粗细 |
+| `style` | `StyleProp<ViewStyle>` | — | 外层样式 |
+
+## 节奏
+
+900ms 一圈，线性 easing，不要回弹。这是设计令牌 [`motion`](/docs/design/tokens/motion) 之外的特例——加载体感需要稳定均匀。

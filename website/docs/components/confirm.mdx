@@ -1,0 +1,88 @@
+---
+sidebar_position: 6
+title: Confirm 确认对话框
+description: 命令式 confirm() · 高风险操作前置二次确认
+---
+
+# Confirm 确认对话框
+
+命令式 `await confirm(...)` 返回 `Promise<boolean>`,跟 Toast 同款 imperative API,
+不需要 caller 维护 `useState / open / onClose`。背后用 `<BottomSheet snapPoints={['30%']}>`
++ `<ConfirmHost />` Portal 实现,App 根挂一次。
+
+## 用法
+
+```tsx
+import { confirm } from '@unif/react-native-design';
+
+const ok = await confirm({
+  title: '确认注销账号?',
+  message: '注销后所有数据将被删除,且无法恢复。',
+  confirmLabel: '确认注销',
+  destructive: true,        // 红色按钮 c.error
+});
+if (ok) doLogout();
+```
+
+## API
+
+| Prop | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `title` | `string` | — | 主标题(必传),短句:`确认注销账号?` / `确认退出登录?` |
+| `message` | `string?` | — | 说明文本(可选)1-2 句解释操作后果 |
+| `confirmLabel` | `string?` | `'确认'` | 确认按钮文案 |
+| `cancelLabel` | `string?` | `'取消'` | 取消按钮文案 |
+| `destructive` | `boolean?` | `false` | 标记破坏性操作 → 确认按钮变红(`c.error`)|
+
+## 返回值
+
+`Promise<boolean>`:
+- `true` — 用户点确认按钮
+- `false` — 用户点取消 / 点 backdrop / drag 关闭
+
+## 设计稿对照
+
+| 视觉态 | 规则 |
+|---|---|
+| 容器 | `<BottomSheet snapPoints={['30%']}>` 单档,底部弹层 |
+| 标题 | `t.heroSm`(18)+ `fw.semi` + `c.foreground` |
+| 说明 | `t.body`(15)+ `c.foregroundMuted` + `lineHeight 1.45` |
+| 按钮行 | `<Button variant="secondary">` 取消 + `<Button variant="primary"\|"danger">` 确认,横向均分 |
+
+## 业务消费示例
+
+- **注销账号**(`AccountSecurity.tsx`)— `destructive: true`,取消则不调用注销 API
+- **退出登录**(`Setting.tsx`)— `destructive: true`,取消则保持 `authed=true`
+- 未来:删除会话 / 取消订单 / webview 跳转前提示(根据 UX 决策)
+
+## 业务侧 loading
+
+`confirm()` 立即关闭对话框 + resolve,**不内置 loading**。caller 自行处理:
+
+```tsx
+const [loggingOut, setLoggingOut] = useState(false);
+
+const handleLogout = async () => {
+  const ok = await confirm({ title: '确认退出?', destructive: true });
+  if (!ok) return;
+  setLoggingOut(true);
+  try {
+    await logout();
+  } catch {
+    setLoggingOut(false);
+  }
+};
+
+// 在 cell title 上展示 "退出中…" + disabled
+```
+
+## 不要
+
+- ❌ 不要嵌套 confirm(同一时间只允许 1 个,新请求被拒绝 + dev warn)
+- ❌ 不要把"信息提示"用 confirm(用 `toast()`),confirm 只用于"用户决策"
+- ❌ 不要假设 confirm 一直在等(用户切屏 / app suspend 可能让 promise hang,关键路径上做超时保护)
+
+## 关联组件
+
+- [Toast](/docs/components/toast)— 单向反馈(不需用户决策)
+- BottomSheet — Portal 底层
