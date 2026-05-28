@@ -30,7 +30,16 @@ import { Empty } from '@unif/react-native-design';
 />
 ```
 
-通常在空态下方再渲染一组建议 chips（由业务侧实现），给用户初始话术。
+通常配合 SuggestionList 使用，给用户初始话术：
+
+```tsx
+<Empty title="..." desc="..." />
+<SuggestionList align="center" items={[
+  { label: '今天的安排', leading: 'spark' },
+  { label: '帮我查询数据', leading: 'spark' },
+  { label: '新建一条记录', leading: 'spark' },
+]} onPress={(item) => sendMessage(item.label)} />
+```
 
 ## API
 

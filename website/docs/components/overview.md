@@ -9,7 +9,7 @@ description: 组件全览 — 通用 / 表单 / 导航 / 反馈 / 数据展示
 
 按使用场景分组。所有组件均已在 RN 中实现。每个组件一个文件夹，导出统一通过 `@/components/ui` barrel。
 
-> **聊天专属组件** 不在本表，请看 Chat 概览。
+> **聊天专属组件** 不在本表，请看 [Chat 概览](/docs/chat)。
 
 ## 品牌
 
@@ -91,7 +91,7 @@ description: 组件全览 — 通用 / 表单 / 导航 / 反馈 / 数据展示
 | ModernAppCell | ✓ | `src/components/business/ModernAppCell/` | 46×46 r13 应用图标 tile（IconName / imageUrl 双轨 · tint 透传 · badge） |
 | SmsCodeInput | ✓ | `src/components/business/SmsCodeInput/` | Input + sendSms + isMobile 校验 + 60s 倒计时,3 处 caller 复用 |
 
-> 横向小卡入口(Me 屏底部"设置 / 关于"双列)看 [EntryCard](./entry-card.mdx)（在 ui 层,不在 business）。
+> 横向小卡入口(Me 屏底部"设置 / 关于"双列)看 [EntryCard](./entry-card)（在 ui 层,不在 business）。
 
 会话列表用 `<List>` + `<Cell variant="assistant" />` 直接渲染（icon 玻璃感 + 标题 + badge + 时间 + 预览全在 Cell.assistant 里），不再单独抽 `AssistantChatRow` 组件。
 

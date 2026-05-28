@@ -16,11 +16,11 @@ export default function Home(): React.JSX.Element {
             一套设计令牌、一套组件契约,直接 import 即用。中文优先、橙色克制、无装饰。
           </p>
           <div className="unif-hero__ctas">
-            <Link to="/docs/intro" className="unif-hero__cta unif-hero__cta--primary">
+            <Link to="/docs/components" className="unif-hero__cta unif-hero__cta--primary">
               开始使用 →
             </Link>
-            <Link to="/docs/components/button" className="unif-hero__cta unif-hero__cta--ghost">
-              Button 示例
+            <Link to="/docs/unif-design" className="unif-hero__cta unif-hero__cta--ghost">
+              设计
             </Link>
           </div>
         </div>

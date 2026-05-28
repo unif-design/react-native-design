@@ -74,19 +74,20 @@ const config: Config = {
       items: [
         {
           type: 'docSidebar',
-          sidebarId: 'docsSidebar',
+          sidebarId: 'componentsSidebar',
           position: 'left',
-          label: '文档',
+          label: '组件',
         },
         {
-          href: 'https://www.npmjs.com/package/@unif/react-native-design',
-          label: 'npm',
-          position: 'right',
+          type: 'docSidebar',
+          sidebarId: 'designSidebar',
+          position: 'left',
+          label: '设计',
         },
         {
-          href: 'https://github.com/unif-design/react-native-design',
-          label: 'GitHub',
+          type: 'html',
           position: 'right',
+          value: '<span class="navbar-version">v0.2.0</span>',
         },
       ],
     },
@@ -94,21 +95,24 @@ const config: Config = {
       style: 'light',
       links: [
         {
-          title: '文档',
+          title: '设计',
           items: [
-            { label: '简介', to: '/docs/intro' },
-            { label: 'Button', to: '/docs/components/button' },
+            { label: '设计原则', to: '/docs/design/principles' },
+            { label: '设计令牌', to: '/docs/design/tokens/colors' },
+            { label: '不要这样做', to: '/docs/design/donts' },
           ],
         },
         {
-          title: '资源',
+          title: '组件',
           items: [
-            { label: 'npm', href: 'https://www.npmjs.com/package/@unif/react-native-design' },
-            { label: 'GitHub', href: 'https://github.com/unif-design/react-native-design' },
+            { label: '概览', to: '/docs/components' },
+            { label: 'Button', to: '/docs/components/button' },
+            { label: 'NavBar', to: '/docs/components/navbar' },
+            { label: 'Cell · List', to: '/docs/components/cell' },
           ],
         },
       ],
-      copyright: '@unif/react-native-design · MIT',
+      copyright: 'Unif Design System · v0.2.0',
     },
     prism: {
       theme: prismThemes.github,
