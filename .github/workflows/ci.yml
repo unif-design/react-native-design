@@ -24,7 +24,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Run actionlint
-        # 下载 pinned binary 校验所有 workflow 的 YAML / 表达式 / run 里的 shell(集成 shellcheck)。
+        # 下载 pinned binary 校验所有 workflow 的 YAML / 表达式 / run 里的 shell。
+        # shell 检查靠 ubuntu runner 自带的 shellcheck(actionlint 自动探测 PATH 调用,无需额外装)。
         # release.yml 那次 YAML 引号 bug 当初就是缺这道 lint 才漏到 main 的。
         run: |
           ACTIONLINT_VERSION=1.7.12
