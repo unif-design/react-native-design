@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
+    "build:llms": "node scripts/build-llms.js",
+    "prestart": "npm run build:llms",
+    "prebuild": "npm run build:llms",
     "start": "docusaurus start",
     "build": "docusaurus build",
     "serve": "docusaurus serve",
