@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.4.27](https://github.com/unif-design/react-native-design/compare/v0.4.26...v0.4.27) (2026-05-28)
+
 ## [0.4.26](https://github.com/unif-design/react-native-design/compare/v0.4.25...v0.4.26) (2026-05-28)
 
 ## [0.4.25](https://github.com/unif-design/react-native-design/compare/v0.4.24...v0.4.25) (2026-05-28)
