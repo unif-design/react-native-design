@@ -49,7 +49,7 @@ description: 组件全览 — 通用 / 表单 / 导航 / 反馈 / 数据展示
 | [NavBar](./navbar.mdx) | ✓ | `src/components/ui/NavBar/` |
 | [TabBar](./tabbar.mdx) | ✓ | `src/components/ui/TabBar/` |
 | [Tabs](./tabs.mdx) | ✓ | `src/components/ui/Tabs/`（页级下划线）+ `src/components/ui/Segmented/`（局部分段） |
-| [Drawer](./drawer.mdx) | ✓ | `src/components/ui/DrawerHeader/` + `@react-navigation/drawer` |
+| Drawer | ✓ | `src/components/ui/DrawerHeader/` + `@react-navigation/drawer` |
 
 ## 反馈
 
@@ -88,8 +88,8 @@ description: 组件全览 — 通用 / 表单 / 导航 / 反馈 / 数据展示
 | GlassStats | ✓ | `src/components/business/GlassStats/` | 玻璃数据条（BlurView + N 列） |
 | Decorations | ✓ | `src/components/business/Decorations/` | `GradientWash` 线性渐变 + `RadialHalo` 径向柔光 + `ScreenBackdrop` 整屏沉浸渐变(preset 暖橙 + 暗色自适配) |
 | [Thumbnail](./thumbnail.mdx) | ✓ | `src/components/ui/Thumbnail/` | 列表 / 卡片 / chat 通用 16:9.5 缩略图(sm 64×40 / md 113×67 / lg 160×96)|
-| [ModernAppCell](./modern-app-cell.mdx) | ✓ | `src/components/business/ModernAppCell/` | 46×46 r13 应用图标 tile（IconName / imageUrl 双轨 · tint 透传 · badge） |
-| [SmsCodeInput](./sms-code-input.mdx) | ✓ | `src/components/business/SmsCodeInput/` | Input + sendSms + isMobile 校验 + 60s 倒计时,3 处 caller 复用 |
+| ModernAppCell | ✓ | `src/components/business/ModernAppCell/` | 46×46 r13 应用图标 tile（IconName / imageUrl 双轨 · tint 透传 · badge） |
+| SmsCodeInput | ✓ | `src/components/business/SmsCodeInput/` | Input + sendSms + isMobile 校验 + 60s 倒计时,3 处 caller 复用 |
 
 > 横向小卡入口(Me 屏底部"设置 / 关于"双列)看 [EntryCard](./entry-card)（在 ui 层,不在 business）。
 
