@@ -1,6 +1,7 @@
 import { themes as prismThemes } from 'prism-react-renderer';
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import pkg from '../package.json';
 
 const config: Config = {
   title: 'Unif Design',
@@ -87,7 +88,7 @@ const config: Config = {
         {
           type: 'html',
           position: 'right',
-          value: '<span class="navbar-version">v0.2.0</span>',
+          value: `<span class="navbar-version">v${pkg.version}</span>`,
         },
       ],
     },
@@ -112,7 +113,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: 'Unif Design System · v0.2.0',
+      copyright: `Unif Design System · v${pkg.version}`,
     },
     prism: {
       theme: prismThemes.github,
