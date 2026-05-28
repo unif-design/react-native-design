@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.34](https://github.com/unif-design/react-native-design/compare/v0.4.33...v0.4.34) (2026-05-28)
+
+
+### Bug Fixes
+
+* **ci:** release.yml if 表达式加 yaml 引号 ([#26](https://github.com/unif-design/react-native-design/issues/26)) ([9a3888d](https://github.com/unif-design/react-native-design/commit/9a3888d2577d9ccb6653cab893561bc8a8f5aac4)), closes [#25](https://github.com/unif-design/react-native-design/issues/25)
+* 根治发版死循环 + app-slug shell 注入 ([#25](https://github.com/unif-design/react-native-design/issues/25)) ([fa47a64](https://github.com/unif-design/react-native-design/commit/fa47a64c26e9fe7e441d14f23caa71c99a0fdb59))
+
 ## [0.4.33](https://github.com/unif-design/react-native-design/compare/v0.4.32...v0.4.33) (2026-05-28)
 
 ## [0.4.32](https://github.com/unif-design/react-native-design/compare/v0.4.31...v0.4.32) (2026-05-28)
