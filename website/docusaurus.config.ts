@@ -111,15 +111,8 @@ const config: Config = {
             { label: 'Cell · List', to: '/docs/components/cell' },
           ],
         },
-        {
-          title: '资源',
-          items: [
-            { label: 'npm', href: 'https://www.npmjs.com/package/@unif/react-native-design' },
-            { label: 'GitHub', href: 'https://github.com/unif-design/react-native-design' },
-          ],
-        },
       ],
-      copyright: '@unif/react-native-design · MIT · v0.2.0',
+      copyright: 'Unif Design System · v0.2.0',
     },
     prism: {
       theme: prismThemes.github,
