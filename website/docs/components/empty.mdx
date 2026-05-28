@@ -5,8 +5,7 @@ description: 圆形 illust + 大字标题 + 小字描述
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
-import { Empty } from '@/components/ui';
-import { SuggestionList } from '@/components/chat';
+import { Empty } from '@unif/react-native-design';
 
 # Empty 空态
 
@@ -17,24 +16,13 @@ import { SuggestionList } from '@/components/chat';
 下方渲染的就是 `src/components/ui/Empty/Empty.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
 
 <LiveDemo>
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-    <Empty title="你好，我是 AI 助手" desc="告诉我你今天的工作目标，我来帮你规划" />
-    <SuggestionList
-      align="center"
-      items={[
-        { label: '今天的安排', leading: 'spark' },
-        { label: '帮我查询数据', leading: 'spark' },
-        { label: '新建一条记录', leading: 'spark' },
-      ]}
-      onPress={() => {}}
-    />
-  </div>
+  <Empty title="你好，我是 AI 助手" desc="告诉我你今天的工作目标，我来帮你规划" />
 </LiveDemo>
 
 ## 用法
 
 ```tsx
-import { Empty } from '@/components/ui';
+import { Empty } from '@unif/react-native-design';
 
 <Empty
   title="你好，我是 AI 助手"

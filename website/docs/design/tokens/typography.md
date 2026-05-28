@@ -56,8 +56,8 @@ Mono：`"SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace`
 
 ```tsx
 import { StyleSheet } from 'react-native';
-import { type as t, fw, fontMono, useThemedStyles } from '@/theme';
-import type { ColorTokens } from '@/theme';
+import { type as t, fw, fontMono, useThemedStyles } from '@unif/react-native-design';
+import type { ColorTokens } from '@unif/react-native-design';
 
 const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({

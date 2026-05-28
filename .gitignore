@@ -87,3 +87,6 @@ nitrogen/
 
 # Docusaurus
 .docusaurus/
+
+# Playwright MCP cache (web testing)
+.playwright-mcp/

@@ -5,7 +5,7 @@ description: 多行内容输入 · 复用 Input 视觉系统 · idle / focus / f
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
-import { Textarea } from '@/components/ui';
+import { Textarea } from '@unif/react-native-design';
 import { useState } from 'react';
 
 # Textarea 多行输入
@@ -65,7 +65,7 @@ export const TextareaDemo = () => {
 ## 用法
 
 ```tsx
-import { Textarea } from '@/components/ui';
+import { Textarea } from '@unif/react-native-design';
 
 {/* 默认 minHeight=96 */}
 <Textarea value={note} onChangeText={setNote} placeholder="详细说明…" />
