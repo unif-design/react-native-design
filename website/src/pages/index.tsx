@@ -10,7 +10,7 @@ export default function Home(): React.JSX.Element {
     >
       <header className="unif-hero">
         <div className="unif-hero__inner">
-          <span className="unif-hero__pill">@UNIF/REACT-NATIVE-DESIGN · v0.2</span>
+          <span className="unif-hero__pill">@UNIF/REACT-NATIVE-DESIGN</span>
           <h1 className="unif-hero__title">Unif Design</h1>
           <p className="unif-hero__lede">
             一套设计令牌、一套组件契约,直接 import 即用。中文优先、橙色克制、无装饰。
