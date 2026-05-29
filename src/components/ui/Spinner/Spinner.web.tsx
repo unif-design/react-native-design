@@ -23,6 +23,10 @@ function ensureKeyframes() {
   if (win.document.getElementById(SPIN_KEYFRAMES_ID)) return;
   const style = win.document.createElement('style');
   style.id = SPIN_KEYFRAMES_ID;
+  // ⚠️ 安全:注入 <style> 的内容会被浏览器当 CSS 解析。本字符串必须保持「静态
+  // 硬编码」,严禁拼接任何外部 / 用户 / props 输入(size / color 等),否则 CSS
+  // 注入。每实例的尺寸 / 颜色 / 时长走 RN style + node.style.animation(见下),
+  // 不进 keyframes —— 本函数永远只注册这一条固定 0→360deg 规则。
   style.textContent =
     '@keyframes unif-spinner-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
   win.document.head.appendChild(style);

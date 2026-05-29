@@ -37,30 +37,37 @@ export function ToastHost({
   }, []);
 
   useEffect(() => {
-    if (!entry) {
-      // unmount case —— 清掉残留 timer / RAF
-      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
-      if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
-      if (enterRafRef.current != null)
-        cancelAnimationFrame(enterRafRef.current);
-      return;
-    }
+    // entry=null:上一轮 effect 的 cleanup 已清 timer/RAF,这里无需重复。
+    if (!entry) return;
+
+    // cancelled 标志:entry 快速连续切换 / 组件卸载时,cleanup 置 true。RAF 与
+    // timer 回调执行前都检查它 —— cancelAnimationFrame 在部分浏览器不保证取消
+    // 已排队回调,且双 RAF 的外层回调可能在 cleanup 后仍跑并 queue 内层,光靠
+    // cancel 防不住。cancelled 兜底,杜绝 unmount 后 setState 警告 + 状态错位。
+    let cancelled = false;
     // 进场:每次 entry 切换都从 visible=false 开始,确保 CSS transition 有起点
     setVisible(false);
     // 双 RAF 才能稳过 React commit/paint 一帧 —— 否则同一 microtask 内 visible
     // 还是 true(未刷),CSS transition 没起点。
     enterRafRef.current = requestAnimationFrame(() => {
-      enterRafRef.current = requestAnimationFrame(() => setVisible(true));
+      if (cancelled) return;
+      enterRafRef.current = requestAnimationFrame(() => {
+        if (cancelled) return;
+        setVisible(true);
+      });
     });
     // 停留时长:从 setEntry 到关闭 = entry.duration ms。
     dismissTimerRef.current = setTimeout(() => {
+      if (cancelled) return;
       setVisible(false);
       exitTimerRef.current = setTimeout(() => {
+        if (cancelled) return;
         setEntry(null);
       }, motion.base);
     }, entry.duration);
 
     return () => {
+      cancelled = true;
       if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
       if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
       if (enterRafRef.current != null)
