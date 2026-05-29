@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.35](https://github.com/unif-design/react-native-design/compare/v0.4.34...v0.4.35) (2026-05-29)
+
+
+### Bug Fixes
+
+* **web:** 恢复 4 个 .web shim 修 reanimated worklet web 崩 ([#30](https://github.com/unif-design/react-native-design/issues/30)) ([05d9974](https://github.com/unif-design/react-native-design/commit/05d997495bc94ee9ae5b43001b3dd67ebf3a117e)), closes [#2628](https://github.com/unif-design/react-native-design/issues/2628)
+
 ## [0.4.34](https://github.com/unif-design/react-native-design/compare/v0.4.33...v0.4.34) (2026-05-28)
 
 
