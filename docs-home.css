@@ -271,6 +271,9 @@
 }
 .unif-home .hp * { box-sizing: border-box; }
 .unif-home .hp a { text-decoration: none; color: inherit; }
+/* Docusaurus 全局 a/a:hover 兜底:首页所有链接永不被加下划线(颜色由各元素显式 hover 规则控制,这里只去下划线,不碰 color 以免覆盖按钮文字色) */
+.unif-home a,
+.unif-home a:hover { text-decoration: none; }
 
 /* ─────────────────────────────────────────────────────────────
  * 6. NAV BAR
