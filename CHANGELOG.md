@@ -1,5 +1,19 @@
 # Changelog
 
+# [0.5.0](https://github.com/unif-design/react-native-design/compare/v0.4.37...v0.5.0) (2026-06-02)
+
+
+### Bug Fixes
+
+* **website:** build-llms review 加固 + CLAUDE.md [@import](https://github.com/import) AGENTS.md ([#47](https://github.com/unif-design/react-native-design/issues/47)) ([5b7b2e0](https://github.com/unif-design/react-native-design/commit/5b7b2e0f7673f7090ec05d94a267de74c677a8ff))
+* **website:** build-llms 参数化 + 路径遍历彻底加固(path.resolve) ([#46](https://github.com/unif-design/react-native-design/issues/46)) ([ac448ea](https://github.com/unif-design/react-native-design/commit/ac448ea21f758100b81e9aff487f02ee8c5e20b4)), closes [#44](https://github.com/unif-design/react-native-design/issues/44) [#2](https://github.com/unif-design/react-native-design/issues/2)
+
+
+### Features
+
+* **website:** llms.txt 标准化 — 站点根索引 + 全文 + 修 yarn4 钩子 ([#43](https://github.com/unif-design/react-native-design/issues/43)) ([abd9d79](https://github.com/unif-design/react-native-design/commit/abd9d7927ffcb95928ab9451d7663fe7bacabc68))
+* 文档站共享首页设计 — 导出 docs-home.css + design 站首页重构 ([#49](https://github.com/unif-design/react-native-design/issues/49)) ([5077fde](https://github.com/unif-design/react-native-design/commit/5077fde4ec7b8b33d9abd499312cac79e79178fc))
+
 ## 0.4.38 — feat: 导出 docs-home.css(文档站共享首页样式)
 
 ## [0.4.37](https://github.com/unif-design/react-native-design/compare/v0.4.36...v0.4.37) (2026-06-02)
