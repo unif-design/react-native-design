@@ -44,6 +44,8 @@ export { Pulse, PulseDot, usePulse } from './Pulse';
 export type { PulseOptions, PulseProps, PulseDotProps } from './Pulse';
 export { Radio } from './Radio';
 export type { GroupProps as RadioGroupProps, RadioProps } from './Radio';
+export { Reveal } from './Reveal';
+export type { RevealProps } from './Reveal';
 export { Search } from './Search';
 export type { SearchProps } from './Search';
 export { Skeleton } from './Skeleton';
