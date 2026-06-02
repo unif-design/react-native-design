@@ -76,15 +76,15 @@ const config: Config = {
       items: [
         {
           type: 'docSidebar',
-          sidebarId: 'componentsSidebar',
-          position: 'left',
-          label: '组件',
-        },
-        {
-          type: 'docSidebar',
           sidebarId: 'designSidebar',
           position: 'left',
           label: '设计',
+        },
+        {
+          type: 'docSidebar',
+          sidebarId: 'componentsSidebar',
+          position: 'left',
+          label: '组件',
         },
         {
           type: 'html',
