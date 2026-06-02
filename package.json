@@ -1,6 +1,6 @@
 {
   "name": "@unif/react-native-design",
-  "version": "0.4.37",
+  "version": "0.4.38",
   "description": "Unif 设计系统:theme + icons + utils + components",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -10,11 +10,13 @@
       "types": "./lib/typescript/src/index.d.ts",
       "default": "./lib/module/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./docs-home.css": "./docs-home.css"
   },
   "files": [
     "src",
     "lib",
+    "docs-home.css",
     "android",
     "ios",
     "cpp",
