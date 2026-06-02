@@ -198,7 +198,7 @@ export default function Home(): React.JSX.Element {
                   开始使用 <span className="hp-arrow"><IconArrowRight s={18} /></span>
                 </Link>
                 <Link to="/docs/components" className="hp-btn hp-btn-outline">
-                  快速开始
+                  浏览组件
                 </Link>
               </div>
               <InstallBlock />

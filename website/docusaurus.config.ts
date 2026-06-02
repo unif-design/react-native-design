@@ -75,12 +75,6 @@ const config: Config = {
       },
       items: [
         {
-          type: 'doc',
-          docId: 'getting-started',
-          position: 'left',
-          label: '快速开始',
-        },
-        {
           type: 'docSidebar',
           sidebarId: 'componentsSidebar',
           position: 'left',
