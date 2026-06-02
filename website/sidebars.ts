@@ -3,6 +3,7 @@ import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
 const sidebars: SidebarsConfig = {
   designSidebar: [
     'UNIF-DESIGN',
+    'getting-started',
     'design/intro',
     'design/principles',
     'design/voice',
@@ -18,6 +19,8 @@ const sidebars: SidebarsConfig = {
       ],
     },
     'design/donts',
+    'troubleshooting',
+    'migration',
   ],
 
   componentsSidebar: [
