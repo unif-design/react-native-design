@@ -75,22 +75,16 @@ const config: Config = {
       },
       items: [
         {
-          type: 'doc',
-          docId: 'getting-started',
+          type: 'docSidebar',
+          sidebarId: 'designSidebar',
           position: 'left',
-          label: '快速开始',
+          label: '设计',
         },
         {
           type: 'docSidebar',
           sidebarId: 'componentsSidebar',
           position: 'left',
           label: '组件',
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'designSidebar',
-          position: 'left',
-          label: '设计',
         },
         {
           type: 'html',
