@@ -194,8 +194,11 @@
  * 3. DARK TOKENS — OS preference fallback (no explicit data-theme)
  * ───────────────────────────────────────────────────────────── */
 
+/* OS 偏好兜底:仅当 Docusaurus 尚未在 <html> 注入 data-theme 时才生效。
+ * 旧写法 .unif-home:not([data-theme="light"]) 恒为真(data-theme 在 <html> 上、
+ * 不在 .unif-home),会让"系统深色 + 站点手动切浅色"时内容区被强制深色。 */
 @media (prefers-color-scheme: dark) {
-  .unif-home:not([data-theme="light"]) {
+  html:not([data-theme]) .unif-home {
     --primary-container:       #3D1F00;
     --primary-container-subtle:#2A1500;
     --error:                   #FF6B40;
