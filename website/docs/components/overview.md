@@ -9,7 +9,7 @@ description: 组件全览 — 通用 / 表单 / 导航 / 反馈 / 数据展示
 
 按使用场景分组。所有组件均已在 RN 中实现。每个组件一个文件夹，导出统一通过 `@/components/ui` barrel。
 
-> **聊天专属组件** 不在本表，请看 [Chat 概览](/docs/chat)。
+> **聊天专属组件**（Message / PromptInput / Suggestion 等）在 portal 仓库文档站维护，不在本表。
 
 ## 品牌
 
@@ -91,10 +91,31 @@ description: 组件全览 — 通用 / 表单 / 导航 / 反馈 / 数据展示
 | ModernAppCell | ✓ | `src/components/business/ModernAppCell/` | 46×46 r13 应用图标 tile（IconName / imageUrl 双轨 · tint 透传 · badge） |
 | SmsCodeInput | ✓ | `src/components/business/SmsCodeInput/` | Input + sendSms + isMobile 校验 + 60s 倒计时,3 处 caller 复用 |
 
-> 横向小卡入口(Me 屏底部"设置 / 关于"双列)看 [EntryCard](./entry-card)（在 ui 层,不在 business）。
+> 横向小卡入口(Me 屏底部"设置 / 关于"双列)看 [EntryCard](/docs/components/entry-card)（在 ui 层,不在 business）。
 
 会话列表用 `<List>` + `<Cell variant="assistant" />` 直接渲染（icon 玻璃感 + 标题 + badge + 时间 + 预览全在 Cell.assistant 里），不再单独抽 `AssistantChatRow` 组件。
 
 ## 基础令牌
 
 颜色 / 字体 / 间距 / 圆角 / 阴影 / 动效 / 图标 → [设计令牌](/docs/design/tokens/colors)
+
+## 页面约定
+
+每个组件文档页遵循统一结构：
+
+1. **LiveDemo 预览** — 可交互的实时演示（`<LiveDemo>`）
+2. **Props 表** — 完整 API 参数说明
+3. **主题键（Tokens）表** — 该组件实际读取的设计令牌，格式如下：
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.primary` | `useColors()` | 主按钮背景色 |
+| `radius.md` | `@unif/react-native-design` | 中等圆角 |
+| `s.brandLg` | `useThemedStyles` shadow | 品牌卡片阴影 |
+
+**Token 来源说明：**
+- `useColors()` — 运行期主题色，随亮/暗自动切换（`ColorTokens`）
+- `space.*` / `radius.*` / `type.*` / `fw.*` — 静态 token，直接 import
+- shadow 参数（`s.*`）— `useThemedStyles((c, s) => ...)` 第二参数，暗色下大多数阴影趋零
+
+这是统一标准；存量组件页的 Tokens 表正在逐步回填，以 [Button](/docs/components/button) 和 [Cell · List](/docs/components/cell) 为参考实现。

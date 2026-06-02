@@ -17,10 +17,11 @@ const config: Config = {
   projectName: 'react-native-design',
   trailingSlash: false,
 
-  onBrokenLinks: 'warn',
+  onBrokenLinks: 'throw',
+  onBrokenAnchors: 'throw',
   markdown: {
     hooks: {
-      onBrokenMarkdownLinks: 'warn',
+      onBrokenMarkdownLinks: 'throw',
     },
   },
 
@@ -73,6 +74,12 @@ const config: Config = {
         src: 'img/logo.png',
       },
       items: [
+        {
+          type: 'doc',
+          docId: 'getting-started',
+          position: 'left',
+          label: '快速开始',
+        },
         {
           type: 'docSidebar',
           sidebarId: 'componentsSidebar',

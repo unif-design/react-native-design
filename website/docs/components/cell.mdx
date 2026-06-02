@@ -102,3 +102,23 @@ import { Cell, List } from '@unif/react-native-design';
 |---|---|
 | 数据展示 / 跳转 | **Cell · List** — 白卡 + gap |
 | 数据录入 / 表单 | [Form](./form) — 白卡 + 行间 hairline |
+
+## 主题键（Tokens）
+
+读取来源：`src/components/ui/Cell/styles.ts`。
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.surface` | `useColors()` | grouped 模式下单行白卡背景色 |
+| `c.foreground` | `useColors()` | 主标题文字色（`title` / `titleFlush`） |
+| `c.foregroundSubtle` | `useColors()` | 副标题 / extra 文字色（grouped 模式） |
+| `c.foregroundMuted` | `useColors()` | 副标题 / extra 文字色（flush 模式，另加 `opacity: 0.55`） |
+| `c.background` | `useColors()` | `<List>` grouped 模式外容器背景色（浅灰底） |
+| `c.outline` | `useColors()` | flush 模式行间 hairline 分隔线颜色 |
+| `radius.lg` | 静态 token | grouped 模式单行卡片圆角 |
+| `radius.xl` | 静态 token | `<List>` grouped 模式外容器圆角 |
+| `space[5]` / `space[6]` / `space[3]` | 静态 token | 行间 gap / 行内水平+垂直内边距 / List gap |
+| `space[4]` | 静态 token | flush 模式行内元素间 gap（`cellFlush.gap`） |
+| `type.body` / `type.xs` | 静态 token | 主标题 / 副标题字号（grouped 模式） |
+| `fw.medium` | 静态 token | 主标题字重 |
+| `StyleSheet.hairlineWidth` | React Native | flush 模式分隔线物理宽度（不参与 token 缩放） |

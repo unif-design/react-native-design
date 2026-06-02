@@ -69,3 +69,23 @@ import { Button } from '@unif/react-native-design';
 | `disabled` | `boolean` | `false` | 禁用（opacity 0.5） |
 | `loading` | `boolean` | `false` | 显示 spinner |
 | `onPress` | `() => void` | — | 点击回调 |
+
+## 主题键（Tokens）
+
+读取来源：`src/components/ui/Button/styles.ts`、`ButtonBase.tsx`。
+
+| Token | 来源 | variant / 说明 |
+|---|---|---|
+| `c.primary` | `useColors()` | `primary` 变体背景色；`ghost` / `text` 变体文字色 |
+| `c.onPrimary` | `useColors()` | `primary` 变体文字/图标色 |
+| `c.surfaceContainerHigh` | `useColors()` | `secondary` 变体背景色 |
+| `c.foreground` | `useColors()` | `secondary` / `neutral` / `outline` 变体文字色 |
+| `c.surface` | `useColors()` | `outline` 变体背景色 |
+| `c.outline` | `useColors()` | `outline` 变体边框色 |
+| `c.error` | `useColors()` | `danger` 变体背景色 |
+| `c.onError` | `useColors()` | `danger` 变体文字色 |
+| `radius.lg` / `radius.md` / `radius.sm` | 静态 token | 按 `size='lg'/'md'/'sm'` 对应圆角 |
+| `control.lg` / `control.md` / `control.sm` | 静态 token（`src/theme`） | 按尺寸对应高度（44 / 36 / 28） |
+| `space['6']` / `space['4']` | 静态 token | `md`/`sm` 水平内边距 |
+| `fw.semi` | 静态 token | 按钮文字字重（`600`） |
+| `type.body` / `type.sm` / `type.xxs` | 静态 token | 按 `size='lg'/'md'/'sm'` 对应字号 |
