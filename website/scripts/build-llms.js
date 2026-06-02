@@ -20,6 +20,19 @@ const root = path.join(__dirname, '..');
 const docsDir = path.join(root, 'docs');
 const outDir = path.join(root, 'static', 'md');
 
+// 站点名从 docusaurus.config 的 title 读 —— 本脚本各库共用,自动适配,不硬编码库名。
+function readSiteTitle() {
+  for (const ext of ['ts', 'js', 'mjs']) {
+    const cfg = path.join(root, `docusaurus.config.${ext}`);
+    if (fs.existsSync(cfg)) {
+      const m = fs.readFileSync(cfg, 'utf8').match(/title:\s*['"]([^'"]+)['"]/);
+      if (m) return m[1];
+    }
+  }
+  return 'Documentation';
+}
+const SITE_NAME = readSiteTitle();
+
 function walk(dir) {
   const entries = [];
   for (const name of fs.readdirSync(dir)) {
@@ -45,8 +58,11 @@ function write(file, content) {
 }
 
 function relSlug(file) {
-  const rel = path.relative(docsDir, file);
-  return rel.replace(/\.(mdx?|md)$/, '');
+  const rel = path.relative(docsDir, file).replace(/\.(mdx?|md)$/, '');
+  // 防御:剔除任何 `..` 路径遍历段 + 空段,把 slug 锁死在 static/md/ 内。
+  // 链接(/md/<slug>.md)与写入文件名永远用这同一个 slug —— 不混入 frontmatter slug,
+  // 杜绝「llms.txt 链接指向的 md 实际没被写」的不一致。
+  return rel.split(path.sep).filter(seg => seg && seg !== '..').join('/');
 }
 
 /** Pull the `slug:` / `title:` values out of a frontmatter block. */
@@ -164,7 +180,7 @@ function main() {
 
   const files = walk(docsDir).sort();
   const aggregate = [];
-  aggregate.push('# Unif Design — Full Documentation Bundle');
+  aggregate.push(`# ${SITE_NAME} — 全文文档聚合`);
   aggregate.push('');
   aggregate.push('> 单文件聚合版。每段都带源路径与标题，方便整体粘贴给 LLM。');
   aggregate.push('');
@@ -219,9 +235,9 @@ function main() {
   const bySection = {};
   for (const e of entries) (bySection[e.section] = bySection[e.section] || []).push(e);
   const llmsLines = [
-    '# Unif Design System',
+    `# ${SITE_NAME}`,
     '',
-    '> @unif/react-native-design 设计系统文档索引。每个链接是该页的纯 Markdown 版(供 LLM 抓取);需要完整全文一次性喂入时用 /llms-full.txt。',
+    `> ${SITE_NAME} 文档索引。每个链接是该页的纯 Markdown 版(供 LLM 抓取);需要完整全文一次性喂入时用 /llms-full.txt。`,
     '',
   ];
   for (const section of Object.keys(bySection).sort()) {
