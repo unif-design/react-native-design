@@ -2,6 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+<!-- 跨 agent 通用规则见 AGENTS.md(Cursor / Codex / Copilot 等直接读);Claude Code 不读 AGENTS.md,故在此 @import,一份内容两端同步。 -->
+@AGENTS.md
+
 ## 仓库定位
 
 `@unif/react-native-design` —— React Native 设计系统,包含 theme + icons + utils + UI 组件 + 少量通用业务复合组件。目标运行时:**RN 0.85 新架构**(Fabric + concurrent React)、React 19、TypeScript 6。
