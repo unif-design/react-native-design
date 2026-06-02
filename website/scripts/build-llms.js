@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 /**
- * Copies every docs/**\/*.md and .mdx into static/md/ as plain .md files,
- * and emits an aggregated `static/md/llms.txt` for LLM-friendly bulk reading.
- *
- * Output paths mirror the doc slug:
- *   docs/intro.md                  → static/md/intro.md
- *   docs/tokens/colors.mdx         → static/md/tokens/colors.md
- *   docs/components/basics.mdx     → static/md/components/basics.md
+ * 生成 LLM 友好的文档产物(遵循 llmstxt.org 约定,放站点根):
+ *   static/llms.txt        → /llms.txt:索引(H1 + 摘要 + 按目录分节的链接列表)
+ *   static/llms-full.txt   → /llms-full.txt:全站全文聚合(一次性喂大 context window)
+ *   static/md/<slug>.md    → 每页纯 Markdown(llms.txt 的链接指向这些)
  *
  * MDX noise (`import ...;`, `export const ... = ...;`, `<LiveDemo>...</LiveDemo>`)
- * is stripped so the output reads as plain Markdown when fed to an LLM.
+ * 被清理成纯 Markdown(LiveDemo 换成 placeholder),适合喂给 LLM。
+ *
+ * 【由 package.json 的 build/start 显式调用】(`node scripts/build-llms.js && docusaurus ...`)——
+ * 不挂 prebuild/prestart 钩子,因为 yarn 4(berry)不触发 npm-style 生命周期钩子,会被跳过。
  */
 'use strict';
 
@@ -196,24 +196,47 @@ function main() {
     aggregate.push('');
   }
 
-  const llms = aggregate.join('\n').replace(/\n{3,}/g, '\n\n');
-  write(path.join(outDir, 'llms.txt'), llms);
+  const staticDir = path.join(root, 'static');
 
-  const index = files.map(f => {
+  // /llms-full.txt — 全文聚合(站点根,标准命名)
+  const llmsFull = aggregate.join('\n').replace(/\n{3,}/g, '\n\n');
+  write(path.join(staticDir, 'llms-full.txt'), llmsFull);
+
+  // /llms.txt — 标准索引(H1 + 摘要 + 按顶层目录分节的链接列表,站点根)。
+  // 链接指向每页纯 .md(供 agent 按需抓取),全文一次性喂入走 /llms-full.txt。
+  const entries = files.map(f => {
     const slug = relSlug(f);
-    const raw = read(f);
-    const { slug: fmSlug, title } = parseFrontmatter(raw);
+    const { slug: fmSlug, title } = parseFrontmatter(read(f));
     const finalSlug = fmSlug ? fmSlug.replace(/^\/+/, '') : slug;
+    const seg = slug.split('/');
     return {
-      slug: `/${finalSlug}`,
       title: title || finalSlug,
-      mdPath: `/md/${finalSlug}.md`,
-      filePath: `/md/${slug}.md`,
+      mdPath: `/md/${slug}.md`,
+      slug: `/${finalSlug}`,
+      section: seg.length > 1 ? seg[0] : '概览',
     };
   });
-  write(path.join(outDir, 'index.json'), JSON.stringify(index, null, 2));
+  const bySection = {};
+  for (const e of entries) (bySection[e.section] = bySection[e.section] || []).push(e);
+  const llmsLines = [
+    '# Unif Design System',
+    '',
+    '> @unif/react-native-design 设计系统文档索引。每个链接是该页的纯 Markdown 版(供 LLM 抓取);需要完整全文一次性喂入时用 /llms-full.txt。',
+    '',
+  ];
+  for (const section of Object.keys(bySection).sort()) {
+    llmsLines.push(`## ${section}`, '');
+    for (const e of bySection[section]) llmsLines.push(`- [${e.title}](${e.mdPath})`);
+    llmsLines.push('');
+  }
+  write(path.join(staticDir, 'llms.txt'), llmsLines.join('\n'));
 
-  console.log(`[build-llms] wrote ${files.length} pages + llms.txt (${(llms.length / 1024).toFixed(1)} KB) to static/md/`);
+  // index.json 留给站点自身用(/md/index.json)
+  write(path.join(outDir, 'index.json'), JSON.stringify(entries, null, 2));
+
+  console.log(
+    `[build-llms] /llms.txt(索引 ${entries.length} 页) + /llms-full.txt(${(llmsFull.length / 1024).toFixed(1)} KB) + ${files.length} 页 /md/*.md`
+  );
 }
 
 main();

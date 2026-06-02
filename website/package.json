@@ -5,10 +5,8 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "build:llms": "node scripts/build-llms.js",
-    "prestart": "npm run build:llms",
-    "prebuild": "npm run build:llms",
-    "start": "docusaurus start",
-    "build": "docusaurus build",
+    "start": "node scripts/build-llms.js && docusaurus start",
+    "build": "node scripts/build-llms.js && docusaurus build",
     "serve": "docusaurus serve",
     "clear": "docusaurus clear",
     "swizzle": "docusaurus swizzle",
