@@ -113,8 +113,24 @@ const config: Config = {
             { label: 'Cell · List', to: '/docs/components/cell' },
           ],
         },
+        {
+          title: '资源',
+          items: [
+            { label: 'npm', href: 'https://www.npmjs.com/package/@unif/react-native-design' },
+            { label: 'GitHub', href: 'https://github.com/unif-design/react-native-design' },
+          ],
+        },
+        {
+          title: 'Unif 生态',
+          items: [
+            { label: '文档总站', href: 'https://unif.design' },
+            { label: '相机 camera', href: 'https://unif-design.github.io/react-native-camera/' },
+            { label: '友盟分享 umeng', href: 'https://unif-design.github.io/react-native-umeng/' },
+            { label: '华为扫码 hms-scan', href: 'https://unif-design.github.io/react-native-hms-scan/' },
+          ],
+        },
       ],
-      copyright: `Unif Design System · v${pkg.version}`,
+      copyright: '@unif/react-native-design · MIT',
     },
     prism: {
       theme: prismThemes.github,
