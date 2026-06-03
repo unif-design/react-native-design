@@ -1,79 +1,165 @@
 ---
 sidebar_position: 1
 title: 颜色
-description: 主色 + 语义色 + 中性色，点击色块复制 HEX
+description: "Unif Design 颜色 token：role-based 角色 token（c.primary / c.surface / c.foreground…），亮/暗各一套 hex，跟随系统切换；含取色优先级链与代码用法。"
 ---
 
 import { Swatches } from '@site/src/components/Swatches';
 
 # 颜色
 
-单一主色 + 极简语义色 + 纯净中性色。**点击色块复制 HEX 值**。
+Unif Design 的颜色是 **role-based(角色化)token**:role 名固定(`primary` / `surface` / `foreground`…),亮 / 暗主题切换时,改的是 role 指向哪个 hex,组件代码不动。值的唯一真相源是 `src/theme/colors.ts`。
 
-## 主色 / Primary（橙色阶）
-
-<Swatches items={[
-  { name: 'primary-0', hex: '#FFF5EB', desc: '高亮背景' },
-  { name: 'primary-100', hex: '#FFC18A', desc: '渐变起色' },
-  { name: 'primary-200', hex: '#EF8B33', desc: '渐变中色' },
-  { name: 'primary-300', hex: '#EB6E00', desc: '★ 主品牌色' },
-  { name: 'primary-400', hex: '#E96C00', desc: '渐变结束' },
-  { name: 'primary-500', hex: '#D06200', desc: 'Hover / Pressed' },
-  { name: 'primary-600', hex: '#B35400', desc: '深按压态' },
-]} />
-
-**品牌渐变**（135°，仅用于 logo 圆 + drawer header）：
-`linear-gradient(135deg, #EB6E00 0%, #E96C00 100%)`
-
-平铺橙色 `#EB6E00` 在 90% 场景下足够。**不要引入新的渐变。**
-
-## 语义色 / Semantic
-
-<Swatches items={[
-  { name: 'success-300', hex: '#52C41A', desc: '成功 / 完成' },
-  { name: 'error-300', hex: '#F4511E', desc: '错误 / 销毁' },
-  { name: 'info-300', hex: '#3775F6', desc: '⚠ 仅用于用户头像' },
-]} />
-
-:::warning 蓝色规则
-`#3775F6` **专属于用户头像**。不要在按钮、提示、链接等任何其它地方使用蓝色——这会破坏 user vs AI 的视觉区分。
+:::info 取色只走 hook,不要顶层 import
+颜色跟随系统亮暗切换,**必须**在组件内用 `useColors()` / `useTheme().colors` 运行期拿。顶层 `import { colors }` 导出已删除(见[迁移 → 令牌迁移](/docs/migration#令牌迁移)）。下方所有色块的 `hex` 仅供查阅;代码里写 role 名,不写 hex。
 :::
 
-## 中性色 / Neutrals
+## 取色优先级链 {#取色优先级链}
+
+从语义匹配度由高到低,**不跳级**:
+
+1. **角色 token** —— `useColors()` 返回的 `c.primary` / `c.surface` / `c.foreground` 等。语义对得上就用它,自动亮 / 暗。
+2. **静态 palettes** —— 渐变序列(`avatarGradient`、`warmOrangePalette`),塞不进单值 role 的"色组 / 渐变",见[间距·圆角·阴影](/docs/design/tokens/spacing-radii-shadows)与下文。
+3. **新增 token** —— 现有 role 都对不上时,在 `colors.ts` 给 `lightColors` 和 `darkColors` **同时**加同名 key(TS 编译期强制两套键集合对齐,少一个就报错)。
+
+**永远不要内联 `#EB6E00` / `rgba(...)`。** 新硬编码颜色会被 CI 拦下。唯一例外:视觉锁定(QR 白卡、固定商标色),且必须加注释说明锁定理由。
+
+## 品牌 / Brand {#品牌}
+
+品牌橙 `#EB6E00` 是 Unif 的核心识别色。**亮 / 暗共用同一 hex** —— 在 `#0A0A0A` 暗底上对比度仍过 WCAG AA,brand identity 不随主题变。
 
 <Swatches items={[
-  { name: 'bg-page', hex: '#F5F5F5', desc: '页面背景' },
-  { name: 'bg-card', hex: '#FFFFFF', desc: '卡片背景' },
-  { name: 'bg-muted', hex: '#F0F0F0', desc: '次按钮 / 取消' },
-  { name: 'bg-pill', hex: '#E0E0E0', desc: '禁用按钮' },
-  { name: 'fg-1', hex: '#333333', desc: '主要文字' },
-  { name: 'fg-2', hex: '#666666', desc: '次要文字' },
-  { name: 'fg-3', hex: '#999999', desc: '占位 / 三级' },
-  { name: 'border', hex: '#EDEDED', desc: '默认边线' },
+  { name: 'primary', hex: '#EB6E00', desc: '主品牌橙(亮/暗共用)' },
+  { name: 'primaryPressed', hex: '#D06200', desc: '按下态(亮/暗共用)' },
+  { name: 'primaryContainer', hex: '#FFF5EB', desc: '亮:高亮选中背景' },
+  { name: 'primaryContainerSubtle', hex: '#FFF8F0', desc: '亮:Card 选中背景' },
+  { name: 'onPrimary', hex: '#FFFFFF', desc: '品牌底上的内容色' },
 ]} />
 
-**规则。** 无近黑、无米白、无染色灰。中性色保持纯净。
+| role | light | dark | 用途 |
+|---|---|---|---|
+| `primary` | `#EB6E00` | `#EB6E00` | 主按钮、用户气泡、活动标签、关键强调 |
+| `primaryPressed` | `#D06200` | `#D06200` | 按下态 |
+| `primaryContainer` | `#FFF5EB` | `#3D1F00` | 高亮选中背景 |
+| `primaryContainerSubtle` | `#FFF8F0` | `#2A1500` | Card 选中背景 |
+| `onPrimary` | `#FFFFFF` | `#FFFFFF` | 品牌底上的内容色 |
+| `onPrimaryMuted` | `rgba(255,255,255,0.85)` | `rgba(255,255,255,0.85)` | 品牌底上的次级文字 |
 
-## 在代码中使用
+**品牌渐变**(数组,不暴露为 role):`avatarGradient = ['#F49443', '#EB6E00']`(135°,Me hero 头像;亮 / 暗共用)。平铺橙 `#EB6E00` 在 90% 场景已足够,**不要引入新渐变**。
 
-颜色 token 跟随主题暗亮切换，**必须**通过 `useColors()` / `useTheme().colors` 在组件内拿；不要在模块顶层 `import { colors }`（顶层导出已删）。
+## 语义色 / Semantic {#语义色}
+
+<Swatches items={[
+  { name: 'success', hex: '#52C41A', desc: '成功 / 完成' },
+  { name: 'error', hex: '#F4511E', desc: '错误 / 销毁(暗:#FF6B40)' },
+  { name: 'info', hex: '#3775F6', desc: '⚠ 仅用于用户头像(暗:#5A91FF)' },
+]} />
+
+| role | light | dark | 用途 |
+|---|---|---|---|
+| `success` | `#52C41A` | `#52C41A` | 成功态 |
+| `successContainer` | `#F0FFF0` | `#0E2810` | success badge 底 |
+| `onSuccess` | `#FFFFFF` | `#FFFFFF` | success 上的内容 |
+| `error` | `#F4511E` | `#FF6B40` | 错误 / destructive |
+| `errorContainer` | `#FFF5F5` | `#2A1010` | error badge 底 |
+| `onError` | `#FFFFFF` | `#FFFFFF` | error 上的内容 |
+| `info` | `#3775F6` | `#5A91FF` | **仅用户头像**(Tag `info` variant 历史沿用) |
+| `infoContainer` | `#F0F5FF` | `#0F1A33` | info badge 底 |
+| `onInfo` | `#FFFFFF` | `#FFFFFF` | info 上的内容 |
+
+:::warning 蓝色规则
+`info`(`#3775F6`)**专属于用户头像**。除 Tag 的 `info` variant 历史沿用外,不要在按钮、提示、链接等任何其它地方铺蓝色 —— 这会破坏 user / AI 的视觉区分。详见[设计原则 → 橙色克制](/docs/design/principles#橙色克制)。
+:::
+
+## 表面 / Surface(5 层) {#表面}
+
+5 层明度阶梯。**暗色不靠 shadow 表达深度,靠这 5 层 surface 的明度差**(见[阴影](/docs/design/tokens/spacing-radii-shadows#阴影))。
+
+<Swatches items={[
+  { name: 'background', hex: '#F5F5F5', desc: '整页底(暗:#0A0A0A,OLED 友好)' },
+  { name: 'surface', hex: '#FFFFFF', desc: 'Card / Sheet / 气泡(暗:#1C1C1E)' },
+  { name: 'surfaceContainer', hex: '#F5F5F5', desc: '卡内输入框 / 次级(暗:#2C2C2E)' },
+  { name: 'surfaceContainerHigh', hex: '#F0F0F0', desc: '次按钮 / 按下态(暗:#3A3A3C)' },
+  { name: 'surfaceContainerHighest', hex: '#E0E0E0', desc: 'disabled / pill(暗:#48484A)' },
+]} />
+
+| role | light | dark | 用途 |
+|---|---|---|---|
+| `background` | `#F5F5F5` | `#0A0A0A` | 整页底色(OLED 友好) |
+| `surface` | `#FFFFFF` | `#1C1C1E` | Card / Sheet / 气泡 |
+| `surfaceContainer` | `#F5F5F5` | `#2C2C2E` | 卡内输入框 / 次级面 |
+| `surfaceContainerHigh` | `#F0F0F0` | `#3A3A3C` | 次按钮 / 按下态 |
+| `surfaceContainerHighest` | `#E0E0E0` | `#48484A` | disabled 按钮 / pill |
+
+## 前景 / Foreground {#前景}
+
+<Swatches items={[
+  { name: 'foreground', hex: '#333333', desc: '主文字(暗:#FFFFFF)' },
+  { name: 'foregroundMuted', hex: '#666666', desc: '次级文字' },
+  { name: 'foregroundSubtle', hex: '#999999', desc: '三级 / placeholder' },
+]} />
+
+| role | light | dark | 用途 |
+|---|---|---|---|
+| `foreground` | `#333333` | `#FFFFFF` | 主文字 |
+| `foregroundMuted` | `#666666` | `rgba(235,235,245,0.6)` | 次级文字 |
+| `foregroundSubtle` | `#999999` | `rgba(235,235,245,0.3)` | 三级文字 / placeholder |
+| `onSurface` | `= foreground` | `= foreground` | 别名(语义同 `foreground`) |
+| `onSurfaceMuted` | `= foregroundMuted` | `= foregroundMuted` | 别名 |
+
+## 描边 / Outline {#描边}
+
+| role | light | dark | 用途 |
+|---|---|---|---|
+| `outline` | `#EDEDED` | `#3A3A3C` | 默认 hairline |
+| `outlineVariant` | `#E8E8E8` | `#48484A` | 次级 hairline |
+| `outlineFaint` | `#F5F5F5` | `rgba(84,84,88,0.65)` | 最弱 hairline |
+
+## 反色 / Inverse · 遮罩 / Scrim {#反色与遮罩}
+
+| role | light | dark | 用途 |
+|---|---|---|---|
+| `inverseSurface` | `#1C1C1E` | `#FFFFFF` | toast / tooltip 反色底 |
+| `inverseOnSurface` | `#FFFFFF` | `#000000` | inverseSurface 上的内容 |
+| `scrim` | `rgba(0,0,0,0.5)` | `rgba(0,0,0,0.7)` | Sheet 遮罩(暗色加深) |
+| `sheetBackdrop` | `rgba(245,245,247,0.72)` | `rgba(245,245,247,0.72)` | 合规 sheet 之下的浅 tint(焦点引导,亮 / 暗共用) |
+
+:::note 玻璃 / 渐变等专用色
+`colors.ts` 另有一批玻璃感(`glassTintLight` / `glassBorder` / `glassActiveFg`…)、Hero 渐变(`heroGradient0/1/2`)、淡阶图标(`iconFaint40/30/25`)等专用 role,多数亮 / 暗 alpha **故意不同**(逐条注释了原因,不要"归一化")。这些供具体组件内部使用,完整清单与注释见 `src/theme/colors.ts`。
+:::
+
+## 中性色规则 {#中性色规则}
+
+**无近黑、无米白、无染色灰。** 中性色保持纯净 —— 不要在灰阶里掺品牌橙或其它色相。
+
+## 在代码中使用 {#在代码中使用}
 
 ```tsx
 import { StyleSheet } from 'react-native';
 import { useColors, useThemedStyles } from '@unif/react-native-design';
 import type { ColorTokens } from '@unif/react-native-design';
 
+// makeStyles 必须定义在模块顶层(不要内联进组件,否则打穿 useThemedStyles 缓存)
 const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({
-    primary:   { backgroundColor: c.primary },        // 亮:#EB6E00 / 暗 同
-    text:      { color: c.foreground },               // 亮:#333333 / 暗:#FFFFFF
-    border:    { borderColor: c.outline },            // 亮:#EDEDED / 暗:#3A3A3C
-    errorTint: { color: c.error },                    // 亮:#F4511E / 暗:#FF6B40
+    primary: { backgroundColor: c.primary },   // 亮/暗同:#EB6E00
+    text:    { color: c.foreground },          // 亮:#333333 / 暗:#FFFFFF
+    border:  { borderColor: c.outline },       // 亮:#EDEDED / 暗:#3A3A3C
+    error:   { color: c.error },               // 亮:#F4511E / 暗:#FF6B40
   });
 
 function MyView() {
   const styles = useThemedStyles(makeStyles);
-  const c = useColors(); // 也可拿来做 inline 计算的颜色 fallback
+  const c = useColors(); // inline 取色(状态映射 / prop fallback)时用
   // ...
 }
 ```
+
+## 暗色哲学 {#暗色哲学}
+
+- **iOS HIG dark 风格** —— 纯黑 / 近黑 `background`(`#0A0A0A`)+ 深灰多层 `surface`(`#1C / #2C / #3A / #48`),OLED 友好。
+- **品牌橙保留原值** —— 亮 / 暗均 `#EB6E00`,brand identity 不变。
+- **layered surface 替代 shadow** —— 暗色下 shadow token 的 `shadowOpacity` / `elevation` 多数置 0,深度靠 surface 5 层明度差(见[阴影](/docs/design/tokens/spacing-radii-shadows#阴影))。
+- **气泡"内角方"签名完整保留**(见[设计原则 → 气泡内角方](/docs/design/principles#气泡内角方))。
+
+> 完整 role → hex 对照、迁移 grep 表、为何不引入 reference layer,见[完整规范 → Color system](/docs/unif-design)。
