@@ -87,6 +87,22 @@ import { Radio } from '@unif/react-native-design';
 | `label` | `string` | 右侧文字 |
 | `disabled` | `boolean?` | 禁用 |
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Radio/Radio.tsx`、`RadioGroup.tsx`、`types.ts`。
+
+- 默认 `accessibilityRole`：每个 `<Radio>` 在其 `<Pressable>` 上硬编码 `'radio'`。`<Radio.Group>` 渲染为普通 `<View>`，源码**未**设置 `radiogroup` role（仅作布局容器 + Context 派发，无 group 语义）。
+- a11y props：`accessibilityLabel` 取自 `label`，但 `label` 在 `types.ts` 中是**可选**的（`label?`）——不传 `label` 时（仅渲染圆点）无朗读文案，此时应由外部上下文提供语义。
+- 状态语义：`accessibilityState={{ checked, disabled: !!disabled }}`——`checked` 由 `Radio.Group` 的受控 `value` 派生（`ctx.value === value`），`disabled` 映射本项 `disabled` prop。
+
+```tsx
+// label 同时作为 SR 朗读文案；checked 由 Group 的 value 决定
+<Radio.Group value={tier} onChange={setTier}>
+  <Radio value="vip" label="VIP 客户" />
+  <Radio value="normal" label="普通客户" />
+</Radio.Group>
+```
+
 ## 与 Checkbox 的区别
 
 | Radio | Checkbox |

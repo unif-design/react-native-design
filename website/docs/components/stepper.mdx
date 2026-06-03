@@ -105,6 +105,19 @@ const [qty, setQty] = useState(12);
 | `step` | `number?` | `1` | 步长 |
 | `size` | `'sm' \| 'md'` | `'md'` | 高度 28 / 32 |
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Stepper/Stepper.tsx`、`types.ts`。
+
+- 默认 `accessibilityRole`：`−` / `+` 两个 `<Pressable>` 均硬编码 `'button'`；中间数字框 `<View>` 硬编码 `'adjustable'`（可调整值容器）。根 `<View>` 不设 role。
+- a11y props：标签由源码硬编码、不可由外部传入——`−` 为 `accessibilityLabel="减少"`、`+` 为 `accessibilityLabel="增加"`，两者各带 `accessibilityHint`（`` `当前值 ${value}，减/加 ${step}` ``，动态拼当前值与步长）。数字框设 `accessibilityValue={{ min, max, now }}`，把范围与当前值暴露给 SR。`StepperProps` 不含任何 a11y prop（仅 `value` / `onChange` / `min` / `max` / `step` / `size` / `disabled` / `testID`）。
+- 状态语义：两个按钮各自 `accessibilityState={{ disabled }}`——`−` 在 `disabled || value <= min` 时禁用，`+` 在 `disabled || value >= max` 时禁用（到达边界自动禁用对应按钮）。
+
+```tsx
+// 角色 / 标签 / hint 全部内置，无需额外 a11y prop
+<Stepper value={qty} onChange={setQty} min={1} max={99} />
+```
+
 ## 不要
 
 - ❌ 不要在 Stepper 中间放可输入的 TextInput——下单场景请用专门的 InputNumber 控件（待规划）

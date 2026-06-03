@@ -72,6 +72,12 @@ import { Skeleton } from '@unif/react-native-design';
 > 单一组件 + `shape` prop(MUI Skeleton 同款 variant 模式),旧的
 > `Skeleton.Line / .Rect / .Circle` 命名空间访问已移除。
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Skeleton/Skeleton.tsx`、`types.ts`。
+
+加载占位骨架为纯视觉元素，无交互。源码在其 `<Animated.View>` 上显式设 `accessibilityElementsHidden` + `importantForAccessibility="no-hide-descendants"`，对 SR **完全隐藏**——占位块没有朗读价值，隐藏可避免在加载阶段读出无意义节点。无 `accessibilityRole` / `accessibilityLabel`，也无可传的 a11y prop（仅 `shape` / `width` / `height` / `size` / `radius` / `style` / `testID`）。加载完成后用真实内容整体替换骨架即可，真实内容自带其语义。
+
 ## 与 Shimmer 的区别
 
 | Skeleton | Shimmer (chat) |

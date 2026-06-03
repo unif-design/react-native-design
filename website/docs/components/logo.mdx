@@ -93,6 +93,17 @@ import { Logo } from '@unif/react-native-design';
 | `style` | `StyleProp<ImageStyle>?` | — | 附加样式 |
 | `testID` | `string?` | — | E2E 定位 |
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Logo/Logo.tsx`、`types.ts`。
+
+本组件渲染为单个 `<Image>`，源码显式设 `accessibilityLabel={label}`，`label` 为**可选** prop、默认 `'Logo'`，故即便不传也有兜底朗读文案。未设置 `accessibilityRole`（继承底层 `<Image>` 默认）。品牌主标作为有意义的图片对 SR 可读，若上下文需要更具体的朗读（如「Unif 健康快乐」），显式传 `label` 覆盖默认值。
+
+```tsx
+// 传 label 覆盖默认 'Logo'
+<Logo source={require('@/assets/logo.png')} label="Unif" />
+```
+
 ## 用法规则
 
 - **背景色** 主橙 `#EB6E00`，**不要换其它底色**。如需放在浅色背景上，外层包一层主橙圆角容器或留 padding。

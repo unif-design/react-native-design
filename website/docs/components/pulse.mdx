@@ -121,6 +121,16 @@ import { PulseDot } from '@unif/react-native-design';
 | `color` | `string` | `c.primary`（运行期 hook 取） | 填充色 |
 | `from` / `to` / `duration` / `delay` | 同上 | from=0.5 / to=1 / duration=700 / delay=0 | 透传给 `usePulse` |
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Pulse/PulseDot.tsx`、`Pulse.tsx`、`usePulse.ts`。
+
+纯视觉脉冲原语，三个 API 均无交互、无 `accessibilityRole`：
+
+- `<PulseDot>` 源码在其 `<Animated.View>` 上显式设 `accessibilityElementsHidden` + `importantForAccessibility="no-hide-descendants"`，对 SR **完全隐藏**（圆点是装饰性指示器，无朗读价值）。
+- `<Pulse>` 是透明包装层（仅给 children 套一个 opacity 循环的 `<Animated.View>`），自身**未设置任何 a11y prop**，a11y 语义完全由其 `children` 承载——把语义放在被包裹的内容上（如有意义的图标加 `accessibilityLabel`）。
+- `usePulse` 只返回动画 `style`，不涉及 a11y。
+
 ## 内部使用
 
 | 消费者 | 做什么 |
