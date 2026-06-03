@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 title: Loading 加载
-description: 旋转 spinner · 3 种尺寸
+description: "旋转加载指示器 Spinner —— size（默认 18，< 8 钳到 8）/ color（默认 c.primary）/ thickness（默认 2）；900ms 线性一圈，native 走 reanimated 4、web 走 CSS keyframes，刻意对屏幕阅读器隐藏。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -9,7 +9,7 @@ import { Spinner } from '@unif/react-native-design';
 
 # Loading 加载
 
-旋转加载指示器。`width / height` 可调，`thickness` 可调，`color` 默认主橙。
+旋转加载指示器。`size` 调直径（默认 18，`< 8` 会被钳到 8），`thickness` 调描边粗细（默认 2），`color` 默认主橙 `c.primary`。
 
 ## 实时预览
 
@@ -69,10 +69,11 @@ function Demo() {
 
 | Prop | Type | 默认 | 说明 |
 |---|---|---|---|
-| `size` | `number` | `18` | 直径 |
-| `color` | `string` | `c.primary`（运行期 hook 取） | 旋转弧颜色 |
-| `thickness` | `number` | `2` | 描边粗细 |
-| `style` | `StyleProp<ViewStyle>` | — | 外层样式 |
+| `size` | `number?` | `18` | 直径（含 stroke）；非有限或 `< 8` 钳到 8（打 warn） |
+| `color` | `string?` | `c.primary`（运行期 hook 取） | 旋转弧颜色（轨道色固定 `c.outline`） |
+| `thickness` | `number?` | `2` | 描边粗细；`≤ 0` fallback 到 2 |
+| `style` | `StyleProp<ViewStyle>?` | — | 外层样式 |
+| `testID` | `string?` | — | E2E / 测试定位 |
 
 ## 无障碍（a11y）
 

@@ -1,7 +1,7 @@
 ---
 sidebar_position: 5
 title: Pulse · PulseDot · usePulse
-description: reanimated 4 worklet 通用脉冲原语 — opacity 循环 hook + 包装组件 + 圆点
+description: "reanimated 4 worklet 通用脉冲原语 —— usePulse(opacity 循环 hook) + <Pulse>(包装组件) + <PulseDot>(默认 6×6 主橙圆点)；UI 线程驱动、不占 JS 桥，纯视觉对屏幕阅读器隐藏。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -111,15 +111,16 @@ import { PulseDot } from '@unif/react-native-design';
 
 ### `<Pulse>`
 
-接受 `usePulse` 全部 options + `children`。把 children 渲在一个 `<Animated.View>` 里，opacity 走脉冲循环。
+接受 `usePulse` 全部 options（`from` / `to` / `duration` / `delay`）+ `children` + 可选 `testID`。把 children 渲在一个 `<Animated.View>` 里，opacity 走脉冲循环。
 
 ### `<PulseDot>`
 
 | Prop | 类型 | 默认 | 说明 |
 |---|---|---|---|
-| `size` | `number` | `6` | 圆点直径（px） |
-| `color` | `string` | `c.primary`（运行期 hook 取） | 填充色 |
-| `from` / `to` / `duration` / `delay` | 同上 | from=0.5 / to=1 / duration=700 / delay=0 | 透传给 `usePulse` |
+| `size` | `number?` | `6` | 圆点直径（px） |
+| `color` | `string?` | `c.primary`（运行期 hook 取） | 填充色 |
+| `from` / `to` / `duration` / `delay` | `number?` | from=0.5 / to=1 / duration=700 / delay=0 | 透传给 `usePulse`（注意 `PulseDot` 的 `from` 默认 0.5，`usePulse` / `<Pulse>` 默认 0.6） |
+| `testID` | `string?` | — | E2E / 测试定位 |
 
 ## 无障碍（a11y）
 

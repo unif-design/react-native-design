@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 title: Radio 单选
-description: 单选组 · 同时只能选一个
+description: "单选控件 —— <Radio.Group value onChange> 包裹若干 <Radio value label>，同组只能选一个；20×20 圆，已选主橙描边 + 中心 8×8 主橙点，每项 accessibilityRole=\"radio\"。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -73,19 +73,27 @@ import { Radio } from '@unif/react-native-design';
 
 ### `<Radio.Group>`
 
-| Prop | Type | 说明 |
-|---|---|---|
-| `value` | `string \| number` | 当前选中值 |
-| `onChange` | `(value) => void` | 切换回调 |
-| `children` | `ReactNode` | `<Radio>` 列表 |
+来源：`src/components/ui/Radio/types.ts`、`RadioGroup.tsx`。
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `value` | `string \| number` | — | 当前选中值（受控） |
+| `onChange` | `(value: string \| number) => void` | — | 切换回调 |
+| `children` | `ReactNode` | — | `<Radio>` 列表（渲染为普通 `<View>`，组内 `gap: space[1]`） |
+| `testID` | `string?` | — | 容器 testID；每个 `Radio` 自动派生 `${testID}-${value}` |
 
 ### `<Radio>`
 
-| Prop | Type | 说明 |
-|---|---|---|
-| `value` | `string \| number` | 此项的值 |
-| `label` | `string` | 右侧文字 |
-| `disabled` | `boolean?` | 禁用 |
+来源：`src/components/ui/Radio/types.ts`、`Radio.tsx`。
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `value` | `string \| number` | — | 此项的值（与 Group 的 `value` 比较得 checked） |
+| `label` | `string?` | — | 右侧文字；同时作为 `accessibilityLabel`（**可选**，不传则仅渲染圆点、无朗读文案） |
+| `disabled` | `boolean?` | `false` | 禁用（`opacity: 0.5` + 不响应） |
+| `testID` | `string?` | — | 单项 testID（不传则从父 Group 派生 `${groupTestID}-${value}`） |
+
+> `<Radio>` 必须放在 `<Radio.Group>` 内使用；脱离 Group 会打 warn 并渲染空 `<View>`。
 
 ## 无障碍（a11y）
 

@@ -1,7 +1,7 @@
 ---
 sidebar_position: 5
 title: 图标
-description: 24×24 描边 SVG 规则 · 全部语义图标
+description: "手绘 24×24 描边 SVG 图标系统 —— 统一绘制规则、IconName 字面量联合类型自动补全；<Icon> 刻意对屏幕阅读器隐藏，语义由承载它的可交互父组件提供。"
 ---
 
 import IconCatalog from '@site/src/components/IconCatalog';
@@ -32,7 +32,22 @@ function Demo() {
 }
 ```
 
-`name` 是 TypeScript 字面量联合类型——所有图标名都有自动补全；`IconName` 由 `src/assets/icons/data.ts` 生成。
+`name` 是 TypeScript 字面量联合类型——所有图标名都有自动补全；`IconName` 由 `src/icons/data.ts` 生成（该文件 **AUTO-GENERATED，请勿手改**）。
+
+### `<Icon>` props
+
+来源：`src/components/ui/Icon/types.ts`、`Icon.tsx`。
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `name` | `IconName` | — | 图标语义名（字面量联合类型，自动补全） |
+| `size` | `number?` | `18` | 宽高（正方形） |
+| `color` | `string?` | `c.foregroundMuted` | 传给 SVG `stroke`（及 `fill="currentColor"` 元素） |
+| `strokeWidth` | `number?` | 每图标自带值（多数 `1.75`，`check` 为 `2`） | 覆盖描边宽度 |
+| `style` | `StyleProp<ViewStyle>?` | — | 外层 `<View>` 样式 |
+| `testID` | `string?` | — | E2E / 测试定位（挂在外层 `<View>`） |
+
+> 未知 `name` 不抛错：打 `warn` 并渲染一个等尺寸空 `<View>` 占位（同样对 SR 隐藏）。
 
 ## 绘制规则
 
@@ -45,14 +60,14 @@ function Demo() {
 | `stroke-linecap` | `round` |
 | `stroke-linejoin` | `round` |
 | `fill` | `none`（实心填充用 `fill="currentColor"`） |
-| `color` | 通过 `currentColor` 继承 |
-| 默认尺寸 | 16–20px 内联，24px 独立 |
+| `color` | `<Icon>` 的 `color` prop → `stroke`，默认 `c.foregroundMuted`（不传 color 时） |
+| 组件默认 `size` | `18`（`<Icon>` 的 `size` 默认值）；用法上 16–20px 内联、24px 独立 |
 
 ## 添加新图标
 
-1. 在 `src/assets/icons/svg/<name>.svg` 加新文件,遵守上面的绘制规则
-2. 编辑 `src/assets/icons/data.ts`,加一条 `<name>: {svg: () => <Svg ...>...</Svg>}`(参考已有 entry;`types.ts` 是稳定类型)
-3. 文档站走的 `website/src/components/iconsCatalog.ts` 是从 `@/assets/icons` re-export 的薄壳,自动同步,无需再生成
+1. 在 `src/icons/svg/<name>.svg` 加新文件,遵守上面的绘制规则(只用 `<path>` / `<rect>` / `<circle>`;polyline / polygon 先转 path)
+2. 运行 `node scripts/build-icons.js`,脚本扫 `src/icons/svg/*.svg` 重新生成 `src/icons/data.ts`(纯 regex 抽属性,无第三方依赖)。**不要手改 `data.ts`** —— 它是生成产物(`{ strokeWidth, elements }`),改 SVG 再跑脚本
+3. 文档站走的 `website/src/components/iconsCatalog.ts` 是从 `@unif/react-native-design` barrel re-export 的薄壳(`ICONS` / `ICON_NAMES` / `IconName`),自动同步,无需再生成
 4. `IconName` TypeScript 字面量类型自动包含新名字,IDE 立即给出补全
 5. 若新图标属于某个语义类别,把它加进 `website/src/components/IconCatalog.tsx` 的 `CATEGORIES` 数组对应组里;若它是某个 appId 的图标,补 `APP_MAPPINGS`
 

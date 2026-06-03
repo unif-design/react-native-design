@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: Search 搜索栏
-description: 搜索栏 · 带 search 图标 + clear
+description: "Input 的搜索预设 —— 内置 leading search 图标 + 输入后 trailing 清除按钮、高 36、返回键为「搜索」；SearchProps = Omit<TextInputProps, style> + onSubmit / placeholder。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -43,14 +43,16 @@ export const SearchDemo = () => {
 
 ## 视觉规范
 
+来源：`src/components/ui/Search/Search.tsx`（底层 Input/TextFieldBase styles）。
+
 | 元素 | 规则 |
 |---|---|
-| 高度 | 36px (略矮于普通 Input) |
-| 圆角 | 8px |
-| 背景 | `#F5F5F5` (bg-input) |
-| 左图标 | search · 18px · `fg-3` |
-| 占位 | `搜索…` 或具体场景 `搜索客户` |
-| Clear | 16px × 圆，输入非空时出现，点击清空 |
+| 高度 | 36px（`height={36}`，普通 Input 为 44） |
+| 圆角 | 8px（`radius.md`） |
+| 背景（idle） | `c.surfaceContainerHigh`（亮色 `#F0F0F0`）；focus 时白底 |
+| 左图标 | `search` · `size={18}` · `c.foregroundSubtle`（`#999999`） |
+| 占位 | 默认「搜索…」，可覆盖（如「搜索客户」） |
+| Clear | `value` 非空时出现的 `close` 图标 · `size={14}` · `c.foregroundSubtle`，点击清空 |
 
 ## 用法
 
@@ -64,6 +66,19 @@ import { Search } from '@unif/react-native-design';
   onSubmit={handleSearch}
 />
 ```
+
+## API
+
+来源：`src/components/ui/Search/types.ts`、`Search.tsx`。
+
+`SearchProps` = **`Omit<TextInputProps, 'style'>`** + 这 2 个扩展。所有 RN [`TextInput` props](https://reactnative.dev/docs/textinput)（`value` / `onChangeText` / `accessibilityLabel` / `autoFocus` 等）都直接可用；`style` 被 omit。
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `onSubmit` | `(value: string) => void` | — | 提交回调（按 return 键触发，回传当前 `value`） |
+| `placeholder` | `string?` | `'搜索…'` | 占位文字 |
+
+> 这些是 Search 在底层 `<Input>` 上写死的预设（**非可配置 prop**）：`leading` = `<Icon name="search" />`、`value` 非空时 `trailing` 出现清除按钮、`height={36}`、`returnKeyType="search"`、`accessibilityRole="search"`。支持 `ref`（`forwardRef` 透传到内部 `TextInput`，可 `searchRef.current?.focus()`）。
 
 ## 无障碍（a11y）
 
@@ -80,8 +95,8 @@ import { Search } from '@unif/react-native-design';
 
 ## 与 Input 的区别
 
-`Search` 是 `Input` 的常用预设：
-- 默认 `leadingIcon="search"`
-- 默认 `clearable=true`
-- 高度 36px (Input 默认 44px)
-- 提交回调 `onSubmit`，键盘 return 类型 `search`
+`Search` 是 `Input` 的常用预设（这些都是 Search 内部写死、非 Input 的可配置 prop —— Input 本身**没有** `leadingIcon` / `clearable` 这类 prop，需自行组合 `leading` / `trailing`）：
+- 内置 `leading` 为 `<Icon name="search" />`
+- `value` 非空时内置 `trailing` 清除按钮
+- 高度 36px（Input 默认 44px）
+- 提交回调 `onSubmit`，`returnKeyType="search"`、`accessibilityRole="search"`

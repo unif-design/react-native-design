@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: Input 输入框
-description: 单行 · idle / focus / filled / error
+description: "单行文本输入框 —— 高 44（control.lg）、圆角 8、灰底无边框，4 视觉态 idle/focus/filled/error；InputProps = Omit<TextInputProps, style|multiline|numberOfLines> + leading/trailing/error/height/disabled/containerStyle。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -10,7 +10,7 @@ import { useState } from 'react';
 
 # Input 输入框
 
-单行输入。**44px** 高（`dim.controlLg`），**8px** 圆角，灰底无边框，focus 时显橙色描边。
+单行输入。**44px** 高（`control.lg`），**8px** 圆角（`radius.md`），灰底无边框，focus 时显橙色描边。
 
 > 多行内容请用 [`<Textarea />`](./textarea)。Input 不接受 `multiline` / `numberOfLines`。
 
@@ -39,25 +39,29 @@ export const InputDemo = () => {
 
 ## 状态
 
+来源：`src/components/ui/TextField/styles.ts`（值取自 `src/theme/colors.ts`）。状态优先级 `error > focus > filled > idle`。
+
 | 状态 | 背景 | 边框 |
 |---|---|---|
-| `idle` | `#F5F5F5` (bg-input) | 透明 |
-| `focus` | `#FFFFFF` | 1px 主橙 `#EB6E00` |
-| `filled` | `#FFFFFF` | 1px 默认 hairline `#EDEDED` |
-| `error` | `#FFFFFF` | 1px 错误色 `#F4511E` |
+| `idle` | `c.surfaceContainerHigh`（亮色 `#F0F0F0`） | 透明 |
+| `focus` | `c.surface`（`#FFFFFF`） | 1px `c.primary`（`#EB6E00`） |
+| `filled` | `c.surface`（`#FFFFFF`） | 1px `c.outline`（`#EDEDED`） |
+| `error` | `c.surface`（`#FFFFFF`） | 1px `c.error`（`#F4511E`） |
 
 ## 视觉规范
 
+来源：`src/components/ui/TextField/styles.ts`。
+
 | 元素 | 规则 |
 |---|---|
-| 高度 | 44px（`dim.controlLg`，可用 `height` prop 覆盖） |
-| 圆角 | 8px |
-| 内边距 | `0 12px` |
-| 字号 | 15px (`body`) |
-| 占位文字 | `fg-3 #999999` |
-| 输入文字 | `fg-1 #333333` |
-| 左/右图标 | 18px，`fg-3 #999999` |
-| 清除按钮 | 16px 圆形，点击清空 |
+| 高度 | 44px（`control.lg`，可用 `height` prop 覆盖） |
+| 圆角 | 8px（`radius.md`） |
+| 内边距 | `paddingHorizontal: space[5]`（12） |
+| 字号 | `t.body`（15），色 `c.foreground`（`#333333`） |
+| 占位文字 | `c.foregroundSubtle`（`#999999`） |
+| 错误文字 | 下方独立 `<Text>`，`t.micro`（11）/ `c.error` |
+| leading / trailing | 任意 `ReactNode`（自填 `<Icon>` 等）；间距 `gap: space[3]`（8） |
+| disabled | 容器 `opacity: 0.5` + `editable=false` |
 
 ## 用法
 
@@ -116,6 +120,8 @@ function MyForm() {
 | `height` | `number?` | 覆盖容器高度，默认 `dim.controlLg`（44） |
 | `disabled` | `boolean?` | 整体禁用 + 视觉变灰，优先级高于 `editable` |
 | `containerStyle` | `StyleProp<ViewStyle>?` | 容器外层样式（不是 TextInput 的 style） |
+
+> `testID` 来自透传的 `TextInputProps`：设在外层容器，内层 `<TextInput>` 自动派生 `${testID}-input`。`style` / `multiline` / `numberOfLines` 被 `Omit` 掉——容器样式走 `containerStyle`，多行请用 [`<Textarea />`](./textarea)。
 
 > 没有内置的 `clearable` / `leadingIcon` —— 自己组合 `<Icon>` 给 `leading`/`trailing` 即可。`Search` 组件就是基于这种组合的预设。多行文本请用 [`<Textarea />`](./textarea)。
 

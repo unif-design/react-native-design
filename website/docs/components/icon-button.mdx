@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: IconButton 图标按钮
-description: icon-only 按钮 · 28/36/44 三档方形 · variant palette · 必填 accessibilityLabel
+description: "icon-only 方形按钮 —— size sm/md/lg（28/36/44）、variant 走 Button 同套 palette（默认 ghost）、accessibilityLabel TypeScript 强制必填。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -28,7 +28,7 @@ import { IconButton } from '@unif/react-native-design';
       </div>
     </div>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <span className="demo-label">variant · neutral 灰底 / brand 橙底 / ghost 透明</span>
+      <span className="demo-label">variant · neutral 中性 / primary 橙底 / ghost 透明</span>
       <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
         <IconButton icon="scan" variant="neutral" accessibilityLabel="扫码" />
         <IconButton icon="scan" variant="primary" accessibilityLabel="扫码" />
