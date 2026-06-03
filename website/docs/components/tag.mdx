@@ -1,7 +1,7 @@
 ---
 sidebar_position: 3
 title: Tag 标签
-description: 状态标签 · 5 种语义 · 2 种尺寸
+description: "纯展示状态标签 —— variant='neutral'(默认)/'brand'/'success'/'error'/'info'/'outline' 六种配色,size='md'(22h,默认)/'lg'(26h),label 必填,numberOfLines 默认 1 超长省略。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -9,7 +9,7 @@ import { Tag } from '@unif/react-native-design';
 
 # Tag 标签
 
-状态标签 · 5 种语义 · 2 种尺寸。
+纯展示状态标签 · 6 种配色变体 · 2 种尺寸。
 
 ## 实时预览
 
@@ -46,11 +46,31 @@ import { Tag } from '@unif/react-native-design';
 
 ## API
 
+来源：`src/components/ui/Tag/types.ts`、`Tag.tsx`。
+
 | Prop | Type | 默认 | 说明 |
 |---|---|---|---|
-| `label` | `string` | — | 标签文字 |
-| `variant` | `'brand' \| 'success' \| 'error' \| 'info' \| 'neutral' \| 'outline'` | `'neutral'` | 语义变体 |
+| `label` | `string` | — | 标签文字（必填） |
+| `variant` | `'neutral' \| 'brand' \| 'success' \| 'error' \| 'info' \| 'outline'` | `'neutral'` | 配色变体 |
 | `size` | `'md' \| 'lg'` | `'md'` | 高度 22 / 26 |
+| `numberOfLines` | `number?` | `1` | 文本行数（超长 ellipsis） |
+| `style` | `StyleProp<ViewStyle>?` | — | 额外样式覆盖 |
+| `testID` | `string?` | — | E2E / 测试定位 |
+
+## 配色（Tokens）
+
+来源：`src/components/ui/Tag/styles.ts`（`paletteFor` / `sizingFor`）。
+
+| variant | 底色 | 文字 | 边框 |
+|---|---|---|---|
+| `neutral`（默认） | `c.surfaceContainerHigh` | `c.foregroundMuted` | — |
+| `brand` | `c.primaryContainer` | `c.primary` | — |
+| `success` | `c.successContainer` | `c.success` | — |
+| `error` | `c.errorContainer` | `c.error` | — |
+| `info` | `c.infoContainer` | `c.info` | — |
+| `outline` | 透明 | `c.foregroundMuted` | `c.outline`（1px） |
+
+尺寸：`md` = 高 22 / 横向 padding 8 / 字号 12；`lg` = 高 26 / padding 10 / 字号 13。圆角统一 `radius.sm`（6）。
 
 ## 无障碍（a11y）
 

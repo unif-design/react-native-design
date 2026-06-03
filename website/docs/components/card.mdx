@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: Card 卡片
-description: 内容卡片 · 12px 圆角 · 卡片阴影
+description: "通用内容卡片 —— default(白底 + 卡片阴影)/ plain(仅圆角无阴影)，12px 圆角、14px padding，可加状态彩边 borderColor，bare 抑制内边距。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -68,6 +68,15 @@ import { Text, View } from 'react-native';
 | 阴影 | `0 1px 4px rgba(0,0,0,0.08)` (`shadow.card`) |
 | Variant `plain` | 无阴影、无描边（嵌套场景；`flat` 已 deprecated 等价 `plain`） |
 
+## 主题键（Tokens）
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.surface` | `useColors()` | 卡片背景色（白 / 暗色 surface） |
+| `radius.xl` | `@unif/react-native-design` | 默认圆角（12，可被 `borderRadius` 覆盖） |
+| `space['6']` | `@unif/react-native-design` | 默认内边距（14，可被 `padding` 覆盖） |
+| `s.card` | `useShadow()` | `default` 变体卡片阴影（暗色置零） |
+
 ## 用法
 
 ```tsx
@@ -106,12 +115,15 @@ function Confirm() {
 
 | Prop | Type | 默认 | 说明 |
 |---|---|---|---|
-| `variant` | `'default' \| 'plain'` | `'default'` | 默认带阴影 / 仅圆角无阴影。`'flat'` 已 deprecated 等价 `'plain'` |
-| `padding` | `number?` | `14` | 内边距 |
-| `borderRadius` | `number?` | `12` | 圆角 |
-| `borderColor` | `string?` | — | 强调描边色（启用时默认 2px） |
-| `borderWidth` | `number?` | `2` | 与 `borderColor` 配合 |
-| `bare` | `boolean?` | `false` | 抑制内边距，内容自控 |
+| `children` | `ReactNode` | — | 卡片内容 |
+| `variant` | `'default' \| 'flat' \| 'plain'` | `'default'` | 带阴影 / 仅圆角无阴影。`'flat'` 已 deprecated 等价 `'plain'` |
+| `padding` | `number` | `14`（`space['6']`） | 内边距 |
+| `borderRadius` | `number` | `12`（`radius.xl`） | 圆角 |
+| `borderColor` | `string` | — | 强调描边色（任意 variant 均生效;启用时默认 2px） |
+| `borderWidth` | `number` | `2` | 与 `borderColor` 配合 |
+| `bare` | `boolean` | `false` | 抑制内边距,内容自控（与 variant 正交） |
+| `style` | `StyleProp<ViewStyle>` | — | 额外样式覆盖 |
+| `testID` | `string` | — | E2E / 测试定位 |
 
 ## 无障碍（a11y）
 

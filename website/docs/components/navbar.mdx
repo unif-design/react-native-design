@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: NavBar 导航栏
-description: 顶部导航 · 44px 高 · 默认 / 品牌 / 透明
+description: "顶部导航栏 —— 44px 高、居中标题 + 可选副标题、左右槽（传 config 自动用 IconButton 渲染）；3 variant default（白底 hairline）/ brand（橙底白字）/ transparent（透明 + 深字，浮在浅色 hero 上）。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -10,7 +10,7 @@ import { View } from 'react-native';
 
 # NavBar 导航栏
 
-顶部导航 · 44px 高 · 默认 / 品牌橙底 / 透明浮层。
+顶部导航 · 44px 高 · 三变体：`default` 白底 hairline · `brand` 品牌橙底白字 · `transparent` 透明无边框 + **深字**（`c.foreground`，用于浮在浅色 hero 渐变之上的子页）。
 
 ## 实时预览
 
@@ -36,13 +36,13 @@ import { View } from 'react-native';
         right={{ icon: 'more-h', onPress: () => {}, accessibilityLabel: '更多' }}
       />
     </View>
-    <span className="demo-label">透明浮层 · variant="transparent"（相机 / 地图场景）</span>
-    <View style={{ borderWidth: 1, borderColor: 'var(--ifm-color-emphasis-200)', borderRadius: 12, overflow: 'hidden', backgroundColor: '#1F2937' }}>
+    <span className="demo-label">透明无边框 · variant="transparent"（深字，浮在浅色 hero 渐变上）</span>
+    <View style={{ borderWidth: 1, borderColor: 'var(--ifm-color-emphasis-200)', borderRadius: 12, overflow: 'hidden', background: 'linear-gradient(180deg, #FFE3C8, #FFF0DD)' }}>
       <NavBar
-        title="扫一扫"
+        title="我的名片"
         variant="transparent"
         left={{ icon: 'arrow-left', onPress: () => {}, accessibilityLabel: '返回' }}
-        right={{ icon: 'camera', onPress: () => {}, accessibilityLabel: '切换相机' }}
+        right={{ icon: 'more-h', onPress: () => {}, accessibilityLabel: '更多' }}
       />
     </View>
   </div>
@@ -63,8 +63,8 @@ import { NavBar } from '@unif/react-native-design';
 {/* 品牌橙底 */}
 <NavBar title="登录" variant="brand" />
 
-{/* 相机 / 地图浮层 */}
-<NavBar title="扫一扫" variant="transparent" left={{ icon: 'arrow-left', onPress: goBack }} />
+{/* 透明浮层（深字）—— 浮在浅色 hero 渐变之上的子页 */}
+<NavBar title="我的名片" variant="transparent" left={{ icon: 'arrow-left', onPress: goBack }} />
 ```
 
 ## API
@@ -75,8 +75,10 @@ import { NavBar } from '@unif/react-native-design';
 | `subtitle` | `string?` | — | 副标题（小字号，主标题下方） |
 | `left` | `ReactNode \| { icon, onPress, accessibilityLabel? }` | — | 左槽，传 config 自动用 Slot 渲染 |
 | `right` | `ReactNode \| { icon, onPress, accessibilityLabel? }` | — | 右槽，同 `left` |
-| `variant` | `'default' \| 'brand' \| 'transparent'` | `'default'` | 视觉变体：白底 hairline / 品牌橙底白字 / 透明白字 |
+| `variant` | `'default' \| 'brand' \| 'transparent'` | `'default'` | 视觉变体：`default` 白底 hairline + 深字 / `brand` 品牌橙底 + 白字 / `transparent` 透明无边框 + **深字 `c.foreground`**（浮在浅色 hero 上；若需白字深色浮层后续加 `transparentLight`） |
 | `testID` | `string?` | — | E2E 定位 |
+
+> `left` / `right` 传 config 对象时渲染为内部 `IconButton`（`variant='ghost'`，icon 色按 variant tint：brand 用 `c.onPrimary`、其余 `c.foreground`）；传 `ReactNode` 则原样渲染。标题用 `t.h3 + 0.5` / `fw.semi` / `letterSpacing: -0.2`，副标题 `t.micro`（11）。
 
 ## 无障碍（a11y）
 

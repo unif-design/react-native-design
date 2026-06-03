@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: GlassStats 玻璃数据条
-description: 多列数字 + 标签 · 玻璃质感胶囊容器 · 个人 / 业绩 / 统计页用
+description: "横向多列数据条，每格一个数字 + 标签；玻璃质感（BlurLayer backdrop + 半透白纱），数据用 [count, label] 元组、count 需预先格式化好再传入。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -70,12 +70,15 @@ import { GlassStats } from '@unif/react-native-design';
 
 ## 视觉规范
 
+来源：`src/components/business/GlassStats/styles.ts`（值取自 `src/theme/{tokens,colors,shadow}.ts`）。
+
 | 元素 | 规则 |
 |---|---|
-| count 字号 | `t.heroMd`(20),`fw.bold`,`c.foreground` |
-| label 字号 | `t.xs`(12),`c.foregroundMuted` |
-| 列间分隔 | 1px 竖线,`c.outline` 30% 透明 |
-| 容器 | 圆角 16,半透明 surface + `s.subtle` shadow,跟 BlurLayer 配套用 |
+| count 字号 | `rf(20)`（本地常量,无对应 type token）· `fw.bold` · `c.foreground` · `fontFamily: fontMono` · `letterSpacing: -0.3` |
+| label 字号 | `t.micro`（11）· `c.foregroundMuted` · `paddingTop: space[1]` |
+| 列间分隔 | `StyleSheet.hairlineWidth` 竖线 · `c.glassSeparator`（亮色 `rgba(0,0,0,0.08)`） |
+| 容器 | 双层：外层 `glassShell` 仅 `radius['2xl']`（14）+ `s.glassBar` shadow；内层 `glass` `radius['2xl']` + `overflow:hidden` + `c.glassBorder` 边框；顶部 1px inset 高光线 `c.glassStatsHighlight` |
+| 玻璃底 | 由 `<BlurLayer intensity="soft" />` 接管（BlurView + `c.glassTintLight` 白纱），随 light/dark scheme 自动切 |
 
 ## 不要
 

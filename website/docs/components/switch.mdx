@@ -1,7 +1,7 @@
 ---
 sidebar_position: 5
 title: Switch 开关
-description: 开关 · 灰底关 / 主橙底开
+description: "布尔开关 —— 受控 value/onChange,32×20 轨道 + 16×16 白色把手,关 surfaceContainerHighest 底 / 开 primary 橙底,200ms 缓动;accessibilityRole='switch' + checked 上报,可选 disabled / accessibilityLabel。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -53,13 +53,15 @@ export const SwitchDemo = () => {
 
 ## 状态
 
+来源：`src/components/ui/Switch/styles.ts`、`Switch.tsx`。
+
 | 状态 | 视觉 |
 |---|---|
-| 关 | 32×20 灰底 `#E0E0E0`，16×16 白圆 thumb 在左 |
-| 开 | 32×20 主橙底 `#EB6E00`，16×16 白圆 thumb 在右 |
-| 禁用 | `opacity: 0.5` |
+| 关 | 32×20 灰底 `c.surfaceContainerHighest`（亮色 `#E0E0E0`），16×16 白圆 thumb（`c.onPrimary`）在左 |
+| 开 | 32×20 主橙底 `c.primary`（`#EB6E00`），16×16 白圆 thumb 在右 |
+| 禁用 | 整体 `opacity: 0.5` |
 
-切换动画：thumb 水平移动 12px，背景颜色插值，200ms ease。
+切换动画：thumb 水平移动 12px（off `x=2` → on `x=14`），背景颜色插值，200ms（`motion.base`）。native 走 reanimated 4 worklet，web 走 CSS transition（见 `Switch.web.tsx`）。
 
 ## 用法
 
@@ -86,11 +88,15 @@ import { Switch, Cell, List } from '@unif/react-native-design';
 
 ## API
 
-| Prop | Type | 说明 |
-|---|---|---|
-| `value` | `boolean` | 当前状态 |
-| `onChange` | `(value) => void` | 切换回调 |
-| `disabled` | `boolean?` | 禁用 |
+来源：`src/components/ui/Switch/types.ts`、`Switch.tsx`。
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `value` | `boolean` | — | 当前状态（受控，必填） |
+| `onChange` | `(value: boolean) => void` | — | 切换回调（必填） |
+| `disabled` | `boolean?` | — | 禁用（不可点 + `opacity: 0.5`） |
+| `accessibilityLabel` | `string?` | — | 无障碍朗读文案（独立使用时建议传） |
+| `testID` | `string?` | — | E2E / 测试定位 |
 
 ## 无障碍（a11y）
 

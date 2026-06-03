@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: Avatar 头像
-description: 单字符 monogram · brand / info / soft / neutral · 18 / 28 / 32 / 40 / 56
+description: "圆形 monogram 头像 —— brand / info / soft / neutral 四配色 × xs/sm/md/lg/xl 五档(18/28/32/40/56),支持图片 source 与加载失败回退 label。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -9,7 +9,7 @@ import { Avatar } from '@unif/react-native-design';
 
 # Avatar 头像
 
-单字符 monogram 头像。`brand` / `info` / `soft` / `neutral` · `xs` 18 / `sm` 28 / `md` 32 / `lg` 40 / `xl` 56。
+圆形 monogram 头像(建议 1–2 字符)。`brand` / `info` / `soft` / `neutral` · `xs` 18 / `sm` 28 / `md` 32 / `lg` 40 / `xl` 56。可传 `source` 渲染真实头像图片,加载失败时自动回退到 `label` 文字。
 
 :::warning 蓝色规则
 `info` 变体（蓝底 `#3775F6`）**专用于用户头像**。其它头像用 `brand` / `soft` / `neutral`。
@@ -66,11 +66,24 @@ import { Avatar } from '@unif/react-native-design';
 
 | Prop | Type | 默认 | 说明 |
 |---|---|---|---|
-| `label` | `string` | — | 单个字符 |
-| `variant` | `'brand' \| 'info' \| 'soft' \| 'neutral'` | `'neutral'` | 颜色变体 |
+| `label` | `string` | — | 显示文字(建议 1–2 字符);同时作为 a11y label,图片加载失败时回退展示 |
 | `size` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | 18 / 28 / 32 / 40 / 56 |
+| `variant` | `'brand' \| 'info' \| 'soft' \| 'neutral'` | `'neutral'` | 配色变体(仅在显示 label 时生效,有 `source` 时被图片覆盖) |
+| `source` | `ImageSourcePropType` | — | 真实头像图片(`{ uri }` 或 `require(...)`);优先渲染,`onError` 后回退 label |
+| `testID` | `string` | — | E2E / 测试定位 |
 
 `xs`（18px）专为内联序号 / 脚注引用使用 —— 例如 Sources 列表里的来源编号 badge。
+
+## 主题键（Tokens）
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.primary` / `c.onPrimary` | `useColors()` | `brand` 变体底色 / 文字 |
+| `c.info` / `c.onInfo` | `useColors()` | `info` 变体底色 / 文字 |
+| `c.primaryContainer` / `c.primary` | `useColors()` | `soft` 变体底色 / 文字 |
+| `c.surfaceContainerHighest` / `c.foreground` | `useColors()` | `neutral` 变体底色 / 文字 |
+| `avatar.xs … avatar.xl` | `@unif/react-native-design` | 五档容器直径(18 / 28 / 32 / 40 / 56) |
+| `fw.semi` | `@unif/react-native-design` | label 字重 |
 
 ## 无障碍（a11y）
 

@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 title: Carousel 轮播
-description: 包装 react-native-reanimated-carousel · 8 prop · 自带 dot indicator · autoPlay
+description: "包装 react-native-reanimated-carousel 的薄壳轮播 —— 泛型 items、autoPlay、loop、内置 dot indicator(bottom / overlay-bottom-right)，条件性 a11y。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -10,9 +10,9 @@ import { Text, View } from 'react-native';
 
 # Carousel 轮播
 
-包装 `react-native-reanimated-carousel@5.0.0-beta.5` 的薄壳层,收口 8 个 prop 屏蔽库内部 30+ 内部 prop,同时:
+包装 `react-native-reanimated-carousel@5.0.0-beta.5` 的薄壳层,收口一组语义化 prop 屏蔽库内部繁多配置,同时:
 
-1. dot indicator 走 `c.primary` token,使用库内置 `Pagination.Basic`(`useSharedValue` + `onProgressChange` 驱动,无需自己跟 active state)
+1. dot indicator 走 `c.primary` token,使用库内置 `Pagination.Custom`(`useSharedValue` + `onProgressChange` 驱动,无需自己跟 active state;选 Custom 而非 Basic 是为了做出 active dot "4 → 12 长条" 的宽度插值)
 2. `indicatorPosition` 控制指示器位置:`'bottom'` 独立行(占额外 16px 高度) / `'overlay-bottom-right'` 浮在 banner 右下角
 3. 类型泛型 `<T>` 让 caller 拿 typed item(库默认 `unknown`)
 4. **后续库 v5 stable / 换其他库,只改本文件 caller 0 改动**
@@ -122,11 +122,20 @@ const banners: Banner[] = [/* … */];
 
 | 元素 | 规则 |
 |---|---|
-| Dot · 默认 | 6px 圆,`c.foregroundFaint` |
-| Dot · active | 6px 圆,`c.primary` |
-| `'bottom'` 占位 | 容器高度 = `height + 16` |
+| Dot · 默认 | 4×4 圆(`space['1']`),`c.primary` @ opacity 0.32 |
+| Dot · active | 12×4 长条(`space['5']`),`c.primary` @ opacity 1 |
+| `'bottom'` 占位 | 容器高度 = `height + 16`(`space['7']`) |
 | `'overlay-bottom-right'` | dot 浮层 absolute 在右下角,不占额外高度 |
 | `loop` | 默认开启 —— 最后一张滑回第一张 |
+
+## 主题键（Tokens）
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.primary` | `useColors()` | dot indicator 颜色(默认 0.32 / active 1 opacity) |
+| `space['1']` / `space['5']` | `@unif/react-native-design` | dot 尺寸(4)/ active dot 宽(12) |
+| `space['7']` | `@unif/react-native-design` | `'bottom'` 模式指示器预留行高(16) |
+| `radius.pill` | `@unif/react-native-design` | dot 圆角(clamp 成圆) |
 
 ## 备注
 

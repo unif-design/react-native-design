@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: Decorations 装饰图元
-description: GradientWash 渐变条 · RadialHalo 径向光晕 · ScreenBackdrop 沉浸背景预设
+description: "沉浸式屏 / hero 装饰原子(react-native-svg)—— GradientWash 线性渐变带、RadialHalo 径向光晕、ScreenBackdrop 整屏渐变 + halo 预设(warmOrange)，全 absolute 纯装饰不接管 hit area。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -96,7 +96,23 @@ import { GradientWash, RadialHalo, ScreenBackdrop } from '@unif/react-native-des
 
 | Prop | Type | 默认 | 说明 |
 |---|---|---|---|
-| `preset` | `ScreenBackdropPreset?` | `'warmOrange'` | 预设名,目前只有 `'warmOrange'`(暖橙渐变 + 3 halo) |
+| `preset` | `ScreenBackdropPreset` | — | 预设名,目前只有 `'warmOrange'`(暖橙渐变 + 3 halo)。**不传且无 `stops`/`halos` 时仅渲染 `c.background` 实色外壳** |
+| `stops` | `{ light: GradientStop[]; dark: GradientStop[] }` | preset 推算 | 自定义全屏渐变 stops(scheme-aware),覆盖 preset |
+| `halos` | `ReadonlyArray<ScreenBackdropHalo>` | preset 推算 | 自定义 halo 列表,覆盖 preset |
+| `children` | `ReactNode` | — | 内容层(渲染在装饰层之上) |
+| `style` | `StyleProp<ViewStyle>` | — | 外层附加样式 |
+
+`ScreenBackdropHalo`:`{ size, height?, color?(默认 c.primary), maxOpacity?(默认 0.16), top?, bottom?, left?, right?, centerX? }`。
+
+## 主题键（Tokens）
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.background` | `useColors()` | `ScreenBackdrop` 外壳实色底 |
+| `c.primary` | `useColors()` | `ScreenBackdrop` halo 默认色(`color` 缺省时) |
+| `warmOrangePalette` | `@unif/react-native-design` | `warmOrange` preset 的 4 stop 渐变(light / dark) |
+
+> `GradientWash` / `RadialHalo` 本身不读主题色 —— 颜色全由 `color` / `stops` 入参决定(`ScreenBackdrop` 内部才注入 `c.background` / `c.primary`)。
 
 ## 无障碍（a11y）
 

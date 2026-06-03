@@ -1,7 +1,7 @@
 ---
 sidebar_position: 11
 title: EntryCard 入口卡
-description: 横向小卡 · 30×30 灰底 icon tile + title/sub · 适合 grid 双列入口
+description: "横向入口小卡 —— 左 30×30 灰底 icon tile + 右 title/sub，独立 surface 视觉(无 arrow / extra)，适合 grid 双列等宽入口，可点带按压态。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -82,10 +82,23 @@ import { View } from 'react-native';
 | Prop | Type | 默认 | 说明 |
 |---|---|---|---|
 | `icon` | `IconName` | — | 左侧 icon tile 内的图标 |
-| `title` | `string` | — | 主标题(13.5 medium) |
-| `sub` | `string?` | — | 副标题(11 muted),省略不渲染该行 |
-| `onPress` | `() => void` 可选 | — | 点击回调;不传时不挂 Pressable,静态展示 |
-| `style` | `ViewStyle?` | — | 外层附加样式,常用于 grid 列设 `flex: 1` |
+| `title` | `string` | — | 主标题(13.5 medium,numberOfLines=1) |
+| `sub` | `string` | — | 副标题(11 muted),省略不渲染该行 |
+| `onPress` | `() => void` | — | 点击回调;不传时不挂 Pressable,静态展示 |
+| `style` | `StyleProp<ViewStyle>` | — | 外层附加样式,常用于 grid 列设 `flex: 1` |
+| `testID` | `string` | — | E2E / 测试定位 |
+
+## 主题键（Tokens）
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.surface` | `useColors()` | 卡片背景色 |
+| `c.surfaceContainer` | `useColors()` | icon tile 灰底色 |
+| `c.foregroundMuted` | `useColors()` | tile 内 icon 色 + sub 文字色 |
+| `c.foreground` | `useColors()` | title 文字色 |
+| `radius['2xl']` | `@unif/react-native-design` | 卡片圆角(14) |
+| `icon.lg` | `@unif/react-native-design` | icon tile 尺寸(30) |
+| `space['4']` / `space['5']` / `space['6']` | `@unif/react-native-design` | row gap(10)/ 垂直 padding(12)/ 水平 padding(14) |
 
 ## 无障碍（a11y）
 

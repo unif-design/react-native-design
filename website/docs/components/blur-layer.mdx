@@ -1,7 +1,7 @@
 ---
 sidebar_position: 3
 title: BlurLayer 玻璃模糊层
-description: BlurView + tint 双层 · 对齐设计稿 backdrop-filter token
+description: "BlurView + 颜色 tint 双层玻璃层 —— intensity soft(blur 10)/ strong(blur 40)，blurType 随亮 / 暗主题自动切换，纯装饰 pointerEvents='none'。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -65,8 +65,16 @@ function BlurBackdrop(props) {
 |---|---|---|---|
 | `intensity` | `'soft' \| 'strong'` | — | 模糊强度(必传)。`'soft'` 对齐 `blur(10)`,`'strong'` 对齐 `blur(40)` |
 | `tint` | `string?` | 推算 | 不传按 intensity 推:soft → `c.glassTintLight` / strong → `c.sheetBackdrop` |
-| `style` | `ViewStyle?` | `StyleSheet.absoluteFill` | 附加样式,通常不需要传 |
-| `testID` | `string?` | — | E2E / 测试定位 |
+| `style` | `StyleProp<ViewStyle>` | `StyleSheet.absoluteFill` | 附加样式,通常不需要传 |
+| `testID` | `string` | — | E2E / 测试定位 |
+
+## 主题键（Tokens）
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.glassTintLight` | `useColors()` | `soft` 默认 tint(0.55 白纱) |
+| `c.sheetBackdrop` | `useColors()` | `strong` 默认 tint(0.72 浅灰焦点引导) |
+| `blur.soft` / `blur.strong` | `@unif/react-native-design` | BlurView `blurAmount`(10 / 40) |
 
 ## 无障碍（a11y）
 

@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 title: Form 表单
-description: 表单布局 · 行分组
+description: "表单容器三件套 Form / FormGroup / FormRow —— 白卡分组 + 行（label + 控件）+ 行间 hairline 分隔（表单不用 gap 的例外）。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -48,15 +48,50 @@ export const FormDemo = () => {
 
 <FormDemo />
 
+## API
+
+来源：`src/components/ui/Form/types.ts`、`{Form,FormGroup,FormRow}.tsx`。
+
+### `<Form>`
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `children` | `ReactNode` | — | 通常是若干 `FormGroup` / `FormRow`；根容器纵向堆叠，组间 `gap: space[7]`（16） |
+| `testID` | `string?` | — | E2E / 测试定位 |
+
+### `<FormGroup>`
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `label` | `string?` | — | 分组标题（uppercase 小标签风格）；不传则不渲染标题行 |
+| `children` | `ReactNode` | — | 该分组下若干 `FormRow`；行间自动插 1px hairline 分隔（除首行外） |
+| `testID` | `string?` | — | E2E / 测试定位 |
+
+### `<FormRow>`
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `label` | `string` | — | 字段标题（左侧） |
+| `children` | `ReactNode` | — | 字段控件（Input / Switch 等，右侧） |
+| `required` | `boolean?` | `false` | 必填标记，label 后渲染红色 `*`（色值 `c.error`） |
+| `error` | `string?` | — | 错误信息，渲染在该行下方（红字） |
+| `testID` | `string?` | — | E2E / 测试定位 |
+
+> `FormGroup` 动态列表（运行时增删 `FormRow`）必须给每个 child 传稳定 `key`；不传时 fallback 到 `__row-${i}`，仅适用于**静态**列表，动态列表会导致 state 漂移。
+
 ## 视觉规范
+
+来源：`src/components/ui/Form/styles.ts`（值取自 `src/theme/tokens.ts`）。
 
 | 元素 | 规则 |
 |---|---|
-| 分组标题 | 13px / 600 / `fg-3`，全大写、字符间距 1，上下 padding 12 |
-| Form Row | 高度 ≥ 48px，左 label + 右控件，padding `12 16` |
-| 行间分隔 | 1px hairline `#EDEDED`（这是 form 的例外，**不**用 gap） |
-| 必填标记 | label 后带 `*` 红色（`error-300`） |
-| 错误提示 | 行下方 12px 红字 |
+| 分组标题 | `t.xs`（13）/ `fw.semi`（600）/ `c.foregroundSubtle`，全大写、`letterSpacing: 1`、`paddingHorizontal: space[1]`（4） |
+| 分组卡片 | `c.surface` 白底，`radius.lg`（10）圆角，`overflow: hidden`，组内 `gap: space[3]`（8） |
+| Form Row | `minHeight: 48`，左 label + 右控件，`paddingHorizontal: space[7]`（16）/ `paddingVertical: space[5]`（12） |
+| 行 label | `t.sm`（14）/ `fw.medium`（500）/ `c.foreground` |
+| 行间分隔 | `StyleSheet.hairlineWidth`、`c.outline`（亮色 `#EDEDED`）（这是 form 的例外，**不**用 gap） |
+| 必填标记 | label 后带 `*`，色 `c.error`（亮色 `#F4511E`） |
+| 错误提示 | 行下方 `t.micro`（11）/ `c.error` 红字 |
 
 ## 用法
 

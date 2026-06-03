@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 title: Chip 标签
-description: 胶囊形可点击 pill · 默认 / 选中 / 按下三态
+description: "胶囊形可点击 / 可选中 pill —— 默认白底细边 / 选中主橙边 + 浅橙底 / 按下半透明，支持 leading / trailing 插槽，Suggestion 与多选筛选的底层组件。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -77,8 +77,8 @@ export const ChipDemo = () => {
 
 | 状态 | 视觉 |
 |---|---|
-| 默认 | 白底 + 细线边框 (`#EDEDED`)，文本 `fg-1` (`#333`) |
-| 选中 (`selected`) | 主色边框 (`#EB6E00`) + 主色文本 |
+| 默认 | `c.surface` 白底 + 1px `c.outline` 细边框,`c.foreground` 文本 |
+| 选中 (`selected`) | `c.primary` 边框 + `c.primaryContainerSubtle` 浅橙底 + `c.primary` 文本 |
 | 按下 | 透明度 0.7（仅当传 `onPress` 时） |
 | 非交互（无 `onPress`） | 不响应按压、不显示按压态 |
 
@@ -117,12 +117,26 @@ import { Chip, Icon } from '@unif/react-native-design';
 
 | Prop | Type | 默认 | 说明 |
 |---|---|---|---|
-| `label` | `string` | — | 显示文本 |
-| `selected` | `boolean?` | `false` | 选中态（主色边框 + 文本） |
-| `onPress` | `() => void` 可选 | — | 点击回调；不传时 chip 渲染为静态 `<View>`，不响应按压 |
-| `leading` | `ReactNode?` | — | 前置插槽（图标 / 小圆点等） |
-| `trailing` | `ReactNode?` | — | 后置插槽（关闭按钮等） |
-| `style` | `ViewStyle?` | — | 附加样式 |
+| `label` | `string` | — | 显示文本(单行 numberOfLines=1 截断) |
+| `selected` | `boolean` | `false` | 选中态（主色边框 + 浅橙底 + 主色文本） |
+| `onPress` | `() => void` | — | 点击回调；不传时 chip 渲染为静态 `<View>`，不响应按压 |
+| `leading` | `ReactNode` | — | 前置插槽（图标 / 小圆点等） |
+| `trailing` | `ReactNode` | — | 后置插槽（关闭按钮等） |
+| `style` | `StyleProp<ViewStyle>` | — | 附加样式 |
+| `testID` | `string` | — | E2E / 测试定位 |
+
+## 主题键（Tokens）
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.surface` | `useColors()` | 默认背景色 |
+| `c.outline` | `useColors()` | 默认边框色 |
+| `c.primary` | `useColors()` | 选中边框 + 文本色 |
+| `c.primaryContainerSubtle` | `useColors()` | 选中浅橙底色 |
+| `c.foreground` | `useColors()` | 默认文本色 |
+| `radius.pill` | `@unif/react-native-design` | 胶囊圆角 |
+| `space['2']` / `space['5']` / `space['3']` | `@unif/react-native-design` | 内容 gap(6)/ 水平内边距(12)/ 垂直内边距(8) |
+| `type.xs` | `@unif/react-native-design` | 文本字号 |
 
 ## 无障碍（a11y）
 
