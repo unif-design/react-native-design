@@ -68,6 +68,12 @@ function BlurBackdrop(props) {
 | `style` | `ViewStyle?` | `StyleSheet.absoluteFill` | 附加样式,通常不需要传 |
 | `testID` | `string?` | — | E2E / 测试定位 |
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/BlurLayer/BlurLayer.tsx`、`BlurLayer.web.tsx`、`types.ts`。
+
+本组件为纯装饰用的视觉模糊层，无交互，无任何 a11y 语义：源码根 `<View>` 显式设 `pointerEvents="none"`（native 与 web 两份实现一致），不拦截触摸、不暴露给 screen reader。无 `accessibilityRole` / `accessibilityLabel`。语义应由其覆盖 / 承载的内容自行提供。
+
 ## 设计稿对照
 
 | intensity | blurAmount | 默认 tint | 设计稿语义 |

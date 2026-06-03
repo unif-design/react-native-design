@@ -34,6 +34,23 @@ if (ok) doLogout();
 | `cancelLabel` | `string?` | `'取消'` | 取消按钮文案 |
 | `destructive` | `boolean?` | `false` | 标记破坏性操作 → 确认按钮变红(`c.error`)|
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Confirm/ConfirmHost.tsx`、`confirm.ts`、`types.ts`。
+
+`confirm()` 是命令式 API，`ConfirmOptions` 里**没有任何 a11y 入参**，a11y 全部来自底层组合：
+
+- 对话框容器走 `@gorhom/bottom-sheet` 的 `<BottomSheetModal>`，源码未在其上显式设 `accessibilityRole`/`accessibilityViewIsModal`，沿用该库的默认行为。
+- 标题 / 说明用 `<Text>`（`entry.title` / `entry.message`）渲染，screen reader 可读到文字。
+- 取消 / 确认两个按钮用本库 [Button](./button) 渲染，自动带 `accessibilityRole='button'`，且 `accessibilityLabel` 取自各自的文案：取消← `cancelLabel ?? '取消'`、确认← `confirmLabel ?? '确认'`。
+
+要让 SR 读到清晰语义，给 `title`（必填）/ `confirmLabel` / `cancelLabel` 传明确文案即可；组件层无额外 a11y 旋钮。
+
+```tsx
+// title 必填即标题语义;按钮文案即按钮 a11y label
+await confirm({ title: '确认注销账号?', confirmLabel: '确认注销', destructive: true });
+```
+
 ## 返回值
 
 `Promise<boolean>`:

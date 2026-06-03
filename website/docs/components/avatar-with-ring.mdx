@@ -68,6 +68,12 @@ import { AvatarWithRing } from '@unif/react-native-design';
 | `ringColor` | `string?` | `c.primary` | ring + 填充背景色,hex 字符串 |
 | `style` | `StyleProp<ViewStyle>` | — | 容器附加样式(margin / position) |
 
+## 无障碍（a11y）
+
+来源：`src/components/business/AvatarWithRing/AvatarWithRing.tsx`、`types.ts`。
+
+本组件为展示 / 装饰用，无交互（渲染为 `<View>` 外壳，内含 SVG 渐变 + `<Text>` label）。源码**未设置任何 a11y prop**（既无 `accessibilityRole` 也无 `accessibilityLabel`）——中心 `label` 仅作为可见 `<Text>` 渲染，因此 screen reader 默认会读到该文字，但不会带头像语义。如需承载语义（如可点击进入资料页），请由父级可点区域设置 `accessibilityLabel` / `accessibilityRole`。
+
 ## 视觉规范
 
 | 元素 | 比例 |

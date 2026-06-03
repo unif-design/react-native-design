@@ -79,3 +79,16 @@ import { Checkbox } from '@unif/react-native-design';
 | `onChange` | `(checked) => void` | 状态变更回调 |
 | `label` | `string` | 右侧文字 |
 | `disabled` | `boolean?` | 禁用 |
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Checkbox/Checkbox.tsx`、`types.ts`。
+
+- 默认 `accessibilityRole`：`'checkbox'`（在 `<Pressable>` 上硬编码）。
+- a11y props：`accessibilityLabel` 取自 `label`，但 `label` 是**可选**的 —— 不传 `label` 时（仅渲染勾选方框）无朗读文案，此时应由外部上下文或包裹元素提供语义。
+- 状态语义：`accessibilityState={{ checked, disabled: !!disabled }}` —— `checked` 直接映射受控的 `checked` prop，`disabled` 映射 `disabled` prop。
+
+```tsx
+// label 同时作为 SR 朗读文案
+<Checkbox checked={agree} onChange={setAgree} label="同意服务条款" />
+```

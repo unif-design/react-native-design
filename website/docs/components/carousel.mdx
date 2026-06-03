@@ -97,6 +97,27 @@ const banners: Banner[] = [/* … */];
 | `style` | `StyleProp<ViewStyle>?` | — | 外层 View 附加样式 |
 | `testID` | `string?` | — | E2E / 测试定位,子项自动加 `${testID}-item-${i}` |
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Carousel/Carousel.tsx`、`types.ts`。
+
+每张 slide 都包在一个 `<Pressable>` 里，但 a11y 语义是**条件性**的：
+
+- 默认 `accessibilityRole`：仅当传了 `onPressItem` 时，slide 才声明 `accessibilityRole='button'`；纯展示型轮播（无 `onPressItem`）**不声明** button 语义，避免读屏器误导。
+- a11y props：`getAccessibilityLabel(item, index)` 可选，仅在 `onPressItem` 存在时启用 —— 解析为每张 slide 的 `accessibilityLabel`；不传则 fallback 为 `第 N 项`（`第 ${index + 1} 项`）。
+- 状态语义：源码未设 `selected` / 当前页等状态语义。
+
+```tsx
+// 可点轮播:role=button 自动,label 由 getAccessibilityLabel 提供
+<Carousel
+  items={banners}
+  height={140}
+  onPressItem={(item) => openWebview(item.linkUrl)}
+  getAccessibilityLabel={(item) => item.title ?? 'Banner'}
+  renderItem={(item) => <Image source={{ uri: item.imageUrl }} style={{ flex: 1 }} />}
+/>
+```
+
 ## 视觉规范
 
 | 元素 | 规则 |

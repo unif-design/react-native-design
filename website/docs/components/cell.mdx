@@ -96,6 +96,29 @@ import { Cell, List } from '@unif/react-native-design';
 | `style` | `StyleProp<ViewStyle>?` | 额外样式覆盖 |
 | `testID` | `string?` | E2E / 测试定位 |
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Cell/Cell.tsx`、`types.ts`。
+
+a11y 语义是**条件性**的：仅当传了 `onPress` 时，Cell 才用 `<Pressable>` 包裹并声明语义；不可点的纯展示 Cell 渲染为 `<View>`，无 a11y 角色。
+
+- 默认 `accessibilityRole`：可点时为 `'button'`（`onPress` 缺省则无角色）。
+- a11y props（仅 `onPress` 时生效）：`accessibilityLabel` 取 `accessibilityLabel ?? (typeof title === 'string' ? title : undefined)` —— 即 `title` 为字符串时自动作 label；**`title` 传 ReactNode（自定义渲染）时务必显式传 `accessibilityLabel`，否则 SR 用户听不到内容**。`accessibilityHint` 可选，说明 tap 后行为（短句，如「查看详情」）。
+- 状态语义：`disabled=true` 时上报 `accessibilityState={{ disabled: true }}`（仅对带 `onPress` 的 cell 有效）。
+
+```tsx
+// string title 自动作 label
+<Cell title="主题" extra="跟随系统" arrow onPress={...} />
+
+// ReactNode title 必须显式给 label
+<Cell
+  title={<CustomTitle />}
+  accessibilityLabel="客户：东方便利店"
+  accessibilityHint="查看详情"
+  onPress={...}
+/>
+```
+
 ## 与 Form 的区别
 
 | 用途 | 选哪个 |
