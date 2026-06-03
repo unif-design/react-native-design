@@ -6,7 +6,7 @@
  *   static/md/<slug>.md    → 每页纯 Markdown(llms.txt 的链接指向这些)
  *
  * MDX noise (`import ...;`, `export const ... = ...;`, `<LiveDemo>...</LiveDemo>`)
- * 被清理成纯 Markdown(LiveDemo 换成 placeholder),适合喂给 LLM。
+ * 被清理成纯 Markdown(`<LiveDemo>...</LiveDemo>` 内层 JSX 提取为 ```tsx 源码块,组件用法,反幻觉素材),适合喂给 LLM。
  *
  * 【由 package.json 的 build/start 显式调用】(`node scripts/build-llms.js && docusaurus ...`)——
  * 不挂 prebuild/prestart 钩子,因为 yarn 4(berry)不触发 npm-style 生命周期钩子,会被跳过。
@@ -168,10 +168,11 @@ function stripMdxNoise(src) {
       let j = i + 1;
       const inner = [];
       while (j < lines.length && !/<\/LiveDemo>/.test(lines[j])) { inner.push(lines[j]); j++; }
-      out.push('```tsx');
+      const fence = inner.some(l => /```/.test(l)) ? '````' : '```';
+      out.push(fence + 'tsx');
       out.push('// web demo 源码,组件用法可参考');
       out.push(...inner);
-      out.push('```');
+      out.push(fence);
       i = j + 1;
       continue;
     }
