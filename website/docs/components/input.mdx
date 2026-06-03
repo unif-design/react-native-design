@@ -118,3 +118,19 @@ function MyForm() {
 | `containerStyle` | `StyleProp<ViewStyle>?` | 容器外层样式（不是 TextInput 的 style） |
 
 > 没有内置的 `clearable` / `leadingIcon` —— 自己组合 `<Icon>` 给 `leading`/`trailing` 即可。`Search` 组件就是基于这种组合的预设。多行文本请用 [`<Textarea />`](./textarea)。
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Input/Input.tsx`、`TextField/TextFieldBase.tsx`、`types.ts`。
+
+输入框的核心 a11y 来自 RN 内置的 [`TextInput`](https://reactnative.dev/docs/textinput)（Input 是 `TextFieldBase` 的薄 wrap，最终渲染原生 `<TextInput>`）。
+
+- 默认 `accessibilityRole`：不显式设置 —— 继承底层 `<TextInput>`（RN/平台自带文本框语义，无需我们硬编码 role）。
+- a11y props：`InputProps` = `Omit<TextInputProps, 'style' | 'multiline' | 'numberOfLines'>` + 6 个扩展，所以 RN `TextInput` 的全部 a11y / 行为 props（`accessibilityLabel`、`placeholder`、`keyboardType`、`secureTextEntry` 等）都直接透传到 `<TextInput>`。朗读文案优先来自 `accessibilityLabel`，缺省时由 `placeholder` / `value` 提供。
+- 包裹层**唯一额外设置**的 a11y 是：`disabled` 时对内层 `<TextInput>` 设 `accessibilityState={{ disabled: true }}`（同时 `editable=false`，`disabled` 优先级高于 `editable`）；非 disabled 时不附加该状态。
+- `error` 文字渲染为下方独立 `<Text>`，**未**与输入框做程序化关联（无 `accessibilityLabelledBy` / describedBy），SR 会作为相邻文本读到。
+
+```tsx
+// placeholder 无法完全替代 label;无可见 label 时显式传 accessibilityLabel
+<Input value={phone} onChangeText={setPhone} placeholder="11 位手机号" accessibilityLabel="手机号" keyboardType="phone-pad" />
+```

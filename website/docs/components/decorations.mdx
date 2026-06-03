@@ -98,6 +98,17 @@ import { GradientWash, RadialHalo, ScreenBackdrop } from '@unif/react-native-des
 |---|---|---|---|
 | `preset` | `ScreenBackdropPreset?` | `'warmOrange'` | 预设名,目前只有 `'warmOrange'`(暖橙渐变 + 3 halo) |
 
+## 无障碍（a11y）
+
+来源：`src/components/business/Decorations/{GradientWash,RadialHalo,ScreenBackdrop}.tsx`、`types.ts`。
+
+3 个组件都是纯视觉装饰图层,均**无 `accessibilityRole` / `accessibilityLabel`**,也无可传的 a11y prop。
+
+- `GradientWash` / `RadialHalo`:根 `<View>` 显式设 `pointerEvents="none"`,不拦截触摸、不暴露给 SR,只渲染 SVG 渐变。
+- `ScreenBackdrop`:外壳 `<View>` 本身不设 a11y(它在装饰层之上承载 `children`);其内部叠加的 `GradientWash` / `RadialHalo` 子层各自 `pointerEvents="none"`。
+
+语义应由这些装饰所承载 / 覆盖的内容(`children` 或上层业务屏)自行提供,不要给装饰图元挂交互或 a11y。
+
 ## 不要
 
 - 不要在装饰组件上挂 onPress —— 它们是纯视觉图层,加交互会拦截真内容的 hit

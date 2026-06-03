@@ -75,3 +75,16 @@ import { Grid } from '@unif/react-native-design';
   onPress={(item) => navigation.push(item.id)}
 />
 ```
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Grid/Grid.tsx`、`types.ts`。
+
+- 默认 `accessibilityRole`：每个格子都渲染为 `<Pressable accessibilityRole="button">`（无论 `onPress` 是否传 —— `onPress` 可选,但 Pressable 恒以 `onPress={() => onPress?.(item)}` 挂载,故角色恒为 `button`）。
+- a11y props：每格 `accessibilityLabel` 取自必填的 `item.label`（`GridItem.label: string`）—— icon 自身对 SR 隐藏（见 [图标](./icons)），label 文本即朗读内容。`badge` 角标未单独纳入 a11y 朗读。
+- 状态语义：源码未设 `accessibilityState`（无 selected/disabled/checked 概念）。
+
+```tsx
+// 每格 role=button、label 取 item.label
+<Grid columns={4} items={[{ id: 'visit', icon: 'location', label: '拜访' }]} onPress={(item) => ...} />
+```

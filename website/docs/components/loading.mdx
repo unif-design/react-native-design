@@ -74,6 +74,14 @@ function Demo() {
 | `thickness` | `number` | `2` | 描边粗细 |
 | `style` | `StyleProp<ViewStyle>` | — | 外层样式 |
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Spinner/Spinner.tsx`、`Spinner.web.tsx`、`types.ts`。
+
+Spinner 是纯视觉旋转指示器，**源码刻意把自己对 SR 隐藏**：根节点（native 的 `Animated.View` / web 的 `View`）显式设 `accessibilityElementsHidden` + `importantForAccessibility="no-hide-descendants"`（两端实现一致）。它**不**设 `accessibilityRole='progressbar'`、也不设 `accessibilityState={{ busy }}` 或 `accessibilityLabel`。
+
+因此「正在加载」的语义必须由**外部上下文**声明 —— 例如在包裹容器上设 `accessibilityState={{ busy: true }}`、或用一段状态文案（如 `<Text>加载中…</Text>` / live region）告知 SR；不要指望 Spinner 自身朗读。组件本身无可配置的 a11y prop（仅 `size` / `color` / `thickness` / `style` / `testID`）。
+
 ## 节奏
 
 900ms 一圈，线性 easing，不要回弹。这是设计令牌 [`motion`](/docs/design/tokens/motion) 之外的特例——加载体感需要稳定均匀。
