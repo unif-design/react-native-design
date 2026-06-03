@@ -7,7 +7,7 @@
 
 `@unif/react-native-design` —— React Native 设计系统,包含 theme + icons + utils + UI 组件 + 少量通用业务复合组件。目标运行时:**RN 0.85 新架构**(Fabric + concurrent React)、React 19、TypeScript 6。
 
-yarn workspaces 单仓库:库本体在根目录,`example/` 是宿主 RN app,通过 `react-native-monorepo-config` 接入 Metro 直读 `src/`,所以改库的 JS 代码在 example 里热更新,不用重新构建原生。
+yarn workspaces 单仓库:库本体在根目录,两个 workspace —— `example/`(宿主 RN app)+ `website/`(Docusaurus 文档站,`llms.txt` 由 `website/scripts/build-llms.js` 从 `website/docs/` 生成,改组件 API 要同步改 docs)。`example/` 通过 `react-native-monorepo-config` 接入 Metro 直读 `src/`,所以改库的 JS 代码在 example 里热更新,不用重新构建原生。
 
 ## 常用命令
 
@@ -110,6 +110,14 @@ ComponentName/
 - `lib/typescript` —— `.d.ts`,用 `tsconfig.build.json`(继承 `tsconfig.json`,排除 `example/`、`lib/`)
 
 `package.json#exports` 把 `.` 映射到 `source: src/index.tsx`(workspace 消费者)+ `default: lib/module/index.js` + `types: lib/typescript/src/index.d.ts`。不要破坏这个三元组。
+
+## 文档与 API 指针
+
+逐组件 API / props / variant / size 的**单一真相源是 `website/docs/`**,经 `website/scripts/build-llms.js` 生成站点 + `llms.txt`/`llms-full.txt`。改组件就同步改对应 `website/docs/components/<name>.mdx`,**不要**把全量 API 复制进 CLAUDE.md 或代码注释。
+
+- 文档站:https://unif-design.github.io/react-native-design/
+- AI 按需 fetch:`llms.txt`(索引)/ `llms-full.txt`(全文)
+- 消费者 / AI 用法约定见 `AGENTS.md`(本文件顶部已 import)
 
 ## 自动化流程标准
 
