@@ -61,6 +61,12 @@ import { VersionPill } from '@unif/react-native-design';
 | `statusColor` | `string?` | `c.success` | 左侧 4×4 圆点颜色 |
 | `style` | `StyleProp<ViewStyle>` | — | 容器附加样式 |
 
+## 无障碍（a11y）
+
+来源：`src/components/business/VersionPill/VersionPill.tsx`、`types.ts`。
+
+VersionPill 是**纯展示**徽章，源码为 `<View>` + 若干 `<Text>`（`版本 {version}`、可选 `· build {build}`），**未设置任何 `accessibilityRole`**，也没有可传的 a11y prop（无 `accessibilityLabel`）。底层 `<Text>` 默认对 screen reader 可读，会按"版本 … / build …"顺序逐段朗读必填的 `version`（及 `build`）；左侧 `statusColor` 圆点是装饰 `<View>`，无文本、不被朗读。无受控状态（`checked` / `selected` / `disabled` 均不适用）。
+
 ## 不要
 
 - 不要硬编码 `version` —— 走 `@/config/brand` 的 `APP_VERSION`(package.json 派生),build 走 react-native-device-info `getBuildNumber()`

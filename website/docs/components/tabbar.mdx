@@ -72,6 +72,26 @@ import { TabBar } from '@unif/react-native-design';
 />
 ```
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/TabBar/TabBar.tsx`、`types.ts`。
+
+- 默认 `accessibilityRole`：每个 tab 的 `<Pressable>` 上硬编码 `'tab'`。外层容器是普通 `<View>`，源码**未**设置 `tablist` role（仅作 50px 高的布局栏）。
+- a11y props：每个 tab 的 `accessibilityLabel` 取自 `item.label`，而 `label` 在 `TabBarItem` 中是**必填**的——所以每个 tab 默认都有朗读文案。`badge` 仅作视觉角标渲染，不进入 a11y 文案。
+- 状态语义：`accessibilityState={{ selected: on }}`——`selected` 由 `item.id === active` 派生。无 `disabled` 语义（`TabBarItem` 无 `disabled` 字段）。
+
+```tsx
+// 每个 tab 自动 role=tab、label=item.label、selected 由 active 决定
+<TabBar
+  active={active}
+  onChange={setActive}
+  items={[
+    { id: 'home',   icon: 'home',     label: '首页' },
+    { id: 'visits', icon: 'location', label: '拜访', badge: 3 },
+  ]}
+/>
+```
+
 ## 不要
 
 - ❌ 不要做 5 个以上 tab——超过就用左侧 Drawer

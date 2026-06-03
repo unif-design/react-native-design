@@ -51,3 +51,9 @@ import { Tag } from '@unif/react-native-design';
 | `label` | `string` | — | 标签文字 |
 | `variant` | `'brand' \| 'success' \| 'error' \| 'info' \| 'neutral' \| 'outline'` | `'neutral'` | 语义变体 |
 | `size` | `'md' \| 'lg'` | `'md'` | 高度 22 / 26 |
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Tag/Tag.tsx`、`types.ts`。
+
+Tag 是**纯展示**标签，源码是 `<View>` + `<Text>`（无 `onPress`、无交互变体），**未设置任何 `accessibilityRole`**，也没有可传的 a11y prop（无 `accessibilityLabel`）。底层 `<Text>` 默认对 screen reader 可读，会朗读必填的 `label`；`variant` 只是配色语义，不会被读出（如需把"成功 / 失败"读给 SR，应在 `label` 文字本身体现，例如 `label="已完成"`）。无受控状态（`checked` / `selected` / `disabled` 均不适用）。

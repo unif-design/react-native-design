@@ -92,6 +92,19 @@ import { Switch, Cell, List } from '@unif/react-native-design';
 | `onChange` | `(value) => void` | 切换回调 |
 | `disabled` | `boolean?` | 禁用 |
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Switch/Switch.tsx`、`Switch.web.tsx`、`types.ts`（native 与 web 两份实现 a11y 完全一致）。
+
+- 默认 `accessibilityRole`：包裹的 `<Pressable>` 上硬编码 `'switch'`。
+- a11y props：`accessibilityLabel` 在 `types.ts` 中是**可选**的（`accessibilityLabel?`）——Switch 本身不带可见 label（设计上 label 交给左侧 [Cell](./cell)），所以独立使用时不传 `accessibilityLabel` 则无朗读文案，应由承载它的 Cell / 上下文提供语义。
+- 状态语义：`accessibilityState={{ checked: value, disabled: !!disabled }}`——`checked` 直接映射必填的 `value`，`disabled` 映射 `disabled` prop。
+
+```tsx
+// 独立使用时显式给 accessibilityLabel；checked 由 value 自动上报
+<Switch value={enabled} onChange={setEnabled} accessibilityLabel="拜访提醒" />
+```
+
 ## 不要
 
 - ❌ 不要换其它颜色——开必须是主橙（这是品牌一致性）
