@@ -105,6 +105,20 @@ const textareaRef = useRef<TextInput>(null);
 | `disabled` | `boolean?` | 整体禁用 + 视觉变灰，优先级高于 `editable` |
 | `containerStyle` | `StyleProp<ViewStyle>?` | 容器外层样式 |
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Textarea/Textarea.tsx`（薄 wrap）→ `src/components/ui/TextField/TextFieldBase.tsx`。
+
+Textarea 是 `<TextFieldBase multiline>` 的薄封装，最终落到原生 `<TextInput multiline>`，因此**继承 RN TextInput 内置的多行可编辑文本 a11y 语义**——源码**未**硬编码 `accessibilityRole`。
+
+- a11y props（继承）：`TextareaProps = Omit<TextInputProps, 'style' | 'multiline' | 'numberOfLines'>` + 扩展，`{...props}` 透传给 base 再到 `<TextInput>`，所以 RN 原生 a11y props（`accessibilityLabel`、`accessibilityHint`、`placeholder` 等）均可传入生效；Textarea 自身不新增专门 a11y prop。
+- 状态语义：`disabled` 经 base 设 `accessibilityState={{ disabled: true }}` 并令 `editable=false`。`error` 只是视觉态 + 下方文案，源码未接入 a11y（无 `accessibilityInvalid`）。
+
+```tsx
+// 传 RN 原生 accessibilityLabel；disabled 自动上报 a11y 禁用态
+<Textarea value={note} onChangeText={setNote} accessibilityLabel="拜访备注" placeholder="详细说明…" />
+```
+
 ## 跟 Input 的区别
 
 | 维度 | Input | Textarea |

@@ -62,6 +62,12 @@ import { GlassStats } from '@unif/react-native-design';
 |---|---|---|---|
 | `items` | `ReadonlyArray<[count: string, label: string]>` | ✓ | 数据列,2~4 列均可。`count` 已格式化字串,`label` 是中文标签 |
 
+## 无障碍（a11y）
+
+来源：`src/components/business/GlassStats/GlassStats.tsx`、`types.ts`。
+
+本组件为纯数据展示条,无交互。源码全是 `<View>` + `<Text>`(每列一个 `count` 文本 + 一个 `label` 文本),**未设置任何 a11y prop**(无 `accessibilityRole` / `accessibilityLabel`),也没有可传的 a11y prop(仅 `items`)。底层 `<Text>` 默认对 SR 可读,会按「数字 + 标签」顺序逐列朗读;配套的 `BlurLayer` 是 `pointerEvents="none"` 装饰层。无受控状态(checked/selected/disabled 均不适用)。
+
 ## 视觉规范
 
 | 元素 | 规则 |

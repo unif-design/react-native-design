@@ -113,6 +113,12 @@ function Confirm() {
 | `borderWidth` | `number?` | `2` | 与 `borderColor` 配合 |
 | `bare` | `boolean?` | `false` | 抑制内边距，内容自控 |
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Card/Card.tsx`、`types.ts`。
+
+本组件为展示 / 容器用，无交互（渲染为 `<View>`，仅负责背景 / 圆角 / 阴影 / 内边距）。源码未设置任何 a11y prop，继承底层 `<View>` 默认。a11y 语义由其 `children` 内容自行承载；若整张卡片需可点击，请在 `children` 内放可点区域（如 [Cell](./cell) 的 `onPress` 或 [Button](./button)），不要把点击语义挂在 Card 本身。
+
 ## 不要
 
 - ❌ 不要叠加多层阴影——卡片只有一种阴影

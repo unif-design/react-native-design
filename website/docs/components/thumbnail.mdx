@@ -47,6 +47,23 @@ import { Thumbnail } from '@unif/react-native-design';
 | `accessibilityLabel` | `string` | — | SR 描述。不传 RN Image 默认 hidden |
 | `testID` | `string` | — | 测试 |
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Thumbnail/Thumbnail.tsx`、`types.ts`。
+
+Thumbnail 是一张 `<Image>`（可选外套 ring `<View>`），**未硬编码 `accessibilityRole`**，a11y 走"可选描述"模型：
+
+- a11y props：`accessibilityLabel` 是**可选**的（`accessibilityLabel?`）。源码同时按 `accessible={!!accessibilityLabel}` 控制可访问性——**不传 `accessibilityLabel` 时该图对 screen reader 默认隐藏**（装饰图不打扰朗读）；传了才作为带描述的图片暴露。
+- 状态语义：源码有 `selected` prop（选中时外层套 2pt 品牌色 ring `<View>`），但该 ring **仅为视觉**，源码**未**给它设置 `accessibilityState`（无 `selected` a11y 上报）；选中语义需由承载它的可选父级（如 picker 单元）提供。
+- 无图（`uri` / `source` 都空）时组件返回 `null`，不渲染任何节点。
+
+```tsx
+// 内容图：给 accessibilityLabel 才会被 SR 读到
+<Thumbnail uri={item.coverUrl} accessibilityLabel="客户门店照片" />
+// 纯装饰缩略图：省略 accessibilityLabel → 对 SR 隐藏
+<Thumbnail uri={item.coverUrl} />
+```
+
 ## 内部使用
 
 - [NewsList / NewsArea](/docs/components/cell) —— `newsToCellItem` 共享 mapper 内 `extra: <Thumbnail uri={images[0]} />`,两屏渲染一致

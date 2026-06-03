@@ -84,11 +84,18 @@ import { IconButton } from '@unif/react-native-design';
 | `style` | `StyleProp<ViewStyle>` | — | 容器附加样式 |
 | `testID` | `string?` | — | E2E / 测试定位 |
 
-## a11y
+## 无障碍（a11y）
 
-- `accessibilityLabel` 是 TS 强制必填,缺会编译错。
-- 行为有副作用 / 不显然时加 `accessibilityHint`(如"切换密码可见"),普通"确认 / 取消 / 返回"不必加(label 已显然)。
-- `disabled` 自动透传 `accessibilityState={{ disabled }}`。
+来源：`src/components/ui/IconButton/types.ts`、`IconButton.tsx`、`Button/ButtonBase.tsx`。
+
+- 默认 `accessibilityRole`：`'button'`（IconButton 透传给共享的 `ButtonBase`，其 `accessibilityRole = 'button'` 为默认参数）。
+- a11y props：`accessibilityLabel` **是 TS 强制必填**（`types.ts` 中 `accessibilityLabel: string`，无 `?`）—— icon-only 无可见文本，缺则编译报错；`accessibilityHint` 可选，仅在「行为不显然」时补（如「切换密码可见」），普通「确认 / 取消 / 返回」不必加。
+- 状态语义：`accessibilityState.disabled` 取 `!isInteractive`（在 `ButtonBase` 内由 `disabled` 推导，IconButton 无 `loading`）。
+
+```tsx
+// label 必填(SR 唯一信息源);hint 仅在行为不显然时补
+<IconButton icon="scan" accessibilityLabel="扫码" accessibilityHint="打开二维码扫描" onPress={...} />
+```
 
 ## 不要
 

@@ -81,6 +81,22 @@ import { Form, FormGroup, FormRow, Input, Switch } from '@unif/react-native-desi
 </Form>
 ```
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Form/{Form,FormGroup,FormRow}.tsx`、`types.ts`。
+
+`Form` / `FormGroup` / `FormRow` 都是纯布局容器,源码全是 `<View>` + `<Text>`(分组标题 / 字段 label / 必填星号 / 错误文字),**三者均未设置任何 a11y prop**(无 `accessibilityRole` / `accessibilityLabel` / state),也无可传的 a11y prop。
+
+- 真正的 a11y 语义来自传入 `FormRow` 的**控件 children**(如 [Input](./input) 的 `<TextInput>`、[Switch](./switch)),由控件自身承载 role / label / state。
+- `FormRow` 的 `label`、必填 `*`、`error` 文字渲染为相邻 `<Text>`,默认对 SR 可读,但**未与控件做程序化关联**(无 `accessibilityLabelledBy` / describedBy)。为确保 SR 把字段名读到对应控件上,建议在控件上显式补 `accessibilityLabel`(如 `<Input accessibilityLabel="姓名" />`),错误态可补 `accessibilityHint`。
+
+```tsx
+// label 是视觉文本;控件上显式补 accessibilityLabel 把字段名关联到输入
+<FormRow label="姓名" required>
+  <Input value={name} onChangeText={setName} accessibilityLabel="姓名" />
+</FormRow>
+```
+
 ## 与 Cell · List 的区别
 
 | 用途 | 选哪个 |

@@ -40,6 +40,21 @@ src/components/ui/
 └── Search/           ← Input + leading 搜索图标 + 圆角胶囊预设
 ```
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/TextField/TextFieldBase.tsx`、`types.ts`。
+
+`TextFieldBase` 包裹原生 `<TextInput>`，因此**继承 RN TextInput 内置的可编辑文本 a11y 语义**——源码**未**额外硬编码 `accessibilityRole`（依赖 TextInput 默认）。
+
+- a11y props（继承）：`TextFieldBaseProps` extends `TextInputProps`，并把 `{...rest}` 透传给 `<TextInput>`，所以 RN 原生 a11y props（`accessibilityLabel`、`accessibilityHint`、`placeholder` 等）都可由调用方传入并生效；本 base 自身不暴露专门的 a11y prop。
+- 状态语义：仅显式设置 `accessibilityState={disabled ? { disabled: true } : undefined}`——`disabled`（优先级高于 `editable`）会同时令 `editable=false`。`error` 仅作视觉态 + 下方 `<Text>` 文案，源码**未**把它接入 a11y（如 `accessibilityInvalid`），需要时由上层封装补。
+- 该组件是 internal base：实际 a11y 由公开封装 [Input](./input) / `Textarea` / [PasswordInput](./password-input) / [Search](./search) 在各自层面传入 label。
+
+```tsx
+// 调用方（如 Input/Textarea）透传 RN 原生 a11y props
+<Textarea accessibilityLabel="拜访备注" placeholder="详细说明…" />
+```
+
 ## 不要
 
 - 不要 `import { TextField } from '@unif/react-native-design'` —— 用对应高层组件,见上表

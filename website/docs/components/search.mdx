@@ -65,6 +65,19 @@ import { Search } from '@unif/react-native-design';
 />
 ```
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Search/Search.tsx`、`types.ts`。
+
+- 默认 `accessibilityRole`：Search 在底层 [`Input`](./input)（最终为原生 `<TextInput>`）上显式设 `'search'`，并设 `returnKeyType="search"`（键盘 return 键显示「搜索」）。
+- a11y props：`SearchProps = Omit<TextInputProps, 'style'> & { onSubmit?, placeholder? }`，故 RN `TextInput` 的全部 a11y props（`accessibilityLabel`、`placeholder` 等）都透传到底层输入框。朗读文案优先来自 `accessibilityLabel`，缺省时由 `placeholder`（默认「搜索…」）/ `value` 提供。
+- 清除按钮：`value` 非空时出现的 clear `<Pressable>` 硬编码 `accessibilityRole="button"` + `accessibilityLabel="清除"`，点击清空输入。
+
+```tsx
+// placeholder 已能表意；如需更明确朗读可显式传 accessibilityLabel
+<Search value={q} onChangeText={setQ} placeholder="搜索客户" accessibilityLabel="搜索客户" />
+```
+
 ## 与 Input 的区别
 
 `Search` 是 `Input` 的常用预设：

@@ -87,6 +87,21 @@ import { View } from 'react-native';
 | `onPress` | `() => void` 可选 | — | 点击回调;不传时不挂 Pressable,静态展示 |
 | `style` | `ViewStyle?` | — | 外层附加样式,常用于 grid 列设 `flex: 1` |
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/EntryCard/EntryCard.tsx`、`types.ts`。
+
+a11y 语义是**条件性**的:仅当传了 `onPress` 时,EntryCard 才用 `<Pressable>` 包裹并声明语义;无 `onPress` 时渲染为纯 `<View>`,无 a11y 角色（与「不响应按压」一致）。
+
+- 默认 `accessibilityRole`：可点时为 `'button'`(`onPress` 缺省则无角色)。
+- a11y props(仅 `onPress` 时生效):`accessibilityLabel` 取自必填的 `title`(`<Pressable accessibilityLabel={title}>`),无需另传。
+- 状态语义:源码未设 `accessibilityState`(无 disabled/selected/checked 概念)。
+
+```tsx
+// 可点:role=button、label 自动取 title
+<EntryCard icon="settings" title="设置" sub="账号 / 通知 / 权限" onPress={() => ...} />
+```
+
 ## 不要
 
 - ❌ 不要在 EntryCard 内放 arrow —— 它的语义是"独立入口卡",不是 List 行。需要 chevron 用 [Cell](./cell)。

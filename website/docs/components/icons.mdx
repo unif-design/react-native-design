@@ -73,6 +73,14 @@ import { ICONS } from '@unif/react-native-design';
 </Svg>
 ```
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Icon/Icon.tsx`、`types.ts`。
+
+`<Icon>` 是纯视觉图元，**源码刻意把它对 SR 隐藏**：外层 `<View>`（正常路径与未知图标 fallback 路径都）显式设 `accessibilityElementsHidden` + `importantForAccessibility="no-hide-descendants"`。它**不**设 `accessibilityRole` / `accessibilityLabel`，也没有可传的 a11y prop（仅 `name` / `size` / `color` / `strokeWidth` / `style` / `testID`）。
+
+这是有意为之：图标的语义应由**承载它的可交互父组件**提供朗读文案 —— 如 [IconButton](./icon-button) 的必填 `accessibilityLabel`、[Button](./button) 的 `label`。独立装饰用 `<Icon>` 即可，无需也不应给它单独挂 a11y。
+
 ## 头像
 
 头像不是图标，是实体。所有头像都是**单字符 monogram**（`我` / `AI` / 客户首字母）放在彩色圆盘上。**绝不**在头像里放图片或多于 1 个字符。

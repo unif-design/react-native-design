@@ -71,3 +71,14 @@ import { Avatar } from '@unif/react-native-design';
 | `size` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | 18 / 28 / 32 / 40 / 56 |
 
 `xs`（18px）专为内联序号 / 脚注引用使用 —— 例如 Sources 列表里的来源编号 badge。
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Avatar/Avatar.tsx`、`types.ts`。
+
+本组件为展示用，无交互（渲染为 `<View>`，不接收点击）。源码在根 `<View>` 上设了 `accessibilityLabel={label}`，且 `label` 为必填，因此 screen reader 会朗读该文字（即使 `source` 图片加载成功，朗读的仍是 `label`；图片加载失败时也回退展示 `label`）。无 `accessibilityRole`，继承底层 `<View>` 默认。如需让头像可点击，请由父级可点区域承载语义。
+
+```tsx
+// label 同时作为 SR 朗读文案
+<Avatar label="王" variant="info" />
+```

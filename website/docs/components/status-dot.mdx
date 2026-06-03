@@ -83,6 +83,12 @@ import { StatusDot } from '@unif/react-native-design';
 | `size` | `number` | `16` | 圆点直径 |
 | `tone` | `'flat' \| 'soft'` | `'flat'` | flat 透明底；soft 柔色底（pending=bgCard、active=primary0） |
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/StatusDot/StatusDot.tsx`、`types.ts`。
+
+视觉状态指示器，无交互。源码渲染为一个普通 `<View>`，**未设置任何 a11y prop**（无 `accessibilityRole` / `accessibilityLabel`），也无可传的 a11y prop（仅 `status` / `size` / `tone` / `testID`），继承底层 `<View>` 默认。内部内容随状态变化：`active` 时嵌入对 SR 隐藏的 `<PulseDot>`，`done` 时是一个 `<Icon name="check">`（按图标自身实现处理，见 [图标](./icons)），`pending` 时为空。因此圆点本身不向 SR 朗读「完成 / 进行中 / 待办」语义——状态文案应由相邻可见文本承载（如任务行的标题或状态标签），不要依赖 StatusDot 单独传达状态。
+
 ## 内部使用
 
 - Task `TaskRow` —— `<StatusDot status={mapped} size={16} />`（todo→pending、running→active、done→done）

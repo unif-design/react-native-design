@@ -77,3 +77,20 @@ import { NavBar } from '@unif/react-native-design';
 | `right` | `ReactNode \| { icon, onPress, accessibilityLabel? }` | — | 右槽，同 `left` |
 | `variant` | `'default' \| 'brand' \| 'transparent'` | `'default'` | 视觉变体：白底 hairline / 品牌橙底白字 / 透明白字 |
 | `testID` | `string?` | — | E2E 定位 |
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/NavBar/NavBar.tsx`、`types.ts`。
+
+- 默认 `accessibilityRole`：NavBar 根 `<View>` **未**设置 role（无 `header` 等），`title` / `subtitle` 渲染为普通 `<Text>`，按文本默认对 SR 可读。
+- a11y props：`left` / `right` 槽传 config 对象时由内部 `IconButton` 渲染，其 `accessibilityLabel` 取 `slot.accessibilityLabel ?? slot.icon`——`accessibilityLabel` 在槽 config 中是**可选**的，缺省会 fallback 到 icon 名（如 `'menu'` / `'arrow-left'`）。fallback 仅是英文图标名，体验不佳，**建议每个可点槽都显式传 `accessibilityLabel`**（如「返回」「更多」）。若 `left` / `right` 直接传 `ReactNode`，则 a11y 由该节点自行负责。
+- 状态语义：NavBar 自身无可切换状态，不附加 `accessibilityState`。
+
+```tsx
+// 给可点槽显式 accessibilityLabel，避免 fallback 到英文 icon 名
+<NavBar
+  title="登录"
+  left={{ icon: 'arrow-left', onPress: goBack, accessibilityLabel: '返回' }}
+  right={{ icon: 'more-h', onPress: openMenu, accessibilityLabel: '更多' }}
+/>
+```

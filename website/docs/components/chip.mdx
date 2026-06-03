@@ -124,6 +124,21 @@ import { Chip, Icon } from '@unif/react-native-design';
 | `trailing` | `ReactNode?` | — | 后置插槽（关闭按钮等） |
 | `style` | `ViewStyle?` | — | 附加样式 |
 
+## 无障碍（a11y）
+
+来源：`src/components/ui/Chip/Chip.tsx`、`types.ts`。
+
+a11y 语义是**条件性**的：仅当传了 `onPress` 时，Chip 才用 `<Pressable>` 包裹并声明语义；静态展示型（无 `onPress`）渲染为纯 `<View>`，无 a11y 角色（与「不响应按压」一致）。
+
+- 默认 `accessibilityRole`：可点时为 `'button'`（`onPress` 缺省则无角色）。
+- a11y props（仅 `onPress` 时生效）：`accessibilityLabel` 取自必填的 `label`。
+- 状态语义：可点时上报 `accessibilityState={{ selected: !!selected }}`，映射 `selected` prop。
+
+```tsx
+// 可点 + 可选中:role=button、label=label、state.selected 自动
+<Chip label="待跟进" selected={filter === 'pending'} onPress={() => setFilter('pending')} />
+```
+
 ## 不要
 
 - ❌ 不要把 `<Chip>` 当成"按钮的小号版" —— 实际按钮（包括小号）走 [Button](./button) `size="sm"`。Chip 的视觉重心在"可选状态"，不在"主操作"。
