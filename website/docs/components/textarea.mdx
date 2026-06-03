@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: Textarea 多行输入
-description: 多行内容输入 · 复用 Input 视觉系统 · idle / focus / filled / error
+description: "多行文本输入框 —— TextareaProps = Omit<TextInputProps,'style'|'multiline'|'numberOfLines'> + leading/trailing/error/minHeight(默认96)/maxHeight/disabled/containerStyle;内置 multiline + 顶对齐,复用 Input 的 idle/focus/filled/error/disabled 视觉。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -93,17 +93,20 @@ const textareaRef = useRef<TextInput>(null);
 
 ## API
 
-`TextareaProps` = **`Omit<TextInputProps, 'style' | 'multiline' | 'numberOfLines'>`** + 这 7 个扩展。`multiline` 已内置无需传；`numberOfLines` 故意 omit（用 `minHeight` / `maxHeight` 表达更直观）。
+`TextareaProps` = **`Omit<TextInputProps, 'style' | 'multiline' | 'numberOfLines'>`** + 这 7 个扩展（`leading` / `trailing` / `error` / `minHeight` / `maxHeight` / `disabled` / `containerStyle`）。`multiline` 已内置无需传；`numberOfLines` 故意 omit（用 `minHeight` / `maxHeight` 表达更直观）。下表最后的 `testID` 等来自透传的 `TextInputProps`。
 
-| Prop | Type | 说明 |
-|---|---|---|
-| `leading` | `ReactNode?` | 前置插槽（顶对齐渲染） |
-| `trailing` | `ReactNode?` | 后置插槽（如字符计数器） |
-| `error` | `string?` | 错误文字 —— 容器进入 error 态并在下方显示 |
-| `minHeight` | `number?` | 最小高度，默认 96。业务传 &lt;20 时内部已 `Math.max` 保护 |
-| `maxHeight` | `number?` | 最大高度，超过后内部滚动；不传则不限 |
-| `disabled` | `boolean?` | 整体禁用 + 视觉变灰，优先级高于 `editable` |
-| `containerStyle` | `StyleProp<ViewStyle>?` | 容器外层样式 |
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `leading` | `ReactNode?` | — | 前置插槽（顶对齐渲染） |
+| `trailing` | `ReactNode?` | — | 后置插槽（如字符计数器） |
+| `error` | `string?` | — | 错误文字 —— 容器进入 error 态并在下方显示（`""` / undefined 不进 error 态） |
+| `minHeight` | `number?` | `96` | 最小高度（约 5 行）；内部 input minHeight 减去上下 padding 后 `Math.max(0, …)` 保护 |
+| `maxHeight` | `number?` | — | 最大高度，超过后内部滚动；不传则不限 |
+| `disabled` | `boolean?` | — | 整体禁用 + 视觉变灰，优先级高于 `editable` |
+| `containerStyle` | `StyleProp<ViewStyle>?` | — | 容器外层样式（含 leading/trailing 整个 wrap） |
+| `testID` | `string?` | — | 测试定位（经 `TextInputProps` 透传；input 派生 `${testID}-input`） |
+
+> 余下 RN `TextInput` props（`value` / `onChangeText` / `placeholder` / `accessibilityLabel` / `autoFocus` 等）均直接可用；仅 `style` / `multiline` / `numberOfLines` 被 omit。支持 `ref`（`forwardRef` 到内部 `TextInput`）。
 
 ## 无障碍（a11y）
 

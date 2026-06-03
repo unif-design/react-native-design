@@ -1,7 +1,7 @@
 ---
 sidebar_position: 6
 title: Stepper 步进器
-description: 数字步进 · 限制 min / max
+description: "数字步进器 [−][N][+] —— 受控 value/onChange,自动夹到 [min,max](默认 0–99),step 默认 1,size='sm'(28px)/'md'(32px,默认),disabled;到达边界自动禁用对应按钮。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -69,14 +69,16 @@ export const StepperDemo = () => {
 
 ## 视觉规范
 
+来源：`src/components/ui/Stepper/styles.ts`、`Stepper.tsx`。
+
 | 元素 | 规则 |
 |---|---|
-| 高度 | 32px（默认）/ 28px（sm） |
-| 圆角 | 8px（外层），中间数字框无独立圆角 |
-| 按钮 | 32×32 描边，`±` 18px |
-| 数字框 | min-width 48，1px 上下边线，无左右边线 |
-| 描边 | 1px `#EDEDED` |
-| 禁用 | 按钮 `opacity: 0.4`（达到 min/max 时） |
+| 高度 | md 32px（默认）/ sm 28px（`control.sm`） |
+| 圆角 | 8px（`radius.md`，外层左右两角），中间数字框无独立圆角 |
+| 按钮 | md 32×32 / sm 28×28，`±` 字号 18px（`type.h1`） |
+| 数字框 | min-width md 48 / sm 40，1px 上下边线，无左右边线，字号 md 14 / sm 13 |
+| 背景 / 描边 | `c.surface` 底 + 1px `c.outline`（亮色 `#EDEDED`）边 |
+| 禁用 | 按钮 `opacity: 0.4`（达到 min/max 或整体 `disabled` 时；按下 0.7） |
 
 ## 用法
 
@@ -96,14 +98,20 @@ const [qty, setQty] = useState(12);
 
 ## API
 
+来源：`src/components/ui/Stepper/types.ts`、`Stepper.tsx`。
+
 | Prop | Type | 默认 | 说明 |
 |---|---|---|---|
-| `value` | `number` | — | 当前值 |
-| `onChange` | `(n) => void` | — | 变更回调 |
+| `value` | `number` | — | 当前值（受控，必填） |
+| `onChange` | `(value: number) => void` | — | 变更回调（已自动夹到 `[min, max]`，必填） |
 | `min` | `number?` | `0` | 下限（达到时 `−` 禁用） |
 | `max` | `number?` | `99` | 上限（达到时 `+` 禁用） |
-| `step` | `number?` | `1` | 步长 |
+| `step` | `number?` | `1` | 步长（非正数 / 非有限数回退为 1） |
 | `size` | `'sm' \| 'md'` | `'md'` | 高度 28 / 32 |
+| `disabled` | `boolean?` | `false` | 整体禁用（两个按钮都不可点） |
+| `testID` | `string?` | — | E2E 定位（派生 `-decrement` / `-value` / `-increment`） |
+
+> 健壮性：`value` 为 `NaN` 时显示为 `min`；`±Infinity` 钳到 `[min, max]`；`min > max` 时整体按 `min` 渲染（避免写出乱序值）。无 `style` prop。
 
 ## 无障碍（a11y）
 

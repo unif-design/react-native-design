@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: TabBar 底部 tab 栏
-description: 固定底部 · 50px 高 · icon + 文字
+description: "固定底部主导航 tab 栏 —— 50px 高 + 顶部 hairline,各 tab icon+文字垂直居中,激活 c.primary;受控 active/onChange,items 含 id/icon/label/可选 badge,role='tab' + selected。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -44,16 +44,18 @@ export const TabBarDemo = () => {
 
 ## 视觉规范
 
+来源：`src/components/ui/TabBar/styles.ts`、`TabBar.tsx`。
+
 | 元素 | 规则 |
 |---|---|
-| 高度 | 50px |
-| 背景 | `#FFFFFF` |
-| 顶部边线 | 1px hairline `#EDEDED` |
+| 高度 | 50px（`fixed.tabbarH`，物理常量不缩放） |
+| 背景 | `c.surface`（亮色 `#FFFFFF`） |
+| 顶部边线 | hairline `c.outline`（亮色 `#EDEDED`） |
 | Tab 项 | `flex: 1`，垂直居中 icon + 文字 |
-| Icon | 22×22，`fg-3 #999` (默认) / `primary-300 #EB6E00` (active) |
-| 文字 | 10px / 500，与 icon 同色 |
-| Badge | 小红点或数字徽章，叠在 icon 右上 |
-| 安全区 | bottom inset (iOS home indicator 34px) 不计入 50px |
+| Icon | 22×22（`icon.sm`），`c.foregroundSubtle`（亮色 `#999`，默认）/ `c.primary`（`#EB6E00`，active） |
+| 文字 | 10px（`type.nano`）/ 500，与 icon 同色 |
+| Badge | `c.error` 底数字徽章（`number \| string`），叠在 icon 右上 |
+| 安全区 | bottom inset（iOS home indicator 34px）不计入 50px——外面包 `<SafeAreaView edges={['bottom']}>` |
 
 ## 用法
 
@@ -71,6 +73,29 @@ import { TabBar } from '@unif/react-native-design';
   ]}
 />
 ```
+
+## API
+
+来源：`src/components/ui/TabBar/types.ts`、`TabBar.tsx`。
+
+`TabBarProps`：
+
+| Prop | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `active` | `string` | — | 当前激活 tab 的 `id`（必填） |
+| `onChange` | `(id: string) => void` | — | 切换回调，回传点中 tab 的 `id`（必填） |
+| `items` | `TabBarItem[]` | — | tab 列表（必填） |
+| `testID` | `string?` | — | 容器 testID；item testID 自动派生为 `${testID}-${id}` |
+
+`TabBarItem`：
+
+| 字段 | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `id` | `string` | — | 唯一标识，用作 key 与选中判定 |
+| `icon` | `IconName` | — | 图标名（见 [图标](./icons)） |
+| `label` | `string` | — | tab 文字（同时作 `accessibilityLabel`） |
+| `badge` | `number \| string` | — | 图标右上角数字角标（用 `string` 才能写 `'99+'`） |
+| `testID` | `string?` | — | 单 tab testID（默认 `${barTestID}-${id}`） |
 
 ## 无障碍（a11y）
 

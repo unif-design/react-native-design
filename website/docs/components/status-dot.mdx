@@ -1,7 +1,7 @@
 ---
 sidebar_position: 6
 title: StatusDot 状态点
-description: done / active / pending 圆点 — 任务列表与推理链共用
+description: "status='pending'/'active'/'done' 状态圆点 —— done=success 底+白勾、active=primary 边框+内嵌 PulseDot、pending=outline 描边；tone='flat'(默认,透明底)/'soft'(柔色底),size 默认 16。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -17,8 +17,8 @@ import { StatusDot } from '@unif/react-native-design';
 | `active` | 边框 + 内嵌 `<PulseDot>` | `primary` 边框 + 跳动 |
 | `pending` | 仅边框 | `outline` 灰边 |
 
-`tone='flat'`（默认）—— pending/active 底色透明，用于 Task。
-`tone='soft'` —— pending = `surface`、active = `primaryContainer`，用于 ChainOfThought（推理链气氛更柔）。
+`tone='flat'`（默认）—— pending/active 底色透明（`'transparent'`），用于 Task。
+`tone='soft'` —— pending = `c.surface`、active = `c.primaryContainer`，用于 ChainOfThought（推理链气氛更柔）。
 
 ## 实时预览
 
@@ -77,11 +77,16 @@ import { StatusDot } from '@unif/react-native-design';
 
 ## API
 
+来源：`src/components/ui/StatusDot/types.ts`、`StatusDot.tsx`、`styles.ts`。
+
 | Prop | 类型 | 默认 | 说明 |
 |---|---|---|---|
-| `status` | `'done' \| 'active' \| 'pending'` | — | 当前状态 |
-| `size` | `number` | `16` | 圆点直径 |
-| `tone` | `'flat' \| 'soft'` | `'flat'` | flat 透明底；soft 柔色底（pending=bgCard、active=primary0） |
+| `status` | `'pending' \| 'active' \| 'done'` | — | 当前状态（必填） |
+| `size` | `number?` | `16` | 圆点直径（done 勾 ≈ `size*0.6`） |
+| `tone` | `'flat' \| 'soft'` | `'flat'` | flat 透明底；soft 柔色底（pending=`c.surface`、active=`c.primaryContainer`） |
+| `testID` | `string?` | — | E2E / 测试定位 |
+
+> 颜色派生（`paletteFor`）：done = `c.success` 底+边；active = `c.primary` 边框（底 flat 透明 / soft `c.primaryContainer`）；pending = `c.outline` 边框（底 flat 透明 / soft `c.surface`）。圆点带 1.5px 边框。
 
 ## 无障碍（a11y）
 

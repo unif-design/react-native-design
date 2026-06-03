@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: VersionPill 版本号药丸
-description: 状态点 + 版本号 + 可选 build · 圆角胶囊
+description: "版本徽章胶囊 —— 状态点 + 「版本 {version}」+ 可选「· build {build}」mono 后缀,hairline 描边圆角(radius.pill)胶囊;version 必填,statusColor 默认 c.success,可传 style。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -54,12 +54,26 @@ import { VersionPill } from '@unif/react-native-design';
 
 ## API
 
+来源：`src/components/business/VersionPill/types.ts`、`VersionPill.tsx`。
+
 | Prop | Type | 默认 | 说明 |
 |---|---|---|---|
-| `version` | `string` | — | 版本号字串(`'2.8.0'`) |
-| `build` | `string?` | — | build 号;为空时省略分点与 build 字 |
-| `statusColor` | `string?` | `c.success` | 左侧 4×4 圆点颜色 |
-| `style` | `StyleProp<ViewStyle>` | — | 容器附加样式 |
+| `version` | `string` | — | 版本号字串（`'2.8.0'`，必填） |
+| `build` | `string?` | — | build 号；为空时省略分点与 build 字 |
+| `statusColor` | `string?` | `c.success` | 左侧 5×5 圆点颜色 |
+| `style` | `StyleProp<ViewStyle>?` | — | 容器附加样式覆盖 |
+
+## 视觉规范（Tokens）
+
+来源：`src/components/business/VersionPill/styles.ts`。
+
+| 元素 | 规则 |
+|---|---|
+| 胶囊 | `c.surface` 底 + hairline `c.outline` 边，圆角 `radius.pill`（999），横向 padding 11 / 纵向 5 |
+| 状态点 | 5×5 圆点（`radius.pill`），色由 `statusColor` 决定（默认 `c.success`） |
+| 版本文字 | `type.microPlus`（11.5）+ `c.foregroundMuted` + `tabular-nums`（等宽数字） |
+| 分隔点 | `·`，`type.microPlus` + `opacity 0.5` |
+| build 文字 | `type.micro`（11）+ `c.foregroundMuted` + 等宽字体（`fontMono`） |
 
 ## 无障碍（a11y）
 
@@ -70,4 +84,4 @@ VersionPill 是**纯展示**徽章，源码为 `<View>` + 若干 `<Text>`（`版
 ## 不要
 
 - 不要硬编码 `version` —— 走 `@/config/brand` 的 `APP_VERSION`(package.json 派生),build 走 react-native-device-info `getBuildNumber()`
-- 不要把 statusColor 滥用成"主题色徽章" —— 它的语义是"状态指示",通常 `c.success`(正常)/ `c.warning`(beta)/ `c.danger`(已废)
+- 不要把 statusColor 滥用成"主题色徽章" —— 它的语义是"状态指示",通常 `c.success`(正常,默认)/ `c.primary` 或 `c.info`(beta / 内测)/ `c.error`(已废)

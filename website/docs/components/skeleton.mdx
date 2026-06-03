@@ -1,7 +1,7 @@
 ---
 sidebar_position: 5
 title: Skeleton 骨架屏
-description: 加载占位 · 行 / 圆 / 矩形
+description: "页面级加载占位骨架 —— shape='line'/'rect'/'circle' 三形态(默认 rect),width/height/size/radius 可覆盖；共享 usePulse opacity 脉冲(0.5↔1,半周期 700ms),对 SR 隐藏。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -37,11 +37,13 @@ import { View } from 'react-native';
 
 ## 视觉规范
 
+来源：`src/components/ui/Skeleton/Skeleton.tsx`、`types.ts`、共享 [`usePulse`](./pulse)。
+
 | 元素 | 规则 |
 |---|---|
-| 颜色 | `#F0F0F0` (bg-muted) |
-| 圆角 | 行：3px / 圆：50% / 矩形：4–8px |
-| 动画 | opacity 脉冲（共享 [`usePulse`](./pulse) hook），半周期 700ms，全周期 1.4s，0.5 ↔ 1 |
+| 颜色 | `c.surfaceContainerHigh`（亮色 `#F0F0F0`） |
+| 圆角 | line：3px / rect：8px / circle：`size/2`（均可用 `radius` 覆盖） |
+| 动画 | opacity 脉冲（共享 [`usePulse`](./pulse) hook，传 `from: 0.5`），半周期 700ms、全周期 1.4s，`0.5 ↔ 1` 循环 |
 
 ## 形状
 
@@ -50,6 +52,20 @@ import { View } from 'react-native';
 | `'line'` | width 100% / height 11 / radius 3 | 文本占位 |
 | `'rect'`(默认) | width 100% / height 80 / radius 8 | 图片 / 卡片占位 |
 | `'circle'` | size 40 / radius = size/2 | 头像占位 |
+
+## API
+
+来源：`src/components/ui/Skeleton/types.ts`、`Skeleton.tsx`。
+
+| Prop | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `shape` | `'line' \| 'rect' \| 'circle'` | `'rect'` | 形状，决定默认尺寸与圆角 |
+| `width` | `DimensionValue?` | 形状相关 | 宽度（line / rect）；circle 忽略，走 `size` |
+| `height` | `number?` | 形状相关 | 高度（line / rect）；circle 忽略，走 `size` |
+| `size` | `number?` | `40` | 直径（circle）；line / rect 忽略 |
+| `radius` | `number?` | 形状相关 | 覆盖圆角（line 3 / rect 8 / circle `size/2`） |
+| `style` | `StyleProp<ViewStyle>?` | — | 额外样式覆盖 |
+| `testID` | `string?` | — | E2E / 测试定位 |
 
 ## 用法
 

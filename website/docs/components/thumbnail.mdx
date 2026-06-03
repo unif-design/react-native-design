@@ -1,7 +1,7 @@
 ---
 sidebar_position: 24
 title: Thumbnail 缩略图
-description: 列表 / 卡片 / chat 通用 16:9.5 小图 — sm / md / lg 三档尺寸
+description: "列表 / 卡片 / chat 通用 16:9.5 小图 —— size='sm'(64×40)/'md'(113×67,默认)/'lg'(160×96),uri 或 source 二选一(优先 uri),selected 加 2pt 品牌色 ring,无图返回 null;a11y 走可选 accessibilityLabel。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -16,6 +16,31 @@ import { Thumbnail } from '@unif/react-native-design';
 | `sm` | 64×40 | chat 行内、列表二级缩略 |
 | `md`(默认)| 113×67 | `NewsList` / `NewsArea` 公告右侧 |
 | `lg` | 160×96 | 详情页 hero 小图、卡片头图 |
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Thumbnail/Thumbnail.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+export const IMG = 'https://picsum.photos/id/1067/320/200';
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">三档尺寸 · sm / md / lg</span>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'flex-end' }}>
+        <Thumbnail uri={IMG} size="sm" accessibilityLabel="示例图 sm" />
+        <Thumbnail uri={IMG} size="md" accessibilityLabel="示例图 md" />
+        <Thumbnail uri={IMG} size="lg" accessibilityLabel="示例图 lg" />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">selected · 外侧 2pt 品牌色 ring</span>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <Thumbnail uri={IMG} selected accessibilityLabel="已选中的示例图" />
+      </div>
+    </div>
+  </div>
+</LiveDemo>
 
 ## 用法
 

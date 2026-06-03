@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: TextField 输入框 base(internal)
-description: Input / Textarea 共享的内部 base · 业务层请用 Input / Textarea / PasswordInput / Search
+description: "Input / Textarea / PasswordInput / Search 共享的内部 base(TextFieldBaseProps extends TextInputProps)—— 处理 4 态视觉、leading/trailing slot、error、disabled、单/多行;不在 barrel 导出,业务层请用 Input / Textarea / PasswordInput / Search。"
 ---
 
 # TextField 输入框 base(internal)
@@ -39,6 +39,24 @@ src/components/ui/
 ├── PasswordInput/    ← Input + trailing 眼睛 toggle + secureTextEntry
 └── Search/           ← Input + leading 搜索图标 + 圆角胶囊预设
 ```
+
+## Props（internal）
+
+来源：`src/components/ui/TextField/types.ts`、`TextFieldBase.tsx`。**非公开 API**——下表仅说明 [`Input`](./input.mdx) / `Textarea` 通过封装间接暴露了哪些行为，请勿直接 import。`TextFieldBaseProps` = `TextInputProps`（全部 RN `TextInput` props 透传）+ 这些扩展：
+
+| Prop | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `multiline` | `boolean?` | `false` | false=Input 单行固定 height；true=Textarea 多行 minHeight/maxHeight + 顶对齐 |
+| `height` | `number?` | `control.lg`(44) | 单行高度（`multiline=false` 时生效） |
+| `minHeight` | `number?` | `96` | 最小高度（`multiline=true` 时生效） |
+| `maxHeight` | `number?` | — | 最大高度（`multiline=true`）；超出 ScrollView 内滚 |
+| `leading` | `ReactNode?` | — | 左侧 slot（Icon / 装饰） |
+| `trailing` | `ReactNode?` | — | 右侧 slot（Icon / 操作按钮） |
+| `error` | `string?` | — | 非空字符串时 border 切 error 色并在下方显示文本（`""` / undefined 不进 error 态） |
+| `disabled` | `boolean?` | — | 整体禁用：`opacity 0.5` + `editable=false`，优先级高于 `editable` |
+| `containerStyle` | `StyleProp<ViewStyle>?` | — | 外层 `View` 附加 style |
+
+> `forwardRef<TextInputRef>`：业务表单可 `inputRef.current?.focus()`（实际通过 Input / Textarea 透传）。视觉 4 态优先级：error > focus > filled > idle。
 
 ## 无障碍（a11y）
 

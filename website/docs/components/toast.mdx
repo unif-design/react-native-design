@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: Toast 轻提示
-description: 全局轻提示 · 自动消失
+description: "命令式全局轻提示 —— toast(msg) / toast.success / .error / .info,或 {message,kind,duration};配根部挂一次 <ToastHost />,inverseSurface 底胶囊 + 可选状态点,默认 3000ms 后 fade+slide 自动消失,同时最多 1 条。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -27,22 +27,27 @@ import { Button, toast, ToastHost } from '@unif/react-native-design';
 
 ## 视觉规范
 
+来源：`src/components/ui/Toast/styles.ts`、`ToastHost.tsx`、`toast.ts`。
+
 | 元素 | 规则 |
 |---|---|
-| 形态 | 圆角 8 黑底（`rgba(51,51,51,0.92)`），白字 |
-| 高度 | min-height 36px |
-| 宽度 | max-width 80%，水平居中 |
-| 字号 | 14px / 500 |
-| 出现 | 200ms fade + 8px slide-up |
-| 停留 | 默认 3000ms |
-| 退出 | 200ms fade |
+| 形态 | 圆角 8（`radius.md`）`c.inverseSurface` 底（亮色 `#1C1C1E`），`c.inverseOnSurface` 白字 |
+| 内边距 | 横向 14（`space[6]`）/ 纵向 10（`space[4]`） |
+| 宽度 | max-width 85%，水平居中；距底部 32px（`space[10]`） |
+| 字号 | 14px（`type.sm`）/ 500 |
+| 出现 | 200ms（`motion.base`）fade + 8px slide-up |
+| 停留 | 默认 3000ms（`duration` 可覆盖） |
+| 退出 | 200ms fade + 下滑 8px |
+| 层级 | host `position: absolute` + `zIndex: 200` + `pointerEvents: none` |
 
 ## 状态变体
 
+`kind` 仅决定文本左侧 6×6 圆点的颜色（来源：`dotColorFor`）：
+
 ```text
-✓ 成功 · 绿色 #52C41A 圆点
-✕ 失败 · 红色 #F4511E 圆点
-ℹ 信息 · 默认无前缀图标
+✓ success · c.success 绿点（亮色 #52C41A）
+✕ error   · c.error 红点（亮色 #F4511E）
+ℹ info    · 无圆点（默认）
 ```
 
 ## 用法
@@ -62,6 +67,35 @@ toast.info('已切换到日报模式');
 // 自定义时长
 toast({ message: '正在同步…', duration: 5000 });
 ```
+
+## API
+
+来源：`src/components/ui/Toast/toast.ts`、`types.ts`、`ToastHost.tsx`。
+
+命令式函数 `toast`（不是组件）：
+
+| 调用 | 签名 | 说明 |
+|---|---|---|
+| `toast(input)` | `(input: ToastInput) => void` | 默认 `kind: 'info'` |
+| `toast.info(input)` | `(input: ToastInput) => void` | info 提示 |
+| `toast.success(input)` | `(input: ToastInput) => void` | success 提示（绿点） |
+| `toast.error(input)` | `(input: ToastInput) => void` | error 提示（红点） |
+
+`ToastInput` = `string`（简写，走默认 kind + 3000ms）`|` 对象：
+
+| 字段 | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `message` | `string` | — | 消息文本（必填） |
+| `kind` | `'info' \| 'success' \| 'error'` | `'info'` | 类型（决定圆点颜色） |
+| `duration` | `number?` | `3000` | 自动消失毫秒数 |
+
+`<ToastHost />` 组件 props（`ToastHostProps`，在 app 根附近挂一次）：
+
+| Prop | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `testID` | `string?` | — | 容器 testID；文本节点派生 `${testID}-text` |
+
+> 全局只需一个 `<ToastHost />`；同一时间只显示一条，新调用替换旧的。
 
 ## 无障碍（a11y）
 
