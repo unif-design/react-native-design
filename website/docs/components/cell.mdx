@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: Cell · List 列表行
-description: 白卡 + gap 分组 · 不用 border
+description: "列表行 + List 容器 —— grouped(独立白卡 + 8px gap)/ flush(透明底 + 行间 hairline)两模式，leading / title / desc / extra / arrow 插槽，可点 onPress、danger 危险态。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -48,10 +48,10 @@ import { Cell, List } from '@unif/react-native-design';
 
 | 元素 | 规则 |
 |---|---|
-| 整组容器 | `bg-page #F5F5F5` 浅灰底（视觉分组），`padding: 8`，`borderRadius: 12`，`gap: 8` |
-| 单行 | `bg-card #fff`，`borderRadius: 10`，`min-height: 56`，`padding: 12 14` |
-| 行内布局 | 左 icon (22) + 中 (title 15/500 + desc 13/3rd) + 右 extra (13/3rd) + arrow (16/3rd) |
-| **绝不** | `border-bottom`、`hairline` 分隔 |
+| 整组容器（grouped） | `c.background` 浅灰底（视觉分组），`padding: 8`（`space[3]`），`borderRadius: 12`（`radius.xl`），`gap: 8` |
+| 单行 | `c.surface` 白底，`borderRadius: 10`（`radius.lg`），`min-height: 56`，`padding: 14`（`space[6]`，水平 + 垂直同值） |
+| 行内布局 | 左 icon (grouped 22 / flush 28 盒) + 中 (title 15/500 + desc 13/subtle) + 右 extra (13/subtle) + arrow (grouped 20 / flush 18) |
+| **绝不**（grouped） | `border-bottom`、`hairline` 分隔（flush 模式才用 inset hairline） |
 
 ## 用法
 
@@ -74,27 +74,31 @@ import { Cell, List } from '@unif/react-native-design';
 
 ### `<Cell>`
 
-| Prop | Type | 说明 |
-|---|---|---|
-| `title` | `string \| ReactNode` | 主标题 |
-| `desc` | `string \| ReactNode?` | 副标题 / 描述 |
-| `leading` | `IconName \| ReactNode?` | 左侧 icon 名（自动渲染为 22px Icon）或自定义节点（如 Avatar） |
-| `extra` | `ReactNode?` | 右侧 slot — 文字、Tag、Switch 等 |
-| `arrow` | `boolean?` | 显示右侧 chevron |
-| `onPress` | `() => void?` | 点击回调（提供时启用按压态） |
-| `disabled` | `boolean?` | 仅对带 `onPress` 的 cell 有效，true 时 onPress 不触发 + 整体半透明 + a11y disabled |
-| `danger` | `boolean?` | 危险态：icon 盒子 + 标题用 error 红，且不渲染 arrow（常用于退出登录 / 删除等） |
-| `style` | `StyleProp<ViewStyle>?` | 额外样式覆盖（合并到 cell 容器的 style 数组） |
-| `testID` | `string?` | E2E / 测试定位 |
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `title` | `ReactNode` | — | 主标题(必填);string 自动套 `<Text>` + `numberOfLines=titleLines`,传 ReactNode 完全自定义 |
+| `titleLines` | `number` | `1` | `title` 为 string 时的 `numberOfLines`(如新闻标题传 2) |
+| `desc` | `ReactNode` | — | 副标题 / 描述;string 自动 `numberOfLines=2` |
+| `extra` | `ReactNode` | — | 右侧 slot — 文字、Tag、Switch、Stepper 等 |
+| `arrow` | `boolean` | `false` | 显示右侧 chevron-right(`danger` 时不渲染) |
+| `leading` | `IconName \| ReactNode` | — | 左侧 icon 名（grouped 渲染 22px 裸 icon / flush 渲染 28×28 橙盒 + 16px icon）或自定义节点（如 Avatar） |
+| `onPress` | `() => void` | — | 点击回调（提供时启用按压态;不传则为纯展示 `<View>`） |
+| `disabled` | `boolean` | `false` | 仅对带 `onPress` 的 cell 有效,true 时 onPress 不触发 + 整体半透明 + a11y disabled |
+| `danger` | `boolean` | `false` | 危险态：icon 盒子 + 标题用 error 红,且不渲染 arrow（常用于退出登录 / 删除等） |
+| `style` | `StyleProp<ViewStyle>` | — | 额外样式覆盖（合并到 cell 容器的 style 数组） |
+| `testID` | `string` | — | E2E / 测试定位 |
+| `accessibilityLabel` | `string` | title(string 时) | 显式 SR 朗读文案;`title` 传 ReactNode 时务必显式传 |
+| `accessibilityHint` | `string` | — | SR 行为说明 hint(≤8 字,如「查看详情」);`onPress` 缺省时无意义 |
 
 ### `<List>`
 
-| Prop | Type | 说明 |
-|---|---|---|
-| `flush` | `boolean?` | 透明背景（嵌套用）；省略则白卡 + 8px gap + 浅灰底容器 |
-| `divider` | `'full' \| 'none'?` | flush 模式下行间分隔线样式，默认 `'full'`（铺满全宽 hairline）；`'none'` 表示不画分隔线 |
-| `style` | `StyleProp<ViewStyle>?` | 额外样式覆盖 |
-| `testID` | `string?` | E2E / 测试定位 |
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `children` | `ReactNode` | — | 一组 `<Cell>` |
+| `flush` | `boolean` | `false` | 透明背景（嵌套用）；省略则白卡 + 8px gap + 浅灰底容器 |
+| `divider` | `'full' \| 'none'` | `'full'` | flush 模式下行间分隔线:`'full'` 铺满全宽 hairline / `'none'` 不画 |
+| `style` | `StyleProp<ViewStyle>` | — | 额外样式覆盖 |
+| `testID` | `string` | — | E2E / 测试定位 |
 
 ## 无障碍（a11y）
 
@@ -140,7 +144,7 @@ a11y 语义是**条件性**的：仅当传了 `onPress` 时，Cell 才用 `<Pres
 | `c.outline` | `useColors()` | flush 模式行间 hairline 分隔线颜色 |
 | `radius.lg` | 静态 token | grouped 模式单行卡片圆角 |
 | `radius.xl` | 静态 token | `<List>` grouped 模式外容器圆角 |
-| `space[5]` / `space[6]` / `space[3]` | 静态 token | 行间 gap / 行内水平+垂直内边距 / List gap |
+| `space[5]` / `space[6]` / `space[3]` | 静态 token | 行内 leading↔body↔extra gap(12)/ 行内水平+垂直内边距(14)/ List 行间 gap + 容器 padding(8) |
 | `space[4]` | 静态 token | flush 模式行内元素间 gap（`cellFlush.gap`） |
 | `type.body` / `type.xs` | 静态 token | 主标题 / 副标题字号（grouped 模式） |
 | `fw.medium` | 静态 token | 主标题字重 |

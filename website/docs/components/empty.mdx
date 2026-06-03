@@ -1,7 +1,7 @@
 ---
 sidebar_position: 5
 title: Empty 空态
-description: 圆形 illust + 大字标题 + 小字描述
+description: "空态 / 占位 —— 56×56 浅橙圆盘 + icon 插画(默认 spark)+ 大字标题 + 小字描述，icon 可换强语义图标(camera-off / permission-denied 等)。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -9,7 +9,7 @@ import { Empty } from '@unif/react-native-design';
 
 # Empty 空态
 
-无内容状态——圆形 illust（橙色 spark）+ 大字标题 + 小字描述。可附带建议 chips。
+无内容状态——浅橙圆盘 illust（默认橙色 spark）+ 大字标题 + 小字描述。`icon` 可换成强语义图标(相机 / 权限 / 出错场景),常配合 SuggestionList 给出下一步操作。
 
 ## 实时预览
 
@@ -43,10 +43,24 @@ import { Empty } from '@unif/react-native-design';
 
 ## API
 
-| Prop | Type | 说明 |
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `title` | `string` | — | 大字标题（如「暂无数据」,15px / 600） |
+| `desc` | `string` | — | 小字描述（建议下一步操作,13px / 400 / `c.foregroundSubtle`） |
+| `icon` | `IconName` | `'spark'` | 圆盘内图标;相机域可传 `'camera-off'` / `'permission-denied'` / `'error-alert'` 等 |
+| `testID` | `string` | — | E2E / 测试定位 |
+
+## 主题键（Tokens）
+
+| Token | 来源 | 作用 |
 |---|---|---|
-| `title` | `string` | 大字标题（15px / 600） |
-| `desc` | `string?` | 小字描述（13px / 400 / `fg-3`） |
+| `c.primaryContainer` | `useColors()` | 圆盘背景色（浅橙） |
+| `c.primary` | `useColors()` | 圆盘内 icon 色 |
+| `c.foreground` | `useColors()` | 标题文字色 |
+| `c.foregroundSubtle` | `useColors()` | 描述文字色 |
+| `icon['2xl']` | `@unif/react-native-design` | 圆盘尺寸（56） |
+| `type.h3` / `type.xs` | `@unif/react-native-design` | 标题（15）/ 描述（13）字号 |
+| `space['4']` / `space['3']` / `space['7']` | `@unif/react-native-design` | gap（10）/ 水平 padding（8）/ 垂直 padding（16） |
 
 ## 无障碍（a11y）
 
@@ -58,7 +72,7 @@ import { Empty } from '@unif/react-native-design';
 
 | 元素 | 规则 |
 |---|---|
-| illust | 56×56 圆，背景 `primary-0 #FFF5EB`，spark 图标 28px 主橙色 |
-| title | 15px / 600 / `fg-1` |
-| desc | 13px / 400 / `fg-3`，居中 |
-| 间距 | gap 10，整体居中 |
+| illust | 56×56 圆（`icon['2xl']`），背景 `c.primaryContainer`，icon 28px `c.primary` |
+| title | 15px / 600 / `c.foreground`（`type.h3` + `fw.semi`） |
+| desc | 13px / 400 / `c.foregroundSubtle`（`type.xs`），居中 |
+| 间距 | gap 10（`space['4']`），整体居中 |

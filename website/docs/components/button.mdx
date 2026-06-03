@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: Button 按钮
-description: 主 / 次 / 描边 / 文字 · 3 种尺寸 · 块级 / 内联
+description: "文本按钮 —— 7 variant(primary/secondary/ghost/neutral/outline/danger/text)× 3 size(sm/md/lg，高 28/36/44)，支持 block 块级、loading、leftIcon / rightIcon。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -9,7 +9,7 @@ import { Button } from '@unif/react-native-design';
 
 # Button 按钮
 
-主 / 次 / 描边 / 文字 · 3 种尺寸 · 块级 / 内联。
+文本按钮,7 视觉变体 × 3 尺寸 · 支持块级 / 内联。变体:`primary` 主操作 · `secondary` 次操作 · `ghost` 透明底品牌橙字 · `neutral` 透明底主文字色(多 icon 场景避免全染主橙)· `outline` 白底灰边 · `danger` 破坏性操作 · `text` 纯文字。
 
 ## 实时预览
 
@@ -23,6 +23,7 @@ import { Button } from '@unif/react-native-design';
         <Button label="主按钮" variant="primary" />
         <Button label="次按钮" variant="secondary" />
         <Button label="ghost" variant="ghost" />
+        <Button label="中性" variant="neutral" />
         <Button label="描边" variant="outline" />
         <Button label="危险" variant="danger" />
         <Button label="文字" variant="text" />
@@ -62,13 +63,18 @@ import { Button } from '@unif/react-native-design';
 
 | Prop | Type | 默认 | 说明 |
 |---|---|---|---|
-| `label` | `string` | — | 按钮文字 |
-| `variant` | `'primary' \| 'secondary' \| 'ghost' \| 'outline' \| 'danger' \| 'text'` | `'primary'` | 视觉变体 |
+| `label` | `string` | — | 按钮文字(icon-only 场景请用 [IconButton](/docs/components/icon-button)) |
+| `onPress` | `() => void` | — | 点击回调;`disabled` / `loading` 时不触发 |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | 高度 28 / 36 / 44 |
-| `block` | `boolean` | `false` | 是否块级（`flexGrow: 1`） |
-| `disabled` | `boolean` | `false` | 禁用（opacity 0.5） |
-| `loading` | `boolean` | `false` | 显示 spinner |
-| `onPress` | `() => void` | — | 点击回调 |
+| `variant` | `'primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'danger' \| 'text'` | `'primary'` | 视觉变体 |
+| `block` | `boolean` | `false` | 撑满父容器宽度（`alignSelf: stretch + flexGrow: 1`） |
+| `disabled` | `boolean` | `false` | 禁用（opacity 0.5 + 不响应 onPress） |
+| `loading` | `boolean` | `false` | 加载态:用 `ActivityIndicator` 替代 label,自动 disabled |
+| `leftIcon` | `IconName` | — | 左侧图标,与文本同色同高 |
+| `rightIcon` | `IconName` | — | 右侧图标,与文本同色同高 |
+| `style` | `StyleProp<ViewStyle>` | — | 额外样式覆盖（merge 到末尾） |
+| `testID` | `string` | — | E2E / 测试定位 |
+| `accessibilityHint` | `string` | — | SR 行为说明 hint,仅在「行为不显然」时加 |
 
 ## 无障碍（a11y）
 
@@ -100,6 +106,7 @@ import { Button } from '@unif/react-native-design';
 | `c.onError` | `useColors()` | `danger` 变体文字色 |
 | `radius.lg` / `radius.md` / `radius.sm` | 静态 token | 按 `size='lg'/'md'/'sm'` 对应圆角 |
 | `control.lg` / `control.md` / `control.sm` | 静态 token（`src/theme`） | 按尺寸对应高度（44 / 36 / 28） |
-| `space['6']` / `space['4']` | 静态 token | `md`/`sm` 水平内边距 |
+| `space['6']` / `space['4']` | 静态 token | `md` / `sm` 水平内边距(`lg` 用 `r(18)`) |
+| `space['2']` / `space['1']` | 静态 token | 内容 gap(`lg`/`md` 用 `'2'`,`sm` 用 `'1'`) |
 | `fw.semi` | 静态 token | 按钮文字字重（`600`） |
 | `type.body` / `type.sm` / `type.xxs` | 静态 token | 按 `size='lg'/'md'/'sm'` 对应字号 |

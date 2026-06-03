@@ -1,7 +1,7 @@
 ---
 sidebar_position: 3
 title: Checkbox 复选框
-description: 多选 · 三种状态：未选 / 已选 / 禁用
+description: "受控多选框 —— 20×20 盒子，square / circle 两种形状，未选透明描边 / 已选主橙实心 + 白勾 / 禁用半透明，可选 label。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -10,7 +10,7 @@ import { useState } from 'react';
 
 # Checkbox 复选框
 
-多选控件——20×20 方框，未选透明描边、已选主橙实心 + 白勾、禁用半透明。
+受控多选控件——20×20 盒子，未选透明描边、已选主橙实心 + 白勾、禁用半透明。`shape='circle'` 切圆形,用于需要强调的必勾项(如协议同意)。
 
 ## 实时预览
 
@@ -49,8 +49,8 @@ export const CheckboxDemo = () => {
 
 | 状态 | 视觉 |
 |---|---|
-| 未选 | 20×20 方框，1.5px 描边 `#EDEDED`，透明背景 |
-| 已选 | 20×20 主橙背景 + 白勾 |
+| 未选 | 20×20 盒子,1.5px 描边 `c.outline`,透明背景 |
+| 已选 | 20×20 `c.primary` 背景 + `c.onPrimary` 白勾(check,strokeWidth 2.5) |
 | 禁用 | `opacity: 0.5` |
 
 ## 用法
@@ -73,12 +73,26 @@ import { Checkbox } from '@unif/react-native-design';
 
 ## API
 
-| Prop | Type | 说明 |
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `checked` | `boolean` | — | 当前是否选中(受控) |
+| `onChange` | `(checked: boolean) => void` | — | 状态变更回调,传入新的 `checked` 值 |
+| `label` | `string` | — | 旁标文字(不传则只渲染勾选盒子) |
+| `shape` | `'square' \| 'circle'` | `'square'` | 形状;`'circle'` 用于强调的必勾项(如协议同意) |
+| `disabled` | `boolean` | `false` | 禁用 |
+| `testID` | `string` | — | E2E / 测试定位 |
+
+## 主题键（Tokens）
+
+| Token | 来源 | 作用 |
 |---|---|---|
-| `checked` | `boolean` | 当前是否选中 |
-| `onChange` | `(checked) => void` | 状态变更回调 |
-| `label` | `string` | 右侧文字 |
-| `disabled` | `boolean?` | 禁用 |
+| `c.outline` | `useColors()` | 未选盒子描边色 |
+| `c.primary` | `useColors()` | 已选盒子填充 + 边框色 |
+| `c.onPrimary` | `useColors()` | 白勾(check icon)色 |
+| `c.foreground` | `useColors()` | label 文字色 |
+| `radius.xs` | `@unif/react-native-design` | 方形盒子圆角(4) |
+| `space['4']` | `@unif/react-native-design` | 盒子↔label 间距(10) |
+| `type.sm` | `@unif/react-native-design` | label 字号 |
 
 ## 无障碍（a11y）
 

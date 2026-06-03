@@ -1,7 +1,7 @@
 ---
 sidebar_position: 6
 title: Confirm 确认对话框
-description: 命令式 confirm() · 高风险操作前置二次确认
+description: "命令式 await confirm() → Promise<boolean> —— 高风险操作二次确认，BottomSheetModal 单档 + ConfirmHost Portal，destructive 红确认按钮，同一时间仅 1 个。"
 ---
 
 # Confirm 确认对话框
@@ -64,7 +64,21 @@ await confirm({ title: '确认注销账号?', confirmLabel: '确认注销', dest
 | 容器 | `<BottomSheet snapPoints={['30%']}>` 单档,底部弹层 |
 | 标题 | `t.heroSm`(18)+ `fw.semi` + `c.foreground` |
 | 说明 | `t.body`(15)+ `c.foregroundMuted` + `lineHeight 1.45` |
-| 按钮行 | `<Button variant="secondary">` 取消 + `<Button variant="primary"\|"danger">` 确认,横向均分 |
+| 按钮行 | `<Button variant="secondary" block>` 取消 + `<Button variant="primary"\|"danger" block>` 确认,横向均分(走 BottomSheetFooter) |
+
+## 主题键（Tokens）
+
+读取来源:`src/components/ui/Confirm/styles.ts`、`ConfirmHost.tsx`。
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.surface` | `useColors()` | sheet 背景色 |
+| `c.foreground` | `useColors()` | 标题文字色 |
+| `c.foregroundMuted` | `useColors()` | 说明文字色 |
+| `type.heroSm` | `@unif/react-native-design` | 标题字号(18) |
+| `type.body` | `@unif/react-native-design` | 说明字号(15) |
+| `fw.semi` | `@unif/react-native-design` | 标题字重 |
+| `space['9']` / `space['4']` / `space['5']` / `space['7']` | `@unif/react-native-design` | sheet / actions 内边距与 gap |
 
 ## 业务消费示例
 
