@@ -1,10 +1,13 @@
 /** Toast 类型：info=灰点 / success=绿点 / error=红点 */
 export type ToastKind = 'info' | 'success' | 'error';
 
+/** Toast 显示位置：top=顶部 / bottom=底部(默认) / center=屏幕居中 */
+export type ToastPosition = 'top' | 'bottom' | 'center';
+
 /**
  * `toast(...)` 调用入参：
- * - 字符串简写：默认 info kind 跟 2200ms duration
- * - 对象形式：可指定 kind 跟 duration
+ * - 字符串简写：默认 info kind、bottom 位置、3000ms duration
+ * - 对象形式：可指定 kind / duration / position
  */
 export type ToastInput =
   | string
@@ -13,8 +16,10 @@ export type ToastInput =
       message: string;
       /** Toast 类型，默认 'info' */
       kind?: ToastKind;
-      /** 自动消失毫秒数，默认 2200 */
+      /** 自动消失毫秒数，默认 3000 */
       duration?: number;
+      /** 显示位置，默认 'bottom' */
+      position?: ToastPosition;
     };
 
 export type ToastEntry = {
@@ -26,6 +31,8 @@ export type ToastEntry = {
   kind: ToastKind;
   /** 显示毫秒数 */
   duration: number;
+  /** 显示位置 */
+  position: ToastPosition;
 };
 
 /** Toast 订阅者函数签名（ToastHost 内部用） */

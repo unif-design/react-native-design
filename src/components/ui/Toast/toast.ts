@@ -11,12 +11,13 @@ export const _subs = new Set<Subscriber>();
 function emit(input: ToastInput, kind: ToastKind = 'info') {
   const entry: ToastEntry =
     typeof input === 'string'
-      ? { id: ++_id, message: input, kind, duration: 3000 }
+      ? { id: ++_id, message: input, kind, duration: 3000, position: 'bottom' }
       : {
           id: ++_id,
           message: input.message,
           kind: input.kind ?? kind,
           duration: input.duration ?? 3000,
+          position: input.position ?? 'bottom',
         };
   _subs.forEach((s) => s(entry));
 }

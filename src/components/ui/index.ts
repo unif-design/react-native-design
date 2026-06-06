@@ -76,4 +76,5 @@ export type {
   ToastHostProps,
   ToastInput,
   ToastKind,
+  ToastPosition,
 } from './Toast';

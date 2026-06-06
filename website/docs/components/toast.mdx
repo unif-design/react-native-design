@@ -88,6 +88,7 @@ toast({ message: '正在同步…', duration: 5000 });
 | `message` | `string` | — | 消息文本（必填） |
 | `kind` | `'info' \| 'success' \| 'error'` | `'info'` | 类型（决定圆点颜色） |
 | `duration` | `number?` | `3000` | 自动消失毫秒数 |
+| `position` | `'top' \| 'bottom' \| 'center'` | `'bottom'` | 显示位置(top/center 自动避让 safe-area) |
 
 `<ToastHost />` 组件 props（`ToastHostProps`，在 app 根附近挂一次）：
 
