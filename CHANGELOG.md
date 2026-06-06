@@ -1,5 +1,13 @@
 # Changelog
 
+# [0.6.0](https://github.com/unif-design/react-native-design/compare/v0.5.1...v0.6.0) (2026-06-06)
+
+
+### Features
+
+* **llms:** richer llms.txt (index descriptions, TOC, LiveDemo→code) + component a11y ([#57](https://github.com/unif-design/react-native-design/issues/57)) ([e1881c6](https://github.com/unif-design/react-native-design/commit/e1881c6cff1c6338626100805486d1c1145a2ae7))
+* **ui:** 新增 Toast position 枚举,移除 [@gorhom](https://github.com/gorhom)(删 BottomSheet/Confirm) ([41f1f30](https://github.com/unif-design/react-native-design/commit/41f1f3056417763667563e1cd30cb5e4a70228c6))
+
 ## [0.5.1](https://github.com/unif-design/react-native-design/compare/v0.5.0...v0.5.1) (2026-06-03)
 
 
