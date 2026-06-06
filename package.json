@@ -66,7 +66,6 @@
     "@eslint/compat": "^2.0.3",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
-    "@gorhom/bottom-sheet": "^5.2.14",
     "@jest/globals": "^30.0.0",
     "@react-native/babel-preset": "0.85.3",
     "@react-native/eslint-config": "0.85.3",
@@ -97,7 +96,6 @@
     "typescript": "^6.0.2"
   },
   "peerDependencies": {
-    "@gorhom/bottom-sheet": ">=5",
     "@sbaiahmed1/react-native-blur": ">=4",
     "react": "*",
     "react-native": "*",

@@ -79,7 +79,6 @@ const sidebars: SidebarsConfig = {
       collapsed: true,
       items: [
         'components/toast',
-        'components/confirm',
         'components/empty',
         'components/skeleton',
       ],

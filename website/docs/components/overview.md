@@ -66,7 +66,6 @@ description: "@unif/react-native-design 组件索引（40+ 组件，按场景分
 | 组件 | 说明 |
 |---|---|
 | [Toast](/docs/components/toast) | 命令式 `toast()` + `<ToastHost />` 全局轻提示 |
-| [Confirm](/docs/components/confirm) | 命令式 `confirm()` + `<ConfirmHost />` 高风险二次确认 |
 | [Empty](/docs/components/empty) | 空状态 |
 | [Skeleton](/docs/components/skeleton) | 骨架占位,`shape='line'/'rect'/'circle'`(走 `usePulse`) |
 
@@ -96,8 +95,6 @@ description: "@unif/react-native-design 组件索引（40+ 组件，按场景分
 |---|---|
 | [BlurLayer](/docs/components/blur-layer) | BlurView + tint 双层,intensity `soft`(10)/ `strong`(40) |
 | [EntryCard](/docs/components/entry-card) | 横向小卡入口(Me 屏"设置 / 关于"双列) |
-
-> BottomSheet 是纯 layout 容器,配合路由 `presentation: 'transparentModal'` 使用,无独立组件页。
 
 ## 基础令牌 {#基础令牌}
 

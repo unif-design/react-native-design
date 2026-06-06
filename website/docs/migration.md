@@ -115,7 +115,3 @@ module.exports = {
   ],
 };
 ```
-
-### 升级 @gorhom/bottom-sheet {#升级-bottom-sheet}
-
-BottomSheet 在新架构(Fabric)下需要额外的 peer:确保 `react-native-gesture-handler`(>=2)和 `react-native-reanimated`(>=4)版本符合 bottom-sheet 当前版本的 peerDependencies。升级前查阅 [@gorhom/bottom-sheet releases](https://github.com/gorhom/react-native-bottom-sheet/releases)。
