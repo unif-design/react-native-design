@@ -353,7 +353,6 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 
 ### 反馈
 - **Toast** —— 命令式 `toast()` + `<ToastHost />`,全局轻提示,自动消失。
-- **Confirm** —— 命令式 `confirm(): Promise<boolean>` + `<ConfirmHost />`,高风险二次确认(同一时间只 1 个对话框)。
 - **Empty** —— 空状态。
 - **Skeleton** —— 骨架占位,`shape='line'/'rect'/'circle'`(走 `usePulse`)。
 
@@ -365,7 +364,6 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 
 ### 其他 ui
 - **BlurLayer** —— BlurView + tint 双层,intensity `soft`(10)/ `strong`(40)。
-- **BottomSheet** —— 纯 layout 容器,配 `presentation: 'transparentModal'` 路由屏。
 - **EntryCard** —— 横向小卡入口(Me 屏"设置 / 关于"双列)。
 - **Reveal** —— 进出过渡封装(收口 web 特化)。
 

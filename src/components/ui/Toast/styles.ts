@@ -6,10 +6,10 @@ import type { ToastKind } from './types';
 export const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({
     host: {
+      // 定位(top/bottom/center)由 ToastHost 按 entry.position 注入,这里只留通用
       position: 'absolute',
       left: 0,
       right: 0,
-      bottom: space[10],
       alignItems: 'center',
       // zIndex: toast 浮层 —— 盖在 Screen 内容之上(navigator / overlay 之下)。
       // 同级兄弟节点无 z 顺序需求,但作为 absolute 浮岛对其他屏内 absolute 节点

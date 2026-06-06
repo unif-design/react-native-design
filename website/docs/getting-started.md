@@ -65,21 +65,19 @@ module.exports = {
 在 App 根组件挂载一次 `ThemeProvider`(它读 `useColorScheme()`,自动跟随系统亮暗),并按需渲染命令式 host:
 
 ```tsx
-import { ThemeProvider, ToastHost, ConfirmHost } from '@unif/react-native-design';
+import { ThemeProvider, ToastHost } from '@unif/react-native-design';
 
 export function App() {
   return (
     <ThemeProvider>
       {/* 你的导航 / 屏幕 */}
       <ToastHost />
-      <ConfirmHost />
     </ThemeProvider>
   );
 }
 ```
 
 - `ToastHost` —— 渲染 `toast.success / error / info(...)` 命令式调用的弹层。
-- `ConfirmHost` —— 渲染 `await confirm(...)` 命令式确认对话框。
 
 :::tip 完整 Provider 栈
 实战里 `ThemeProvider` 通常嵌在手势 / 键盘 / 安全区 Provider 内:`GestureHandlerRootView → KeyboardProvider → SafeAreaProvider → ThemeProvider → NavigationContainer`。骨架见[完整规范 → Quickstart](/docs/unif-design)。`ThemeProvider` 接受 `forceScheme?: 'light' | 'dark'` 强制某主题(用于测试 / 设置项接入)。
@@ -131,19 +129,9 @@ function Banner({ active }: { active: boolean }) {
 挂好 host 后,任意位置可直接调用:
 
 ```tsx
-import { toast, confirm } from '@unif/react-native-design';
+import { toast } from '@unif/react-native-design';
 
 toast.success('已保存');
-
-// confirm 返回 Promise<boolean>;title 必填,message / destructive 可选
-const ok = await confirm({
-  title: '确认注销账号?',
-  message: '注销后数据无法恢复',
-  destructive: true,
-});
-if (ok) {
-  // 用户点了确认
-}
 ```
 
 ## 下一步 {#下一步}

@@ -46,15 +46,6 @@ import { BlurLayer } from '@unif/react-native-design';
   <View>...</View>
 </View>
 
-{/* BottomSheet blur backdrop(@gorhom backdropComponent 内用) */}
-function BlurBackdrop(props) {
-  return (
-    <BottomSheetBackdrop {...props} opacity={1} style={[props.style, { backgroundColor: 'transparent' }]}>
-      <BlurLayer intensity="strong" />
-    </BottomSheetBackdrop>
-  );
-}
-
 {/* 自定义 tint override */}
 <BlurLayer intensity="soft" tint="rgba(255,255,255,0.3)" />
 ```
