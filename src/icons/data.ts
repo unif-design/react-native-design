@@ -98,6 +98,7 @@ export type IconName =
   | 'shutter-recording'
   | 'shutter'
   | 'sort'
+  | 'sound-off'
   | 'sound'
   | 'spark'
   | 'star'
@@ -1979,6 +1980,23 @@ export const ICONS: Record<IconName, IconDef> = {
       },
     ],
   },
+  'sound-off': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M11 5L6 9H3v6h3l5 4V5z',
+      },
+      {
+        kind: 'path',
+        d: 'M16 9l5 6',
+      },
+      {
+        kind: 'path',
+        d: 'M21 9l-5 6',
+      },
+    ],
+  },
   'sound': {
     strokeWidth: 1.75,
     elements: [
@@ -2467,6 +2485,7 @@ export const ICON_NAMES: IconName[] = [
   'shutter-recording',
   'shutter',
   'sort',
+  'sound-off',
   'sound',
   'spark',
   'star',
