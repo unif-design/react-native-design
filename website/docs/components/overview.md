@@ -31,6 +31,7 @@ description: "@unif/react-native-design 组件索引（40+ 组件，按场景分
 | [Avatar](/docs/components/avatar) | 单字符 monogram 头像,variant `brand`/`info`/`soft`/`neutral` |
 | [Tag](/docs/components/tag) | 状态徽章,5 语义 × 2 尺寸 |
 | [Chip](/docs/components/chip) | 胶囊形可选中 pill(Suggestion 底层) |
+| [Confirm](/docs/components/confirm) | 命令式 `confirm()` + `<ConfirmHost />` 高风险二次确认 |
 | [Thumbnail](/docs/components/thumbnail) | 16:9.5 缩略图,sm / md / lg 三档 |
 | [Loading](/docs/components/loading) | `Spinner`(reanimated 4 旋转)+ 线性进度 |
 | [Pulse](/docs/components/pulse) | `usePulse` + `<Pulse>` + `<PulseDot>`,通用脉冲底座 |
