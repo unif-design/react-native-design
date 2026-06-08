@@ -2,7 +2,7 @@
 slug: /migration
 sidebar_position: 11
 title: 升级 / 迁移
-description: "@unif/react-native-design 迁移指南：旧顶层 colors / shadow 静态导出 → 运行期 useColors() / useThemedStyles() hook（含旧 token → 新 role grep 对照），以及 reanimated 4 / bottom-sheet 升级注意。"
+description: "@unif/react-native-design 迁移指南：旧顶层 colors / shadow 静态导出 → 运行期 useColors() / useThemedStyles() hook（含旧 token → 新 role grep 对照），reanimated 4 升级，以及 0.6.0 移除 BottomSheet / Confirm。"
 ---
 
 # 升级 / 迁移
@@ -100,6 +100,22 @@ import { space, radius, type as t, fw, fontMono, motion } from '@unif/react-nati
 ---
 
 ## 版本升级注意事项 {#版本升级注意事项}
+
+### 0.6.0：移除 BottomSheet / Confirm（去 @gorhom） {#0-6-0}
+
+0.6.0 起移除了 `BottomSheet` 与 `Confirm` 组件、去掉 `@gorhom/bottom-sheet` 依赖 —— 设计系统不再内置 sheet / 命令式弹层实现，交由消费方按导航与交互需求自选：
+
+```tsx
+// ❌ 0.6.0 已移除，不再从包根导出
+import { BottomSheet, confirm } from '@unif/react-native-design';
+```
+
+迁移建议：
+
+- **底部 sheet / 弹层** → 用 React Navigation 的 `presentation: 'formSheet'`（原生 sheet，系统接管手势 / 动画 / 变暗），或自持 sheet 容器。
+- **命令式确认** → 自持 `confirm()`（pub/sub + RN `Modal`），或用 `Alert.alert`。
+
+同时 `Toast` 新增 `position`（`'top' | 'bottom' | 'center'`，默认 `'bottom'`），详见 [Toast](/docs/components/toast)。
 
 ### 升级 react-native-reanimated 4.x {#升级-reanimated-4}
 
