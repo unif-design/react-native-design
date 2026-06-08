@@ -20,6 +20,7 @@ const CATEGORIES: ReadonlyArray<Category> = [
   { name: '方向', desc: 'Direction', items: [
     'arrow-up', 'arrow-down', 'arrow-left', 'arrow-right',
     'chevron-up', 'chevron-down', 'chevron-left', 'chevron-right',
+    'undo',
   ] },
   { name: '菜单', desc: 'Menu', items: ['menu', 'more-h', 'more-v'] },
   { name: '状态', desc: 'Status', items: ['check', 'close', 'success', 'error', 'warning', 'alert', 'info'] },
