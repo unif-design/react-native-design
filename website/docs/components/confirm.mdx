@@ -1,0 +1,118 @@
+---
+sidebar_position: 6
+title: Confirm 确认对话框
+description: "命令式 await confirm() → Promise<boolean> —— 高风险操作二次确认，ConfirmHost 裸 RN Modal 底部弹层（不依赖 @gorhom），destructive 红确认按钮，同一时间仅 1 个。"
+---
+
+# Confirm 确认对话框
+
+命令式 `await confirm(...)` 返回 `Promise<boolean>`,跟 Toast 同款 imperative API,
+不需要 caller 维护 `useState / open / onClose`。背后是 `<ConfirmHost />`(裸 RN
+`Modal` + pub/sub,**不依赖 @gorhom**),App 根挂一次。
+
+## 用法
+
+```tsx
+import { confirm } from '@unif/react-native-design';
+
+const ok = await confirm({
+  title: '确认注销账号?',
+  message: '注销后所有数据将被删除,且无法恢复。',
+  confirmLabel: '确认注销',
+  destructive: true,        // 红色按钮 c.error
+});
+if (ok) doLogout();
+```
+
+## API
+
+| Prop | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `title` | `string` | — | 主标题(必传),短句:`确认注销账号?` / `确认退出登录?` |
+| `message` | `string?` | — | 说明文本(可选)1-2 句解释操作后果 |
+| `confirmLabel` | `string?` | `'确认'` | 确认按钮文案 |
+| `cancelLabel` | `string?` | `'取消'` | 取消按钮文案 |
+| `destructive` | `boolean?` | `false` | 标记破坏性操作 → 确认按钮变红(`c.error`)|
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Confirm/ConfirmHost.tsx`、`confirm.ts`、`types.ts`。
+
+`confirm()` 是命令式 API，`ConfirmOptions` 里**没有任何 a11y 入参**，a11y 全部来自底层组合：
+
+- 对话框容器走 RN 原生 `<Modal transparent animationType="slide">`，backdrop 是 `<Pressable accessibilityRole="button" accessibilityLabel="关闭">`（点击取消）。
+- 标题 / 说明用 `<Text>`（`entry.title` / `entry.message`）渲染，screen reader 可读到文字。
+- 取消 / 确认两个按钮用本库 [Button](./button) 渲染，自动带 `accessibilityRole='button'`，且 `accessibilityLabel` 取自各自的文案：取消← `cancelLabel ?? '取消'`、确认← `confirmLabel ?? '确认'`。
+
+要让 SR 读到清晰语义，给 `title`（必填）/ `confirmLabel` / `cancelLabel` 传明确文案即可；组件层无额外 a11y 旋钮。
+
+```tsx
+// title 必填即标题语义;按钮文案即按钮 a11y label
+await confirm({ title: '确认注销账号?', confirmLabel: '确认注销', destructive: true });
+```
+
+## 返回值
+
+`Promise<boolean>`:
+- `true` — 用户点确认按钮
+- `false` — 用户点取消 / 点 backdrop
+
+## 设计稿对照
+
+| 视觉态 | 规则 |
+|---|---|
+| 容器 | RN `<Modal transparent animationType="slide">` + backdrop,底部弹层卡片 |
+| 标题 | `t.heroSm`(18)+ `fw.semi` + `c.foreground` |
+| 说明 | `t.body`(15)+ `c.foregroundMuted` + `lineHeight 1.45` |
+| 按钮行 | `<Button variant="secondary" block>` 取消 + `<Button variant="primary"\|"danger" block>` 确认,横向均分 |
+
+## 主题键（Tokens）
+
+读取来源:`src/components/ui/Confirm/styles.ts`、`ConfirmHost.tsx`。
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.surface` | `useColors()` | sheet 背景色 |
+| `c.foreground` | `useColors()` | 标题文字色 |
+| `c.foregroundMuted` | `useColors()` | 说明文字色 |
+| `type.heroSm` | `@unif/react-native-design` | 标题字号(18) |
+| `type.body` | `@unif/react-native-design` | 说明字号(15) |
+| `fw.semi` | `@unif/react-native-design` | 标题字重 |
+| `space['9']` / `space['4']` / `space['5']` / `space['7']` | `@unif/react-native-design` | sheet / actions 内边距与 gap |
+
+## 业务消费示例
+
+- **注销账号**(`AccountSecurity.tsx`)— `destructive: true`,取消则不调用注销 API
+- **退出登录**(`Setting.tsx`)— `destructive: true`,取消则保持 `authed=true`
+- 未来:删除会话 / 取消订单 / webview 跳转前提示(根据 UX 决策)
+
+## 业务侧 loading
+
+`confirm()` 立即关闭对话框 + resolve,**不内置 loading**。caller 自行处理:
+
+```tsx
+const [loggingOut, setLoggingOut] = useState(false);
+
+const handleLogout = async () => {
+  const ok = await confirm({ title: '确认退出?', destructive: true });
+  if (!ok) return;
+  setLoggingOut(true);
+  try {
+    await logout();
+  } catch {
+    setLoggingOut(false);
+  }
+};
+
+// 在 cell title 上展示 "退出中…" + disabled
+```
+
+## 不要
+
+- ❌ 不要嵌套 confirm(同一时间只允许 1 个,新请求被拒绝 + dev warn)
+- ❌ 不要把"信息提示"用 confirm(用 `toast()`),confirm 只用于"用户决策"
+- ❌ 不要假设 confirm 一直在等(用户切屏 / app suspend 可能让 promise hang,关键路径上做超时保护)
+
+## 关联组件
+
+- [Toast](/docs/components/toast)— 单向反馈(不需用户决策)

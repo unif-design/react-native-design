@@ -113,6 +113,7 @@ const sidebars: SidebarsConfig = {
         'components/blur-layer',
         'components/entry-card',
         'components/chip',
+        'components/confirm',
       ],
     },
   ],

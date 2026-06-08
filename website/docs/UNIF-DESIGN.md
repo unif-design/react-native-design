@@ -331,6 +331,7 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 - **Avatar** —— 单字符 monogram。variant:`brand` / `info` / `soft` / `neutral`;size:`xs`(18)/ `sm`(28)/ `md`(32)/ `lg`(40)/ `xl`(56)。
 - **Tag** —— 状态徽章,5 语义 × 2 尺寸(`md` / `lg`)。
 - **Chip** —— 胶囊形可选中 pill;`selected` 切主色边框 / 文本;可带 leading / trailing。Suggestion 底层。
+- **Confirm** —— 命令式 `confirm(): Promise<boolean>` + `<ConfirmHost />`,高风险二次确认(同一时间只 1 个对话框;裸 RN Modal + pub/sub,不依赖 @gorhom)。
 - **Thumbnail** —— 16:9.5 缩略图,`sm 64×40 / md 113×67 / lg 160×96`。
 - **Loading** —— `Spinner`(reanimated 4 旋转)+ 线性进度。
 - **Pulse** —— `usePulse` + `<Pulse>` + `<PulseDot>`,reanimated 4 worklet 通用脉冲。Skeleton / Shimmer / Reasoning 等建立其上。

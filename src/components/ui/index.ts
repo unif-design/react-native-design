@@ -14,6 +14,8 @@ export { Checkbox } from './Checkbox';
 export type { CheckboxProps } from './Checkbox';
 export { Chip } from './Chip';
 export type { ChipProps } from './Chip';
+export { confirm, ConfirmHost } from './Confirm';
+export type { ConfirmOptions } from './Confirm';
 export { DrawerHeader } from './DrawerHeader';
 export type { DrawerHeaderProps } from './DrawerHeader';
 export { Empty } from './Empty';
