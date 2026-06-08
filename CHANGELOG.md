@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.8.0](https://github.com/unif-design/react-native-design/compare/v0.7.1...v0.8.0) (2026-06-08)
+
+
+### Features
+
+* **icons:** add sound-off + undo icons ([#69](https://github.com/unif-design/react-native-design/issues/69)) ([4e03d4e](https://github.com/unif-design/react-native-design/commit/4e03d4ebf00c4b6f8270d932ec8c781e5e1f1585))
+
 ## [0.7.1](https://github.com/unif-design/react-native-design/compare/v0.7.0...v0.7.1) (2026-06-08)
 
 # [0.7.0](https://github.com/unif-design/react-native-design/compare/v0.6.0...v0.7.0) (2026-06-08)
