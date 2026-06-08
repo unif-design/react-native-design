@@ -5,5 +5,6 @@ export * from './theme';
 export * from './icons';
 export * from './utils/testID';
 export * from './utils/logger';
+// 组件按 ui(基础)· business(业务)分层导出。
 export * from './components/ui';
 export * from './components/business';
