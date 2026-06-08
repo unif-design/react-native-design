@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.7.0](https://github.com/unif-design/react-native-design/compare/v0.6.0...v0.7.0) (2026-06-08)
+
+
+### Features
+
+* **ui:** 恢复 confirm/ConfirmHost(裸 Modal 版,去 [@gorhom](https://github.com/gorhom)) ([#66](https://github.com/unif-design/react-native-design/issues/66)) ([5959980](https://github.com/unif-design/react-native-design/commit/5959980d65ff3c58d391c2623723e1e38bb53028))
+
 # [0.6.0](https://github.com/unif-design/react-native-design/compare/v0.5.1...v0.6.0) (2026-06-06)
 
 
