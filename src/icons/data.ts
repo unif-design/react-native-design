@@ -112,6 +112,7 @@ export type IconName =
   | 'tag'
   | 'thinking'
   | 'trash'
+  | 'undo'
   | 'upload'
   | 'user'
   | 'users-search'
@@ -2275,6 +2276,19 @@ export const ICONS: Record<IconName, IconDef> = {
       },
     ],
   },
+  'undo': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M9 14 4 9l5-5',
+      },
+      {
+        kind: 'path',
+        d: 'M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5 5.5 5.5 0 0 1-5.5 5.5H11',
+      },
+    ],
+  },
   'upload': {
     strokeWidth: 1.75,
     elements: [
@@ -2499,6 +2513,7 @@ export const ICON_NAMES: IconName[] = [
   'tag',
   'thinking',
   'trash',
+  'undo',
   'upload',
   'user',
   'users-search',
