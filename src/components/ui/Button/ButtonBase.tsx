@@ -84,7 +84,11 @@ export function ButtonBase({
           borderWidth: palette.border ? 1 : 0,
           opacity: disabled ? 0.5 : pressed ? 0.7 : 1,
           alignSelf: block ? 'stretch' : 'flex-start',
-          flexGrow: block ? 1 : 0,
+          // 非 block 用 undefined 而非硬编码 0:Yoga 的 resolveFlexGrow 里显式 flexGrow
+          // 优先级高于 flex 简写,写死 0 会让调用方 style={{ flex: 1 }} 失效(按钮撑不开 /
+          // 并排塌成 padding 宽裁掉 label)。undefined → 仍走 Yoga 默认 0(普通态零变化),
+          // 但把 flex / flexGrow 的控制权交还给末尾 merge 的 style。撑满优先仍推荐用 block。
+          flexGrow: block ? 1 : undefined,
           gap: sizing.gap,
         },
         style,
