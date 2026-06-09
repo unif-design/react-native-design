@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/unif-design/react-native-design/compare/v0.8.0...v0.8.1) (2026-06-09)
+
+
+### Bug Fixes
+
+* **button:** 非 block 用 flexGrow undefined，放行 style 的 flex 覆盖 ([#70](https://github.com/unif-design/react-native-design/issues/70)) ([8779a92](https://github.com/unif-design/react-native-design/commit/8779a925429aa830a1cbf9e91a7da25374678a64))
+
 # [0.8.0](https://github.com/unif-design/react-native-design/compare/v0.7.1...v0.8.0) (2026-06-08)
 
 
