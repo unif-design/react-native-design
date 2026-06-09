@@ -72,8 +72,8 @@ export const App = () => (
 - **文档站**(快速开始 · 组件 API · 设计令牌 · 设计原则):https://unif-design.github.io/react-native-design/
 - **AI / LLM**(纯 Markdown,按需 fetch,别凭记忆猜 API):
   [llms.txt 索引](https://unif-design.github.io/react-native-design/llms.txt) · [llms-full.txt 全文](https://unif-design.github.io/react-native-design/llms-full.txt)
-- **Agent Skill** `using-unif-design`(覆盖组件 API、token 规则、与原生 RN 的关键差异):
-  `/plugin marketplace add unif-design/react-native-skills` → `/plugin install unif-react-native@unif-react-native-skills`
+- **Agent Skill** `unif-design`(覆盖组件 API、token 规则、与原生 RN 的关键差异):
+  `/plugin marketplace add unif-design/skills` → `/plugin install unif@unif-skills`
 
 ## 兼容性
 
