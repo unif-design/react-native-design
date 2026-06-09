@@ -1,8 +1,5 @@
 # CLAUDE.md
 
-<!-- Cross-agent rules live in AGENTS.md (Cursor / Codex / Copilot read it directly). Claude Code does not read AGENTS.md, so CLAUDE.md imports it below. -->
-@AGENTS.md
-
 ## 仓库定位
 
 `@unif/react-native-design` —— React Native 设计系统,包含 theme + icons + utils + UI 组件 + 少量通用业务复合组件。目标运行时:**RN 0.85 新架构**(Fabric + concurrent React)、React 19、TypeScript 6。
@@ -34,6 +31,8 @@ yarn example android  # 构建并跑 Android
 
 ## 架构
 
+改 / 加组件、token、icon、util 前先看本节对应小节,确认放哪、跟哪个约定走。
+
 ### 对外暴露(`src/index.tsx`)
 
 包的 barrel 重新导出:
@@ -52,11 +51,21 @@ yarn example android  # 构建并跑 Android
 ### Theme 系统(`src/theme/`)
 
 - **`ThemeProvider`** 读 `useColorScheme()`,只以 `scheme` 为依赖 `useMemo` 出 `{ scheme, colors, shadow }` —— 这个稳定引用是 `useThemedStyles` 缓存生效的契约。
-- **`useThemedStyles(maker)`** —— `maker: (colors, shadow) => StyleSheet`。**`maker` 必须定义在模块顶层**(从 `styles.ts` 导出),绝不要写在组件里 inline 内联。inline 写法每次渲染都是新引用,直接打穿 `useMemo([colors, shadow, maker])` 缓存。
-- **颜色 token** 是 role-based(`primary`、`surfaceContainer`、`foregroundMuted`、`glassTintLight`……)。暗色切换的是同一个 role 后面的 hex。很多 alpha 值在亮/暗之间故意不同(`colors.ts` 有逐条注释)—— 不要"归一化"它们。
-- **Shadow token** 在暗色下把*大多数* key 的 `shadowOpacity`/`elevation` 置零:暗色用 `surface*` 5 层亮度阶梯表达深度,而不是 shadow。例外项(`floating`、`glassBar`、`brandAvatar`)都明确注释了原因 —— 新加 shadow 时保持这个模式。
-- **缩放(`r`、`rf`)** —— `r(n)` 走 `PixelRatio.roundToNearestPixel`(避免 @3x 屏 0.5px 缝隙)。`rf(n)` 字号 moderate 缩放,系数 `0.3`(对中文字号最友好)。设计基准宽 = `402pt`(iPhone 17 Pro)。**`fixed.*` 物理常量(`hitTarget`、`navbarH`、`tabbarH`、`hairline`)不参与缩放** —— 不要再套 `r()`。
-- `palettes.ts` 用于*渐变序列* —— 那些塞不进 role-based `ColorTokens` 的设计调色板(如 4 stop `warmOrangePalette.light/dark`)。新加 palette 走这里,不要往 `colors.ts` 塞。
+- **`useThemedStyles(maker)`** —— `maker: (colors, shadow) => StyleSheet`,**必须**定义在模块顶层(从 `styles.ts` 导出),绝不写在组件里 inline 内联。
+
+  > 为什么 — inline `maker` 每次渲染都是新引用 → 直接打穿 `useMemo([colors, shadow, maker])` 缓存。
+
+- **颜色 token** —— role-based(`primary`、`surfaceContainer`、`foregroundMuted`、`glassTintLight`……)。
+  - **暗色** 切换的是同一个 role 后面的 hex。
+  - **别归一化** alpha:很多 alpha 值在亮/暗之间故意不同(`colors.ts` 有逐条注释)。
+- **Shadow token** —— 暗色下把*大多数* key 的 `shadowOpacity`/`elevation` 置零。
+  - **默认** 暗色用 `surface*` 5 层亮度阶梯表达深度,而不是 shadow。
+  - **例外** `floating`、`glassBar`、`brandAvatar` 都明确注释了原因 —— 新加 shadow 时保持这个模式。
+- **缩放(`r`、`rf`)** —— 设计基准宽 = `402pt`(iPhone 17 Pro)。
+  - `r(n)` 走 `PixelRatio.roundToNearestPixel`(避免 @3x 屏 0.5px 缝隙)。
+  - `rf(n)` 字号 moderate 缩放,系数 `0.3`(对中文字号最友好)。
+  - **不缩放** `fixed.*` 物理常量(`hitTarget`、`navbarH`、`tabbarH`、`hairline`)—— 不要再套 `r()`。
+- **`palettes.ts`** —— *渐变序列* 专用,那些塞不进 role-based `ColorTokens` 的设计调色板(如 4 stop `warmOrangePalette.light/dark`)。新加 palette 走这里,不要往 `colors.ts` 塞。
 
 ### 组件约定
 
@@ -72,28 +81,51 @@ ComponentName/
 
 共用模式:
 
-- **`sizingFor(size)` + `paletteFor(variant, colors)`** —— `styles.ts` 里的纯函数,分别返回 `{ h, px, fs, br, gap }` 和 `{ bg, fg, border }`。加新 size/variant 的流程:`types.ts` 扩 union → 这两个函数里加 `case`。`Button`、`Avatar`、`Tag` 等都遵循此约定。
-- **`ButtonBase`** 是 `Button` / `IconButton` 共享的内部 primitive。它用 **render-prop `children`** 把 `{ sizing, palette }` 暴露给调用方,调用方自行组合内容(Icon + Text)。新的按钮型组件不要在 `ButtonBase` 外重复 chrome(Pressable / 尺寸 / palette / a11y)。
-- **命令式 API**(`toast()`、`confirm()`)用一个模块级 `Set<Subscriber>` 注册表,配合在 app 根附近渲染一次的 `<ToastHost />` / `<ConfirmHost />`。`confirm()` 强制同一时间只有 1 个对话框,重入直接 `Promise.resolve(false)`。
-- **`*.web.tsx` 兄弟文件**(如 `BlurLayer.web.tsx`)提供 web 特化实现 —— Metro / bob 按平台自动选。
-- **`ui/` vs `business/`** —— `ui/` 原子且无业务上下文。`business/` 是复合的,但*仍保持通用* —— 任何耦合 navigation / store / 业务流程(SMS 验证码、屏幕布局)的东西留在消费者仓库,不要进这里。
+- **`sizingFor(size)` + `paletteFor(variant, colors)`** —— `styles.ts` 里的纯函数,分别返回 `{ h, px, fs, br, gap }` 和 `{ bg, fg, border }`。
+  - **谁用** `Button`、`Avatar`、`Tag` 等都遵循此约定。
+  - **加 size/variant** `types.ts` 扩 union → 这两个函数里加 `case`。
+- **`ButtonBase`** —— `Button` / `IconButton` 共享的内部 primitive。
+  - 用 **render-prop `children`** 把 `{ sizing, palette }` 暴露给调用方,调用方自行组合内容(Icon + Text)。
+  - 新的按钮型组件**不要**在 `ButtonBase` 外重复 chrome(Pressable / 尺寸 / palette / a11y)。
+- **命令式 API**(`toast()`、`confirm()`)—— 模块级 `Set<Subscriber>` 注册表,配合在 app 根附近渲染一次的 `<ToastHost />` / `<ConfirmHost />`。`confirm()` 强制同一时间只有 1 个对话框,重入直接 `Promise.resolve(false)`。
+- **`*.web.tsx` 兄弟文件**(如 `BlurLayer.web.tsx`)—— web 特化实现,Metro / bob 按平台自动选。
+- **`ui/` vs `business/`**:
+  - **`ui/`** 原子且无业务上下文。
+  - **`business/`** 复合,但*仍保持通用* —— 任何耦合 navigation / store / 业务流程(SMS 验证码、屏幕布局)的东西留在消费者仓库,不要进这里。
 
 ### Icons
 
-- `src/icons/data.ts` 由 `scripts/build-icons.js` 从 `src/icons/svg/*.svg` 生成,**不要手改**(头部有 `AUTO-GENERATED — DO NOT EDIT BY HAND`)。脚本零依赖纯 regex,只识别 `<path>` / `<rect>` / `<circle>` 元素 + `fill="currentColor"`,其它(polyline / polygon)请先在 SVG 里转 path。
-- 加图标流程:扔 SVG 到 `src/icons/svg/` → `node scripts/build-icons.js` → `yarn lint --fix`(prettier 把 `IconName` union 从单行拆成分行,符合现有风格)→ `yarn typecheck`。`IconName` 是闭集,组件 prop `IconName` 类型会自动同步。
-- SVG 规范:`viewBox="0 0 24 24"`、`stroke="currentColor"`、`stroke-width="1.75"`、`stroke-linecap="round"`、`stroke-linejoin="round"`。`Icon.tsx` 把 `fill: 'currentColor'` 替换为当前 stroke 色,使生成的 path 继承主题色。
+- **`src/icons/data.ts` 是生成物,不要手改**(头部有 `AUTO-GENERATED — DO NOT EDIT BY HAND`)—— `scripts/build-icons.js` 从 `src/icons/svg/*.svg` 生成。
+  - **限制** 脚本零依赖纯 regex,只识别 `<path>` / `<rect>` / `<circle>` 元素 + `fill="currentColor"`;其它(polyline / polygon)请先在 SVG 里转 path。
+- **加图标流程** —— 扔 SVG 到 `src/icons/svg/` → `node scripts/build-icons.js` → `yarn lint --fix`(prettier 把 `IconName` union 从单行拆成分行,符合现有风格)→ `yarn typecheck`。`IconName` 是闭集,组件 prop `IconName` 类型会自动同步。
+- **SVG 规范** —— `Icon.tsx` 把 `fill: 'currentColor'` 替换为当前 stroke 色,使生成的 path 继承主题色。属性要求:
+
+  | 属性 | 值 |
+  | --- | --- |
+  | `viewBox` | `0 0 24 24` |
+  | `stroke` | `currentColor` |
+  | `stroke-width` | `1.75` |
+  | `stroke-linecap` | `round` |
+  | `stroke-linejoin` | `round` |
 
 ### Utils
 
-- **`createLogger(scope)`** —— 每个模块一次(`const log = createLogger('Icon')`)。level:`debug | info | warn | error`。默认 `__DEV__` 下 `debug`、生产 `warn`。自定义 transport 通过 `addTransport(t)` 接入(每个 transport 带 `id`,再次 add 时按 id 去重)。**transport 抛错由调用方静默吞掉** —— 日志不能拖累业务。
+- **`createLogger(scope)`** —— 每个模块一次(`const log = createLogger('Icon')`)。
+  - **level** `debug | info | warn | error`;默认 `__DEV__` 下 `debug`、生产 `warn`。
+  - **transport** 通过 `addTransport(t)` 接入(每个 transport 带 `id`,再次 add 时按 id 去重)。
+  - **抛错静默** transport 抛错由调用方静默吞掉 —— 日志不能拖累业务。
 - **`childTestID(parent, id, override?)`** —— 列表型组件(Tabs、Segmented、Grid……)拼 `parent-childId` 的标准助手。用它替代 inline 的 `?? \`${parent}-${id}\`` 三元。
 
 ### 测试
 
-- 测试文件放在仓库根 `__tests__/`,**不**与源码 colocate,目录结构镜像 `src/`(`__tests__/theme/`、`__tests__/utils/`……)。
-- 当前只覆盖**纯逻辑 utility**(`scale` / `logger` / `childTestID`)。**design 层不重复测组件行为** —— 组件用法由消费者层(portal)的集成测试 cover,在这里写组件 snapshot 是冗余。新增测试时遵循这条边界,只补纯函数 / hook 逻辑。
-- `package.json` 的 `jest.testEnvironment: 'node'` 显式覆盖 `@react-native/jest-preset` 默认的 RN env —— 原因:RN 0.85 preset 内置 `jest-environment-node@29` 跟顶层 `jest@30` mismatch,`resetModules` 时报 `clearMocksOnScope is not a function`。等真要测 RN 组件时再考虑切回 / 隔离 preset。
+- **位置** —— 仓库根 `__tests__/`,**不**与源码 colocate,目录结构镜像 `src/`(`__tests__/theme/`、`__tests__/utils/`……)。
+- **只覆盖纯逻辑 utility**(`scale` / `logger` / `childTestID`)。**design 层不重复测组件行为** —— 新增测试时遵循这条边界,只补纯函数 / hook 逻辑。
+
+  > 为什么 — 组件用法由消费者层(portal)的集成测试 cover → 在这里写组件 snapshot 是冗余。
+
+- **jest env** —— `package.json` 的 `jest.testEnvironment: 'node'` 显式覆盖 `@react-native/jest-preset` 默认的 RN env;等真要测 RN 组件时再考虑切回 / 隔离 preset。
+
+  > 为什么 — RN 0.85 preset 内置 `jest-environment-node@29` 跟顶层 `jest@30` mismatch → `resetModules` 时报 `clearMocksOnScope is not a function`。
 
 ### TypeScript 严格度
 
@@ -111,13 +143,18 @@ ComponentName/
 
 `package.json#exports` 把 `.` 映射到 `source: src/index.tsx`(workspace 消费者)+ `default: lib/module/index.js` + `types: lib/typescript/src/index.d.ts`。不要破坏这个三元组。
 
-## 文档与 API 指针
+## 文档与 skill 同步
 
-逐组件 API / props / variant / size 的**单一真相源是 `website/docs/`**,经 `website/scripts/build-llms.js` 生成站点 + `llms.txt`/`llms-full.txt`。改组件就同步改对应 `website/docs/components/<name>.mdx`,**不要**把全量 API 复制进 CLAUDE.md 或代码注释。
+改组件 / API / 类型、或想知道消费者怎么接入本库时看这里。
 
-- 文档站:https://unif-design.github.io/react-native-design/
-- AI 按需 fetch:`llms.txt`(索引)/ `llms-full.txt`(全文)
-- 消费者 / AI 用法约定见 `AGENTS.md`(本文件顶部已 import)
+- **逐组件 API / props / variant / size 全量** → 文档站 + 远程 llms.txt(按需 fetch,**不在本仓正文镜像**):
+  - 文档站:https://unif-design.github.io/react-native-design/
+  - llms 索引:https://unif-design.github.io/react-native-design/llms.txt
+  - llms 全文:https://unif-design.github.io/react-native-design/llms-full.txt
+- **website docs 是 llms.txt 的唯一来源** —— 改了组件 / API / 类型,**同步改对应 `website/docs/components/<name>.mdx`** 再 `yarn workspace website build:llms` 重生成(`website/scripts/build-llms.js`),否则 AI 读到的会过时。**不要**把全量 API 复制进 CLAUDE.md 或代码注释。
+- **改 API 也要同步消费侧 skill** —— skill `unif-design`(`unif-design/skills` 仓 `skills/unif-design/SKILL.md`):**手写部分**(快速开始 / 坑 / `assets/` 模板)手动改;**全量 props** 已路由 llms.txt,随 docs 自动跟随。
+- **作为消费者接入** → Agent Skill `unif-design`(`unif` 插件),装:`/plugin marketplace add unif-design/skills` → `/plugin install unif@unif-skills`。经核实的组件 API / token 规则 / 与原生 RN 的关键差异,是接入侧首选入口。
+- CI / release / native-lint 约定见 `README` + `.github/`。
 
 ## 自动化流程标准
 
