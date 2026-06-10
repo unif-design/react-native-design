@@ -85,7 +85,6 @@ yarn add react-native-svg \
   react-native-worklets \
   react-native-safe-area-context \
   react-native-reanimated-carousel \
-  @gorhom/bottom-sheet \
   @sbaiahmed1/react-native-blur
 ```
 

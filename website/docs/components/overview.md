@@ -35,6 +35,7 @@ description: "@unif/react-native-design 组件索引（40+ 组件，按场景分
 | [Thumbnail](/docs/components/thumbnail) | 16:9.5 缩略图,sm / md / lg 三档 |
 | [Loading](/docs/components/loading) | `Spinner`(reanimated 4 旋转)+ 线性进度 |
 | [Pulse](/docs/components/pulse) | `usePulse` + `<Pulse>` + `<PulseDot>`,通用脉冲底座 |
+| [Reveal](/docs/components/reveal) | 入/出场淡入容器,收口 reanimated layout 动画的 web 特化 |
 | [StatusDot](/docs/components/status-dot) | `done`/`active`/`pending` 圆点,`flat`/`soft` 双 tone |
 
 ## 表单 {#表单}
