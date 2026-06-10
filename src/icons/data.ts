@@ -2274,6 +2274,14 @@ export const ICONS: Record<IconName, IconDef> = {
         kind: 'path',
         d: 'M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13',
       },
+      {
+        kind: 'path',
+        d: 'M10 11v6',
+      },
+      {
+        kind: 'path',
+        d: 'M14 11v6',
+      },
     ],
   },
   'undo': {
