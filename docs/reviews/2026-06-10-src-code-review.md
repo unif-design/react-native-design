@@ -21,6 +21,7 @@
 | `src/components/ui/Spinner/Spinner.tsx:24-36 ↔ src/components/ui/Spinner/Spinner.web.tsx:46-60` | 重复 | Medium | | jscpd #5(13 行/110 token,单笔最大 token 克隆):入参防御逻辑在 native/web 双实现逐行重复 —— `size`/`thickness` 的 `Number.isFinite` 校验、两条 `log.warn` 中文文案、`safeSize`/`safeThickness` 钳制。属行为性逻辑而非样板:钳制规则或文案改动需两端同步,漂移即两端运行时行为不一致。 | 抽 `Spinner/shared.ts` 导出 `sanitizeSpinnerProps(size, thickness)`(校验 + warn + 钳制一体),两端消费,渲染保持平台分叉 |
 | `src/components/ui/Switch/Switch.tsx:11-38、:63-76 ↔ src/components/ui/Switch/Switch.web.tsx:3-35、:49-62`(jscpd #6/#7 合并) | 重复 | Medium | | 2 笔克隆共 42 行/171 token,文件对累计最大:(a)动画端点常量 `THUMB_OFF_X`/`THUMB_ON_X` 的 `r()` 推导连同推导注释整段两端复制,而其依赖 `INSET`/`TRACK_W`/`THUMB` 本就由 `styles.ts` 导出,派生常量却未收口;(b)`Pressable` 外壳(onPress 翻转、disabled、hitSlop 6、a11y switch role/state、testID)两端逐行一致。 | (a)`THUMB_OFF_X`/`THUMB_ON_X` 移入 `styles.ts` 与 INSET 等同源导出;(b)评估抽共享 Pressable 外壳,两端只分叉 track/thumb 动画实现 |
 | `src/components/ui/Toast/ToastHost.tsx:11-28 ↔ src/components/ui/Toast/ToastHost.web.tsx:3-23` | 重复 | Medium | | jscpd #8(18 行/71 token):host 开场段重复 —— theme/styles/`_subs`/types import + 函数签名 + `useColors`/`useThemedStyles`/state hooks。另经核读,克隆区下方紧邻的 `_subs` 订阅 effect(native :34-43 ↔ web :29-37)亦两端同构(仅 native 多 clearTimeout 一行——系刻意架构分歧:web 端 timer 清理移入 entry effect cleanup,抽共享 hook 须把 timer 处理留在平台侧或暴露回调),jscpd 因 token 数不足未报。 | 评估把订阅与 entry state 抽共享 hook(如 `useToastEntry`),两端只分叉动画渲染;若判平台分叉约定豁免,Task 14 定 |
+| `src/components/index.ts:1-2`(整文件) | 解耦 | Medium | | madge --orphans 报 8 个孤儿,7 个经排除流程判误报(根入口 1 + `*.web.*` 平台变体 6),本文件是唯一真孤儿(疑似死代码):src 内零 import —— 根 barrel `src/index.tsx:9-10` 直接 re-export `./components/ui` 与 `./components/business`,绕过本文件;包外亦零引用 —— `package.json#exports` 无 `./components` 子路径,example/website 全仓 grep 深路径 0 命中(example 全部从包根 import),jest/babel 配置无模块映射。git 史:`b090723`(phase 2+3 迁移)引入后零改动,且全历史 `src/index.tsx` 从未 import 过 `./components` → 自引入起即未被使用。完整证据链见 §3.2。 | 删除 `src/components/index.ts`(2 行 re-export barrel,无任何契约内可达路径);不建议反向「改走它」——那会为零消费者多加一跳 re-export,且与根 barrel 直连 ui/business 的现行结构相悖;若日后想要 `components` 聚合入口,再按需重建并让根 barrel 经它 re-export |
 
 ### 2.2 定稿发现(Task 14/15 按严重度分组填入)
 
@@ -73,6 +74,62 @@ yarn dlx jscpd src --ignore-pattern "**/data.ts" --min-tokens 50 --reporters con
 - **入台账:8 对 → §2.1 共 7 行**(#6/#7 同属 `Switch.tsx ↔ Switch.web.tsx` 同一文件对、同一成因,合并 1 行)。其中 5 对(#2、#5、#6、#7、#8)是 `*.tsx ↔ *.web.tsx` 平台兄弟文件之间的重复 —— 平台分叉本身是仓库约定(CLAUDE.md「`*.web.tsx` 兄弟文件」),但分叉内被克隆的逻辑/常量是否应抽公共模块,台账逐对给出证据,留 Task 14 权衡。
 
 ### 3.2 madge(循环依赖 / 孤儿)
+
+**实际命令**(`yarn dlx` 解析到 madge 8.0.0;两查询按计划分两次运行;src 内全部相对路径 import、无 `@/` 别名,默认解析即可全量定位,未需 `--ts-config`):
+
+```sh
+yarn dlx madge --circular --extensions ts,tsx src
+yarn dlx madge --orphans --extensions ts,tsx src
+```
+
+两次均 `Processed 195 files`,与 `find src -type f \( -name "*.ts" -o -name "*.tsx" \) | wc -l` = 195 一致 → 覆盖 src 全量 ts/tsx(含 §3.1 jscpd 排除的 `data.ts`;jscpd 的「128 文件」是其自身统计口径,与此无冲突)。
+
+**循环依赖** — 原始输出:
+
+```
+✔ No circular dependency found!
+```
+
+0 环,无台账项。
+
+**孤儿模块** — 原始输出(8 个,madge 输出为相对 `src/` 路径):
+
+```
+components/index.ts
+components/ui/BlurLayer/BlurLayer.web.tsx
+components/ui/Pulse/usePulse.web.ts
+components/ui/Reveal/Reveal.web.tsx
+components/ui/Spinner/Spinner.web.tsx
+components/ui/Switch/Switch.web.tsx
+components/ui/Toast/ToastHost.web.tsx
+index.tsx
+```
+
+**逐个判读**(排除流程:① 根入口 / ② package.json 字段引用 / ③ example、website workspace 引用 / ④ 平台变体 / ⑤ jest、babel 配置引用;全过 8 项,误报 7 + 真孤儿 1):
+
+| Orphan(相对 src/) | 判定 | 排除理由 |
+| --- | --- | --- |
+| `index.tsx` | 误报 | ① 根入口;② `package.json#exports["."]` 的 `source` 直指 `./src/index.tsx`、`main`/`types` 指向其 bob 构建产物,`tsconfig.paths` 亦把包名映射到 `./src/index` —— 包的对外入口,src 内无人 import 是设计使然 |
+| `components/ui/BlurLayer/BlurLayer.web.tsx` | 误报 | ④ 平台变体:native 兄弟 `BlurLayer.tsx` 同目录存在,目录内 `index.ts` 以无后缀 `./BlurLayer` import,Metro / bob 按平台后缀解析,madge 不认 `.web` 后缀、固定解析到 native 版 → `*.web.*` 必然报孤儿 |
+| `components/ui/Pulse/usePulse.web.ts` | 误报 | ④ 同上,native 兄弟 `usePulse.ts` 存在 |
+| `components/ui/Reveal/Reveal.web.tsx` | 误报 | ④ 同上,native 兄弟 `Reveal.tsx` 存在 |
+| `components/ui/Spinner/Spinner.web.tsx` | 误报 | ④ 同上,native 兄弟 `Spinner.tsx` 存在 |
+| `components/ui/Switch/Switch.web.tsx` | 误报 | ④ 同上,native 兄弟 `Switch.tsx` 存在 |
+| `components/ui/Toast/ToastHost.web.tsx` | 误报 | ④ 同上,native 兄弟 `ToastHost.tsx` 存在 |
+| `components/index.ts` | **真孤儿** | ①–⑤ 逐项排除均不命中,证据见下 |
+
+**真孤儿证据链 — `src/components/index.ts`**(整文件仅 2 行:`export * from './ui'; export * from './business';`):
+
+- ① 非根入口(根入口是 `src/index.tsx`)。
+- ② package.json 各字段不引用:`exports` 仅映射 `.`、`./package.json`、`./docs-home.css`,无 `./components` 子路径;`main`/`types` 指向根入口产物;bob `source: src` 是整目录构建配置、不构成对单文件的引用。
+- ③ workspace 零引用:`grep -rn "components/index"` 全仓(仅排除 node_modules / lib / .yarn / .git / 本审查自身产物 docs/reviews、docs/plans)0 命中;example/src 对本包的 import 全部是 `from '@unif/react-native-design'` 包根形式(子路径 import grep 0 命中);example + website 内 `design/(src|components|lib)` 深路径 grep 0 命中。
+- ④ 非平台变体(无 `.web` 后缀亦无对应变体)。
+- ⑤ jest 配置(package.json#jest 仅 preset / testEnvironment / 路径忽略项)与 babel.config.js(仅两段 presets,无模块映射)均不引用。
+- 旁证:src 内绕过它的原因是根 barrel `src/index.tsx:9-10` 直接 `export * from './components/ui'` + `'./components/business'`;git 史上该文件由 `b090723`(phase 2+3 迁移)引入后零改动,且 `git log --all -S "from './components'"` 对 `src/index.tsx` 全历史 0 命中 → 根入口从未经由它 re-export,自引入起即未被使用。
+
+**度量边界**(与 §3.1「0 对」边界句同理,防止「0 环 + 1 孤儿」被外推成「解耦无问题」):(a)孤儿判定是**文件级**入边检查——可达文件内 export 级的未使用代码不在本结论范围,且本次审查没有任务覆盖该粒度(madge/jscpd 均不查,深读 checklist 亦未列专项);(b)**0 环 ≠ 分层方向合规**——`ui → business` 这类越层 import 只要不构成环,`--circular` 不会报,方向合规由 Task 13 Step 3 的 grep 专项核查。两点加强语:madge 8 默认跟随 `import type` 边(实测双 type-import 互引即报环),故「0 环」已含类型层;src 内 grep 动态 import/require 为 0(命中均为注释),静态图即全图。另一条现成推论供 Task 13 复用:孤儿清单不含任何组件级 `index.ts` → 不存在整组件目录从 barrel 体系脱链,「漏导出」核查可收窄为 barrel 内 named export 完整性。
+
+→ 记入 §2.1:真孤儿 1 项(Medium,维度=解耦);环 0 项。
 
 ### 3.3 eslint 复杂度热点
 
