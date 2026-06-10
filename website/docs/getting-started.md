@@ -38,14 +38,13 @@ yarn add react-native-svg \
   react-native-worklets \
   react-native-safe-area-context \
   react-native-reanimated-carousel \
-  @gorhom/bottom-sheet \
   @sbaiahmed1/react-native-blur
 ```
 
 iOS 装完原生包后,在 `ios/` 目录执行 `bundle exec pod install`。
 :::
 
-> 版本下限(来自 `package.json#peerDependencies`):`react-native-reanimated >=4`、`react-native-worklets >=0.9`、`react-native-gesture-handler >=2`、`react-native-safe-area-context >=5`、`react-native-svg >=15`、`react-native-reanimated-carousel >=5.0.0-beta.0`、`@gorhom/bottom-sheet >=5`、`@sbaiahmed1/react-native-blur >=4`。
+> 版本下限(来自 `package.json#peerDependencies`):`react-native-reanimated >=4`、`react-native-worklets >=0.9`、`react-native-gesture-handler >=2`、`react-native-safe-area-context >=5`、`react-native-svg >=15`、`react-native-reanimated-carousel >=5.0.0-beta.0`、`@sbaiahmed1/react-native-blur >=4`。
 
 ### 3. 配 babel(worklets 插件必须最后)
 

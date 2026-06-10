@@ -1,0 +1,95 @@
+---
+sidebar_position: 6
+title: Reveal
+description: "内容入/出场淡入淡出容器 —— native 走 reanimated FadeIn/FadeOut layout 动画,web 自动切到 CSS transition 特化(RN-Web 上 reanimated layout 动画运行时会崩)。共享代码做进出过渡一律用它,不要直接写 FadeIn/FadeOut。"
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Reveal, Tag } from '@unif/react-native-design';
+
+# Reveal
+
+内容**入 / 出场淡入淡出**容器。把会"出现 / 消失"的内容包进 `<Reveal>`,挂载时淡入、卸载时淡出:
+
+- **native**(RN app)走 `react-native-reanimated` 的 `FadeIn` / `FadeOut` layout 动画。
+- **web**(react-native-web)自动切到 `Reveal.web.tsx` —— 用 React state + CSS transition 复刻入场淡入(退场省略,卸载即移除)。
+
+它存在的核心理由:**reanimated 4 的 layout 动画在 react-native-web 运行时会崩**(`layoutReanimation/web` 的 `_updatePropsJS` 里 `Object.keys` 抛 `TypeError`,渲染即每帧崩)。`<Reveal>` 把这个 web 特化**收口在设计系统内**,共享代码(portal `src/` 等双端消费的代码)做进出过渡一律用它,不要直接写 `FadeIn` / `FadeOut`。
+
+## 实时预览
+
+下方内容由 `<Reveal>` 包裹,页面加载时淡入(本页是 web,走的就是 CSS transition 特化;刷新页面可重看入场)。
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">默认时长(motion.base = 200ms)</span>
+      <Reveal>
+        <Tag label="我是淡入进场的内容" variant="info" />
+      </Reveal>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">duration=800 · 慢速入场</span>
+      <Reveal duration={800}>
+        <Tag label="慢速淡入(800ms)" variant="success" />
+      </Reveal>
+    </div>
+  </div>
+</LiveDemo>
+
+## 用法
+
+```tsx
+import { Reveal } from '@unif/react-native-design';
+
+// 条件渲染的内容包进 Reveal:挂载淡入、卸载淡出(native)
+{loaded && (
+  <Reveal>
+    <ResultCard data={data} />
+  </Reveal>
+)}
+
+// 自定义时长
+<Reveal duration={320} style={{ flex: 1 }}>
+  <Section />
+</Reveal>
+```
+
+## API
+
+### `<Reveal>`
+
+| Prop | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `children` | `ReactNode` | —(必填) | 要做入 / 出场过渡的内容 |
+| `style` | `StyleProp<ViewStyle>?` | — | 容器样式(传给外层容器) |
+| `duration` | `number?` | `motion.base`(200) | 入 / 出场时长(ms) |
+| `testID` | `string?` | — | E2E / 测试定位 |
+
+## Tokens
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `motion.base` | `@unif/react-native-design`(静态 token) | 默认入 / 出场时长(200ms) |
+
+## 平台差异
+
+| | native(`Reveal.tsx`) | web(`Reveal.web.tsx`) |
+|---|---|---|
+| 实现 | reanimated `FadeIn` / `FadeOut` layout 动画 | React state + CSS `opacity` transition(双 RAF 保证有 `opacity:0` 起点) |
+| 入场 | ✅ 淡入 | ✅ 淡入 |
+| 退场 | ✅ 淡出 | ❌ 省略(卸载即移除) |
+
+> 需要 web 端也有退场动画的场景不要依赖 `<Reveal>`(web 退场是直接移除);native-only 代码里直接用 reanimated 也可以,但**共享代码必须走 `<Reveal>`**。
+
+## 无障碍(a11y)
+
+来源:`src/components/ui/Reveal/Reveal.tsx`、`Reveal.web.tsx`。
+
+纯视觉过渡容器,自身**不设置任何 a11y prop**,语义完全由 `children` 承载——内容该有的 `accessibilityRole` / `accessibilityLabel` 写在被包裹的组件上。
+
+## 不要
+
+- ❌ 不要在共享代码(`src/` 双端消费)里直接用 reanimated 的 `entering={FadeIn}` / `exiting={FadeOut}` —— RN-Web 上运行时崩;包 `<Reveal>`。
+- ❌ 不要给 web 端依赖退场动画的交互(web 退场被省略,内容卸载即消失)。
+- ❌ 不要用它做循环 / 强调动画 —— 那是 [Pulse](./pulse) 的事;`<Reveal>` 只管挂载 / 卸载这一次过渡。
