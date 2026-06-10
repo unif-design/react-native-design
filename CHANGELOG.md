@@ -53,7 +53,12 @@
 * **website:** llms.txt 标准化 — 站点根索引 + 全文 + 修 yarn4 钩子 ([#43](https://github.com/unif-design/react-native-design/issues/43)) ([abd9d79](https://github.com/unif-design/react-native-design/commit/abd9d7927ffcb95928ab9451d7663fe7bacabc68))
 * 文档站共享首页设计 — 导出 docs-home.css + design 站首页重构 ([#49](https://github.com/unif-design/react-native-design/issues/49)) ([5077fde](https://github.com/unif-design/react-native-design/commit/5077fde4ec7b8b33d9abd499312cac79e79178fc))
 
-## 0.4.38 — feat: 导出 docs-home.css(文档站共享首页样式)
+## 0.4.38 (2026-06-02)
+
+
+### Features
+
+* 导出 docs-home.css(文档站共享首页样式;npm-only 发版无 git tag,由 [#50](https://github.com/unif-design/react-native-design/issues/50) 触发) ([a6a8c03](https://github.com/unif-design/react-native-design/commit/a6a8c039164ead1698d5bc79a1a001eb8394d5ce))
 
 ## [0.4.37](https://github.com/unif-design/react-native-design/compare/v0.4.36...v0.4.37) (2026-06-02)
 

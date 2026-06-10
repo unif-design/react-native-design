@@ -10,7 +10,7 @@ Unif 设计系统 —— theme(设计令牌)+ 组件 + 图标 + utils,面向 Rea
 ## 特性
 
 - **运行时主题**:`useColors()` 角色 token 跟随系统 light/dark 自动切换;`useThemedStyles` + 模块顶层 `makeStyles` 缓存样式,绝不内联 hex。
-- **40+ 组件**:Button、Card、Cell、NavBar、BottomSheet、Toast 等原子组件 + AvatarWithRing、GlassStats 等通用复合组件,全部从包根 barrel 导出,无需深路径。
+- **40+ 组件**:Button、Card、Cell、NavBar、Toast 等原子组件 + AvatarWithRing、GlassStats 等通用复合组件,全部从包根 barrel 导出,无需深路径。
 - **a11y 内建**:交互组件预设 `accessibilityRole`;`IconButton` 的 `accessibilityLabel` 为类型必填。
 - **图标集 + 严格 TS**:`IconName` 闭集类型、`<Icon>` 自动继承主题色;`strict` + `noUncheckedIndexedAccess`,类型随包发布。
 
@@ -29,7 +29,6 @@ yarn add react-native-svg \
   react-native-worklets \
   react-native-safe-area-context \
   react-native-reanimated-carousel \
-  @gorhom/bottom-sheet \
   @sbaiahmed1/react-native-blur
 ```
 

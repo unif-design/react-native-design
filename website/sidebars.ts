@@ -43,6 +43,7 @@ const sidebars: SidebarsConfig = {
         'components/thumbnail',
         'components/loading',
         'components/pulse',
+        'components/reveal',
         'components/status-dot',
       ],
     },
