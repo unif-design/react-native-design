@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](https://github.com/unif-design/react-native-design/compare/v0.8.1...v0.8.2) (2026-06-10)
+
+
+### Bug Fixes
+
+* **icons:** trash 补桶内两条竖纹 ([#74](https://github.com/unif-design/react-native-design/issues/74)) ([2dc3606](https://github.com/unif-design/react-native-design/commit/2dc3606cc4895d9fa08228ff80e303f500ccd1bb))
+
 ## [0.8.1](https://github.com/unif-design/react-native-design/compare/v0.8.0...v0.8.1) (2026-06-09)
 
 
