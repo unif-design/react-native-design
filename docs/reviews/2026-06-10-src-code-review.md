@@ -133,6 +133,32 @@ index.tsx
 
 ### 3.3 eslint 复杂度热点
 
+**实际命令**(与计划一致,eslint 9.39.4 的 `--rule` 旗标直通可用,未走 overlay 兜底;实际退出码 0 —— 0 error,warning 不计入退出码):
+
+```sh
+yarn eslint "src/**/*.{ts,tsx}" \
+  --rule '{"complexity":["warn",10],"max-depth":["warn",4],"max-lines-per-function":["warn",{"max":100,"skipBlankLines":true,"skipComments":true}]}'
+```
+
+覆盖面经 `-f json` 二次运行复核:实际 lint **195 个文件**,与 §3.2 madge 的 src 全量 ts/tsx 计数一致(含 `src/icons/data.ts` —— `eslint.config.mjs` 的 ignores 只排 node_modules/lib/website,纯数据文件无函数体,三规则天然 0 命中)。输出无基线规则混入(json 输出中 ruleId 仅含三条注入规则;注:基线 `yarn lint` 退出码 0 只证 0 error,不蕴含 0 warning,故此处以 json 复核为准),全部 warning 均来自本次注入的目标规则。
+
+**汇总** —— 共 **6 条 warning,全部来自 `complexity`**;`max-depth`(>4)与 `max-lines-per-function`(>100 有效行)均 **0 命中** —— 0 也是有效结论:src 内无超过 4 层的嵌套块、无超过 100 有效行的函数体,这两个维度无深读线索。
+
+**热点清单**(每文件恰 1 条 warning,文件聚合即逐条列出;按实测复杂度降序 = 深读优先序):
+
+| 文件 | 位置(函数) | 规则 | 实测/阈值 |
+| --- | --- | --- | --- |
+| `src/components/ui/Stepper/Stepper.tsx` | 18:8(`Stepper`) | complexity | 22 / 10 |
+| `src/components/ui/Cell/Cell.tsx` | 34:8(`Cell`) | complexity | 20 / 10 |
+| `src/components/ui/TextField/TextFieldBase.tsx` | 25:3(`TextFieldBase`) | complexity | 20 / 10 |
+| `src/components/ui/Spinner/Spinner.tsx` | 16:8(`Spinner`) | complexity | 12 / 10 |
+| `src/components/ui/Spinner/Spinner.web.tsx` | 35:8(`Spinner`) | complexity | 12 / 10 |
+| `src/components/ui/Button/ButtonBase.tsx` | 73:28(匿名箭头函数 —— `Pressable` 的 `style` 回调,多重三元合成样式数组) | complexity | 11 / 10 |
+
+**度量边界**:超阈值只是深读优先线索,**不是缺陷判据**(spec §4)—— RN 组件渲染函数靠条件分支表达 variant/状态本属常态,是否构成问题由深读期结合上下文判断,故本节不向 §2.1 台账记行。后续深读任务优先精读上表 6 文件,头部三个(22/20/20,双倍于阈值)优先级最高。两条交叉线索供深读复用:(a)`Spinner.tsx ↔ Spinner.web.tsx` 同值 12 —— 被标记函数体恰包含 §3.1 jscpd #5 的克隆区(两端逐行重复的入参防御分支),与该台账行「抽 `sanitizeSpinnerProps`」的建议同源,若采纳则两端复杂度同步回落;(b)`ButtonBase.tsx:73` 仅超 1,但位于 Button/IconButton 共享的核心 primitive 上,影响面大于单组件。
+
+→ 记入 §2.1:0 行(线索随深读任务消化)。
+
 ## 4. 豁免说明
 
 (约定性同形清单 + 「基础原子」认定清单,Task 14/15 填)
