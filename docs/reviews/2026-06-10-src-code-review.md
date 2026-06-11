@@ -338,6 +338,21 @@ yarn eslint "src/**/*.{ts,tsx}" \
 | Switch 平台克隆 | [M-25] | 仅 (b) Pressable 外壳可随平台分叉约定豁免 | (a) 派生常量 THUMB_OFF_X/ON_X 收口进 styles.ts 无豁免争议,应做 |
 | createImperativeHost 跨族抽取 | [L-97] | **已评估维持现状**(2 族不满足 rule-of-three,抽象体量大于被消除样板) | 第 3 个命令式浮层(sheet()/alert() 类)落地时重评 |
 
+**修复期裁决回填(PR #76,2026-06)** —— §4.2 六候选均按「采纳豁免 + 配套落地」结案:
+
+| 候选 | 裁决 | 配套落地 |
+| --- | --- | --- |
+| [M-23] BlurLayer 样板克隆 | 采纳豁免 | 维持现状(共享推导未达增长阈值,`shared.ts` 暂不抽) |
+| [M-22] tab 三实例 | 采纳豁免(原子独立性优先) | `pressedOpacity` 共享常量 + [L-34]/[L-48] tablist 已落地 |
+| [M-27] Chip 自建 chrome | 采纳豁免(selected-toggle 自成一族) | `pressedOpacity` + `disabled` prop 已落地 |
+| [M-26] ToastHost 双端 | 采纳豁免(平台分叉约定) | [H-6] 定位漂移已修(commit `2ec4d49`);[L-95] 粒度约定已沉淀 CLAUDE.md |
+| [M-25] Switch 克隆 | 采纳豁免(b) | THUMB_OFF_X/ON_X 派生常量已收口 styles.ts |
+| [L-97] createImperativeHost | 维持现状 | 第 3 个命令式浮层落地时重评 |
+
+**Breaking 留待用户拍板(本 PR 未改):** checked/value 等 prop 重命名([L-80] 子项)属公开 API 破坏,须 major 版本 + 迁移说明单列;NavBar slot `accessibilityLabel` 一度改必填,已回退为可选 + dev warn 保持非 breaking。
+
+**需真机/浏览器坐实(代码侧已就位或留观,定级待运行时):** [M-11] FormRow+Input native 宽度塌缩(修复方向已记,须起 example 定级,运行时坐实即升 High);[M-17] Modal 链式翻转(多层浮层交互);[L-27] Chip trailing 交互件 VoiceOver 可达性(iOS 实测);批3 触控目标视觉变化(Segmented 项高 28→44pt、Cell flush +5pt、Stepper 容器 padding)合 iOS HIG,待真机确认无布局回归。
+
 ### 4.3 「ui 基础原子」横向依赖白名单(grep 实证)
 
 src/components 内全部组件间横向 import(Task 14 复核重跑 grep),方向均为「复合 → 原子」,与 Task 13 分层结论一致;新增横向依赖应落在此白名单形态内(直连组件目录,不走层级 barrel):

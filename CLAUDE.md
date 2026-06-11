@@ -89,6 +89,7 @@ ComponentName/
   - 新的按钮型组件**不要**在 `ButtonBase` 外重复 chrome(Pressable / 尺寸 / palette / a11y)。
 - **命令式 API**(`toast()`、`confirm()`)—— 模块级 `Set<Subscriber>` 注册表,配合在 app 根附近渲染一次的 `<ToastHost />` / `<ConfirmHost />`。`confirm()` 强制同一时间只有 1 个对话框,重入直接 `Promise.resolve(false)`。
 - **`*.web.tsx` 兄弟文件**(如 `BlurLayer.web.tsx`)—— web 特化实现,Metro / bob 按平台自动选。
+  - **分叉粒度** 优先把分叉收窄到*平台差异本体*(动画驱动 / 命令式 hook),渲染件保持单源 —— 正例 `Pulse`:`usePulse.ts` / `usePulse.web.ts` 分叉,`Pulse`/`PulseDot`/`Skeleton` 单源零克隆;反例组件级 `*.web.tsx`(整件复制)易行为漂移(`ToastHost.web` 漏定位注入是现实代价)。新加平台分叉走 hook 级。
 - **`ui/` vs `business/`**:
   - **`ui/`** 原子且无业务上下文。
   - **`business/`** 复合,但*仍保持通用* —— 任何耦合 navigation / store / 业务流程(SMS 验证码、屏幕布局)的东西留在消费者仓库,不要进这里。
