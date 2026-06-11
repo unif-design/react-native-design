@@ -15,7 +15,8 @@ export type TextareaProps = Omit<
   leading?: ReactNode;
   /** 可选的后置插槽（如字符计数器） */
   trailing?: ReactNode;
-  /** 错误信息 —— 容器进入错误态并在下方显示 */
+  /** 错误信息 —— 容器进入错误态并在下方显示。
+   *  空串 `""` / undefined 都不进 error 态(truthy 判定),与 TextFieldBase 保持一致。[L-96] */
   error?: string;
   /** 最小高度，默认 96（约 5 行） */
   minHeight?: number;

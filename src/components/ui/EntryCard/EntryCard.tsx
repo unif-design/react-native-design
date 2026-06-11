@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
 import { Icon } from '../Icon';
-import { useColors, useThemedStyles } from '../../../theme';
+import { r, useColors, useThemedStyles } from '../../../theme';
 import { makeStyles } from './styles';
 import type { EntryCardProps } from './types';
 
@@ -22,7 +22,7 @@ export function EntryCard({
   const content = (
     <>
       <View style={styles.iconTile}>
-        <Icon name={icon} size={16} color={c.foregroundMuted} />
+        <Icon name={icon} size={r(16)} color={c.foregroundMuted} />
       </View>
       <View style={styles.body}>
         <Text style={styles.title} numberOfLines={1}>
@@ -38,11 +38,13 @@ export function EntryCard({
   );
 
   if (onPress) {
+    // a11y label 包含副标题,SR 用户听到完整信息(标题+sub)再决定是否点击
+    const a11yLabel = sub ? `${title},${sub}` : title;
     return (
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={title}
+        accessibilityLabel={a11yLabel}
         testID={testID}
         style={({ pressed }) => [styles.card, pressed && styles.pressed, style]}
       >

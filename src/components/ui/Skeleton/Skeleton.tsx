@@ -1,7 +1,7 @@
 import React from 'react';
 import Animated from 'react-native-reanimated';
 import { usePulse } from '../Pulse';
-import { useColors } from '../../../theme';
+import { r, useColors } from '../../../theme';
 import type { SkeletonProps } from './types';
 
 /**
@@ -13,13 +13,14 @@ import type { SkeletonProps } from './types';
  * <Skeleton shape="circle" size={40} />        // 头像占位
  * ```
  *
- * `usePulse({ from: 0.5 })` 全局共享脉冲(Reanimated 4 worklet 驱动 opacity),
- * 区别于 chat `Shimmer`(沿 X 横扫高光,流式语义)。 */
+ * `usePulse({ from: 0.5 })` 每实例独立脉冲 —— native 端走 Reanimated 4 worklet,
+ * web 端走 CSS transition + setInterval(零 rAF JS 帧),opacity 在 0.5~1 循环。
+ * 区别于沿 X 横扫高光的流式 shimmer。 */
 export function Skeleton({
   shape = 'rect',
   width,
   height,
-  size = 40,
+  size = r(40),
   radius,
   style,
   testID,
@@ -35,14 +36,14 @@ export function Skeleton({
     if (shape === 'line') {
       return {
         width: width ?? '100%',
-        height: height ?? 11,
-        borderRadius: radius ?? 3,
+        height: height ?? r(11),
+        borderRadius: radius ?? r(3),
       };
     }
     return {
       width: width ?? '100%',
-      height: height ?? 80,
-      borderRadius: radius ?? 8,
+      height: height ?? r(80),
+      borderRadius: radius ?? r(8),
     };
   })();
 

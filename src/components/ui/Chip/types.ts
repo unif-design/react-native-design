@@ -5,6 +5,8 @@ export type ChipProps = {
   label: string;
   selected?: boolean;
   onPress?: () => void;
+  /** 整体禁用:opacity 0.5 + 不响应 onPress + accessibilityState.disabled */
+  disabled?: boolean;
   /** 可选的前置插槽 —— 如 <Icon name="spark" /> */
   leading?: ReactNode;
   /** 可选的后置插槽 —— 如一个小的 × 关闭按钮 */

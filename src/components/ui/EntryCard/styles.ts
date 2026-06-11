@@ -1,5 +1,14 @@
 import { StyleSheet } from 'react-native';
-import { fw, icon, r, radius, space, type ColorTokens } from '../../../theme';
+import {
+  fw,
+  icon,
+  pressedOpacity,
+  r,
+  rf,
+  radius,
+  space,
+  type ColorTokens,
+} from '../../../theme';
 
 export const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({
@@ -29,16 +38,16 @@ export const makeStyles = (c: ColorTokens) =>
     },
     title: {
       // 13.5pt —— 介于 type.xs(13) / type.sm(14) 之间的设计稿专定字号
-      fontSize: r(13) + 0.5,
+      fontSize: rf(13) + 0.5,
       fontWeight: fw.medium,
       letterSpacing: -0.2,
       color: c.foreground,
     },
     sub: {
-      fontSize: r(11),
+      fontSize: rf(11),
       color: c.foregroundMuted,
     },
     pressed: {
-      opacity: 0.7,
+      opacity: pressedOpacity,
     },
   });

@@ -7,6 +7,7 @@ import {
   type as t,
   type ColorTokens,
 } from '../../../theme';
+import { badgeStyles } from '../shared/badgeStyles';
 
 /**
  * 预生成 1..6 列的宽度规则，避免 render 时创建 `{ width: pct }` 内联对象
@@ -39,8 +40,10 @@ export const colWidth = (columns: number) => {
   }
 };
 
-export const makeStyles = (c: ColorTokens) =>
-  StyleSheet.create({
+export const makeStyles = (c: ColorTokens) => {
+  // Grid 图标容器上边缘偏移 r(-6):图标高 r(28),角标圆心对齐图标右上角
+  const badge = badgeStyles(c, r(-6));
+  return StyleSheet.create({
     wrap: {
       width: '100%',
     },
@@ -67,22 +70,7 @@ export const makeStyles = (c: ColorTokens) =>
       fontWeight: fw.medium,
       color: c.foreground,
     },
-    badge: {
-      position: 'absolute',
-      top: r(-6),
-      right: r(-10),
-      minWidth: r(16),
-      height: r(16),
-      borderRadius: radius.md,
-      backgroundColor: c.error,
-      paddingHorizontal: space[1],
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    badgeText: {
-      color: c.onError,
-      fontSize: t.nano,
-      fontWeight: fw.bold,
-      lineHeight: 12,
-    },
+    badge: badge.badge,
+    badgeText: badge.badgeText,
   });
+};

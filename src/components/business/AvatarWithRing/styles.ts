@@ -1,5 +1,8 @@
 import { StyleSheet, type ViewStyle } from 'react-native';
 import { fw, r, type ColorTokens } from '../../../theme';
+import { createLogger } from '../../../utils/logger';
+
+const log = createLogger('AvatarWithRing');
 
 /**
  * 头像样式工厂 —— **非标 maker 签名**:`(size, ringColor, shadowStyle, c)` 4 参,
@@ -26,9 +29,24 @@ export const makeAvatarStyles = (
   shadowStyle: ViewStyle,
   c: ColorTokens
 ) => {
-  const dim = r(size);
+  // 防御非法 size:NaN / 负数 / 0 会导致 inner 为负传入 SVG。
+  // 最小合理值 = ringWidth*2 + 1(至少 1pt 圆心可见)。
+  // ringWidth 下限为 2(见下方 Math.max),所以 size 至少要大于 4pt。
+  const MIN_SIZE = 5;
+  const safeSize =
+    Number.isFinite(size) && size >= MIN_SIZE
+      ? size
+      : (() => {
+          if (__DEV__) {
+            log.warn(
+              `AvatarWithRing: size=${size} 无效(须 ≥ ${MIN_SIZE}),已钳制为 ${MIN_SIZE}。`
+            );
+          }
+          return MIN_SIZE;
+        })();
+  const dim = r(safeSize);
   const half = dim / 2;
-  const ringWidth = Math.max(2, r(Math.round(size * 0.0625)));
+  const ringWidth = Math.max(2, r(Math.round(safeSize * 0.0625)));
   const inner = dim - ringWidth * 2;
   const innerHalf = inner / 2;
   const styles = StyleSheet.create({
@@ -50,7 +68,7 @@ export const makeAvatarStyles = (
       justifyContent: 'center',
     },
     label: {
-      fontSize: r(Math.round(size * 0.4)),
+      fontSize: r(Math.round(safeSize * 0.4)),
       fontWeight: fw.bold,
       color: c.onPrimary,
       letterSpacing: -0.5,

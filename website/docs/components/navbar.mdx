@@ -80,16 +80,34 @@ import { NavBar } from '@unif/react-native-design';
 
 > `left` / `right` 传 config 对象时渲染为内部 `IconButton`（`variant='ghost'`，icon 色按 variant tint：brand 用 `c.onPrimary`、其余 `c.foreground`）；传 `ReactNode` 则原样渲染。标题用 `t.h3 + 0.5` / `fw.semi` / `letterSpacing: -0.2`，副标题 `t.micro`（11）。
 
+## 安全区（Safe Area）
+
+**NavBar 不内置 top safe-area inset**，由宿主页面负责。推荐做法：
+
+```tsx
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+// 方式 A：SafeAreaView 包裹
+<SafeAreaView edges={['top']}>
+  <NavBar title="首页" />
+</SafeAreaView>
+
+// 方式 B：react-navigation Stack.Screen header 配置
+// headerStatusBarHeight 会自动注入 inset，无需手动包裹
+```
+
+这样 NavBar 本体可在任何场景复用（modal、底部抽屉 header、全屏画中画等不需要 top inset 的场景）。
+
 ## 无障碍（a11y）
 
 来源：`src/components/ui/NavBar/NavBar.tsx`、`types.ts`。
 
 - 默认 `accessibilityRole`：NavBar 根 `<View>` **未**设置 role（无 `header` 等），`title` / `subtitle` 渲染为普通 `<Text>`，按文本默认对 SR 可读。
-- a11y props：`left` / `right` 槽传 config 对象时由内部 `IconButton` 渲染，其 `accessibilityLabel` 取 `slot.accessibilityLabel ?? slot.icon`——`accessibilityLabel` 在槽 config 中是**可选**的，缺省会 fallback 到 icon 名（如 `'menu'` / `'arrow-left'`）。fallback 仅是英文图标名，体验不佳，**建议每个可点槽都显式传 `accessibilityLabel`**（如「返回」「更多」）。若 `left` / `right` 直接传 `ReactNode`，则 a11y 由该节点自行负责。
+- a11y props：`left` / `right` 槽传 config 对象时由内部 `IconButton` 渲染，其 `accessibilityLabel` 在 `NavBarSlotConfig` 中**可选但强烈建议传**——缺省时 dev 下告警且 SR 回退读英文 icon 名（体验不佳）。若 `left` / `right` 直接传 `ReactNode`，则 a11y 由该节点自行负责。
 - 状态语义：NavBar 自身无可切换状态，不附加 `accessibilityState`。
 
 ```tsx
-// 给可点槽显式 accessibilityLabel，避免 fallback 到英文 icon 名
+// accessibilityLabel 可选但强烈建议传，请传人类可读短语
 <NavBar
   title="登录"
   left={{ icon: 'arrow-left', onPress: goBack, accessibilityLabel: '返回' }}

@@ -1,5 +1,8 @@
+import type { ICarouselInstance } from 'react-native-reanimated-carousel';
 import type { ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
+
+export type { ICarouselInstance };
 
 /** Indicator 位置策略:
  *  - 'bottom'(默认):指示器独立行,跟 Carousel 下方;容器高度 = height + 16
@@ -19,6 +22,8 @@ export type CarouselProps<T> = {
   itemWidth?: number;
   /** autoPlay 间隔 ms,undefined / 0 不自动 */
   autoPlay?: number;
+  /** 是否循环播放,默认 true。传 false 时首尾不循环,可配合 a11y 暂停控制。 */
+  loop?: boolean;
   /** 是否显示底部 dot indicator,默认 true */
   showIndicator?: boolean;
   /** indicator 位置策略,默认 'bottom' */

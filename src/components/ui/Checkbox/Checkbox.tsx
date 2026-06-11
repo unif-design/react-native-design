@@ -1,7 +1,13 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { r, useColors, useThemedStyles } from '../../../theme';
+import {
+  fixed,
+  pressedOpacity,
+  r,
+  useColors,
+  useThemedStyles,
+} from '../../../theme';
 import { Icon } from '../Icon';
 import { makeStyles } from './styles';
 import type { CheckboxProps } from './types';
@@ -27,20 +33,22 @@ export function Checkbox({
     <Pressable
       onPress={() => !disabled && onChange(!checked)}
       disabled={disabled}
-      hitSlop={4}
+      // [M-7] box 20pt → 垂直补 (44-20)/2=12 到 fixed.hitTarget
+      hitSlop={Math.round((fixed.hitTarget - r(20)) / 2)}
       accessibilityRole="checkbox"
       accessibilityState={{ checked, disabled: !!disabled }}
       accessibilityLabel={label}
       testID={testID}
       style={({ pressed }) => [
         styles.row,
-        { opacity: disabled ? 0.5 : pressed ? 0.7 : 1 },
+        { opacity: disabled ? 0.5 : pressed ? pressedOpacity : 1 },
       ]}
     >
       <View
         style={[
           styles.box,
-          shape === 'circle' && { borderRadius: r(20) / 2 },
+          // [L-79] circle 形态改用 radius.pill —— sentinel 999 确保任何尺寸下都是真圆
+          shape === 'circle' && styles.boxCircle,
           checked && {
             backgroundColor: c.primary,
             borderColor: c.primary,
@@ -48,7 +56,12 @@ export function Checkbox({
         ]}
       >
         {checked ? (
-          <Icon name="check" size={14} color={c.onPrimary} strokeWidth={2.5} />
+          <Icon
+            name="check"
+            size={r(14)}
+            color={c.onPrimary}
+            strokeWidth={2.5}
+          />
         ) : null}
       </View>
       {label ? <Text style={styles.label}>{label}</Text> : null}

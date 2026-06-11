@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { useThemedStyles } from '../../../theme';
 import { RadioContext } from './RadioContext';
@@ -20,9 +20,16 @@ export function RadioGroup({
   testID,
 }: GroupProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
+  // [L-80b] useMemo 稳定 context value —— 避免每次渲染都产生新对象引用,
+  // 防止所有 Radio 子项因 context 变化而不必要 re-render。
+  const ctx = useMemo(
+    () => ({ value, onChange, groupTestID: testID }),
+    [value, onChange, testID]
+  );
   return (
-    <RadioContext.Provider value={{ value, onChange, groupTestID: testID }}>
-      <View style={styles.group} testID={testID}>
+    <RadioContext.Provider value={ctx}>
+      {/* [L-34] accessibilityRole="radiogroup" —— SR 宣读"单选按钮组" */}
+      <View style={styles.group} testID={testID} accessibilityRole="radiogroup">
         {children}
       </View>
     </RadioContext.Provider>

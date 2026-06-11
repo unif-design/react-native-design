@@ -1,4 +1,4 @@
-import React, { useId, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, {
   Defs,
@@ -7,6 +7,7 @@ import Svg, {
   Stop,
 } from 'react-native-svg';
 import { avatarGradient, useTheme } from '../../../theme';
+import { useSvgId } from '../useSvgId';
 import { makeAvatarStyles } from './styles';
 import type { AvatarWithRingProps } from './types';
 
@@ -22,17 +23,17 @@ export function AvatarWithRing({
   size = 64,
   ringColor,
   style,
+  testID,
 }: AvatarWithRingProps): React.JSX.Element {
   const { colors: c, shadow } = useTheme();
-  const autoId = useId();
-  const id = `av-${autoId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
+  const id = useSvgId('av');
   const { inner, styles } = useMemo(
     () =>
       makeAvatarStyles(size, ringColor ?? c.avatarRing, shadow.brandAvatar, c),
     [size, ringColor, c, shadow.brandAvatar]
   );
   return (
-    <View style={[styles.shell, style]}>
+    <View style={[styles.shell, style]} testID={testID}>
       <View style={styles.avatarCore}>
         <Svg width={inner} height={inner} style={StyleSheet.absoluteFill}>
           <Defs>

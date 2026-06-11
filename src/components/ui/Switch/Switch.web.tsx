@@ -1,15 +1,9 @@
 import React from 'react';
 import { Pressable } from 'react-native-gesture-handler';
 import { View } from 'react-native';
-import { motion, r, useColors, useThemedStyles } from '../../../theme';
-import { INSET, makeStyles, THUMB, TRACK_W } from './styles';
+import { motion, useColors, useThemedStyles } from '../../../theme';
+import { makeStyles, THUMB_OFF_X, THUMB_ON_X } from './styles';
 import type { SwitchProps } from './types';
-
-// ─── 动画派生常量(组件私有,非 style)─────────────────────────────────────
-// 把手 translateX 的 off / on 端点:左右各留 INSET 间距,
-// off = INSET(2),on = trackW - INSET - thumbW(32-2-16=14)。
-const THUMB_OFF_X = r(INSET);
-const THUMB_ON_X = r(TRACK_W - INSET - THUMB);
 
 /**
  * Web 端 Switch —— RN-Web 上 reanimated 4 + worklets 0.9.x 的 useAnimatedStyle

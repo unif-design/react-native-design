@@ -1,3 +1,4 @@
+import type { StyleProp, ViewStyle } from 'react-native';
 import type { IconName } from '../Icon';
 
 export type TabBarItem = {
@@ -14,6 +15,8 @@ export type TabBarProps = {
   active: string;
   onChange: (id: string) => void;
   items: TabBarItem[];
+  /** 容器附加样式(margin / position 等布局微调)。 */
+  style?: StyleProp<ViewStyle>;
   /** 容器 testID；item testID 自动派生为 `${testID}-${id}` */
   testID?: string;
 };

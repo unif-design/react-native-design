@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
+import type { StyleProp, ViewStyle } from 'react-native';
 import type { IconName } from '../Icon';
 
 export type NavBarSlotConfig = {
   icon: IconName;
   onPress?: () => void;
-  /** 屏幕阅读器读出的功能描述（icon-only 必填） */
+  /** 屏幕阅读器读出的功能描述。强烈建议传 —— icon-only 按钮无文字,缺省时 SR 回退
+   *  读英文 icon 名(如 "menu")且 dev 下告警。请传人类可读短语(如「返回」「更多」)。 */
   accessibilityLabel?: string;
 };
 
@@ -26,6 +28,8 @@ export type NavBarProps = {
    *   'transparentLight' variant。
    */
   variant?: 'default' | 'brand' | 'transparent';
+  /** 容器附加样式(margin / position 等布局微调)。 */
+  style?: StyleProp<ViewStyle>;
   /** E2E / 测试定位 */
   testID?: string;
 };

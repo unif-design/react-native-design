@@ -1,3 +1,4 @@
+import type { StyleProp, ViewStyle } from 'react-native';
 import type { IconName } from '../Icon';
 
 export type GridItem = {
@@ -14,12 +15,14 @@ export type GridProps = {
   items: GridItem[];
   /**
    * 列数 1..6；默认 4。
-   * ⚠️ 类型外的值（如 `7`）会**静默**回退到 4 列 — 业务应在传入前自行校验。
+   * ⚠️ 类型外的值（如 `7`）会**告警**（dev log.warn）并回退到 4 列 — 业务应在传入前自行校验。
    */
   columns?: 1 | 2 | 3 | 4 | 5 | 6;
   onPress?: (item: GridItem) => void;
   /** 是否套白色卡片；传 false 则背景透明 */
   card?: boolean;
+  /** 容器附加样式(margin / position 等布局微调)。 */
+  style?: StyleProp<ViewStyle>;
   /** 容器 testID；item testID 会自动派生为 `${testID}-${item.id}` */
   testID?: string;
 };

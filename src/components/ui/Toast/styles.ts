@@ -14,6 +14,8 @@ export const makeStyles = (c: ColorTokens) =>
       // zIndex: toast 浮层 —— 盖在 Screen 内容之上(navigator / overlay 之下)。
       // 同级兄弟节点无 z 顺序需求,但作为 absolute 浮岛对其他屏内 absolute 节点
       // 需要显式 200 抢占,保留并锁数值。
+      // 注意:confirm() 的原生 Modal 是 window 级,永远盖在 toast 之上 —— confirm
+      // 打开期间到达的 toast 不可见,勿把 toast 当作 confirm 显示期间的反馈通道。
       zIndex: 200,
     },
     toast: {

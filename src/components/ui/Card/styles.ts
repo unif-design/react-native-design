@@ -4,8 +4,13 @@ import type { CardVariant } from './types';
 
 export const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({
+    // 外层:底色 + 阴影(iOS 阴影需不透明背景才投影)。overflow hidden 不放这层 ——
+    // 否则 iOS 会把 View 自己的卡片阴影一起裁掉([H-4])。
     base: {
       backgroundColor: c.surface,
+    },
+    // 内层:overflow hidden 按圆角裁剪内容(如贴边媒体),不影响外层阴影。
+    clip: {
       overflow: 'hidden',
     },
     flat: {},

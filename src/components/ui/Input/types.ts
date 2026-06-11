@@ -17,9 +17,10 @@ export type InputProps = Omit<
   leading?: ReactNode;
   /** 可选的后置插槽（清除按钮、眼睛切换等） */
   trailing?: ReactNode;
-  /** 错误信息 —— 容器进入错误态并在下方显示 */
+  /** 错误信息 —— 容器进入错误态并在下方显示。
+   *  空串 `""` / undefined 都不进 error 态(truthy 判定),与 TextFieldBase 保持一致。[L-96] */
   error?: string;
-  /** 覆盖单行高度，默认 44（hitTarget） */
+  /** 覆盖单行高度，默认 control.lg(r(44),随设备缩放) */
   height?: number;
   /** 容器外层样式（含 leading/trailing 整个 wrap） */
   containerStyle?: StyleProp<ViewStyle>;

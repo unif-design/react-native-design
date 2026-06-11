@@ -24,7 +24,13 @@ export function FormRow({
         </Text>
         <View style={styles.rowControl}>{children}</View>
       </View>
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      {/* [L-31] accessibilityLiveRegion="polite" —— error 出现时 SR 自动播报,
+          不干扰当前朗读(polite 排队等当前发言结束)。 */}
+      {error ? (
+        <Text style={styles.errorText} accessibilityLiveRegion="polite">
+          {error}
+        </Text>
+      ) : null}
     </View>
   );
 }

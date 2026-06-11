@@ -9,7 +9,10 @@ export type CellProps = {
   titleLines?: number;
   /** 副标题；string 自动 numberOfLines=2，传 ReactNode 完全自定义 */
   desc?: ReactNode;
-  /** 右侧 slot —— 字符串自动套 Text；传 ReactNode 放 Switch / Stepper / Tag 等控件 */
+  /** 右侧 slot —— 字符串自动套 Text；传 ReactNode 放 Switch / Stepper / Tag 等控件。
+   *  **a11y 边界**：extra 为 ReactNode 时，外壳 Pressable 会关闭 `accessible`，
+   *  让 SR 直接穿透到 extra 控件（避免双播报）；extra 的 a11y 由其自身负责。
+   *  若 extra 是纯展示 ReactNode 且仍需外壳播报，请改用 string 或传 `accessibilityLabel`。 */
   extra?: ReactNode;
   /** 显示右侧 chevron-right 图标，常配合 onPress 表示「可进入下一级」 */
   arrow?: boolean;
@@ -31,7 +34,7 @@ export type CellProps = {
   /** 显式 SR 朗读文案,覆盖 Cell 默认从 string title 推断的 fallback。
    *  title 是 ReactNode(自定义渲染)时尤其需要,否则 SR 用户听不到任何内容。 */
   accessibilityLabel?: string;
-  /** SR 朗读 hint —— 说明 tap 后行为(参 CLAUDE.md a11y 章节,短 ≤8 字)。
+  /** SR 朗读 hint —— 说明 tap 后行为(短 ≤8 字)。
    *  常用:"查看详情" / "打开应用" 等;onPress 缺省时此 prop 无意义。 */
   accessibilityHint?: string;
 };

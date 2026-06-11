@@ -17,9 +17,9 @@ export const type = {
   xs: rf(13),
   xxs: rf(12),
   micro: rf(11),
-  nano: rf(10), // TabBar/Grid/Citation/Sources 角标/小标签 10pt
+  nano: rf(10), // TabBar/Grid 角标/小标签 10pt
   // ── 半档微调(0.5 step,加于"近似 token + delta"反模式收敛) ──
-  /** micro(11)与 xxs(12)之间:VersionPill / profileCard / Splash / carousel 副标题。 */
+  /** micro(11)与 xxs(12)之间:VersionPill / Splash / carousel 副标题。 */
   microPlus: rf(11.5),
   /** xs(13)与 sm(14)之间:Privacy 长文阅读字号。 */
   xsPlus: rf(13.5),
@@ -28,7 +28,7 @@ export const type = {
   smPlus: rf(14.5),
   /** Hero 区主标题档(一级 brand hero,带 Logo,Login 屏)。 */
   heroLg: rf(26),
-  /** Hero 区中等档(独立屏 + NavBar 的二级 hero,ForgotPassword)。 */
+  /** Hero 区中等档(独立屏 + NavBar 的二级 hero)。 */
   heroMd: rf(22),
   /** Hero 区小档(承接式 hero,Group 选组/选角色子区)。 */
   heroSm: rf(18),
@@ -57,7 +57,7 @@ export const space = {
 } as const;
 
 export const radius = {
-  'xs': r(4), // Radio/Checkbox/Tag/Citation 内圈 4pt
+  'xs': r(4), // Radio/Checkbox 内圈 4pt
   'sm': r(6),
   'md': r(8),
   'lg': r(10),
@@ -98,7 +98,7 @@ export const control = {
 
 /** 散尺寸 —— 未归到 avatar/icon/control 阶梯的单点常量。 */
 export const dim = {
-  /** 发送按钮 32px —— chat PromptInput / 主送出按钮专用,与 avatar.md 同值 */
+  /** 发送按钮 32px —— 主送出/发送按钮专用,与 avatar.md 同值 */
   sendBtn: r(32),
 } as const;
 
@@ -117,3 +117,8 @@ export const motion = {
   slow: 300,
   pulse: 1600,
 } as const;
+
+/** 按压态透明度 —— Pressable pressed 时 opacity 的共享常量。
+ *  ButtonBase、Chip、Cell、Grid、EntryCard、Tabs、Segmented、TabBar 等
+ *  凡需要「按压反馈」的组件统一引用此值,避免散落多处手写 0.7 后不同步。 */
+export const pressedOpacity = 0.7;

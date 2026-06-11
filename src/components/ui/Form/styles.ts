@@ -48,6 +48,8 @@ export const makeStyles = (c: ColorTokens) =>
       fontSize: t.sm,
       fontWeight: fw.medium,
       color: c.foreground,
+      // flexShrink:让 FormRow.numberOfLines 真正生效,长 label 不把 rowControl 挤到 0 宽([M-10])
+      flexShrink: 1,
     },
     required: {
       color: c.error,

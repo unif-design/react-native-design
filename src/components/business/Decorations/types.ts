@@ -100,4 +100,6 @@ export type ScreenBackdropProps = {
   children?: ReactNode;
   /** 外层附加样式 */
   style?: StyleProp<ViewStyle>;
+  /** E2E / 测试定位 */
+  testID?: string;
 };

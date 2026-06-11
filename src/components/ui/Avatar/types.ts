@@ -1,4 +1,4 @@
-import type { ImageSourcePropType } from 'react-native';
+import type { ImageSourcePropType, StyleProp, ViewStyle } from 'react-native';
 
 /** 头像尺寸（对应 avatar.xs..xl）：xs=18 / sm=28 / md=32 / lg=40 / xl=56 */
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -27,6 +27,8 @@ export type AvatarProps = {
    * 提供时优先渲染 image；onError 触发后自动 fallback 到 label。
    */
   source?: ImageSourcePropType;
+  /** 容器附加样式(margin / position 等布局微调)。 */
+  style?: StyleProp<ViewStyle>;
   /** E2E / 测试定位 */
   testID?: string;
 };

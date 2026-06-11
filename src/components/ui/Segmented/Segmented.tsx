@@ -16,6 +16,7 @@ export function Segmented({
   value,
   onChange,
   items,
+  disabled = false,
   testID,
 }: SegmentedProps): React.JSX.Element {
   const { colors: c, scheme, shadow } = useTheme();
@@ -24,16 +25,20 @@ export function Segmented({
   const activeShadow = scheme === 'dark' ? null : shadow.subtle;
 
   return (
-    <View style={styles.seg} testID={testID}>
+    // [L-34] accessibilityRole="tablist" —— SR 宣读"标签列表"
+    <View style={styles.seg} testID={testID} accessibilityRole="tablist">
       {items.map((it) => {
         const on = it.id === value;
         const itemTestID = childTestID(testID, it.id, it.testID);
+        // [L-82] item 禁用 = 整体 disabled OR 单项 it.disabled
+        const itemDisabled = disabled || !!it.disabled;
         return (
           <Pressable
             key={it.id}
-            onPress={() => onChange(it.id)}
+            onPress={() => !itemDisabled && onChange(it.id)}
+            disabled={itemDisabled}
             accessibilityRole="tab"
-            accessibilityState={{ selected: on }}
+            accessibilityState={{ selected: on, disabled: itemDisabled }}
             accessibilityLabel={it.label}
             testID={itemTestID}
             style={({ pressed }) => [

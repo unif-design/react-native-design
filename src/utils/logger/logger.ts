@@ -61,9 +61,13 @@ export function getLogLevel(): LogLevel {
 
 export function addTransport(t: LogTransport): void {
   removeTransport(t.id);
-  state.transports.push(t);
+  // push 后立即赋新数组:保证 emit 的 for-of 迭代期间若调用 addTransport,
+  // 迭代的旧快照不受影响(重入安全)。
+  state.transports = [...state.transports, t];
 }
 
 export function removeTransport(id: string): void {
+  // filter 返回新数组,不原地变更 —— 保证 emit 的 for-of 迭代期间若调用
+  // removeTransport(自移除等场景),迭代的旧快照仍完整走完(重入安全)。
   state.transports = state.transports.filter((t) => t.id !== id);
 }

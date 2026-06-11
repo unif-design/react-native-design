@@ -1,7 +1,9 @@
 import { StyleSheet } from 'react-native';
 import {
+  fixed,
   fw,
   r,
+  rf,
   radius,
   space,
   type as t,
@@ -26,7 +28,8 @@ export const makeStyles = (c: ColorTokens) =>
       gap: space[4],
       paddingHorizontal: r(11),
       paddingVertical: r(11),
-      minHeight: 0,
+      // [M-7] flush 可按压行高约 39pt < iOS HIG 44pt;用 minHeight 撑到 fixed.hitTarget
+      minHeight: fixed.hitTarget,
     },
     cellFlushWithDesc: {
       paddingVertical: r(9),
@@ -43,10 +46,10 @@ export const makeStyles = (c: ColorTokens) =>
       lineHeight: t.body * 1.3,
     },
     titleFlush: {
-      fontSize: r(13),
+      fontSize: rf(13),
       fontWeight: fw.medium,
       letterSpacing: -0.1,
-      lineHeight: r(13) * 1.3,
+      lineHeight: rf(13) * 1.3,
       color: c.foreground,
     },
     desc: {
@@ -55,7 +58,7 @@ export const makeStyles = (c: ColorTokens) =>
       lineHeight: t.xs * 1.4,
     },
     descFlush: {
-      fontSize: r(11),
+      fontSize: rf(11),
       color: c.foregroundMuted,
       opacity: 0.55,
       marginTop: r(1),
@@ -65,7 +68,7 @@ export const makeStyles = (c: ColorTokens) =>
       color: c.foregroundSubtle,
     },
     extraFlush: {
-      fontSize: r(11),
+      fontSize: rf(11),
       color: c.foregroundMuted,
       opacity: 0.55,
     },

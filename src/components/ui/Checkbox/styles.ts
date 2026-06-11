@@ -7,6 +7,8 @@ export const makeStyles = (c: ColorTokens) =>
     row: {
       flexDirection: 'row',
       alignItems: 'center',
+      // [L-37] alignSelf:'flex-start' 防止父容器拉伸(与 Chip [M-8] 同口径)
+      alignSelf: 'flex-start' as const,
       gap: space[4],
     },
     box: {
@@ -18,9 +20,15 @@ export const makeStyles = (c: ColorTokens) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
+    /** [L-79] circle 形态 —— radius.pill(sentinel 999)确保任何尺寸下真圆 */
+    boxCircle: {
+      borderRadius: radius.pill,
+    },
     label: {
       fontSize: t.sm,
       color: c.foreground,
       fontWeight: fw.regular,
+      // flexShrink:长 label 在 row 内换行/截断,不溢出也不把同行控件挤没([M-10])
+      flexShrink: 1,
     },
   });

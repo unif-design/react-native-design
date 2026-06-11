@@ -1,9 +1,12 @@
 import { StyleSheet } from 'react-native';
 import type { ColorTokens } from '../../../theme';
-import { fixed, fw, r, radius, space, type as t } from '../../../theme';
+import { fixed, fw, r, type as t } from '../../../theme';
+import { badgeStyles } from '../shared/badgeStyles';
 
-export const makeStyles = (c: ColorTokens) =>
-  StyleSheet.create({
+export const makeStyles = (c: ColorTokens) => {
+  // TabBar 图标 22pt,角标上边缘偏移 r(-3):使圆心落在图标右上角
+  const badge = badgeStyles(c, r(-3));
+  return StyleSheet.create({
     bar: {
       height: fixed.tabbarH,
       flexDirection: 'row',
@@ -22,22 +25,7 @@ export const makeStyles = (c: ColorTokens) =>
       fontWeight: fw.medium,
       lineHeight: 12,
     },
-    badge: {
-      position: 'absolute',
-      top: r(-3),
-      right: r(-10),
-      minWidth: r(16),
-      height: r(16),
-      borderRadius: radius.md,
-      backgroundColor: c.error,
-      paddingHorizontal: space[1],
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    badgeText: {
-      color: c.onError,
-      fontSize: t.nano,
-      fontWeight: fw.bold,
-      lineHeight: 12,
-    },
+    badge: badge.badge,
+    badgeText: badge.badgeText,
   });
+};

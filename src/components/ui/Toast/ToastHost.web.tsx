@@ -1,6 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Text, View } from 'react-native';
-import { useColors, useThemedStyles, motion } from '../../../theme';
+import { AccessibilityInfo, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  motion,
+  space,
+  useColors,
+  usePrefersReducedMotion,
+  useThemedStyles,
+} from '../../../theme';
 import { dotColorFor, makeStyles } from './styles';
 import { _subs } from './toast';
 import type { Subscriber, ToastEntry, ToastHostProps } from './types';
@@ -20,6 +27,8 @@ export function ToastHost({
 }: ToastHostProps = {}): React.JSX.Element | null {
   const c = useColors();
   const styles = useThemedStyles(makeStyles);
+  const insets = useSafeAreaInsets();
+  const reduced = usePrefersReducedMotion();
   const [entry, setEntry] = useState<ToastEntry | null>(null);
   const [visible, setVisible] = useState(false);
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -39,6 +48,8 @@ export function ToastHost({
   useEffect(() => {
     // entry=null:上一轮 effect 的 cleanup 已清 timer/RAF,这里无需重复。
     if (!entry) return;
+    // [M-15] web 同样主动播报(RN-Web announceForAccessibility 注入 aria-live region)。
+    AccessibilityInfo.announceForAccessibility(entry.message);
 
     // cancelled 标志:entry 快速连续切换 / 组件卸载时,cleanup 置 true。RAF 与
     // timer 回调执行前都检查它 —— cancelAnimationFrame 在部分浏览器不保证取消
@@ -77,15 +88,26 @@ export function ToastHost({
 
   if (!entry) return null;
 
+  // 位置:top=顶部(safe-area + 间距)/ center=屏幕居中 / bottom=底部(默认),复刻 native 版。
+  // 此前 web 完全未注入定位,position 参数被静默忽略、垂直位置随挂载次序漂移([H-6])。
+  const posStyle =
+    entry.position === 'top'
+      ? { top: insets.top + space[10] }
+      : entry.position === 'center'
+        ? { top: 0, bottom: 0, justifyContent: 'center' as const }
+        : { bottom: insets.bottom + space[10] };
+
   const dotColor = dotColorFor(entry.kind, c);
   const animatedWebStyle: React.CSSProperties = {
     opacity: visible ? 1 : 0,
     transform: visible ? 'translateY(0px)' : 'translateY(8px)',
-    transition: `opacity ${motion.base}ms ease-out, transform ${motion.base}ms ease-out`,
+    transition: reduced
+      ? 'none'
+      : `opacity ${motion.base}ms ease-out, transform ${motion.base}ms ease-out`,
   };
 
   return (
-    <View style={styles.host} pointerEvents="none" testID={testID}>
+    <View style={[styles.host, posStyle]} pointerEvents="none" testID={testID}>
       <div style={animatedWebStyle}>
         <View style={styles.toast}>
           {dotColor ? (

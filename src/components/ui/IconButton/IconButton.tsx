@@ -19,6 +19,7 @@ export function IconButton({
   variant = 'ghost',
   color,
   disabled,
+  loading,
   accessibilityLabel,
   accessibilityHint,
   style,
@@ -30,6 +31,7 @@ export function IconButton({
       onPress={onPress}
       size={size}
       variant={variant}
+      loading={loading}
       disabled={disabled}
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}

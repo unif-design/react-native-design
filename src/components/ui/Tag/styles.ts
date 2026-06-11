@@ -1,5 +1,12 @@
 import { StyleSheet } from 'react-native';
-import { fw, radius, type ColorTokens } from '../../../theme';
+import {
+  fw,
+  r,
+  radius,
+  space,
+  type as t,
+  type ColorTokens,
+} from '../../../theme';
 import type { TagSize, TagVariant } from './types';
 
 /** Tag 静态 base —— alignSelf 防 flex 父容器拉伸,radius 走 token。 */
@@ -24,16 +31,23 @@ export function sizingFor(size: TagSize): {
 } {
   switch (size) {
     case 'md':
-      return { h: 22, px: 8, fs: 12 };
+      return { h: r(22), px: space['3'], fs: t.xxs };
     case 'lg':
-      return { h: 26, px: 10, fs: 13 };
+      return { h: r(26), px: space['4'], fs: t.xs };
   }
 }
 
 /** Tag 颜色推导:variant → { bg, fg, border } 三色,全走 ColorTokens。
- *  签名 `(target, context)` 与 chat/Tool 的 tintFor / variantFor / labelFor 一致。 */
+ *  签名 `(variant, c)` 与 Button/Avatar 的 paletteFor 一致。
+ *  新增 variant 在 types.ts 加 union + 这里加 case。 */
 export function paletteFor(variant: TagVariant, c: ColorTokens) {
   switch (variant) {
+    case 'neutral':
+      return {
+        bg: c.surfaceContainerHigh,
+        fg: c.foregroundMuted,
+        border: undefined,
+      };
     case 'brand':
       return { bg: c.primaryContainer, fg: c.primary, border: undefined };
     case 'success':
@@ -47,12 +61,6 @@ export function paletteFor(variant: TagVariant, c: ColorTokens) {
         bg: 'transparent' as const,
         fg: c.foregroundMuted,
         border: c.outline,
-      };
-    default:
-      return {
-        bg: c.surfaceContainerHigh,
-        fg: c.foregroundMuted,
-        border: undefined,
       };
   }
 }

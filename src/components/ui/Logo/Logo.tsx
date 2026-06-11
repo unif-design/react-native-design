@@ -1,5 +1,6 @@
 import React from 'react';
 import { Image } from 'react-native';
+import { r } from '../../../theme';
 import type { LogoProps } from './types';
 
 /**
@@ -13,7 +14,7 @@ import type { LogoProps } from './types';
  */
 export function Logo({
   source,
-  size = 64,
+  size = r(64),
   borderRadius,
   label = 'Logo',
   style,

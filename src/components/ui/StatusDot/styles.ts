@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
 });
 
 /** StatusDot 颜色推导:status × tone → { bg, border } 二色,全走 ColorTokens。
- *  签名 `(target, context, tokens)` 与 Tag/Tool 的 paletteFor 一致。
+ *  与 Tag/Button 的 paletteFor 同约定(状态入参 + ColorTokens → 配色对象),多一维 tone。
  *  `flat` = pending/active 底色透明；`soft` = pending 走 surface、active 走 primaryContainer。 */
 export function paletteFor(
   status: StatusDotStatus,

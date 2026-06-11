@@ -9,7 +9,7 @@ import {
 } from '../../../theme';
 
 /** VersionPill 样式工厂 —— hairline 描边 + surface 底胶囊。
- *  字号走 type.microPlus(11.5),与 SplashScreen / profileCard / carousel 共用。 */
+ *  字号走 type.microPlus(11.5),现仓内仅 VersionPill 消费。 */
 export const makeVersionPillStyles = (c: ColorTokens) =>
   StyleSheet.create({
     pill: {
