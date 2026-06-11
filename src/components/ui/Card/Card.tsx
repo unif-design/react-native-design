@@ -17,23 +17,33 @@ export function Card({
 }: CardProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
   const shadow = useShadow();
+  const br = borderRadius ?? radius.xl;
 
+  // 双层:外层持底色 + 阴影 + 圆角(无 overflow,阴影不被裁);内层持 overflow hidden
+  // 按圆角裁内容 + padding + 可选边框。[H-4] iOS 上 overflow 与阴影同层会裁掉阴影。
   return (
     <View
       testID={testID}
       style={[
         styles.base,
-        { borderRadius: borderRadius ?? radius.xl },
-        !bare && { padding: padding ?? space[6] },
+        { borderRadius: br },
         variantToStyle(variant, shadow, styles),
-        borderColor != null && {
-          borderColor,
-          borderWidth: borderWidth ?? 2,
-        },
         style,
       ]}
     >
-      {children}
+      <View
+        style={[
+          styles.clip,
+          { borderRadius: br },
+          !bare && { padding: padding ?? space[6] },
+          borderColor != null && {
+            borderColor,
+            borderWidth: borderWidth ?? 2,
+          },
+        ]}
+      >
+        {children}
+      </View>
     </View>
   );
 }

@@ -1,8 +1,7 @@
 /**
  * `childTestID` —— 把"父 testID + 子 id → 子 testID"的拼接逻辑收口。
  *
- * 业务侧 7 处 list-like 组件(Tabs / Segmented / TabBar / Grid / Task /
- * Sources / ChainOfThought)重复同一三元:
+ * list-like 组件(Tabs / Segmented / TabBar / Grid)重复同一三元:
  *
  * ```ts
  * const itemTestID = item.testID ?? (testID ? `${testID}-${item.id}` : undefined);

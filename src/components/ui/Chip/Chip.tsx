@@ -7,7 +7,7 @@ import type { ChipProps } from './types';
 
 /**
  * 胶囊形可点击 chip。
- * - 默认：白底 + 细线边框，fg-1 文本
+ * - 默认：surface 底 + outline 细线边框，foreground 文本
  * - 选中：主色边框 + 主色文本
  * - 按下：透明度 0.7
  *

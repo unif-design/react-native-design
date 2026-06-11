@@ -31,7 +31,7 @@ export function sizingFor(size: TagSize): {
 }
 
 /** Tag 颜色推导:variant → { bg, fg, border } 三色,全走 ColorTokens。
- *  签名 `(target, context)` 与 chat/Tool 的 tintFor / variantFor / labelFor 一致。 */
+ *  签名 `(variant, c)` 与 Button/Avatar 的 paletteFor 一致。 */
 export function paletteFor(variant: TagVariant, c: ColorTokens) {
   switch (variant) {
     case 'brand':

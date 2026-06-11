@@ -14,7 +14,7 @@ import type { SkeletonProps } from './types';
  * ```
  *
  * `usePulse({ from: 0.5 })` 全局共享脉冲(Reanimated 4 worklet 驱动 opacity),
- * 区别于 chat `Shimmer`(沿 X 横扫高光,流式语义)。 */
+ * 区别于沿 X 横扫高光的流式 shimmer。 */
 export function Skeleton({
   shape = 'rect',
   width,

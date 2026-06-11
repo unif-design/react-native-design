@@ -42,7 +42,7 @@ yarn example android  # 构建并跑 Android
 ./icons            ICONS 数据 + IconName 联合类型 + types
 ./utils/testID     childTestID 助手
 ./utils/logger     createLogger + console transport + setLogLevel
-./components/ui    原子组件(Button、Card、Cell、NavBar、BottomSheet、Toast、……)
+./components/ui    原子组件(Button、Card、Cell、NavBar、Toast、Confirm、……)
 ./components/business  复合组件(AvatarWithRing、Decorations、GlassStats、VersionPill)
 ```
 

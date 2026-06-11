@@ -6,7 +6,7 @@ import { makeStyles } from './styles';
 import type { EmptyProps } from './types';
 
 /**
- * 空态 / 占位组件 —— `primary-0` 圆盘上的 icon 插画 + 标题 + 描述。
+ * 空态 / 占位组件 —— `primaryContainer` 圆盘上的 icon 插画 + 标题 + 描述。
  * icon 默认 `'spark'`(通用空态);相机 / 出错 / 权限场景应显式传强语义 icon。
  */
 export function Empty({

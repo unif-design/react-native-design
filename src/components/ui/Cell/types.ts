@@ -31,7 +31,7 @@ export type CellProps = {
   /** 显式 SR 朗读文案,覆盖 Cell 默认从 string title 推断的 fallback。
    *  title 是 ReactNode(自定义渲染)时尤其需要,否则 SR 用户听不到任何内容。 */
   accessibilityLabel?: string;
-  /** SR 朗读 hint —— 说明 tap 后行为(参 CLAUDE.md a11y 章节,短 ≤8 字)。
+  /** SR 朗读 hint —— 说明 tap 后行为(短 ≤8 字)。
    *  常用:"查看详情" / "打开应用" 等;onPress 缺省时此 prop 无意义。 */
   accessibilityHint?: string;
 };

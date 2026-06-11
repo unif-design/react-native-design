@@ -36,7 +36,7 @@ export function sizingFor(size: AvatarSize): { box: number; fs: number } {
   }
 }
 
-/** Avatar 配色推导:4 种 variant → { bg, fg }。签名与 Tag/Tool 的 paletteFor 一致。 */
+/** Avatar 配色推导:4 种 variant → { bg, fg }。签名与 Tag/Button 的 paletteFor 一致。 */
 export function paletteFor(
   variant: AvatarVariant,
   c: ColorTokens

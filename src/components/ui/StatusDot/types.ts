@@ -2,7 +2,7 @@ export type StatusDotStatus = 'pending' | 'active' | 'done';
 
 /**
  * `flat`：pending/active 底色透明（任务列表风格）。
- * `soft`：pending = bgCard、active = primary0，常用于推理链。
+ * `soft`：pending = surface、active = primaryContainer，常用于推理链。
  */
 export type StatusDotTone = 'flat' | 'soft';
 

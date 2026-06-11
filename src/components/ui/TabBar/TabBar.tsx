@@ -9,7 +9,7 @@ import type { TabBarProps } from './types';
 
 /**
  * 固定底部 tab bar —— App 主导航。
- * 高 50px，顶部一条细线边框。激活色：primary-300。
+ * 高 50px，顶部一条细线边框。激活色：primary。
  * 想留 home indicator 的安全区，请外面包一层 `<SafeAreaView edges={['bottom']}>`。
  */
 export function TabBar({

@@ -9,7 +9,7 @@ import type { PasswordInputProps } from './types';
 /** 密码 Input —— Input + leading lock + trailing eye 切换明文 / 密文。
  *  showPw 内部 useState,caller 只关心 value/onChangeText。
  *  a11y:label 已表达"显示/隐藏密码"意图,不再加 accessibilityHint(避免
- *  SR 朗读 over-hint,见 CLAUDE.md a11y 规范)。 */
+ *  SR 朗读 over-hint)。 */
 export function PasswordInput({
   value,
   onChangeText,

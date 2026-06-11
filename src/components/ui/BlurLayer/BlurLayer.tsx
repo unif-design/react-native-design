@@ -9,7 +9,7 @@ import type { BlurLayerProps } from './types';
  *  blurType 跟 scheme 自动切(亮 'light' / 暗 'dark',避免暗色奶白雾)。
  *
  *  - `'soft'` 玻璃数据条 / 小区域
- *  - `'strong'` 焦点引导 backdrop(BottomSheet blur 模式) */
+ *  - `'strong'` 焦点引导 backdrop(sheet 类浮层) */
 export function BlurLayer({
   intensity,
   tint,
