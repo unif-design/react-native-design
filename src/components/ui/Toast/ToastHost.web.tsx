@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Text, View } from 'react-native';
+import { AccessibilityInfo, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   motion,
@@ -48,6 +48,8 @@ export function ToastHost({
   useEffect(() => {
     // entry=null:上一轮 effect 的 cleanup 已清 timer/RAF,这里无需重复。
     if (!entry) return;
+    // [M-15] web 同样主动播报(RN-Web announceForAccessibility 注入 aria-live region)。
+    AccessibilityInfo.announceForAccessibility(entry.message);
 
     // cancelled 标志:entry 快速连续切换 / 组件卸载时,cleanup 置 true。RAF 与
     // timer 回调执行前都检查它 —— cancelAnimationFrame 在部分浏览器不保证取消

@@ -103,11 +103,11 @@ toast({ message: '正在同步…', duration: 5000 });
 来源：`src/components/ui/Toast/ToastHost.tsx`、`ToastHost.web.tsx`、`toast.ts`、`types.ts`。
 
 - 默认 `accessibilityRole`：**无**。Toast 由 `<ToastHost>` 渲染为 `<View>` + `<Text>`（native 与 web 两份实现一致），源码**未**设置 `accessibilityRole`。
-- 朗读 / live region：源码**未**设置 `accessibilityLiveRegion`（native）或 `role="alert"` / `aria-live`（web），且 host 容器显式 `pointerEvents="none"`。因此 **Toast 不会被 screen reader 自动播报**——出现/消失（默认 3000ms）对 SR 是静默的。需要无障碍播报的关键反馈，请改用会获得焦点的模态对话框，或在宿主侧自行触发播报。
+- 朗读 / live region：`<ToastHost>` 在每条 toast 出现时调用 `AccessibilityInfo.announceForAccessibility(message)`（native 与 web 两端一致，web 经 RN-Web 注入 aria-live region），**screen reader 会主动播报 message 文本**。host 容器仍 `pointerEvents="none"`（不抢焦点）。需要用户*停留确认*的关键操作（而非一次性通知）仍应改用会获得焦点的模态对话框。
 - a11y props：命令式 `toast(...)` 入参（`ToastInput`：`message` / `kind` / `duration`）与 `ToastHostProps`（仅 `testID`）均**不含** a11y 字段；`kind`（success/error/info）只决定圆点颜色，不带语义角色。
 - 无受控状态（`checked` / `selected` / `disabled` 均不适用）。
 
-> 现状如实记录：当前实现把 Toast 定位为纯视觉的非阻塞提示，无障碍播报需由宿主或更高语义的组件承担。
+> 现状如实记录：Toast 出现时主动播报 message（SR 可感知），但仍是非阻塞提示（不抢焦点、自动消失）；需要用户停留确认的关键操作请用模态对话框。
 
 - ❌ 不要在 Toast 里放按钮——需要交互的反馈用内联 Confirmation 或模态对话框
 - ❌ 不要堆叠多个 Toast——同一时间最多 1 条，新的把旧的替换

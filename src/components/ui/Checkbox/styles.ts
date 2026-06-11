@@ -22,5 +22,7 @@ export const makeStyles = (c: ColorTokens) =>
       fontSize: t.sm,
       color: c.foreground,
       fontWeight: fw.regular,
+      // flexShrink:长 label 在 row 内换行/截断,不溢出也不把同行控件挤没([M-10])
+      flexShrink: 1,
     },
   });

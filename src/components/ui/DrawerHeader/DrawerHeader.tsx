@@ -38,6 +38,7 @@ export function DrawerHeader({
             onError={handleImageError}
             style={styles.avatarImage}
             resizeMode="cover"
+            accessible={!!name}
             accessibilityLabel={name}
           />
         ) : (

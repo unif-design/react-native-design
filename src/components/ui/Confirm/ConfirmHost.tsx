@@ -62,12 +62,14 @@ export function ConfirmHost(): React.JSX.Element | null {
       <Pressable
         style={styles.backdrop}
         onPress={handleCancel}
-        accessibilityRole="button"
-        accessibilityLabel="关闭"
+        // [M-16] accessible={false}:否则 backdrop 把整个子树合并成单一「关闭, 按钮」,
+        // 遮蔽 sheet 内的 title/message/按钮。SR 取消路径走 cancel 按钮 + onRequestClose。
+        accessible={false}
       >
         <Pressable
           style={[styles.sheet, { paddingBottom: insets.bottom + space['7'] }]}
           onPress={() => {}}
+          accessible={false}
         >
           {display ? (
             <>

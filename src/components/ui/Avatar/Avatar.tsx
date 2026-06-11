@@ -46,6 +46,7 @@ export function Avatar({
           backgroundColor: palette.bg,
         },
       ]}
+      accessible={!!label}
       accessibilityLabel={label}
       testID={testID}
     >

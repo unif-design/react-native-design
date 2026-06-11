@@ -44,7 +44,9 @@ export function Chip({
         accessibilityState={{ selected: !!selected }}
         accessibilityLabel={label}
         testID={testID}
-        style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+        style={({ pressed }) => [
+          { alignSelf: 'flex-start', opacity: pressed ? 0.7 : 1 },
+        ]}
       >
         {inner}
       </Pressable>

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Text, View } from 'react-native';
+import { AccessibilityInfo, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   cancelAnimation,
@@ -50,6 +50,9 @@ export function ToastHost({
 
   useEffect(() => {
     if (!entry) return;
+    // [M-15] toast 出现时主动播报 —— 容器 pointerEvents="none" + 3s 自动消失,
+    // SR 用户对一闪而过的反馈本无任何感知通道。
+    AccessibilityInfo.announceForAccessibility(entry.message);
     const id = entry.id;
     // 进入方向:top 从上(-8)滑入,bottom / center 从下(8)滑入
     const from = entry.position === 'top' ? -8 : 8;
