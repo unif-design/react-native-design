@@ -8,6 +8,9 @@ import type { IconProps } from './types';
 
 const log = createLogger('Icon');
 
+// 模块级去重集合:同一未知 name 只警一次,避免列表场景告警风暴。
+const warnedNames = new Set<string>();
+
 export function Icon({
   name,
   size = r(18),
@@ -20,7 +23,10 @@ export function Icon({
   const stroke = color ?? c.foregroundMuted;
   const def: IconDef | undefined = ICONS[name];
   if (!def) {
-    log.warn(`unknown icon: ${name}`);
+    if (!warnedNames.has(name)) {
+      warnedNames.add(name);
+      log.warn(`unknown icon: ${name}`);
+    }
     return (
       <View
         style={[{ width: size, height: size }, style]}
@@ -57,29 +63,33 @@ export function Icon({
             opacity: el.opacity,
             stroke: el.stroke,
           };
-          if (el.kind === 'path') {
-            return <Path key={i} d={el.d} {...elProps} />;
+          switch (el.kind) {
+            case 'path':
+              return <Path key={i} d={el.d} {...elProps} />;
+            case 'circle':
+              return (
+                <Circle key={i} cx={el.cx} cy={el.cy} r={el.r} {...elProps} />
+              );
+            case 'rect':
+              // ry 不被 build-icons.js 抽取,不在 IconElement 类型中 —— 此处不传。
+              return (
+                <Rect
+                  key={i}
+                  x={el.x}
+                  y={el.y}
+                  width={el.width}
+                  height={el.height}
+                  rx={el.rx}
+                  {...elProps}
+                />
+              );
+            default: {
+              // 穷尽兜底:未来若 build-icons.js 新增 kind(如 line/ellipse),
+              // TypeScript 会在此行报错提示渲染端同步处理,防静默渲染空。
+              const _exhaustive: never = el;
+              return _exhaustive;
+            }
           }
-          if (el.kind === 'circle') {
-            return (
-              <Circle key={i} cx={el.cx} cy={el.cy} r={el.r} {...elProps} />
-            );
-          }
-          if (el.kind === 'rect') {
-            return (
-              <Rect
-                key={i}
-                x={el.x}
-                y={el.y}
-                width={el.width}
-                height={el.height}
-                rx={el.rx}
-                ry={el.ry}
-                {...elProps}
-              />
-            );
-          }
-          return null;
         })}
       </Svg>
     </View>

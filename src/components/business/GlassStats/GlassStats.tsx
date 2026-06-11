@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import { BlurLayer } from '../../ui';
+import { BlurLayer } from '../../ui/BlurLayer';
 import { useThemedStyles } from '../../../theme';
 import { makeGlassStatsStyles } from './styles';
 import type { GlassStatsProps } from './types';
@@ -24,7 +24,7 @@ export function GlassStats({ items }: GlassStatsProps): React.JSX.Element {
         <View style={styles.topHighlight} pointerEvents="none" />
         <View style={styles.inner}>
           {items.map(([count, label], i) => (
-            <React.Fragment key={label}>
+            <React.Fragment key={`${label}-${i}`}>
               {i > 0 ? <View style={styles.sep} /> : null}
               <View style={styles.col}>
                 <Text style={styles.countText}>{count}</Text>

@@ -1,8 +1,12 @@
 // Role-based color tokens —— role 名固定,亮/暗主题切的是 role 指向哪个 hex。
 
+/** 品牌橙 hex —— 跨文件(colors 亮/暗 primary、glassActiveFg、avatarGradient、shadow BRAND)
+ *  共用同一来源,改品牌色只改这一处。 */
+export const BRAND_ORANGE = '#EB6E00';
+
 export const lightColors = {
   // Brand
-  primary: '#EB6E00',
+  primary: BRAND_ORANGE,
   primaryPressed: '#D06200',
   primaryContainer: '#FFF5EB',
   primaryContainerSubtle: '#FFF8F0',
@@ -48,6 +52,7 @@ export const lightColors = {
   inverseOnSurface: '#FFFFFF',
 
   // Misc
+  /** 亮色 0.5:标准遮挡强度,背景内容隐退但保留可感知轮廓,符合 iOS/MD 规范建议。 */
   scrim: 'rgba(0,0,0,0.5)',
   /** Sheet backdrop —— sheet 之下浅灰 tint,合规态高对比度让 sheet 焦点突出。
    *  跟通用 scrim(黑半透"普通遮挡")区分:这是"焦点引导"。 */
@@ -57,11 +62,11 @@ export const lightColors = {
   /** 玻璃容器内部分隔线 —— 暗色翻成对应低透白,保证暗底可见。 */
   glassSeparator: 'rgba(0,0,0,0.08)',
   /** 浮动玻璃胶囊外区 tint(TabBar 滚动玻璃门)。
-   *  数值配合 blurAmount=25 让"玻璃门外区滚动内容透过模糊显示"达成。
+   *  数值配合 blur.strong(blurAmount=40) 让"玻璃门外区滚动内容透过模糊显示"达成。
    *  跟 glassTintLight 区分:此 token 给"玻璃门外区"语义。 */
   glassSurface: 'rgba(255,255,255,0.20)',
   /** TabBar 玻璃门 tint —— 跟 glassSurface 区分,真机实测 0.20 太厚看不清滚动内容,
-   *  TabBar 场景配合 blurAmount=15 主导,语义不同不可复用同一个 alpha。 */
+   *  TabBar 场景配合 blur.soft(blurAmount=10) 主导,语义不同不可复用同一个 alpha。 */
   tabBarGlassTint: 'rgba(255,255,255,0.10)',
   /** 玻璃胶囊边框(亮 0.18 / 暗 0.14 白透)。 */
   glassBorder: 'rgba(255,255,255,0.18)',
@@ -72,7 +77,7 @@ export const lightColors = {
   glassStatsHighlight: 'rgba(255,255,255,0.65)',
   /** 玻璃胶囊 active 段文字 / icon 色。亮色同 primary;暗色 #FFB068
    *  更浅一档的橙,在半透深灰玻璃上分量更轻。 */
-  glassActiveFg: '#EB6E00',
+  glassActiveFg: BRAND_ORANGE,
   /** 品牌橙 active 容器底 —— TabBar active 段比 brandTint10 多 2% 视觉权重。 */
   brandTint12: 'rgba(235,110,0,0.12)',
 
@@ -89,7 +94,10 @@ export const lightColors = {
   /** Me 屏 QR / 扫码按钮背景 —— scanBtn 要在 hero 上"凸起被看到"。 */
   qrBg: 'rgba(255,255,255,0.55)',
 
-  // Hero gradient stops —— Me 屏顶部暖橙 → 浅黄 → background 三段渐变
+  // Hero gradient stops —— Me 屏顶部暖橙 → 浅黄 → background 三段渐变。
+  // 历史驻留:渐变序列按约定应进 palettes.ts,但 heroGradient 驻 ColorTokens 可随主题
+  // 自动切换(消费方无需手动 scheme 分支);迁 palettes 会让消费方须手写 scheme 判断,
+  // 属人体工程学回退。新渐变序列一律进 palettes.ts,不要往 colors.ts 追加。
   /** Hero 渐变第 1 段:暖橙起色。 */
   heroGradient0: '#FFE3C8',
   /** Hero 渐变第 2 段(0.55 offset):浅黄过渡。 */
@@ -108,7 +116,7 @@ export type ColorTokens = { [K in keyof typeof lightColors]: string };
 
 export const darkColors: ColorTokens = {
   // Brand
-  primary: '#EB6E00',
+  primary: BRAND_ORANGE,
   primaryPressed: '#D06200',
   primaryContainer: '#3D1F00',
   primaryContainerSubtle: '#2A1500',
@@ -153,6 +161,8 @@ export const darkColors: ColorTokens = {
   inverseOnSurface: '#000000',
 
   // Misc
+  /** 暗色加深至 0.7(亮色 0.5):暗色环境底图对比度低、亮部元素更"抢眼",
+   *  scrim 需更重才能有效压住背景,让前景 sheet / modal 焦点突出。 */
   scrim: 'rgba(0,0,0,0.7)',
   /** Sheet backdrop 暗色:沿用亮色同值,合规态保持浅 tint(打破暗色默认深底)让焦点
    *  聚焦在协议 sheet 上。 */
@@ -160,15 +170,21 @@ export const darkColors: ColorTokens = {
   // 暗色 0.06 白透,凸起感由 glassBar 暗色黑 0.35 shadow 补
   glassTintLight: 'rgba(255,255,255,0.06)',
   glassSeparator: 'rgba(255,255,255,0.10)',
-  // 深灰半透 0.30,配合 blurAmount=25 让"玻璃门"语义达成
+  // 深灰半透 0.30,配合 blur.strong(blurAmount=40) 让"玻璃门"语义达成
   glassSurface: 'rgba(28,28,30,0.30)',
-  // 配合 blurAmount=15 让内容透过模糊带 alpha 染色
+  // 配合 blur.soft(blurAmount=10) 让内容透过模糊带 alpha 染色
   tabBarGlassTint: 'rgba(28,28,30,0.18)',
   glassBorder: 'rgba(255,255,255,0.14)',
   glassHighlight: 'rgba(255,255,255,0.24)',
+  // 暗色降至 0.10(亮色 0.65):暗色 BlurView 背景本身已深,顶部高光过强会破坏玻璃质感
+  // 的"透视感"——0.10 轻轻描出上沿即足以传达"凸起"层级。
+  // 注:亮色"比 glassHighlight 更强(0.65>0.28)"在暗色刻意反转(0.10<0.24),
+  // 两端各自以视觉效果为准,非笔误。
   glassStatsHighlight: 'rgba(255,255,255,0.10)',
   // 浅橙,半透深灰玻璃上品牌色更亮起,视觉重量比纯品牌橙轻一档
   glassActiveFg: '#FFB068',
+  // 暗色 brandTint12 与 brandTint14 同值(0.22):亮色 10/12/14 三档在暗底视觉差微弱,
+  // 两档合一后对比度差异仍可感知;若后续设计需要恢复阶梯可将 brandTint12 改为 0.18-0.20。
   brandTint12: 'rgba(235,110,0,0.22)',
 
   // Icon faint —— 暗底反相成白色 alpha,数值跟亮色一致
@@ -183,6 +199,7 @@ export const darkColors: ColorTokens = {
 
   // Hero gradient stops —— 品牌橙 alpha 渐变。
   // react-native-svg <Stop stopColor> 支持 rgba 字符串,最终 alpha = rgba.a × stopOpacity。
+  // 历史驻留(同亮色注释):新渐变序列一律进 palettes.ts。
   heroGradient0: 'rgba(235,110,0,0.18)',
   heroGradient1: 'rgba(235,110,0,0.06)',
   heroGradient2: '#0A0A0A',
@@ -192,5 +209,7 @@ export const darkColors: ColorTokens = {
   glassPillBorder: 'rgba(255,255,255,0.12)',
 };
 
-/** 头像品牌渐变 —— 浅橙 → 主品牌橙,135° 对角线渐变。亮 / 暗共用。 */
-export const avatarGradient = ['#F49443', '#EB6E00'] as const;
+/** 头像品牌渐变 —— 浅橙 → 主品牌橙,135° 对角线渐变。亮 / 暗共用。
+ *  历史驻留:渐变序列按约定应进 palettes.ts,但亮/暗共用无需 scheme 分支且消费面稳定,
+ *  迁移无收益。新渐变序列一律进 palettes.ts。 */
+export const avatarGradient = ['#F49443', BRAND_ORANGE] as const;

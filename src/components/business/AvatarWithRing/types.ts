@@ -8,7 +8,7 @@ export type AvatarWithRingProps = {
    * 视觉占比:label 字号约 size * 0.40,ring 宽度约 size * 0.0625。
    */
   size?: number;
-  /** ring + 填充背景色,默认 c.primary。 */
+  /** ring 颜色,默认 c.avatarRing(白系半透明)。 */
   ringColor?: string;
   /** 容器附加样式(margin / position 等定位)。 */
   style?: StyleProp<ViewStyle>;

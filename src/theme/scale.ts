@@ -7,10 +7,14 @@ const DESIGN_WIDTH = 402;
  *  0.3 对中文字号最友好(避免大屏字过大、小屏字过小)。 */
 const FONT_FACTOR = 0.3;
 
+// 取短边而非宽度:横屏/iPad 启动时 width 会是长边(iPhone 17 Pro 874pt),
+// 导致所有 r() 尺寸约翻倍。Math.min(w, h) 使竖屏行为完全不变,
+// 同时收口横屏启动与 iPad Split View(window 宽可能小于 DESIGN_WIDTH)两个场景。
+const { width: _w, height: _h } = Dimensions.get('window');
 const w =
   Platform.OS === 'web'
     ? DESIGN_WIDTH
-    : Dimensions.get('window').width || DESIGN_WIDTH;
+    : Math.min(_w || DESIGN_WIDTH, _h || DESIGN_WIDTH) || DESIGN_WIDTH;
 
 /** 实际缩放比。 */
 const ratio = w / DESIGN_WIDTH;

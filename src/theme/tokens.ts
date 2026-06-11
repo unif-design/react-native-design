@@ -117,3 +117,8 @@ export const motion = {
   slow: 300,
   pulse: 1600,
 } as const;
+
+/** 按压态透明度 —— Pressable pressed 时 opacity 的共享常量。
+ *  ButtonBase、Chip、Cell、Grid、EntryCard、Tabs、Segmented、TabBar 等
+ *  凡需要「按压反馈」的组件统一引用此值,避免散落多处手写 0.7 后不同步。 */
+export const pressedOpacity = 0.7;

@@ -5,6 +5,7 @@
 //   SmsCodeInput)留在 consumer 仓库
 export { GradientWash, RadialHalo, ScreenBackdrop } from './Decorations';
 export type {
+  GradientStop,
   GradientWashProps,
   RadialHaloProps,
   ScreenBackdropHalo,

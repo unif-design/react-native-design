@@ -1,4 +1,4 @@
-import React, { useId } from 'react';
+import React from 'react';
 import { View } from 'react-native';
 import Svg, {
   Defs,
@@ -6,6 +6,8 @@ import Svg, {
   RadialGradient as SvgRadialGradient,
   Stop,
 } from 'react-native-svg';
+import { useSvgId } from '../useSvgId';
+import { parseRgba } from './GradientWash';
 import type { RadialHaloProps } from './types';
 
 const DEFAULT_MAX_OPACITY = 0.16;
@@ -35,13 +37,15 @@ export function RadialHalo({
 }: RadialHaloProps): React.JSX.Element {
   const w = size;
   const h = height ?? size;
-  const autoId = useId();
-  const id = gradientId ?? `rh-${autoId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
+  const id = useSvgId('rh', gradientId);
   const resolvedStops = stops ?? buildStops(maxOpacity);
   const cx = w / 2;
   const cy = h / 2;
   // farthest-corner:r = 中心到最远角的距离
   const r = Math.sqrt(cx * cx + cy * cy);
+  // parseRgba:react-native-svg stopColor 只解析 RGB,rgba/8位hex 的 alpha 会被忽略;
+  // 拆分为 stopColor(rgb/hex6) + stopOpacity 后跨平台一致(与 GradientWash 同理)。
+  const { color: stopColor } = parseRgba(color);
   return (
     <View pointerEvents="none" style={[{ width: w, height: h }, style]}>
       <Svg width={w} height={h}>
@@ -61,7 +65,7 @@ export function RadialHalo({
               <Stop
                 key={`${s.offset}-${i}`}
                 offset={s.offset}
-                stopColor={color}
+                stopColor={stopColor}
                 stopOpacity={s.opacity}
               />
             ))}
