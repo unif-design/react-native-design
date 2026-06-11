@@ -41,7 +41,7 @@ export function Leading({
         >
           <Icon
             name={slot as IconName}
-            size={16}
+            size={r(16)}
             color={danger ? c.error : c.primary}
           />
         </View>
@@ -50,7 +50,7 @@ export function Leading({
     return (
       <Icon
         name={slot as IconName}
-        size={22}
+        size={r(22)}
         color={danger ? c.error : c.foregroundMuted}
       />
     );

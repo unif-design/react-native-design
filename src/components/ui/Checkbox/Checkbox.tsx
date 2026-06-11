@@ -48,7 +48,12 @@ export function Checkbox({
         ]}
       >
         {checked ? (
-          <Icon name="check" size={14} color={c.onPrimary} strokeWidth={2.5} />
+          <Icon
+            name="check"
+            size={r(14)}
+            color={c.onPrimary}
+            strokeWidth={2.5}
+          />
         ) : null}
       </View>
       {label ? <Text style={styles.label}>{label}</Text> : null}

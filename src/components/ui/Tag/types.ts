@@ -14,7 +14,7 @@ export type TagVariant =
   | 'info'
   | 'outline';
 
-/** Tag 尺寸：md=22 (h) / lg=26 (h) */
+/** Tag 尺寸：md=22 (h) / lg=26 (h)，均随设备宽度缩放 */
 export type TagSize = 'md' | 'lg';
 
 export type TagProps = {

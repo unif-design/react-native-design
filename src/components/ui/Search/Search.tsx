@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { Pressable } from 'react-native-gesture-handler';
 
-import { useColors } from '../../../theme';
+import { r, useColors } from '../../../theme';
 import { Icon } from '../Icon';
 import { Input } from '../Input';
 import type { TextInputRef } from '../TextField/TextFieldBase';
@@ -32,7 +32,7 @@ export const Search = forwardRef<TextInputRef, SearchProps>(function Search(
       onSubmitEditing={() => {
         if (typeof value === 'string') onSubmit?.(value);
       }}
-      leading={<Icon name="search" size={18} color={c.foregroundSubtle} />}
+      leading={<Icon name="search" size={r(18)} color={c.foregroundSubtle} />}
       trailing={
         filled ? (
           <Pressable
@@ -41,7 +41,7 @@ export const Search = forwardRef<TextInputRef, SearchProps>(function Search(
             accessibilityRole="button"
             accessibilityLabel="清除"
           >
-            <Icon name="close" size={14} color={c.foregroundSubtle} />
+            <Icon name="close" size={r(14)} color={c.foregroundSubtle} />
           </Pressable>
         ) : null
       }

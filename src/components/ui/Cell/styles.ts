@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native';
 import {
   fw,
   r,
+  rf,
   radius,
   space,
   type as t,
@@ -43,10 +44,10 @@ export const makeStyles = (c: ColorTokens) =>
       lineHeight: t.body * 1.3,
     },
     titleFlush: {
-      fontSize: r(13),
+      fontSize: rf(13),
       fontWeight: fw.medium,
       letterSpacing: -0.1,
-      lineHeight: r(13) * 1.3,
+      lineHeight: rf(13) * 1.3,
       color: c.foreground,
     },
     desc: {
@@ -55,7 +56,7 @@ export const makeStyles = (c: ColorTokens) =>
       lineHeight: t.xs * 1.4,
     },
     descFlush: {
-      fontSize: r(11),
+      fontSize: rf(11),
       color: c.foregroundMuted,
       opacity: 0.55,
       marginTop: r(1),
@@ -65,7 +66,7 @@ export const makeStyles = (c: ColorTokens) =>
       color: c.foregroundSubtle,
     },
     extraFlush: {
-      fontSize: r(11),
+      fontSize: rf(11),
       color: c.foregroundMuted,
       opacity: 0.55,
     },

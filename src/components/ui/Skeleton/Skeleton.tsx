@@ -1,7 +1,7 @@
 import React from 'react';
 import Animated from 'react-native-reanimated';
 import { usePulse } from '../Pulse';
-import { useColors } from '../../../theme';
+import { r, useColors } from '../../../theme';
 import type { SkeletonProps } from './types';
 
 /**
@@ -19,7 +19,7 @@ export function Skeleton({
   shape = 'rect',
   width,
   height,
-  size = 40,
+  size = r(40),
   radius,
   style,
   testID,
@@ -35,14 +35,14 @@ export function Skeleton({
     if (shape === 'line') {
       return {
         width: width ?? '100%',
-        height: height ?? 11,
-        borderRadius: radius ?? 3,
+        height: height ?? r(11),
+        borderRadius: radius ?? r(3),
       };
     }
     return {
       width: width ?? '100%',
-      height: height ?? 80,
-      borderRadius: radius ?? 8,
+      height: height ?? r(80),
+      borderRadius: radius ?? r(8),
     };
   })();
 

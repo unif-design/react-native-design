@@ -1,5 +1,12 @@
 import { StyleSheet } from 'react-native';
-import { fw, radius, type ColorTokens } from '../../../theme';
+import {
+  fw,
+  r,
+  radius,
+  space,
+  type as t,
+  type ColorTokens,
+} from '../../../theme';
 import type { TagSize, TagVariant } from './types';
 
 /** Tag 静态 base —— alignSelf 防 flex 父容器拉伸,radius 走 token。 */
@@ -24,9 +31,9 @@ export function sizingFor(size: TagSize): {
 } {
   switch (size) {
     case 'md':
-      return { h: 22, px: 8, fs: 12 };
+      return { h: r(22), px: space['3'], fs: t.xxs };
     case 'lg':
-      return { h: 26, px: 10, fs: 13 };
+      return { h: r(26), px: space['4'], fs: t.xs };
   }
 }
 

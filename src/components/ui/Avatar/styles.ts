@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { avatar, fw, type ColorTokens } from '../../../theme';
+import { avatar, fw, rf, type ColorTokens } from '../../../theme';
 import type { AvatarSize, AvatarVariant } from './types';
 
 /** Avatar 静态 base —— 圆形容器(borderRadius / 尺寸由 sizingFor 派生)。 */
@@ -24,15 +24,15 @@ export const styles = StyleSheet.create({
 export function sizingFor(size: AvatarSize): { box: number; fs: number } {
   switch (size) {
     case 'xs':
-      return { box: avatar.xs, fs: 10 };
+      return { box: avatar.xs, fs: rf(10) };
     case 'sm':
-      return { box: avatar.sm, fs: 12 };
+      return { box: avatar.sm, fs: rf(12) };
     case 'md':
-      return { box: avatar.md, fs: 13 };
+      return { box: avatar.md, fs: rf(13) };
     case 'lg':
-      return { box: avatar.lg, fs: 15 };
+      return { box: avatar.lg, fs: rf(15) };
     case 'xl':
-      return { box: avatar.xl, fs: 20 };
+      return { box: avatar.xl, fs: rf(20) };
   }
 }
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { type StyleProp, Text, type TextStyle, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { useColors, useThemedStyles } from '../../../theme';
+import { r, useColors, useThemedStyles } from '../../../theme';
 import { Icon } from '../Icon';
 import { useListVariant } from './context';
 import { Leading } from './Leading';
@@ -77,7 +77,7 @@ export function Cell({
       {arrow && !danger ? (
         <Icon
           name="chevron-right"
-          size={flush ? 18 : 20}
+          size={r(flush ? 18 : 20)}
           color={c.foregroundSubtle}
           style={flush ? styles.chevronFlush : undefined}
         />

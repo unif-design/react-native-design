@@ -1,11 +1,11 @@
 import React from 'react';
 import Animated from 'react-native-reanimated';
-import { useColors } from '../../../theme';
+import { r, useColors } from '../../../theme';
 import { usePulse } from './usePulse';
 import type { PulseDotProps } from './types';
 
 export function PulseDot({
-  size = 6,
+  size = r(6),
   color,
   from = 0.5,
   to = 1,

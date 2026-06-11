@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
 import { Icon } from '../Icon';
-import { useColors, useThemedStyles } from '../../../theme';
+import { r, useColors, useThemedStyles } from '../../../theme';
 import { makeStyles } from './styles';
 import type { EntryCardProps } from './types';
 
@@ -22,7 +22,7 @@ export function EntryCard({
   const content = (
     <>
       <View style={styles.iconTile}>
-        <Icon name={icon} size={16} color={c.foregroundMuted} />
+        <Icon name={icon} size={r(16)} color={c.foregroundMuted} />
       </View>
       <View style={styles.body}>
         <Text style={styles.title} numberOfLines={1}>

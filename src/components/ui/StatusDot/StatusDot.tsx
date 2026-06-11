@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { useColors } from '../../../theme';
+import { r, useColors } from '../../../theme';
 import { Icon } from '../Icon';
 import { PulseDot } from '../Pulse';
 import { paletteFor, styles } from './styles';
@@ -12,7 +12,7 @@ import type { StatusDotProps } from './types';
  */
 export function StatusDot({
   status,
-  size = 16,
+  size = r(16),
   tone = 'flat',
   testID,
 }: StatusDotProps): React.JSX.Element {

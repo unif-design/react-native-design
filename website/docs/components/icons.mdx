@@ -41,7 +41,7 @@ function Demo() {
 | Prop | Type | 默认 | 说明 |
 |---|---|---|---|
 | `name` | `IconName` | — | 图标语义名（字面量联合类型，自动补全） |
-| `size` | `number?` | `18` | 宽高（正方形） |
+| `size` | `number?` | `r(18)`（随设备宽度缩放） | 宽高（正方形）；传入值应已经过 `r()` 缩放 |
 | `color` | `string?` | `c.foregroundMuted` | 传给 SVG `stroke`（及 `fill="currentColor"` 元素） |
 | `strokeWidth` | `number?` | 每图标自带值（多数 `1.75`，`check` 为 `2`） | 覆盖描边宽度 |
 | `style` | `StyleProp<ViewStyle>?` | — | 外层 `<View>` 样式 |
@@ -61,7 +61,7 @@ function Demo() {
 | `stroke-linejoin` | `round` |
 | `fill` | `none`（实心填充用 `fill="currentColor"`） |
 | `color` | `<Icon>` 的 `color` prop → `stroke`，默认 `c.foregroundMuted`（不传 color 时） |
-| 组件默认 `size` | `18`（`<Icon>` 的 `size` 默认值）；用法上 16–20px 内联、24px 独立 |
+| 组件默认 `size` | `r(18)`（随设备宽度缩放）；调用方传值应包 `r()`，如 `size={r(20)}` |
 
 ## 添加新图标
 

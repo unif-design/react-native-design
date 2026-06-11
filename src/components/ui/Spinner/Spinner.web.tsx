@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View } from 'react-native';
-import { useColors } from '../../../theme';
+import { r, useColors } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import type { SpinnerProps } from './types';
 
@@ -33,9 +33,9 @@ function ensureKeyframes() {
 }
 
 export function Spinner({
-  size = 18,
+  size = r(18),
   color,
-  thickness = 2,
+  thickness = r(2),
   style,
   testID,
 }: SpinnerProps): React.JSX.Element {

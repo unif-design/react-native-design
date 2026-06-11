@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { ICONS, type IconDef } from '../../../icons';
-import { useColors } from '../../../theme';
+import { r, useColors } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import type { IconProps } from './types';
 
@@ -10,7 +10,7 @@ const log = createLogger('Icon');
 
 export function Icon({
   name,
-  size = 18,
+  size = r(18),
   color,
   strokeWidth,
   style,

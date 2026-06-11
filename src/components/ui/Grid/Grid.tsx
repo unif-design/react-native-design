@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { useColors, useThemedStyles } from '../../../theme';
+import { r, useColors, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
 import { Icon } from '../Icon';
@@ -47,8 +47,12 @@ export function Grid({
                 ]}
               >
                 <View>
-                  {/* 28pt 介于 icon.md(26) / icon.lg(30) 之间的设计稿专定字号 */}
-                  <Icon name={item.icon} size={28} color={c.foregroundMuted} />
+                  {/* 28pt 介于 icon.md(26) / icon.lg(30) 之间的设计稿专定字形尺寸 */}
+                  <Icon
+                    name={item.icon}
+                    size={r(28)}
+                    color={c.foregroundMuted}
+                  />
                   {item.badge != null ? (
                     <View style={styles.badge}>
                       <Text style={styles.badgeText}>{item.badge}</Text>

@@ -11,9 +11,9 @@ export const makeStyles = (c: ColorTokens) =>
       backgroundColor: c.surfaceContainer,
     },
     ring: {
-      borderWidth: 2,
+      borderWidth: r(2),
       borderColor: c.primary,
-      padding: 1,
+      padding: r(1),
     },
   });
 

@@ -8,16 +8,16 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import { useColors } from '../../../theme';
+import { r, useColors } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import type { SpinnerProps } from './types';
 
 const log = createLogger('Spinner');
 
 export function Spinner({
-  size = 18,
+  size = r(18),
   color,
-  thickness = 2,
+  thickness = r(2),
   style,
   testID,
 }: SpinnerProps) {
