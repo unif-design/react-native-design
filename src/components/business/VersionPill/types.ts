@@ -19,4 +19,6 @@ export type VersionPillProps = {
   buildPrefix?: string;
   /** 容器附加样式覆盖。 */
   style?: StyleProp<ViewStyle>;
+  /** E2E / 测试定位 */
+  testID?: string;
 };

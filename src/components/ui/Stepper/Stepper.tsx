@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { pressedOpacity, useThemedStyles } from '../../../theme';
+import { fixed, pressedOpacity, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
 import { makeStyles, sizingFor } from './styles';
@@ -58,8 +58,15 @@ export function Stepper({
   const decDisabled = disabled || safeValue <= safeMin;
   const incDisabled = disabled || safeValue >= safeMax;
 
+  // [M-7] 按钮高 sm=28 / md=32 均低于 fixed.hitTarget=44;hitSlop 不越父边界,
+  // 须让容器一并扩展:wrap 加垂直 padding 把命中区撑到 44pt。
+  const wrapPaddingV = Math.max(0, Math.round((fixed.hitTarget - dims.h) / 2));
+
   return (
-    <View style={styles.wrap} testID={testID}>
+    <View
+      style={[styles.wrap, { paddingVertical: wrapPaddingV }]}
+      testID={testID}
+    >
       <Pressable
         onPress={() => onChange(Math.max(safeMin, safeValue - safeStep))}
         disabled={decDisabled}

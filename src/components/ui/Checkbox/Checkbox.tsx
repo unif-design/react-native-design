@@ -1,7 +1,13 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { pressedOpacity, r, useColors, useThemedStyles } from '../../../theme';
+import {
+  fixed,
+  pressedOpacity,
+  r,
+  useColors,
+  useThemedStyles,
+} from '../../../theme';
 import { Icon } from '../Icon';
 import { makeStyles } from './styles';
 import type { CheckboxProps } from './types';
@@ -27,7 +33,8 @@ export function Checkbox({
     <Pressable
       onPress={() => !disabled && onChange(!checked)}
       disabled={disabled}
-      hitSlop={4}
+      // [M-7] box 20pt → 垂直补 (44-20)/2=12 到 fixed.hitTarget
+      hitSlop={Math.round((fixed.hitTarget - r(20)) / 2)}
       accessibilityRole="checkbox"
       accessibilityState={{ checked, disabled: !!disabled }}
       accessibilityLabel={label}

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { StyleProp, ViewStyle } from 'react-native';
 import type { IconName } from '../Icon';
 
 export type NavBarSlotConfig = {
@@ -27,6 +28,8 @@ export type NavBarProps = {
    *   'transparentLight' variant。
    */
   variant?: 'default' | 'brand' | 'transparent';
+  /** 容器附加样式(margin / position 等布局微调)。 */
+  style?: StyleProp<ViewStyle>;
   /** E2E / 测试定位 */
   testID?: string;
 };

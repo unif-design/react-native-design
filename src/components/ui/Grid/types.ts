@@ -1,3 +1,4 @@
+import type { StyleProp, ViewStyle } from 'react-native';
 import type { IconName } from '../Icon';
 
 export type GridItem = {
@@ -20,6 +21,8 @@ export type GridProps = {
   onPress?: (item: GridItem) => void;
   /** 是否套白色卡片；传 false 则背景透明 */
   card?: boolean;
+  /** 容器附加样式(margin / position 等布局微调)。 */
+  style?: StyleProp<ViewStyle>;
   /** 容器 testID；item testID 会自动派生为 `${testID}-${item.id}` */
   testID?: string;
 };

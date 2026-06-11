@@ -1,3 +1,5 @@
+import type { StyleProp, ViewStyle } from 'react-native';
+
 export type StatusDotStatus = 'pending' | 'active' | 'done';
 
 /**
@@ -19,6 +21,8 @@ export type StatusDotProps = {
    * 对于需要独立播报的场景(独立状态指示器),请通过此 prop 传入有意义的描述。
    */
   accessibilityLabel?: string;
+  /** 容器附加样式(margin / position 等布局微调)。 */
+  style?: StyleProp<ViewStyle>;
   /** E2E / 测试定位 */
   testID?: string;
 };

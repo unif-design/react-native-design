@@ -2,7 +2,7 @@ import React, { forwardRef, useState } from 'react';
 import { Pressable } from 'react-native-gesture-handler';
 import { Icon } from '../Icon';
 import { Input } from '../Input';
-import { r, useColors } from '../../../theme';
+import { control, fixed, r, useColors } from '../../../theme';
 import { childTestID } from '../../../utils/testID';
 import { styles } from './styles';
 import type { TextInputRef } from '../TextField/TextFieldBase';
@@ -60,7 +60,14 @@ export const PasswordInput = forwardRef<TextInputRef, PasswordInputProps>(
             onPress={() => setShowPw((v) => !v)}
             accessibilityRole="button"
             accessibilityLabel={showPw ? '隐藏密码' : '显示密码'}
-            hitSlop={8}
+            // [M-7] eye icon r(16)≈16pt;Input 高 control.md≈36pt 限制垂直扩展
+            // vertical 走 (44-control.md)/2≈4;horizontal 走 (44-16)/2=14
+            hitSlop={{
+              top: Math.round((fixed.hitTarget - control.md) / 2),
+              bottom: Math.round((fixed.hitTarget - control.md) / 2),
+              left: Math.round((fixed.hitTarget - r(16)) / 2),
+              right: Math.round((fixed.hitTarget - r(16)) / 2),
+            }}
           >
             <Icon
               name={showPw ? 'eye' : 'eye-off'}

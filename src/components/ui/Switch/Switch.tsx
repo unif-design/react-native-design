@@ -9,8 +9,8 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { motion, useColors, useThemedStyles } from '../../../theme';
-import { makeStyles, THUMB_OFF_X, THUMB_ON_X } from './styles';
+import { fixed, motion, r, useColors, useThemedStyles } from '../../../theme';
+import { makeStyles, THUMB_OFF_X, THUMB_ON_X, TRACK_H } from './styles';
 import type { SwitchProps } from './types';
 
 /**
@@ -59,7 +59,8 @@ export function Switch({
     <Pressable
       onPress={() => !disabled && onChange(!value)}
       disabled={disabled}
-      hitSlop={6}
+      // [M-7] 轨道高 r(20)≈20pt;补 (44-20)/2=12 到 fixed.hitTarget
+      hitSlop={Math.round((fixed.hitTarget - r(TRACK_H)) / 2)}
       style={disabled ? styles.pressableDisabled : styles.pressableEnabled}
       accessibilityRole="switch"
       accessibilityState={{ checked: value, disabled: !!disabled }}

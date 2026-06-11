@@ -11,13 +11,17 @@ import type { GlassStatsProps } from './types';
  * BlurLayer 接管 backdrop 双层结构(BlurView soft + glassTintLight tint),
  * blurType 跟 scheme 自动切。
  */
-export function GlassStats({ items }: GlassStatsProps): React.JSX.Element {
+export function GlassStats({
+  items,
+  style,
+  testID,
+}: GlassStatsProps): React.JSX.Element {
   const styles = useThemedStyles(makeGlassStatsStyles);
   return (
     // 外层 shell 承担 shadow(无 overflow,iOS Core Animation masksToBounds=true
     // 会裁掉 outer shadow);内层 glass 承担 overflow:hidden + border 裁圆角。
     // 单层 overflow + shadow 在 iOS 上 shadow 完全不可见。
-    <View style={styles.glassShell}>
+    <View style={[styles.glassShell, style]} testID={testID}>
       <View style={styles.glass}>
         <BlurLayer intensity="soft" />
         {/* 顶部 1px inset 白高光,让数据条顶部"凸起" */}

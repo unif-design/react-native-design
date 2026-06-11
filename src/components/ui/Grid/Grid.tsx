@@ -24,6 +24,7 @@ export function Grid({
   columns = 4,
   onPress,
   card = true,
+  style,
   testID,
 }: GridProps): React.JSX.Element {
   const c = useColors();
@@ -34,7 +35,7 @@ export function Grid({
   }
   const cellWidth = colWidth(columns);
   return (
-    <View style={[styles.wrap, card && styles.card]} testID={testID}>
+    <View style={[styles.wrap, card && styles.card, style]} testID={testID}>
       <View style={styles.inner}>
         {items.map((item) => {
           const itemTestID = childTestID(testID, item.id, item.testID);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
-import { useColors, useTheme, warmOrangePalette } from '../../../theme';
+import { r, useColors, useTheme, warmOrangePalette } from '../../../theme';
 import { GradientWash } from './GradientWash';
 import { RadialHalo } from './RadialHalo';
 import type {
@@ -39,9 +39,22 @@ const PRESETS: Record<ScreenBackdropPreset, PresetConfig> = {
     light: buildStops(warmOrangePalette.light, WARM_ORANGE_OFFSETS),
     dark: buildStops(warmOrangePalette.dark, WARM_ORANGE_OFFSETS),
     halos: [
-      { size: 520, height: 420, maxOpacity: 0.22, top: -120, centerX: true },
-      { size: 560, height: 380, maxOpacity: 0.18, bottom: -160, centerX: true },
-      { size: 220, maxOpacity: 0.16, top: 180, right: -80 },
+      // [L-88] halo 几何走 r() 对齐缩放纪律;maxOpacity / centerX 是无单位值,不缩放。
+      {
+        size: r(520),
+        height: r(420),
+        maxOpacity: 0.22,
+        top: r(-120),
+        centerX: true,
+      },
+      {
+        size: r(560),
+        height: r(380),
+        maxOpacity: 0.18,
+        bottom: r(-160),
+        centerX: true,
+      },
+      { size: r(220), maxOpacity: 0.16, top: r(180), right: r(-80) },
     ],
   },
 };
@@ -70,6 +83,7 @@ export function ScreenBackdrop({
   halos,
   children,
   style,
+  testID,
 }: ScreenBackdropProps): React.JSX.Element {
   const c = useColors();
   const { scheme } = useTheme();
@@ -84,6 +98,7 @@ export function ScreenBackdrop({
   return (
     <View
       style={[backdropStyles.root, { backgroundColor: c.background }, style]}
+      testID={testID}
     >
       {resolvedStops ? (
         <GradientWash
@@ -102,7 +117,10 @@ export function ScreenBackdrop({
             height={h.height}
             color={h.color ?? c.primary}
             maxOpacity={h.maxOpacity}
-            gradientId={`screen-backdrop-halo-${i}`}
+            // [L-60] 不传 gradientId —— 让 RadialHalo 走自己的 useSvgId(useId) 默认值。
+            // 实例内同名在多 ScreenBackdrop 同挂(keep-mounted 栈、导航页)时会导致
+            // web DOM SVG 的 url(#id) 命中文档首个同名渐变,造成跨实例渐变串台。
+            // useId 保证每次挂载唯一,「实例内多 halo 不同 id」也由 useSvgId 前缀+'rh' 保证。
             style={[
               backdropStyles.haloAbsolute,
               { top: h.top, bottom: h.bottom, left, right },

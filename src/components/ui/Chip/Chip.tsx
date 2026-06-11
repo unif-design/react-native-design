@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { pressedOpacity, useThemedStyles } from '../../../theme';
+import { fixed, pressedOpacity, r, rf, useThemedStyles } from '../../../theme';
 import { makeStyles } from './styles';
 import type { ChipProps } from './types';
 
@@ -39,6 +39,12 @@ export function Chip({
   );
 
   if (onPress) {
+    // [M-7] chip 内容高 ≈ 2×space[3] + xs 行高 ≈ 34pt < 44pt
+    // Pressable 是外壳,hitSlop 向外补足到 fixed.hitTarget
+    const chipHitSlopV = Math.max(
+      0,
+      Math.round((fixed.hitTarget - (2 * r(8) + rf(13) * 1.4)) / 2)
+    );
     return (
       <Pressable
         onPress={onPress}
@@ -47,6 +53,7 @@ export function Chip({
         accessibilityState={{ selected: !!selected, disabled: !!disabled }}
         accessibilityLabel={label}
         testID={testID}
+        hitSlop={{ top: chipHitSlopV, bottom: chipHitSlopV, left: 0, right: 0 }}
         style={({ pressed }) => [
           {
             alignSelf: 'flex-start',

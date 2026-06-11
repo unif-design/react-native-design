@@ -1,8 +1,16 @@
 import React, { useContext } from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { pressedOpacity, useColors, useThemedStyles } from '../../../theme';
+import {
+  fixed,
+  pressedOpacity,
+  r,
+  space,
+  useColors,
+  useThemedStyles,
+} from '../../../theme';
 import { createLogger } from '../../../utils/logger';
+import { childTestID } from '../../../utils/testID';
 import { RadioContext } from './RadioContext';
 import { RadioGroup } from './RadioGroup';
 import { makeStyles } from './styles';
@@ -35,14 +43,21 @@ export function Radio({
     return <View />;
   }
   const checked = ctx.value === value;
-  const resolvedTestID =
-    testID ?? (ctx.groupTestID ? `${ctx.groupTestID}-${value}` : undefined);
+  // [L-92] 改用 childTestID:收口 parent+id 拼接逻辑,保持空串 override 回落拼接语义
+  const resolvedTestID = childTestID(ctx.groupTestID, value, testID);
+
+  // [M-7] row 含 paddingVertical space[2](上下各 ~6pt) → 行高 ≈ r(20) + 2×space[2] ≈ 32pt
+  // 补足到 fixed.hitTarget:slop = (44 - 32) / 2 = 6
+  const hitSlopV = Math.max(
+    0,
+    Math.round((fixed.hitTarget - (r(20) + 2 * space[2])) / 2)
+  );
 
   return (
     <Pressable
       onPress={() => !disabled && ctx.onChange(value)}
       disabled={disabled}
-      hitSlop={4}
+      hitSlop={hitSlopV}
       accessibilityRole="radio"
       accessibilityState={{ checked, disabled: !!disabled }}
       accessibilityLabel={label}

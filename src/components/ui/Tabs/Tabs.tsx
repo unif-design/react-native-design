@@ -18,6 +18,7 @@ export function Tabs({
   onChange,
   items,
   disabled: allDisabled = false,
+  style,
   testID,
 }: TabsProps): React.JSX.Element {
   const c = useColors();
@@ -28,7 +29,11 @@ export function Tabs({
     log.warn(`Tabs 至少需要 2 项，当前传入 ${items.length} 项`);
   }
   return (
-    <View style={styles.under} testID={testID} accessibilityRole="tablist">
+    <View
+      style={[styles.under, style]}
+      testID={testID}
+      accessibilityRole="tablist"
+    >
       {items.map((it) => {
         const on = it.id === value;
         const itemDisabled = allDisabled || (it.disabled ?? false);

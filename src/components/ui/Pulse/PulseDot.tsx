@@ -8,6 +8,7 @@ export function PulseDot({
   size = r(6),
   color,
   from = 0.5,
+  style,
   testID,
   ...opts
 }: PulseDotProps = {}): React.JSX.Element {
@@ -25,6 +26,7 @@ export function PulseDot({
           backgroundColor: fill,
         },
         animatedStyle,
+        style,
       ]}
       testID={testID}
       accessibilityElementsHidden

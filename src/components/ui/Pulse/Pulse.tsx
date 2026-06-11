@@ -5,12 +5,13 @@ import type { PulseProps } from './types';
 
 export function Pulse({
   children,
+  style,
   testID,
   ...opts
 }: PulseProps & { children: React.ReactNode }): React.JSX.Element {
   const animatedStyle = usePulse(opts);
   return (
-    <Animated.View style={animatedStyle} testID={testID}>
+    <Animated.View style={[animatedStyle, style]} testID={testID}>
       {children}
     </Animated.View>
   );

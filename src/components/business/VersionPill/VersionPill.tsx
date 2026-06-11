@@ -12,6 +12,7 @@ export function VersionPill({
   versionPrefix = '版本 ',
   buildPrefix = 'build ',
   style,
+  testID,
 }: VersionPillProps): React.JSX.Element {
   const c = useColors();
   const styles = useThemedStyles(makeVersionPillStyles);
@@ -27,6 +28,7 @@ export function VersionPill({
       accessible
       accessibilityLabel={a11yLabel}
       style={[styles.pill, style]}
+      testID={testID}
     >
       {/* 状态点仅颜色通道,屏幕阅读器由外层容器统一朗读,此处隐藏 */}
       <View

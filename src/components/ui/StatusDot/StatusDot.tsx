@@ -22,6 +22,7 @@ export function StatusDot({
   size = r(16),
   tone = 'flat',
   accessibilityLabel,
+  style,
   testID,
 }: StatusDotProps): React.JSX.Element {
   const c = useColors();
@@ -43,6 +44,7 @@ export function StatusDot({
           backgroundColor: bg,
           borderColor: border,
         },
+        style,
       ]}
       accessible={!!a11yLabel}
       accessibilityLabel={a11yLabel}

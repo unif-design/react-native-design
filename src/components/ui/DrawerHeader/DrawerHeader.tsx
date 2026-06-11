@@ -12,6 +12,7 @@ export function DrawerHeader({
   name,
   subtitle,
   source,
+  style,
   testID,
 }: DrawerHeaderProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
@@ -34,7 +35,7 @@ export function DrawerHeader({
   const initial = [...name.trim()][0] ?? '?';
   const showImage = source != null && !imageFailed;
   return (
-    <View style={styles.header} testID={testID}>
+    <View style={[styles.header, style]} testID={testID}>
       <View style={[styles.avatar, showImage && styles.avatarImageMode]}>
         {showImage ? (
           <Image

@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { Pressable } from 'react-native-gesture-handler';
 
-import { control, r, useColors } from '../../../theme';
+import { control, fixed, r, useColors } from '../../../theme';
 import { childTestID } from '../../../utils/testID';
 import { Icon } from '../Icon';
 import { Input } from '../Input';
@@ -42,7 +42,14 @@ export const Search = forwardRef<TextInputRef, SearchProps>(function Search(
         filled ? (
           <Pressable
             onPress={() => onChangeText?.('')}
-            hitSlop={6}
+            // [M-7] 清除按钮 icon r(14)≈14pt;Input 高 control.md≈36pt 限制垂直扩展
+            // horizontal 走 (44-14)/2=15;vertical 走 (44-control.md)/2≈4
+            hitSlop={{
+              top: Math.round((fixed.hitTarget - control.md) / 2),
+              bottom: Math.round((fixed.hitTarget - control.md) / 2),
+              left: Math.round((fixed.hitTarget - r(14)) / 2),
+              right: Math.round((fixed.hitTarget - r(14)) / 2),
+            }}
             accessibilityRole="button"
             accessibilityLabel="清除"
             testID={childTestID(testID, 'clear')}

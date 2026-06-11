@@ -12,4 +12,6 @@ export type AvatarWithRingProps = {
   ringColor?: string;
   /** 容器附加样式(margin / position 等定位)。 */
   style?: StyleProp<ViewStyle>;
+  /** E2E / 测试定位 */
+  testID?: string;
 };

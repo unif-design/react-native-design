@@ -13,12 +13,13 @@ export function Empty({
   title,
   desc,
   icon = 'spark',
+  style,
   testID,
 }: EmptyProps): React.JSX.Element {
   const c = useColors();
   const styles = useThemedStyles(makeStyles);
   return (
-    <View style={styles.wrap} testID={testID}>
+    <View style={[styles.wrap, style]} testID={testID}>
       <View style={styles.illust}>
         <Icon name={icon} size={r(28)} color={c.primary} />
       </View>

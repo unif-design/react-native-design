@@ -73,6 +73,12 @@ function CarouselInner<T extends object>(
           <Pressable
             onPress={() => onPressItem?.(item, index)}
             style={{ width, height }}
+            // [L-92] 恒产出兜底:testID 缺失时用 'carousel' 前缀而非 undefined。
+            // 与 childTestID「父缺失返 undefined」语义不同,不替换为 childTestID。
+            // 原因:renderItem 须向 ReanimatedCarousel 提供稳定可预期的子项 testID
+            // 用于 E2E 定位,哪怕调用方未传 testID 也能用 carousel-item-0 等定位;
+            // 副作用:同屏两个未传 testID 的 Carousel 会碰撞 carousel-item-N。
+            // 建议:多 Carousel 场景请务必传 testID 以避免碰撞。
             testID={`${testID ?? 'carousel'}-item-${index}`}
             // 只在真正可点时声明 button 语义,纯展示型不标 button 避免读屏器误导
             {...(onPressItem

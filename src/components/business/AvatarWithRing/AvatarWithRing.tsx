@@ -23,6 +23,7 @@ export function AvatarWithRing({
   size = 64,
   ringColor,
   style,
+  testID,
 }: AvatarWithRingProps): React.JSX.Element {
   const { colors: c, shadow } = useTheme();
   const id = useSvgId('av');
@@ -32,7 +33,7 @@ export function AvatarWithRing({
     [size, ringColor, c, shadow.brandAvatar]
   );
   return (
-    <View style={[styles.shell, style]}>
+    <View style={[styles.shell, style]} testID={testID}>
       <View style={styles.avatarCore}>
         <Svg width={inner} height={inner} style={StyleSheet.absoluteFill}>
           <Defs>

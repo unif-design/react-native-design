@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import {
+  fixed,
   fw,
   r,
   rf,
@@ -26,10 +27,9 @@ export const makeStyles = (c: ColorTokens) =>
       borderRadius: 0,
       gap: space[4],
       paddingHorizontal: r(11),
-      // TODO [M-7] flush 可按压行高约 39pt < iOS HIG 44pt 触控目标要求。
-      // 与整批触控目标修正一起决断,不在此单独改(改小了 paddingVertical 影响多处 flush 视觉)。
       paddingVertical: r(11),
-      minHeight: 0,
+      // [M-7] flush 可按压行高约 39pt < iOS HIG 44pt;用 minHeight 撑到 fixed.hitTarget
+      minHeight: fixed.hitTarget,
     },
     cellFlushWithDesc: {
       paddingVertical: r(9),

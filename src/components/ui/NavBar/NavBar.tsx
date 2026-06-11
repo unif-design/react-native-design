@@ -48,6 +48,7 @@ export function NavBar({
   left,
   right,
   variant = 'default',
+  style,
   testID,
 }: NavBarProps) {
   const c = useColors();
@@ -65,6 +66,7 @@ export function NavBar({
         styles.bar,
         isBrand && styles.barBrand,
         isTransparent && styles.barTransparent,
+        style,
       ]}
       testID={testID}
     >

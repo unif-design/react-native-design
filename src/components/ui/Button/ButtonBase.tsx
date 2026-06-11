@@ -6,7 +6,12 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { pressedOpacity, useColors, useThemedStyles } from '../../../theme';
+import {
+  fixed,
+  pressedOpacity,
+  useColors,
+  useThemedStyles,
+} from '../../../theme';
 import { makeStyles, paletteFor, sizingFor } from './styles';
 import type {
   ButtonBaseRenderContext,
@@ -61,6 +66,24 @@ export function ButtonBase({
   const isText = variant === 'text';
   const isInteractive = !disabled && !loading;
 
+  // [M-7] 触控目标补偿:hitSlop 向外扩展命中区域到 fixed.hitTarget(44pt)。
+  // 公式:vertical slop = max(0, (hitTarget - h) / 2);square 时同补 horizontal。
+  // text variant height=undefined(仅行内文字高 ~18pt),无法从 sizing.h 推算,
+  // 保守固定补到 44pt 等效(top+bottom ≈ 13pt each)。
+  // ⚠ hitSlop 不越父边界;相邻可按压元素建议间距 ≥ 2×slop 以防重叠裁决。
+  const hitSlop = useMemo(() => {
+    if (isText) {
+      // text 无 chrome,仅靠行高无法可靠获取实际高度,固定补至 44pt
+      const v = Math.round((fixed.hitTarget - 18) / 2);
+      return { top: v, bottom: v, left: 0, right: 0 };
+    }
+    const v = Math.max(0, Math.round((fixed.hitTarget - sizing.h) / 2));
+    if (square) {
+      return { top: v, bottom: v, left: v, right: v };
+    }
+    return { top: v, bottom: v, left: 0, right: 0 };
+  }, [isText, sizing.h, square]);
+
   return (
     <Pressable
       accessibilityRole={accessibilityRole}
@@ -69,6 +92,7 @@ export function ButtonBase({
       accessibilityHint={accessibilityHint}
       disabled={!isInteractive}
       onPress={onPress}
+      hitSlop={hitSlop}
       testID={testID}
       style={({ pressed }) => [
         styles.base,

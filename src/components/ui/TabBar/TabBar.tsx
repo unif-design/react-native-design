@@ -16,12 +16,17 @@ export function TabBar({
   active,
   onChange,
   items,
+  style,
   testID,
 }: TabBarProps): React.JSX.Element {
   const c = useColors();
   const styles = useThemedStyles(makeStyles);
   return (
-    <View style={styles.bar} testID={testID} accessibilityRole="tablist">
+    <View
+      style={[styles.bar, style]}
+      testID={testID}
+      accessibilityRole="tablist"
+    >
       {items.map((item) => {
         const on = item.id === active;
         const tint = on ? c.primary : c.foregroundSubtle;

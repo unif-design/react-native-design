@@ -15,6 +15,7 @@ export function Avatar({
   size = 'md',
   variant = 'neutral',
   source,
+  style,
   testID,
 }: AvatarProps): React.JSX.Element {
   const c = useColors();
@@ -49,6 +50,7 @@ export function Avatar({
           borderRadius: dims.box / 2,
           backgroundColor: palette.bg,
         },
+        style,
       ]}
       accessible={!!label}
       accessibilityLabel={label}
