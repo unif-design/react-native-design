@@ -61,6 +61,8 @@ export function Spinner({
     ensureKeyframes();
     const node = ref.current;
     if (node && node.style) {
+      // essential motion:加载指示在 prefers-reduced-motion 下仍应旋转(与 native 的
+      // ReduceMotion.Never 对齐),故意不加 @media (prefers-reduced-motion) 停转。
       node.style.animation = 'unif-spinner-spin 900ms linear infinite';
     }
   }, []);

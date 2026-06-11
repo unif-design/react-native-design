@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { usePrefersReducedMotion } from '../../../theme';
 import type { PulseOptions } from './types';
 
 /**
@@ -19,9 +20,15 @@ export function usePulse({
   duration = 700,
   delay = 0,
 }: PulseOptions = {}): { opacity: number } {
+  const reduced = usePrefersReducedMotion();
   const [opacity, setOpacity] = useState(from);
 
   useEffect(() => {
+    // reduce-motion:不脉冲,直接停在完全显示(to),骨架/圆点静态呈现([M-19] c)。
+    if (reduced) {
+      setOpacity(to);
+      return;
+    }
     let cancelled = false;
     let direction: 'up' | 'down' = 'up';
     let start = Date.now() + delay;
@@ -51,7 +58,7 @@ export function usePulse({
       cancelled = true;
       if (raf != null) cancelAnimationFrame(raf);
     };
-  }, [from, to, duration, delay]);
+  }, [from, to, duration, delay, reduced]);
 
-  return { opacity };
+  return { opacity: reduced ? to : opacity };
 }

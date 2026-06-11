@@ -12,6 +12,7 @@ export type { ColorScheme, ThemeContextValue } from './ThemeProvider';
 export { useTheme, useColors, useShadow } from './useTheme';
 export { useThemedStyles } from './useThemedStyles';
 export type { StylesMaker } from './useThemedStyles';
+export { usePrefersReducedMotion } from './usePrefersReducedMotion';
 
 export {
   fontMono,

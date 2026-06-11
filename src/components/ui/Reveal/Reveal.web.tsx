@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
-import { motion } from '../../../theme';
+import { motion, usePrefersReducedMotion } from '../../../theme';
 import type { RevealProps } from './types';
 
 /**
@@ -15,10 +15,16 @@ export function Reveal({
   duration = motion.base,
   testID,
 }: RevealProps): React.JSX.Element {
+  const reduced = usePrefersReducedMotion();
   const [visible, setVisible] = useState(false);
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
+    // reduce-motion:跳过淡入,内容即时呈现(与 native FadeIn 在 ReduceMotion.System 下一致)。
+    if (reduced) {
+      setVisible(true);
+      return;
+    }
     let cancelled = false;
     // 双 RAF 过一帧 commit/paint，确保 CSS transition 有 opacity:0 起点（仿 ToastHost.web）。
     rafRef.current = requestAnimationFrame(() => {
@@ -31,11 +37,11 @@ export function Reveal({
       cancelled = true;
       if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
     };
-  }, []);
+  }, [reduced]);
 
   const animatedWebStyle: React.CSSProperties = {
     opacity: visible ? 1 : 0,
-    transition: `opacity ${duration}ms ease-out`,
+    transition: reduced ? undefined : `opacity ${duration}ms ease-out`,
   };
 
   return (

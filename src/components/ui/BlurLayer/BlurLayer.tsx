@@ -32,6 +32,9 @@ export function BlurLayer({
         style={StyleSheet.absoluteFill}
         blurType={blurType}
         blurAmount={blurTokens[intensity]}
+        // iOS「降低透明度」开启时 BlurView 用纯色替换模糊;库默认 #FFFFFF 在暗色 scheme
+        // 下整面刺眼白底。传随 scheme 的 surface 色,与下方 tint 层视觉一致([M-6])。
+        reducedTransparencyFallbackColor={c.surface}
       />
       <View
         style={[

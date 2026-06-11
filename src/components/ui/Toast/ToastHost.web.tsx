@@ -1,7 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useColors, useThemedStyles, motion, space } from '../../../theme';
+import {
+  motion,
+  space,
+  useColors,
+  usePrefersReducedMotion,
+  useThemedStyles,
+} from '../../../theme';
 import { dotColorFor, makeStyles } from './styles';
 import { _subs } from './toast';
 import type { Subscriber, ToastEntry, ToastHostProps } from './types';
@@ -22,6 +28,7 @@ export function ToastHost({
   const c = useColors();
   const styles = useThemedStyles(makeStyles);
   const insets = useSafeAreaInsets();
+  const reduced = usePrefersReducedMotion();
   const [entry, setEntry] = useState<ToastEntry | null>(null);
   const [visible, setVisible] = useState(false);
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -92,7 +99,9 @@ export function ToastHost({
   const animatedWebStyle: React.CSSProperties = {
     opacity: visible ? 1 : 0,
     transform: visible ? 'translateY(0px)' : 'translateY(8px)',
-    transition: `opacity ${motion.base}ms ease-out, transform ${motion.base}ms ease-out`,
+    transition: reduced
+      ? 'none'
+      : `opacity ${motion.base}ms ease-out, transform ${motion.base}ms ease-out`,
   };
 
   return (

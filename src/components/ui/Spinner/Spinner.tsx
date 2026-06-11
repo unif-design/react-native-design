@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import Animated, {
   cancelAnimation,
   Easing,
+  ReduceMotion,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -34,10 +35,19 @@ export function Spinner({
     Number.isFinite(thickness) && thickness > 0 ? thickness : 2;
 
   useEffect(() => {
+    // 加载指示属 essential motion(W3C):系统「减弱动态效果」下仍应旋转,否则会冻结成
+    // 与空闲/完成不可区分的静止圆环(形似卡死)。显式 ReduceMotion.Never 覆盖 reanimated
+    // 默认的 System —— 后者在 reduce-motion 下让 withTiming 跳端值、withRepeat 一轮即停。
     angle.value = withRepeat(
-      withTiming(360, { duration: 900, easing: Easing.linear }),
+      withTiming(360, {
+        duration: 900,
+        easing: Easing.linear,
+        reduceMotion: ReduceMotion.Never,
+      }),
       -1,
-      false
+      false,
+      undefined,
+      ReduceMotion.Never
     );
     return () => cancelAnimation(angle);
   }, [angle]);
