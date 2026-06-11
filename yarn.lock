@@ -5319,12 +5319,12 @@ __metadata:
   linkType: hard
 
 "@sbaiahmed1/react-native-blur@npm:^4.6.2":
-  version: 4.6.2
-  resolution: "@sbaiahmed1/react-native-blur@npm:4.6.2"
+  version: 4.6.3
+  resolution: "@sbaiahmed1/react-native-blur@npm:4.6.3"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10c0/e749fdf0d034cce8612c28745542cbbe8d717e9d09205ed344fc90c024eba7aea9be85af7842dfdc55f91d1a8211791451ec01e46c39cfea29e1d8ee9e93d7d8
+  checksum: 10c0/683d034d5b8b7ca9d365fa109dc1cf937933755b0cafcf40bc63f8c25307af5484dbba4ec3aaa31c6e8ce728cf7647163a130121bd8e8622b6481cdc2219dd21
   languageName: node
   linkType: hard
 
