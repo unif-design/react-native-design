@@ -38,6 +38,14 @@ export function confirm(options: ConfirmOptions): Promise<boolean> {
     );
     return Promise.resolve(false);
   }
+  // 没有 ConfirmHost 订阅 → entry 无人接收,Promise 会永久悬挂、调用方 await 卡死。
+  // 立即 resolve(false) 并告警,且不占 _activeEntry(否则后续 confirm 全被重入分支锁死)。
+  if (_subs.size === 0) {
+    log.warn(
+      'confirm() 调用时未挂载 <ConfirmHost />,对话框无法显示,已 resolve(false)。请在 app 根附近挂一次 <ConfirmHost />。'
+    );
+    return Promise.resolve(false);
+  }
   return new Promise<boolean>((resolve) => {
     const entry: ConfirmEntry = {
       id: ++_id,

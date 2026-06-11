@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Text, View } from 'react-native';
-import { useColors, useThemedStyles, motion } from '../../../theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColors, useThemedStyles, motion, space } from '../../../theme';
 import { dotColorFor, makeStyles } from './styles';
 import { _subs } from './toast';
 import type { Subscriber, ToastEntry, ToastHostProps } from './types';
@@ -20,6 +21,7 @@ export function ToastHost({
 }: ToastHostProps = {}): React.JSX.Element | null {
   const c = useColors();
   const styles = useThemedStyles(makeStyles);
+  const insets = useSafeAreaInsets();
   const [entry, setEntry] = useState<ToastEntry | null>(null);
   const [visible, setVisible] = useState(false);
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -77,6 +79,15 @@ export function ToastHost({
 
   if (!entry) return null;
 
+  // 位置:top=顶部(safe-area + 间距)/ center=屏幕居中 / bottom=底部(默认),复刻 native 版。
+  // 此前 web 完全未注入定位,position 参数被静默忽略、垂直位置随挂载次序漂移([H-6])。
+  const posStyle =
+    entry.position === 'top'
+      ? { top: insets.top + space[10] }
+      : entry.position === 'center'
+        ? { top: 0, bottom: 0, justifyContent: 'center' as const }
+        : { bottom: insets.bottom + space[10] };
+
   const dotColor = dotColorFor(entry.kind, c);
   const animatedWebStyle: React.CSSProperties = {
     opacity: visible ? 1 : 0,
@@ -85,7 +96,7 @@ export function ToastHost({
   };
 
   return (
-    <View style={styles.host} pointerEvents="none" testID={testID}>
+    <View style={[styles.host, posStyle]} pointerEvents="none" testID={testID}>
       <div style={animatedWebStyle}>
         <View style={styles.toast}>
           {dotColor ? (

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
@@ -42,8 +42,15 @@ export function ToastHost({
     };
   }, []);
 
+  // 退场完成只清「仍是自己」的 entry:withTiming 完成回调经 runOnJS 跨线程异步投递,
+  // 投递到执行之间若来了新 toast,无 id 守卫的 setEntry(null) 会把新 toast 瞬时清掉([M-14])。
+  const dismissIfCurrent = useCallback((id: number) => {
+    setEntry((cur) => (cur?.id === id ? null : cur));
+  }, []);
+
   useEffect(() => {
     if (!entry) return;
+    const id = entry.id;
     // 进入方向:top 从上(-8)滑入,bottom / center 从下(8)滑入
     const from = entry.position === 'top' ? -8 : 8;
     cancelAnimation(op);
@@ -56,7 +63,7 @@ export function ToastHost({
     dismissTimer.current = setTimeout(() => {
       op.value = withTiming(0, { duration: motion.base });
       ty.value = withTiming(from, { duration: motion.base }, (finished) => {
-        if (finished) runOnJS(setEntry)(null);
+        if (finished) runOnJS(dismissIfCurrent)(id);
       });
     }, entry.duration);
 
@@ -65,7 +72,7 @@ export function ToastHost({
       cancelAnimation(op);
       cancelAnimation(ty);
     };
-  }, [entry, op, ty]);
+  }, [entry, op, ty, dismissIfCurrent]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: op.value,

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { space, useThemedStyles } from '../../../theme';
@@ -19,11 +19,24 @@ export function ConfirmHost(): React.JSX.Element | null {
   const insets = useSafeAreaInsets();
   const [entry, setEntry] = useState<ConfirmEntry | null>(null);
 
+  // 跟踪当前未决 entry,供 unmount cleanup resolve(false)。
+  const pendingRef = useRef<ConfirmEntry | null>(null);
+  pendingRef.current = entry;
+
+  // 保留最后一次显示的 entry:关闭时 entry 立即置 null,但 slide 退场动画期 Modal 仍可见,
+  // 渲染 lastEntry 才不会滑出一个只剩 padding 的空 sheet([M-17])。
+  const lastEntryRef = useRef<ConfirmEntry | null>(null);
+  if (entry) lastEntryRef.current = entry;
+  const display = entry ?? lastEntryRef.current;
+
   useEffect(() => {
     const sub: Subscriber = (next) => setEntry(next);
     _subs.add(sub);
     return () => {
       _subs.delete(sub);
+      // Host 卸载时若对话框仍未决(error boundary 重置 / 根 re-key 切语言主题等),
+      // resolve(false) —— 否则 confirm() 的 Promise 永久悬挂、_activeEntry 锁死([H-5])。
+      pendingRef.current?.resolve(false);
     };
   }, []);
 
@@ -56,28 +69,28 @@ export function ConfirmHost(): React.JSX.Element | null {
           style={[styles.sheet, { paddingBottom: insets.bottom + space['7'] }]}
           onPress={() => {}}
         >
-          {entry ? (
+          {display ? (
             <>
               <View style={styles.body}>
                 <Text style={styles.title} accessibilityRole="header">
-                  {entry.title}
+                  {display.title}
                 </Text>
-                {entry.message ? (
-                  <Text style={styles.message}>{entry.message}</Text>
+                {display.message ? (
+                  <Text style={styles.message}>{display.message}</Text>
                 ) : null}
               </View>
               <View style={styles.actions}>
                 <Button
                   testID="confirm-cancel"
-                  label={entry.cancelLabel ?? '取消'}
+                  label={display.cancelLabel ?? '取消'}
                   variant="secondary"
                   block
                   onPress={handleCancel}
                 />
                 <Button
                   testID="confirm-ok"
-                  label={entry.confirmLabel ?? '确认'}
-                  variant={entry.destructive ? 'danger' : 'primary'}
+                  label={display.confirmLabel ?? '确认'}
+                  variant={display.destructive ? 'danger' : 'primary'}
                   block
                   onPress={handleConfirm}
                 />

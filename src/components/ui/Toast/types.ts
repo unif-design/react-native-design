@@ -23,7 +23,7 @@ export type ToastInput =
     };
 
 export type ToastEntry = {
-  /** 唯一 id（自增），用于动画切换识别 */
+  /** 唯一 id（自增）—— 退场守卫用:ToastHost 只清「仍是当前」的 toast,避免清掉竞态期到达的新 toast */
   id: number;
   /** 消息文本 */
   message: string;
