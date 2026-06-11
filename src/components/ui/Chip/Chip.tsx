@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { useThemedStyles } from '../../../theme';
+import { pressedOpacity, useThemedStyles } from '../../../theme';
 import { makeStyles } from './styles';
 import type { ChipProps } from './types';
 
@@ -9,7 +9,8 @@ import type { ChipProps } from './types';
  * 胶囊形可点击 chip。
  * - 默认：surface 底 + outline 细线边框，foreground 文本
  * - 选中：主色边框 + 主色文本
- * - 按下：透明度 0.7
+ * - 按下：透明度 pressedOpacity(与 ButtonBase 同源)
+ * - 禁用：透明度 0.5 + 不响应 onPress
  *
  * 常用于建议 chip、筛选 pill、多选标签等。
  */
@@ -17,6 +18,7 @@ export function Chip({
   label,
   selected,
   onPress,
+  disabled,
   leading,
   trailing,
   style,
@@ -40,12 +42,16 @@ export function Chip({
     return (
       <Pressable
         onPress={onPress}
+        disabled={disabled}
         accessibilityRole="button"
-        accessibilityState={{ selected: !!selected }}
+        accessibilityState={{ selected: !!selected, disabled: !!disabled }}
         accessibilityLabel={label}
         testID={testID}
         style={({ pressed }) => [
-          { alignSelf: 'flex-start', opacity: pressed ? 0.7 : 1 },
+          {
+            alignSelf: 'flex-start',
+            opacity: disabled ? 0.5 : pressed ? pressedOpacity : 1,
+          },
         ]}
       >
         {inner}

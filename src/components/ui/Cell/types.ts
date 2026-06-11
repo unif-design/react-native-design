@@ -9,7 +9,10 @@ export type CellProps = {
   titleLines?: number;
   /** 副标题；string 自动 numberOfLines=2，传 ReactNode 完全自定义 */
   desc?: ReactNode;
-  /** 右侧 slot —— 字符串自动套 Text；传 ReactNode 放 Switch / Stepper / Tag 等控件 */
+  /** 右侧 slot —— 字符串自动套 Text；传 ReactNode 放 Switch / Stepper / Tag 等控件。
+   *  **a11y 边界**：extra 为 ReactNode 时，外壳 Pressable 会关闭 `accessible`，
+   *  让 SR 直接穿透到 extra 控件（避免双播报）；extra 的 a11y 由其自身负责。
+   *  若 extra 是纯展示 ReactNode 且仍需外壳播报，请改用 string 或传 `accessibilityLabel`。 */
   extra?: ReactNode;
   /** 显示右侧 chevron-right 图标，常配合 onPress 表示「可进入下一级」 */
   arrow?: boolean;

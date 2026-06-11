@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, Text, View } from 'react-native';
 import { useThemedStyles } from '../../../theme';
 import { makeStyles } from './styles';
@@ -16,18 +16,22 @@ export function DrawerHeader({
 }: DrawerHeaderProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
   const [imageFailed, setImageFailed] = useState(false);
-  // 避免 unmount 后 Image 网络回包仍调 setState 的 React warning
-  const mountedRef = useRef(true);
-  useEffect(
-    () => () => {
-      mountedRef.current = false;
-    },
-    []
-  );
+
+  // [M-20] React 18+ 已移除 unmount 后 setState 的 warning,mountedRef 守卫为死码,删除。
+  // [L-44] source 变化时重置 imageFailed,否则换图 URL 后仍展示 fallback 文字。
+  const uri =
+    source != null && typeof source === 'object' && 'uri' in source
+      ? (source as { uri?: string }).uri
+      : null;
+  useEffect(() => {
+    setImageFailed(false);
+  }, [uri, source]);
+
   const handleImageError = () => {
-    if (mountedRef.current) setImageFailed(true);
+    setImageFailed(true);
   };
-  const initial = name.trim()[0] ?? '?';
+  // [L-51] 码点级取首字,防 emoji / 代理对被截断为乱码。
+  const initial = [...name.trim()][0] ?? '?';
   const showImage = source != null && !imageFailed;
   return (
     <View style={styles.header} testID={testID}>

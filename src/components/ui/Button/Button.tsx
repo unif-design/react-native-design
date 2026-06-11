@@ -7,7 +7,7 @@ import { makeStyles } from './styles';
 import type { ButtonProps } from './types';
 
 /**
- * 6 variant × 3 size 文本按钮。
+ * 7 variant × 3 size 文本按钮。
  * 内部组合 ButtonBase + content(label + 可选 leftIcon / rightIcon),
  * ButtonBase 接管 chrome(sizing / palette / disabled / loading / a11y)。
  *
@@ -48,6 +48,7 @@ export function Button({
           ) : null}
           <Text
             style={[styles.label, { color: palette.fg, fontSize: sizing.fs }]}
+            numberOfLines={1}
           >
             {label}
           </Text>

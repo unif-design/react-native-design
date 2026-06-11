@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, Text, View } from 'react-native';
 import { useColors } from '../../../theme';
 import { paletteFor, sizingFor, styles } from './styles';
@@ -19,16 +19,20 @@ export function Avatar({
 }: AvatarProps): React.JSX.Element {
   const c = useColors();
   const [imageFailed, setImageFailed] = useState(false);
-  // 避免 unmount 后 Image 网络回包仍调 setState 的 React warning
-  const mountedRef = useRef(true);
-  useEffect(
-    () => () => {
-      mountedRef.current = false;
-    },
-    []
-  );
+
+  // [M-20] React 18+ 已移除 unmount 后 setState 的 warning,mountedRef 守卫为死码,删除。
+  // [L-44] source 变化时重置 imageFailed,否则换图 URL 后仍展示 fallback 文字。
+  // source 可能是对象形态({ uri }),按 uri 字段做细粒度比较。
+  const uri =
+    source != null && typeof source === 'object' && 'uri' in source
+      ? (source as { uri?: string }).uri
+      : null;
+  useEffect(() => {
+    setImageFailed(false);
+  }, [uri, source]);
+
   const handleImageError = () => {
-    if (mountedRef.current) setImageFailed(true);
+    setImageFailed(true);
   };
   const dims = sizingFor(size);
   const palette = paletteFor(variant, c);

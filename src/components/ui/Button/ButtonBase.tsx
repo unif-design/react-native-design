@@ -6,7 +6,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { useColors, useThemedStyles } from '../../../theme';
+import { pressedOpacity, useColors, useThemedStyles } from '../../../theme';
 import { makeStyles, paletteFor, sizingFor } from './styles';
 import type {
   ButtonBaseRenderContext,
@@ -82,7 +82,7 @@ export function ButtonBase({
           backgroundColor: palette.bg,
           borderColor: palette.border ?? 'transparent',
           borderWidth: palette.border ? 1 : 0,
-          opacity: disabled ? 0.5 : pressed ? 0.7 : 1,
+          opacity: disabled ? 0.5 : pressed ? pressedOpacity : 1,
           alignSelf: block ? 'stretch' : 'flex-start',
           // 非 block 用 undefined 而非硬编码 0:Yoga 的 resolveFlexGrow 里显式 flexGrow
           // 优先级高于 flex 简写,写死 0 会让调用方 style={{ flex: 1 }} 失效(按钮撑不开 /

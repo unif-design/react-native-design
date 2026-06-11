@@ -1,6 +1,7 @@
 import React, { type ComponentRef, forwardRef, useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
-import { control, space, useColors, useThemedStyles } from '../../../theme';
+import { control, r, space, useColors, useThemedStyles } from '../../../theme';
+import { childTestID } from '../../../utils/testID';
 import { makeStyles } from './styles';
 import type { TextFieldBaseProps } from './types';
 
@@ -26,7 +27,8 @@ export const TextFieldBase = forwardRef<TextInputRef, TextFieldBaseProps>(
     {
       multiline = false,
       height = control.lg,
-      minHeight = 96,
+      // [L-81] multiline minHeight 裸 96 → r(96),随设备缩放
+      minHeight = r(96),
       maxHeight,
       leading,
       trailing,
@@ -37,6 +39,7 @@ export const TextFieldBase = forwardRef<TextInputRef, TextFieldBaseProps>(
       value,
       onFocus,
       onBlur,
+      onChangeText,
       testID,
       ...rest
     },
@@ -45,8 +48,15 @@ export const TextFieldBase = forwardRef<TextInputRef, TextFieldBaseProps>(
     const c = useColors();
     const styles = useThemedStyles(makeStyles);
     const [focused, setFocused] = useState(false);
-    const filled = value != null && String(value).length > 0;
+    // [M-9] 内部镜像 state:非受控场景 value 不传,用 _mirror 做 hasValue 判断
+    const [_mirror, setMirror] = useState('');
+    // [M-9] filled 在受控 value 和内部镜像 state 之间取 hasValue,
+    // 保证非受控场景 filled 视觉态能正确响应用户输入,且受控用法行为不变
+    const filled =
+      value != null ? String(value).length > 0 : _mirror.length > 0;
     const isEditable = disabled ? false : editable;
+    // [L-31] editable=false(非 disabled)时也应进入 disabled a11y state
+    const isDisabledA11y = disabled || editable === false;
 
     // 视觉态优先级:error > focused > filled > idle。
     // active 三态(focus/filled/error)共享 wrapActive 白底,各自只覆 borderColor 差量。
@@ -79,6 +89,11 @@ export const TextFieldBase = forwardRef<TextInputRef, TextFieldBaseProps>(
             {...rest}
             editable={isEditable}
             value={value}
+            onChangeText={(text) => {
+              // [M-9] 同步内部镜像,非受控场景 filled 视觉态依赖此 state
+              setMirror(text);
+              onChangeText?.(text);
+            }}
             multiline={multiline}
             onFocus={(e) => {
               setFocused(true);
@@ -97,12 +112,22 @@ export const TextFieldBase = forwardRef<TextInputRef, TextFieldBaseProps>(
               },
             ]}
             placeholderTextColor={c.foregroundSubtle}
-            accessibilityState={disabled ? { disabled: true } : undefined}
-            testID={testID ? `${testID}-input` : undefined}
+            // [L-31] editable=false 并入 disabled a11y state,SR 能正确播报不可编辑
+            accessibilityState={isDisabledA11y ? { disabled: true } : undefined}
+            testID={childTestID(testID, 'input')}
           />
           {trailing != null ? <View>{trailing}</View> : null}
         </View>
-        {error ? <Text style={styles.errorMsg}>{error}</Text> : null}
+        {/* [L-31] error Text 补 accessibilityLiveRegion="polite" —— 错误出现时 SR 自动播报 */}
+        {error ? (
+          <Text
+            style={styles.errorMsg}
+            accessibilityLiveRegion="polite"
+            testID={childTestID(testID, 'error')}
+          >
+            {error}
+          </Text>
+        ) : null}
       </View>
     );
   }

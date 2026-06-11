@@ -9,16 +9,9 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { motion, r, useColors, useThemedStyles } from '../../../theme';
-import { INSET, makeStyles, THUMB, TRACK_W } from './styles';
+import { motion, useColors, useThemedStyles } from '../../../theme';
+import { makeStyles, THUMB_OFF_X, THUMB_ON_X } from './styles';
 import type { SwitchProps } from './types';
-
-// ─── 动画派生常量(组件私有,非 style)─────────────────────────────────────
-// 把手 translateX 的 off / on 端点:左右各留 INSET 间距,
-// off = INSET(2),on = trackW - INSET - thumbW(32-2-16=14)。
-// 走 r() 保证多设备缩放跟 track / thumb 物理尺寸一致(否则非设计基准设备会错位)。
-const THUMB_OFF_X = r(INSET);
-const THUMB_ON_X = r(TRACK_W - INSET - THUMB);
 
 /**
  * 布尔切换。32×20 轨道 + 16×16 白色把手,200ms 缓动。

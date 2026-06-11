@@ -13,7 +13,8 @@ import type { SkeletonProps } from './types';
  * <Skeleton shape="circle" size={40} />        // 头像占位
  * ```
  *
- * `usePulse({ from: 0.5 })` 全局共享脉冲(Reanimated 4 worklet 驱动 opacity),
+ * `usePulse({ from: 0.5 })` 每实例独立脉冲 —— native 端走 Reanimated 4 worklet,
+ * web 端走 CSS transition + setInterval(零 rAF JS 帧),opacity 在 0.5~1 循环。
  * 区别于沿 X 横扫高光的流式 shimmer。 */
 export function Skeleton({
   shape = 'rect',

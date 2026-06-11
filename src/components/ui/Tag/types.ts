@@ -26,7 +26,11 @@ export type TagProps = {
   size?: TagSize;
   /** 额外样式覆盖 */
   style?: StyleProp<ViewStyle>;
-  /** 文本 numberOfLines，默认 1（超长 ellipsis） */
+  /**
+   * 文本截断行数，默认 1（超长 ellipsis）。
+   * **警告：Tag 高度钉死（md=22 / lg=26），传 >1 时多余行溢出或被裁，
+   * 仅在同时自定义高度的场景才有意义。**
+   */
   numberOfLines?: number;
   /** E2E / 测试定位 */
   testID?: string;

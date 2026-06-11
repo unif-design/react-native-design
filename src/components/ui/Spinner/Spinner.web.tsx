@@ -1,10 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { View } from 'react-native';
 import { r, useColors } from '../../../theme';
-import { createLogger } from '../../../utils/logger';
+import { sanitizeSpinnerProps } from './shared';
 import type { SpinnerProps } from './types';
-
-const log = createLogger('Spinner');
 
 // React-Native-Web 上 reanimated 4 + worklets 0.9.x 的 useAnimatedStyle 链路在
 // web bundle 里跑会触发 `_updatePropsJS` 里 `Object.keys(updates)` 的 worklet
@@ -45,15 +43,7 @@ export function Spinner({
 
   const ref = useRef<any>(null);
   const stroke = color ?? c.primary;
-  if (!Number.isFinite(size) || (size as number) < 8) {
-    log.warn(`size 应为 ≥8 的有限数，传入 ${size}，已钳到 8`);
-  }
-  if (Number.isFinite(thickness) && (thickness as number) <= 0) {
-    log.warn(`thickness 应为正数，传入 ${thickness}，已 fallback 为 2`);
-  }
-  const safeSize = Number.isFinite(size) && size > 8 ? size : 8;
-  const safeThickness =
-    Number.isFinite(thickness) && thickness > 0 ? thickness : 2;
+  const { safeSize, safeThickness } = sanitizeSpinnerProps(size, thickness);
 
   // RN-Web 把 View 渲染成 div,我们用 ref 拿到底层 DOM 节点直接挂 CSS animation
   // (RN style 不支持 animation 字段;只能事后注入)。

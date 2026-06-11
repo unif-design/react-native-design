@@ -25,7 +25,7 @@ export type ButtonVariant =
   | 'text';
 
 export type ButtonProps = {
-  /** 按钮文案；icon-only 场景请用其他组件（Pressable + Icon） */
+  /** 按钮文案；icon-only 场景请用 IconButton */
   label: string;
   /** 点击回调；disabled / loading 时不触发 */
   onPress?: () => void;

@@ -1,8 +1,11 @@
 import React from 'react';
 import { Image, View } from 'react-native';
 import { useThemedStyles } from '../../../theme';
-import { makeStyles, sizingFor } from './styles';
+import { createLogger } from '../../../utils/logger';
+import { makeStyles, RING_EXTRA_RADIUS, sizingFor } from './styles';
 import type { ThumbnailProps } from './types';
+
+const log = createLogger('Thumbnail');
 
 /** 缩略图基础组件 —— 列表 / 卡片 / chat 行内通用 16:9.5 小图。
  *
@@ -26,7 +29,12 @@ export function Thumbnail({
   testID,
 }: ThumbnailProps): React.JSX.Element | null {
   const styles = useThemedStyles(makeStyles);
-  if (!uri && !source) return null;
+  if (!uri && !source) {
+    // [L-18] uri/source 均未传:一次性告警,返回 null 而非空白区域。
+    // types 注释已说明二选一语义;此 warn 用于开发期快速定位漏传。
+    log.warn('Thumbnail: uri 和 source 均未提供,组件将渲染为 null');
+    return null;
+  }
   const dim = sizingFor(size);
   const image = (
     <Image
@@ -42,7 +50,10 @@ export function Thumbnail({
   // ring 容器:borderRadius 比 image 大 (border + padding) 才能贴合包裹外圈
   return (
     <View
-      style={[styles.ring, { borderRadius: dim.borderRadius + 3 }]}
+      style={[
+        styles.ring,
+        { borderRadius: dim.borderRadius + RING_EXTRA_RADIUS },
+      ]}
       testID={testID}
     >
       {image}

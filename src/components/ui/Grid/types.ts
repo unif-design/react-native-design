@@ -14,7 +14,7 @@ export type GridProps = {
   items: GridItem[];
   /**
    * 列数 1..6；默认 4。
-   * ⚠️ 类型外的值（如 `7`）会**静默**回退到 4 列 — 业务应在传入前自行校验。
+   * ⚠️ 类型外的值（如 `7`）会**告警**（dev log.warn）并回退到 4 列 — 业务应在传入前自行校验。
    */
   columns?: 1 | 2 | 3 | 4 | 5 | 6;
   onPress?: (item: GridItem) => void;

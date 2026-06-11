@@ -33,35 +33,37 @@ export const makeStyles = (_c: ColorTokens) =>
  *  h 走 control.<size>,br 走 radius.<size>,gap / px 走 space[].
  *  新增 size 在 types.ts 加 union + 这里加 case。 */
 export function sizingFor(size: ButtonSize): ButtonSizing {
-  if (size === 'lg') {
-    return {
-      h: control.lg,
-      px: r(18),
-      fs: t.body,
-      br: radius.lg,
-      gap: space['2'],
-    };
+  switch (size) {
+    case 'lg':
+      return {
+        h: control.lg,
+        px: r(18),
+        fs: t.body,
+        br: radius.lg,
+        gap: space['2'],
+      };
+    case 'sm':
+      return {
+        h: control.sm,
+        px: space['4'],
+        fs: t.xxs,
+        br: radius.sm,
+        gap: space['1'],
+      };
+    case 'md':
+      return {
+        h: control.md,
+        px: space['6'],
+        fs: t.sm,
+        br: radius.md,
+        gap: space['2'],
+      };
   }
-  if (size === 'sm') {
-    return {
-      h: control.sm,
-      px: space['4'],
-      fs: t.xxs,
-      br: radius.sm,
-      gap: space['1'],
-    };
-  }
-  return {
-    h: control.md,
-    px: space['6'],
-    fs: t.sm,
-    br: radius.md,
-    gap: space['2'],
-  };
 }
 
 /** Button 配色推导:7 种 variant → { bg, fg, border }。签名与 Tag/Avatar 的 paletteFor 一致。
- *  text / ghost / neutral 共用 'transparent' 底,差异在 fg。 */
+ *  text / ghost / neutral 共用 'transparent' 底;ghost↔text palette 字节级同一,
+ *  差异在几何:text variant 在 ButtonBase 撕除高度与内边距。 */
 export function paletteFor(
   variant: ButtonVariant,
   c: ColorTokens

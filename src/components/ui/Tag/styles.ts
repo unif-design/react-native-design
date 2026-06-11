@@ -38,9 +38,16 @@ export function sizingFor(size: TagSize): {
 }
 
 /** Tag 颜色推导:variant → { bg, fg, border } 三色,全走 ColorTokens。
- *  签名 `(variant, c)` 与 Button/Avatar 的 paletteFor 一致。 */
+ *  签名 `(variant, c)` 与 Button/Avatar 的 paletteFor 一致。
+ *  新增 variant 在 types.ts 加 union + 这里加 case。 */
 export function paletteFor(variant: TagVariant, c: ColorTokens) {
   switch (variant) {
+    case 'neutral':
+      return {
+        bg: c.surfaceContainerHigh,
+        fg: c.foregroundMuted,
+        border: undefined,
+      };
     case 'brand':
       return { bg: c.primaryContainer, fg: c.primary, border: undefined };
     case 'success':
@@ -54,12 +61,6 @@ export function paletteFor(variant: TagVariant, c: ColorTokens) {
         bg: 'transparent' as const,
         fg: c.foregroundMuted,
         border: c.outline,
-      };
-    default:
-      return {
-        bg: c.surfaceContainerHigh,
-        fg: c.foregroundMuted,
-        border: undefined,
       };
   }
 }

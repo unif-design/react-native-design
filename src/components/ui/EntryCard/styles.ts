@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native';
 import {
   fw,
   icon,
+  pressedOpacity,
   r,
   rf,
   radius,
@@ -47,6 +48,6 @@ export const makeStyles = (c: ColorTokens) =>
       color: c.foregroundMuted,
     },
     pressed: {
-      opacity: 0.7,
+      opacity: pressedOpacity,
     },
   });

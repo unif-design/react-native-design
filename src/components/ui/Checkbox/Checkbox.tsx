@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { r, useColors, useThemedStyles } from '../../../theme';
+import { pressedOpacity, r, useColors, useThemedStyles } from '../../../theme';
 import { Icon } from '../Icon';
 import { makeStyles } from './styles';
 import type { CheckboxProps } from './types';
@@ -34,13 +34,14 @@ export function Checkbox({
       testID={testID}
       style={({ pressed }) => [
         styles.row,
-        { opacity: disabled ? 0.5 : pressed ? 0.7 : 1 },
+        { opacity: disabled ? 0.5 : pressed ? pressedOpacity : 1 },
       ]}
     >
       <View
         style={[
           styles.box,
-          shape === 'circle' && { borderRadius: r(20) / 2 },
+          // [L-79] circle 形态改用 radius.pill —— sentinel 999 确保任何尺寸下都是真圆
+          shape === 'circle' && styles.boxCircle,
           checked && {
             backgroundColor: c.primary,
             borderColor: c.primary,

@@ -5,6 +5,8 @@ export type SegmentedProps = {
   value: string;
   onChange: (id: string) => void;
   items: TabItem[];
+  /** [L-82] 整体禁用 —— 所有 item 不可点击,a11y state 同步 */
+  disabled?: boolean;
   /** 容器 testID；item testID 自动派生为 `${testID}-${id}` */
   testID?: string;
 };

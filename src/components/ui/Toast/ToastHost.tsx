@@ -9,6 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useColors, useThemedStyles, motion, space } from '../../../theme';
+import { childTestID } from '../../../utils/testID';
 import { dotColorFor, makeStyles } from './styles';
 import { _subs } from './toast';
 import type { Subscriber, ToastEntry, ToastHostProps } from './types';
@@ -100,10 +101,7 @@ export function ToastHost({
         {dotColor ? (
           <View style={[styles.dot, { backgroundColor: dotColor }]} />
         ) : null}
-        <Text
-          style={styles.text}
-          testID={testID ? `${testID}-text` : undefined}
-        >
+        <Text style={styles.text} testID={childTestID(testID, 'text')}>
           {entry.message}
         </Text>
       </Animated.View>

@@ -4,7 +4,8 @@ import type { IconName } from '../Icon';
 export type NavBarSlotConfig = {
   icon: IconName;
   onPress?: () => void;
-  /** 屏幕阅读器读出的功能描述（icon-only 必填） */
+  /** 屏幕阅读器读出的功能描述。强烈建议传 —— icon-only 按钮无文字,缺省时 SR 回退
+   *  读英文 icon 名(如 "menu")且 dev 下告警。请传人类可读短语(如「返回」「更多」)。 */
   accessibilityLabel?: string;
 };
 

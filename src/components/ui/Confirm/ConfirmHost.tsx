@@ -30,6 +30,7 @@ export function ConfirmHost(): React.JSX.Element | null {
   const display = entry ?? lastEntryRef.current;
 
   useEffect(() => {
+    // [L-101] Subscriber 不再接收 null —— 收到新 entry 即显示;关闭路径由 resolve() 驱动
     const sub: Subscriber = (next) => setEntry(next);
     _subs.add(sub);
     return () => {

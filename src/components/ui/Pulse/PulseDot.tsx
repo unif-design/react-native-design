@@ -8,14 +8,13 @@ export function PulseDot({
   size = r(6),
   color,
   from = 0.5,
-  to = 1,
-  duration = 700,
-  delay = 0,
   testID,
+  ...opts
 }: PulseDotProps = {}): React.JSX.Element {
   const c = useColors();
   const fill = color ?? c.primary;
-  const animatedStyle = usePulse({ from, to, duration, delay });
+  // [L-93] 只显式覆盖 from(默认 0.5 与 usePulse 的 0.6 不同),其余 opts 透传 usePulse。
+  const animatedStyle = usePulse({ from, ...opts });
   return (
     <Animated.View
       style={[

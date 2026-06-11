@@ -24,14 +24,20 @@ export function List({
     return (
       <ListVariantContext.Provider value="flush">
         <View style={[styles.listFlush, style]} testID={testID}>
-          {items.map((child, i) => (
-            <React.Fragment key={i}>
-              {i > 0 && divider === 'full' ? (
-                <View style={styles.separator} />
-              ) : null}
-              {child}
-            </React.Fragment>
-          ))}
+          {items.map((child, i) => {
+            // 优先使用 caller 传入的 key(React.Children.toArray 已将 key 注入 child)，
+            // 回退到索引确保 reconciler 稳定 —— 避免 caller key 丢失导致不必要重挂载。
+            const key =
+              React.isValidElement(child) && child.key != null ? child.key : i;
+            return (
+              <React.Fragment key={key}>
+                {i > 0 && divider === 'full' ? (
+                  <View style={styles.separator} />
+                ) : null}
+                {child}
+              </React.Fragment>
+            );
+          })}
         </View>
       </ListVariantContext.Provider>
     );
