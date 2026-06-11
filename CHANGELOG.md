@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.9.0](https://github.com/unif-design/react-native-design/compare/v0.8.2...v0.9.0) (2026-06-11)
+
+
+### Features
+
+* src 审查报告落地修复 + 组件 prop 增强 ([#76](https://github.com/unif-design/react-native-design/issues/76)) ([5b1ebc4](https://github.com/unif-design/react-native-design/commit/5b1ebc4267d4620270f382aa3c9e897ee60c7525)), closes [#FFFFFF](https://github.com/unif-design/react-native-design/issues/FFFFFF)
+
 ## [0.8.2](https://github.com/unif-design/react-native-design/compare/v0.8.1...v0.8.2) (2026-06-10)
 
 
