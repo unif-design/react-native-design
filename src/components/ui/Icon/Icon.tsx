@@ -50,14 +50,19 @@ export function Icon({
         strokeLinejoin="round"
       >
         {def.elements.map((el, i) => {
-          const fill =
-            el.fill === 'currentColor' ? stroke : (el.fill ?? 'none');
+          // fill:currentColor → 主题 stroke 色;其余原样;缺省继承根 fill="none"。
+          // opacity / stroke:透传源 svg 的元素级覆盖(stroke="none" = 纯 fill 不继承根描边)。
+          const elProps = {
+            fill: el.fill === 'currentColor' ? stroke : (el.fill ?? 'none'),
+            opacity: el.opacity,
+            stroke: el.stroke,
+          };
           if (el.kind === 'path') {
-            return <Path key={i} d={el.d} fill={fill} />;
+            return <Path key={i} d={el.d} {...elProps} />;
           }
           if (el.kind === 'circle') {
             return (
-              <Circle key={i} cx={el.cx} cy={el.cy} r={el.r} fill={fill} />
+              <Circle key={i} cx={el.cx} cy={el.cy} r={el.r} {...elProps} />
             );
           }
           if (el.kind === 'rect') {
@@ -70,7 +75,7 @@ export function Icon({
                 height={el.height}
                 rx={el.rx}
                 ry={el.ry}
-                fill={fill}
+                {...elProps}
               />
             );
           }

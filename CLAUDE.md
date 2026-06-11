@@ -96,8 +96,9 @@ ComponentName/
 ### Icons
 
 - **`src/icons/data.ts` 是生成物,不要手改**(头部有 `AUTO-GENERATED — DO NOT EDIT BY HAND`)—— `scripts/build-icons.js` 从 `src/icons/svg/*.svg` 生成。
-  - **限制** 脚本零依赖纯 regex,只识别 `<path>` / `<rect>` / `<circle>` 元素 + `fill="currentColor"`;其它(polyline / polygon)请先在 SVG 里转 path。
-- **加图标流程** —— 扔 SVG 到 `src/icons/svg/` → `node scripts/build-icons.js` → `yarn lint --fix`(prettier 把 `IconName` union 从单行拆成分行,符合现有风格)→ `yarn typecheck`。`IconName` 是闭集,组件 prop `IconName` 类型会自动同步。
+  - **支持** 解析零依赖纯 regex(仅末尾用仓内 prettier 格式化输出),识别 `<path>` / `<rect>` / `<circle>`;元素级 `fill="currentColor"`(→ 主题色)、`stroke="none"`(纯 fill 不描边)、`opacity` 均抽取并由 `Icon.tsx` 透传。
+  - **fail-fast** 违反限制(不支持元素 polyline/polygon/line/g…、单引号属性、空图标、`viewBox` ≠ `0 0 24 24`、元素属性值含 `/`)脚本列出文件名 `exit 1`,不再静默产坏数据 —— 校验逻辑见 `collectSvgIssues`,测试 `__tests__/scripts/build-icons.test.ts`。
+- **加图标流程** —— 扔 SVG 到 `src/icons/svg/` → `node scripts/build-icons.js`(生成物已是 prettier 格式、再生成幂等;不规范会 `exit 1` 阻断并提示文件名)→ `yarn typecheck`。`IconName` 是闭集,组件 prop `IconName` 类型会自动同步。
 - **SVG 规范** —— `Icon.tsx` 把 `fill: 'currentColor'` 替换为当前 stroke 色,使生成的 path 继承主题色。属性要求:
 
   | 属性 | 值 |
@@ -107,6 +108,8 @@ ComponentName/
   | `stroke-width` | `1.75` |
   | `stroke-linecap` | `round` |
   | `stroke-linejoin` | `round` |
+
+  **纯 fill 元素**(实心方块/圆点,如 `stop` / 计数器圆点)用元素级 `fill="currentColor" stroke="none"` 表达(根可保留 `fill="currentColor"`);否则会继承根描边、变成空心或加粗。
 
 ### Utils
 
