@@ -32,7 +32,7 @@ const CATEGORIES: ReadonlyArray<Category> = [
   ] },
   { name: '对象', desc: 'Objects', items: [
     'bell', 'calendar', 'camera', 'card', 'clipboard', 'file', 'flag', 'image',
-    'lock', 'mail', 'phone', 'tag', 'location',
+    'lock', 'mail', 'phone', 'bluetooth', 'tag', 'location',
   ] },
   { name: '控件', desc: 'Controls', items: [
     'eye', 'eye-off', 'filter', 'grid', 'list', 'sort', 'search', 'settings',
