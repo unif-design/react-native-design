@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.10.0](https://github.com/unif-design/react-native-design/compare/v0.9.0...v0.10.0) (2026-06-15)
+
+
+### Features
+
+* **icons:** add bluetooth icon ([#79](https://github.com/unif-design/react-native-design/issues/79)) ([3f2ea5e](https://github.com/unif-design/react-native-design/commit/3f2ea5ea95a4d341c1324a8e6f24e66368bf5c39))
+
 # [0.9.0](https://github.com/unif-design/react-native-design/compare/v0.8.2...v0.9.0) (2026-06-11)
 
 
