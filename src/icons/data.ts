@@ -16,6 +16,7 @@ export type IconName =
   | 'attachment'
   | 'bag-check'
   | 'bell'
+  | 'bluetooth'
   | 'bot'
   | 'box-list'
   | 'box-up'
@@ -294,6 +295,15 @@ export const ICONS: Record<IconName, IconDef> = {
       {
         kind: 'path',
         d: 'M10 21a2 2 0 0 0 4 0',
+      },
+    ],
+  },
+  'bluetooth': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'm7 7 10 10-5 5V2l5 5L7 17',
       },
     ],
   },
@@ -2444,6 +2454,7 @@ export const ICON_NAMES: IconName[] = [
   'attachment',
   'bag-check',
   'bell',
+  'bluetooth',
   'bot',
   'box-list',
   'box-up',
