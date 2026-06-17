@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/unif-design/react-native-design/compare/v0.11.0...v0.11.1) (2026-06-17)
+
+
+### Bug Fixes
+
+* **checkbox:** 对勾常驻渲染+opacity 切换,修 rn-svg 新架构动态挂载不重绘(toggle 后不显示) ([#82](https://github.com/unif-design/react-native-design/issues/82)) ([010cc8a](https://github.com/unif-design/react-native-design/commit/010cc8ae8bebe12a43a29722a6b1c887bfb06cf5))
+
 # [0.11.0](https://github.com/unif-design/react-native-design/compare/v0.10.0...v0.11.0) (2026-06-17)
 
 
