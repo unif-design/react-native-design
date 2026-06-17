@@ -60,7 +60,7 @@ export function Checkbox({
             name="check"
             size={r(14)}
             color={c.onPrimary}
-            strokeWidth={2.5}
+            strokeWidth={3.5}
           />
         ) : null}
       </View>

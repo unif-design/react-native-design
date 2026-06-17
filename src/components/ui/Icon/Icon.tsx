@@ -57,11 +57,12 @@ export function Icon({
       >
         {def.elements.map((el, i) => {
           // fill:currentColor → 主题 stroke 色;其余原样;缺省继承根 fill="none"。
-          // opacity / stroke:透传源 svg 的元素级覆盖(stroke="none" = 纯 fill 不继承根描边)。
+          // stroke:元素级覆盖优先(stroke="none" = 纯 fill 不描边);描边元素缺省时显式
+          // 传根 stroke,不靠 SVG 继承 —— 部分 Fabric/RNW 运行时继承 stroke 不稳。
           const elProps = {
             fill: el.fill === 'currentColor' ? stroke : (el.fill ?? 'none'),
             opacity: el.opacity,
-            stroke: el.stroke,
+            stroke: el.stroke ?? stroke,
           };
           switch (el.kind) {
             case 'path':
