@@ -24,6 +24,9 @@ export const makeStyles = (c: ColorTokens) =>
     boxCircle: {
       borderRadius: radius.pill,
     },
+    /** 未选中时对勾透明但仍常驻渲染 —— 避开 react-native-svg 新架构下条件挂载(动态 mount)
+     *  SVG 不重绘的问题(仅首屏 mount 渲染,toggle 后不显示)。 */
+    tickHidden: { opacity: 0 },
     label: {
       fontSize: t.sm,
       color: c.foreground,
