@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: Card 卡片
-description: "通用内容卡片 —— default(白底 + 卡片阴影)/ plain(仅圆角无阴影)，12px 圆角、14px padding，可加状态彩边 borderColor，bare 抑制内边距。"
+description: "通用内容卡片 —— default(白底 + 卡片阴影)/ plain(仅圆角无阴影)，12px 圆角、14px padding，可加状态彩边 borderColor，bare 抑制内边距，fill 撑满 flex 父。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -107,6 +107,14 @@ function Confirm() {
   <Header />
   <Body />
 </Card>
+
+{/* fill — Card 撑满 flex 父 + 内部列表滚动（如 Me 屏会话列表）*/}
+<View style={{ flex: 1 }}>
+  <Card variant="plain" fill>
+    <Header />
+    <ScrollView style={{ flex: 1 }}>{/* 长列表 */}</ScrollView>
+  </Card>
+</View>
 ```
 
 > `variant="flat"` 已 deprecated，等价 `plain`，新代码请用 `plain`。
@@ -122,6 +130,7 @@ function Confirm() {
 | `borderColor` | `string` | — | 强调描边色（任意 variant 均生效;启用时默认 2px） |
 | `borderWidth` | `number` | `2` | 与 `borderColor` 配合 |
 | `bare` | `boolean` | `false` | 抑制内边距,内容自控（与 variant 正交） |
+| `fill` | `boolean` | `false` | 撑满模式:外层 + 内层 clip 均 `flex:1`,Card 在 flex 父里撑满、内容区填满外层（内部 `flex:1` 滚动列表据此拿到高度） |
 | `style` | `StyleProp<ViewStyle>` | — | 额外样式覆盖 |
 | `testID` | `string` | — | E2E / 测试定位 |
 

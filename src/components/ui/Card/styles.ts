@@ -14,6 +14,8 @@ export const makeStyles = (c: ColorTokens) =>
       overflow: 'hidden',
     },
     flat: {},
+    // fill 模式:外层撑满 flex 父、内层 clip 填满外层 —— 让内部 flex:1 滚动视图拿到高度。
+    fill: { flex: 1 },
   });
 
 /**
