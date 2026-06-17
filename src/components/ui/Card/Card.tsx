@@ -12,6 +12,7 @@ export function Card({
   borderColor,
   borderWidth,
   bare,
+  fill,
   style,
   testID,
 }: CardProps): React.JSX.Element {
@@ -28,6 +29,7 @@ export function Card({
         styles.base,
         { borderRadius: br },
         variantToStyle(variant, shadow, styles),
+        fill && styles.fill,
         style,
       ]}
     >
@@ -35,6 +37,7 @@ export function Card({
         style={[
           styles.clip,
           { borderRadius: br },
+          fill && styles.fill,
           !bare && { padding: padding ?? space[6] },
           borderColor != null && {
             borderColor,

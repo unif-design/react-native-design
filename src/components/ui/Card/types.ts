@@ -34,6 +34,11 @@ export type CardProps = {
    *  - 业务要「完全朴素」（无装饰 + 无 padding）→ `<Card variant="plain" bare>`
    */
   bare?: boolean;
+  /**
+   * 撑满模式:外层与内层 clip 都 `flex:1`,让 Card 在 flex 父里撑满可用空间、
+   * 内容区填满外层,使内部 `flex:1` 的滚动视图能拿到高度。默认 false（内容自然高度）。
+   */
+  fill?: boolean;
   /** 额外样式覆盖 */
   style?: StyleProp<ViewStyle>;
   /** 测试 testID */
