@@ -55,14 +55,14 @@ export function Checkbox({
           },
         ]}
       >
-        {checked ? (
-          <Icon
-            name="check"
-            size={r(14)}
-            color={c.onPrimary}
-            strokeWidth={3.5}
-          />
-        ) : null}
+        {/* 常驻渲染 + opacity 切显隐(非 {checked?<Icon/>:null} 条件挂载)—— 见 styles.tickHidden。 */}
+        <Icon
+          name="check"
+          size={r(14)}
+          color={c.onPrimary}
+          strokeWidth={3.5}
+          style={checked ? undefined : styles.tickHidden}
+        />
       </View>
       {label ? <Text style={styles.label}>{label}</Text> : null}
     </Pressable>
