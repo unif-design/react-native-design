@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.11.0](https://github.com/unif-design/react-native-design/compare/v0.10.0...v0.11.0) (2026-06-17)
+
+
+### Features
+
+* **card): fill prop + fix(checkbox:** 选中态对勾可见性 ([#81](https://github.com/unif-design/react-native-design/issues/81)) ([da5a4ca](https://github.com/unif-design/react-native-design/commit/da5a4ca151dddc23c1c674b7e37521a07348f818))
+
 # [0.10.0](https://github.com/unif-design/react-native-design/compare/v0.9.0...v0.10.0) (2026-06-15)
 
 
