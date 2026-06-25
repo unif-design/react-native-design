@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.12.0](https://github.com/unif-design/react-native-design/compare/v0.11.1...v0.12.0) (2026-06-25)
+
+
+### Features
+
+* **business:** 公开导出 useSvgId(供消费者生成 SVG 渐变 gradientId) ([#83](https://github.com/unif-design/react-native-design/issues/83)) ([1e2bb98](https://github.com/unif-design/react-native-design/commit/1e2bb98fdfd74baeee819a346b04335897b26573))
+
 ## [0.11.1](https://github.com/unif-design/react-native-design/compare/v0.11.0...v0.11.1) (2026-06-17)
 
 
