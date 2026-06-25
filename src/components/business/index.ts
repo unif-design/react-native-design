@@ -13,6 +13,10 @@ export type {
   ScreenBackdropProps,
 } from './Decorations';
 
+// SVG 渐变 id 生成 hook —— 喂 GradientWash / RadialHalo 的 gradientId,或消费者自建
+// SVG 渐变复用;消毒 React 19 useId 的冒号(SVG id 非法字符)。
+export { useSvgId } from './useSvgId';
+
 export { GlassStats } from './GlassStats';
 export type { GlassStatsProps, GlassStatItem } from './GlassStats';
 

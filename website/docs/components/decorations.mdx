@@ -104,6 +104,28 @@ import { GradientWash, RadialHalo, ScreenBackdrop } from '@unif/react-native-des
 
 `ScreenBackdropHalo`:`{ size, height?, color?(默认 c.primary), maxOpacity?(默认 0.16), top?, bottom?, left?, right?, centerX? }`。
 
+## useSvgId（生成 gradientId）
+
+`useSvgId(prefix, override?)` —— 公共 hook,生成**唯一且 SVG 合法**的渐变 id,用来喂 `GradientWash` / `RadialHalo` 的 `gradientId`(或你自建 SVG 渐变的 `<LinearGradient id>` / `<RadialGradient id>`)。
+
+React 19 的 `useId()` 返回含冒号的串(`:r0:`),不是合法的 SVG id(XML NCName);`useSvgId` 消毒冒号后拼上 `prefix`,保证同屏多渐变 id 互不覆盖 —— 正是上文「不要忘传 `gradientId`」的标准解法。
+
+```tsx
+import { GradientWash, useSvgId } from '@unif/react-native-design';
+
+function Hero() {
+  const gid = useSvgId('hero-wash');
+  return (
+    <GradientWash gradientId={gid} height={220} color="#EB6E00" fromOpacity={0.18} toOpacity={0} />
+  );
+}
+```
+
+| 参数 | Type | 说明 |
+|---|---|---|
+| `prefix` | `string` | 短前缀,区分同屏多 gradient(如 `"gw"` / `"rh"` / `"av"`) |
+| `override` | `string?` | 有值时直接返回(跳过 `useId` 分配),用于外部受控 id |
+
 ## 主题键（Tokens）
 
 | Token | 来源 | 作用 |
