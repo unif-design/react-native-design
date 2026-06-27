@@ -70,6 +70,7 @@ export type IconName =
   | 'lock'
   | 'logout'
   | 'mail'
+  | 'maximize'
   | 'menu'
   | 'mic-on'
   | 'mic'
@@ -1419,6 +1420,15 @@ export const ICONS: Record<IconName, IconDef> = {
       },
     ],
   },
+  'maximize': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7',
+      },
+    ],
+  },
   'menu': {
     strokeWidth: 1.75,
     elements: [
@@ -2508,6 +2518,7 @@ export const ICON_NAMES: IconName[] = [
   'lock',
   'logout',
   'mail',
+  'maximize',
   'menu',
   'mic-on',
   'mic',

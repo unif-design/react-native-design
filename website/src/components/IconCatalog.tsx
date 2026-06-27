@@ -36,7 +36,7 @@ const CATEGORIES: ReadonlyArray<Category> = [
   ] },
   { name: '控件', desc: 'Controls', items: [
     'eye', 'eye-off', 'filter', 'grid', 'list', 'sort', 'search', 'settings',
-    'keyboard', 'play', 'pause', 'sound',
+    'keyboard', 'play', 'pause', 'sound', 'maximize',
   ] },
   { name: '输入', desc: 'Input', items: ['mic', 'mic-on', 'paperclip', 'attachment', 'qr'] },
   { name: 'AI 智能', desc: 'AI', items: ['bot', 'spark', 'thinking', 'lightbulb'] },
