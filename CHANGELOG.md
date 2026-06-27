@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.13.0](https://github.com/unif-design/react-native-design/compare/v0.12.0...v0.13.0) (2026-06-27)
+
+
+### Features
+
+* **icons:** add maximize icon ([#85](https://github.com/unif-design/react-native-design/issues/85)) ([96e8870](https://github.com/unif-design/react-native-design/commit/96e887029b0ce18338674cd75d38770557a4027d))
+
 # [0.12.0](https://github.com/unif-design/react-native-design/compare/v0.11.1...v0.12.0) (2026-06-25)
 
 
