@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.14.0](https://github.com/unif-design/react-native-design/compare/v0.13.0...v0.14.0) (2026-06-30)
+
+
+### Features
+
+* **segmented:** 加 size=sm 变体(小号段控,默认 md 不变) ([#87](https://github.com/unif-design/react-native-design/issues/87)) ([37d5d34](https://github.com/unif-design/react-native-design/commit/37d5d3495437c74fa94ebbd5e247921040498cb6))
+
 # [0.13.0](https://github.com/unif-design/react-native-design/compare/v0.12.0...v0.13.0) (2026-06-27)
 
 
