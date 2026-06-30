@@ -1,7 +1,7 @@
 ---
 sidebar_position: 3
 title: Tabs 标签页
-description: "页面内分类切换 —— 下划线 Tabs(页面级,44px 高 + 2px 主色下划线)与分段控件 Segmented(局部,28px 高灰底胶囊);均受控 value/onChange + items(id/label),role='tab' + selected。"
+description: "页面内分类切换 —— 下划线 Tabs(页面级,44px 高 + 2px 主色下划线)与分段控件 Segmented(局部灰底胶囊,size sm/md;md 默认 44px 触控达标 / sm 28px 紧凑);均受控 value/onChange + items(id/label),role='tab' + selected。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -35,8 +35,19 @@ export const TabsDemo = () => {
           />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <span className="demo-label">分段控件 · 局部</span>
+          <span className="demo-label">分段控件 · 局部 · md（默认）</span>
           <Segmented
+            value={range}
+            onChange={setRange}
+            items={[
+              { id: 'day',   label: '日' },
+              { id: 'week',  label: '周' },
+              { id: 'month', label: '月' },
+            ]}
+          />
+          <span className="demo-label">分段控件 · sm（紧凑，模型下拉等局促位）</span>
+          <Segmented
+            size="sm"
             value={range}
             onChange={setRange}
             items={[
@@ -69,9 +80,9 @@ export const TabsDemo = () => {
 
 | 元素 | 规则 |
 |---|---|
-| 容器 | 高 28px（`control.sm`），背景 `c.surfaceContainerHigh`（亮色 `#F0F0F0`），圆角 8（`radius.md`），内 padding 2 |
-| 项 | 平分宽度，`13px`（`type.xs`） |
-| 激活 | 白底 thumb，圆角 6（`radius.sm`），柔阴影，200ms 平移 |
+| 容器 | `alignSelf: 'flex-start'` 内容自适应宽，背景 `c.surfaceContainerHigh`（亮色 `#F0F0F0`），圆角 8（`radius.md`），内 padding 2 |
+| 项 | 内容宽（非平分）；`minHeight` / 水平 padding / 字号随 `size`：`md` 44 / 16 / 13（`fixed.hitTarget`·`space[7]`·`type.xs`，默认、触控达标）· `sm` 28 / 12 / 12（高 28pt 物理常量·`space[5]`·`type.xxs`，紧凑、触控 < 44px） |
+| 激活 | 白底 thumb（暗色 `surfaceContainerHighest`），圆角 6（`radius.sm`），亮色态柔阴影 |
 
 ## 用法
 
@@ -112,6 +123,7 @@ import { Tabs, Segmented } from '@unif/react-native-design';
 | `value` | `string` | — | 当前选中项的 `id`（必填） |
 | `onChange` | `(id: string) => void` | — | 切换回调，回传点中项的 `id`（必填） |
 | `items` | `TabItem[]` | — | 列表项（Tabs ≥2 项才有意义；必填） |
+| `size` | `'sm' \| 'md'` | `'md'` | **仅 Segmented**；`'md'` 默认（高 44px 触控达标），`'sm'` 紧凑（高 28px / 字号 12，给模型下拉等局促位用，触控 < 44px） |
 | `testID` | `string?` | — | 容器 testID；item testID 自动派生为 `${testID}-${id}` |
 
 `TabItem`：

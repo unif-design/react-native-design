@@ -1,26 +1,30 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
 import { fw, useTheme, useThemedStyles } from '../../../theme';
 import { childTestID } from '../../../utils/testID';
-import { makeStyles } from './styles';
+import { makeStyles, sizingFor } from './styles';
 import type { SegmentedProps } from './types';
 
 /**
- * 局部分段控件 —— 32px pill 在 track 上,激活项是亮色 thumb。
+ * 局部分段控件 —— pill 在 track 上,激活项是亮色 thumb。
  *
  * **active thumb 必须比 track 亮一档** —— shadow 只在亮色态显示,
  * 暗色态由 surface 明度差表达层级。
+ *
+ * `size`:默认 `'md'`(44pt 触控达标);`'sm'` 紧凑(28pt)给模型下拉等局促位用。
  */
 export function Segmented({
   value,
   onChange,
   items,
+  size = 'md',
   disabled = false,
   testID,
 }: SegmentedProps): React.JSX.Element {
   const { colors: c, scheme, shadow } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const sizing = useMemo(() => sizingFor(size), [size]);
   const activeBg = scheme === 'dark' ? c.surfaceContainerHighest : c.surface;
   const activeShadow = scheme === 'dark' ? null : shadow.subtle;
 
@@ -43,19 +47,18 @@ export function Segmented({
             testID={itemTestID}
             style={({ pressed }) => [
               styles.segItem,
+              { minHeight: sizing.minHeight, paddingHorizontal: sizing.px },
               on && { backgroundColor: activeBg },
               on && activeShadow,
               { opacity: pressed ? 0.85 : 1 },
             ]}
           >
             <Text
-              style={[
-                styles.segLabel,
-                {
-                  color: on ? c.foreground : c.foregroundSubtle,
-                  fontWeight: on ? fw.semi : fw.medium,
-                },
-              ]}
+              style={{
+                fontSize: sizing.fs,
+                color: on ? c.foreground : c.foregroundSubtle,
+                fontWeight: on ? fw.semi : fw.medium,
+              }}
               numberOfLines={1}
             >
               {it.label}

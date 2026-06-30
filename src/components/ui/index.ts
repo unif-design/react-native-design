@@ -49,7 +49,7 @@ export type { SearchProps } from './Search';
 export { Skeleton } from './Skeleton';
 export type { SkeletonProps, SkeletonShape } from './Skeleton';
 export { Segmented } from './Segmented';
-export type { SegmentedProps } from './Segmented';
+export type { SegmentedProps, SegmentedSize } from './Segmented';
 export { Spinner } from './Spinner';
 export type { SpinnerProps } from './Spinner';
 export { StatusDot } from './StatusDot';
