@@ -1,2 +1,2 @@
 export { Segmented } from './Segmented';
-export type { SegmentedProps } from './types';
+export type { SegmentedProps, SegmentedSize } from './types';
