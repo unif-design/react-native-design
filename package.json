@@ -4,7 +4,9 @@
   "description": "Unif 设计系统:theme + icons + utils + components",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "exports": {
     ".": {
       "source": "./src/index.tsx",
