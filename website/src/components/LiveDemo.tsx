@@ -33,11 +33,26 @@ type LiveDemoProps = {
   inline?: boolean;
 };
 
+/** SSG 期喂给 SafeAreaProvider 的初始度量 —— **不给就 build 挂**:
+ *  SafeAreaProvider 在 web 上是靠 effect 量 insets 的,而静态渲染在 Node 里跑、effect 不执行
+ *  → insets 恒为 null → 任何 `useSafeAreaInsets()`(如 ToastHost)直接 throw
+ *  「No safe area value available」,整个页面 SSG 失败。initialMetrics 让 insets 首帧就有值。
+ *  demo 是文档正文里的一个 div,本来也不该有安全区 → 全零。 */
+const DEMO_METRICS = {
+  frame: { x: 0, y: 0, width: 0, height: 0 },
+  insets: { top: 0, left: 0, right: 0, bottom: 0 },
+};
+
 /**
  * 把 mdx 内嵌 demo 包进 RN 必要的 Providers + Unif ThemeProvider。
  * - 走 react-native-web 渲染,浏览器里看到的就是真组件本体
  * - 默认 demo 主题跟随 Docusaurus 主题切换(亮 / 暗 toggle 实时联动)
  * - 容器底色用 themed `background` token,跟内部组件视觉一致
+ *
+ * BrowserOnly 只为躲 `useColorMode`(静态渲染期取不到站点主题)—— **Providers 两条路必须一致**:
+ * fallback 曾经裸渲 children(无 Provider),Toast 页的 `<ToastHost/>` 于是在 Node 里跑
+ * `useSafeAreaInsets()` 直接炸,文档站 build 长期失败。故 SSG / 浏览器共用下面这一个外壳,
+ * 唯一差别是 scheme 从哪来。
  *
  * 关键修复：
  * - GestureHandlerRootView 用 `width: '100%'` 而非 `flex: 1`:docusaurus 文档容器是 block flow
@@ -49,7 +64,10 @@ type LiveDemoProps = {
  */
 export function LiveDemo(props: LiveDemoProps) {
   return (
-    <BrowserOnly fallback={<LiveDemoFallback {...props} />}>
+    <BrowserOnly
+      // 静态渲染期没有 useColorMode → 锁 forceScheme(未指定则亮色);Providers 一个不少。
+      fallback={<LiveDemoFrame {...props} scheme={props.forceScheme ?? 'light'} />}
+    >
       {() => <LiveDemoInner {...props} />}
     </BrowserOnly>
   );
@@ -57,17 +75,23 @@ export function LiveDemo(props: LiveDemoProps) {
 
 export default LiveDemo;
 
-function LiveDemoInner({
+/** 浏览器路径:scheme 跟随 Docusaurus 亮 / 暗 toggle 实时联动。 */
+function LiveDemoInner(props: LiveDemoProps) {
+  const { colorMode } = useColorMode();
+  const scheme: ColorScheme =
+    props.forceScheme ?? (colorMode === 'dark' ? 'dark' : 'light');
+  return <LiveDemoFrame {...props} scheme={scheme} />;
+}
+
+/** demo 外壳 —— SSG 与浏览器共用同一套 Providers(见上方 BrowserOnly 注释)。 */
+function LiveDemoFrame({
   children,
   height = 'auto',
   padding = 24,
-  forceScheme,
   variant = 'page',
   inline = false,
-}: LiveDemoProps) {
-  const { colorMode } = useColorMode();
-  const scheme: ColorScheme =
-    forceScheme ?? (colorMode === 'dark' ? 'dark' : 'light');
+  scheme,
+}: LiveDemoProps & { scheme: ColorScheme }) {
   return (
     <div
       className="unif-livedemo-frame"
@@ -75,7 +99,7 @@ function LiveDemoInner({
     >
       <ThemeProvider forceScheme={scheme}>
         <GestureHandlerRootView style={inline ? { alignSelf: 'flex-start' } : { width: '100%' }}>
-          <SafeAreaProvider>
+          <SafeAreaProvider initialMetrics={DEMO_METRICS}>
             <ThemedFrame height={height} padding={padding} variant={variant} inline={inline}>
               {children}
             </ThemedFrame>
@@ -115,28 +139,5 @@ function ThemedFrame({
     >
       {children}
     </View>
-  );
-}
-
-/** SSR fallback — 静态渲染期没有 useColorMode,简单显示亮色容器避免 build 失败。 */
-function LiveDemoFallback({
-  children,
-  height = 'auto',
-  padding = 24,
-}: LiveDemoProps) {
-  return (
-    <div
-      style={{
-        backgroundColor: '#F5F5F5',
-        padding,
-        minHeight: height === 'auto' ? undefined : (height as number),
-        borderRadius: 12,
-        border: '1px solid #EDEDED',
-        marginTop: 12,
-        marginBottom: 12,
-      }}
-    >
-      {children}
-    </div>
   );
 }

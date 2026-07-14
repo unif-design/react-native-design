@@ -10,14 +10,41 @@
  */
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
+
+/** 在 root 与 website/ 下**各有一份**、必须强制解析到同一份的 RN 库(见 dedupeAlias 注释)。 */
+const DEDUPED_RN_PACKAGES = [
+  'react-native-reanimated',
+  'react-native-worklets',
+  'react-native-gesture-handler',
+  'react-native-keyboard-controller',
+  'react-native-svg',
+  'react-native-safe-area-context',
+];
 
 module.exports = function reactNativeWebPlugin(context) {
   // context.siteDir = <repo>/website ; 上一级是 <repo>(design 仓根)。
   const projectRoot = path.resolve(context.siteDir, '..');
   const srcDir = path.join(projectRoot, 'src');
   const rnghPressableShim = path.join(__dirname, 'shims/RnghPressable.js');
+  const siteModules = path.join(context.siteDir, 'node_modules');
+
+  // 去重别名 —— **不做的话带 React Context 的 RN 库会直接炸**:
+  // 库源码编自 <repo>/src,它 import 的 RN 库按「就近 node_modules」解析到 **root**;
+  // website 自己的组件(如 LiveDemo)则解析到 **website/node_modules**。同一个包被打进
+  // bundle 两次 = 两个模块实例 = 两个互不相干的 React Context。
+  // 于是 website 侧的 <SafeAreaProvider> 喂不到库侧 ToastHost 的 useSafeAreaInsets ——
+  // SSG 渲 Toast 页抛 "No safe area value available",文档站 build 长期失败(2026-07 定位:
+  // 编译产物里能直接数出两个 SafeAreaProvider 定义)。
+  // 统一取 website/node_modules:babel-loader 与版本对齐一向以它为准。
+  // 不带 `$`(前缀匹配)→ 子路径 `<pkg>/lib/...` 一并跟着走;包不存在则不 alias(免解析到空路径)。
+  const dedupeAlias = Object.fromEntries(
+    DEDUPED_RN_PACKAGES.filter((pkg) =>
+      fs.existsSync(path.join(siteModules, pkg)),
+    ).map((pkg) => [pkg, path.join(siteModules, pkg)]),
+  );
 
   // 几个 ESM-shipped 且带 Flow / TS 注解的 RN 库要让 babel-loader 处理（默认 node_modules 不走 babel）。
   // 用 regex 匹配，因为这些包同时在 root 和 website/ 两份 node_modules 下都可能存在。
@@ -66,6 +93,9 @@ module.exports = function reactNativeWebPlugin(context) {
         },
         resolve: {
           alias: {
+            // 双份 RN 库强制收敛到 website/node_modules 的那一份(见上方 dedupeAlias 注释)。
+            // 放在最前:后面的 'react-native$' 是精确匹配,两者不会互相遮蔽。
+            ...dedupeAlias,
             // 把 RN 内置入口换成 RNW；$ 表示精确匹配，不影响 react-native-* 的子包。
             'react-native$': 'react-native-web',
             // RN 一些深路径（fabric / codegen / TurboModule specs）只有 native runtime 才执行；
