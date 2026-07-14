@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.1](https://github.com/unif-design/react-native-design/compare/v0.14.0...v0.14.1) (2026-07-14)
+
+
+### Bug Fixes
+
+* **ci:** 发版 + 文档站双双复活 —— npm@latest engines 漂移 / RN 库双份实例 ([#94](https://github.com/unif-design/react-native-design/issues/94)) ([0abad18](https://github.com/unif-design/react-native-design/commit/0abad18ab5bfcc60368ca474f8377e03e6c44b2c)), closes [#93](https://github.com/unif-design/react-native-design/issues/93)
+* **confirm:** 遮罩不再跟着 sheet 滑 —— 弹出时顶部露白根治 ([#93](https://github.com/unif-design/react-native-design/issues/93)) ([e7d91b4](https://github.com/unif-design/react-native-design/commit/e7d91b4b00a49aa76dd1920a5288b90200172686))
+
 # [0.14.0](https://github.com/unif-design/react-native-design/compare/v0.13.0...v0.14.0) (2026-06-30)
 
 
