@@ -1,6 +1,6 @@
 import type { StyleProp, ViewStyle } from 'react-native';
 
-export type StatusDotStatus = 'pending' | 'active' | 'done';
+export type StatusDotStatus = 'pending' | 'active' | 'done' | 'error';
 
 /**
  * `flat`：pending/active 底色透明（任务列表风格）。

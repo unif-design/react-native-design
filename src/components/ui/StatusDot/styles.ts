@@ -26,6 +26,8 @@ export function paletteFor(
   switch (status) {
     case 'done':
       return { bg: c.success, border: c.success };
+    case 'error':
+      return { bg: c.error, border: c.error };
     case 'active':
       return {
         bg: tone === 'soft' ? c.primaryContainer : 'transparent',

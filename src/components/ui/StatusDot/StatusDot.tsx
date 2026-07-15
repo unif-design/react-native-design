@@ -8,13 +8,14 @@ import type { StatusDotProps } from './types';
 
 /**
  * 任务列表 / 推理链通用的状态圆点。
- * done = 绿底 + 白勾；active = 边框 + 内部 PulseDot；pending = 仅边框。
+ * done = 绿底 + 白勾；error = 红底 + 白叉；active = 边框 + 内部 PulseDot；pending = 仅边框。
  */
 // status 派生默认 a11y label —— 不传时 SR 仍能播报状态语义。
 const DEFAULT_A11Y: Record<string, string> = {
   pending: 'pending',
   active: 'active',
   done: 'done',
+  error: 'error',
 };
 
 export function StatusDot({
@@ -55,6 +56,13 @@ export function StatusDot({
           name="check"
           size={Math.round(size * 0.6)}
           color={c.onPrimary}
+          strokeWidth={2.5}
+        />
+      ) : status === 'error' ? (
+        <Icon
+          name="close"
+          size={Math.round(size * 0.6)}
+          color={c.onError}
           strokeWidth={2.5}
         />
       ) : status === 'active' ? (

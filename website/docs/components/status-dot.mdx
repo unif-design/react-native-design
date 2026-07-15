@@ -1,7 +1,7 @@
 ---
 sidebar_position: 6
 title: StatusDot 状态点
-description: "status='pending'/'active'/'done' 状态圆点 —— done=success 底+白勾、active=primary 边框+内嵌 PulseDot、pending=outline 描边；tone='flat'(默认,透明底)/'soft'(柔色底),size 默认 16。"
+description: "status='pending'/'active'/'done'/'error' 状态圆点 —— done=success 底+白勾、error=error 底+白叉、active=primary 边框+内嵌 PulseDot、pending=outline 描边；tone='flat'(默认,透明底)/'soft'(柔色底),size 默认 16。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -9,11 +9,12 @@ import { StatusDot } from '@unif/react-native-design';
 
 # StatusDot 状态点
 
-任务列表 / 推理链通用的状态圆点。三态（done / active / pending）× 两风格（flat / soft）。
+任务列表 / 推理链通用的状态圆点。四态（done / error / active / pending）× 两风格（flat / soft）。
 
 | 状态 | 视觉 | 内部 |
 |---|---|---|
 | `done` | 绿底 + 白勾 | `success` 填充 + `<Icon name="check" />` |
+| `error` | 红底 + 白叉 | `error` 填充 + `<Icon name="close" />` |
 | `active` | 边框 + 内嵌 `<PulseDot>` | `primary` 边框 + 跳动 |
 | `pending` | 仅边框 | `outline` 灰边 |
 
@@ -32,6 +33,10 @@ import { StatusDot } from '@unif/react-native-design';
           <span>done</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <StatusDot status="error" size={16} />
+          <span>error</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <StatusDot status="active" size={16} />
           <span>active</span>
         </div>
@@ -47,6 +52,10 @@ import { StatusDot } from '@unif/react-native-design';
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <StatusDot status="done" size={18} tone="soft" />
           <span>done</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <StatusDot status="error" size={18} tone="soft" />
+          <span>error</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <StatusDot status="active" size={18} tone="soft" />
@@ -81,18 +90,18 @@ import { StatusDot } from '@unif/react-native-design';
 
 | Prop | 类型 | 默认 | 说明 |
 |---|---|---|---|
-| `status` | `'pending' \| 'active' \| 'done'` | — | 当前状态（必填） |
+| `status` | `'pending' \| 'active' \| 'done' \| 'error'` | — | 当前状态（必填） |
 | `size` | `number?` | `16` | 圆点直径（done 勾 ≈ `size*0.6`） |
 | `tone` | `'flat' \| 'soft'` | `'flat'` | flat 透明底；soft 柔色底（pending=`c.surface`、active=`c.primaryContainer`） |
 | `testID` | `string?` | — | E2E / 测试定位 |
 
-> 颜色派生（`paletteFor`）：done = `c.success` 底+边；active = `c.primary` 边框（底 flat 透明 / soft `c.primaryContainer`）；pending = `c.outline` 边框（底 flat 透明 / soft `c.surface`）。圆点带 1.5px 边框。
+> 颜色派生（`paletteFor`）：done = `c.success` 底+边；error = `c.error` 底+边；active = `c.primary` 边框（底 flat 透明 / soft `c.primaryContainer`）；pending = `c.outline` 边框（底 flat 透明 / soft `c.surface`）。圆点带 1.5px 边框。
 
 ## 无障碍（a11y）
 
 来源：`src/components/ui/StatusDot/StatusDot.tsx`、`types.ts`。
 
-视觉状态指示器，无交互。源码渲染为一个普通 `<View>`，**未设置任何 a11y prop**（无 `accessibilityRole` / `accessibilityLabel`），也无可传的 a11y prop（仅 `status` / `size` / `tone` / `testID`），继承底层 `<View>` 默认。内部内容随状态变化：`active` 时嵌入对 SR 隐藏的 `<PulseDot>`，`done` 时是一个 `<Icon name="check">`（按图标自身实现处理，见 [图标](./icons)），`pending` 时为空。因此圆点本身不向 SR 朗读「完成 / 进行中 / 待办」语义——状态文案应由相邻可见文本承载（如任务行的标题或状态标签），不要依赖 StatusDot 单独传达状态。
+视觉状态指示器，无交互。源码渲染为一个普通 `<View>`，**未设置任何 a11y prop**（无 `accessibilityRole` / `accessibilityLabel`），也无可传的 a11y prop（仅 `status` / `size` / `tone` / `testID`），继承底层 `<View>` 默认。内部内容随状态变化：`active` 时嵌入对 SR 隐藏的 `<PulseDot>`，`done` 时是一个 `<Icon name="check">`、`error` 时是 `<Icon name="close">`（按图标自身实现处理，见 [图标](./icons)），`pending` 时为空。因此圆点本身不向 SR 朗读「完成 / 进行中 / 待办」语义——状态文案应由相邻可见文本承载（如任务行的标题或状态标签），不要依赖 StatusDot 单独传达状态。
 
 ## 内部使用
 
