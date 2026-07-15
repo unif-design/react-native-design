@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.15.0](https://github.com/unif-design/react-native-design/compare/v0.14.2...v0.15.0) (2026-07-15)
+
+
+### Features
+
+* **status-dot:** 新增 error 态(红底白叉) ([#96](https://github.com/unif-design/react-native-design/issues/96)) ([ae3c9dc](https://github.com/unif-design/react-native-design/commit/ae3c9dc2a9728ad497e9101084019763ee8c360b))
+
 ## [0.14.2](https://github.com/unif-design/react-native-design/compare/v0.14.1...v0.14.2) (2026-07-14)
 
 
