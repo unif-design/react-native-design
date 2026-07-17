@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.16.0](https://github.com/unif-design/react-native-design/compare/v0.15.0...v0.16.0) (2026-07-17)
+
+
+### Features
+
+* **icons:** 新增 sidebar / chat-plus,修 AvatarWithRing 渐变圆角 ([#97](https://github.com/unif-design/react-native-design/issues/97)) ([11f8f93](https://github.com/unif-design/react-native-design/commit/11f8f93888816969f3f36edcfe7fe6ce6ad6a6a8))
+
 # [0.15.0](https://github.com/unif-design/react-native-design/compare/v0.14.2...v0.15.0) (2026-07-15)
 
 
