@@ -51,7 +51,14 @@ export function AvatarWithRing({
               <Stop offset={1} stopColor={avatarGradient[1]} />
             </SvgLinearGradient>
           </Defs>
-          <Rect width={inner} height={inner} fill={`url(#${id})`} />
+          {/* rx 全圆:渐变本体自带圆形,不依赖 avatarCore 的 overflow:hidden ——
+              Fabric 上 overflow 对 SVG 子层的圆角裁切不生效,方形渐变会露角。 */}
+          <Rect
+            width={inner}
+            height={inner}
+            rx={inner / 2}
+            fill={`url(#${id})`}
+          />
         </Svg>
         <Text style={[styles.label, { lineHeight: inner }]}>{label}</Text>
       </View>
