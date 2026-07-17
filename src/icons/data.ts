@@ -28,6 +28,7 @@ export type IconName =
   | 'camera-off'
   | 'camera'
   | 'card'
+  | 'chat-plus'
   | 'chat-star'
   | 'check'
   | 'chevron-down'
@@ -99,6 +100,7 @@ export type IconName =
   | 'shield-check'
   | 'shutter-recording'
   | 'shutter'
+  | 'sidebar'
   | 'sort'
   | 'sound-off'
   | 'sound'
@@ -642,6 +644,23 @@ export const ICONS: Record<IconName, IconDef> = {
       {
         kind: 'path',
         d: 'M7 15h3',
+      },
+    ],
+  },
+  'chat-plus': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-6l-4 4v-4H6a2 2 0 0 1-2-2z',
+      },
+      {
+        kind: 'path',
+        d: 'M12 7v5',
+      },
+      {
+        kind: 'path',
+        d: 'M9.5 9.5h5',
       },
     ],
   },
@@ -1995,6 +2014,19 @@ export const ICONS: Record<IconName, IconDef> = {
       },
     ],
   },
+  'sidebar': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M4 8h16',
+      },
+      {
+        kind: 'path',
+        d: 'M4 16h10',
+      },
+    ],
+  },
   'sort': {
     strokeWidth: 1.75,
     elements: [
@@ -2476,6 +2508,7 @@ export const ICON_NAMES: IconName[] = [
   'camera-off',
   'camera',
   'card',
+  'chat-plus',
   'chat-star',
   'check',
   'chevron-down',
@@ -2547,6 +2580,7 @@ export const ICON_NAMES: IconName[] = [
   'shield-check',
   'shutter-recording',
   'shutter',
+  'sidebar',
   'sort',
   'sound-off',
   'sound',
