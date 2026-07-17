@@ -59,6 +59,7 @@ export type IconName =
   | 'flash-off'
   | 'flash-on'
   | 'grid'
+  | 'hand'
   | 'heart'
   | 'home'
   | 'image'
@@ -1192,6 +1193,15 @@ export const ICONS: Record<IconName, IconDef> = {
         width: 7,
         height: 7,
         rx: 1,
+      },
+    ],
+  },
+  'hand': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M8.5 11.5V6a1.25 1.25 0 012.5 0v4.5m0-.5V4.6a1.25 1.25 0 012.5 0V10m0-.3V5.6a1.25 1.25 0 012.5 0V14c0 3.3-2.2 5.8-5.2 5.8-2 0-3.4-1-4.6-2.7l-2.4-3.4a1.3 1.3 0 012-1.6l1.7 1.6',
       },
     ],
   },
@@ -2539,6 +2549,7 @@ export const ICON_NAMES: IconName[] = [
   'flash-off',
   'flash-on',
   'grid',
+  'hand',
   'heart',
   'home',
   'image',
