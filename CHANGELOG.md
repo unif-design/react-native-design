@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.18.0](https://github.com/unif-design/react-native-design/compare/v0.17.0...v0.18.0) (2026-07-18)
+
+
+### Features
+
+* **theme:** 应用级字号缩放 —— fontScale 入 ThemeProvider,useThemedStyles 出口缩放字号三属性 ([#99](https://github.com/unif-design/react-native-design/issues/99)) ([c2f7603](https://github.com/unif-design/react-native-design/commit/c2f76031f36b22debf454d91b68bdbdceb63d7e8))
+
 # [0.17.0](https://github.com/unif-design/react-native-design/compare/v0.16.0...v0.17.0) (2026-07-17)
 
 
