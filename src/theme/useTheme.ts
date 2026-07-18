@@ -7,6 +7,7 @@ const FALLBACK: ThemeContextValue = {
   scheme: 'light',
   colors: lightColors,
   shadow: lightShadow,
+  fontScale: 1,
 };
 
 // 静默回退而非 throw:FALLBACK 是模块级稳定引用,useThemedStyles 缓存契约不受影响。
