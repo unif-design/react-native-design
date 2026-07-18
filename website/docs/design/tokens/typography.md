@@ -126,3 +126,13 @@ function Article() {
 ```
 
 > `type` 导入时常起别名 `t`(避开 JS 保留字 `type`):`import { type as t } from '@unif/react-native-design'`。
+
+## 应用级字号缩放(fontScale)
+
+app 内「字体大小」档位经 `<ThemeProvider fontScale={…}>` 传入(默认 `1`),`useThemedStyles` 出口对 maker 产物的 `fontSize / lineHeight / letterSpacing` 统一缩放:
+
+- 与 RN `allowFontScaling` 的原生缩放范围一致 —— **只缩文字,不缩 padding / 高度等布局尺寸**;
+- `fontScale = 1` 时恒等返回原引用,未接入的消费方(web 文档站等)行为与引用完全不变;
+- 与 `rf()` 正交:`rf()` 是按屏宽的**静态**适配(模块加载时算一次),`fontScale` 是**运行期**用户档位(变更即触发全树 themed 样式重算)。
+
+接入方自持档位状态(persist store 等);组件层零改动 —— 所有走 `useThemedStyles` 的样式自动生效。
