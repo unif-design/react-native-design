@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.19.0](https://github.com/unif-design/react-native-design/compare/v0.18.0...v0.19.0) (2026-07-23)
+
+
+### Features
+
+* **chip:** 加 busy 处理中态 —— leading 换 spinner + 吞二次点击 ([#101](https://github.com/unif-design/react-native-design/issues/101)) ([5878bbc](https://github.com/unif-design/react-native-design/commit/5878bbce670f0bd1c752c306e054c4442341311d))
+
 # [0.18.0](https://github.com/unif-design/react-native-design/compare/v0.17.0...v0.18.0) (2026-07-18)
 
 
