@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.20.0](https://github.com/unif-design/react-native-design/compare/v0.19.0...v0.20.0) (2026-07-30)
+
+
+### Features
+
+* **carousel:** migrate wrapper to stable v5 ([#102](https://github.com/unif-design/react-native-design/issues/102)) ([7f8415e](https://github.com/unif-design/react-native-design/commit/7f8415e9a98264249ceee5dec3cb5b916ff923b3))
+
 # [0.19.0](https://github.com/unif-design/react-native-design/compare/v0.18.0...v0.19.0) (2026-07-23)
 
 
