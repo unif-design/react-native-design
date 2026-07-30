@@ -1,2 +1,2 @@
 export { Carousel } from './Carousel';
-export type { CarouselProps, ICarouselInstance } from './types';
+export type { CarouselProps, CarouselRef } from './types';

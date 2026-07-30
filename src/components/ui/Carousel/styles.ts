@@ -3,13 +3,11 @@ import { r, radius, space, type ColorTokens } from '../../../theme';
 
 export const makeCarouselStyles = (c: ColorTokens) =>
   StyleSheet.create({
-    /** 'bottom' 模式:独立行容器,覆盖 Pagination.Custom 默认的 `justifyContent: 'space-between'`
-     *  (否则 dot 横向撑开),让 dot 居中紧贴。 */
+    /** 'bottom' 模式:独立行容器,让 dot 居中紧贴。 */
     dotsWrapBottom: {
-      flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      // 3pt 横间距:dot 单元 4pt + space[1]=r(4) 偏大,保留 r(3) 作为局部 dot 间隙
+      // 正式版按 active 最大宽度为每个 dot 预留 12pt,额外保留 3pt 间距。
       gap: r(3),
       paddingTop: space['3'],
     },
@@ -19,7 +17,6 @@ export const makeCarouselStyles = (c: ColorTokens) =>
       position: 'absolute',
       bottom: space['3'],
       right: space['5'],
-      flexDirection: 'row',
       justifyContent: 'flex-end',
       alignItems: 'center',
       gap: r(3),
@@ -32,10 +29,10 @@ export const makeCarouselStyles = (c: ColorTokens) =>
       backgroundColor: c.primary,
       opacity: 0.32,
     },
-    /** activeDot —— 12×4 长条,Pagination.Custom 会把 dotStyle 的 height /
-     *  borderRadius 与 activeDotStyle 的 width 一起 interpolate,这里只 override 变化值。 */
+    /** activeDot —— 12×4 长条,正式版 Pagination 为每项预留 12pt 宽避免布局跳动。 */
     dotActive: {
       width: space['5'],
+      backgroundColor: c.primary,
       opacity: 1,
     },
   });
