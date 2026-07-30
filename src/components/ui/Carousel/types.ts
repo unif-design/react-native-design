@@ -1,8 +1,10 @@
-import type { ICarouselInstance } from 'react-native-reanimated-carousel';
-import type { ReactNode } from 'react';
+import type {
+  CarouselRef,
+  CarouselRenderItem,
+} from 'react-native-reanimated-carousel';
 import type { StyleProp, ViewStyle } from 'react-native';
 
-export type { ICarouselInstance };
+export type { CarouselRef };
 
 /** Indicator 位置策略:
  *  - 'bottom'(默认):指示器独立行,跟 Carousel 下方;容器高度 = height + 16
@@ -11,18 +13,22 @@ export type CarouselIndicatorPosition = 'bottom' | 'overlay-bottom-right';
 
 export type CarouselProps<T> = {
   /** 数组数据 */
-  items: ReadonlyArray<T>;
+  data: T[];
   /** 单项渲染 */
-  renderItem: (item: T, index: number) => ReactNode;
-  /** 每张高度(宽度默认 = 屏宽,被 itemWidth 覆盖) */
+  renderItem: CarouselRenderItem<T>;
+  /** 稳定 key 解析器,数据更新时用于保持 item 身份。 */
+  keyExtractor?: (item: T, index: number) => string;
+  /** 每张高度(宽度默认 = 屏宽,被 itemSize 覆盖) */
   height: number;
-  /** 每张宽度,默认 useWindowDimensions().width。
+  /** 每张宽度与水平翻页步长,默认 useWindowDimensions().width。
    *  若 caller 外层有 marginHorizontal(如 Dashboard banner inset 16),需要传
    *  `屏宽 - 左右 margin*2`,否则 slide 宽度超过可视区,右侧内容被裁切。 */
-  itemWidth?: number;
-  /** autoPlay 间隔 ms,undefined / 0 不自动 */
-  autoPlay?: number;
-  /** 是否循环播放,默认 true。传 false 时首尾不循环,可配合 a11y 暂停控制。 */
+  itemSize?: number;
+  /** 是否自动播放,默认 false。 */
+  autoplay?: boolean;
+  /** 自动播放间隔 ms,默认 3000。 */
+  autoplayInterval?: number;
+  /** 是否循环播放,默认 true。传 false 时到首尾停止。 */
   loop?: boolean;
   /** 是否显示底部 dot indicator,默认 true */
   showIndicator?: boolean;

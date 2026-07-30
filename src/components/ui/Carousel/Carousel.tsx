@@ -1,33 +1,31 @@
 import React from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
-import ReanimatedCarousel, {
+import {
+  Carousel as ReanimatedCarousel,
   Pagination,
 } from 'react-native-reanimated-carousel';
 import { useSharedValue } from 'react-native-reanimated';
 import { space, useThemedStyles } from '../../../theme';
 import { makeCarouselStyles } from './styles';
-import type { CarouselProps, ICarouselInstance } from './types';
+import type { CarouselProps, CarouselRef } from './types';
 
-/** Carousel —— 包装 `react-native-reanimated-carousel@5.0.0-beta.5`。
+/** Carousel —— 包装 `react-native-reanimated-carousel@5.0.0`。
  *
- *  dot indicator 走 `c.primary` token,使用库内置 `Pagination.Custom`
- *  (`useSharedValue` + `onProgressChange` 驱动,re-render 全在 worklet 里)。
+ *  dot indicator 走 `c.primary` token,使用库内置 `Pagination`
+ *  (`useSharedValue` + `progress` 驱动,视觉插值留在 UI 线程)。
  *
- *  用 Pagination.Custom 而非 Basic:Basic 的 activeDot 用 translateX 推进
- *  内层 fill,外壳宽度等于 dotStyle.width,activeDotStyle.width 只影响内层,
- *  做不出"active 4 → 12 长条"。Custom 自己 interpolate width/height/bg。
- *
- *  forwardRef 透传 ICarouselInstance —— 解锁 a11y 暂停(ref.current.scrollTo)
- *  以及宿主页面的命令式 scrollTo / prev / next。
+ *  forwardRef 透传 CarouselRef,供宿主命令式 scrollTo / prev / next
+ *  并读取最后一次完成落位的 index。
  */
-// T 约束 object —— `Pagination.Basic<T extends {}>` 需要 object
-function CarouselInner<T extends object>(
+function CarouselInner<T>(
   {
-    items,
+    data,
     renderItem,
+    keyExtractor,
     height,
-    itemWidth,
-    autoPlay,
+    itemSize,
+    autoplay,
+    autoplayInterval,
     loop = true,
     showIndicator = true,
     indicatorPosition = 'bottom',
@@ -36,12 +34,12 @@ function CarouselInner<T extends object>(
     style,
     testID,
   }: CarouselProps<T>,
-  ref: React.Ref<ICarouselInstance>
+  ref: React.Ref<CarouselRef>
 ): React.JSX.Element {
   const { width: screenWidth } = useWindowDimensions();
-  const width = itemWidth ?? screenWidth;
+  const width = itemSize ?? screenWidth;
   const styles = useThemedStyles(makeCarouselStyles);
-  // Carousel `onProgressChange` 把 absoluteProgress 写进 shared value,Pagination 自动跟。
+  // Carousel 把逻辑页进度写进 shared value,Pagination 自动跟随。
   const progress = useSharedValue<number>(0);
 
   // 'bottom' 模式给容器额外 +space[7] (=r(16)) 高度容纳独立行指示器;
@@ -49,8 +47,6 @@ function CarouselInner<T extends object>(
   // 'overlay-bottom-right' 不占额外高度。
   const indicatorReservedHeight =
     showIndicator && indicatorPosition === 'bottom' ? space['7'] : 0;
-
-  const data = items as T[];
 
   return (
     <View
@@ -60,13 +56,15 @@ function CarouselInner<T extends object>(
       <ReanimatedCarousel
         // v5 把 width / height prop deprecate,迁到 style
         style={{ width, height }}
+        itemSize={width}
         data={data}
+        keyExtractor={keyExtractor}
         loop={loop}
-        autoPlay={!!autoPlay}
-        autoPlayInterval={autoPlay}
-        onProgressChange={progress}
+        autoplay={autoplay}
+        autoplayInterval={autoplayInterval}
+        progress={progress}
         ref={ref}
-        renderItem={({ item, index }) => (
+        renderItem={({ item, index, relativeProgress }) => (
           // RN Pressable 而非 RNGH Pressable:Carousel 的 GestureDetector 已挂在
           // ReanimatedCarousel 内部,外层再套 RNGH Pressable 会产生手势冲突;
           // 用 RN 原生 Pressable 让库自己的拖拽手势优先,tap 仍正常触发。
@@ -90,17 +88,15 @@ function CarouselInner<T extends object>(
                 }
               : null)}
           >
-            {renderItem(item, index)}
+            {renderItem({ item, index, relativeProgress })}
           </Pressable>
         )}
       />
-      {showIndicator && items.length > 1 ? (
-        // importantForAccessibility="no" —— dots 仅视觉辅助,SR 不需要读出
-        // 每个 dot 的状态(已由 accessibilityRole=tab / accessibilityState.selected 表达
-        // 的场景另论,这里 Pagination.Custom 无内置 a11y 语义,对 SR 隐藏比误读更优)。
-        <Pagination.Custom<T>
+      {showIndicator && data.length > 1 ? (
+        // 未传 onPress 时,正式版 Pagination 会把 dots 作为纯视觉辅助从 a11y 树隐藏。
+        <Pagination
           progress={progress}
-          data={data}
+          count={data.length}
           dotStyle={styles.dot}
           activeDotStyle={styles.dotActive}
           containerStyle={
@@ -108,10 +104,6 @@ function CarouselInner<T extends object>(
               ? styles.dotsWrapOverlay
               : styles.dotsWrapBottom
           }
-          // @ts-expect-error — importantForAccessibility 是 RN View prop,
-          // Pagination.Custom containerStyle 走 ViewStyle 但 TS 类型未收录该 prop
-          importantForAccessibility="no-hide-descendants"
-          accessibilityElementsHidden={true}
         />
       ) : null}
     </View>
@@ -119,6 +111,6 @@ function CarouselInner<T extends object>(
 }
 
 // forwardRef 不支持泛型函数组件直接推断 T,需要手动标注 + 类型断言
-export const Carousel = React.forwardRef(CarouselInner) as <T extends object>(
-  props: CarouselProps<T> & { ref?: React.Ref<ICarouselInstance> }
+export const Carousel = React.forwardRef(CarouselInner) as <T>(
+  props: CarouselProps<T> & { ref?: React.Ref<CarouselRef> }
 ) => React.JSX.Element;

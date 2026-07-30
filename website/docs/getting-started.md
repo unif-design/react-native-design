@@ -44,7 +44,28 @@ yarn add react-native-svg \
 iOS 装完原生包后,在 `ios/` 目录执行 `bundle exec pod install`。
 :::
 
-> 版本下限(来自 `package.json#peerDependencies`):`react-native-reanimated >=4`、`react-native-worklets >=0.9`、`react-native-gesture-handler >=2`、`react-native-safe-area-context >=5`、`react-native-svg >=15`、`react-native-reanimated-carousel >=5.0.0-beta.0`、`@sbaiahmed1/react-native-blur >=4`。
+> 版本范围(来自 `package.json#peerDependencies`):`react-native-reanimated >=4.1.0`、`react-native-worklets >=0.9`、`react-native-gesture-handler >=3.0.0 <4.0.0`、`react-native-safe-area-context >=5`、`react-native-svg >=15`、`react-native-reanimated-carousel >=5.0.0 <6.0.0`、`@sbaiahmed1/react-native-blur >=4`。
+
+:::caution npm 需要 Carousel scoped override
+本包要求 Gesture Handler 3.x,但
+`react-native-reanimated-carousel@5.0.0` 的 peer 范围暂未包含 Gesture Handler 3。
+使用 npm 安装时,请在消费端根 `package.json` 加入只作用于 Carousel 的 scoped
+override,再执行 `npm install`:
+
+```json
+{
+  "overrides": {
+    "react-native-reanimated-carousel": {
+      "react-native-gesture-handler": "$react-native-gesture-handler"
+    }
+  }
+}
+```
+
+不要使用全局 override、`--force` 或 `--legacy-peer-deps`;上面的
+`$react-native-gesture-handler` 会复用消费端根依赖中满足 `>=3.0.0 <4.0.0`
+的版本,避免安装第二份 Gesture Handler。
+:::
 
 ### 3. 配 babel(worklets 插件必须最后)
 

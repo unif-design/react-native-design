@@ -7,7 +7,7 @@ export type { ButtonProps, ButtonSize, ButtonVariant } from './Button';
 export { Card } from './Card';
 export type { CardProps, CardVariant } from './Card';
 export { Carousel } from './Carousel';
-export type { CarouselProps } from './Carousel';
+export type { CarouselProps, CarouselRef } from './Carousel';
 export { Cell, List } from './Cell';
 export type { CellProps, ListProps } from './Cell';
 export { Checkbox } from './Checkbox';
