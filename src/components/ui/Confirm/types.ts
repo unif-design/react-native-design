@@ -12,13 +12,5 @@ export type ConfirmOptions = {
   destructive?: boolean;
 };
 
-/** Host 内部 entry —— options + resolve 回调,用户点 确认/取消/backdrop 时 resolve。 */
-export type ConfirmEntry = ConfirmOptions & {
-  id: number;
-  resolve: (confirmed: boolean) => void;
-};
-
-/** ConfirmHost 监听器签名 —— 收到 entry 渲染对话框。
- *  [L-101] 删去 null 分支:全仓唯一发射点 confirm.ts:_subs.forEach 只发非 null entry,
- *  关闭路径由 ConfirmEntry.resolve() 驱动;null 分支是死协议,对齐 Toast Subscriber 签名。 */
-export type Subscriber = (entry: ConfirmEntry) => void;
+// entry / event / lease 类型都在 `store.ts` —— 它们是 Host 与 Store 之间的内部协议,
+// 不进公共 barrel。本文件只保留对外的 `ConfirmOptions`。

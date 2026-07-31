@@ -8,7 +8,11 @@ description: "命令式 await confirm() → Promise<boolean> —— 高风险操
 
 命令式 `await confirm(...)` 返回 `Promise<boolean>`,跟 Toast 同款 imperative API,
 不需要 caller 维护 `useState / open / onClose`。背后是 `<ConfirmHost />`(裸 RN
-`Modal` + pub/sub,**不依赖 @gorhom**),App 根挂一次。
+`Modal` + 单 owner 状态机,**不依赖 @gorhom**),App 根挂**一次**。
+
+:::tip Promise 必然 settle
+`confirm()` 在任何路径下都会 resolve,不会悬挂 —— 包括没挂 Host、重入、Host 渲染抛错和 Host 卸载。详见下方[生命周期契约](#生命周期契约)。
+:::
 
 ## 用法
 
@@ -55,7 +59,29 @@ await confirm({ title: '确认注销账号?', confirmLabel: '确认注销', dest
 
 `Promise<boolean>`:
 - `true` — 用户点确认按钮
-- `false` — 用户点取消 / 点 backdrop
+- `false` — 用户点取消 / 点 backdrop / 系统返回,以及下表所有兜底路径
+
+## 生命周期契约 {#生命周期契约}
+
+`confirm()` 由一个纯状态机驱动(`src/components/ui/Confirm/store.ts`),两条不变量:
+**同一时间只有一个 Host owner**、**同一时间只有一个未决对话框**。所有关闭路径汇聚到同一个
+identity-guarded、幂等的 `settle`。
+
+| 场景 | 结果 | 说明 |
+|---|---|---|
+| 未挂 `<ConfirmHost />` | 立即 `false` + dev warn | 不占单例锁 —— 之后挂上 Host 仍能正常弹出 |
+| 已有对话框在显示时再调用 | 立即 `false` + dev warn | 拒绝重入,已显示的那个**不受影响** |
+| 挂了多个 `<ConfirmHost />` | 只有第一个生效 | 重复挂载的实例拿不到 owner,永久惰性、不渲染、不接收事件 |
+| Host 渲染 / 订阅回调抛错 | `false` | 只作废该 owner;新 Host 挂上后可正常接管 |
+| Host 卸载时对话框仍未决 | `false` | 由 Store 结算,Promise 不会永久悬挂 |
+| 同一次对话框被 settle 两次 | 第二次无效 | 幂等,结果以第一次为准 |
+| 旧对话框的迟到回调 | 无效 | identity guard:旧 entry 引用永远匹配不上新的 active,不会误关新对话框 |
+
+:::danger 只挂一次
+`<ConfirmHost />` 在 App 根挂**一次**。多挂的实例不会「都渲染一遍」,而是静默惰性 —— 但这意味着如果你把唯一那次挂在了会被卸载的子树里,卸载瞬间未决的对话框会被结算为 `false`。
+:::
+
+`ConfirmEntry` / `ConfirmEvent` / lease 等标识类型是 Host 与 Store 之间的**内部协议**,不从包根导出,也不保证跨版本稳定。
 
 ## 设计稿对照
 
@@ -111,7 +137,8 @@ const handleLogout = async () => {
 
 - ❌ 不要嵌套 confirm(同一时间只允许 1 个,新请求被拒绝 + dev warn)
 - ❌ 不要把"信息提示"用 confirm(用 `toast()`),confirm 只用于"用户决策"
-- ❌ 不要假设 confirm 一直在等(用户切屏 / app suspend 可能让 promise hang,关键路径上做超时保护)
+- ❌ 不要挂多个 `<ConfirmHost />` —— 多余的实例惰性,并不会提高可用性
+- ❌ 不要把 `<ConfirmHost />` 挂在会被条件卸载的子树里 —— 卸载会把未决对话框结算为 `false`
 
 ## 关联组件
 
