@@ -27,7 +27,8 @@ export type ValueState =
 
 export type ValueDiagnostic =
   | 'controlled-to-uncontrolled'
-  | 'uncontrolled-to-controlled';
+  | 'uncontrolled-to-controlled'
+  | 'invalid-controlled-value';
 
 export type ValueTransition = {
   state: ValueState;
@@ -44,13 +45,21 @@ export type TextFieldValueController = {
 };
 
 export function createValueState(
-  value: string | undefined,
-  defaultValue: string | undefined
+  value: unknown,
+  defaultValue: unknown
 ): ValueState {
   if (value !== undefined) {
-    return { mode: 'controlled', value, lastValidControlledValue: value };
+    const safeValue = typeof value === 'string' ? value : '';
+    return {
+      mode: 'controlled',
+      value: safeValue,
+      lastValidControlledValue: safeValue,
+    };
   }
-  return { mode: 'uncontrolled', value: defaultValue ?? '' };
+  return {
+    mode: 'uncontrolled',
+    value: typeof defaultValue === 'string' ? defaultValue : '',
+  };
 }
 
 /**
@@ -59,7 +68,7 @@ export function createValueState(
  */
 export function reconcileValueState(
   state: ValueState,
-  incomingValue: string | undefined
+  incomingValue: unknown
 ): ValueTransition {
   if (state.mode === 'controlled') {
     if (incomingValue === undefined) {
@@ -69,6 +78,13 @@ export function reconcileValueState(
         state,
         value: state.lastValidControlledValue,
         diagnostic: 'controlled-to-uncontrolled',
+      };
+    }
+    if (typeof incomingValue !== 'string') {
+      return {
+        state,
+        value: state.lastValidControlledValue,
+        diagnostic: 'invalid-controlled-value',
       };
     }
     return {

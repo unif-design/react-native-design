@@ -5,14 +5,14 @@ import { useColors, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { Icon } from '../Icon';
-import { normalizeSlotIconSize } from './normalize';
+import { normalizeSlotIconSize, normalizeTextFieldSlot } from './normalize';
 import { makeStyles } from './styles';
 import type { TextFieldSlot as TextFieldSlotConfig } from './types';
 
 const log = createLogger('TextFieldSlot');
 
 type TextFieldSlotProps = {
-  slot: TextFieldSlotConfig | undefined;
+  slot: TextFieldSlotConfig | unknown;
   effectiveEditable: boolean;
   testID?: string;
 };
@@ -28,26 +28,36 @@ export function TextFieldSlot({
 }: TextFieldSlotProps): React.JSX.Element | null {
   const colors = useColors();
   const styles = useThemedStyles(makeStyles);
+  const normalizedSlot = normalizeTextFieldSlot(slot);
+  const safeSlot = normalizedSlot.slot;
   const iconSize =
-    slot?.kind === 'icon' ? normalizeSlotIconSize(slot.size) : undefined;
+    safeSlot?.kind === 'icon'
+      ? normalizeSlotIconSize(safeSlot.size)
+      : undefined;
   const iconDiagnosticKey = iconSize?.diagnostics.join(',') ?? '';
+  const slotDiagnosticKey = normalizedSlot.diagnostics.join(',');
 
   useEffect(() => {
     if (iconDiagnosticKey.length > 0) {
       log.warn('slot.icon.size 非法，已回退为 18。');
     }
   }, [iconDiagnosticKey]);
+  useEffect(() => {
+    if (slotDiagnosticKey.length > 0) {
+      log.warn('非法 action slot 已移除：需要函数 handler 和非空可访问名称。');
+    }
+  }, [slotDiagnosticKey]);
 
-  if (!slot) return null;
+  if (!safeSlot) return null;
 
-  switch (slot.kind) {
+  switch (safeSlot.kind) {
     case 'icon':
       return (
         <View {...A11Y_HIDDEN_PROPS} style={styles.slotDisplay} testID={testID}>
           <Icon
-            name={slot.icon}
+            name={safeSlot.icon}
             size={iconSize?.value ?? 18}
-            color={slot.color ?? colors.foregroundMuted}
+            color={safeSlot.color ?? colors.foregroundMuted}
           />
         </View>
       );
@@ -58,22 +68,22 @@ export function TextFieldSlot({
           style={[styles.slotDisplay, styles.slotText]}
           testID={testID}
         >
-          {slot.value}
+          {safeSlot.value}
         </Text>
       );
     case 'action': {
-      const disabled = !effectiveEditable || slot.disabled === true;
+      const disabled = !effectiveEditable || safeSlot.disabled === true;
       return (
         <Pressable
-          onPress={disabled ? undefined : slot.onPress}
+          onPress={disabled ? undefined : safeSlot.onPress}
           disabled={disabled}
           accessibilityRole="button"
-          accessibilityLabel={slot.accessibilityLabel}
+          accessibilityLabel={safeSlot.accessibilityLabel}
           accessibilityState={{ disabled }}
           style={styles.actionFrame}
           testID={testID}
         >
-          <Icon name={slot.icon} size={18} color={colors.foregroundMuted} />
+          <Icon name={safeSlot.icon} size={18} color={colors.foregroundMuted} />
         </Pressable>
       );
     }

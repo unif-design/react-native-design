@@ -34,8 +34,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
       height,
       minHeight,
       maxHeight,
-      visibleHeight,
-      inputFrameHeight,
+      searchLayout,
       leading,
       trailing,
       error,
@@ -79,9 +78,8 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
     const scope = multiline ? 'Textarea' : 'Input';
     const controller = useTextFieldValue(
       {
-        value: typeof value === 'string' ? value : undefined,
-        defaultValue:
-          typeof defaultValue === 'string' ? defaultValue : undefined,
+        value,
+        defaultValue,
         onChangeText:
           typeof onChangeText === 'function'
             ? (onChangeText as (next: string) => void)
@@ -141,14 +139,15 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
         : filled
           ? [styles.wrapActive, styles.wrapFilled]
           : [styles.wrapIdle];
-    const visibleFieldHeight = visibleHeight ?? normalizedHeight;
+    const interactiveHeight =
+      searchLayout?.interactiveHeight ?? normalizedHeight;
 
     return (
       <View
         style={[
           sanitizedContainer.style,
           !effectiveEditable && styles.containerDisabled,
-          visibleHeight !== undefined && !multiline && styles.rootCentered,
+          searchLayout !== undefined && !multiline && styles.rootCentered,
           { minWidth: fixed.hitTarget, minHeight: normalizedHeight },
         ]}
         testID={testID}
@@ -157,17 +156,31 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
           style={[
             styles.wrap,
             multiline && styles.wrapMultiline,
-            ...wrapStateStyles,
+            searchLayout === undefined && wrapStateStyles,
+            searchLayout !== undefined && styles.searchInteractiveRow,
             multiline
               ? {
-                  minHeight: visibleFieldHeight,
+                  minHeight: normalizedHeight,
                   ...(normalizedTextareaHeights.maxHeight !== undefined && {
                     maxHeight: normalizedTextareaHeights.maxHeight,
                   }),
                 }
-              : { height: visibleFieldHeight },
+              : { height: interactiveHeight },
           ]}
         >
+          {searchLayout ? (
+            <View
+              pointerEvents="none"
+              style={[
+                styles.searchVisibleSurface,
+                ...wrapStateStyles,
+                {
+                  top: searchLayout.verticalInset,
+                  bottom: searchLayout.verticalInset,
+                },
+              ]}
+            />
+          ) : null}
           <TextFieldSlot
             slot={leading}
             effectiveEditable={effectiveEditable}
@@ -194,8 +207,8 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
               multiline && {
                 minHeight: Math.max(0, normalizedHeight - space[4] * 2),
               },
-              inputFrameHeight !== undefined && {
-                minHeight: inputFrameHeight,
+              searchLayout !== undefined && {
+                minHeight: searchLayout.interactiveHeight,
               },
             ]}
             placeholderTextColor={callerPlaceholder ?? colors.foregroundSubtle}

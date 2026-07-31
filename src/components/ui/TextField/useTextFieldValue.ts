@@ -19,11 +19,13 @@ const DIAGNOSTIC_MESSAGE: Record<ValueDiagnostic, string> = {
     '受控输入的 value 变成了 undefined。mode 已在首次 render 锁定为受控,本次沿用上一个合法值 —— 请始终传字符串(清空用 "")。',
   'uncontrolled-to-controlled':
     '非受控输入后来收到了 value。mode 已在首次 render 锁定为非受控,该 value 被忽略 —— 请从一开始就同时传 value 与 onChangeText。',
+  'invalid-controlled-value':
+    '受控输入的 value 必须是字符串。已保持最后一个合法值,不会切换到非受控 mode。',
 };
 
 export type UseTextFieldValueInput = {
-  value?: string | undefined;
-  defaultValue?: string | undefined;
+  value?: unknown;
+  defaultValue?: unknown;
   onChangeText?: ((value: string) => void) | undefined;
 };
 

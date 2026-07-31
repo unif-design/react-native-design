@@ -1,7 +1,11 @@
 import { StyleSheet } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { fixed } from '../../../theme';
-import type { TextFieldContainerStyle } from './types';
+import type {
+  SearchFieldLayout,
+  TextFieldContainerStyle,
+  TextFieldSlot,
+} from './types';
 
 /**
  * TextField 家族的**纯布局归一化** —— 无 React 依赖,可直接单测。
@@ -15,6 +19,7 @@ const DEFAULT_SLOT_ICON_SIZE = 18;
 const MAX_SLOT_ICON_SIZE = 32;
 /** Textarea 默认最小高度(约 5 行)。 */
 const DEFAULT_TEXTAREA_MIN_HEIGHT = 96;
+const DEFAULT_SEARCH_VISIBLE_HEIGHT = 36;
 
 /** 这六个字段会破坏 TextField 自持的最小命中框,一律从 containerStyle 剥离。 */
 const RESERVED_CONTAINER_KEYS = [
@@ -89,6 +94,64 @@ export function normalizeSlotIconSize(value: unknown): NormalizedNumber {
   return isFiniteWithin(value, 1, MAX_SLOT_ICON_SIZE)
     ? { value, diagnostics: [] }
     : { value: DEFAULT_SLOT_ICON_SIZE, diagnostics: ['slot.size'] };
+}
+
+export type NormalizedTextFieldSlot = {
+  slot: TextFieldSlot | undefined;
+  diagnostics: readonly string[];
+};
+
+/** 未类型化 JS 的 action 也必须同时有真 handler 和非空可访问名称。 */
+export function normalizeTextFieldSlot(slot: unknown): NormalizedTextFieldSlot {
+  if (!slot || typeof slot !== 'object') {
+    return { slot: undefined, diagnostics: [] };
+  }
+  const candidate = slot as Record<string, unknown>;
+  if (candidate.kind !== 'action') {
+    return { slot: slot as TextFieldSlot, diagnostics: [] };
+  }
+  if (
+    typeof candidate.onPress !== 'function' ||
+    typeof candidate.accessibilityLabel !== 'string' ||
+    candidate.accessibilityLabel.trim().length === 0
+  ) {
+    return { slot: undefined, diagnostics: ['slot.action'] };
+  }
+  return { slot: slot as TextFieldSlot, diagnostics: [] };
+}
+
+export type NormalizedSearchLayout = SearchFieldLayout & {
+  diagnostics: readonly string[];
+};
+
+/** 搜索框的可见面可为 36pt,但承载输入/操作的实际行永远不得小于 44pt。 */
+export function normalizeSearchLayout(
+  interactiveHeight: unknown,
+  visibleHeight: unknown
+): NormalizedSearchLayout {
+  const diagnostics: string[] = [];
+  const safeInteractive = isFiniteAtLeast(interactiveHeight, fixed.hitTarget)
+    ? interactiveHeight
+    : fixed.hitTarget;
+  if (safeInteractive !== interactiveHeight) {
+    diagnostics.push('interactiveHeight');
+  }
+  const safeVisible =
+    typeof visibleHeight === 'number' &&
+    Number.isFinite(visibleHeight) &&
+    visibleHeight > 0 &&
+    visibleHeight <= safeInteractive
+      ? visibleHeight
+      : DEFAULT_SEARCH_VISIBLE_HEIGHT;
+  if (safeVisible !== visibleHeight) {
+    diagnostics.push('visibleHeight');
+  }
+  return {
+    interactiveHeight: safeInteractive,
+    visibleHeight: safeVisible,
+    verticalInset: (safeInteractive - safeVisible) / 2,
+    diagnostics,
+  };
 }
 
 export type SanitizedContainerStyle = {

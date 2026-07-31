@@ -40,7 +40,6 @@ export function RuntimeApiScreen(): React.JSX.Element {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('查询');
   const [searchResult, setSearchResult] = useState('—');
-  const colors = useColors();
   const modeSwitchProps = modeSwitched
     ? { value: '后来受控', onChangeText: setControlledInput }
     : { defaultValue: '首次非受控' };
@@ -183,11 +182,7 @@ export function RuntimeApiScreen(): React.JSX.Element {
                   maxHeight={10}
                   placeholder="非法 min/max（应回退 96 / 无上限）"
                 />
-                <Input
-                  defaultValue=""
-                  placeholder="caller placeholder 色优先"
-                  placeholderTextColor={colors.primary}
-                />
+                <PlaceholderPriorityCase />
                 <Button
                   label="切换错误（iOS 后续变化才播报）"
                   variant="secondary"
@@ -233,6 +228,18 @@ export function RuntimeApiScreen(): React.JSX.Element {
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
+  );
+}
+
+/** 必须在 ThemeProvider 子树中读取 role token,不能依赖 provider 外的 fallback。 */
+function PlaceholderPriorityCase(): React.JSX.Element {
+  const colors = useColors();
+  return (
+    <Input
+      defaultValue=""
+      placeholder="caller placeholder 色优先"
+      placeholderTextColor={colors.primary}
+    />
   );
 }
 

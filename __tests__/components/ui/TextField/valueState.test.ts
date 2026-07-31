@@ -40,6 +40,17 @@ describe('createValueState — 首次 render 锁定 mode', () => {
   test('controlled 时 defaultValue 完全不参与', () => {
     expect(createValueState('A', 'seed').value).toBe('A');
   });
+
+  test('首帧 null 仍锁 controlled,显示安全空串并诊断非法值', () => {
+    const initial = createValueState(null, 'seed');
+    const transition = reconcileValueState(initial, null);
+    expect(transition).toMatchObject({
+      state: { mode: 'controlled', lastValidControlledValue: '' },
+      value: '',
+      diagnostic: 'invalid-controlled-value',
+    });
+    expect(resolveCanUpdate(transition.state.mode, undefined)).toBe(false);
+  });
 });
 
 describe('reconcileValueState — mode 永不切换', () => {
@@ -73,6 +84,17 @@ describe('reconcileValueState — mode 永不切换', () => {
     const next = reconcileValueState(createValueState('A', undefined), '');
     expect(next.value).toBe('');
     expect(next.diagnostic).toBeUndefined();
+  });
+
+  test('controlled 后续收到 number 时保留最后字符串且不会获得内部更新路径', () => {
+    const initial = createValueState('stable', undefined);
+    const invalid = reconcileValueState(initial, 42);
+    expect(invalid).toMatchObject({
+      state: { mode: 'controlled', lastValidControlledValue: 'stable' },
+      value: 'stable',
+      diagnostic: 'invalid-controlled-value',
+    });
+    expect(resolveCanUpdate(invalid.state.mode, undefined)).toBe(false);
   });
 
   test('uncontrolled 忽略后续 value/defaultValue,只接受用户输入', () => {

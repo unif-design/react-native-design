@@ -1,7 +1,8 @@
 import React, { forwardRef, useEffect } from 'react';
-import { control, fixed } from '../../../theme';
+import { fixed } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { TextFieldBase } from '../TextField/TextFieldBase';
+import { normalizeSearchLayout } from '../TextField/normalize';
 import type {
   TextFieldBaseProps,
   TextFieldHandle,
@@ -36,9 +37,8 @@ export const Search = forwardRef<TextFieldHandle, SearchProps>(
       enterKeyHint: _enterKeyHint,
       ...rest
     } = props as SearchProps & Record<string, unknown>;
-    const value = typeof rawValue === 'string' ? rawValue : undefined;
-    const defaultValue =
-      typeof rawDefaultValue === 'string' ? rawDefaultValue : undefined;
+    const value = rawValue;
+    const defaultValue = rawDefaultValue;
     const onChangeText =
       typeof rawOnChangeText === 'function'
         ? (rawOnChangeText as (next: string) => void)
@@ -64,8 +64,7 @@ export const Search = forwardRef<TextFieldHandle, SearchProps>(
       | 'leading'
       | 'trailing'
       | 'height'
-      | 'visibleHeight'
-      | 'inputFrameHeight'
+      | 'searchLayout'
       | 'returnKeyType'
       | 'accessibilityRole'
       | 'onSubmitEditing'
@@ -95,6 +94,7 @@ export const Search = forwardRef<TextFieldHandle, SearchProps>(
       { value, defaultValue, onChangeText },
       'Search'
     );
+    const searchLayout = normalizeSearchLayout(fixed.hitTarget, 36);
     const effectiveEditable = disabled !== true && editable !== false;
     const trailing: TextFieldSlot | undefined =
       controller.value.length > 0 && effectiveEditable && controller.canUpdate
@@ -117,8 +117,7 @@ export const Search = forwardRef<TextFieldHandle, SearchProps>(
         editable={editable}
         placeholder={placeholder}
         height={fixed.hitTarget}
-        visibleHeight={control.md}
-        inputFrameHeight={fixed.hitTarget}
+        searchLayout={searchLayout}
         returnKeyType="search"
         accessibilityRole="search"
         onSubmitEditing={(event) => {

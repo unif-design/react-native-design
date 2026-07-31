@@ -17,6 +17,17 @@ export const makeStyles = (c: ColorTokens) =>
       paddingVertical: space[4],
       alignItems: 'flex-start',
     },
+    /** Search 的可见底色/边框绝不承载命中区域。 */
+    searchInteractiveRow: {
+      borderWidth: 0,
+    },
+    searchVisibleSurface: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      borderRadius: radius.md,
+      borderWidth: 1,
+    },
     wrapIdle: {
       backgroundColor: c.surfaceContainerHigh,
       borderColor: 'transparent',

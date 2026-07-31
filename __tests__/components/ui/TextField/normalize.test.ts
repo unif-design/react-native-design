@@ -2,8 +2,10 @@ import { describe, expect, test } from '@jest/globals';
 import { StyleSheet } from 'react-native';
 import {
   normalizeInputHeight,
+  normalizeSearchLayout,
   normalizeSlotIconSize,
   normalizeTextareaHeights,
+  normalizeTextFieldSlot,
   sanitizeTextFieldContainerStyle,
 } from '../../../../src/components/ui/TextField/normalize';
 
@@ -115,6 +117,71 @@ describe('normalizeSlotIconSize — 只接受 [1, 32]', () => {
     expect(normalizeSlotIconSize(input)).toEqual({
       value: 18,
       diagnostics: ['slot.size'],
+    });
+  });
+});
+
+describe('normalizeTextFieldSlot — 未类型化 action 不能绕过 handler/name', () => {
+  test('有效 action 原样保留', () => {
+    const action = {
+      kind: 'action',
+      icon: 'close',
+      onPress: () => {},
+      accessibilityLabel: '清除',
+    } as const;
+    expect(normalizeTextFieldSlot(action)).toEqual({
+      slot: action,
+      diagnostics: [],
+    });
+  });
+
+  test.each([
+    [
+      '缺 handler',
+      { kind: 'action', icon: 'close', accessibilityLabel: '清除' },
+    ],
+    [
+      'handler 非函数',
+      {
+        kind: 'action',
+        icon: 'close',
+        onPress: 'clear',
+        accessibilityLabel: '清除',
+      },
+    ],
+    [
+      '空白 label',
+      {
+        kind: 'action',
+        icon: 'close',
+        onPress: () => {},
+        accessibilityLabel: '  ',
+      },
+    ],
+  ])('%s 时移除 action 并给出诊断', (_name, slot) => {
+    expect(normalizeTextFieldSlot(slot)).toEqual({
+      slot: undefined,
+      diagnostics: ['slot.action'],
+    });
+  });
+});
+
+describe('normalizeSearchLayout — 44pt 交互层与 36pt 可视面分离', () => {
+  test('非法尺寸回退为 44pt interactive / 36pt visible 和 4pt inset', () => {
+    expect(normalizeSearchLayout(20, 100)).toEqual({
+      interactiveHeight: 44,
+      visibleHeight: 36,
+      verticalInset: 4,
+      diagnostics: ['interactiveHeight', 'visibleHeight'],
+    });
+  });
+
+  test('合法默认尺寸保留独立的实际命中层', () => {
+    expect(normalizeSearchLayout(44, 36)).toEqual({
+      interactiveHeight: 44,
+      visibleHeight: 36,
+      verticalInset: 4,
+      diagnostics: [],
     });
   });
 });

@@ -60,6 +60,13 @@ export type TextFieldContainerStyle = Omit<
   'height' | 'minHeight' | 'maxHeight' | 'minWidth' | 'maxWidth' | 'overflow'
 >;
 
+/** internal:Search 把真实交互行与仅作视觉的 surface 明确分层。 */
+export type SearchFieldLayout = {
+  interactiveHeight: number;
+  visibleHeight: number;
+  verticalInset: number;
+};
+
 /** TextField 家族共享的非值 props(内部)。 */
 export type TextFieldCommonProps = {
   /** 左侧 slot —— 图标 / 文本 / 带 handler 与名称的操作 */
@@ -111,8 +118,6 @@ export type TextFieldBaseProps = Omit<TextInputProps, RemovedTextInputProps> &
     minHeight?: number;
     /** 最大高度(multiline=true 时生效);超出 ScrollView 内滚 */
     maxHeight?: number;
-    /** internal:Search 的 36pt 可视 surface;root 仍维持 44pt 命中框。 */
-    visibleHeight?: number;
-    /** internal:Search 让原生 TextInput 保留 44pt 交互 frame。 */
-    inputFrameHeight?: number;
+    /** internal:Search 的 44pt interactive row + 36pt decorative surface。 */
+    searchLayout?: SearchFieldLayout;
   };
