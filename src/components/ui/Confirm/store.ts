@@ -63,8 +63,14 @@ export function createConfirmStore(log: Logger): ConfirmStore {
         current.subscriber({ type: 'clear', id: entry.id });
       } catch (error) {
         log.error('ConfirmHost clear subscriber 抛错', error);
-        // 只作废「抛错时捕获到的那个 owner」;期间若已换人,不能误伤新 owner。
-        if (owner?.token === current.token) owner = null;
+        // 只作废「抛错时捕获到的那个 owner」;期间若已 cleanup / 换人,不能误伤新 owner。
+        // clear 回调可能同步 request() 出新 entry:先摘 owner 再 settle,避免再次回调已坏的
+        // subscriber,同时保证新 Promise 不会以「active 但无 owner」永久悬挂。
+        if (owner?.token === current.token) {
+          owner = null;
+          const reentrant = active;
+          if (reentrant) settle(reentrant, false);
+        }
       }
     }
     return true;

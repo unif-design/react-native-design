@@ -103,27 +103,39 @@ module.exports = {
 };
 ```
 
-## 根挂 ThemeProvider {#根挂-themeprovider}
+## 根挂 Provider 与 Host {#根挂-themeprovider}
 
-在 App 根组件挂载一次 `ThemeProvider`(它读 `useColorScheme()`,自动跟随系统亮暗),并按需渲染命令式 host:
+App 根按 `GestureHandlerRootView → SafeAreaProvider → ThemeProvider → App 内容 + Hosts` 装配。`SafeAreaProvider` 必须从 `react-native-safe-area-context` 这个 peer 包导入；设计系统组件与函数仍只从 `@unif/react-native-design` 包根导入:
 
 ```tsx
-import { ThemeProvider, ToastHost } from '@unif/react-native-design';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import {
+  ConfirmHost,
+  ThemeProvider,
+  ToastHost,
+} from '@unif/react-native-design';
 
 export function App() {
   return (
-    <ThemeProvider>
-      {/* 你的导航 / 屏幕 */}
-      <ToastHost />
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          {/* 你的导航 / 屏幕 */}
+          <ToastHost />
+          <ConfirmHost />
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 ```
 
-- `ToastHost` —— 渲染 `toast.success / error / info(...)` 命令式调用的弹层。
+- `ThemeProvider` —— 读取 `useColorScheme()`,自动跟随系统亮暗。
+- `ToastHost` / `ConfirmHost` —— 都会读取安全区 context；各挂一次，且必须位于 `SafeAreaProvider` 内。
 
 :::tip 完整 Provider 栈
-实战里 `ThemeProvider` 通常嵌在手势 / 键盘 / 安全区 Provider 内:`GestureHandlerRootView → KeyboardProvider → SafeAreaProvider → ThemeProvider → NavigationContainer`。骨架见[完整规范 → Quickstart](/docs/unif-design)。`ThemeProvider` 接受 `forceScheme?: 'light' | 'dark'` 强制某主题(用于测试 / 设置项接入)。
+若宿主还使用键盘或导航 Provider，可在不破坏上述相对顺序的前提下加入，例如 `GestureHandlerRootView → KeyboardProvider → SafeAreaProvider → ThemeProvider → NavigationContainer + Hosts`。骨架见[完整规范 → Quickstart](/docs/unif-design)。`ThemeProvider` 接受 `forceScheme?: 'light' | 'dark'` 强制某主题(用于测试 / 设置项接入)。
 :::
 
 ## 第一个主题化组件 {#第一个主题化组件}

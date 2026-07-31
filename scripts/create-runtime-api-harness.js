@@ -460,6 +460,7 @@ function assertOwnedTempParent(parent, tempRoot) {
 function runWithOwnedTempCleanup(parent, operation, seam = {}) {
   assertOwnedTempParent(parent, seam.tempRoot ?? os.tmpdir());
   try {
+    assertOutsideExample(parent);
     return operation();
   } catch (error) {
     const remove = seam.remove ?? fs.rmSync;
@@ -548,7 +549,6 @@ function main() {
   );
 
   const parent = fs.mkdtempSync(path.join(os.tmpdir(), TEMP_PREFIX));
-  assertOutsideExample(parent);
   const appDir = path.join(parent, APP_NAME);
   runWithOwnedTempCleanup(parent, () => {
     console.log(`[harness] 打包当前源码…`);

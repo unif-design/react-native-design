@@ -171,6 +171,92 @@ describe('auditRuntimePeers — 严格 allowlist', () => {
     );
   });
 
+  test('额外的第三 workspace provider 不得进入窄例外', () => {
+    const thirdProvider = '@unif/runtime-third@workspace:runtime-third';
+    const thirdDetail = rootDetail.replaceAll(
+      '@unif/react-native-design@workspace:.',
+      thirdProvider
+    );
+    const summaries = parseRequirementList(
+      [
+        LIST.split('\n')[0],
+        LIST.split('\n')[1],
+        'pthird → ✘ @unif/runtime-third@workspace:runtime-third provides react-native-gesture-handler@npm:3.1.0',
+      ].join('\n')
+    );
+    const details = new Map([
+      ['pc850d5', parseRequirementDetail('pc850d5', rootDetail)],
+      ['pwebsite', parseRequirementDetail('pwebsite', websiteDetail)],
+      ['pthird', parseRequirementDetail('pthird', thirdDetail)],
+    ]);
+
+    const result = auditRuntimePeers(summaries, details);
+    expect(result.errors.join('\n')).toContain(thirdProvider);
+    expect(result.knownExceptions).toEqual(['pc850d5', 'pwebsite']);
+  });
+
+  test.each([
+    [
+      'hash',
+      {
+        ...parseRequirementDetail('pc850d5', rootDetail),
+        hash: 'pother',
+      },
+    ],
+    [
+      'provider',
+      {
+        ...parseRequirementDetail('pc850d5', rootDetail),
+        providerLocator: '@unif/react-native-design-website@workspace:website',
+      },
+    ],
+    [
+      'package',
+      {
+        ...parseRequirementDetail('pc850d5', rootDetail),
+        packageName: 'react-native-reanimated',
+      },
+    ],
+    [
+      'version',
+      {
+        ...parseRequirementDetail('pc850d5', rootDetail),
+        providerVersion: '3.2.0',
+      },
+    ],
+  ])('summary/detail 的 %s 身份不一致时失败', (_field, mismatchedDetail) => {
+    const summaries = parseRequirementList(
+      [LIST.split('\n')[0], LIST.split('\n')[1]].join('\n')
+    );
+    const details = new Map([
+      ['pc850d5', mismatchedDetail],
+      ['pwebsite', parseRequirementDetail('pwebsite', websiteDetail)],
+    ]);
+
+    const result = auditRuntimePeers(summaries, details);
+    expect(result.errors.join('\n')).toContain('身份不一致');
+    expect(result.knownExceptions).toEqual(['pwebsite']);
+  });
+
+  test('同一个 required provider 出现两次时失败', () => {
+    const summaries = parseRequirementList(
+      [
+        LIST.split('\n')[0],
+        'pduplicate → ✘ @unif/react-native-design@workspace:. provides react-native-gesture-handler@npm:3.1.0',
+        LIST.split('\n')[1],
+      ].join('\n')
+    );
+    const details = new Map([
+      ['pc850d5', parseRequirementDetail('pc850d5', rootDetail)],
+      ['pduplicate', parseRequirementDetail('pduplicate', rootDetail)],
+      ['pwebsite', parseRequirementDetail('pwebsite', websiteDetail)],
+    ]);
+
+    const result = auditRuntimePeers(summaries, details);
+    expect(result.errors.join('\n')).toContain('重复');
+    expect(result.knownExceptions).toEqual(['pc850d5', 'pwebsite']);
+  });
+
   test('真实 Yarn 4.11 输出(requester 带 [hash] 虚拟实例后缀)被接受', () => {
     const summaries = parseRequirementList(REAL_LIST);
     expect(summaries.map((item) => item.hash)).toEqual(['p86ac4b', 'pc850d5']);

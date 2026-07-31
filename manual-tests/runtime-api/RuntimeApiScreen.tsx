@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
   Button,
   ConfirmHost,
@@ -61,62 +62,64 @@ export function RuntimeApiScreen(): React.JSX.Element {
 
   return (
     <GestureHandlerRootView style={styles.root}>
-      <ThemeProvider>
-        <ScrollView contentContainerStyle={styles.content}>
-          <Section title="Confirm">
-            <Button label="打开 Confirm" onPress={runConfirm} />
-            <Button
-              label="重入(A 保持 / B 立即 false)"
-              variant="secondary"
-              onPress={runReentry}
-            />
-            <Button
-              label="破坏性 Confirm"
-              variant="danger"
-              onPress={runDestructive}
-            />
-            <Result label="confirm 结果" value={confirmResult} />
-            <Result label="重入 B 结果" value={reentryResult} />
-          </Section>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <ScrollView contentContainerStyle={styles.content}>
+            <Section title="Confirm">
+              <Button label="打开 Confirm" onPress={runConfirm} />
+              <Button
+                label="重入(A 保持 / B 立即 false)"
+                variant="secondary"
+                onPress={runReentry}
+              />
+              <Button
+                label="破坏性 Confirm"
+                variant="danger"
+                onPress={runDestructive}
+              />
+              <Result label="confirm 结果" value={confirmResult} />
+              <Result label="重入 B 结果" value={reentryResult} />
+            </Section>
 
-          <Section title="Toast">
-            <Button
-              label="① Host 关闭时发布(应保留到挂上再显示)"
-              variant="secondary"
-              onPress={() => toast('pending-before-host')}
-            />
-            <Button
-              label="② 快速发 A 再发 B(只应看到 B)"
-              variant="secondary"
-              onPress={() => {
-                toast('A — 不应停留');
-                toast.success('B — 应当显示这条');
-              }}
-            />
-            <Button
-              label={toastHostOn ? '③ 关闭 ToastHost' : '③ 打开 ToastHost'}
-              onPress={() => setToastHostOn((on) => !on)}
-            />
-            <Button
-              label="④ 重挂 ToastHost(未播完的应重投递)"
-              variant="secondary"
-              onPress={() => setToastHostKey((key) => key + 1)}
-            />
-            <Result
-              label="ToastHost"
-              value={toastHostOn ? `on (#${toastHostKey})` : 'off'}
-            />
-          </Section>
+            <Section title="Toast">
+              <Button
+                label="① Host 关闭时发布(应保留到挂上再显示)"
+                variant="secondary"
+                onPress={() => toast('pending-before-host')}
+              />
+              <Button
+                label="② 快速发 A 再发 B(只应看到 B)"
+                variant="secondary"
+                onPress={() => {
+                  toast('A — 不应停留');
+                  toast.success('B — 应当显示这条');
+                }}
+              />
+              <Button
+                label={toastHostOn ? '③ 关闭 ToastHost' : '③ 打开 ToastHost'}
+                onPress={() => setToastHostOn((on) => !on)}
+              />
+              <Button
+                label="④ 重挂 ToastHost(未播完的应重投递)"
+                variant="secondary"
+                onPress={() => setToastHostKey((key) => key + 1)}
+              />
+              <Result
+                label="ToastHost"
+                value={toastHostOn ? `on (#${toastHostKey})` : 'off'}
+              />
+            </Section>
 
-          <PulseSection />
-        </ScrollView>
+            <PulseSection />
+          </ScrollView>
 
-        {/* ConfirmHost 全屏只挂一次 —— 多挂的实例会惰性,不会重复渲染。 */}
-        <ConfirmHost />
-        {toastHostOn ? (
-          <ToastHost key={toastHostKey} testID="toast-host" />
-        ) : null}
-      </ThemeProvider>
+          {/* ConfirmHost 全屏只挂一次 —— 多挂的实例会惰性,不会重复渲染。 */}
+          <ConfirmHost />
+          {toastHostOn ? (
+            <ToastHost key={toastHostKey} testID="toast-host" />
+          ) : null}
+        </ThemeProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

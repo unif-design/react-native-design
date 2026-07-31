@@ -230,6 +230,32 @@ describe('ConfirmStore — subscriber 抛错', () => {
     await expect(second).resolves.toBe(false);
   }, 2000);
 
+  test('clear 回调先同步 request(B) 再抛错时确定性结算 B,且不锁死后续请求', async () => {
+    const store = createConfirmStore(testLog);
+    const events: ConfirmEvent[] = [];
+    let second: Promise<boolean> | undefined;
+    store.registerHost((event) => {
+      events.push(event);
+      if (event.type === 'clear') {
+        second = store.request({ title: 'B' });
+        throw new Error('clear failed after B');
+      }
+    });
+
+    const first = store.request({ title: 'A' });
+    expect(store.settle(firstEntry(events), true)).toBe(true);
+    await expect(first).resolves.toBe(true);
+    expect(second).toBeDefined();
+    await expect(second).resolves.toBe(false);
+    expect(store.activeEntry()).toBeNull();
+
+    const next: ConfirmEvent[] = [];
+    expect(store.registerHost((event) => next.push(event))).not.toBeNull();
+    const third = store.request({ title: 'C' });
+    store.settle(firstEntry(next), true);
+    await expect(third).resolves.toBe(true);
+  }, 2000);
+
   test('show 抛错的 entry 事后再 settle 也不会二次 resolve', async () => {
     const store = createConfirmStore(testLog);
     let captured: ConfirmEntry | null = null;

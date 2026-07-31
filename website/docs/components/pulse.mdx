@@ -1,7 +1,7 @@
 ---
 sidebar_position: 5
 title: Pulse · PulseDot · usePulse
-description: "reanimated 4 worklet 通用脉冲原语 —— usePulse(opacity 循环 hook) + <Pulse>(包装组件) + <PulseDot>(默认 6×6 主橙圆点)；UI 线程驱动、不占 JS 桥，纯视觉对屏幕阅读器隐藏。"
+description: "跨平台脉冲原语 —— usePulse(opacity 循环 hook) + <Pulse>(包装组件) + <PulseDot>(默认 6×6 主橙圆点)；统一归一化后由 native Reanimated / Web CSS driver 执行，纯视觉对屏幕阅读器隐藏。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -9,7 +9,7 @@ import { Pulse, PulseDot, Icon } from '@unif/react-native-design';
 
 # Pulse · PulseDot · usePulse
 
-通用脉冲原语，基于 `react-native-reanimated@4` worklet 实现 —— UI 线程驱动、原生 driver、不占 JS 桥。三个 API：
+通用脉冲原语：公共 `usePulse.ts` 先统一完成参数归一化、诊断、静态与 reduced-motion 判定，再把归一化结果交给平台 driver。native 使用 `react-native-reanimated@4` worklet，Web 使用 CSS transition + timer。三个 API：
 
 - **`usePulse(options)`** — 钩子，返回 `useAnimatedStyle`，可直接拼到 `Animated.View` 上
 - **`<Pulse>{children}</Pulse>`** — 把 children 包进一个 opacity 循环动画
@@ -17,7 +17,7 @@ import { Pulse, PulseDot, Icon } from '@unif/react-native-design';
 
 ## 实时预览
 
-下方渲染的就是 `src/components/ui/Pulse/PulseDot.tsx` 与 `Pulse.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。worklet 在 web 端走 reanimated 的 web 实现，效果跟 RN 端一致。
+下方渲染的是 `PulseDot.tsx` 与 `Pulse.tsx` 的 Web 路径：公共 hook 仍执行同一套归一化，平台解析选择 `usePulseDriver.web.ts`，由 CSS transition + timer 驱动；参数和 reduced-motion 语义与 native 一致。
 
 <LiveDemo>
   <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>

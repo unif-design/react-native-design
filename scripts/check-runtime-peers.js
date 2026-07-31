@@ -88,6 +88,7 @@ function auditRuntimePeers(summaries, details) {
   const knownExceptions = [];
   const errors = [];
   const seenProviders = new Set();
+  const acceptedProviders = new Set();
   for (const summary of summaries) {
     if (!RUNTIME_PACKAGES.has(summary.packageName)) continue;
     const detail = details.get(summary.hash);
@@ -95,6 +96,28 @@ function auditRuntimePeers(summaries, details) {
       errors.push(`${summary.hash}: 缺少 runtime peer 明细`);
       continue;
     }
+    if (
+      detail.hash !== summary.hash ||
+      detail.providerLocator !== summary.providerLocator ||
+      detail.packageName !== summary.packageName ||
+      detail.providerVersion !== summary.providerVersion
+    ) {
+      errors.push(`${summary.hash}: summary/detail 身份不一致`);
+      continue;
+    }
+    if (!REQUIRED_PROVIDERS.has(detail.providerLocator)) {
+      errors.push(
+        `${summary.hash}: 未获准的 runtime peer provider ${detail.providerLocator}`
+      );
+      continue;
+    }
+    if (seenProviders.has(detail.providerLocator)) {
+      errors.push(
+        `${summary.hash}: runtime peer provider ${detail.providerLocator} 重复`
+      );
+      continue;
+    }
+    seenProviders.add(detail.providerLocator);
     const knownRequest = detail.requests.filter(
       (request) => request.requester === KNOWN_REQUESTER
     );
@@ -118,10 +141,10 @@ function auditRuntimePeers(summaries, details) {
       continue;
     }
     knownExceptions.push(summary.hash);
-    seenProviders.add(detail.providerLocator);
+    acceptedProviders.add(detail.providerLocator);
   }
   for (const provider of REQUIRED_PROVIDERS) {
-    if (!seenProviders.has(provider)) {
+    if (!acceptedProviders.has(provider)) {
       errors.push(`缺少 ${provider} 的 RNRC 5/RNGH 3 审计项`);
     }
   }

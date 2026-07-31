@@ -40,13 +40,15 @@ iOS 另需在 `ios/` 执行 `bundle exec pod install`。完整步骤见[文档�
 
 ## 快速开始
 
-在 App 根挂一次 `ThemeProvider`,命令式 host(`ToastHost` / `ConfirmHost`)按需添加;`makeStyles` 必须写在模块顶层:
+App 根必须按 `GestureHandlerRootView → SafeAreaProvider → ThemeProvider → App 内容 + Hosts` 装配；`SafeAreaProvider` 从其 peer 包导入，设计系统 API 继续只从包根导入。`makeStyles` 必须写在模块顶层:
 
 ```tsx
 import {
-  ThemeProvider, ToastHost, Button, useThemedStyles, type ColorTokens,
+  ThemeProvider, ToastHost, ConfirmHost, Button, useThemedStyles, type ColorTokens,
 } from '@unif/react-native-design';
 import { View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // inline 会破坏 useThemedStyles 的样式缓存
 const makeStyles = (c: ColorTokens) => ({
@@ -63,10 +65,15 @@ function Demo() {
 }
 
 export const App = () => (
-  <ThemeProvider>
-    <Demo />
-    <ToastHost />
-  </ThemeProvider>
+  <GestureHandlerRootView style={{ flex: 1 }}>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <Demo />
+        <ToastHost />
+        <ConfirmHost />
+      </ThemeProvider>
+    </SafeAreaProvider>
+  </GestureHandlerRootView>
 );
 ```
 

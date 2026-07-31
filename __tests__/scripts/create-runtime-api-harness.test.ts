@@ -420,6 +420,28 @@ describe('runWithOwnedTempCleanup', () => {
     });
     expect(removed).toEqual([]);
   });
+
+  test('TMPDIR 含 example 时路径断言失败也会清理 owned parent', () => {
+    const parent = '/tmp/example/unif-runtime-api-red';
+    const removed: string[] = [];
+    let operationRan = false;
+    expect(() =>
+      runWithOwnedTempCleanup(
+        parent,
+        () => {
+          operationRan = true;
+        },
+        {
+          tempRoot: '/tmp/example',
+          remove(target) {
+            removed.push(target);
+          },
+        }
+      )
+    ).toThrow('example');
+    expect(operationRan).toBe(false);
+    expect(removed).toEqual([parent]);
+  });
 });
 
 describe('assertExactVersion — CLI / template 漂移', () => {
