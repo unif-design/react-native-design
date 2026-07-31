@@ -40,6 +40,9 @@ export declare function assertNoDestinationArgument(
 /** 拒绝任何落在 legacy `example/` 之内的路径。 */
 export declare function assertOutsideExample(targetPath: string): void;
 
+/** 验证 manual screen 消费 safe-area inset,同时让全屏 Hosts 留在内容容器外。 */
+export declare function assertRuntimeScreenSafeArea(): void;
+
 export declare function buildScaffoldArgs(
   templatePath: string,
   targetDirectory: string

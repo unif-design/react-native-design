@@ -71,6 +71,37 @@ function assertTemplateManifest(manifest) {
   );
 }
 
+/** manual screen 必须消费 inset,但全屏 overlay Hosts 不应被 safe-area 裁进内容区。 */
+function assertRuntimeScreenSafeArea() {
+  const source = fs.readFileSync(
+    path.join(REPO_ROOT, 'manual-tests/runtime-api/RuntimeApiScreen.tsx'),
+    'utf8'
+  );
+  const safeAreaImport =
+    /import\s*\{[^}]*\bSafeAreaProvider\b[^}]*\bSafeAreaView\b[^}]*\}\s*from 'react-native-safe-area-context';/u;
+  const safeAreaOpen = source.indexOf('<SafeAreaView style={styles.safeArea}>');
+  const scrollViewOpen = source.indexOf('<ScrollView');
+  const scrollViewClose = source.indexOf('</ScrollView>');
+  const safeAreaClose = source.indexOf('</SafeAreaView>');
+  const confirmHost = source.indexOf('<ConfirmHost />');
+  const toastHost = source.indexOf('<ToastHost');
+
+  if (
+    !safeAreaImport.test(source) ||
+    !source.includes('safeArea: { flex: 1 }') ||
+    safeAreaOpen < 0 ||
+    scrollViewOpen < safeAreaOpen ||
+    scrollViewClose < scrollViewOpen ||
+    safeAreaClose < scrollViewClose ||
+    confirmHost < safeAreaClose ||
+    toastHost < safeAreaClose
+  ) {
+    throw new Error(
+      'RuntimeApiScreen 必须用 SafeAreaView 包住 ScrollView 内容,并把 ConfirmHost / ToastHost 保持在其外。'
+    );
+  }
+}
+
 /** 在 yarn.lock 中定位 `<name>@npm:<version>` 条目块,返回其 checksum(无则 null)。 */
 function findLockChecksum(lockText, name, version) {
   const lines = lockText.split(/\r?\n/u);
@@ -508,6 +539,7 @@ AppRegistry.registerComponent(appName, () => RuntimeApiScreen);
 
 function main() {
   assertNoDestinationArgument(process.argv.slice(2));
+  assertRuntimeScreenSafeArea();
 
   const rootManifest = readJson(path.join(REPO_ROOT, 'package.json'));
   const lockText = fs.readFileSync(path.join(REPO_ROOT, 'yarn.lock'), 'utf8');
@@ -637,6 +669,7 @@ module.exports = {
   assertNoDestinationArgument,
   assertNativeTemplateSnapshot,
   assertOutsideExample,
+  assertRuntimeScreenSafeArea,
   assertTemplateManifest,
   buildHarnessManifest,
   buildNativeTemplateSnapshot,

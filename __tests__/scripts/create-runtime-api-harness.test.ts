@@ -2,6 +2,7 @@ import { describe, expect, test } from '@jest/globals';
 import {
   EXPECTED,
   assertExactVersion,
+  assertRuntimeScreenSafeArea,
   assertLockChecksums,
   assertNoDestinationArgument,
   assertOutsideExample,
@@ -564,5 +565,11 @@ describe('assertOutsideExample — 绝不碰 legacy example shell', () => {
 
   test('名字里带 example 但不是该目录的路径不误伤', () => {
     expect(() => assertOutsideExample('/tmp/examples-of-things')).not.toThrow();
+  });
+});
+
+describe('Runtime API screen safe-area contract', () => {
+  test('内容 ScrollView 消费 inset,全屏 Hosts 保持在 SafeAreaView 外', () => {
+    expect(() => assertRuntimeScreenSafeArea()).not.toThrow();
   });
 });
