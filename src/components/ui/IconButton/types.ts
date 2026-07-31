@@ -1,4 +1,4 @@
-import type { StyleProp, ViewStyle } from 'react-native';
+import type { AccessibilityState, StyleProp, ViewStyle } from 'react-native';
 import type { IconName } from '../Icon';
 import type { ButtonSize, ButtonVariant } from '../Button/types';
 
@@ -9,7 +9,7 @@ export type IconButtonProps = {
   /** 图标名 */
   icon: IconName;
   /** 点击;disabled 时不触发 */
-  onPress?: () => void;
+  onPress: () => void;
   /** 尺寸,默认 'md'(28 / 36 / 44 方形) */
   size?: ButtonSize;
   /** 视觉变体,默认 'ghost'(透明底,适合 header right-tray 场景)。
@@ -27,6 +27,8 @@ export type IconButtonProps = {
   accessibilityLabel: string;
   /** SR 朗读 label 后的行为说明 hint。仅在"行为不显然"时加。 */
   accessibilityHint?: string;
+  /** 额外 a11y 状态；disabled / busy 由组件根据 disabled / loading 统一上报。 */
+  accessibilityState?: Omit<AccessibilityState, 'disabled' | 'busy'>;
   /** 额外样式 */
   style?: StyleProp<ViewStyle>;
   /** E2E / 测试定位 */

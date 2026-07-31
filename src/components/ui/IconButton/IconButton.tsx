@@ -22,6 +22,7 @@ export function IconButton({
   loading,
   accessibilityLabel,
   accessibilityHint,
+  accessibilityState,
   style,
   testID,
 }: IconButtonProps): React.JSX.Element {
@@ -35,6 +36,7 @@ export function IconButton({
       disabled={disabled}
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
+      accessibilityState={accessibilityState}
       style={style}
       testID={testID}
     >

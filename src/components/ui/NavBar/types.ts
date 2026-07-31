@@ -2,23 +2,24 @@ import type { ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import type { IconName } from '../Icon';
 
-export type NavBarSlotConfig = {
+export type NavBarAction = {
   icon: IconName;
-  onPress?: () => void;
-  /** 屏幕阅读器读出的功能描述。强烈建议传 —— icon-only 按钮无文字,缺省时 SR 回退
-   *  读英文 icon 名(如 "menu")且 dev 下告警。请传人类可读短语(如「返回」「更多」)。 */
-  accessibilityLabel?: string;
+  onPress: () => void;
+  /** 屏幕阅读器读出的非空功能描述。 */
+  accessibilityLabel: string;
 };
+
+export type NavBarSlot = NavBarAction | ReactNode;
 
 export type NavBarProps = {
   /** 主标题 */
   title: string;
   /** 副标题（可选，主标题下方一行） */
   subtitle?: string;
-  /** 左侧槽位：传 NavBarSlotConfig 自动用 IconButton 渲染 / 传 ReactNode 自定义 */
-  left?: ReactNode | NavBarSlotConfig;
+  /** 左侧槽位：传 NavBarAction 自动用 IconButton 渲染 / 传 ReactNode 自定义 */
+  left?: NavBarSlot;
   /** 右侧槽位：同 left */
-  right?: ReactNode | NavBarSlotConfig;
+  right?: NavBarSlot;
   /**
    * 视觉变体，默认 'default'：
    * - `default`：白底 + hairline 底边

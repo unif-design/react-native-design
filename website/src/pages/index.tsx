@@ -137,8 +137,8 @@ const CODE_LINES: CodeLine[] = [
   <>{K('import')} <span className="tok-id">{'{ ThemeProvider, Button }'}</span></>,
   <>{'  '}{K('from')} {ST("'@unif/react-native-design'")}</>,
   <>{' '}</>,
-  <>{DIM('<')}{FN('ThemeProvider')} theme={'{'}{ST("'dark'")}{'}'}{DIM('>')}</>,
-  <>{'  '}{DIM('<')}{FN('Button')} variant={'{'}{ST("'primary'")}{'}'}{DIM('>')}提交{DIM('</')}{FN('Button')}{DIM('>')}</>,
+  <>{DIM('<')}{FN('ThemeProvider')} forceScheme={'{'}{ST("'dark'")}{'}'}{DIM('>')}</>,
+  <>{'  '}{DIM('<')}{FN('Button')} label={ST('"提交"')} variant={ST('"primary"')} onPress={'{'}FN('submit'){'}'} {DIM('/>')}</>,
   <>{DIM('</')}{FN('ThemeProvider')}{DIM('>')}</>,
 ];
 

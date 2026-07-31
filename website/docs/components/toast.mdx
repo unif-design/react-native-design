@@ -13,7 +13,7 @@ import { Button, toast, ToastHost } from '@unif/react-native-design';
 
 ## 实时预览
 
-下方在 Web 平台解析到 `ToastHost.web.tsx`：使用纯 React state、CSS transition 与 timer 驱动 fade + slide；native 才解析到 `ToastHost.tsx` 并使用 Reanimated 4。两端共享同一个 Toast Store 与 delivery identity 契约。点按钮触发。
+下方在 Web 平台解析到 `ToastHost.web.tsx`：使用纯 React state、CSS transition 与 timer 驱动 fade + slide；native 才解析到 `ToastHost.tsx` 并使用 Reanimated 4。两端共享同一个 Toast Store 与 delivery identity 契约。每个 Button 都带真实的 `onPress`，点击即可触发对应提示。
 
 <LiveDemo>
   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>

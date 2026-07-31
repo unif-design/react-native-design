@@ -26,6 +26,7 @@ export function Button({
   style,
   testID,
   accessibilityHint,
+  accessibilityState,
 }: ButtonProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
   return (
@@ -38,6 +39,7 @@ export function Button({
       loading={loading}
       accessibilityLabel={label}
       accessibilityHint={accessibilityHint}
+      accessibilityState={accessibilityState}
       style={style}
       testID={testID}
     >

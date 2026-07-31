@@ -6,6 +6,7 @@ description: "文本按钮 —— 7 variant(primary/secondary/ghost/neutral/outl
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
 import { Button } from '@unif/react-native-design';
+import { useState } from 'react';
 
 # Button 按钮
 
@@ -15,48 +16,57 @@ import { Button } from '@unif/react-native-design';
 
 下方渲染的就是 `src/components/ui/Button/Button.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
 
-<LiveDemo>
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+export const ButtonDemo = () => {
+  const [count, setCount] = useState(0);
+  const onPress = () => setCount((value) => value + 1);
+  return (
+    <LiveDemo>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span className="demo-label">Button · 变体</span>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-        <Button label="主按钮" variant="primary" />
-        <Button label="次按钮" variant="secondary" />
-        <Button label="ghost" variant="ghost" />
-        <Button label="中性" variant="neutral" />
-        <Button label="描边" variant="outline" />
-        <Button label="危险" variant="danger" />
-        <Button label="文字" variant="text" />
+        <Button label="主按钮" variant="primary" onPress={onPress} />
+        <Button label="次按钮" variant="secondary" onPress={onPress} />
+        <Button label="ghost" variant="ghost" onPress={onPress} />
+        <Button label="中性" variant="neutral" onPress={onPress} />
+        <Button label="描边" variant="outline" onPress={onPress} />
+        <Button label="危险" variant="danger" onPress={onPress} />
+        <Button label="文字" variant="text" onPress={onPress} />
       </div>
     </div>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span className="demo-label">Button · 尺寸</span>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-        <Button label="Small" size="sm" />
-        <Button label="Medium" size="md" />
-        <Button label="Large" size="lg" />
+        <Button label="Small" size="sm" onPress={onPress} />
+        <Button label="Medium" size="md" onPress={onPress} />
+        <Button label="Large" size="lg" onPress={onPress} />
       </div>
     </div>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span className="demo-label">状态</span>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-        <Button label="禁用" disabled />
-        <Button label="加载中" loading />
+        <Button label="禁用" disabled onPress={onPress} />
+        <Button label="加载中" loading onPress={onPress} />
       </div>
     </div>
-  </div>
-</LiveDemo>
+        <span className="demo-label">已触发 {count} 次</span>
+      </div>
+    </LiveDemo>
+  );
+};
+
+<ButtonDemo />
 
 ## 用法
 
 ```tsx
 import { Button } from '@unif/react-native-design';
 
-<Button label="确认" variant="primary" onPress={...} />
-<Button label="取消" variant="secondary" />
-<Button label="查看详情" variant="outline" />
-<Button label="重新发起" variant="text" size="sm" />
-<Button label="提交" variant="primary" block size="lg" />
+<Button label="确认" variant="primary" onPress={handleConfirm} />
+<Button label="取消" variant="secondary" onPress={handleCancel} />
+<Button label="查看详情" variant="outline" onPress={openDetails} />
+<Button label="重新发起" variant="text" size="sm" onPress={restart} />
+<Button label="提交" variant="primary" block size="lg" onPress={submit} />
 ```
 
 ## API
@@ -64,10 +74,10 @@ import { Button } from '@unif/react-native-design';
 | Prop | Type | 默认 | 说明 |
 |---|---|---|---|
 | `label` | `string` | — | 按钮文字(icon-only 场景请用 [IconButton](/docs/components/icon-button)) |
-| `onPress` | `() => void` | — | 点击回调;`disabled` / `loading` 时不触发 |
+| `onPress` | `() => void` | — | **必填**点击回调；`disabled` / `loading` 时组件移除有效 handler |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | 高度 28 / 36 / 44 |
 | `variant` | `'primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'danger' \| 'text'` | `'primary'` | 视觉变体 |
-| `block` | `boolean` | `false` | 撑满父容器宽度（`alignSelf: stretch + flexGrow: 1`） |
+| `block` | `boolean` | `false` | 仅撑满父容器交叉轴（`alignSelf: stretch`）；主轴尺寸由父容器或 `style` 决定 |
 | `disabled` | `boolean` | `false` | 禁用（opacity 0.5 + 不响应 onPress） |
 | `loading` | `boolean` | `false` | 加载态:用 `ActivityIndicator` 替代 label,自动 disabled |
 | `leftIcon` | `IconName` | — | 左侧图标,与文本同色同高 |
@@ -82,12 +92,12 @@ import { Button } from '@unif/react-native-design';
 
 - 默认 `accessibilityRole`：`'button'`（在 `ButtonBase` 中硬编码，`accessibilityRole = 'button'`）。
 - a11y props：`accessibilityLabel` 自动取自必填的 `label`（`<ButtonBase accessibilityLabel={label}>`），无需另传；`accessibilityHint` 可选，仅在「行为不显然」时补充（如「切换主题」）。
-- 状态语义：`accessibilityState.disabled` 取 `!isInteractive`，即 `disabled` **或** `loading` 任一为真时都会上报 disabled（`loading` 时 label 被 `ActivityIndicator` 替换）。
+- 状态语义：`disabled` **或** `loading` 任一为真时都会上报 `accessibilityState.disabled: true` 并移除有效 handler；loading 还上报 `busy: true`（此时 label 被 `ActivityIndicator` 替换）。调用方传入的状态不能覆盖这两个字段。
 
 ```tsx
 // label 即 a11y label;hint 仅在行为不显然时补
-<Button label="确认" variant="primary" onPress={...} />
-<Button label="切换" accessibilityHint="切换深浅主题" onPress={...} />
+<Button label="确认" variant="primary" onPress={handleConfirm} />
+<Button label="切换" accessibilityHint="切换深浅主题" onPress={toggleTheme} />
 ```
 
 ## 主题键（Tokens）

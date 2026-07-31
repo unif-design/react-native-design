@@ -40,7 +40,7 @@ export type {
 export { Logo } from './Logo';
 export type { LogoProps } from './Logo';
 export { NavBar } from './NavBar';
-export type { NavBarProps, NavBarSlotConfig } from './NavBar';
+export type { NavBarAction, NavBarProps, NavBarSlot } from './NavBar';
 export { PasswordInput } from './PasswordInput';
 export type { PasswordInputProps } from './PasswordInput';
 export { Pulse, PulseDot, usePulse } from './Pulse';

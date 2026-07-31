@@ -148,7 +148,7 @@ export function ConfirmHost(): React.JSX.Element | null {
                     testID="confirm-cancel"
                     label={display.options.cancelLabel ?? '取消'}
                     variant="secondary"
-                    block
+                    style={{ flex: 1 }}
                     onPress={handleCancel}
                   />
                 </View>
@@ -157,7 +157,7 @@ export function ConfirmHost(): React.JSX.Element | null {
                     testID="confirm-ok"
                     label={display.options.confirmLabel ?? '确认'}
                     variant={display.options.destructive ? 'danger' : 'primary'}
-                    block
+                    style={{ flex: 1 }}
                     onPress={handleConfirm}
                   />
                 </View>

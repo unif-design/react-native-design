@@ -1,9 +1,15 @@
-import type { NavBarSlotConfig } from './types';
+import type { NavBarAction } from './types';
 
 /**
- * Type guard：判断 left/right 是否为 NavBarSlotConfig 对象（含 icon 字段）。
- * 不是的话视为 ReactNode 自定义内容。
+ * Type guard：action 必须同时有 icon、可调用 handler 和非空可访问名称。
  */
-export function isSlot(v: unknown): v is NavBarSlotConfig {
-  return typeof v === 'object' && v !== null && 'icon' in v;
+export function isNavBarAction(v: unknown): v is NavBarAction {
+  if (typeof v !== 'object' || v === null) return false;
+  const slot = v as Record<string, unknown>;
+  return (
+    typeof slot.icon === 'string' &&
+    typeof slot.onPress === 'function' &&
+    typeof slot.accessibilityLabel === 'string' &&
+    slot.accessibilityLabel.trim().length > 0
+  );
 }

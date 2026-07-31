@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import {
   ActivityIndicator,
   type AccessibilityRole,
+  type AccessibilityState,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
@@ -20,7 +21,7 @@ import type {
 } from './types';
 
 export type ButtonBaseProps = {
-  onPress?: () => void;
+  onPress: () => void;
   size?: ButtonSize;
   variant?: ButtonVariant;
   disabled?: boolean;
@@ -32,6 +33,8 @@ export type ButtonBaseProps = {
   accessibilityRole?: AccessibilityRole;
   /** SR 朗读 label 后的行为说明 hint。仅在"行为不显然"时加。 */
   accessibilityHint?: string;
+  /** 调用方附加状态；disabled / busy 由内部状态机控制，不能被覆盖。 */
+  accessibilityState?: Omit<AccessibilityState, 'disabled' | 'busy'>;
   style?: StyleProp<ViewStyle>;
   testID?: string;
   /** 强制函数形态 — 消费者通过 ctx.sizing / ctx.palette 渲染内容,
@@ -53,6 +56,7 @@ export function ButtonBase({
   accessibilityLabel,
   accessibilityRole = 'button',
   accessibilityHint,
+  accessibilityState,
   style,
   testID,
   children,
@@ -64,7 +68,7 @@ export function ButtonBase({
   const palette = useMemo(() => paletteFor(variant, c), [variant, c]);
 
   const isText = variant === 'text';
-  const isInteractive = !disabled && !loading;
+  const unavailable = disabled === true || loading === true;
 
   // [M-7] 触控目标补偿:hitSlop 向外扩展命中区域到 fixed.hitTarget(44pt)。
   // 公式:vertical slop = max(0, (hitTarget - h) / 2);square 时同补 horizontal。
@@ -87,11 +91,15 @@ export function ButtonBase({
   return (
     <Pressable
       accessibilityRole={accessibilityRole}
-      accessibilityState={{ disabled: !isInteractive }}
+      accessibilityState={{
+        ...accessibilityState,
+        disabled: unavailable,
+        busy: loading === true,
+      }}
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
-      disabled={!isInteractive}
-      onPress={onPress}
+      disabled={unavailable}
+      onPress={unavailable ? undefined : onPress}
       hitSlop={hitSlop}
       testID={testID}
       style={({ pressed }) => [
@@ -106,13 +114,8 @@ export function ButtonBase({
           backgroundColor: palette.bg,
           borderColor: palette.border ?? 'transparent',
           borderWidth: palette.border ? 1 : 0,
-          opacity: disabled ? 0.5 : pressed ? pressedOpacity : 1,
+          opacity: unavailable ? 0.5 : pressed ? pressedOpacity : 1,
           alignSelf: block ? 'stretch' : 'flex-start',
-          // 非 block 用 undefined 而非硬编码 0:Yoga 的 resolveFlexGrow 里显式 flexGrow
-          // 优先级高于 flex 简写,写死 0 会让调用方 style={{ flex: 1 }} 失效(按钮撑不开 /
-          // 并排塌成 padding 宽裁掉 label)。undefined → 仍走 Yoga 默认 0(普通态零变化),
-          // 但把 flex / flexGrow 的控制权交还给末尾 merge 的 style。撑满优先仍推荐用 block。
-          flexGrow: block ? 1 : undefined,
           gap: sizing.gap,
         },
         style,

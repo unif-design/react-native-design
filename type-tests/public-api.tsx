@@ -9,9 +9,12 @@
  * 那样的 fixture 通过了也证明不了什么。
  */
 import { createRef } from 'react';
-import { Pressable } from 'react-native';
+import { Pressable, Text } from 'react-native';
 import {
+  Button,
+  IconButton,
   Input,
+  NavBar,
   PasswordInput,
   Search,
   Textarea,
@@ -19,8 +22,24 @@ import {
 } from '../src';
 
 const setText = (_value: string) => {};
+const noop = () => {};
 const inputRef = createRef<TextFieldHandle>();
 const tooShortContainer = { height: 20 };
+
+// --- Button / IconButton / NavBar:所有操作必须显式可达 --------------------
+
+// @ts-expect-error Button 始终是操作
+<Button label="保存" />;
+// @ts-expect-error IconButton 始终是操作
+<IconButton icon="close" accessibilityLabel="关闭" />;
+// @ts-expect-error NavBar action object 必须有 handler 和名称
+<NavBar title="标题" left={{ icon: 'arrow-left' }} />;
+
+<NavBar
+  title="标题"
+  left={{ icon: 'arrow-left', onPress: noop, accessibilityLabel: '返回' }}
+/>;
+<NavBar title="标题" right={<Text>只读</Text>} />;
 
 // --- Input / Textarea:受控 vs 非受控 -------------------------------------
 
