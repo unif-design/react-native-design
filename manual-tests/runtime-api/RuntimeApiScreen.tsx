@@ -4,10 +4,14 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   Button,
   ConfirmHost,
+  Pulse,
+  PulseDot,
+  Skeleton,
   ThemeProvider,
   ToastHost,
   confirm,
   toast,
+  usePrefersReducedMotion,
 } from '@unif/react-native-design';
 
 /**
@@ -103,6 +107,8 @@ export function RuntimeApiScreen(): React.JSX.Element {
               value={toastHostOn ? `on (#${toastHostKey})` : 'off'}
             />
           </Section>
+
+          <PulseSection />
         </ScrollView>
 
         {/* ConfirmHost 全屏只挂一次 —— 多挂的实例会惰性,不会重复渲染。 */}
@@ -112,6 +118,71 @@ export function RuntimeApiScreen(): React.JSX.Element {
         ) : null}
       </ThemeProvider>
     </GestureHandlerRootView>
+  );
+}
+
+/**
+ * Pulse:非法参数、反向脉冲、两端相等与 reduced motion。
+ *
+ * 人工验收要点 —— 非法 duration 必须回退成 700ms 的正常脉冲(并在 Metro 日志里
+ * 看到一条 dev warn),`from === to` 与系统开启减弱动效时必须**完全静止**。
+ */
+function PulseSection(): React.JSX.Element {
+  const reduced = usePrefersReducedMotion();
+  return (
+    <Section title="Pulse">
+      <Result label="系统 reduced motion" value={String(reduced)} />
+      <Row label="默认(0.6↔1, 700ms)">
+        <Pulse>
+          <PulseSwatch />
+        </Pulse>
+      </Row>
+      <Row label="非法 duration=0(应回退 700ms + dev warn)">
+        <Pulse duration={0}>
+          <PulseSwatch />
+        </Pulse>
+      </Row>
+      <Row label="非法 delay=-1(应回退 0 + dev warn)">
+        <Pulse delay={-1}>
+          <PulseSwatch />
+        </Pulse>
+      </Row>
+      <Row label="反向 from=0.9 → to=0.2(合法,原样保留)">
+        <Pulse from={0.9} to={0.2}>
+          <PulseSwatch />
+        </Pulse>
+      </Row>
+      <Row label="两端相等 from=to=0.4(应完全静止)">
+        <Pulse from={0.4} to={0.4}>
+          <PulseSwatch />
+        </Pulse>
+      </Row>
+      <Row label="PulseDot(默认 from=0.5)">
+        <PulseDot size={12} />
+      </Row>
+      <Row label="Skeleton(默认 from=0.5)">
+        <Skeleton shape="line" width={120} />
+      </Row>
+    </Section>
+  );
+}
+
+function PulseSwatch(): React.JSX.Element {
+  return <View style={styles.swatch} />;
+}
+
+function Row({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}): React.JSX.Element {
+  return (
+    <View style={styles.row}>
+      <Text style={styles.result}>{label}</Text>
+      {children}
+    </View>
   );
 }
 
@@ -151,5 +222,12 @@ const styles = StyleSheet.create({
   content: { padding: 16, gap: 24 },
   section: { gap: 12 },
   sectionTitle: { fontSize: 18, fontWeight: '600' },
-  result: { fontSize: 14 },
+  result: { fontSize: 14, flexShrink: 1 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  swatch: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    backgroundColor: '#F97316',
+  },
 });

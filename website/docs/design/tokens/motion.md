@@ -21,6 +21,8 @@ description: "Unif Design 的 motion 时长 token（fast/base/slow/pulse）与�
 
 :::tip pulse 是全周期,usePulse 取半周期
 `motion.pulse`(1600ms)是脉冲一来一回的**全周期**。`usePulse` / `<Pulse>` 的 `duration` 是**半周期**(一个方向),所以脉冲场景常传 `motion.pulse / 2`(800ms)。
+
+`duration` 合法域 `[1, 2³¹)`、`delay` 合法域 `[0, 2³¹)`、`from` / `to` 合法域 `[0, 1]`。非法值**整体回退默认值 + dev warn**,不做 clamp 也不取整;`from === to` 为静态。详见 [Pulse → 参数校验规则](/docs/components/pulse#参数校验规则)。
 :::
 
 ## Reduced motion / `usePrefersReducedMotion` {#reduced-motion}
