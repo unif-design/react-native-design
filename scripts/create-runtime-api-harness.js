@@ -71,14 +71,17 @@ function assertTemplateManifest(manifest) {
   );
 }
 
-/** manual screen 必须消费 inset,但全屏 overlay Hosts 不应被 safe-area 裁进内容区。 */
-function assertRuntimeScreenSafeArea() {
-  const source = fs.readFileSync(
-    path.join(REPO_ROOT, 'manual-tests/runtime-api/RuntimeApiScreen.tsx'),
-    'utf8'
-  );
+/**
+ * manual screen 的 safe-area 结构契约。source 参数让此规则可脱离文件系统单测,
+ * 避免只因 import 存在就误判 Provider 真的包住了内容和全屏 Hosts。
+ */
+function assertRuntimeScreenSafeAreaSource(source) {
   const safeAreaImport =
     /import\s*\{[^}]*\bSafeAreaProvider\b[^}]*\bSafeAreaView\b[^}]*\}\s*from 'react-native-safe-area-context';/u;
+  const providerOpen = source.indexOf('<SafeAreaProvider>');
+  const providerClose = source.indexOf('</SafeAreaProvider>');
+  const themeOpen = source.indexOf('<ThemeProvider>');
+  const themeClose = source.indexOf('</ThemeProvider>');
   const safeAreaOpen = source.indexOf('<SafeAreaView style={styles.safeArea}>');
   const scrollViewOpen = source.indexOf('<ScrollView');
   const scrollViewClose = source.indexOf('</ScrollView>');
@@ -89,17 +92,35 @@ function assertRuntimeScreenSafeArea() {
   if (
     !safeAreaImport.test(source) ||
     !source.includes('safeArea: { flex: 1 }') ||
+    providerOpen < 0 ||
+    providerClose < providerOpen ||
+    themeOpen < providerOpen ||
+    themeClose < themeOpen ||
+    themeClose > providerClose ||
     safeAreaOpen < 0 ||
+    safeAreaOpen < themeOpen ||
     scrollViewOpen < safeAreaOpen ||
     scrollViewClose < scrollViewOpen ||
     safeAreaClose < scrollViewClose ||
+    safeAreaClose > themeClose ||
     confirmHost < safeAreaClose ||
-    toastHost < safeAreaClose
+    confirmHost > themeClose ||
+    toastHost < safeAreaClose ||
+    toastHost > themeClose
   ) {
     throw new Error(
-      'RuntimeApiScreen 必须用 SafeAreaView 包住 ScrollView 内容,并把 ConfirmHost / ToastHost 保持在其外。'
+      'RuntimeApiScreen 必须由 SafeAreaProvider 包住 Theme、SafeAreaView 内容和 ConfirmHost / ToastHost;SafeAreaView 只包住 ScrollView。'
     );
   }
+}
+
+/** manual screen 必须消费 inset,但全屏 overlay Hosts 不应被 safe-area 裁进内容区。 */
+function assertRuntimeScreenSafeArea() {
+  const source = fs.readFileSync(
+    path.join(REPO_ROOT, 'manual-tests/runtime-api/RuntimeApiScreen.tsx'),
+    'utf8'
+  );
+  assertRuntimeScreenSafeAreaSource(source);
 }
 
 /** 在 yarn.lock 中定位 `<name>@npm:<version>` 条目块,返回其 checksum(无则 null)。 */
@@ -670,6 +691,7 @@ module.exports = {
   assertNativeTemplateSnapshot,
   assertOutsideExample,
   assertRuntimeScreenSafeArea,
+  assertRuntimeScreenSafeAreaSource,
   assertTemplateManifest,
   buildHarnessManifest,
   buildNativeTemplateSnapshot,

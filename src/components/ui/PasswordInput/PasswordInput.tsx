@@ -1,81 +1,79 @@
-import React, { forwardRef, useState } from 'react';
-import { Pressable } from 'react-native-gesture-handler';
-import { Icon } from '../Icon';
+import React, { forwardRef, useEffect, useState } from 'react';
 import { Input } from '../Input';
-import { control, fixed, r, useColors } from '../../../theme';
-import { childTestID } from '../../../utils/testID';
-import { styles } from './styles';
-import type { TextInputRef } from '../TextField/TextFieldBase';
+import type { TextFieldHandle, TextFieldSlot } from '../TextField/types';
+import { createLogger } from '../../../utils/logger';
 import type { PasswordInputProps } from './types';
 
-/**
- * 密码 Input —— Input + leading lock + trailing eye 切换明文 / 密文。
- *
- * [L-32] 增强:
- * - forwardRef<TextInput> —— 业务表单 focus() 聚焦
- * - inputProps 类型改为 Omit<TextInputProps,'secureTextEntry'>
- * - 补 textContentType='password' / autoComplete='current-password' / autoCapitalize='none' 默认值
- * - 暴露 error / disabled 透传给底层 Input
- *
- * showPw 内部 useState,caller 只关心 value/onChangeText。
- * a11y:label 已表达"显示/隐藏密码"意图,不再加 accessibilityHint(避免 SR 朗读 over-hint)。
- */
-export const PasswordInput = forwardRef<TextInputRef, PasswordInputProps>(
-  function PasswordInput(
-    {
-      value,
-      onChangeText,
-      placeholder = '请输入密码',
-      testID,
-      error,
-      disabled,
-      inputProps,
-    },
-    ref
-  ): React.JSX.Element {
-    const c = useColors();
-    const [showPw, setShowPw] = useState(false);
+const log = createLogger('PasswordInput');
+
+/** 密码输入:只切换 secureTextEntry,不改变调用方持有的受控文本或焦点。 */
+export const PasswordInput = forwardRef<TextFieldHandle, PasswordInputProps>(
+  function PasswordInput(props, ref): React.JSX.Element {
+    const {
+      textContentType: rawTextContentType,
+      autoComplete: rawAutoComplete,
+      autoCapitalize: rawAutoCapitalize,
+      value: rawValue,
+      onChangeText: rawOnChangeText,
+      disabled: rawDisabled,
+      editable: rawEditable,
+      placeholder: rawPlaceholder,
+      defaultValue: _defaultValue,
+      inputProps: _inputProps,
+      secureTextEntry: _secureTextEntry,
+      leading: _leading,
+      trailing: _trailing,
+      ...rest
+    } = props as PasswordInputProps & Record<string, unknown>;
+    const value = typeof rawValue === 'string' ? rawValue : '';
+    const onChangeText =
+      typeof rawOnChangeText === 'function'
+        ? (rawOnChangeText as (next: string) => void)
+        : undefined;
+    const disabled = rawDisabled === true;
+    const editable = rawEditable === false ? false : undefined;
+    const placeholder =
+      typeof rawPlaceholder === 'string' ? rawPlaceholder : '请输入密码';
+    const removedNativeAliasKey = Object.entries({
+      defaultValue: _defaultValue,
+      inputProps: _inputProps,
+      secureTextEntry: _secureTextEntry,
+      leading: _leading,
+      trailing: _trailing,
+    })
+      .filter(([, entry]) => entry !== undefined)
+      .map(([name]) => name)
+      .join(',');
+    useEffect(() => {
+      if (removedNativeAliasKey.length > 0) {
+        log.warn(`已忽略 PasswordInput 自管 props(${removedNativeAliasKey})。`);
+      }
+    }, [removedNativeAliasKey]);
+    const [showPassword, setShowPassword] = useState(false);
+    const effectiveEditable = disabled !== true && editable !== false;
+    const trailing: TextFieldSlot = {
+      kind: 'action',
+      icon: showPassword ? 'eye' : 'eye-off',
+      onPress: () => setShowPassword((visible) => !visible),
+      accessibilityLabel: showPassword ? '隐藏密码' : '显示密码',
+      disabled: !effectiveEditable,
+    };
 
     return (
       <Input
         ref={ref}
-        testID={testID}
+        {...(rest as PasswordInputProps)}
         value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        error={error}
+        onChangeText={onChangeText as (next: string) => void}
         disabled={disabled}
-        // [L-32] 补 textContentType / autoComplete / autoCapitalize 默认值 —— 提升密码自动填充体验
-        textContentType="password"
-        autoComplete="current-password"
-        autoCapitalize="none"
-        {...inputProps}
-        // secureTextEntry 在 inputProps spread 之后覆盖,确保组件自管不被 caller 干扰
-        secureTextEntry={!showPw}
-        leading={<Icon name="lock" size={r(18)} color={c.iconFaint40} />}
-        trailing={
-          <Pressable
-            testID={childTestID(testID, 'toggle')}
-            style={styles.eyeBtn}
-            onPress={() => setShowPw((v) => !v)}
-            accessibilityRole="button"
-            accessibilityLabel={showPw ? '隐藏密码' : '显示密码'}
-            // [M-7] eye icon r(16)≈16pt;Input 高 control.md≈36pt 限制垂直扩展
-            // vertical 走 (44-control.md)/2≈4;horizontal 走 (44-16)/2=14
-            hitSlop={{
-              top: Math.round((fixed.hitTarget - control.md) / 2),
-              bottom: Math.round((fixed.hitTarget - control.md) / 2),
-              left: Math.round((fixed.hitTarget - r(16)) / 2),
-              right: Math.round((fixed.hitTarget - r(16)) / 2),
-            }}
-          >
-            <Icon
-              name={showPw ? 'eye' : 'eye-off'}
-              size={r(16)}
-              color={c.iconFaint40}
-            />
-          </Pressable>
-        }
+        editable={editable}
+        placeholder={placeholder}
+        textContentType={rawTextContentType ?? 'password'}
+        autoComplete={rawAutoComplete ?? 'current-password'}
+        autoCapitalize={rawAutoCapitalize ?? 'none'}
+        secureTextEntry={!showPassword}
+        leading={{ kind: 'icon', icon: 'lock', size: 18 }}
+        trailing={trailing}
       />
     );
   }

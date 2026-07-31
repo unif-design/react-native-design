@@ -43,6 +43,9 @@ export declare function assertOutsideExample(targetPath: string): void;
 /** 验证 manual screen 消费 safe-area inset,同时让全屏 Hosts 留在内容容器外。 */
 export declare function assertRuntimeScreenSafeArea(): void;
 
+/** source-injectable pure seam;验证 Provider 包住 Theme / 内容 / 全屏 Hosts 的结构。 */
+export declare function assertRuntimeScreenSafeAreaSource(source: string): void;
+
 export declare function buildScaffoldArgs(
   templatePath: string,
   targetDirectory: string

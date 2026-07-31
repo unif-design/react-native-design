@@ -105,7 +105,10 @@ export type SanitizedContainerStyle = {
 export function sanitizeTextFieldContainerStyle(
   style: StyleProp<ViewStyle> | undefined
 ): SanitizedContainerStyle {
-  const flattened: Record<string, unknown> = StyleSheet.flatten(style) ?? {};
+  const flattened = (StyleSheet.flatten(style) ?? {}) as Record<
+    string,
+    unknown
+  >;
   const reserved: readonly string[] = RESERVED_CONTAINER_KEYS;
   const sanitized: Record<string, unknown> = {};
   const diagnostics: string[] = [];

@@ -48,6 +48,23 @@ export const makeStyles = (c: ColorTokens) =>
     inputMultiline: {
       textAlignVertical: 'top' as const,
     },
+    slotDisplay: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: 18,
+      minHeight: 18,
+    },
+    slotText: {
+      color: c.foregroundMuted,
+      fontSize: t.sm,
+    },
+    // 固定命中框不走 r()/fontScale:它是手指可达性约束,不是视觉 token。
+    actionFrame: {
+      width: 44,
+      height: 44,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     errorMsg: {
       fontSize: t.micro,
       color: c.error,
@@ -57,5 +74,8 @@ export const makeStyles = (c: ColorTokens) =>
     },
     containerDisabled: {
       opacity: 0.5,
+    },
+    rootCentered: {
+      justifyContent: 'center',
     },
   });

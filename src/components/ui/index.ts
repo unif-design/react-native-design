@@ -31,7 +31,12 @@ export type { IconName, IconProps } from './Icon';
 export { IconButton } from './IconButton';
 export type { IconButtonProps } from './IconButton';
 export { Input } from './Input';
-export type { InputProps } from './Input';
+export type {
+  InputProps,
+  TextFieldContainerStyle,
+  TextFieldHandle,
+  TextFieldSlot,
+} from './Input';
 export { Logo } from './Logo';
 export type { LogoProps } from './Logo';
 export { NavBar } from './NavBar';

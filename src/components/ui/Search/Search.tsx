@@ -1,65 +1,135 @@
-import React, { forwardRef } from 'react';
-import { Pressable } from 'react-native-gesture-handler';
-
-import { control, fixed, r, useColors } from '../../../theme';
-import { childTestID } from '../../../utils/testID';
-import { Icon } from '../Icon';
-import { Input } from '../Input';
-import type { TextInputRef } from '../TextField/TextFieldBase';
+import React, { forwardRef, useEffect } from 'react';
+import { control, fixed } from '../../../theme';
+import { createLogger } from '../../../utils/logger';
+import { TextFieldBase } from '../TextField/TextFieldBase';
+import type {
+  TextFieldBaseProps,
+  TextFieldHandle,
+  TextFieldSlot,
+} from '../TextField/types';
+import { useTextFieldValue } from '../TextField/useTextFieldValue';
 import type { SearchProps } from './types';
 
+const log = createLogger('Search');
+
 /**
- * 搜索输入框 —— `<Input>` 的预设：前置搜索图标、清除按钮、
- * 高 control.md、键盘 return 键为「搜索」。
- *
- * Ref 透传到 Input 内部 TextInput，业务可调 `searchRef.current?.focus()`。
+ * 搜索输入框:值状态只在本层 controller 持有一次,下层 base 始终以受控形状渲染。
  */
-export const Search = forwardRef<TextInputRef, SearchProps>(function Search(
-  { onSubmit, placeholder = '搜索…', value, onChangeText, testID, ...rest },
-  ref
-): React.JSX.Element {
-  const c = useColors();
-  const filled = typeof value === 'string' && value.length > 0;
-  return (
-    <Input
-      ref={ref}
-      {...rest}
-      value={value}
-      onChangeText={onChangeText}
-      placeholder={placeholder}
-      // [L-81] 高度裸 36 → control.md(r(36),随设备缩放)
-      height={control.md}
-      returnKeyType="search"
-      accessibilityRole="search"
-      testID={testID}
-      onSubmitEditing={(e) => {
-        // [M-9] 改读 e.nativeEvent.text —— 不再依赖受控 value,非受控场景也能触发
-        const text = e.nativeEvent.text;
-        onSubmit?.(text);
-      }}
-      leading={<Icon name="search" size={r(18)} color={c.foregroundSubtle} />}
-      trailing={
-        filled ? (
-          <Pressable
-            onPress={() => onChangeText?.('')}
-            // [M-7] 清除按钮 icon r(14)≈14pt;Input 高 control.md≈36pt 限制垂直扩展
-            // horizontal 走 (44-14)/2=15;vertical 走 (44-control.md)/2≈4
-            hitSlop={{
-              top: Math.round((fixed.hitTarget - control.md) / 2),
-              bottom: Math.round((fixed.hitTarget - control.md) / 2),
-              left: Math.round((fixed.hitTarget - r(14)) / 2),
-              right: Math.round((fixed.hitTarget - r(14)) / 2),
-            }}
-            accessibilityRole="button"
-            accessibilityLabel="清除"
-            testID={childTestID(testID, 'clear')}
-          >
-            <Icon name="close" size={r(14)} color={c.foregroundSubtle} />
-          </Pressable>
-        ) : null
+export const Search = forwardRef<TextFieldHandle, SearchProps>(
+  function Search(props, ref): React.JSX.Element {
+    const {
+      value: rawValue,
+      defaultValue: rawDefaultValue,
+      onChangeText: rawOnChangeText,
+      onSubmit: rawOnSubmit,
+      onSubmitEditing: rawOnSubmitEditing,
+      disabled: rawDisabled,
+      editable: rawEditable,
+      placeholder: rawPlaceholder,
+      leading: _leading,
+      trailing: _trailing,
+      height: _height,
+      returnKeyType: _returnKeyType,
+      accessibilityRole: _accessibilityRole,
+      role: _role,
+      clearButtonMode: _clearButtonMode,
+      enterKeyHint: _enterKeyHint,
+      ...rest
+    } = props as SearchProps & Record<string, unknown>;
+    const value = typeof rawValue === 'string' ? rawValue : undefined;
+    const defaultValue =
+      typeof rawDefaultValue === 'string' ? rawDefaultValue : undefined;
+    const onChangeText =
+      typeof rawOnChangeText === 'function'
+        ? (rawOnChangeText as (next: string) => void)
+        : undefined;
+    const onSubmit =
+      typeof rawOnSubmit === 'function'
+        ? (rawOnSubmit as (next: string) => void)
+        : undefined;
+    const onSubmitEditing =
+      typeof rawOnSubmitEditing === 'function'
+        ? (rawOnSubmitEditing as NonNullable<SearchProps['onSubmitEditing']>)
+        : undefined;
+    const disabled = rawDisabled === true;
+    const editable = rawEditable === false ? false : undefined;
+    const placeholder =
+      typeof rawPlaceholder === 'string' ? rawPlaceholder : '搜索…';
+    const allowedNativeProps = rest as Omit<
+      TextFieldBaseProps,
+      | 'value'
+      | 'defaultValue'
+      | 'onChangeText'
+      | 'multiline'
+      | 'leading'
+      | 'trailing'
+      | 'height'
+      | 'visibleHeight'
+      | 'inputFrameHeight'
+      | 'returnKeyType'
+      | 'accessibilityRole'
+      | 'onSubmitEditing'
+      | 'disabled'
+      | 'editable'
+      | 'placeholder'
+    >;
+    const removedNativeAliasKey = Object.entries({
+      leading: _leading,
+      trailing: _trailing,
+      height: _height,
+      returnKeyType: _returnKeyType,
+      accessibilityRole: _accessibilityRole,
+      role: _role,
+      clearButtonMode: _clearButtonMode,
+      enterKeyHint: _enterKeyHint,
+    })
+      .filter(([, entry]) => entry !== undefined)
+      .map(([name]) => name)
+      .join(',');
+    useEffect(() => {
+      if (removedNativeAliasKey.length > 0) {
+        log.warn(`已忽略 Search 自管 props(${removedNativeAliasKey})。`);
       }
-    />
-  );
-});
+    }, [removedNativeAliasKey]);
+    const controller = useTextFieldValue(
+      { value, defaultValue, onChangeText },
+      'Search'
+    );
+    const effectiveEditable = disabled !== true && editable !== false;
+    const trailing: TextFieldSlot | undefined =
+      controller.value.length > 0 && effectiveEditable && controller.canUpdate
+        ? {
+            kind: 'action',
+            icon: 'close',
+            onPress: () => controller.onChangeText(''),
+            accessibilityLabel: '清除搜索内容',
+          }
+        : undefined;
+
+    return (
+      <TextFieldBase
+        ref={ref}
+        {...allowedNativeProps}
+        multiline={false}
+        value={controller.value}
+        onChangeText={controller.onChangeText}
+        disabled={disabled}
+        editable={editable}
+        placeholder={placeholder}
+        height={fixed.hitTarget}
+        visibleHeight={control.md}
+        inputFrameHeight={fixed.hitTarget}
+        returnKeyType="search"
+        accessibilityRole="search"
+        onSubmitEditing={(event) => {
+          onSubmitEditing?.(event);
+          onSubmit?.(controller.value);
+        }}
+        leading={{ kind: 'icon', icon: 'search', size: 18 }}
+        trailing={trailing}
+      />
+    );
+  }
+);
 
 Search.displayName = 'Search';

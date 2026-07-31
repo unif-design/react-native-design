@@ -2,6 +2,7 @@ import { describe, expect, test } from '@jest/globals';
 import {
   EXPECTED,
   assertExactVersion,
+  assertRuntimeScreenSafeAreaSource,
   assertRuntimeScreenSafeArea,
   assertLockChecksums,
   assertNoDestinationArgument,
@@ -571,5 +572,50 @@ describe('assertOutsideExample — 绝不碰 legacy example shell', () => {
 describe('Runtime API screen safe-area contract', () => {
   test('内容 ScrollView 消费 inset,全屏 Hosts 保持在 SafeAreaView 外', () => {
     expect(() => assertRuntimeScreenSafeArea()).not.toThrow();
+  });
+
+  const source = `
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+
+export function RuntimeApiScreen() {
+  return (
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <SafeAreaView style={styles.safeArea}>
+          <ScrollView />
+        </SafeAreaView>
+        <ConfirmHost />
+        <ToastHost />
+      </ThemeProvider>
+    </SafeAreaProvider>
+  );
+}
+
+const styles = StyleSheet.create({
+  safeArea: { flex: 1 },
+});
+`;
+
+  test('即使仍保留 SafeAreaProvider import,删除 Provider JSX 时拒绝', () => {
+    const withoutProvider = source.replace('<SafeAreaProvider>', '');
+    expect(() => assertRuntimeScreenSafeAreaSource(withoutProvider)).toThrow(
+      'SafeAreaProvider'
+    );
+  });
+
+  test('SafeAreaProvider 未包住 Theme 和 Hosts 时拒绝', () => {
+    const providerOnlyWrapsContent = source
+      .replace(
+        '<SafeAreaProvider>\n      <ThemeProvider>',
+        '<ThemeProvider>\n      <SafeAreaProvider>'
+      )
+      .replace(
+        '</SafeAreaView>\n        <ConfirmHost />',
+        '</SafeAreaView>\n      </SafeAreaProvider>\n        <ConfirmHost />'
+      )
+      .replace('</ThemeProvider>\n    </SafeAreaProvider>', '</ThemeProvider>');
+    expect(() =>
+      assertRuntimeScreenSafeAreaSource(providerOnlyWrapsContent)
+    ).toThrow('SafeAreaProvider');
   });
 });

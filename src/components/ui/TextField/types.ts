@@ -97,28 +97,22 @@ export type RemovedTextInputProps =
   | 'clearTextOnFocus';
 
 /**
- * internal — Input / Textarea 共享 props。
- *
- * 注意:本类型仍是**旧形状**,Task 2 才会切到上面的严格 slot / 值联合。
- * 此处保持不变,是为了让 Task 1 的纯状态机可以独立落地并通过 typecheck。
+ * internal — TextFieldBase 的严格形状。公开组件在此基础上固定单/多行布局,
+ * 因此不能由未类型化的 native prop 反向覆盖 value、slot 或命中框规则。
  */
-export type TextFieldBaseProps = TextInputProps & {
-  /** false(默认)= Input 行为(单行,固定 height);true = Textarea 行为 */
-  multiline?: boolean;
-  /** 单行 height(multiline=false 时生效),默认 control.lg */
-  height?: number;
-  /** 最小高度(multiline=true 时生效),默认 96 */
-  minHeight?: number;
-  /** 最大高度(multiline=true 时生效);超出 ScrollView 内滚 */
-  maxHeight?: number;
-  /** 左侧 slot */
-  leading?: import('react').ReactNode;
-  /** 右侧 slot */
-  trailing?: import('react').ReactNode;
-  /** 错误文案 */
-  error?: string;
-  /** 整体禁用 */
-  disabled?: boolean;
-  /** 外层 View 附加 style */
-  containerStyle?: StyleProp<ViewStyle>;
-};
+export type TextFieldBaseProps = Omit<TextInputProps, RemovedTextInputProps> &
+  TextFieldCommonProps &
+  TextFieldValueProps & {
+    /** internal:由 Input / Textarea / Search 固定,不作为公共可选入口。 */
+    multiline: boolean;
+    /** 单行 height(multiline=false 时生效),默认 control.lg */
+    height?: number;
+    /** 最小高度(multiline=true 时生效),默认 96 */
+    minHeight?: number;
+    /** 最大高度(multiline=true 时生效);超出 ScrollView 内滚 */
+    maxHeight?: number;
+    /** internal:Search 的 36pt 可视 surface;root 仍维持 44pt 命中框。 */
+    visibleHeight?: number;
+    /** internal:Search 让原生 TextInput 保留 44pt 交互 frame。 */
+    inputFrameHeight?: number;
+  };

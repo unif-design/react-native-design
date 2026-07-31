@@ -1,102 +1,32 @@
 ---
-sidebar_position: 2
-title: Search 搜索栏
-description: "Input 的搜索预设 —— 内置 leading search 图标 + 输入后 trailing 清除按钮、高 36、返回键为「搜索」；SearchProps = Omit<TextInputProps, style> + onSubmit / placeholder。"
+sidebar_position: 3
+title: Search 搜索框
+description: '严格受控/非受控 Search：单一 current value、库自管 action、44pt root 与 36pt surface。'
 ---
 
-import { LiveDemo } from '@site/src/components/LiveDemo';
-import { Search } from '@unif/react-native-design';
-import { Text, View } from 'react-native';
-import { useState } from 'react';
+# Search 搜索框
 
-# Search 搜索栏
+Search 自管搜索 icon、清除 action、36pt 可视 surface、44pt 根命中框、`returnKeyType="search"` 与 `accessibilityRole="search"`。这些入口不能由 caller 覆盖。
 
-`Input` 的搜索预设——左侧带 search 图标，输入后右侧出现 clear。常放在页面顶部或 NavBar 下方。
-
-## 实时预览
-
-下方渲染的就是 `src/components/ui/Search/Search.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
-
-export const ALL = ['东方便利店', '明珠超市', '优家便利', '悦家', '王经理', '李经理'];
-
-export const SearchDemo = () => {
-  const [q, setQ] = useState('');
-  const matches = q ? ALL.filter((n) => n.includes(q)) : ALL;
-  return (
-    <LiveDemo>
-      <Search value={q} onChangeText={setQ} placeholder="搜索客户" />
-      <View style={{ marginTop: 14, gap: 4 }}>
-        {matches.map((name) => (
-          <View key={name} style={{ paddingVertical: 10, paddingHorizontal: 12, backgroundColor: 'var(--ifm-background-surface-color)', borderRadius: 8 }}>
-            <Text style={{ fontSize: 14, color: 'var(--ifm-color-emphasis-800)' }}>{name}</Text>
-          </View>
-        ))}
-        {matches.length === 0 ? (
-          <Text style={{ fontSize: 13, color: 'var(--ifm-color-emphasis-600)', paddingVertical: 12 }}>没有匹配项</Text>
-        ) : null}
-      </View>
-    </LiveDemo>
-  );
-};
-
-<SearchDemo />
-
-## 视觉规范
-
-来源：`src/components/ui/Search/Search.tsx`（底层 Input/TextFieldBase styles）。
-
-| 元素 | 规则 |
-|---|---|
-| 高度 | 36px（`height={36}`，普通 Input 为 44） |
-| 圆角 | 8px（`radius.md`） |
-| 背景（idle） | `c.surfaceContainerHigh`（亮色 `#F0F0F0`）；focus 时白底 |
-| 左图标 | `search` · `size={18}` · `c.foregroundSubtle`（`#999999`） |
-| 占位 | 默认「搜索…」，可覆盖（如「搜索客户」） |
-| Clear | `value` 非空时出现的 `close` 图标 · `size={14}` · `c.foregroundSubtle`，点击清空 |
-
-## 用法
+## 值模式与提交
 
 ```tsx
-import { Search } from '@unif/react-native-design';
-
+<Search defaultValue="初始关键词" onSubmit={submit} />
 <Search
-  value={q}
-  onChangeText={setQ}
-  placeholder="搜索客户"
-  onSubmit={handleSearch}
+  value={query}
+  onChangeText={setQuery}
+  onSubmitEditing={recordNativeEvent}
+  onSubmit={submit}
+  accessibilityLabel="搜索客户"
 />
 ```
 
-## API
+首次 render 锁定 controlled/uncontrolled mode。非受控 `defaultValue` 仅初始化一次；受控调用必须同时给 `value` 与 `onChangeText`。Search 只维护一个 controller value：输入、清除和 `onSubmit` 都读取它。
 
-来源：`src/components/ui/Search/types.ts`、`Search.tsx`。
+按 return 时先执行 `onSubmitEditing(event)`，再执行 `onSubmit(currentValue)`。当前 value 非空、字段有效可编辑且 controller 能更新时才渲染清除 action；清除调用同一个 `onChangeText('')` 路径。
 
-`SearchProps` = **`Omit<TextInputProps, 'style'>`** + 这 2 个扩展。所有 RN [`TextInput` props](https://reactnative.dev/docs/textinput)（`value` / `onChangeText` / `accessibilityLabel` / `autoFocus` 等）都直接可用；`style` 被 omit。
+## 删除的入口与 ref
 
-| Prop | Type | 默认 | 说明 |
-|---|---|---|---|
-| `onSubmit` | `(value: string) => void` | — | 提交回调（按 return 键触发，回传当前 `value`） |
-| `placeholder` | `string?` | `'搜索…'` | 占位文字 |
+不支持 caller `leading`、`trailing`、`height`、`returnKeyType`、`accessibilityRole`、`role`、`clearButtonMode` 或 `enterKeyHint`。`disabled`/`editable={false}` 会移除清除 handler 并上报 disabled state。
 
-> 这些是 Search 在底层 `<Input>` 上写死的预设（**非可配置 prop**）：`leading` = `<Icon name="search" />`、`value` 非空时 `trailing` 出现清除按钮、`height={36}`、`returnKeyType="search"`、`accessibilityRole="search"`。支持 `ref`（`forwardRef` 透传到内部 `TextInput`，可 `searchRef.current?.focus()`）。
-
-## 无障碍（a11y）
-
-来源：`src/components/ui/Search/Search.tsx`、`types.ts`。
-
-- 默认 `accessibilityRole`：Search 在底层 [`Input`](./input)（最终为原生 `<TextInput>`）上显式设 `'search'`，并设 `returnKeyType="search"`（键盘 return 键显示「搜索」）。
-- a11y props：`SearchProps = Omit<TextInputProps, 'style'> & { onSubmit?, placeholder? }`，故 RN `TextInput` 的全部 a11y props（`accessibilityLabel`、`placeholder` 等）都透传到底层输入框。朗读文案优先来自 `accessibilityLabel`，缺省时由 `placeholder`（默认「搜索…」）/ `value` 提供。
-- 清除按钮：`value` 非空时出现的 clear `<Pressable>` 硬编码 `accessibilityRole="button"` + `accessibilityLabel="清除"`，点击清空输入。
-
-```tsx
-// placeholder 已能表意；如需更明确朗读可显式传 accessibilityLabel
-<Search value={q} onChangeText={setQ} placeholder="搜索客户" accessibilityLabel="搜索客户" />
-```
-
-## 与 Input 的区别
-
-`Search` 是 `Input` 的常用预设（这些都是 Search 内部写死、非 Input 的可配置 prop —— Input 本身**没有** `leadingIcon` / `clearable` 这类 prop，需自行组合 `leading` / `trailing`）：
-- 内置 `leading` 为 `<Icon name="search" />`
-- `value` 非空时内置 `trailing` 清除按钮
-- 高度 36px（Input 默认 44px）
-- 提交回调 `onSubmit`，`returnKeyType="search"`、`accessibilityRole="search"`
+ref 是 `TextFieldHandle`，只含 `focus()` / `blur()`；没有原生 `clear()`。无可见 label 时提供 `accessibilityLabel`。

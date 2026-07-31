@@ -5,13 +5,18 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import {
   Button,
   ConfirmHost,
+  Input,
+  PasswordInput,
   Pulse,
   PulseDot,
+  Search,
   Skeleton,
+  Textarea,
   ThemeProvider,
   ToastHost,
   confirm,
   toast,
+  useColors,
   usePrefersReducedMotion,
 } from '@unif/react-native-design';
 
@@ -30,6 +35,15 @@ export function RuntimeApiScreen(): React.JSX.Element {
   // ToastHost 可开关 —— 用来验证「Host 挂上前发布的消息会补投」以及「owner 重挂后重投递」
   const [toastHostOn, setToastHostOn] = useState(false);
   const [toastHostKey, setToastHostKey] = useState(0);
+  const [controlledInput, setControlledInput] = useState('受控初值');
+  const [modeSwitched, setModeSwitched] = useState(false);
+  const [error, setError] = useState('');
+  const [search, setSearch] = useState('查询');
+  const [searchResult, setSearchResult] = useState('—');
+  const colors = useColors();
+  const modeSwitchProps = modeSwitched
+    ? { value: '后来受控', onChangeText: setControlledInput }
+    : { defaultValue: '首次非受控' };
 
   const runConfirm = async () => {
     const result = await confirm({
@@ -108,6 +122,102 @@ export function RuntimeApiScreen(): React.JSX.Element {
                 <Result
                   label="ToastHost"
                   value={toastHostOn ? `on (#${toastHostKey})` : 'off'}
+                />
+              </Section>
+
+              <Section title="严格文本输入 / a11y">
+                <Text style={styles.result}>
+                  以下项目用于人工确认受控/非受控、44pt action frame、归一化和
+                  iOS 错误播报。
+                </Text>
+                <Input
+                  defaultValue="只在首次初始化"
+                  placeholder="非受控 defaultValue"
+                  accessibilityLabel="非受控初始化"
+                />
+                <Input
+                  value={controlledInput}
+                  onChangeText={setControlledInput}
+                  placeholder="受控编辑"
+                  accessibilityLabel="受控编辑"
+                />
+                <Button
+                  label="切换非受控为受控（应在 Metro 诊断且保持初始 mode）"
+                  variant="secondary"
+                  onPress={() => setModeSwitched(true)}
+                />
+                <Input
+                  {...modeSwitchProps}
+                  placeholder="mode lock"
+                  accessibilityLabel="mode lock"
+                />
+                <Input
+                  defaultValue=""
+                  disabled
+                  trailing={{
+                    kind: 'action',
+                    icon: 'close',
+                    onPress: () => setControlledInput('不应触发'),
+                    accessibilityLabel: '禁用操作',
+                  }}
+                  testID="disabled-slot"
+                />
+                <Input
+                  defaultValue=""
+                  trailing={{
+                    kind: 'action',
+                    icon: 'close',
+                    onPress: () => setControlledInput('action'),
+                    accessibilityLabel: '44pt 操作',
+                  }}
+                  testID="action-frame-44"
+                />
+                <Input
+                  defaultValue=""
+                  height={20}
+                  placeholder="非法 height=20（应回退 44）"
+                />
+                <Textarea
+                  defaultValue=""
+                  minHeight={20}
+                  maxHeight={10}
+                  placeholder="非法 min/max（应回退 96 / 无上限）"
+                />
+                <Input
+                  defaultValue=""
+                  placeholder="caller placeholder 色优先"
+                  placeholderTextColor={colors.primary}
+                />
+                <Button
+                  label="切换错误（iOS 后续变化才播报）"
+                  variant="secondary"
+                  onPress={() =>
+                    setError((current) => (current ? '' : '请输入有效内容'))
+                  }
+                />
+                <Input
+                  defaultValue=""
+                  error={error}
+                  placeholder="iOS 错误播报"
+                  accessibilityLabel="iOS 错误播报"
+                />
+                <Search
+                  value={search}
+                  onChangeText={setSearch}
+                  onSubmitEditing={() => setSearchResult(() => 'native')}
+                  onSubmit={(value) =>
+                    setSearchResult(
+                      (previous) => `${previous} → convenience: ${value}`
+                    )
+                  }
+                  accessibilityLabel="搜索"
+                />
+                <Result label="Search submit" value={searchResult} />
+                <PasswordInput
+                  value="password"
+                  onChangeText={() => {}}
+                  disabled
+                  accessibilityLabel="禁用密码操作"
                 />
               </Section>
 

@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: Input 输入框
-description: "单行文本输入框 —— 高 44（control.lg）、圆角 8、灰底无边框，4 视觉态 idle/focus/filled/error；InputProps = Omit<TextInputProps, style|multiline|numberOfLines> + leading/trailing/error/height/disabled/containerStyle。"
+description: '严格单行输入：受控/非受控 mode、44pt 最小 frame、可验证 slot 与窄 ref。'
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -10,133 +10,72 @@ import { useState } from 'react';
 
 # Input 输入框
 
-单行输入。**44px** 高（`control.lg`），**8px** 圆角（`radius.md`），灰底无边框，focus 时显橙色描边。
-
-> 多行内容请用 [`<Textarea />`](./textarea)。Input 不接受 `multiline` / `numberOfLines`。
-
-## 实时预览
-
-下方渲染的就是 `src/components/ui/Input/Input.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+单行文本输入。可视高度默认及最小命中框均为 44pt；多行使用 [Textarea](./textarea)。
 
 export const InputDemo = () => {
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('1581234');
-  const [pwd, setPwd] = useState('');
-  const phoneError = phone.length > 0 && phone.length < 11 ? '请输入 11 位手机号' : undefined;
+  const [value, setValue] = useState('');
   return (
     <LiveDemo>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <span className="demo-label">idle / filled / error / focus</span>
-        <Input value={name} onChangeText={setName} placeholder="客户名称" />
-        <Input value={phone} onChangeText={setPhone} placeholder="手机号" error={phoneError} />
-        <Input value={pwd} onChangeText={setPwd} placeholder="密码" secureTextEntry />
-      </div>
+      <Input
+        value={value}
+        onChangeText={setValue}
+        placeholder="客户名称"
+        accessibilityLabel="客户名称"
+      />
     </LiveDemo>
   );
 };
 
 <InputDemo />
 
-## 状态
+## 严格 value mode
 
-来源：`src/components/ui/TextField/styles.ts`（值取自 `src/theme/colors.ts`）。状态优先级 `error > focus > filled > idle`。
-
-| 状态 | 背景 | 边框 |
-|---|---|---|
-| `idle` | `c.surfaceContainerHigh`（亮色 `#F0F0F0`） | 透明 |
-| `focus` | `c.surface`（`#FFFFFF`） | 1px `c.primary`（`#EB6E00`） |
-| `filled` | `c.surface`（`#FFFFFF`） | 1px `c.outline`（`#EDEDED`） |
-| `error` | `c.surface`（`#FFFFFF`） | 1px `c.error`（`#F4511E`） |
-
-## 视觉规范
-
-来源：`src/components/ui/TextField/styles.ts`。
-
-| 元素 | 规则 |
-|---|---|
-| 高度 | 44px（`control.lg`，可用 `height` prop 覆盖） |
-| 圆角 | 8px（`radius.md`） |
-| 内边距 | `paddingHorizontal: space[5]`（12） |
-| 字号 | `t.body`（15），色 `c.foreground`（`#333333`） |
-| 占位文字 | `c.foregroundSubtle`（`#999999`） |
-| 错误文字 | 下方独立 `<Text>`，`t.micro`（11）/ `c.error` |
-| leading / trailing | 任意 `ReactNode`（自填 `<Icon>` 等）；间距 `gap: space[3]`（8） |
-| disabled | 容器 `opacity: 0.5` + `editable=false` |
-
-## 用法
+受控调用必须同时提供更新入口；非受控调用可选 `defaultValue`，且它只在首次 render 读取一次。不要在同一实例切换两种 mode。
 
 ```tsx
-import { Input, Icon } from '@unif/react-native-design';
-import { useColors } from '@unif/react-native-design';
+<Input value={name} onChangeText={setName} />
+<Input defaultValue="初始姓名" onChangeText={trackDraft} />
 
-<Input value={text} onChangeText={setText} placeholder="搜索…" />
+// 不支持：<Input value="locked" />
+// 不支持：同时给 value 和 defaultValue
+```
 
-{/* 密码：直接透传 RN TextInput 的 secureTextEntry */}
-<Input
-  value={pwd}
-  onChangeText={setPwd}
-  secureTextEntry
-  placeholder="密码"
-/>
+## slot、禁用与样式
 
-{/* 多行：用 Textarea，不要再用 Input multiline */}
-<Textarea
-  value={text}
-  onChangeText={setText}
-  minHeight={88}
-  placeholder="详细说明…"
-/>
-
-{/* 错误态 */}
-<Input
-  value={text}
-  onChangeText={setText}
-  error="格式不正确"
-/>
-
-{/* 自定义前后插槽 —— 颜色走 hook */}
-function MyForm() {
-  const c = useColors();
+```tsx
+function SearchConditionField() {
+  const colors = useColors();
   return (
     <Input
-      value={text}
-      onChangeText={setText}
-      leading={<Icon name="search" size={18} color={c.foregroundSubtle} />}
-      trailing={text ? <Icon name="close" size={14} color={c.foregroundSubtle} /> : null}
+      value={query}
+      onChangeText={setQuery}
+      leading={{ kind: 'icon', icon: 'search' }}
+      trailing={{
+        kind: 'action',
+        icon: 'close',
+        onPress: () => setQuery(''),
+        accessibilityLabel: '清除搜索条件',
+      }}
+      placeholderTextColor={colors.primary}
+      accessibilityLabel="搜索条件"
     />
   );
 }
 ```
 
-## API
+action slot 由库渲染 44×44pt frame。`disabled` 或 `editable={false}` 会同时禁止文本与 action；`disabled` 覆盖 caller 的 `editable` 和 `accessibilityState.disabled`。
 
-`InputProps` = **`Omit<TextInputProps, 'style' | 'multiline' | 'numberOfLines'>`** + 这 6 个扩展。所有 RN [`TextInput` props](https://reactnative.dev/docs/textinput)（`value` / `onChangeText` / `placeholder` / `secureTextEntry` / `keyboardType` / `returnKeyType` / `autoCapitalize` 等）都直接可用。
+`containerStyle` 用于外层布局，但不能设置高度、min/max 尺寸或 `overflow`。`height` 小于 44 或非法时会回退为 44 并在开发环境诊断。
 
-| Prop | Type | 说明 |
-|---|---|---|
-| `leading` | `ReactNode?` | 前置插槽（图标、label 等） |
-| `trailing` | `ReactNode?` | 后置插槽（清除按钮、显示密码切换等） |
-| `error` | `string?` | 错误文字 —— 容器进入 error 态（红描边）并在下方显示 |
-| `height` | `number?` | 覆盖容器高度，默认 `dim.controlLg`（44） |
-| `disabled` | `boolean?` | 整体禁用 + 视觉变灰，优先级高于 `editable` |
-| `containerStyle` | `StyleProp<ViewStyle>?` | 容器外层样式（不是 TextInput 的 style） |
+## API 要点
 
-> `testID` 来自透传的 `TextInputProps`：设在外层容器，内层 `<TextInput>` 自动派生 `${testID}-input`。`style` / `multiline` / `numberOfLines` 被 `Omit` 掉——容器样式走 `containerStyle`，多行请用 [`<Textarea />`](./textarea)。
+`InputProps` 基于 `TextInputProps`，但移除了 `style`、`multiline`、`numberOfLines`、`value`、`defaultValue`、`onChangeText`、`readOnly`、`role`、`aria-disabled`、`enterKeyHint`、`clearTextOnFocus` 的宽入口；严格 value union 重新提供前三项。
 
-> 没有内置的 `clearable` / `leadingIcon` —— 自己组合 `<Icon>` 给 `leading`/`trailing` 即可。`Search` 组件就是基于这种组合的预设。多行文本请用 [`<Textarea />`](./textarea)。
+- `leading` / `trailing`: `TextFieldSlot?`
+- `height`: `number?`（最小 44）
+- `error`: `string?`
+- `disabled`: `boolean?`
+- `containerStyle`: `TextFieldContainerStyle?`
+- `ref`: `TextFieldHandle`，仅 `focus()` / `blur()`
 
-## 无障碍（a11y）
-
-来源：`src/components/ui/Input/Input.tsx`、`TextField/TextFieldBase.tsx`、`types.ts`。
-
-输入框的核心 a11y 来自 RN 内置的 [`TextInput`](https://reactnative.dev/docs/textinput)（Input 是 `TextFieldBase` 的薄 wrap，最终渲染原生 `<TextInput>`）。
-
-- 默认 `accessibilityRole`：不显式设置 —— 继承底层 `<TextInput>`（RN/平台自带文本框语义，无需我们硬编码 role）。
-- a11y props：`InputProps` = `Omit<TextInputProps, 'style' | 'multiline' | 'numberOfLines'>` + 6 个扩展，所以 RN `TextInput` 的全部 a11y / 行为 props（`accessibilityLabel`、`placeholder`、`keyboardType`、`secureTextEntry` 等）都直接透传到 `<TextInput>`。朗读文案优先来自 `accessibilityLabel`，缺省时由 `placeholder` / `value` 提供。
-- 包裹层**唯一额外设置**的 a11y 是：`disabled` 时对内层 `<TextInput>` 设 `accessibilityState={{ disabled: true }}`（同时 `editable=false`，`disabled` 优先级高于 `editable`）；非 disabled 时不附加该状态。
-- `error` 文字渲染为下方独立 `<Text>`，**未**与输入框做程序化关联（无 `accessibilityLabelledBy` / describedBy），SR 会作为相邻文本读到。
-
-```tsx
-// placeholder 无法完全替代 label;无可见 label 时显式传 accessibilityLabel
-<Input value={phone} onChangeText={setPhone} placeholder="11 位手机号" accessibilityLabel="手机号" keyboardType="phone-pad" />
-```
+无可见 label 时请传 `accessibilityLabel`。错误文字在 Android 是 polite live region；iOS 后续错误变化会播报。
