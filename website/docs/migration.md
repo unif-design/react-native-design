@@ -95,7 +95,7 @@ import { space, radius, type as t, fw, fontMono, motion } from '@unif/react-nati
 
 ### 为什么不能继续用静态导出 {#为什么不能继续用静态导出}
 
-`ThemeProvider` 读 `useColorScheme()` 动态算亮 / 暗,并以 `scheme` 为唯一 `useMemo` 依赖,把稳定的 `colors` / `shadow` 引用注入 Context。`useThemedStyles(maker)` 的 `useMemo([colors, shadow, maker])` 依赖这个引用 —— 静态顶层导出永远只有亮色值,亮暗切换对它无效。
+`ThemeProvider` 读 `useColorScheme()` 动态算亮 / 暗,并以 `[scheme, fontScale]` 为 `useMemo` 依赖,把稳定的 `colors` / `shadow` 引用和字号倍数注入 Context。`useThemedStyles(maker)` 的 `useMemo([colors, shadow, fontScale, maker])` 依赖这些值 —— 静态顶层导出永远只有亮色值,亮暗切换和应用级字号档位都对它无效。
 
 ---
 

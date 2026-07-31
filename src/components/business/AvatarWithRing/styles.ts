@@ -10,8 +10,8 @@ const log = createLogger('AvatarWithRing');
  *
  * **为何破例**:`size` / `ringColor` 是 **props 派生**(每次调用值不同,如 ring 宽度
  * = `size * 0.0625`、label 字号 = `size * 0.40`、inner 直径 = `size - ringWidth*2`),
- * 标准 `useThemedStyles(maker)` 按 `[colors, shadow]` memo 假设 maker 是模块顶层
- * 常量,无法承接 props 变化。改走调用点自带 `useMemo([size, ringColor, c,
+ * 标准 `useThemedStyles(maker)` 按 `[colors, shadow, fontScale, maker]` memo,且假设 maker
+ * 是模块顶层常量,无法承接 props 变化。改走调用点自带 `useMemo([size, ringColor, c,
  * shadow.brandAvatar])` 精确缓存,signature 因此带上 size/ringColor/shadow 三个
  * 运行期入参,c 仍传入用于 label 文字色。
  *

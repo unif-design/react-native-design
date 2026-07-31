@@ -35,7 +35,7 @@ description: "@unif/react-native-design 排障决策树（症状 → 因 → 解
 
 ### 症状:主题切换后样式没变 / `useThemedStyles` 每次都重算 {#usethemedstyles-缓存不生效}
 
-**原因。** `makeStyles` 函数写在了组件函数体内(内联),每次渲染都是新引用,打穿 `useMemo([colors, shadow, maker])` 缓存。
+**原因。** `makeStyles` 函数写在了组件函数体内(内联),每次渲染都是新引用,打穿 `useMemo([colors, shadow, fontScale, maker])` 缓存。
 
 **解法。** `makeStyles` 定义在**模块顶层**(通常从 `styles.ts` 导出):
 

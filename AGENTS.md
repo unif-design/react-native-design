@@ -34,36 +34,53 @@
 
 ## 共享与本仓规则边界
 
-本区块外的内容属于本仓规则,同步时必须保留。模板已有的通用规则不得在仓库正文重复。
+- 本区块外的内容属于本仓规则,同步时必须保留;模板已有的通用规则不得在仓库正文重复。
+- 同步脚本只保留正文结构,不证明正文语义仍然正确。同步或迁移 `AGENTS.md` 后,必须逐条对照当前代码、类型、测试、`package.json`、有效文档与已批准规格,删除或改写失效、重复和互相矛盾的说明。
+- 已落地行为写成当前事实;已批准但尚未实现的契约写成开发约束,不得伪装为已经实现。无法确认时先查证,不能沿用旧正文猜测。
 
 <!-- END UNIF REACT NATIVE STANDARD -->
 
 ## 仓库定位
 
-`@unif/react-native-design` —— React Native 设计系统,包含 theme + icons + utils + UI 组件 + 少量通用业务复合组件。目标运行时:**RN 0.85 新架构**(Fabric + concurrent React)、React 19、TypeScript 6。
+`@unif/react-native-design` —— React Native 设计系统,包含 theme + icons + utils + UI 组件 + 少量通用业务复合组件。当前依赖与构建基线是 React Native `0.86.2`、React `19.2.3`、TypeScript 6;发布 contract 为 `react-native >=0.86.0 <0.87.0`、`react >=19.2.3 <20.0.0`。
 
-yarn workspaces 单仓库:库本体在根目录,两个 workspace —— `example/`(宿主 RN app)+ `website/`(Docusaurus 文档站,`llms.txt` 由 `website/scripts/build-llms.js` 从 `website/docs/` 生成,改组件 API 要同步改 docs)。`example/` 通过 `react-native-monorepo-config` 接入 Metro 直读 `src/`,所以改库的 JS 代码在 example 里热更新,不用重新构建原生。
+yarn workspaces 单仓库:库本体在根目录;`example/` 的实际 workspace 名是 `react-native-designdd-example`,`website/` 的实际 workspace 名是 `@unif/react-native-design-website`。`example/` 仍是启用新架构的 RN `0.85.3` 现有版本 shell,通过 `react-native-monorepo-config` 让 Metro 直读 `src/`;不得把它作为 RN `0.86.2` 支持证据。
+
+## Runtime API 整改契约
+
+`docs/superpowers/specs/2026-07-30-runtime-api-full-remediation-design.md` 及其 Dependency / Runtime、Input / a11y、Theme / platform / icons、Website / LLM plans 是已批准契约。当前新 Store、platform driver、strict Input API、type fixture、runtime harness 与对应检查命令尚未全部落地;下文标注「整改目标」的内容是开发强制约束,不是当前能力。
+
+- **已落地**:验证基线升到 React Native `0.86.2` + React `19.2.3`,`@react-native/babel-preset` / `eslint-config` / `jest-preset` / `metro-config` 同步到 `0.86.2`,lockfile 重解析,发布 contract 收紧为 `react-native >=0.86.0 <0.87.0`、`react >=19.2.3 <20.0.0`,`scripts/check-runtime-peers.js` + `yarn check:runtime-peers` 可运行并有 `__tests__/scripts/check-runtime-peers.test.ts` 覆盖。
+- **尚未落地**:临时 native harness(`yarn create:runtime-harness`)、图标检查(`yarn check:icons`)和人工验收矩阵。这三项真实通过前,只能说依赖与发布 contract 已对齐 RN `0.86.x`,不得声称运行时支持已完成验收。
+- 目标文件或 script 不存在时先实现并验证;不得把 plans 文字、源码推断、空白或 TODO 记为 PASS。
 
 ## 常用命令
 
 除非另注,命令都在仓库根目录执行。
 
 ```sh
-yarn                  # 安装(yarn 4.11,node ≥ 24.13,见 .nvmrc)
-yarn typecheck        # tsc(noEmit,strict + noUncheckedIndexedAccess)
+yarn install --immutable                     # 按现有 lockfile 安装
+yarn typecheck                               # 根 tsc
 yarn lint             # eslint **/*.{js,ts,tsx}
-yarn lint --fix       # 自动修复
-yarn test             # jest(跑根目录 __tests__/ 下的纯逻辑 utility 测试)
-yarn test __tests__/theme/scale.test.ts   # 跑单文件
-yarn test -t "pattern"                    # 按测试名过滤
-yarn prepare          # react-native-builder-bob → lib/module + lib/typescript
-yarn clean            # 清 lib/ + example 构建产物
+yarn lint --fix
+yarn test --runInBand                        # 根 __tests__ 的 Node 环境逻辑测试
+yarn test __tests__/theme/scale.test.ts       # 单文件
+yarn test -t "pattern"                        # 按测试名过滤
+yarn prepare                                 # bob → lib/module + lib/typescript
+yarn clean
 
-# example 应用
-yarn example start    # metro
-yarn example ios      # 构建并跑 iOS
-yarn example android  # 构建并跑 Android
+# 当前 example 是启用新架构的 RN 0.85.3 shell;不作为 RN 0.86 验收宿主
+yarn --cwd example start
+yarn --cwd example ios
+yarn --cwd example android
+
+# website 的真实 workspace 名
+yarn workspace @unif/react-native-design-website typecheck
+yarn workspace @unif/react-native-design-website build:llms
+yarn workspace @unif/react-native-design-website build
 ```
+
+根 `package.json#scripts.example` 当前指向不存在的 `@unif/react-native-design-example`,所以不要使用 `yarn example ...`;按上面的 `yarn --cwd example ...` 执行。`yarn check:runtime-peers` 已落地可运行;整改计划中的 `yarn create:runtime-harness` 和 `yarn check:icons` 尚无对应 script,在真正落地前只是验收目标,不得声称已运行。
 
 **只用 yarn** —— 项目依赖 yarn workspaces(`packageManager: yarn@4.11.0`、`nodeLinker: node-modules`、`nmHoistingLimits: workspaces`)。pre-commit hook(lefthook)对 staged 文件跑 `eslint` + `tsc`。
 
@@ -88,10 +105,11 @@ yarn example android  # 构建并跑 Android
 
 ### Theme 系统(`src/theme/`)
 
-- **`ThemeProvider`** 读 `useColorScheme()`,只以 `scheme` 为依赖 `useMemo` 出 `{ scheme, colors, shadow }` —— 这个稳定引用是 `useThemedStyles` 缓存生效的契约。
-- **`useThemedStyles(maker)`** —— `maker: (colors, shadow) => StyleSheet`,**必须**定义在模块顶层(从 `styles.ts` 导出),绝不写在组件里 inline 内联。
+- **当前 `ThemeProvider`** 读 `useColorScheme()`,并接收默认值为 `1` 的 `fontScale`;当前 memo 依赖是 `[scheme, fontScale]`,context value 为 `{ scheme, colors, shadow, fontScale }`。`useThemedStyles` 已把 maker 产物中的 `fontSize` / `lineHeight` / `letterSpacing` 乘以该值,但 render 期动态 typography 不会因此自动覆盖,且当前 raw `fontScale` 尚未校验。
+- **`useThemedStyles(maker)`** 的 `maker: (colors, shadow) => StyleSheet` 必须定义在模块顶层;其当前缓存依赖为 `[colors, shadow, fontScale, maker]`。
 
-  > 为什么 — inline `maker` 每次渲染都是新引用 → 直接打穿 `useMemo([colors, shadow, maker])` 缓存。
+  > 为什么 — inline `maker` 每次 render 都产生新引用,会直接打穿 memo 缓存。
+- **整改目标** —— 增加并公开 `normalizeFontScale`、`scaleFontMetric`、`useFontScale`;仅接受有限正数且不设上限,非法值回退 `1`。静态和动态文字 metric 恰好缩放一次;Icon、Spinner、spacing、控件尺寸、border radius 和 `fixed.*` 不随 fontScale 缩放。`ThemeContext` 默认值改为 `undefined` 并从公共 barrel 移除,缺 Provider 的 dev 诊断必须在 effect 中真实可达。当前实现是 `createContext(...null)` 却检查 `undefined`,不得声称该告警已经生效。
 
 - **颜色 token** —— role-based(`primary`、`surfaceContainer`、`foregroundMuted`、`glassTintLight`……)。
   - **暗色** 切换的是同一个 role 后面的 hex。
@@ -107,7 +125,7 @@ yarn example android  # 构建并跑 Android
 
 ### 组件约定
 
-每个组件一个独立目录,固定结构:
+每个组件一个独立目录,常见渲染结构:
 
 ```
 ComponentName/
@@ -117,6 +135,8 @@ ComponentName/
   index.ts              # barrel
 ```
 
+纯 Store、normalizer、platform driver 与测试辅助按职责增加独立文件,不强塞进上述四件套;内部类型不进入根公共 barrel。
+
 共用模式:
 
 - **`sizingFor(size)` + `paletteFor(variant, colors)`** —— `styles.ts` 里的纯函数,分别返回 `{ h, px, fs, br, gap }` 和 `{ bg, fg, border }`。
@@ -125,12 +145,23 @@ ComponentName/
 - **`ButtonBase`** —— `Button` / `IconButton` 共享的内部 primitive。
   - 用 **render-prop `children`** 把 `{ sizing, palette }` 暴露给调用方,调用方自行组合内容(Icon + Text)。
   - 新的按钮型组件**不要**在 `ButtonBase` 外重复 chrome(Pressable / 尺寸 / palette / a11y)。
-- **命令式 API**(`toast()`、`confirm()`)—— 模块级 `Set<Subscriber>` 注册表,配合在 app 根附近渲染一次的 `<ToastHost />` / `<ConfirmHost />`。`confirm()` 强制同一时间只有 1 个对话框,重入直接 `Promise.resolve(false)`。
-- **`*.web.tsx` 兄弟文件**(如 `BlurLayer.web.tsx`)—— web 特化实现,Metro / bob 按平台自动选。
-  - **分叉粒度** 优先把分叉收窄到*平台差异本体*(动画驱动 / 命令式 hook),渲染件保持单源 —— 正例 `Pulse`:`usePulse.ts` / `usePulse.web.ts` 分叉,`Pulse`/`PulseDot`/`Skeleton` 单源零克隆;反例组件级 `*.web.tsx`(整件复制)易行为漂移(`ToastHost.web` 漏定位注入是现实代价)。新加平台分叉走 hook 级。
+- **命令式 API 当前基线** —— `toast()` / `confirm()` 仍使用模块级 `Set<Subscriber>`;这是待整改实现,不能作为新代码范式。
+  - **Confirm 整改目标**:抽出纯 `ConfirmStore`,只允许一个 Host owner 和一个 active entry;所有关闭路径统一走 identity-guarded、幂等的 `settle`,无 Host、重入、subscriber 异常和 owner cleanup 都必须确定性 resolve。
+  - **Toast 整改目标**:抽出独立 `ToastStore`,使用 latest-wins pending / delivery、owner token、`leaseId` 和 entry id 的 CAS;Host 前调用保留最新消息,旧 timer / RAF / animation / owner 回调不得完成或隐藏新 delivery。Confirm / Toast 语义不同,不得抽成泛型事件总线;Store / lease / event 类型不得进入根公共 barrel。
+- **平台分叉当前基线** —— Metro / bob 按 `*.web.*` 自动选平台兄弟文件;当前 Pulse 仍由 `usePulse.ts` / `usePulse.web.ts` 各自读取 raw props。
+  - **platform driver 整改目标**:公共 hook / component 先统一完成 state、validation 和 normalization,平台差异只下沉到 driver。Pulse 必须由单源 `usePulse.ts` 调用只接收 `NormalizedPulseOptions` 的 `usePulseDriver.ts` / `usePulseDriver.web.ts`,并删除会绕过公共层的 `usePulse.web.ts`。公开容器层级和 style 语义须跨平台一致;只有动画驱动等差异使用兄弟实现。native `usePrefersReducedMotion` 必须读取真实系统设置,不能继续恒返回 `false`。
 - **`ui/` vs `business/`**:
   - **`ui/`** 原子且无业务上下文。
   - **`business/`** 复合,但*仍保持通用* —— 任何耦合 navigation / store / 业务流程(SMS 验证码、屏幕布局)的东西留在消费者仓库,不要进这里。
+
+### Input / 交互 / a11y 整改目标(尚未实现)
+
+以下四条都是已批准的开发约束,当前源码仍保留宽 Input props、可选 `onPress` 和旧 Carousel 行为;不得当成现有公共能力。
+
+- Input、Textarea、Search 必须用严格 controlled / uncontrolled 联合并在首次 render 锁定 mode;`defaultValue` 只初始化一次。PasswordInput 删除 `inputProps`,只保留顶层受控入口;公开 `TextFieldHandle` 只能 `focus()` / `blur()`,不能暴露 `clear()` / `setNativeProps()`。
+- TextField slot 改为库可验证的 display / action 配置;action 必须有 handler 和 accessible name。输入 slot、Switch、Stepper 使用真实至少 `44pt` 的布局 frame,不靠会被裁剪的 `hitSlop`;固定命中尺寸不经过 `r()` 或 fontScale。
+- Button / IconButton 的 `onPress` 必填;disabled / loading 时移除有效 handler,loading 同时上报 `disabled` 和 `busy`。所有真实操作必须有可访问名称和真实 state;装饰内容使用共享隐藏 props,且只落到库内本地 View / Image,不得透传给未知第三方组件。
+- Carousel 使用 display / action 联合:只有同时提供 `onPressItem` 和 `getAccessibilityLabel` 的分支才渲染 Pressable;纯展示 slide 使用 View。reduced motion 下强制停止 autoplay;`data.length <= 1` 不渲染 Pagination 也不保留高度;多页 Pagination 由本地 View 隐藏 a11y tree。
 
 ### Icons
 
@@ -150,6 +181,9 @@ ComponentName/
 
   **纯 fill 元素**(实心方块/圆点,如 `stop` / 计数器圆点)用元素级 `fill="currentColor" stroke="none"` 表达(根可保留 `fill="currentColor"`);否则会继承根描边、变成空心或加粗。
 
+- **Icon 整改目标** —— `build-icons` 改为移除 comment 后的 full-tag stack scanner:文档只能有一个根 `svg`,其直接叶子只能是 `path` / `rect` / `circle`;根和 shape 都使用 attribute allowlist,未知标签、未知属性、硬编码颜色、非法数值或结构错误必须在写文件前 fail-fast。规范根必须精确包含 `viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"`。
+- **Icon gate 整改目标** —— 增加非写工作区的 `yarn check:icons`:在两个独立临时目录调用真实生成器,逐字节比较 temp A、temp B 和 committed `src/icons/data.ts`,任一不一致退出非零。命令落地后,每次 SVG / 生成器修改都必须先更新正式生成物,再运行脚本单测、`yarn check:icons` 与 `yarn typecheck`。
+
 ### Utils
 
 - **`createLogger(scope)`** —— 每个模块一次(`const log = createLogger('Icon')`)。
@@ -160,14 +194,13 @@ ComponentName/
 
 ### 测试
 
-- **位置** —— 仓库根 `__tests__/`,**不**与源码 colocate,目录结构镜像 `src/`(`__tests__/theme/`、`__tests__/utils/`……)。
-- **只覆盖纯逻辑 utility**(`scale` / `logger` / `childTestID`)。**design 层不重复测组件行为** —— 新增测试时遵循这条边界,只补纯函数 / hook 逻辑。
+- Jest 测试位于根 `__tests__/`,目录按源码 / 能力镜像。当前范围不只是 utils,还包含 Confirm / Toast 逻辑、组件 styles / sizing、Theme transform 和 Icon 脚本。
+- `package.json` 当前固定 `testEnvironment: 'node'`。新增 Jest 测试只覆盖纯 Store、状态机、normalizer、helper 和脚本逻辑;不新增组件 snapshot 或 renderer。
+- 整改目标会新增 `type-tests/public-api.tsx`,由根 `yarn typecheck` 编译合法调用和 `@ts-expect-error` fixture,不要放进 `__tests__/`。真实 native / Web 结构、44pt frame、a11y tree、reduced motion 和竞态通过 `manual-tests/runtime-api/`、临时 RN `0.86.2` harness 与 Website 验证,并把真实证据写入 verification matrix。
 
-  > 为什么 — 组件用法由消费者层(portal)的集成测试 cover → 在这里写组件 snapshot 是冗余。
+- **jest env** —— `package.json` 的 `jest.testEnvironment: 'node'` 显式覆盖 `@react-native/jest-preset` 默认的 RN env。
 
-- **jest env** —— `package.json` 的 `jest.testEnvironment: 'node'` 显式覆盖 `@react-native/jest-preset` 默认的 RN env;等真要测 RN 组件时再考虑切回 / 隔离 preset。
-
-  > 为什么 — RN 0.85 preset 内置 `jest-environment-node@29` 跟顶层 `jest@30` mismatch → `resetModules` 时报 `clearMocksOnScope is not a function`。
+  > 为什么 — `@react-native/jest-preset` 的默认 RN env 会拖入与顶层 `jest@30` 不匹配的 `jest-environment-node@29`,`resetModules` 时报 `clearMocksOnScope is not a function`。现已同时把 `jest-environment-node` 固定到 `30.4.1`,两侧对齐;`testEnvironment: 'node'` 仍显式保留,不要因为「看起来是默认值」删掉。
 
 ### TypeScript 严格度
 
@@ -184,17 +217,6 @@ ComponentName/
 - `lib/typescript` —— `.d.ts`,用 `tsconfig.build.json`(继承 `tsconfig.json`,排除 `example/`、`lib/`)
 
 `package.json#exports` 把 `.` 映射到 `source: src/index.tsx`(workspace 消费者)+ `default: lib/module/index.js` + `types: lib/typescript/src/index.d.ts`。不要破坏这个三元组。
-
-## 文档与 design Skill 映射
-
-改组件 / API / 类型、或想知道消费者怎么接入本库时看这里。
-
-- **逐组件 API / props / variant / size 全量** → 文档站 + 远程 llms.txt(按需 fetch,**不在本仓正文镜像**):
-  - 文档站:https://unif-design.github.io/react-native-design/
-  - llms 索引:https://unif-design.github.io/react-native-design/llms.txt
-  - llms 全文:https://unif-design.github.io/react-native-design/llms-full.txt
-- **website docs 是 llms.txt 的唯一来源** —— 改了组件 / API / 类型,**同步改对应 `website/docs/components/<name>.mdx`** 再 `yarn workspace website build:llms` 重生成(`website/scripts/build-llms.js`),否则 AI 读到的会过时。**不要**把全量 API 复制进 AGENTS.md 或代码注释。
-- **design Skill 精确文件映射** —— `../skills/skills/design/SKILL.md` 保存手写的快速开始 / 易错点,`../skills/skills/design/assets/` 保存模板;全量 props 路由到 llms.txt,随 website docs 自动更新。
 
 ## 仓库内注释风格
 

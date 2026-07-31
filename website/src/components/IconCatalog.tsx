@@ -208,7 +208,6 @@ function RenderIcon({ def }: { def: IconDef }): React.JSX.Element {
               width={el.width}
               height={el.height}
               rx={el.rx}
-              ry={el.ry}
               fill={fill}
             />
           );
