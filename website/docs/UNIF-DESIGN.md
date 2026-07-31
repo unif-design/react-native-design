@@ -531,7 +531,7 @@ import { Logo } from '@unif/react-native-design';
 
 接手项目时它有:
 
-- RN 0.85 / React 19,新架构(Fabric + TurboModules)默认开启。
+- RN `0.86.2` / React `19.2.3`,新架构(Fabric + TurboModules)默认开启。发布 contract 为 `react-native >=0.86.0 <0.87.0`、`react >=19.2.3 <20.0.0`;Node engine 为 `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`。运行时四件套固定在 RNGH `>=3.0.0 <4.0.0`、Reanimated `>=4.5.2 <4.6.0`、Worklets `>=0.11.0 <0.12.0`、RNRC `>=5.0.0 <6.0.0`。
 - 完整设计系统:38 ui + 4 业务复合组件,全套 token(`colors / shadow / type / fw / space / radius / avatar / icon / control / dim / fixed / motion / blur / fontMono`)在 `src/theme/`,亮 / 暗双套经 `ThemeProvider` + `useThemedStyles`;SVG 图标目录在 `src/icons/svg/` + 生成的 `src/icons/data.ts`(只读)。
 - 单元 / 集成测试在 `__tests__/`(Jest + `@testing-library/react-native`)。
 - Docusaurus 文档站在 `website/`。

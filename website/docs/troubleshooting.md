@@ -90,6 +90,36 @@ yarn add react-native-svg \
 
 iOS 装完还需 `cd ios && bundle exec pod install`。
 
+版本范围见[快速开始 → 环境要求](/docs/getting-started#环境要求)。本库只支持 `react-native >=0.86.0 <0.87.0` + `react >=19.2.3 <20.0.0`;RN `0.85.x` 与 `0.87+` 都会因 peer 不满足而失败,这是有意收紧的 contract,不要用忽略 peer 的方式绕过。
+
+---
+
+### 症状:worklet 不生效 / Metro 报 worklets 插件相关错误 {#worklets-babel-metro}
+
+**原因。** `react-native-worklets@0.11` 的 Babel 插件与 Metro transformer 由**宿主工程**提供,本库不分发它们。宿主的 `@babel/core`、`@react-native/babel-preset`、`@react-native/metro-config` 版本与 RN `0.86.2` 不匹配时,worklet 编译会静默降级或直接报错。
+
+**解法。** 宿主自备并对齐版本,且 `react-native-worklets/plugin` 必须排在 `plugins` 数组**最后**:
+
+```sh
+yarn add -D @babel/core @react-native/babel-preset@0.86.2 @react-native/metro-config@0.86.2
+```
+
+---
+
+### 症状:安装时报 `react-native-reanimated-carousel` 与 `react-native-gesture-handler` 的 peer 冲突 {#rnrc-rngh-peer}
+
+**原因。** `react-native-reanimated-carousel@5.0.0` 发布的 RNGH peer metadata 是 `>=2.9.0 <3.0.0`,与本库要求的 `>=3.0.0 <4.0.0` **没有交集**。这是 RNRC 侧的 metadata 滞后,该组合已在本仓实测适配并通过验证。
+
+**解法。** 只有两种被认可的处理方式:**接受这一条警告**,或加**只作用于 Carousel 的窄 override / filter**。
+
+- npm:`overrides` → `{"react-native-reanimated-carousel": {"react-native-gesture-handler": "$react-native-gesture-handler"}}`
+- pnpm:`pnpm.peerDependencyRules.allowedVersions`,精确到 `react-native-reanimated-carousel>react-native-gesture-handler`
+- Yarn:scoped `logFilters`
+
+**不要**用全局 peer 忽略、`--force`、`--legacy-peer-deps` 或无效的 `packageExtensions` / metadata patch —— 那会连同真实的 major 漂移一并吞掉。
+
+本仓 `.yarnrc.yml` 里的 `logFilters` **只影响本仓 install 日志,不随 npm 包分发**,消费端必须自行选择上述方式之一。本仓真正的门禁是 `yarn check:runtime-peers`:它按「包名 + 请求方 locator + 精确 range + provider major」四重匹配,任一维度漂移都会退出非零,与日志过滤互相独立。RNRC 发布出正确接受 RNGH 3 的版本后,升级 RNRC 并在同一次改动里删掉 filter 与 checker 的例外分支。
+
 ---
 
 ### 症状:iOS 构建失败 `Undefined symbols for architecture arm64` {#ios-链接错误}

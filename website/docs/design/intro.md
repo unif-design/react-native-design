@@ -2,12 +2,12 @@
 slug: /design
 sidebar_position: 1
 title: 设计系统
-description: "Unif Design 设计系统总览：品牌理念（中文优先、橙色克制、无装饰）、role-based token、组件视觉契约的入口；面向 React Native 0.85 新架构。"
+description: "Unif Design 设计系统总览：品牌理念（中文优先、橙色克制、无装饰）、role-based token、组件视觉契约的入口；面向 React Native 0.86 新架构。"
 ---
 
 # Unif Design
 
-Unif Design 是 [Unif](https://github.com/unif-design)(统一企业 / Uni-President China)的 React Native 设计系统 —— 一套**品牌理念 + role-based token + 组件视觉契约**,面向 RN 0.85 新架构(Fabric + TurboModules)。本区从设计师视角讲清楚:为什么这么设计、用哪些 token、组件该长什么样。
+Unif Design 是 [Unif](https://github.com/unif-design)(统一企业 / Uni-President China)的 React Native 设计系统 —— 一套**品牌理念 + role-based token + 组件视觉契约**,面向 RN 0.86 新架构(Fabric + TurboModules)。本区从设计师视角讲清楚:为什么这么设计、用哪些 token、组件该长什么样。
 
 > 找**怎么装、怎么用代码**?去[快速开始](/docs/getting-started)。找**逐组件 API**?去[组件概览](/docs/components)。要一份单文件全量参考?去[完整规范](/docs/unif-design)。
 

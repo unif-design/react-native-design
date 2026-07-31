@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/npm/l/@unif/react-native-design.svg?color=blue)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-unif--design.github.io-orange.svg)](https://unif-design.github.io/react-native-design/)
 
-Unif 设计系统 —— theme(设计令牌)+ 组件 + 图标 + utils,面向 React Native 0.85 新架构(Fabric + TurboModule)。所有 Unif 应用与端能力包的 UI 基座。
+Unif 设计系统 —— theme(设计令牌)+ 组件 + 图标 + utils,面向 React Native 0.86 新架构(Fabric + TurboModule)。所有 Unif 应用与端能力包的 UI 基座。
 
 ## 特性
 
@@ -33,6 +33,10 @@ yarn add react-native-svg \
 ```
 
 iOS 另需在 `ios/` 执行 `bundle exec pod install`。完整步骤见[文档站 · 快速开始](https://unif-design.github.io/react-native-design/docs/getting-started)。
+
+`react-native-worklets` 的 Babel 插件与 Metro transformer 由宿主工程提供,不随本库分发 —— 宿主需自备与 RN `0.86.2` 匹配的 `@babel/core`、`@react-native/babel-preset@0.86.x`、`@react-native/metro-config@0.86.x`。
+
+`react-native-reanimated-carousel@5.0.0` 发布的 RNGH peer 是 `>=2.9.0 <3.0.0`,与本包要求的 `>=3.0.0 <4.0.0` 无交集;该组合已实测适配。消费端只能**接受这条警告**或加**只作用于 Carousel 的窄 override**(npm `overrides`、pnpm `peerDependencyRules.allowedVersions`、Yarn scoped `logFilters`),不要用全局 peer 忽略、`--force` 或 `--legacy-peer-deps`。本仓 `.yarnrc.yml` 里的 `logFilters` 不随 npm 包分发。
 
 ## 快速开始
 
@@ -76,9 +80,23 @@ export const App = () => (
 
 ## 兼容性
 
-- React Native **0.85+**(新架构 Fabric + TurboModule;随 RN 0.85 对应 concurrent React)
-- React 19、TypeScript 6
-- Node.js ≥ 24.13(见 `.nvmrc`)
+支持范围严格来自 `package.json#peerDependencies`;本仓直接验证的版本是 RN `0.86.2` + React `19.2.3`。
+
+| 依赖 | 支持范围 | 本仓验证版本 |
+| --- | --- | --- |
+| `react-native` | `>=0.86.0 <0.87.0` | `0.86.2` |
+| `react` | `>=19.2.3 <20.0.0` | `19.2.3` |
+| `react-native-gesture-handler` | `>=3.0.0 <4.0.0` | `3.1.0` |
+| `react-native-reanimated` | `>=4.5.2 <4.6.0` | `4.5.3` |
+| `react-native-worklets` | `>=0.11.0 <0.12.0` | `0.11.3` |
+| `react-native-reanimated-carousel` | `>=5.0.0 <6.0.0` | `5.0.0` |
+| `react-native-safe-area-context` | `>=5` | `5.7.x` |
+| `react-native-svg` | `>=15` | `15.15.x` |
+| `@sbaiahmed1/react-native-blur` | `>=4` | `4.6.x` |
+
+- 新架构(Fabric + TurboModule)必须开启;旧架构 Bridge、RN `0.85` 及更低版本、RN `0.87+` 都不在支持范围。
+- Node.js `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`(`package.json#engines`;本仓 `.nvmrc` 固定 `v24.13.0`)
+- TypeScript 6、Yarn 4
 
 ## 许可
 
