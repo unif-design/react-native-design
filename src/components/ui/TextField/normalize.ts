@@ -159,6 +159,31 @@ export type SanitizedContainerStyle = {
   diagnostics: readonly string[];
 };
 
+export type SanitizedTextFieldWrapperProps = {
+  props: Record<string, unknown>;
+  diagnostics: readonly string[];
+};
+
+/**
+ * 公开 Input / Textarea 不允许未类型化 JS 覆盖内部 layout 开关。
+ *
+ * 返回新对象而不是 delete 原 props，既不改变调用方对象，也让 wrapper 能在安全 spread
+ * 后由可信边界写入自己的 `multiline`。
+ */
+export function sanitizeTextFieldWrapperProps(
+  props: Record<string, unknown>
+): SanitizedTextFieldWrapperProps {
+  const { multiline, searchLayout, ...safeProps } = props;
+  const diagnostics: string[] = [];
+  if (multiline !== undefined) {
+    diagnostics.push('multiline');
+  }
+  if (searchLayout !== undefined) {
+    diagnostics.push('searchLayout');
+  }
+  return { props: safeProps, diagnostics };
+}
+
 /**
  * 剥掉 containerStyle 里会覆盖最小 frame 的六个字段。
  *

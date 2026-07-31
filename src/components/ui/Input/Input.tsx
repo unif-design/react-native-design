@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { TextFieldBase } from '../TextField/TextFieldBase';
+import { sanitizeTextFieldWrapperProps } from '../TextField/normalize';
 import type { TextFieldHandle } from '../TextField/types';
 import type { InputProps } from './types';
 
@@ -14,7 +15,16 @@ import type { InputProps } from './types';
  */
 export const Input = forwardRef<TextFieldHandle, InputProps>(
   function Input(props, ref) {
-    return <TextFieldBase ref={ref} multiline={false} {...props} />;
+    const { props: safeProps } = sanitizeTextFieldWrapperProps(
+      props as InputProps & Record<string, unknown>
+    );
+    return (
+      <TextFieldBase
+        ref={ref}
+        {...(safeProps as InputProps)}
+        multiline={false}
+      />
+    );
   }
 );
 

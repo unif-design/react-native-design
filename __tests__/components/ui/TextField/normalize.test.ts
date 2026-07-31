@@ -6,6 +6,7 @@ import {
   normalizeSlotIconSize,
   normalizeTextareaHeights,
   normalizeTextFieldSlot,
+  sanitizeTextFieldWrapperProps,
   sanitizeTextFieldContainerStyle,
 } from '../../../../src/components/ui/TextField/normalize';
 
@@ -182,6 +183,25 @@ describe('normalizeSearchLayout — 44pt 交互层与 36pt 可视面分离', () 
       visibleHeight: 36,
       verticalInset: 4,
       diagnostics: [],
+    });
+  });
+});
+
+describe('sanitizeTextFieldWrapperProps — 公开 wrapper 封死 internal layout keys', () => {
+  test('剥离 multiline/searchLayout,保留其他 native props且不修改 caller 对象', () => {
+    const caller = {
+      placeholder: '姓名',
+      multiline: true,
+      searchLayout: { interactiveHeight: 20 },
+    };
+    expect(sanitizeTextFieldWrapperProps(caller)).toEqual({
+      props: { placeholder: '姓名' },
+      diagnostics: ['multiline', 'searchLayout'],
+    });
+    expect(caller).toEqual({
+      placeholder: '姓名',
+      multiline: true,
+      searchLayout: { interactiveHeight: 20 },
     });
   });
 });

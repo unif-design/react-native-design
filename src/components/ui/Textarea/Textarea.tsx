@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { TextFieldBase } from '../TextField/TextFieldBase';
+import { sanitizeTextFieldWrapperProps } from '../TextField/normalize';
 import type { TextFieldHandle } from '../TextField/types';
 import type { TextareaProps } from './types';
 
@@ -17,7 +18,12 @@ import type { TextareaProps } from './types';
  */
 export const Textarea = forwardRef<TextFieldHandle, TextareaProps>(
   function Textarea(props, ref) {
-    return <TextFieldBase ref={ref} multiline {...props} />;
+    const { props: safeProps } = sanitizeTextFieldWrapperProps(
+      props as TextareaProps & Record<string, unknown>
+    );
+    return (
+      <TextFieldBase ref={ref} {...(safeProps as TextareaProps)} multiline />
+    );
   }
 );
 
