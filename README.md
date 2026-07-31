@@ -90,13 +90,13 @@ yarn create:runtime-harness
 
 1. `yarn prepare` + `yarn pack` 打包**当前源码**,harness 装的是 `file:` tarball,不是 registry 上的版本;
 2. 用 `yarn.lock` 里钉死的官方 `@react-native-community/cli@20.1.0` + `@react-native-community/template@0.86.2` 生成脚手架 —— 两者的版本、template 自带的 React / RN / CLI 版本、以及锁文件里的 `checksum` 都会先校验,任一不符立即失败;
-3. 枚举根 `peerDependencies` 的**每一个**非 optional 项,写入解析出的精确版本(缺任何一个都点名报错);
-4. 配好 Babel(`react-native-worklets/plugin` 排最后)、Metro、RNGH root import,拷入 `manual-tests/runtime-api/RuntimeApiScreen.tsx`;
-5. `yarn install` + `bundle install` + `bundle exec pod install`,最后打印绝对路径与全部解析到的 provider 版本。
+3. 枚举根 `peerDependencies` 的**每一个**非 optional 项,从根 direct range 精确匹配 `yarn.lock` locator,并交叉验证 installed version 与 peer range;`@babel/core` / `@react-native/metro-config` 也走同一链路,在首次安装前写成精确版本;
+4. 配好 Babel(`react-native-worklets/plugin` 排最后)、Metro、RNGH root import,拷入 `manual-tests/runtime-api/RuntimeApiScreen.tsx`,并逐文件核对生成的 Podfile / Android Gradle 文件与 installed template 捕获的摘要;
+5. 首次 `yarn install` 只在脚本自持的临时 app 内生成 `yarn.lock`,随后立即以同一 manifest / lock 执行 `yarn install --immutable` 最终复验,再执行 `bundle install` + `bundle exec pod install`;完整流程成功后才保留并打印绝对路径与全部 provider 版本。
 
 边界:
 
-- app 只建在**脚本自持的系统临时目录**里(`fs.mkdtempSync`),**不接受调用方传目录**;只有生成失败时才递归删除自己那一个临时路径。
+- app 只建在**脚本自持的系统临时目录**里(`fs.mkdtempSync`),**不接受调用方传目录**;脚手架之后的任一步失败也会递归删除自己那一个临时路径,只有完整成功才保留。
 - **完全不读、不写、不复制 `example/`** —— 那是启用新架构的 RN `0.85.3` 现有版本 shell,不能作为 RN `0.86.x` 的支持证据。
 - 生成物不入库。
 

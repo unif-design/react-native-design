@@ -6,14 +6,32 @@ import {
   assertNoDestinationArgument,
   assertOutsideExample,
   assertTemplateManifest,
+  buildNativeTemplateSnapshot,
   buildHarnessManifest,
   buildScaffoldArgs,
   findLockChecksum,
+  installHarnessDependencies,
+  resolveLockedDependency,
+  runWithOwnedTempCleanup,
+  assertNativeTemplateSnapshot,
 } from '../../scripts/create-runtime-api-harness';
 
 /** 根 package.json 的最小切片 —— 只需要 peerDependencies 与其 meta。 */
 const rootManifest = {
   name: '@unif/react-native-design',
+  devDependencies: {
+    '@babel/core': '^7.29.7',
+    '@react-native/metro-config': '0.86.2',
+    '@sbaiahmed1/react-native-blur': '^4.6.2',
+    'react': '19.2.3',
+    'react-native': '0.86.2',
+    'react-native-gesture-handler': '^3.1.0',
+    'react-native-reanimated': '~4.5.3',
+    'react-native-reanimated-carousel': '^5.0.0',
+    'react-native-safe-area-context': '^5.7.0',
+    'react-native-svg': '^15.15.5',
+    'react-native-worklets': '^0.11.3',
+  },
   peerDependencies: {
     '@sbaiahmed1/react-native-blur': '>=4',
     'react': '>=19.2.3 <20.0.0',
@@ -29,6 +47,8 @@ const rootManifest = {
 
 /** 当前 install 解析出的精确 provider 版本 —— 每个非 optional peer 都必须在场。 */
 const resolved: Record<string, string> = {
+  '@babel/core': '7.29.7',
+  '@react-native/metro-config': '0.86.2',
   '@sbaiahmed1/react-native-blur': '4.6.2',
   'react': '19.2.3',
   'react-native': '0.86.2',
@@ -57,6 +77,23 @@ const LOCK = [
   '  version: 20.1.0',
   '  resolution: "@react-native-community/cli@npm:20.1.0"',
   '  checksum: 10c0/aaaabbbbccccdddd',
+  '  languageName: node',
+  '  linkType: hard',
+  '',
+].join('\n');
+
+const PROVIDER_LOCK = [
+  '"@babel/core@npm:^7.29.7":',
+  '  version: 7.29.7',
+  '  resolution: "@babel/core@npm:7.29.7"',
+  '  checksum: 10c0/babel',
+  '  languageName: node',
+  '  linkType: hard',
+  '',
+  '"react-native-svg@npm:^15.15.5":',
+  '  version: 15.15.5',
+  '  resolution: "react-native-svg@npm:15.15.5"',
+  '  checksum: 10c0/svg',
   '  languageName: node',
   '  linkType: hard',
   '',
@@ -116,6 +153,10 @@ describe('buildHarnessManifest', () => {
       'react-native-reanimated': '4.5.3',
       'react-native-worklets': '0.11.3',
     });
+    expect(manifest.devDependencies).toMatchObject({
+      '@babel/core': '7.29.7',
+      '@react-native/metro-config': '0.86.2',
+    });
   });
 
   test('每个非 optional peer 都写进 dependencies,一个不落', () => {
@@ -171,6 +212,213 @@ describe('buildHarnessManifest', () => {
     expect(
       (manifest.dependencies as Record<string, string>)['react-native-optional']
     ).toBeUndefined();
+  });
+});
+
+describe('resolveLockedDependency — direct descriptor / locator / install / peer 闭环', () => {
+  test('从根 direct range 对应的精确 locator 解析 provider', () => {
+    expect(
+      resolveLockedDependency(
+        rootManifest,
+        PROVIDER_LOCK,
+        { 'react-native-svg': '15.15.5' },
+        'react-native-svg',
+        rootManifest.peerDependencies['react-native-svg']
+      )
+    ).toBe('15.15.5');
+  });
+
+  test('descriptor 块指向错误 package locator 时 fail-fast', () => {
+    const wrongLocator = PROVIDER_LOCK.replace(
+      'resolution: "react-native-svg@npm:15.15.5"',
+      'resolution: "react-native-safe-area-context@npm:15.15.5"'
+    );
+    expect(() =>
+      resolveLockedDependency(
+        rootManifest,
+        wrongLocator,
+        { 'react-native-svg': '15.15.5' },
+        'react-native-svg',
+        rootManifest.peerDependencies['react-native-svg']
+      )
+    ).toThrow('locator');
+  });
+
+  test('lock locator 不满足根 direct range 时 fail-fast', () => {
+    const outsideDirectRange = PROVIDER_LOCK.replace(
+      'version: 15.15.5',
+      'version: 14.0.0'
+    ).replace(
+      'resolution: "react-native-svg@npm:15.15.5"',
+      'resolution: "react-native-svg@npm:14.0.0"'
+    );
+    expect(() =>
+      resolveLockedDependency(
+        rootManifest,
+        outsideDirectRange,
+        { 'react-native-svg': '14.0.0' },
+        'react-native-svg',
+        rootManifest.peerDependencies['react-native-svg']
+      )
+    ).toThrow('direct range');
+  });
+
+  test('lock locator 不满足根 peer range 时 fail-fast', () => {
+    const manifest = {
+      devDependencies: { 'react-native-svg': '^14.0.0' },
+      peerDependencies: { 'react-native-svg': '>=15' },
+    };
+    const lock = PROVIDER_LOCK.replaceAll('^15.15.5', '^14.0.0').replaceAll(
+      '15.15.5',
+      '14.0.0'
+    );
+    expect(() =>
+      resolveLockedDependency(
+        manifest,
+        lock,
+        { 'react-native-svg': '14.0.0' },
+        'react-native-svg',
+        '>=15'
+      )
+    ).toThrow('peer range');
+  });
+
+  test('installed version 与 lock locator 漂移时 fail-fast', () => {
+    expect(() =>
+      resolveLockedDependency(
+        rootManifest,
+        PROVIDER_LOCK,
+        { 'react-native-svg': '15.15.4' },
+        'react-native-svg',
+        rootManifest.peerDependencies['react-native-svg']
+      )
+    ).toThrow('installed');
+  });
+});
+
+describe('installHarnessDependencies — 临时 lock bootstrap + immutable 复验', () => {
+  test('先生成临时 lockfile，再用相同 Yarn 执行 immutable install', () => {
+    const calls: Array<{
+      command: string;
+      args: readonly string[];
+      cwd: string;
+    }> = [];
+    let lockExists = false;
+    installHarnessDependencies('/tmp/runtime-app', '/tmp/yarn-4.11.0.cjs', {
+      nodePath: '/usr/local/bin/node',
+      execute(command, args, cwd) {
+        calls.push({ command, args, cwd });
+        lockExists = true;
+      },
+      exists(file) {
+        expect(file).toBe('/tmp/runtime-app/yarn.lock');
+        return lockExists;
+      },
+    });
+    expect(calls).toEqual([
+      {
+        command: '/usr/local/bin/node',
+        args: ['/tmp/yarn-4.11.0.cjs', 'install'],
+        cwd: '/tmp/runtime-app',
+      },
+      {
+        command: '/usr/local/bin/node',
+        args: ['/tmp/yarn-4.11.0.cjs', 'install', '--immutable'],
+        cwd: '/tmp/runtime-app',
+      },
+    ]);
+  });
+
+  test('bootstrap 未生成 lockfile 时不运行 immutable install', () => {
+    const calls: string[][] = [];
+    expect(() =>
+      installHarnessDependencies('/tmp/runtime-app', '/tmp/yarn.cjs', {
+        nodePath: '/usr/local/bin/node',
+        execute(_command, args) {
+          calls.push([...args]);
+        },
+        exists() {
+          return false;
+        },
+      })
+    ).toThrow('yarn.lock');
+    expect(calls).toEqual([['/tmp/yarn.cjs', 'install']]);
+  });
+});
+
+describe('native template snapshot — 从 installed template 捕获版本特征', () => {
+  const templateFiles = {
+    'ios/Podfile': "target 'HelloWorld' do\n  use_react_native!\nend\n",
+    'android/settings.gradle':
+      "plugins { id('com.facebook.react.settings') }\nrootProject.name = 'HelloWorld'\n",
+    'android/build.gradle':
+      'ext { compileSdkVersion = 36 }\napply plugin: "com.facebook.react.rootproject"\n',
+    'android/app/build.gradle':
+      'namespace "com.helloworld"\ntargetSdkVersion rootProject.ext.targetSdkVersion\n',
+  };
+
+  test('只接受与 template 内容及 app-name 替换一致的生成文件', () => {
+    const snapshot = buildNativeTemplateSnapshot(templateFiles);
+    expect(() =>
+      assertNativeTemplateSnapshot(snapshot, {
+        'ios/Podfile':
+          "target 'RuntimeApiHarness' do\n  use_react_native!\nend\n",
+        'android/settings.gradle':
+          "plugins { id('com.facebook.react.settings') }\nrootProject.name = 'RuntimeApiHarness'\n",
+        'android/build.gradle':
+          'ext { compileSdkVersion = 36 }\napply plugin: "com.facebook.react.rootproject"\n',
+        'android/app/build.gradle':
+          'namespace "com.runtimeapiharness"\ntargetSdkVersion rootProject.ext.targetSdkVersion\n',
+      })
+    ).not.toThrow();
+  });
+
+  test('仍含通用 RN marker 但偏离 installed template 时 fail-fast', () => {
+    const snapshot = buildNativeTemplateSnapshot(templateFiles);
+    expect(() =>
+      assertNativeTemplateSnapshot(snapshot, {
+        'ios/Podfile':
+          "target 'RuntimeApiHarness' do\n  use_react_native!\n  pod 'Unexpected'\nend\n",
+        'android/settings.gradle':
+          "plugins { id('com.facebook.react.settings') }\nrootProject.name = 'RuntimeApiHarness'\n",
+        'android/build.gradle':
+          'ext { compileSdkVersion = 35 }\napply plugin: "com.facebook.react.rootproject"\n',
+        'android/app/build.gradle':
+          'namespace "com.runtimeapiharness"\ntargetSdkVersion rootProject.ext.targetSdkVersion\n',
+      })
+    ).toThrow('template');
+  });
+});
+
+describe('runWithOwnedTempCleanup', () => {
+  test('scaffold 后任一步失败都会删除精确 owned parent', () => {
+    const removed: string[] = [];
+    expect(() =>
+      runWithOwnedTempCleanup(
+        '/tmp/unif-runtime-api-red',
+        () => {
+          throw new Error('post-scaffold failure');
+        },
+        {
+          tempRoot: '/tmp',
+          remove(target) {
+            removed.push(target);
+          },
+        }
+      )
+    ).toThrow('post-scaffold failure');
+    expect(removed).toEqual(['/tmp/unif-runtime-api-red']);
+  });
+
+  test('完整流程成功时保留 owned parent', () => {
+    const removed: string[] = [];
+    runWithOwnedTempCleanup('/tmp/unif-runtime-api-green', () => {}, {
+      tempRoot: '/tmp',
+      remove(target) {
+        removed.push(target);
+      },
+    });
+    expect(removed).toEqual([]);
   });
 });
 

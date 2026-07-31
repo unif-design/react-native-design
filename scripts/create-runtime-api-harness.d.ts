@@ -50,3 +50,46 @@ export declare function buildHarnessManifest(
   resolvedVersions: Readonly<Record<string, string>>,
   tarballPath: string
 ): Record<string, unknown>;
+
+/** 从根 direct descriptor 对应的 lock locator 解析并交叉验证 installed / peer。 */
+export declare function resolveLockedDependency(
+  rootManifest: Record<string, unknown>,
+  lockText: string,
+  installedVersions: Readonly<Record<string, string>>,
+  name: string,
+  peerRange?: string
+): string;
+
+export declare function buildNativeTemplateSnapshot(
+  templateFiles: Readonly<Record<string, string>>
+): Record<string, string>;
+
+export declare function assertNativeTemplateSnapshot(
+  snapshot: Readonly<Record<string, string>>,
+  generatedFiles: Readonly<Record<string, string>>
+): void;
+
+export type InstallHarnessSeam = {
+  nodePath?: string;
+  execute?: (command: string, args: readonly string[], cwd: string) => void;
+  exists?: (file: string) => boolean;
+};
+
+/** 首次 install 生成 owned temp lock,随后用同一 manifest / lock immutable 复验。 */
+export declare function installHarnessDependencies(
+  appDir: string,
+  yarnPath: string,
+  seam?: InstallHarnessSeam
+): void;
+
+/** 失败时删除精确 owned temp parent;成功时保留供人工验收。 */
+export type OwnedTempCleanupSeam = {
+  tempRoot?: string;
+  remove?: (target: string, options: { recursive: true; force: true }) => void;
+};
+
+export declare function runWithOwnedTempCleanup<T>(
+  parent: string,
+  operation: () => T,
+  seam?: OwnedTempCleanupSeam
+): T;

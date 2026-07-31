@@ -19,7 +19,9 @@
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const { execFileSync } = require('node:child_process');
+const semver = require('semver');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
 const APP_NAME = 'RuntimeApiHarness';
@@ -33,12 +35,13 @@ const EXPECTED = {
   reactNative: '0.86.2',
 };
 
-/** RN 0.86.2 template 必须留在生成物里的原生标记,缺失说明脚手架没按预期落盘。 */
-const NATIVE_MARKERS = {
-  'ios/Podfile': ['react_native_post_install', 'use_react_native!'],
-  'android/settings.gradle': ['com.facebook.react.settings'],
-  'android/build.gradle': ['com.facebook.react'],
-};
+const TOOLCHAIN_PACKAGES = ['@babel/core', '@react-native/metro-config'];
+const NATIVE_TEMPLATE_FILES = [
+  'ios/Podfile',
+  'android/settings.gradle',
+  'android/build.gradle',
+  'android/app/build.gradle',
+];
 
 // ---------------------------------------------------------------------------
 // 纯逻辑(单测覆盖):版本、路径、锁文件与 manifest
@@ -93,6 +96,108 @@ function assertLockChecksums(lockText, packages) {
       );
     }
   }
+}
+
+function parseYamlScalar(value) {
+  const trimmed = value.trim();
+  if (trimmed.startsWith('"')) return JSON.parse(trimmed);
+  return trimmed;
+}
+
+/**
+ * 用根 manifest 的原始 direct range 精确匹配 yarn.lock descriptor,再读取其 locator。
+ * 不能只按包名或 installed tree 反推,否则同仓多版本时会静默选错 provider。
+ */
+function findLockEntry(lockText, name, directRange) {
+  const descriptor = `${name}@npm:${directRange}`;
+  const lines = lockText.split(/\r?\n/u);
+  for (let start = 0; start < lines.length; start += 1) {
+    const line = lines[start];
+    if (!line || /^\s/u.test(line) || !line.endsWith(':')) continue;
+    const header = parseYamlScalar(line.slice(0, -1));
+    if (!header.split(', ').includes(descriptor)) continue;
+
+    const entry = { descriptor };
+    for (let index = start + 1; index < lines.length; index += 1) {
+      const entryLine = lines[index];
+      if (entryLine && !/^\s/u.test(entryLine)) break;
+      const match = entryLine?.match(
+        /^\s{2}(version|resolution|checksum):\s*(.*)$/u
+      );
+      if (match) entry[match[1]] = parseYamlScalar(match[2]);
+    }
+    return entry;
+  }
+  return null;
+}
+
+function directRangeFor(rootManifest, name) {
+  const dependencyRange = rootManifest.dependencies?.[name];
+  const devDependencyRange = rootManifest.devDependencies?.[name];
+  if (
+    dependencyRange !== undefined &&
+    devDependencyRange !== undefined &&
+    dependencyRange !== devDependencyRange
+  ) {
+    throw new Error(
+      `${name} 在 dependencies / devDependencies 有冲突的 direct range。`
+    );
+  }
+  const directRange = dependencyRange ?? devDependencyRange;
+  if (typeof directRange !== 'string' || directRange.length === 0) {
+    throw new Error(`${name} 缺少根 direct range,不能确定 lock descriptor。`);
+  }
+  return directRange;
+}
+
+function resolveLockedDependency(
+  rootManifest,
+  lockText,
+  installedVersions,
+  name,
+  peerRange
+) {
+  const directRange = directRangeFor(rootManifest, name);
+  const entry = findLockEntry(lockText, name, directRange);
+  if (!entry) {
+    throw new Error(
+      `${name} 的 direct descriptor ${name}@npm:${directRange} 不在 yarn.lock。`
+    );
+  }
+  if (!entry.checksum) {
+    throw new Error(`${name} 的 lock locator 缺少 checksum。`);
+  }
+  if (!semver.valid(entry.version)) {
+    throw new Error(
+      `${name} 的 lock version "${entry.version}" 不是精确版本。`
+    );
+  }
+  const expectedLocator = `${name}@npm:${entry.version}`;
+  if (entry.resolution !== expectedLocator) {
+    throw new Error(
+      `${name} 的 lock locator 漂移:期望 ${expectedLocator},实际 ${entry.resolution}。`
+    );
+  }
+  if (!semver.satisfies(entry.version, directRange)) {
+    throw new Error(
+      `${name}@${entry.version} 不满足根 direct range ${directRange}。`
+    );
+  }
+  if (peerRange && !semver.satisfies(entry.version, peerRange)) {
+    throw new Error(
+      `${name}@${entry.version} 不满足根 peer range ${peerRange}。`
+    );
+  }
+  const installedVersion = installedVersions[name];
+  if (!installedVersion) {
+    throw new Error(`${name} 缺少 installed provider。`);
+  }
+  if (installedVersion !== entry.version) {
+    throw new Error(
+      `${name} installed version ${installedVersion} 与 lock locator ${entry.version} 漂移。`
+    );
+  }
+  return entry.version;
 }
 
 function assertNoDestinationArgument(argv) {
@@ -158,7 +263,17 @@ function buildHarnessManifest(rootManifest, resolvedVersions, tarballPath) {
     }
     dependencies[peer] = version;
   }
-  return { dependencies };
+  const devDependencies = {};
+  for (const name of TOOLCHAIN_PACKAGES) {
+    const version = resolvedVersions[name];
+    if (!version || !EXACT_VERSION.test(version)) {
+      throw new Error(
+        `Worklets toolchain ${name} 缺少 lock-derived 精确版本。`
+      );
+    }
+    devDependencies[name] = version;
+  }
+  return { dependencies, devDependencies };
 }
 
 // ---------------------------------------------------------------------------
@@ -182,12 +297,99 @@ function packageDir(name) {
   return path.dirname(require.resolve(`${name}/package.json`));
 }
 
-function resolveInstalledVersion(name) {
-  try {
-    return readJson(require.resolve(`${name}/package.json`)).version;
-  } catch {
-    return null;
+function resolveInstalledVersions(names, baseDirectory = REPO_ROOT) {
+  const versions = {};
+  for (const name of names) {
+    try {
+      const manifestPath = require.resolve(`${name}/package.json`, {
+        paths: [baseDirectory],
+      });
+      versions[name] = readJson(manifestPath).version;
+    } catch {
+      // 缺失值由 resolveLockedDependency 统一按具体包名 fail-fast。
+    }
   }
+  return versions;
+}
+
+function resolveHarnessVersions(rootManifest, lockText, installedVersions) {
+  const peers = rootManifest.peerDependencies ?? {};
+  const meta = rootManifest.peerDependenciesMeta ?? {};
+  const versions = {};
+  for (const name of Object.keys(peers)) {
+    if (meta[name]?.optional) continue;
+    versions[name] = resolveLockedDependency(
+      rootManifest,
+      lockText,
+      installedVersions,
+      name,
+      peers[name]
+    );
+  }
+  for (const name of TOOLCHAIN_PACKAGES) {
+    versions[name] = resolveLockedDependency(
+      rootManifest,
+      lockText,
+      installedVersions,
+      name
+    );
+  }
+  return versions;
+}
+
+function sha256(text) {
+  return crypto.createHash('sha256').update(text).digest('hex');
+}
+
+function applyTemplateAppName(text) {
+  return text
+    .replaceAll('HelloWorld', APP_NAME)
+    .replaceAll('helloworld', APP_NAME.toLowerCase());
+}
+
+function buildNativeTemplateSnapshot(templateFiles) {
+  const snapshot = {};
+  for (const file of NATIVE_TEMPLATE_FILES) {
+    const text = templateFiles[file];
+    if (typeof text !== 'string') {
+      throw new Error(`installed template 缺少原生文件 ${file}。`);
+    }
+    snapshot[file] = sha256(applyTemplateAppName(text));
+  }
+  return snapshot;
+}
+
+function assertNativeTemplateSnapshot(snapshot, generatedFiles) {
+  for (const file of NATIVE_TEMPLATE_FILES) {
+    const generated = generatedFiles[file];
+    if (typeof generated !== 'string') {
+      throw new Error(`脚手架产物缺少原生文件 ${file}。`);
+    }
+    if (sha256(generated) !== snapshot[file]) {
+      throw new Error(
+        `${file} 与 installed RN ${EXPECTED.template} template 内容漂移。`
+      );
+    }
+  }
+}
+
+function captureNativeTemplateSnapshot(templateDir) {
+  const files = {};
+  for (const file of NATIVE_TEMPLATE_FILES) {
+    files[file] = fs.readFileSync(
+      path.join(templateDir, 'template', file),
+      'utf8'
+    );
+  }
+  return buildNativeTemplateSnapshot(files);
+}
+
+function assertGeneratedNativeSnapshot(appDir, snapshot) {
+  const files = {};
+  for (const file of NATIVE_TEMPLATE_FILES) {
+    files[file] = fs.readFileSync(path.join(appDir, file), 'utf8');
+  }
+  assertNativeTemplateSnapshot(snapshot, files);
 }
 
 function assertGeneratedApp(appDir) {
@@ -208,21 +410,62 @@ function assertGeneratedApp(appDir) {
     generated.devDependencies?.['@react-native-community/cli'],
     EXPECTED.cli
   );
-  for (const [file, markers] of Object.entries(NATIVE_MARKERS)) {
-    const full = path.join(appDir, file);
-    if (!fs.existsSync(full)) {
-      throw new Error(`脚手架产物缺少原生文件 ${file} —— 拒绝继续。`);
-    }
-    const text = fs.readFileSync(full, 'utf8');
-    for (const marker of markers) {
-      if (!text.includes(marker)) {
-        throw new Error(
-          `${file} 缺少 RN ${EXPECTED.reactNative} template 标记 "${marker}" —— 生成物与锁定 template 不符。`
-        );
-      }
-    }
-  }
   return generated;
+}
+
+function installHarnessDependencies(appDir, yarnPath, seam = {}) {
+  const execute = seam.execute ?? run;
+  const exists = seam.exists ?? fs.existsSync;
+  const nodePath = seam.nodePath ?? process.execPath;
+  execute(nodePath, [yarnPath, 'install'], appDir);
+  const lockPath = path.join(appDir, 'yarn.lock');
+  if (!exists(lockPath)) {
+    throw new Error(`首次 install 未生成临时 yarn.lock:${lockPath}`);
+  }
+  execute(nodePath, [yarnPath, 'install', '--immutable'], appDir);
+}
+
+function assertHarnessInstall(appDir, expectedVersions) {
+  const manifest = readJson(path.join(appDir, 'package.json'));
+  const lockText = fs.readFileSync(path.join(appDir, 'yarn.lock'), 'utf8');
+  const names = Object.keys(expectedVersions);
+  const installedVersions = resolveInstalledVersions(names, appDir);
+  for (const name of names) {
+    const lockedVersion = resolveLockedDependency(
+      manifest,
+      lockText,
+      installedVersions,
+      name
+    );
+    assertExactVersion(
+      `${name}(harness install)`,
+      lockedVersion,
+      expectedVersions[name]
+    );
+  }
+}
+
+function assertOwnedTempParent(parent, tempRoot) {
+  const resolvedParent = path.resolve(parent);
+  const resolvedTempRoot = path.resolve(tempRoot);
+  if (
+    path.dirname(resolvedParent) !== resolvedTempRoot ||
+    !path.basename(resolvedParent).startsWith(TEMP_PREFIX) ||
+    path.basename(resolvedParent) === TEMP_PREFIX
+  ) {
+    throw new Error(`拒绝清理非 owned temp 路径:${parent}`);
+  }
+}
+
+function runWithOwnedTempCleanup(parent, operation, seam = {}) {
+  assertOwnedTempParent(parent, seam.tempRoot ?? os.tmpdir());
+  try {
+    return operation();
+  } catch (error) {
+    const remove = seam.remove ?? fs.rmSync;
+    remove(parent, { recursive: true, force: true });
+    throw error;
+  }
 }
 
 function writeBabelConfig(appDir) {
@@ -265,41 +508,49 @@ AppRegistry.registerComponent(appName, () => RuntimeApiScreen);
 function main() {
   assertNoDestinationArgument(process.argv.slice(2));
 
+  const rootManifest = readJson(path.join(REPO_ROOT, 'package.json'));
+  const lockText = fs.readFileSync(path.join(REPO_ROOT, 'yarn.lock'), 'utf8');
   const cliDir = packageDir('@react-native-community/cli');
   const templateDir = packageDir('@react-native-community/template');
-  assertExactVersion(
+  const bootstrapNames = [
     '@react-native-community/cli',
-    readJson(path.join(cliDir, 'package.json')).version,
-    EXPECTED.cli
+    '@react-native-community/template',
+    ...Object.keys(rootManifest.peerDependencies ?? {}),
+    ...TOOLCHAIN_PACKAGES,
+  ];
+  const installedVersions = resolveInstalledVersions(bootstrapNames);
+  const cliVersion = resolveLockedDependency(
+    rootManifest,
+    lockText,
+    installedVersions,
+    '@react-native-community/cli'
   );
+  const templateVersion = resolveLockedDependency(
+    rootManifest,
+    lockText,
+    installedVersions,
+    '@react-native-community/template'
+  );
+  assertExactVersion('@react-native-community/cli', cliVersion, EXPECTED.cli);
   assertExactVersion(
     '@react-native-community/template',
-    readJson(path.join(templateDir, 'package.json')).version,
+    templateVersion,
     EXPECTED.template
   );
   assertTemplateManifest(
     readJson(path.join(templateDir, 'template/package.json'))
   );
-  assertLockChecksums(
-    fs.readFileSync(path.join(REPO_ROOT, 'yarn.lock'), 'utf8'),
-    [
-      { name: '@react-native-community/cli', version: EXPECTED.cli },
-      { name: '@react-native-community/template', version: EXPECTED.template },
-    ]
+  const nativeTemplateSnapshot = captureNativeTemplateSnapshot(templateDir);
+  const resolvedVersions = resolveHarnessVersions(
+    rootManifest,
+    lockText,
+    installedVersions
   );
-
-  const rootManifest = readJson(path.join(REPO_ROOT, 'package.json'));
-  const resolvedVersions = {};
-  for (const peer of Object.keys(rootManifest.peerDependencies ?? {})) {
-    const version = resolveInstalledVersion(peer);
-    if (version) resolvedVersions[peer] = version;
-  }
 
   const parent = fs.mkdtempSync(path.join(os.tmpdir(), TEMP_PREFIX));
   assertOutsideExample(parent);
   const appDir = path.join(parent, APP_NAME);
-  let generated = false;
-  try {
+  runWithOwnedTempCleanup(parent, () => {
     console.log(`[harness] 打包当前源码…`);
     runYarn(['prepare'], REPO_ROOT);
     const tarball = path.join(parent, 'unif-react-native-design.tgz');
@@ -314,27 +565,28 @@ function main() {
       [cliBin, ...buildScaffoldArgs(templateDir, parent)],
       parent
     );
-    generated = true;
 
     const generatedManifest = assertGeneratedApp(appDir);
+    assertGeneratedNativeSnapshot(appDir, nativeTemplateSnapshot);
     const harness = buildHarnessManifest(
       rootManifest,
       resolvedVersions,
       tarball
     );
+    const finalManifest = {
+      ...generatedManifest,
+      dependencies: {
+        ...generatedManifest.dependencies,
+        ...harness.dependencies,
+      },
+      devDependencies: {
+        ...generatedManifest.devDependencies,
+        ...harness.devDependencies,
+      },
+    };
     fs.writeFileSync(
       path.join(appDir, 'package.json'),
-      `${JSON.stringify(
-        {
-          ...generatedManifest,
-          dependencies: {
-            ...generatedManifest.dependencies,
-            ...harness.dependencies,
-          },
-        },
-        null,
-        2
-      )}\n`
+      `${JSON.stringify(finalManifest, null, 2)}\n`
     );
 
     fs.copyFileSync(
@@ -353,12 +605,9 @@ function main() {
     );
     writeEntry(appDir);
 
-    console.log('[harness] 安装依赖…');
-    run(
-      process.execPath,
-      [path.join(appDir, 'yarn-4.11.0.cjs'), 'install'],
-      appDir
-    );
+    console.log('[harness] 生成临时 lockfile 并执行 immutable 复验…');
+    installHarnessDependencies(appDir, path.join(appDir, 'yarn-4.11.0.cjs'));
+    assertHarnessInstall(appDir, resolvedVersions);
 
     // 先装 Gemfile 里锁定的 CocoaPods —— 直接 `bundle exec pod install` 会用宿主机
     // 恰好装着的那个 pod(或者压根没有),生成物就不再由 template 的 Gemfile 决定了。
@@ -378,13 +627,7 @@ function main() {
     console.log('后续在该目录中执行:');
     console.log('  yarn android');
     console.log('  yarn ios');
-  } catch (error) {
-    // 只删自己刚建的那一个 temp 路径;生成失败才删,成功的产物要留给人工验收。
-    if (!generated && parent.includes(TEMP_PREFIX)) {
-      fs.rmSync(parent, { recursive: true, force: true });
-    }
-    throw error;
-  }
+  });
 }
 
 module.exports = {
@@ -392,11 +635,16 @@ module.exports = {
   assertExactVersion,
   assertLockChecksums,
   assertNoDestinationArgument,
+  assertNativeTemplateSnapshot,
   assertOutsideExample,
   assertTemplateManifest,
   buildHarnessManifest,
+  buildNativeTemplateSnapshot,
   buildScaffoldArgs,
   findLockChecksum,
+  installHarnessDependencies,
+  resolveLockedDependency,
+  runWithOwnedTempCleanup,
 };
 
 if (require.main === module) {
