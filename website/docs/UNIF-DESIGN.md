@@ -292,6 +292,8 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 
 **没有 easing token** —— 缓动由 reanimated `withTiming` 默认曲线承担(Spinner 显式用 `Easing.linear`),自定义缓动从 `react-native-reanimated` import `Easing`。
 
+**Reduced motion。** `usePrefersReducedMotion(): boolean` 两端都返回真实系统偏好:native 读 Reanimated 的 `useReducedMotion()`(系统「减弱动态效果」开关),web 读 `matchMedia('(prefers-reduced-motion: reduce)')`。Reanimated 的 `ReduceMotion.System` 只覆盖它自己驱动的动画,timer / RAF / CSS transition / Modal 转场 / autoplay 都不在其管辖内 —— Pulse、Switch、Carousel、Reveal 必须显式分支到该 hook,开启后停在稳态终值而不是继续动。
+
 **按压态。** 非品牌表面 `opacity: 0.7`;品牌 CTA 切到 `c.primaryPressed`(`#D06200`);禁用 = 按钮 `opacity: 0.5` 或送出键背景 `c.surfaceContainerHighest`(`#E0E0E0`)。
 
 ---

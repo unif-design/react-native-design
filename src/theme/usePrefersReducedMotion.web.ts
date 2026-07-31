@@ -7,8 +7,11 @@ const QUERY = '(prefers-reduced-motion: reduce)';
 const win: any = globalThis as any;
 
 /**
- * web:监听系统「减弱动态效果」开关,返回当前是否开启;开关变化时自动更新。
- * native 端走 reanimated 的 `ReduceMotion.System`,对应 `.ts` 版恒返回 false。
+ * web:监听系统「减弱动态效果」开关(`matchMedia`),返回当前是否开启;开关变化时自动更新。
+ *
+ * native 兄弟实现读 Reanimated 的系统信号(`useReducedMotion()`),两端语义一致 ——
+ * 都返回真实的系统偏好。Reanimated 只自动处理它自己驱动的动画,timer / RAF / CSS
+ * transition / autoplay 一律要由消费方显式分支到本 hook。
  */
 export function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState<boolean>(() =>

@@ -23,6 +23,31 @@ description: "Unif Design 的 motion 时长 token（fast/base/slow/pulse）与�
 `motion.pulse`(1600ms)是脉冲一来一回的**全周期**。`usePulse` / `<Pulse>` 的 `duration` 是**半周期**(一个方向),所以脉冲场景常传 `motion.pulse / 2`(800ms)。
 :::
 
+## Reduced motion / `usePrefersReducedMotion` {#reduced-motion}
+
+`usePrefersReducedMotion(): boolean` 返回**真实的系统偏好**,两端语义一致:
+
+| 平台 | 数据源 |
+|---|---|
+| native(iOS / Android) | Reanimated 的系统信号 `useReducedMotion()`,即系统「减弱动态效果 / Remove animations」开关 |
+| web | `matchMedia('(prefers-reduced-motion: reduce)')`,开关变化时自动更新 |
+
+:::danger 动画引擎不会替你处理
+Reanimated 的 `ReduceMotion.System` **只覆盖它自己驱动的动画**(`withTiming` / `withSpring` / layout 装饰器)。组件自己用 `setInterval`、`requestAnimationFrame`、CSS transition、Modal 转场或 autoplay 做的动效完全不在其管辖范围内。
+
+`Pulse` / `Switch` / `Carousel` / `Reveal` 等**必须显式分支到 `usePrefersReducedMotion()`**,不能假设动画引擎已经处理。开启后的正确行为是停在稳态终值(例如 Pulse 静止于 `to`、Carousel 停止 autoplay),而不是继续动或直接消失。
+:::
+
+```tsx
+import { usePrefersReducedMotion } from '@unif/react-native-design';
+
+function Blink() {
+  const reduced = usePrefersReducedMotion();
+  // reduced 为 true 时不启动任何 timer / 动画,直接渲染稳态
+  return <Dot animated={!reduced} />;
+}
+```
+
 ## 按压态规则 {#按压态规则}
 
 - **非品牌表面** —— 按压时 `opacity: 0.7`。
