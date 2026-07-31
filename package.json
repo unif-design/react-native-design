@@ -45,6 +45,7 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "test": "jest --passWithNoTests",
     "check:runtime-peers": "node scripts/check-runtime-peers.js",
+    "create:runtime-harness": "node scripts/create-runtime-api-harness.js",
     "release": "release-it --only-version"
   },
   "keywords": [
