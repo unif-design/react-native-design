@@ -5,7 +5,9 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import {
   Button,
   ConfirmHost,
+  IconButton,
   Input,
+  NavBar,
   PasswordInput,
   Pulse,
   PulseDot,
@@ -18,6 +20,7 @@ import {
   toast,
   useColors,
   usePrefersReducedMotion,
+  type NavBarSlot,
 } from '@unif/react-native-design';
 
 /**
@@ -40,6 +43,9 @@ export function RuntimeApiScreen(): React.JSX.Element {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('查询');
   const [searchResult, setSearchResult] = useState('—');
+  const [buttonPresses, setButtonPresses] = useState(0);
+  const [unexpectedPresses, setUnexpectedPresses] = useState(0);
+  const [navBarAction, setNavBarAction] = useState('—');
   const modeSwitchProps = modeSwitched
     ? { value: '后来受控', onChangeText: setControlledInput }
     : { defaultValue: '首次非受控' };
@@ -73,6 +79,16 @@ export function RuntimeApiScreen(): React.JSX.Element {
     setConfirmResult(`destructive=${String(result)}`);
   };
 
+  // 显式 unknown seam：模拟 JS 消费者绕过 TypeScript 传入的伪 React object。
+  // 它必须在 effect 中给出 Metro warning、渲染为空，且绝不调用其中 handler。
+  const malformedNavBarSlot: unknown = {
+    $$typeof: Symbol.for('react.element'),
+    icon: 'not-generated-icon',
+    onPress: () => setNavBarAction('错误：无效 action 被调用'),
+    accessibilityLabel: '无效 action',
+  };
+  const malformedNavBarLeft = malformedNavBarSlot as NavBarSlot;
+
   return (
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
@@ -93,6 +109,77 @@ export function RuntimeApiScreen(): React.JSX.Element {
                 />
                 <Result label="confirm 结果" value={confirmResult} />
                 <Result label="重入 B 结果" value={reentryResult} />
+              </Section>
+
+              <Section title="Button / IconButton / NavBar action 与 a11y">
+                <Text style={styles.result}>
+                  用 Inspector 或 screen reader 确认 disabled / loading 均移除
+                  handler 并上报 disabled；loading 额外上报 busy。点击 enabled
+                  操作应递增，另两项必须保持 0。
+                </Text>
+                <Button
+                  label="enabled Button"
+                  testID="action-button-enabled"
+                  onPress={() => setButtonPresses((count) => count + 1)}
+                />
+                <Button
+                  label="disabled Button（不应触发）"
+                  disabled
+                  testID="action-button-disabled"
+                  onPress={() => setUnexpectedPresses((count) => count + 1)}
+                />
+                <Button
+                  label="loading Button（不应触发）"
+                  loading
+                  testID="action-button-loading"
+                  onPress={() => setUnexpectedPresses((count) => count + 1)}
+                />
+                <IconButton
+                  icon="check"
+                  accessibilityLabel="enabled IconButton"
+                  testID="action-icon-enabled"
+                  onPress={() => setButtonPresses((count) => count + 1)}
+                />
+                <IconButton
+                  icon="close"
+                  accessibilityLabel="loading IconButton（不应触发）"
+                  loading
+                  testID="action-icon-loading"
+                  onPress={() => setUnexpectedPresses((count) => count + 1)}
+                />
+                <Result label="enabled actions" value={String(buttonPresses)} />
+                <Result
+                  label="disabled/loading actions"
+                  value={String(unexpectedPresses)}
+                />
+                <View style={styles.navBarFrame}>
+                  <NavBar
+                    title="合法 action + display node 0"
+                    left={{
+                      icon: 'arrow-left',
+                      accessibilityLabel: '返回',
+                      onPress: () => setNavBarAction('合法 action 已触发'),
+                    }}
+                    right={0}
+                  />
+                </View>
+                <View style={styles.navBarFrame}>
+                  <NavBar
+                    title="display ReactNode"
+                    right={<Text>只读节点</Text>}
+                  />
+                </View>
+                <View style={styles.navBarFrame}>
+                  <NavBar
+                    title="无类型 malformed action 应为空"
+                    left={malformedNavBarLeft}
+                  />
+                </View>
+                <Result label="NavBar action" value={navBarAction} />
+                <Text style={styles.result}>
+                  malformed NavBar 在首次挂载后应只在 Metro 输出一次警告，left
+                  slot 不显示。
+                </Text>
               </Section>
 
               <Section title="Toast">
@@ -347,6 +434,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: '600' },
   result: { fontSize: 14, flexShrink: 1 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  navBarFrame: { borderWidth: 1 },
   swatch: {
     width: 28,
     height: 28,

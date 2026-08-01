@@ -91,7 +91,7 @@ identity-guarded、幂等的 `settle`。
 | 容器 | RN `<Modal transparent animationType="slide">` + backdrop,底部弹层卡片 |
 | 标题 | `t.heroSm`(18)+ `fw.semi` + `c.foreground` |
 | 说明 | `t.body`(15)+ `c.foregroundMuted` + `lineHeight 1.45` |
-| 按钮行 | 两个 `<Button style={{ flex: 1 }}>` 分别取消 / 确认；横向主轴均分由 Confirm action row 持有 |
+| 按钮行 | 两个 `<Button>` 是 Confirm action row 的直接 children，并由内部 `flex: 1` 平分横向主轴 |
 
 ## 主题键（Tokens）
 

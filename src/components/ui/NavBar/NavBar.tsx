@@ -3,9 +3,9 @@ import { Text, View } from 'react-native';
 import { useColors, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { IconButton } from '../IconButton';
-import { isNavBarAction } from './isSlot';
+import { classifyNavBarSlot, type NavBarSlotClassification } from './isSlot';
 import { makeStyles } from './styles';
-import type { NavBarAction, NavBarProps, NavBarSlot } from './types';
+import type { NavBarAction, NavBarProps } from './types';
 
 const log = createLogger('NavBar');
 
@@ -22,30 +22,14 @@ function renderSlot(slot: NavBarAction, tint: string) {
   );
 }
 
-function isInvalidPlainSlot(slot: unknown): slot is object {
-  if (
-    typeof slot !== 'object' ||
-    slot === null ||
-    Array.isArray(slot) ||
-    React.isValidElement(slot) ||
-    isNavBarAction(slot) ||
-    '$$typeof' in slot
-  ) {
-    return false;
-  }
-  const prototype = Object.getPrototypeOf(slot);
-  return prototype === Object.prototype || prototype === null;
-}
-
 /** left / right slot:NavBarAction → IconButton,ReactNode → 原样。 */
 function resolveSlot(
-  slot: NavBarSlot | undefined,
+  slot: NavBarSlotClassification,
   tint: string
 ): React.ReactNode {
-  if (!slot) return null;
-  if (isNavBarAction(slot)) return renderSlot(slot, tint);
-  if (isInvalidPlainSlot(slot)) return null;
-  return slot;
+  if (slot.kind === 'action') return renderSlot(slot.action, tint);
+  if (slot.kind === 'node') return slot.node;
+  return null;
 }
 
 /**
@@ -68,8 +52,11 @@ export function NavBar({
   const styles = useThemedStyles(makeStyles);
   const isBrand = variant === 'brand';
   const isTransparent = variant === 'transparent';
+  const leftSlot = classifyNavBarSlot(left);
+  const rightSlot = classifyNavBarSlot(right);
   const warnedInvalidSlot = useRef(false);
-  const hasInvalidSlot = isInvalidPlainSlot(left) || isInvalidPlainSlot(right);
+  const hasInvalidSlot =
+    leftSlot.kind === 'invalid' || rightSlot.kind === 'invalid';
   useEffect(() => {
     if (hasInvalidSlot && !warnedInvalidSlot.current) {
       warnedInvalidSlot.current = true;
@@ -91,7 +78,7 @@ export function NavBar({
       ]}
       testID={testID}
     >
-      <View style={styles.side}>{resolveSlot(left, tint)}</View>
+      <View style={styles.side}>{resolveSlot(leftSlot, tint)}</View>
       <View style={styles.center}>
         <Text style={[styles.title, { color: tint }]} numberOfLines={1}>
           {title}
@@ -103,7 +90,7 @@ export function NavBar({
         ) : null}
       </View>
       <View style={[styles.side, styles.sideRight]}>
-        {resolveSlot(right, tint)}
+        {resolveSlot(rightSlot, tint)}
       </View>
     </View>
   );

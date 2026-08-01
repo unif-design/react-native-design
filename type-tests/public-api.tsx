@@ -18,6 +18,8 @@ import {
   PasswordInput,
   Search,
   Textarea,
+  type NavBarAction,
+  type NavBarSlot,
   type TextFieldHandle,
 } from '../src';
 
@@ -35,10 +37,30 @@ const tooShortContainer = { height: 20 };
 // @ts-expect-error NavBar action object 必须有 handler 和名称
 <NavBar title="标题" left={{ icon: 'arrow-left' }} />;
 
-<NavBar
-  title="标题"
-  left={{ icon: 'arrow-left', onPress: noop, accessibilityLabel: '返回' }}
+<Button label="保存" onPress={noop} accessibilityState={{ expanded: false }} />;
+<IconButton
+  icon="close"
+  accessibilityLabel="关闭"
+  onPress={noop}
+  accessibilityState={{ selected: false }}
 />;
+// @ts-expect-error Button 禁止调用方覆盖 disabled
+<Button label="保存" onPress={noop} accessibilityState={{ disabled: false }} />;
+<IconButton
+  icon="close"
+  accessibilityLabel="关闭"
+  onPress={noop}
+  // @ts-expect-error IconButton 禁止调用方覆盖 busy
+  accessibilityState={{ busy: false }}
+/>;
+
+const navBarAction: NavBarAction = {
+  icon: 'arrow-left',
+  onPress: noop,
+  accessibilityLabel: '返回',
+};
+const navBarDisplaySlot: NavBarSlot = <Text>只读</Text>;
+<NavBar title="标题" left={navBarAction} right={navBarDisplaySlot} />;
 <NavBar title="标题" right={<Text>只读</Text>} />;
 
 // --- Input / Textarea:受控 vs 非受控 -------------------------------------

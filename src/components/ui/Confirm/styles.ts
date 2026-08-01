@@ -48,10 +48,8 @@ export const makeStyles = (c: ColorTokens) =>
       paddingHorizontal: space['9'],
       paddingTop: space['7'],
     },
-    // 主轴尺寸归 Confirm 自己:每个 action slot 各占一半。此前靠 Button 的 `block`
-    // (它内部是 alignSelf: 'stretch' + flexGrow)间接撑开 —— 那是按钮自身的语义,
-    // 换成非 Button 的 action 就会塌成内容宽。slot 自持 flex 后两者解耦。
-    actionSlot: {
+    // action row 的两个直接 Button 平分横向主轴；不借用 Button.block 的交叉轴语义。
+    action: {
       flex: 1,
     },
   });

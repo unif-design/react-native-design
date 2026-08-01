@@ -140,27 +140,20 @@ export function ConfirmHost(): React.JSX.Element | null {
                 ) : null}
               </View>
               <View style={styles.actions}>
-                {/* 每个 action slot 自持 flex: 1 —— 主轴尺寸由 Confirm 的布局决定,
-                    不再依赖 Button 的 `block` 语义(那是按钮自己的 alignSelf/flexGrow,
-                    换成非 Button 的 action 就会塌掉)。 */}
-                <View style={styles.actionSlot}>
-                  <Button
-                    testID="confirm-cancel"
-                    label={display.options.cancelLabel ?? '取消'}
-                    variant="secondary"
-                    style={{ flex: 1 }}
-                    onPress={handleCancel}
-                  />
-                </View>
-                <View style={styles.actionSlot}>
-                  <Button
-                    testID="confirm-ok"
-                    label={display.options.confirmLabel ?? '确认'}
-                    variant={display.options.destructive ? 'danger' : 'primary'}
-                    style={{ flex: 1 }}
-                    onPress={handleConfirm}
-                  />
-                </View>
+                <Button
+                  testID="confirm-cancel"
+                  label={display.options.cancelLabel ?? '取消'}
+                  variant="secondary"
+                  style={styles.action}
+                  onPress={handleCancel}
+                />
+                <Button
+                  testID="confirm-ok"
+                  label={display.options.confirmLabel ?? '确认'}
+                  variant={display.options.destructive ? 'danger' : 'primary'}
+                  style={styles.action}
+                  onPress={handleConfirm}
+                />
               </View>
             </>
           ) : null}
