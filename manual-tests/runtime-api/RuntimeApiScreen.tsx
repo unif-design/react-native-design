@@ -82,7 +82,7 @@ export function RuntimeApiScreen(): React.JSX.Element {
   // 显式 unknown seam：模拟 JS 消费者绕过 TypeScript 传入的伪 React object。
   // 它必须在 effect 中给出 Metro warning、渲染为空，且绝不调用其中 handler。
   const malformedNavBarSlot: unknown = {
-    $$typeof: Symbol.for('react.element'),
+    $$typeof: Symbol.for('react.transitional.element'),
     icon: 'not-generated-icon',
     onPress: () => setNavBarAction('错误：无效 action 被调用'),
     accessibilityLabel: '无效 action',

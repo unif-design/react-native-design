@@ -29,15 +29,84 @@ export function isNavBarAction(v: unknown): v is NavBarAction {
   );
 }
 
+function hasElementShape(value: React.ReactElement): boolean {
+  const element = value as unknown as { type: unknown; props: unknown };
+  return (
+    Object.prototype.hasOwnProperty.call(value, 'type') &&
+    Object.prototype.hasOwnProperty.call(value, 'props') &&
+    element.type !== null &&
+    element.type !== undefined &&
+    typeof element.props === 'object' &&
+    element.props !== null
+  );
+}
+
+function isThenable(value: unknown): value is Promise<ReactNode> {
+  if (
+    (typeof value !== 'object' && typeof value !== 'function') ||
+    value === null
+  ) {
+    return false;
+  }
+  try {
+    return typeof (value as { then?: unknown }).then === 'function';
+  } catch {
+    return false;
+  }
+}
+
+function isIterable(value: unknown): value is Iterable<ReactNode> {
+  if (typeof value !== 'object' || value === null) return false;
+  try {
+    return (
+      typeof (value as { [Symbol.iterator]?: unknown })[Symbol.iterator] ===
+      'function'
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isReactPortal(value: object): value is React.ReactPortal {
+  const portal = value as {
+    key?: unknown;
+    containerInfo?: unknown;
+  };
+  const hasPortalShape =
+    Object.prototype.hasOwnProperty.call(value, 'key') &&
+    Object.prototype.hasOwnProperty.call(value, 'children') &&
+    Object.prototype.hasOwnProperty.call(value, 'containerInfo') &&
+    Object.prototype.hasOwnProperty.call(value, 'implementation') &&
+    (portal.key === null || typeof portal.key === 'string') &&
+    portal.containerInfo !== null &&
+    portal.containerInfo !== undefined;
+  if (!hasPortalShape) return false;
+  try {
+    // React 没有公开 portal guard；只调用公开 Children API，且该分支已排除 iterable/
+    // thenable，避免消费 generator 或改变 Promise 语义。
+    return React.Children.count(value as ReactNode) === 1;
+  } catch {
+    return false;
+  }
+}
+
 function isRenderableReactNode(value: unknown): value is ReactNode {
-  if (typeof value === 'string' || typeof value === 'number') return true;
-  if (Array.isArray(value)) return value.every(isRenderableReactNode);
-  return React.isValidElement(value);
+  if (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'bigint'
+  ) {
+    return true;
+  }
+  if (React.isValidElement(value)) return hasElementShape(value);
+  if (isThenable(value) || isIterable(value)) return true;
+  return typeof value === 'object' && value !== null && isReactPortal(value);
 }
 
 /**
- * 未类型化边界的单一分类器。仅接受 React 公开 `isValidElement` 能验证的 element、
- * 基础可渲染值及其数组；任意 plain object（包括伪造 `$$typeof`）都不进入 React 渲染。
+ * 未类型化边界的单一分类器。React 的公开 API 无法证明 object 不可伪造；这里拒绝
+ * 结构不成立的 marker-only element 与普通 plain object，同时保留 React 19 声明的
+ * bigint、Iterable、portal、Promise/thenable 等合法 ReactNode 原值。
  */
 export function classifyNavBarSlot(value: unknown): NavBarSlotClassification {
   if (value === undefined || value === null || typeof value === 'boolean') {
