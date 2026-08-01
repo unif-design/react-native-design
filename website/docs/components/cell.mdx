@@ -1,11 +1,12 @@
 ---
 sidebar_position: 1
 title: Cell · List 列表行
-description: "列表行 + List 容器 —— grouped(独立白卡 + 8px gap)/ flush(透明底 + 行间 hairline)两模式，leading / title / desc / extra / arrow 插槽，可点 onPress、danger 危险态。"
+description: '列表行 + List 容器 —— actionable / control / static 三个显式分支，primitive 文本安全渲染，grouped / flush 两种布局。'
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
-import { Cell, List } from '@unif/react-native-design';
+import { Cell, List, Switch } from '@unif/react-native-design';
+import { useState } from 'react';
 
 # Cell · List 列表行
 
@@ -15,43 +16,105 @@ import { Cell, List } from '@unif/react-native-design';
 
 下方渲染的就是 `src/components/ui/Cell/Cell.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
 
-<LiveDemo>
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <span className="demo-label" style={{ paddingLeft: 8 }}>设置</span>
-      <List>
-        <Cell leading="settings" title="主题" extra="跟随系统" arrow onPress={() => {}} />
-        <Cell leading="bell" title="通知" arrow onPress={() => {}} />
-        <Cell leading="lock" title="隐私" desc="位置 / 相机 / 麦克风" arrow onPress={() => {}} />
-        <Cell leading="info" title="关于" extra="v1.0" arrow onPress={() => {}} />
-      </List>
-    </div>
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <span className="demo-label" style={{ paddingLeft: 8 }}>客户</span>
-      <List>
-        <Cell title="东方便利店" desc="浦东 · 1.2 km" extra="¥12,480" arrow onPress={() => {}} />
-        <Cell title="明珠超市" desc="浦东 · 2.8 km" extra="¥8,960" arrow onPress={() => {}} />
-        <Cell title="优家便利" desc="浦东 · 4.1 km" extra="¥3,200" arrow onPress={() => {}} />
-      </List>
-    </div>
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <span className="demo-label" style={{ paddingLeft: 8 }}>disabled · 不可点击 / 视觉变灰</span>
-      <List>
-        <Cell leading="lock" title="云同步" desc="未登录" arrow disabled />
-        <Cell leading="bell" title="通知（开发中）" extra="即将开放" disabled />
-      </List>
-    </div>
-  </div>
-</LiveDemo>
+export const CellDemo = () => {
+  const [lastAction, setLastAction] = useState('尚未操作');
+  const [notify, setNotify] = useState(true);
+  return (
+    <LiveDemo>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <span className="demo-label" style={{ paddingLeft: 8 }}>
+            设置
+          </span>
+          <List>
+            <Cell
+              leading="settings"
+              title="主题"
+              extra={{ kind: 'text', value: '跟随系统' }}
+              arrow
+              onPress={() => setLastAction('打开主题')}
+            />
+            <Cell
+              leading="bell"
+              title="通知"
+              desc="由行尾开关控制"
+              extra={{
+                kind: 'control',
+                node: (
+                  <Switch
+                    value={notify}
+                    onChange={setNotify}
+                    accessibilityLabel="通知"
+                  />
+                ),
+              }}
+            />
+            <Cell
+              leading="lock"
+              title="隐私"
+              desc="位置 / 相机 / 麦克风"
+              arrow
+              onPress={() => setLastAction('打开隐私')}
+            />
+            <Cell
+              leading="info"
+              title="版本"
+              extra={{ kind: 'text', value: 'v1.0' }}
+            />
+          </List>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <span className="demo-label" style={{ paddingLeft: 8 }}>
+            客户
+          </span>
+          <List>
+            <Cell
+              title="东方便利店"
+              desc="浦东 · 1.2 km"
+              extra={{ kind: 'text', value: '¥12,480' }}
+              arrow
+              onPress={() => setLastAction('打开东方便利店')}
+            />
+            <Cell
+              title="明珠超市"
+              desc="浦东 · 2.8 km"
+              extra={{ kind: 'text', value: '¥8,960' }}
+              arrow
+              onPress={() => setLastAction('打开明珠超市')}
+            />
+          </List>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <span className="demo-label" style={{ paddingLeft: 8 }}>
+            disabled action · handler 会被移除
+          </span>
+          <List>
+            <Cell
+              leading="lock"
+              title="云同步"
+              desc="未登录"
+              arrow
+              disabled
+              onPress={() => setLastAction('错误：禁用行被触发')}
+            />
+          </List>
+        </div>
+        <span className="demo-label">操作结果：{lastAction}</span>
+      </div>
+    </LiveDemo>
+  );
+};
+
+<CellDemo />
 
 ## 视觉规范
 
-| 元素 | 规则 |
-|---|---|
-| 整组容器（grouped） | `c.background` 浅灰底（视觉分组），`padding: 8`（`space[3]`），`borderRadius: 12`（`radius.xl`），`gap: 8` |
-| 单行 | `c.surface` 白底，`borderRadius: 10`（`radius.lg`），`min-height: 56`，`padding: 14`（`space[6]`，水平 + 垂直同值） |
-| 行内布局 | 左 icon (grouped 22 / flush 28 盒) + 中 (title 15/500 + desc 13/subtle) + 右 extra (13/subtle) + arrow (grouped 20 / flush 18) |
-| **绝不**（grouped） | `border-bottom`、`hairline` 分隔（flush 模式才用 inset hairline） |
+| 元素                | 规则                                                                                                                           |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| 整组容器（grouped） | `c.background` 浅灰底（视觉分组），`padding: 8`（`space[3]`），`borderRadius: 12`（`radius.xl`），`gap: 8`                     |
+| 单行                | `c.surface` 白底，`borderRadius: 10`（`radius.lg`），`min-height: 56`，`padding: 14`（`space[6]`，水平 + 垂直同值）            |
+| 行内布局            | 左 icon (grouped 22 / flush 28 盒) + 中 (title 15/500 + desc 13/subtle) + 右 extra (13/subtle) + arrow (grouped 20 / flush 18) |
+| **绝不**（grouped） | `border-bottom`、`hairline` 分隔（flush 模式才用 inset hairline）                                                              |
 
 ## 用法
 
@@ -59,103 +122,158 @@ import { Cell, List } from '@unif/react-native-design';
 import { Cell, List, Switch } from '@unif/react-native-design';
 
 <List>
-  <Cell title="主题" extra="跟随系统" arrow leading="settings" onPress={...} />
-  <Cell title="通知" arrow leading="bell" />
+  <Cell
+    title="主题"
+    extra={{ kind: 'text', value: '跟随系统' }}
+    arrow
+    leading="settings"
+    onPress={openTheme}
+  />
   <Cell
     title="拜访提醒"
     desc="按计划自动推送"
-    extra={
-      <Switch
-        value={notify}
-        onChange={setNotify}
-        accessibilityLabel="拜访提醒"
-      />
-    }
+    extra={{
+      kind: 'control',
+      node: (
+        <Switch
+          value={notify}
+          onChange={setNotify}
+          accessibilityLabel="拜访提醒"
+        />
+      ),
+    }}
   />
-</List>
+  <Cell title="版本" extra={{ kind: 'text', value: 12n }} />
+</List>;
 
-{/* 平铺式（无浅灰背景容器，用于嵌套在其它白卡内）*/}
+{
+  /* 平铺式（无浅灰背景容器，用于嵌套在其它白卡内）*/
+}
 <List flush>
-  <Cell title="客户名" desc="地址" extra="¥1,200" arrow />
-</List>
+  <Cell
+    title="客户名"
+    desc="地址"
+    extra={{ kind: 'text', value: '¥1,200' }}
+    arrow
+    onPress={openCustomer}
+  />
+</List>;
 ```
 
 ## API
 
+公开内容类型：
+
+```ts
+type CellTextValue = string | number | bigint;
+type CellLeading = IconName | { kind: 'display'; node: ReactElement };
+type CellExtra =
+  | { kind: 'text'; value: CellTextValue }
+  | {
+      kind: 'display';
+      node: ReactElement;
+      accessibilityText?: string;
+    }
+  | { kind: 'control'; node: ReactElement };
+```
+
 ### `<Cell>`
 
-| Prop | Type | 默认 | 说明 |
-|---|---|---|---|
-| `title` | `ReactNode` | — | 主标题(必填);string 自动套 `<Text>` + `numberOfLines=titleLines`,传 ReactNode 完全自定义 |
-| `titleLines` | `number` | `1` | `title` 为 string 时的 `numberOfLines`(如新闻标题传 2) |
-| `desc` | `ReactNode` | — | 副标题 / 描述;string 自动 `numberOfLines=2` |
-| `extra` | `ReactNode` | — | 右侧 slot — 文字、Tag、Switch、Stepper 等 |
-| `arrow` | `boolean` | `false` | 显示右侧 chevron-right(`danger` 时不渲染) |
-| `leading` | `IconName \| ReactNode` | — | 左侧 icon 名（grouped 渲染 22px 裸 icon / flush 渲染 28×28 橙盒 + 16px icon）或自定义节点（如 Avatar） |
-| `onPress` | `() => void` | — | 点击回调（提供时启用按压态;不传则为纯展示 `<View>`） |
-| `disabled` | `boolean` | `false` | 仅对带 `onPress` 的 cell 有效,true 时 onPress 不触发 + 整体半透明 + a11y disabled |
-| `danger` | `boolean` | `false` | 危险态：icon 盒子 + 标题用 error 红,且不渲染 arrow（常用于退出登录 / 删除等） |
-| `style` | `StyleProp<ViewStyle>` | — | 额外样式覆盖（合并到 cell 容器的 style 数组） |
-| `testID` | `string` | — | E2E / 测试定位 |
-| `accessibilityLabel` | `string` | title(string 时) | 显式 SR 朗读文案;`title` 传 ReactNode 时务必显式传 |
-| `accessibilityHint` | `string` | — | SR 行为说明 hint(≤8 字,如「查看详情」);`onPress` 缺省时无意义 |
+| Prop                 | Type                   | 默认     | 说明                                                                          |
+| -------------------- | ---------------------- | -------- | ----------------------------------------------------------------------------- |
+| `title`              | `CellTextValue`        | —        | 主标题（必填）；始终由库内 `<Text>` + `stringifyCellText` 安全渲染            |
+| `titleLines`         | `number`               | `1`      | 主标题的 `numberOfLines`                                                      |
+| `desc`               | `CellTextValue`        | —        | 副标题 / 描述；始终由库内 `<Text>` 安全渲染，最多 2 行                        |
+| `extra`              | `CellExtra`            | —        | `text` / `display` / `control` 三种显式配置；可用分支受 `CellProps` 联合约束  |
+| `arrow`              | `boolean`              | `false`  | 仅 actionable 可用；显示 chevron-right，`danger` 时仍不渲染                   |
+| `leading`            | `CellLeading`          | —        | 图标名，或 `{ kind: 'display', node }` 纯展示节点                             |
+| `onPress`            | `() => void`           | —        | actionable 分支必填；control/static 禁止                                      |
+| `disabled`           | `boolean`              | `false`  | 仅 actionable 可用；禁用时移除 handler、半透明并上报 disabled                 |
+| `danger`             | `boolean`              | `false`  | 危险态：icon 盒子 + 标题用 error 红,且不渲染 arrow（常用于退出登录 / 删除等） |
+| `style`              | `StyleProp<ViewStyle>` | —        | 额外样式覆盖（合并到 cell 容器的 style 数组）                                 |
+| `testID`             | `string`               | —        | E2E / 测试定位                                                                |
+| `accessibilityLabel` | `string`               | 自动组合 | 仅 actionable 可用；覆盖自动名称                                              |
+| `accessibilityHint`  | `string`               | —        | 仅 actionable 可用；说明操作结果                                              |
+
+`CellProps` 是三个互斥分支：
+
+| 分支       | 必要条件                   | 可用 extra         | 外层语义                                                 |
+| ---------- | -------------------------- | ------------------ | -------------------------------------------------------- |
+| actionable | `onPress` 必填             | `text` / `display` | RNGH `Pressable` + `button`                              |
+| control    | `extra.kind === 'control'` | `control`          | 本地 `View`；control 自己承担交互与名称                  |
+| static     | 无 `onPress`               | `text` / `display` | 本地 `View`；禁止 `arrow` / disabled / action a11y props |
 
 ### `<List>`
 
-| Prop | Type | 默认 | 说明 |
-|---|---|---|---|
-| `children` | `ReactNode` | — | 一组 `<Cell>` |
-| `flush` | `boolean` | `false` | 透明背景（嵌套用）；省略则白卡 + 8px gap + 浅灰底容器 |
-| `divider` | `'full' \| 'none'` | `'full'` | flush 模式下行间分隔线:`'full'` 铺满全宽 hairline / `'none'` 不画 |
-| `style` | `StyleProp<ViewStyle>` | — | 额外样式覆盖 |
-| `testID` | `string` | — | E2E / 测试定位 |
+| Prop       | Type                   | 默认     | 说明                                                              |
+| ---------- | ---------------------- | -------- | ----------------------------------------------------------------- |
+| `children` | `ReactNode`            | —        | 一组 `<Cell>`                                                     |
+| `flush`    | `boolean`              | `false`  | 透明背景（嵌套用）；省略则白卡 + 8px gap + 浅灰底容器             |
+| `divider`  | `'full' \| 'none'`     | `'full'` | flush 模式下行间分隔线:`'full'` 铺满全宽 hairline / `'none'` 不画 |
+| `style`    | `StyleProp<ViewStyle>` | —        | 额外样式覆盖                                                      |
+| `testID`   | `string`               | —        | E2E / 测试定位                                                    |
 
 ## 无障碍（a11y）
 
-来源：`src/components/ui/Cell/Cell.tsx`、`types.ts`。
+来源：`src/components/ui/Cell/Cell.tsx`、`content.ts`、`types.ts`。
 
-a11y 语义是**条件性**的：仅当传了 `onPress` 时，Cell 才用 `<Pressable>` 包裹并声明语义；不可点的纯展示 Cell 渲染为 `<View>`，无 a11y 角色。
-
-- 默认 `accessibilityRole`：可点时为 `'button'`（`onPress` 缺省则无角色）。
-- a11y props（仅 `onPress` 时生效）：`accessibilityLabel` 取 `accessibilityLabel ?? (typeof title === 'string' ? title : undefined)` —— 即 `title` 为字符串时自动作 label；**`title` 传 ReactNode（自定义渲染）时务必显式传 `accessibilityLabel`，否则 SR 用户听不到内容**。`accessibilityHint` 可选，说明 tap 后行为（短句，如「查看详情」）。
-- 状态语义：`disabled=true` 时上报 `accessibilityState={{ disabled: true }}`（仅对带 `onPress` 的 cell 有效）。
+- actionable 是唯一外层可访问操作：RNGH `Pressable` 固定为 `button`。默认名称依次组合非空的 `title`、`desc` 与 extra 文本，使用中文顿隔 `，`；`display.accessibilityText` 只有非空白时才贡献。显式 `accessibilityLabel` 可覆盖。
+- `disabled=true` 时 actionable 同时设置 disabled state 和 `onPress={undefined}`，不会留下可调用 handler。
+- control/static 都渲染本地 `View`，不创建外层 action 或 a11y element。control 的 node 必须自己提供 role、state、handler 与 accessible name。
+- 所有 leading、自定义 `display` extra 与 chevron 都由库内本地 `View` 包裹，并用共享隐藏属性移出 a11y tree；`display.accessibilityText` 只进入 actionable 外层名称，不形成第二焦点。
+- `title`、`desc` 与 `text` extra 始终由库内 `Text` 渲染，`0` / `bigint` 不会成为 `View` 的裸 child。
 
 ```tsx
-// string title 自动作 label
-<Cell title="主题" extra="跟随系统" arrow onPress={...} />
-
-// ReactNode title 必须显式给 label
+// 默认读作“设备，在线”；display node 本身不形成第二焦点
 <Cell
-  title={<CustomTitle />}
-  accessibilityLabel="客户：东方便利店"
-  accessibilityHint="查看详情"
-  onPress={...}
+  title="设备"
+  extra={{
+    kind: 'display',
+    node: <StatusDot status="active" />,
+    accessibilityText: '在线',
+  }}
+  onPress={openDevice}
+/>
+
+// control Cell 外层不是 button；Switch 自己命名
+<Cell
+  title="通知"
+  extra={{
+    kind: 'control',
+    node: (
+      <Switch
+        value={notify}
+        onChange={setNotify}
+        accessibilityLabel="通知"
+      />
+    ),
+  }}
 />
 ```
 
 ## 与 Form 的区别
 
-| 用途 | 选哪个 |
-|---|---|
-| 数据展示 / 跳转 | **Cell · List** — 白卡 + gap |
+| 用途            | 选哪个                                |
+| --------------- | ------------------------------------- |
+| 数据展示 / 跳转 | **Cell · List** — 白卡 + gap          |
 | 数据录入 / 表单 | [Form](./form) — 白卡 + 行间 hairline |
 
 ## 主题键（Tokens）
 
 读取来源：`src/components/ui/Cell/styles.ts`。
 
-| Token | 来源 | 作用 |
-|---|---|---|
-| `c.surface` | `useColors()` | grouped 模式下单行白卡背景色 |
-| `c.foreground` | `useColors()` | 主标题文字色（`title` / `titleFlush`） |
-| `c.foregroundSubtle` | `useColors()` | 副标题 / extra 文字色（grouped 模式） |
-| `c.foregroundMuted` | `useColors()` | 副标题 / extra 文字色（flush 模式，另加 `opacity: 0.55`） |
-| `c.background` | `useColors()` | `<List>` grouped 模式外容器背景色（浅灰底） |
-| `c.outline` | `useColors()` | flush 模式行间 hairline 分隔线颜色 |
-| `radius.lg` | 静态 token | grouped 模式单行卡片圆角 |
-| `radius.xl` | 静态 token | `<List>` grouped 模式外容器圆角 |
-| `space[5]` / `space[6]` / `space[3]` | 静态 token | 行内 leading↔body↔extra gap(12)/ 行内水平+垂直内边距(14)/ List 行间 gap + 容器 padding(8) |
-| `space[4]` | 静态 token | flush 模式行内元素间 gap（`cellFlush.gap`） |
-| `type.body` / `type.xs` | 静态 token | 主标题 / 副标题字号（grouped 模式） |
-| `fw.medium` | 静态 token | 主标题字重 |
-| `StyleSheet.hairlineWidth` | React Native | flush 模式分隔线物理宽度（不参与 token 缩放） |
+| Token                                | 来源          | 作用                                                                                      |
+| ------------------------------------ | ------------- | ----------------------------------------------------------------------------------------- |
+| `c.surface`                          | `useColors()` | grouped 模式下单行白卡背景色                                                              |
+| `c.foreground`                       | `useColors()` | 主标题文字色（`title` / `titleFlush`）                                                    |
+| `c.foregroundSubtle`                 | `useColors()` | 副标题 / extra 文字色（grouped 模式）                                                     |
+| `c.foregroundMuted`                  | `useColors()` | 副标题 / extra 文字色（flush 模式，另加 `opacity: 0.55`）                                 |
+| `c.background`                       | `useColors()` | `<List>` grouped 模式外容器背景色（浅灰底）                                               |
+| `c.outline`                          | `useColors()` | flush 模式行间 hairline 分隔线颜色                                                        |
+| `radius.lg`                          | 静态 token    | grouped 模式单行卡片圆角                                                                  |
+| `radius.xl`                          | 静态 token    | `<List>` grouped 模式外容器圆角                                                           |
+| `space[5]` / `space[6]` / `space[3]` | 静态 token    | 行内 leading↔body↔extra gap(12)/ 行内水平+垂直内边距(14)/ List 行间 gap + 容器 padding(8) |
+| `space[4]`                           | 静态 token    | flush 模式行内元素间 gap（`cellFlush.gap`）                                               |
+| `type.body` / `type.xs`              | 静态 token    | 主标题 / 副标题字号（grouped 模式）                                                       |
+| `fw.medium`                          | 静态 token    | 主标题字重                                                                                |
+| `StyleSheet.hairlineWidth`           | React Native  | flush 模式分隔线物理宽度（不参与 token 缩放）                                             |

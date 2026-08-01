@@ -12,6 +12,7 @@ import { createRef } from 'react';
 import { Pressable, Text } from 'react-native';
 import {
   Button,
+  Cell,
   Checkbox,
   IconButton,
   Input,
@@ -21,6 +22,10 @@ import {
   Search,
   Switch,
   Textarea,
+  type CellExtra,
+  type CellLeading,
+  type CellProps,
+  type CellTextValue,
   type NavBarAction,
   type NavBarSlot,
   type TextFieldHandle,
@@ -94,6 +99,45 @@ const navBarDisplaySlot: NavBarSlot = <Text>只读</Text>;
 <Switch value={false} onChange={noop} accessibilityLabel="接收提醒" />;
 // @ts-expect-error Switch 没有内置可见 label
 <Switch value={false} onChange={noop} />;
+
+// --- Cell:文本 / 展示 / control 三分联合 -------------------------------
+
+const publicCellTextValue: CellTextValue = 0n;
+const publicCellLeading: CellLeading = {
+  kind: 'display',
+  node: <Text>自定义前导</Text>,
+};
+const publicCellExtra: CellExtra = { kind: 'text', value: 0 };
+const publicCellProps: CellProps = {
+  title: publicCellTextValue,
+  leading: publicCellLeading,
+  extra: publicCellExtra,
+};
+
+<Cell {...publicCellProps} />;
+<Cell title="设置" onPress={noop} arrow />;
+<Cell title="状态" extra={{ kind: 'text', value: 0 }} />;
+<Cell
+  title="通知"
+  extra={{
+    kind: 'control',
+    node: <Switch value={false} onChange={noop} accessibilityLabel="通知" />,
+  }}
+/>;
+// @ts-expect-error control Cell 禁止外层 action
+<Cell
+  title="通知"
+  onPress={noop}
+  extra={{ kind: 'control', node: <Text /> }}
+/>;
+// @ts-expect-error static Cell 不能画 action arrow
+<Cell title="只读" arrow />;
+// @ts-expect-error title 不再接受任意 element
+<Cell title={<Text>标题</Text>} />;
+// @ts-expect-error desc 不再接受任意 element
+<Cell title="标题" desc={<Text>描述</Text>} />;
+// @ts-expect-error 不兼容 legacy raw extra，必须选择显式 kind
+<Cell title="旧调用" extra="文本" />;
 
 // --- Input / Textarea:受控 vs 非受控 -------------------------------------
 

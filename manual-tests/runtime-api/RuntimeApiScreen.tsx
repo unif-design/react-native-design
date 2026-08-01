@@ -4,10 +4,12 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import {
   Button,
+  Cell,
   Checkbox,
   ConfirmHost,
   IconButton,
   Input,
+  List,
   NavBar,
   PasswordInput,
   Pulse,
@@ -308,6 +310,8 @@ export function RuntimeApiScreen(): React.JSX.Element {
 
               <SelectionControlsSection />
 
+              <CellSection />
+
               <PulseSection />
             </ScrollView>
           </SafeAreaView>
@@ -320,6 +324,92 @@ export function RuntimeApiScreen(): React.JSX.Element {
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
+  );
+}
+
+/**
+ * Cell:action/control/static 三分支、primitive 文本和 a11y 所有权。
+ *
+ * 本区只提供可观察结果与 testID；结构和读屏结论必须在 native/Web harness
+ * 逐项人工核验后再写 verification matrix。
+ */
+function CellSection(): React.JSX.Element {
+  const [actionPresses, setActionPresses] = useState(0);
+  const [unexpectedPresses, setUnexpectedPresses] = useState(0);
+  const [notify, setNotify] = useState(false);
+
+  return (
+    <Section title="Cell action / control / static">
+      <Text style={styles.result}>
+        用 Inspector / screen reader 核对：cell-action-text 外层是
+        button，默认名称为 “订单，待支付，0”，IconName leading 与 chevron
+        都不形成第二焦点；cell-action-display 名称为“设备，在线”，其自定义
+        leading 与 display extra 同样隐藏；cell-control 与 cell-static
+        外层均为本地 View、无 action/role，只有 cell-control-switch 自己承担
+        switch 名称与 checked state。禁用 action 应保留 disabled button
+        state，但 onPress 必须不存在且计数始终为 0。
+      </Text>
+      <List>
+        <Cell
+          leading="settings"
+          title="订单"
+          desc="待支付"
+          extra={{ kind: 'text', value: 0 }}
+          arrow
+          onPress={() => setActionPresses((count) => count + 1)}
+          testID="cell-action-text"
+        />
+        <Cell
+          leading={{
+            kind: 'display',
+            node: <Text style={styles.result}>设</Text>,
+          }}
+          title="设备"
+          extra={{
+            kind: 'display',
+            node: <Text style={styles.result}>在线</Text>,
+            accessibilityText: '在线',
+          }}
+          onPress={() => setActionPresses((count) => count + 1)}
+          testID="cell-action-display"
+        />
+        <Cell
+          title="通知"
+          extra={{
+            kind: 'control',
+            node: (
+              <Switch
+                value={notify}
+                onChange={setNotify}
+                accessibilityLabel="通知"
+                testID="cell-control-switch"
+              />
+            ),
+          }}
+          testID="cell-control"
+        />
+        <Cell
+          title={0}
+          desc={12n}
+          extra={{ kind: 'text', value: 0 }}
+          testID="cell-static"
+        />
+        <Cell
+          title="禁用 action"
+          desc="handler 必须移除"
+          arrow
+          disabled
+          onPress={() => setUnexpectedPresses((count) => count + 1)}
+          testID="cell-action-disabled"
+        />
+      </List>
+      <Result label="Cell action presses" value={String(actionPresses)} />
+      <Result label="Cell control" value={String(notify)} />
+      <Result
+        label="Cell disabled action presses"
+        value={String(unexpectedPresses)}
+      />
+    </Section>
   );
 }
 

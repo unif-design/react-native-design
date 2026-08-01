@@ -136,11 +136,7 @@ import {
 
   <FormGroup label="拜访设置">
     <FormRow label="提醒">
-      <Switch
-        value={remind}
-        onChange={setRemind}
-        accessibilityLabel="提醒"
-      />
+      <Switch value={remind} onChange={setRemind} accessibilityLabel="提醒" />
     </FormRow>
   </FormGroup>
 </Form>;
@@ -189,4 +185,22 @@ import {
 | 数据展示（设置项、客户列表） | [Cell · List](./cell) — 白卡 + gap |
 | 数据录入（表单）             | **Form** — 白卡 + 行间 hairline    |
 
-录入场景密度更高，hairline 分隔比 gap 更高效；展示场景反之。
+录入场景密度更高，hairline 分隔比 gap 更高效；展示场景反之。设置列表若把
+Switch / Stepper 放在 Cell 行尾，必须选择 Cell 的显式 control 分支，不能把控件
+当作任意 `ReactNode` extra，也不能同时给 Cell 外层 `onPress`：
+
+```tsx
+<Cell
+  title="拜访提醒"
+  extra={{
+    kind: 'control',
+    node: (
+      <Switch
+        value={remind}
+        onChange={setRemind}
+        accessibilityLabel="拜访提醒"
+      />
+    ),
+  }}
+/>
+```

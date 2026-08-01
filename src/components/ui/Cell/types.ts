@@ -1,43 +1,70 @@
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import type { IconName } from '../Icon';
 
-export type CellProps = {
-  /** 标题（必填）；string 自动套 Text + numberOfLines=titleLines，传 ReactNode 完全自定义 */
-  title: ReactNode;
-  /** title 是 string 时的 numberOfLines（默认 1）。多行场景如新闻列表标题传 2。 */
+export type CellTextValue = string | number | bigint;
+
+export type CellLeading = IconName | { kind: 'display'; node: ReactElement };
+
+export type CellExtra =
+  | { kind: 'text'; value: CellTextValue }
+  | {
+      kind: 'display';
+      node: ReactElement;
+      accessibilityText?: string;
+    }
+  | { kind: 'control'; node: ReactElement };
+
+type DisplayExtra = Exclude<CellExtra, { kind: 'control' }>;
+
+type SharedCellProps = {
+  /** 主标题由库内 Text 安全渲染。 */
+  title: CellTextValue;
+  /** 主标题的 numberOfLines（默认 1）。 */
   titleLines?: number;
-  /** 副标题；string 自动 numberOfLines=2，传 ReactNode 完全自定义 */
-  desc?: ReactNode;
-  /** 右侧 slot —— 字符串自动套 Text；传 ReactNode 放 Switch / Stepper / Tag 等控件。
-   *  **a11y 边界**：extra 为 ReactNode 时，外壳 Pressable 会关闭 `accessible`，
-   *  让 SR 直接穿透到 extra 控件（避免双播报）；extra 的 a11y 由其自身负责。
-   *  若 extra 是纯展示 ReactNode 且仍需外壳播报，请改用 string 或传 `accessibilityLabel`。 */
-  extra?: ReactNode;
-  /** 显示右侧 chevron-right 图标，常配合 onPress 表示「可进入下一级」 */
-  arrow?: boolean;
-  /** 前置 slot —— IconName 自动渲染 24×24 图标；传 ReactNode 放 Avatar / 自定义图形 */
-  leading?: IconName | ReactNode;
-  /** 点击回调 —— 不传则 cell 不可点（纯展示） */
-  onPress?: () => void;
-  /**
-   * 显式禁用：仅对带 onPress 的 cell 有效。
-   * disabled=true 时 onPress 不触发 + 整体半透明 + a11y disabled。
-   */
-  disabled?: boolean;
-  /** 危险态:icon 盒子 + 标题用 error 红色,且不渲染 arrow(常用于退出登录 / 删除等)。 */
+  /** 副标题由库内 Text 安全渲染。 */
+  desc?: CellTextValue;
+  /** 图标名或显式的纯展示前导节点。 */
+  leading?: CellLeading;
+  /** 危险态：icon 盒子与标题使用 error 色；action arrow 不显示。 */
   danger?: boolean;
-  /** 额外样式覆盖(合并到 cell 容器的 style 数组) */
+  /** 额外样式覆盖。 */
   style?: StyleProp<ViewStyle>;
-  /** E2E / 测试定位 */
+  /** E2E / 测试定位。 */
   testID?: string;
-  /** 显式 SR 朗读文案,覆盖 Cell 默认从 string title 推断的 fallback。
-   *  title 是 ReactNode(自定义渲染)时尤其需要,否则 SR 用户听不到任何内容。 */
+};
+
+type ActionableCellProps = {
+  onPress: () => void;
+  extra?: DisplayExtra;
+  arrow?: boolean;
+  disabled?: boolean;
+  /** 覆盖由 title、desc 与 extra 自动组合的 accessible name。 */
   accessibilityLabel?: string;
-  /** SR 朗读 hint —— 说明 tap 后行为(短 ≤8 字)。
-   *  常用:"查看详情" / "打开应用" 等;onPress 缺省时此 prop 无意义。 */
+  /** SR 操作结果说明。 */
   accessibilityHint?: string;
 };
+
+type ControlCellProps = {
+  extra: Extract<CellExtra, { kind: 'control' }>;
+  onPress?: never;
+  arrow?: never;
+  disabled?: never;
+  accessibilityLabel?: never;
+  accessibilityHint?: never;
+};
+
+type StaticCellProps = {
+  extra?: DisplayExtra;
+  onPress?: never;
+  arrow?: never;
+  disabled?: never;
+  accessibilityLabel?: never;
+  accessibilityHint?: never;
+};
+
+export type CellProps = SharedCellProps &
+  (ActionableCellProps | ControlCellProps | StaticCellProps);
 
 export type ListProps = {
   /** 一组 Cell */
