@@ -139,8 +139,8 @@ import { Switch, Cell, List } from '@unif/react-native-design';
 
 | 节点 | testID | 预期布局 |
 |---|---|---|
-| outer RNGH Pressable | `selection-switch` | 44×44，透明、无 `hitSlop` |
-| 本地 visual wrapper | `selection-switch-visual` | 32×20，位于 outer 正中央 |
+| outer RNGH Pressable | `selection-switch` | 所有平台固定 44×44，透明、无 `hitSlop` |
+| 本地 visual wrapper | `selection-switch-visual` | 实现为 `r(32) × r(20)`，位于 outer 正中央；Web 与 402pt RN harness 实测应为 32×20，其他 native window 按实际 `r()` 结果验证 |
 
 打开系统 reduced motion 后反复切换：native 必须取消进行中的动画并立即到终值。Web
 展开 visual wrapper，分别检查 `selection-switch-track` 与

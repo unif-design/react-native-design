@@ -326,10 +326,11 @@ export function RuntimeApiScreen(): React.JSX.Element {
 /**
  * 选择控件:accessible name、checked/disabled state、真实 frame 与 reduced motion。
  *
- * Inspector 在 native/Web 两端分别量 `selection-switch`(44×44)与其本地显示后代
- * `selection-switch-visual`(32×20)。系统开启减弱动效后切换 Switch:两端都必须
- * 直接到终值；Web 展开 visual wrapper 后，track/thumb 两个精确节点都必须完全
- * 没有 transition* inline style。
+ * Inspector 在 native/Web 两端量 `selection-switch`:outer 固定为 44×44。其本地
+ * 显示后代 `selection-switch-visual` 实现为 r(32)×r(20):Web 和 402pt RN harness
+ * 是 32×20,其他 native window 按实际 r(32)×r(20) 验证。系统开启减弱动效后切换
+ * Switch:两端都必须直接到终值；Web 展开 visual wrapper 后，track/thumb 两个精确
+ * 节点都必须完全没有 transition* inline style。
  */
 function SelectionControlsSection(): React.JSX.Element {
   const [checked, setChecked] = useState(false);
@@ -342,8 +343,9 @@ function SelectionControlsSection(): React.JSX.Element {
     <Section title="Checkbox / Radio / Switch a11y">
       <Text style={styles.result}>
         用 Inspector / screen reader 确认每个操作只有一个命名节点并上报
-        checked/disabled。量 selection-switch 外层应为 44×44，后代
-        selection-switch-visual 应为 32×20；系统开启 reduced motion
+        checked/disabled。selection-switch 外层在所有平台应为 44×44；后代
+        selection-switch-visual 实现为 r(32)×r(20)，Web / 402pt RN harness 应为
+        32×20，其他 native 宽度按实际 r() 结果验证。系统开启 reduced motion
         后切换应立即到终值。Web 检查 selection-switch-track /
         selection-switch-thumb：两者都不得出现任何 transition* style。
       </Text>
