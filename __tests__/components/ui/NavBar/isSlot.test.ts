@@ -94,37 +94,138 @@ describe('NavBar slot classification', () => {
     expect(classifyNavBarSlot(inheritedElement).kind).toBe('invalid');
   });
 
-  test('preserves React 19 broad node values without consuming them', () => {
+  test('normalizes one-shot iterables into an equivalent renderable array', () => {
     const generator = (function* (): Generator<React.ReactNode> {
       yield null;
       yield 0;
       yield false;
       yield 'generator node';
     })();
-    const set = new Set<React.ReactNode>([null, undefined, false, 'set node']);
     const promise = Promise.resolve('deferred node');
-    const nestedEmptyNodes: React.ReactNode[] = [
-      null,
-      undefined,
-      false,
-      [true, 0],
-    ];
-
-    expect(classifyNavBarSlot(1n).kind).toBe('node');
-    expect(classifyNavBarSlot(set).kind).toBe('node');
-    expect(classifyNavBarSlot(nestedEmptyNodes).kind).toBe('node');
 
     const generatorResult = classifyNavBarSlot(generator);
     const promiseResult = classifyNavBarSlot(promise);
     expect(generatorResult.kind).toBe('node');
     expect(promiseResult.kind).toBe('node');
     if (generatorResult.kind === 'node') {
-      expect(generatorResult.node).toBe(generator);
-      expect([...generator]).toEqual([null, 0, false, 'generator node']);
+      expect(generatorResult.node).toEqual([null, 0, false, 'generator node']);
+      expect(generatorResult.node).not.toBe(generator);
+      expect([...generator]).toEqual([]);
     }
     if (promiseResult.kind === 'node') {
       expect(promiseResult.node).toBe(promise);
     }
+  });
+
+  test('normalizes nested legal ReactNode collections', () => {
+    const promise = Promise.resolve('deferred node');
+    const element = React.createElement(React.Fragment, null, 'element node');
+    const nested = new Set<React.ReactNode>([
+      1n,
+      promise,
+      element,
+      portal,
+      null,
+      [undefined, false, 'nested node'],
+    ]);
+    const result = classifyNavBarSlot(nested);
+
+    expect(result.kind).toBe('node');
+    if (result.kind === 'node') {
+      expect(result.node).toEqual([
+        1n,
+        promise,
+        element,
+        portal,
+        null,
+        [undefined, false, 'nested node'],
+      ]);
+      expect(result.node).not.toBe(nested);
+    }
+  });
+
+  test('validates Array and Iterable hybrids before treating them as thenables', () => {
+    const arrayThenable = Object.assign([{}], { then: () => {} });
+    const iterableThenable = {
+      then: () => {},
+      *[Symbol.iterator](): Generator<unknown> {
+        yield {};
+      },
+    };
+
+    expect(classifyNavBarSlot(arrayThenable).kind).toBe('invalid');
+    expect(classifyNavBarSlot(iterableThenable).kind).toBe('invalid');
+  });
+
+  test('rejects callable thenables and iterables outside the ReactNode object boundary', () => {
+    const callableThenable = Object.assign(() => {}, { then: () => {} });
+    const callableIterable = Object.assign(() => {}, {
+      *[Symbol.iterator](): Generator<React.ReactNode> {
+        yield 'not a ReactNode iterable';
+      },
+    });
+
+    expect(classifyNavBarSlot(callableThenable).kind).toBe('invalid');
+    expect(classifyNavBarSlot(callableIterable).kind).toBe('invalid');
+  });
+
+  test('accepts a Promise when a non-function iterator property is incidental', () => {
+    const promise = Object.assign(Promise.resolve('deferred node'), {
+      [Symbol.iterator]: 1,
+    });
+    const result = classifyNavBarSlot(promise);
+
+    expect(result.kind).toBe('node');
+    if (result.kind === 'node') expect(result.node).toBe(promise);
+  });
+
+  test.each([
+    [[{}], 'array plain object'],
+    [new Set([{}]), 'Set plain object'],
+    [{ [Symbol.iterator]: () => 123 }, 'bad iterator factory'],
+    [
+      {
+        [Symbol.iterator]: () => ({
+          next() {
+            throw new Error('iterator failure');
+          },
+        }),
+      },
+      'throwing iterator',
+    ],
+  ])('rejects %s from an untyped iterable boundary', (slot, _description) => {
+    expect(classifyNavBarSlot(slot).kind).toBe('invalid');
+  });
+
+  test('rejects self-referential collections instead of recursing forever', () => {
+    const cycle: unknown[] = [];
+    cycle.push(cycle);
+
+    expect(classifyNavBarSlot(cycle).kind).toBe('invalid');
+  });
+
+  test('closes an iterator when a child fails validation', () => {
+    let finalized = false;
+    function* invalidChildGenerator(): Generator<unknown> {
+      try {
+        yield {};
+      } finally {
+        finalized = true;
+      }
+    }
+
+    expect(classifyNavBarSlot(invalidChildGenerator()).kind).toBe('invalid');
+    expect(finalized).toBe(true);
+  });
+
+  test('uses Iterator protocol ToBoolean semantics for done', () => {
+    const iterable = {
+      [Symbol.iterator]: () => ({
+        next: () => ({ done: 1, value: {} }),
+      }),
+    };
+
+    expect(classifyNavBarSlot(iterable)).toEqual({ kind: 'node', node: [] });
   });
 
   test('accepts portals only when React public Children treats them as a child', () => {

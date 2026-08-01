@@ -8,6 +8,13 @@ export type NavBarSlotClassification =
   | { kind: 'node'; node: ReactNode }
   | { kind: 'invalid' };
 
+type NormalizedNode = { kind: 'node'; node: ReactNode } | { kind: 'invalid' };
+
+type IteratorFactoryResult =
+  | { kind: 'none' }
+  | { kind: 'factory'; factory: () => unknown }
+  | { kind: 'invalid' };
+
 function isIconName(value: unknown): value is IconName {
   return (
     typeof value === 'string' &&
@@ -41,11 +48,8 @@ function hasElementShape(value: React.ReactElement): boolean {
   );
 }
 
-function isThenable(value: unknown): value is Promise<ReactNode> {
-  if (
-    (typeof value !== 'object' && typeof value !== 'function') ||
-    value === null
-  ) {
+function isThenable(value: unknown): value is ReactNode {
+  if (typeof value !== 'object' || value === null) {
     return false;
   }
   try {
@@ -55,15 +59,16 @@ function isThenable(value: unknown): value is Promise<ReactNode> {
   }
 }
 
-function isIterable(value: unknown): value is Iterable<ReactNode> {
-  if (typeof value !== 'object' || value === null) return false;
+function getIteratorFactory(value: object): IteratorFactoryResult {
   try {
-    return (
-      typeof (value as { [Symbol.iterator]?: unknown })[Symbol.iterator] ===
-      'function'
-    );
+    const iterator = (value as { [Symbol.iterator]?: unknown })[
+      Symbol.iterator
+    ];
+    if (iterator === undefined || iterator === null) return { kind: 'none' };
+    if (typeof iterator !== 'function') return { kind: 'none' };
+    return { kind: 'factory', factory: iterator as () => unknown };
   } catch {
-    return false;
+    return { kind: 'invalid' };
   }
 }
 
@@ -90,29 +95,123 @@ function isReactPortal(value: object): value is React.ReactPortal {
   }
 }
 
-function isRenderableReactNode(value: unknown): value is ReactNode {
+function normalizeArray(
+  value: unknown[],
+  activeIterables: WeakSet<object>
+): NormalizedNode {
+  if (activeIterables.has(value)) return { kind: 'invalid' };
+  activeIterables.add(value);
+  try {
+    const nodes: ReactNode[] = [];
+    for (let index = 0; index < value.length; index += 1) {
+      const normalized = normalizeReactNode(value[index], activeIterables);
+      if (normalized.kind === 'invalid') return normalized;
+      nodes.push(normalized.node);
+    }
+    return { kind: 'node', node: nodes };
+  } catch {
+    return { kind: 'invalid' };
+  } finally {
+    activeIterables.delete(value);
+  }
+}
+
+function normalizeIterable(
+  value: object,
+  factory: () => unknown,
+  activeIterables: WeakSet<object>
+): NormalizedNode {
+  if (activeIterables.has(value)) return { kind: 'invalid' };
+  activeIterables.add(value);
+  let iterator: object | undefined;
+  let completed = false;
+  try {
+    const candidate = factory.call(value);
+    if (typeof candidate !== 'object' || candidate === null) {
+      return { kind: 'invalid' };
+    }
+    iterator = candidate;
+    const next = (iterator as { next?: unknown }).next;
+    if (typeof next !== 'function') return { kind: 'invalid' };
+
+    const nodes: ReactNode[] = [];
+    for (;;) {
+      const step = next.call(iterator);
+      if (typeof step !== 'object' || step === null) {
+        return { kind: 'invalid' };
+      }
+      const result = step as { done?: unknown; value?: unknown };
+      // Iterator protocol 的 done 走 ToBoolean，而不是限制为 boolean primitive。
+      if (result.done) {
+        completed = true;
+        return { kind: 'node', node: nodes };
+      }
+
+      const normalized = normalizeReactNode(result.value, activeIterables);
+      if (normalized.kind === 'invalid') return normalized;
+      nodes.push(normalized.node);
+    }
+  } catch {
+    return { kind: 'invalid' };
+  } finally {
+    if (!completed && iterator !== undefined) {
+      try {
+        const close = (iterator as { return?: unknown }).return;
+        if (typeof close === 'function') close.call(iterator);
+      } catch {
+        // 分类已失败；关闭时的异常不能逃逸到 NavBar render。
+      }
+    }
+    activeIterables.delete(value);
+  }
+}
+
+function normalizeReactNode(
+  value: unknown,
+  activeIterables: WeakSet<object>
+): NormalizedNode {
   if (
     typeof value === 'string' ||
     typeof value === 'number' ||
     typeof value === 'bigint'
   ) {
-    return true;
+    return { kind: 'node', node: value };
   }
-  if (React.isValidElement(value)) return hasElementShape(value);
-  if (isThenable(value) || isIterable(value)) return true;
-  return typeof value === 'object' && value !== null && isReactPortal(value);
+  if (value === undefined || value === null || typeof value === 'boolean') {
+    return { kind: 'node', node: value };
+  }
+  if (React.isValidElement(value)) {
+    return hasElementShape(value)
+      ? { kind: 'node', node: value }
+      : { kind: 'invalid' };
+  }
+  if (typeof value !== 'object' || value === null) {
+    return { kind: 'invalid' };
+  }
+  if (Array.isArray(value)) return normalizeArray(value, activeIterables);
+
+  const iterator = getIteratorFactory(value);
+  if (iterator.kind === 'invalid') return iterator;
+  if (iterator.kind === 'factory') {
+    return normalizeIterable(value, iterator.factory, activeIterables);
+  }
+  if (isThenable(value)) return { kind: 'node', node: value };
+  if (typeof value !== 'object') return { kind: 'invalid' };
+  return isReactPortal(value)
+    ? { kind: 'node', node: value }
+    : { kind: 'invalid' };
 }
 
 /**
  * 未类型化边界的单一分类器。React 的公开 API 无法证明 object 不可伪造；这里拒绝
  * 结构不成立的 marker-only element 与普通 plain object，同时保留 React 19 声明的
- * bigint、Iterable、portal、Promise/thenable 等合法 ReactNode 原值。
+ * bigint、Iterable、portal、Promise/thenable 等合法 ReactNode。Iterable 会递归验证并
+ * 归一化为新数组，避免把已消费的一次性 iterator 交给 React reconciliation。
  */
 export function classifyNavBarSlot(value: unknown): NavBarSlotClassification {
   if (value === undefined || value === null || typeof value === 'boolean') {
     return { kind: 'empty' };
   }
   if (isNavBarAction(value)) return { kind: 'action', action: value };
-  if (isRenderableReactNode(value)) return { kind: 'node', node: value };
-  return { kind: 'invalid' };
+  return normalizeReactNode(value, new WeakSet<object>());
 }
