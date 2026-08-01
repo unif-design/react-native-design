@@ -47,10 +47,18 @@ export const FormDemo = () => {
         </FormGroup>
         <FormGroup label="拜访设置">
           <FormRow label="拜访提醒">
-            <Switch value={remind} onChange={setRemind} />
+            <Switch
+              value={remind}
+              onChange={setRemind}
+              accessibilityLabel="拜访提醒"
+            />
           </FormRow>
           <FormRow label="同步给团队">
-            <Switch value={team} onChange={setTeam} />
+            <Switch
+              value={team}
+              onChange={setTeam}
+              accessibilityLabel="同步给团队"
+            />
           </FormRow>
         </FormGroup>
       </Form>
@@ -128,7 +136,11 @@ import {
 
   <FormGroup label="拜访设置">
     <FormRow label="提醒">
-      <Switch value={remind} onChange={setRemind} />
+      <Switch
+        value={remind}
+        onChange={setRemind}
+        accessibilityLabel="提醒"
+      />
     </FormRow>
   </FormGroup>
 </Form>;
@@ -145,6 +157,13 @@ import {
 <FormRow label="草稿">
   <Textarea defaultValue="首次草稿" accessibilityLabel="草稿" />
 </FormRow>
+<FormRow label="拜访提醒">
+  <Switch
+    value={remind}
+    onChange={setRemind}
+    accessibilityLabel="拜访提醒"
+  />
+</FormRow>
 ```
 
 ## 无障碍（a11y）
@@ -153,7 +172,7 @@ import {
 
 `Form` / `FormGroup` / `FormRow` 都是纯布局容器,源码全是 `<View>` + `<Text>`(分组标题 / 字段 label / 必填星号 / 错误文字),**三者均未设置任何 a11y prop**(无 `accessibilityRole` / `accessibilityLabel` / state),也无可传的 a11y prop。
 
-- 真正的 a11y 语义来自传入 `FormRow` 的**控件 children**(如 [Input](./input) 的 `<TextInput>`、[Switch](./switch)),由控件自身承载 role / label / state。
+- 真正的 a11y 语义来自传入 `FormRow` 的**控件 children**(如 [Input](./input) 的 `<TextInput>`、[Switch](./switch)),由控件自身承载 role / label / state；Switch 的 `accessibilityLabel` 是必填，必须与行标题一致或提供更明确的名称。
 - `FormRow` 的 `label`、必填 `*`、`error` 文字渲染为相邻 `<Text>`,默认对 SR 可读,但**未与控件做程序化关联**(无 `accessibilityLabelledBy` / describedBy)。为确保 SR 把字段名读到对应控件上,建议在控件上显式补 `accessibilityLabel`(如 `<Input accessibilityLabel="姓名" />`),错误态可补 `accessibilityHint`。
 
 ```tsx

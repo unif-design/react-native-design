@@ -12,11 +12,14 @@ import { createRef } from 'react';
 import { Pressable, Text } from 'react-native';
 import {
   Button,
+  Checkbox,
   IconButton,
   Input,
   NavBar,
   PasswordInput,
+  Radio,
   Search,
+  Switch,
   Textarea,
   type NavBarAction,
   type NavBarSlot,
@@ -62,6 +65,35 @@ const navBarAction: NavBarAction = {
 const navBarDisplaySlot: NavBarSlot = <Text>只读</Text>;
 <NavBar title="标题" left={navBarAction} right={navBarDisplaySlot} />;
 <NavBar title="标题" right={<Text>只读</Text>} />;
+
+// --- Checkbox / Radio / Switch:每个选择控件都有 accessible name ----------
+
+<Checkbox checked={false} onChange={noop} label="同意协议" />;
+<Checkbox checked={false} onChange={noop} accessibilityLabel="同意协议" />;
+<Checkbox
+  checked={false}
+  onChange={noop}
+  label="全部"
+  accessibilityLabel="选择全部协议"
+/>;
+// @ts-expect-error 无可见 label 时 accessible name 必填
+<Checkbox checked={false} onChange={noop} />;
+
+<Radio.Group value="a" onChange={noop} accessibilityLabel="套餐">
+  <Radio value="a" label="A" />
+  <Radio value="b" accessibilityLabel="套餐 B" />
+  <Radio value="c" label="C" accessibilityLabel="套餐 C（补充说明）" />
+</Radio.Group>;
+// @ts-expect-error Radio 无可见 label 时 accessible name 必填
+<Radio value="a" />;
+// @ts-expect-error radiogroup 自身必须命名
+<Radio.Group value="a" onChange={noop}>
+  <Radio value="a" label="A" />
+</Radio.Group>;
+
+<Switch value={false} onChange={noop} accessibilityLabel="接收提醒" />;
+// @ts-expect-error Switch 没有内置可见 label
+<Switch value={false} onChange={noop} />;
 
 // --- Input / Textarea:受控 vs 非受控 -------------------------------------
 

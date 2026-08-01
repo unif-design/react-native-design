@@ -11,6 +11,7 @@ import {
 } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
+import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { RadioContext } from './RadioContext';
 import { RadioGroup } from './RadioGroup';
 import { makeStyles } from './styles';
@@ -27,6 +28,7 @@ const _warnedCtx = new Set<string>();
 export function Radio({
   value,
   label,
+  accessibilityLabel,
   disabled,
   testID,
 }: RadioProps): React.JSX.Element {
@@ -43,6 +45,7 @@ export function Radio({
     return <View />;
   }
   const checked = ctx.value === value;
+  const isDisabled = disabled === true;
   // [L-92] 改用 childTestID:收口 parent+id 拼接逻辑,保持空串 override 回落拼接语义
   const resolvedTestID = childTestID(ctx.groupTestID, value, testID);
 
@@ -55,22 +58,29 @@ export function Radio({
 
   return (
     <Pressable
-      onPress={() => !disabled && ctx.onChange(value)}
-      disabled={disabled}
+      onPress={isDisabled ? undefined : () => ctx.onChange(value)}
+      disabled={isDisabled}
       hitSlop={hitSlopV}
       accessibilityRole="radio"
-      accessibilityState={{ checked, disabled: !!disabled }}
-      accessibilityLabel={label}
+      accessibilityState={{ checked, disabled: isDisabled }}
+      accessibilityLabel={accessibilityLabel ?? label}
       testID={resolvedTestID}
       style={({ pressed }) => [
         styles.row,
-        { opacity: disabled ? 0.5 : pressed ? pressedOpacity : 1 },
+        { opacity: isDisabled ? 0.5 : pressed ? pressedOpacity : 1 },
       ]}
     >
-      <View style={[styles.circle, checked && { borderColor: c.primary }]}>
+      <View
+        {...A11Y_HIDDEN_PROPS}
+        style={[styles.circle, checked && { borderColor: c.primary }]}
+      >
         {checked ? <View style={styles.dot} /> : null}
       </View>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+      {label ? (
+        <Text {...A11Y_HIDDEN_PROPS} style={styles.label}>
+          {label}
+        </Text>
+      ) : null}
     </Pressable>
   );
 }

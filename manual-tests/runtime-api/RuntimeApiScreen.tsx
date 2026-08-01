@@ -4,6 +4,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import {
   Button,
+  Checkbox,
   ConfirmHost,
   IconButton,
   Input,
@@ -11,8 +12,10 @@ import {
   PasswordInput,
   Pulse,
   PulseDot,
+  Radio,
   Search,
   Skeleton,
+  Switch,
   Textarea,
   ThemeProvider,
   ToastHost,
@@ -303,6 +306,8 @@ export function RuntimeApiScreen(): React.JSX.Element {
                 />
               </Section>
 
+              <SelectionControlsSection />
+
               <PulseSection />
             </ScrollView>
           </SafeAreaView>
@@ -315,6 +320,86 @@ export function RuntimeApiScreen(): React.JSX.Element {
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
+  );
+}
+
+/**
+ * 选择控件:accessible name、checked/disabled state、真实 frame 与 reduced motion。
+ *
+ * Inspector 在 native/Web 两端分别量 `selection-switch`(44×44)与其本地显示后代
+ * `selection-switch-visual`(32×20)。系统开启减弱动效后切换 Switch:两端都必须
+ * 直接到终值；Web 展开 visual wrapper 后，track/thumb 两个精确节点都必须完全
+ * 没有 transition* inline style。
+ */
+function SelectionControlsSection(): React.JSX.Element {
+  const [checked, setChecked] = useState(false);
+  const [radioValue, setRadioValue] = useState('daily');
+  const [switchValue, setSwitchValue] = useState(false);
+  const [unexpectedPresses, setUnexpectedPresses] = useState(0);
+  const reduced = usePrefersReducedMotion();
+
+  return (
+    <Section title="Checkbox / Radio / Switch a11y">
+      <Text style={styles.result}>
+        用 Inspector / screen reader 确认每个操作只有一个命名节点并上报
+        checked/disabled。量 selection-switch 外层应为 44×44，后代
+        selection-switch-visual 应为 32×20；系统开启 reduced motion
+        后切换应立即到终值。Web 检查 selection-switch-track /
+        selection-switch-thumb：两者都不得出现任何 transition* style。
+      </Text>
+      <Checkbox checked={checked} onChange={setChecked} label="接收纸质账单" />
+      <Checkbox
+        checked={checked}
+        onChange={setChecked}
+        accessibilityLabel="仅图形 Checkbox"
+        shape="circle"
+      />
+      <Checkbox
+        checked
+        onChange={() => setUnexpectedPresses((count) => count + 1)}
+        label="禁用 Checkbox（不应触发）"
+        disabled
+      />
+      <Radio.Group
+        value={radioValue}
+        onChange={(nextValue) => {
+          if (nextValue === 'disabled') {
+            setUnexpectedPresses((count) => count + 1);
+          } else {
+            setRadioValue(String(nextValue));
+          }
+        }}
+        accessibilityLabel="报告周期"
+        testID="selection-radio-group"
+      >
+        <Radio value="daily" label="日报" />
+        <Radio value="weekly" accessibilityLabel="周报（无可见 label）" />
+        <Radio value="disabled" label="禁用选项（不应触发）" disabled />
+      </Radio.Group>
+      <View style={styles.selectionRow}>
+        <Switch
+          value={switchValue}
+          onChange={setSwitchValue}
+          accessibilityLabel="拜访提醒"
+          testID="selection-switch"
+        />
+        <Switch
+          value
+          onChange={() => setUnexpectedPresses((count) => count + 1)}
+          accessibilityLabel="禁用提醒（不应触发）"
+          disabled
+          testID="selection-switch-disabled"
+        />
+      </View>
+      <Result label="selection checked" value={String(checked)} />
+      <Result label="selection radio" value={radioValue} />
+      <Result label="selection switch" value={String(switchValue)} />
+      <Result label="selection reduced motion" value={String(reduced)} />
+      <Result
+        label="disabled selection actions"
+        value={String(unexpectedPresses)}
+      />
+    </Section>
   );
 }
 
@@ -434,6 +519,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: '600' },
   result: { fontSize: 14, flexShrink: 1 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  selectionRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   navBarFrame: { borderWidth: 1 },
   swatch: {
     width: 28,

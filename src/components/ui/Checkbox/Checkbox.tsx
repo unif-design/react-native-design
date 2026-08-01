@@ -8,6 +8,7 @@ import {
   useColors,
   useThemedStyles,
 } from '../../../theme';
+import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { Icon } from '../Icon';
 import { makeStyles } from './styles';
 import type { CheckboxProps } from './types';
@@ -23,28 +24,31 @@ export function Checkbox({
   checked,
   onChange,
   label,
+  accessibilityLabel,
   shape = 'square',
   disabled,
   testID,
 }: CheckboxProps): React.JSX.Element {
   const c = useColors();
   const styles = useThemedStyles(makeStyles);
+  const isDisabled = disabled === true;
   return (
     <Pressable
-      onPress={() => !disabled && onChange(!checked)}
-      disabled={disabled}
+      onPress={isDisabled ? undefined : () => onChange(!checked)}
+      disabled={isDisabled}
       // [M-7] box 20pt → 垂直补 (44-20)/2=12 到 fixed.hitTarget
       hitSlop={Math.round((fixed.hitTarget - r(20)) / 2)}
       accessibilityRole="checkbox"
-      accessibilityState={{ checked, disabled: !!disabled }}
-      accessibilityLabel={label}
+      accessibilityState={{ checked, disabled: isDisabled }}
+      accessibilityLabel={accessibilityLabel ?? label}
       testID={testID}
       style={({ pressed }) => [
         styles.row,
-        { opacity: disabled ? 0.5 : pressed ? pressedOpacity : 1 },
+        { opacity: isDisabled ? 0.5 : pressed ? pressedOpacity : 1 },
       ]}
     >
       <View
+        {...A11Y_HIDDEN_PROPS}
         style={[
           styles.box,
           // [L-79] circle 形态改用 radius.pill —— sentinel 999 确保任何尺寸下都是真圆
@@ -64,7 +68,11 @@ export function Checkbox({
           style={checked ? undefined : styles.tickHidden}
         />
       </View>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+      {label ? (
+        <Text {...A11Y_HIDDEN_PROPS} style={styles.label}>
+          {label}
+        </Text>
+      ) : null}
     </Pressable>
   );
 }

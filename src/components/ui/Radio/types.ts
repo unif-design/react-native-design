@@ -3,6 +3,18 @@ import type { ReactNode } from 'react';
 /** Radio 选项值类型 */
 export type Value = string | number;
 
+type AccessibleName =
+  | {
+      /** 可见旁标同时提供 accessible name；可显式覆盖读屏文案 */
+      label: string;
+      accessibilityLabel?: string;
+    }
+  | {
+      /** 无可见旁标时必须显式提供 accessible name */
+      label?: never;
+      accessibilityLabel: string;
+    };
+
 export type GroupContext = {
   /** 当前选中值 */
   value: Value;
@@ -17,17 +29,17 @@ export type GroupProps = {
   value: Value;
   /** 选中变化回调 */
   onChange: (value: Value) => void;
+  /** 单选组自身的读屏名称 */
+  accessibilityLabel: string;
   /** 若干个 Radio 子项 */
   children: ReactNode;
   /** E2E / 测试定位 */
   testID?: string;
 };
 
-export type RadioProps = {
+type RadioBehaviorProps = {
   /** 此项的值 */
   value: Value;
-  /** 此项右侧文字 */
-  label?: string;
   /** 禁用 */
   disabled?: boolean;
   /**
@@ -36,3 +48,5 @@ export type RadioProps = {
    */
   testID?: string;
 };
+
+export type RadioProps = RadioBehaviorProps & AccessibleName;

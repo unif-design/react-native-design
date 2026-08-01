@@ -493,7 +493,7 @@ toast.error('网络异常，请重试');
 ### 加新组件
 1. 读 §1(voice)与 §2(原则)。
 2. 定位(每组件一个独立目录 `<Name>/<Name>.tsx + types.ts + styles.ts + index.ts`):净新原子 → `src/components/ui/<Name>/`;通用业务复合 → `src/components/business/<Name>/`。
-3. **组合现有原子**,不重造样式(如"带 Switch 的设置行" = `<Cell title="..." extra={<Switch ... />} />`)。
+3. **组合现有原子**,不重造样式(如"带 Switch 的设置行" = `<Cell title="拜访提醒" extra={<Switch value={remind} onChange={setRemind} accessibilityLabel="拜访提醒" />} />`)。
 4. token 从包根 import,绝不硬编码 hex / px / radius。
 5. 从本地 `index.ts` barrel 导出,并在本文 §10 / §12 登记。
 

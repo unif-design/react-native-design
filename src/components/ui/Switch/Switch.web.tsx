@@ -1,7 +1,14 @@
 import React from 'react';
 import { Pressable } from 'react-native-gesture-handler';
 import { View } from 'react-native';
-import { motion, useColors, useThemedStyles } from '../../../theme';
+import {
+  motion,
+  useColors,
+  usePrefersReducedMotion,
+  useThemedStyles,
+} from '../../../theme';
+import { childTestID } from '../../../utils/testID';
+import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { makeStyles, THUMB_OFF_X, THUMB_ON_X } from './styles';
 import type { SwitchProps } from './types';
 
@@ -24,37 +31,53 @@ export function Switch({
 }: SwitchProps): React.JSX.Element {
   const c = useColors();
   const styles = useThemedStyles(makeStyles);
+  const reducedMotion = usePrefersReducedMotion();
+  const isDisabled = disabled === true;
 
-  // 给 RN style 数组追加 web-only 字段:transition + 切换值
+  // 给 RN style 数组追加 web-only 字段；reduced motion 时连 transition key
+  // 都不输出，避免浏览器仍创建零时长 transition。
   const trackWebStyle = {
     ...styles.track,
     backgroundColor: value ? c.primary : c.surfaceContainerHighest,
-    // RN style 不识 transition 但 RN-Web 会把它当 inline style 透传给 DOM
-    transitionProperty: 'background-color',
-    transitionDuration: `${motion.base}ms`,
-    transitionTimingFunction: 'ease-out',
+    ...(reducedMotion
+      ? {}
+      : {
+          // RN style 不识 transition 但 RN-Web 会把它当 inline style 透传给 DOM
+          transitionProperty: 'background-color',
+          transitionDuration: `${motion.base}ms`,
+          transitionTimingFunction: 'ease-out',
+        }),
   } as unknown as object;
   const thumbWebStyle = {
     ...styles.thumb,
     transform: [{ translateX: value ? THUMB_ON_X : THUMB_OFF_X }],
-    transitionProperty: 'transform',
-    transitionDuration: `${motion.base}ms`,
-    transitionTimingFunction: 'ease-out',
+    ...(reducedMotion
+      ? {}
+      : {
+          transitionProperty: 'transform',
+          transitionDuration: `${motion.base}ms`,
+          transitionTimingFunction: 'ease-out',
+        }),
   } as unknown as object;
 
   return (
     <Pressable
-      onPress={() => !disabled && onChange(!value)}
-      disabled={disabled}
-      hitSlop={6}
-      style={disabled ? styles.pressableDisabled : styles.pressableEnabled}
+      onPress={isDisabled ? undefined : () => onChange(!value)}
+      disabled={isDisabled}
+      style={[styles.pressable, isDisabled && styles.pressableDisabled]}
       accessibilityRole="switch"
-      accessibilityState={{ checked: value, disabled: !!disabled }}
+      accessibilityState={{ checked: value, disabled: isDisabled }}
       accessibilityLabel={accessibilityLabel}
       testID={testID}
     >
-      <View style={trackWebStyle}>
-        <View style={thumbWebStyle} />
+      <View
+        {...A11Y_HIDDEN_PROPS}
+        style={styles.visualFrame}
+        testID={childTestID(testID, 'visual')}
+      >
+        <View style={trackWebStyle} testID={childTestID(testID, 'track')}>
+          <View style={thumbWebStyle} testID={childTestID(testID, 'thumb')} />
+        </View>
       </View>
     </Pressable>
   );

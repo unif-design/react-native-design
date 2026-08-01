@@ -56,12 +56,22 @@ import { Cell, List } from '@unif/react-native-design';
 ## 用法
 
 ```tsx
-import { Cell, List } from '@unif/react-native-design';
+import { Cell, List, Switch } from '@unif/react-native-design';
 
 <List>
   <Cell title="主题" extra="跟随系统" arrow leading="settings" onPress={...} />
   <Cell title="通知" arrow leading="bell" />
-  <Cell title="拜访提醒" desc="按计划自动推送" extra={<Switch value={...} onChange={...} />} />
+  <Cell
+    title="拜访提醒"
+    desc="按计划自动推送"
+    extra={
+      <Switch
+        value={notify}
+        onChange={setNotify}
+        accessibilityLabel="拜访提醒"
+      />
+    }
+  />
 </List>
 
 {/* 平铺式（无浅灰背景容器，用于嵌套在其它白卡内）*/}

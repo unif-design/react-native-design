@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { r, radius } from '../../../theme';
+import { fixed, r, radius } from '../../../theme';
 import type { ColorTokens } from '../../../theme';
 
 /** 轨道宽 32 / 高 20、把手 16×16、轨道内边距 2 —— Unif 自有 Switch 物理尺寸。
@@ -16,14 +16,21 @@ export const THUMB_ON_X = r(TRACK_W - INSET - THUMB);
 
 export const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({
-    pressableEnabled: {
-      opacity: 1,
+    // 固定命中框不走 r()/fontScale:它是手指可达性约束,不是视觉 token。
+    pressable: {
+      width: fixed.hitTarget,
+      height: fixed.hitTarget,
+      alignItems: 'center',
+      justifyContent: 'center',
       // [L-37] alignSelf:'flex-start' 防止父容器拉伸把手区域(与 Chip [M-8] 同口径)
       alignSelf: 'flex-start' as const,
     },
     pressableDisabled: {
       opacity: 0.5,
-      alignSelf: 'flex-start' as const,
+    },
+    visualFrame: {
+      width: r(TRACK_W),
+      height: r(TRACK_H),
     },
     track: {
       width: r(TRACK_W),

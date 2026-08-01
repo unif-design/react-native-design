@@ -8,7 +8,7 @@ import type { GroupProps } from './types';
 /**
  * Radio 组 —— 单选。把若干 `<Radio>` 作为 children 放进来。
  *
- * <Radio.Group value={tier} onChange={setTier}>
+ * <Radio.Group value={tier} onChange={setTier} accessibilityLabel="客户等级">
  *   <Radio value="vip"     label="VIP 客户" />
  *   <Radio value="normal"  label="普通客户" />
  * </Radio.Group>
@@ -16,6 +16,7 @@ import type { GroupProps } from './types';
 export function RadioGroup({
   value,
   onChange,
+  accessibilityLabel,
   children,
   testID,
 }: GroupProps): React.JSX.Element {
@@ -29,7 +30,12 @@ export function RadioGroup({
   return (
     <RadioContext.Provider value={ctx}>
       {/* [L-34] accessibilityRole="radiogroup" —— SR 宣读"单选按钮组" */}
-      <View style={styles.group} testID={testID} accessibilityRole="radiogroup">
+      <View
+        style={styles.group}
+        testID={testID}
+        accessibilityRole="radiogroup"
+        accessibilityLabel={accessibilityLabel}
+      >
         {children}
       </View>
     </RadioContext.Provider>

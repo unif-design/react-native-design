@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
 
 import Animated, {
@@ -9,8 +10,15 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { fixed, motion, r, useColors, useThemedStyles } from '../../../theme';
-import { makeStyles, THUMB_OFF_X, THUMB_ON_X, TRACK_H } from './styles';
+import {
+  motion,
+  useColors,
+  usePrefersReducedMotion,
+  useThemedStyles,
+} from '../../../theme';
+import { childTestID } from '../../../utils/testID';
+import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
+import { makeStyles, THUMB_OFF_X, THUMB_ON_X } from './styles';
 import type { SwitchProps } from './types';
 
 /**
@@ -28,12 +36,19 @@ export function Switch({
 }: SwitchProps): React.JSX.Element {
   const c = useColors();
   const styles = useThemedStyles(makeStyles);
+  const reducedMotion = usePrefersReducedMotion();
   const progress = useSharedValue(value ? 1 : 0);
+  const isDisabled = disabled === true;
 
   useEffect(() => {
-    progress.value = withTiming(value ? 1 : 0, { duration: motion.base });
+    if (reducedMotion) {
+      cancelAnimation(progress);
+      progress.value = value ? 1 : 0;
+    } else {
+      progress.value = withTiming(value ? 1 : 0, { duration: motion.base });
+    }
     return () => cancelAnimation(progress);
-  }, [value, progress]);
+  }, [progress, reducedMotion, value]);
 
   const trackStyle = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(
@@ -57,19 +72,29 @@ export function Switch({
 
   return (
     <Pressable
-      onPress={() => !disabled && onChange(!value)}
-      disabled={disabled}
-      // [M-7] 轨道高 r(20)≈20pt;补 (44-20)/2=12 到 fixed.hitTarget
-      hitSlop={Math.round((fixed.hitTarget - r(TRACK_H)) / 2)}
-      style={disabled ? styles.pressableDisabled : styles.pressableEnabled}
+      onPress={isDisabled ? undefined : () => onChange(!value)}
+      disabled={isDisabled}
+      style={[styles.pressable, isDisabled && styles.pressableDisabled]}
       accessibilityRole="switch"
-      accessibilityState={{ checked: value, disabled: !!disabled }}
+      accessibilityState={{ checked: value, disabled: isDisabled }}
       accessibilityLabel={accessibilityLabel}
       testID={testID}
     >
-      <Animated.View style={[styles.track, trackStyle]}>
-        <Animated.View style={[styles.thumb, thumbStyle]} />
-      </Animated.View>
+      <View
+        {...A11Y_HIDDEN_PROPS}
+        style={styles.visualFrame}
+        testID={childTestID(testID, 'visual')}
+      >
+        <Animated.View
+          style={[styles.track, trackStyle]}
+          testID={childTestID(testID, 'track')}
+        >
+          <Animated.View
+            style={[styles.thumb, thumbStyle]}
+            testID={childTestID(testID, 'thumb')}
+          />
+        </Animated.View>
+      </View>
     </Pressable>
   );
 }
