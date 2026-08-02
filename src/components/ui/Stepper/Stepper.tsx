@@ -1,9 +1,11 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { fixed, pressedOpacity, useThemedStyles } from '../../../theme';
+import { pressedOpacity, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
+import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
+import { normalizeStepper } from './normalizeStepper';
 import { makeStyles, sizingFor } from './styles';
 import type { StepperProps } from './types';
 
@@ -16,12 +18,13 @@ const _warned = new Set<string>();
  * 数字步进器 [−][ N ][+]。
  * 按钮自动夹到 min/max；越界的按钮透明度变 0.4。
  *
- * 健壮性：value 为 NaN/Infinity 时显示为 min；step <=0 或非有限数时回退 1；
- * min > max 时整体按 min（避免 onChange 写出乱序值）。
+ * 健壮性：value 为 NaN 时使用 min，±Infinity 钳到边界；step <=0 或非有限数
+ * 时回退 1；min > max 时折叠为 min 的零范围。
  */
 export function Stepper({
   value,
   onChange,
+  accessibilityLabel,
   min = 0,
   max = 99,
   step = 1,
@@ -31,99 +34,153 @@ export function Stepper({
 }: StepperProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
   const dims = sizingFor(size);
+  const normalized = normalizeStepper({
+    value,
+    min,
+    max,
+    step,
+    disabled,
+  });
+  const {
+    safeMin,
+    safeMax,
+    safeStep,
+    safeValue,
+    rangeDisabled,
+    canDecrement,
+    canIncrement,
+    accessibilityActions,
+  } = normalized;
 
   // [L-30] step 口径对齐:非有限数(NaN/Infinity)也告警,与 min>max 告警保持一致
-  // 模块级 Set 去重:每个异常组合只打一次告警,避免渲染阶段重复刷屏
-  if (!Number.isFinite(step) || step <= 0) {
+  // 告警也读取归一化结果,避免提示 fallback 与实际 render/action 使用不同数值。
+  if (safeStep !== step) {
     const k = `step:${step}`;
     if (!_warned.has(k)) {
       _warned.add(k);
-      log.warn(`step 必须是有限正数，传入 ${step}，已 fallback 为 1`);
+      log.warn(`step 必须是有限正数，传入 ${step}，已 fallback 为 ${safeStep}`);
     }
   }
-  if (Number.isFinite(min) && Number.isFinite(max) && min > max) {
+  if (
+    Number.isFinite(min) &&
+    Number.isFinite(max) &&
+    min > max &&
+    safeMax === safeMin
+  ) {
     const k = `minmax:${min}:${max}`;
     if (!_warned.has(k)) {
       _warned.add(k);
-      log.warn(`min(${min}) 不能大于 max(${max})，已按 min 渲染`);
+      log.warn(
+        `min(${min}) 不能大于 max(${max})，已折叠为 ${safeMin} 的零范围`
+      );
     }
   }
-  const safeStep = Number.isFinite(step) && step > 0 ? step : 1;
-  const safeMin = Number.isFinite(min) ? min : 0;
-  const safeMax = Number.isFinite(max) && max >= safeMin ? max : safeMin;
-  // value 处理:NaN → min;±Infinity → 钳到 [min, max];有限数 → 正常 clamp
-  const safeValue = Number.isNaN(value)
-    ? safeMin
-    : Math.min(safeMax, Math.max(safeMin, value));
-  const decDisabled = disabled || safeValue <= safeMin;
-  const incDisabled = disabled || safeValue >= safeMax;
-
-  // [M-7] 按钮高 sm=28 / md=32 均低于 fixed.hitTarget=44;hitSlop 不越父边界,
-  // 须让容器一并扩展:wrap 加垂直 padding 把命中区撑到 44pt。
-  const wrapPaddingV = Math.max(0, Math.round((fixed.hitTarget - dims.h) / 2));
+  const decrementTestID = childTestID(testID, 'decrement');
+  const valueTestID = childTestID(testID, 'value');
+  const incrementTestID = childTestID(testID, 'increment');
 
   return (
-    <View
-      style={[styles.wrap, { paddingVertical: wrapPaddingV }]}
-      testID={testID}
-    >
+    <View style={styles.wrap} testID={testID}>
       <Pressable
-        onPress={() => onChange(Math.max(safeMin, safeValue - safeStep))}
-        disabled={decDisabled}
+        onPress={
+          canDecrement
+            ? () => onChange(Math.max(safeMin, safeValue - safeStep))
+            : undefined
+        }
+        disabled={!canDecrement}
         accessibilityRole="button"
-        accessibilityLabel="减少"
-        accessibilityState={{ disabled: decDisabled }}
+        accessibilityLabel={`${accessibilityLabel}，减少`}
+        accessibilityState={{ disabled: !canDecrement }}
         accessibilityHint={`当前值 ${safeValue}，减 ${safeStep}`}
-        testID={childTestID(testID, 'decrement')}
+        testID={decrementTestID}
         style={({ pressed }) => [
-          styles.cell,
-          styles.btnLeft,
-          { width: dims.btn, height: dims.h },
-          { opacity: decDisabled ? 0.4 : pressed ? pressedOpacity : 1 },
+          styles.actionFrame,
+          styles.decrementFrame,
+          {
+            opacity: !canDecrement ? 0.4 : pressed ? pressedOpacity : 1,
+          },
         ]}
       >
-        <Text style={styles.btnText}>−</Text>
+        <View
+          {...A11Y_HIDDEN_PROPS}
+          style={[
+            styles.cell,
+            styles.btnLeft,
+            { width: dims.btn, height: dims.h },
+          ]}
+          testID={childTestID(testID, 'decrement-visual')}
+        >
+          <Text style={styles.btnText}>−</Text>
+        </View>
       </Pressable>
-      {/* [L-29] adjustable 需配 accessible + accessibilityActions + onAccessibilityAction,
-          否则 iOS VoiceOver 宣读"可调节"但滑动手势无响应。*/}
       <View
         accessible
         accessibilityRole="adjustable"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityState={{ disabled: rangeDisabled }}
         accessibilityValue={{ min: safeMin, max: safeMax, now: safeValue }}
-        accessibilityActions={[
-          { name: 'increment', label: '增加' },
-          { name: 'decrement', label: '减少' },
-        ]}
-        onAccessibilityAction={(e) => {
-          if (e.nativeEvent.actionName === 'increment' && !incDisabled) {
-            onChange(Math.min(safeMax, safeValue + safeStep));
-          } else if (e.nativeEvent.actionName === 'decrement' && !decDisabled) {
-            onChange(Math.max(safeMin, safeValue - safeStep));
-          }
-        }}
-        style={[styles.cell, { minWidth: dims.w, height: dims.h }]}
-        testID={childTestID(testID, 'value')}
+        accessibilityActions={rangeDisabled ? undefined : accessibilityActions}
+        onAccessibilityAction={
+          rangeDisabled
+            ? undefined
+            : (event) => {
+                if (
+                  event.nativeEvent.actionName === 'increment' &&
+                  canIncrement
+                ) {
+                  onChange(Math.min(safeMax, safeValue + safeStep));
+                } else if (
+                  event.nativeEvent.actionName === 'decrement' &&
+                  canDecrement
+                ) {
+                  onChange(Math.max(safeMin, safeValue - safeStep));
+                }
+              }
+        }
+        style={styles.valueFrame}
+        testID={valueTestID}
       >
-        <Text style={[styles.valueText, { fontSize: dims.fs }]}>
-          {safeValue}
-        </Text>
+        <View
+          {...A11Y_HIDDEN_PROPS}
+          style={[styles.cell, { width: dims.w, height: dims.h }]}
+          testID={childTestID(testID, 'value-visual')}
+        >
+          <Text style={[styles.valueText, { fontSize: dims.fs }]}>
+            {safeValue}
+          </Text>
+        </View>
       </View>
       <Pressable
-        onPress={() => onChange(Math.min(safeMax, safeValue + safeStep))}
-        disabled={incDisabled}
+        onPress={
+          canIncrement
+            ? () => onChange(Math.min(safeMax, safeValue + safeStep))
+            : undefined
+        }
+        disabled={!canIncrement}
         accessibilityRole="button"
-        accessibilityLabel="增加"
-        accessibilityState={{ disabled: incDisabled }}
+        accessibilityLabel={`${accessibilityLabel}，增加`}
+        accessibilityState={{ disabled: !canIncrement }}
         accessibilityHint={`当前值 ${safeValue}，加 ${safeStep}`}
-        testID={childTestID(testID, 'increment')}
+        testID={incrementTestID}
         style={({ pressed }) => [
-          styles.cell,
-          styles.btnRight,
-          { width: dims.btn, height: dims.h },
-          { opacity: incDisabled ? 0.4 : pressed ? pressedOpacity : 1 },
+          styles.actionFrame,
+          styles.incrementFrame,
+          {
+            opacity: !canIncrement ? 0.4 : pressed ? pressedOpacity : 1,
+          },
         ]}
       >
-        <Text style={styles.btnText}>+</Text>
+        <View
+          {...A11Y_HIDDEN_PROPS}
+          style={[
+            styles.cell,
+            styles.btnRight,
+            { width: dims.btn, height: dims.h },
+          ]}
+          testID={childTestID(testID, 'increment-visual')}
+        >
+          <Text style={styles.btnText}>+</Text>
+        </View>
       </Pressable>
     </View>
   );

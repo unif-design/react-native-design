@@ -17,6 +17,7 @@ import {
   Radio,
   Search,
   Skeleton,
+  Stepper,
   Switch,
   Textarea,
   ThemeProvider,
@@ -310,6 +311,8 @@ export function RuntimeApiScreen(): React.JSX.Element {
 
               <SelectionControlsSection />
 
+              <StepperSection />
+
               <CellSection />
 
               <PulseSection />
@@ -500,6 +503,98 @@ function SelectionControlsSection(): React.JSX.Element {
       <Result
         label="disabled selection actions"
         value={String(unexpectedPresses)}
+      />
+    </Section>
+  );
+}
+
+/**
+ * Stepper:三个真实 44pt outer frame、归一化零范围与边界 action。
+ *
+ * Inspector 在所有平台测 `stepper-middle-decrement/value/increment` 都至少 44×44
+ * （左右两侧精确 44×44）。对应 visual 实现为 r(32)/r(48)，只有 Web 与 402pt
+ * RN harness 才写死为 32/48；`stepper-zero-range` 的 sm visual 为 28/r(40)。
+ */
+function StepperSection(): React.JSX.Element {
+  const [middleValue, setMiddleValue] = useState(1);
+  const [minActions, setMinActions] = useState(0);
+  const [maxActions, setMaxActions] = useState(0);
+  const [unexpectedActions, setUnexpectedActions] = useState(0);
+
+  return (
+    <Section title="Stepper 44pt / boundary actions">
+      <Text style={styles.result}>
+        用 Inspector 测量：stepper-middle-decrement/value/increment 的三个 outer
+        在所有平台均至少 44×44，左右两侧精确 44×44；md visual 是 r(32)×r(32) /
+        r(48)×r(32) / r(32)×r(32)，仅 Web 与 402pt RN harness 对应 32×32 / 48×32
+        / 32×32。stepper-zero-range 使用 sm；visual 是 28×28 / r(40)×28 /
+        28×28，但 outer 仍是固定 44pt。
+      </Text>
+      <Text style={styles.result}>
+        用 screen reader 检查：中间值同时有增加/减少；min 只提供增加，max
+        只提供减少；min/max 无效侧按钮没有 handler。原始 min=10/max=0 折叠为
+        now=min=max=10，中央上报 disabled 且完全没有 action，左右名称均保留
+        “异常范围数量”上下文。尝试无效操作后 unexpected 必须始终为 0。
+      </Text>
+      <Row label="范围中间（md）">
+        <Stepper
+          value={middleValue}
+          onChange={setMiddleValue}
+          min={0}
+          max={2}
+          accessibilityLabel="商品数量"
+          testID="stepper-middle"
+        />
+      </Row>
+      <Row label="到 min（只允许增加）">
+        <Stepper
+          value={0}
+          onChange={(nextValue) => {
+            if (nextValue === 1) {
+              setMinActions((count) => count + 1);
+            } else {
+              setUnexpectedActions((count) => count + 1);
+            }
+          }}
+          min={0}
+          max={2}
+          accessibilityLabel="最低库存数量"
+          testID="stepper-min"
+        />
+      </Row>
+      <Row label="到 max（只允许减少）">
+        <Stepper
+          value={2}
+          onChange={(nextValue) => {
+            if (nextValue === 1) {
+              setMaxActions((count) => count + 1);
+            } else {
+              setUnexpectedActions((count) => count + 1);
+            }
+          }}
+          min={0}
+          max={2}
+          accessibilityLabel="最高库存数量"
+          testID="stepper-max"
+        />
+      </Row>
+      <Row label="min > max（sm / 零范围）">
+        <Stepper
+          value={5}
+          onChange={() => setUnexpectedActions((count) => count + 1)}
+          min={10}
+          max={0}
+          size="sm"
+          accessibilityLabel="异常范围数量"
+          testID="stepper-zero-range"
+        />
+      </Row>
+      <Result label="Stepper middle value" value={String(middleValue)} />
+      <Result label="Stepper min valid actions" value={String(minActions)} />
+      <Result label="Stepper max valid actions" value={String(maxActions)} />
+      <Result
+        label="Stepper unexpected actions"
+        value={String(unexpectedActions)}
       />
     </Section>
   );

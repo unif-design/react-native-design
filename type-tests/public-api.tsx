@@ -20,6 +20,7 @@ import {
   PasswordInput,
   Radio,
   Search,
+  Stepper,
   Switch,
   Textarea,
   type CellExtra,
@@ -99,6 +100,10 @@ const navBarDisplaySlot: NavBarSlot = <Text>只读</Text>;
 <Switch value={false} onChange={noop} accessibilityLabel="接收提醒" />;
 // @ts-expect-error Switch 没有内置可见 label
 <Switch value={false} onChange={noop} />;
+
+// @ts-expect-error adjustable 必须有上下文名称
+<Stepper value={1} onChange={noop} />;
+<Stepper value={1} onChange={noop} accessibilityLabel="商品数量" />;
 
 // --- Cell:文本 / 展示 / control 三分联合 -------------------------------
 

@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { control, fw, r, radius, type as t } from '../../../theme';
+import { control, fixed, fw, r, radius, type as t } from '../../../theme';
 import type { ColorTokens } from '../../../theme';
 import type { StepperSize } from './types';
 
@@ -12,6 +12,24 @@ export const makeStyles = (c: ColorTokens) =>
       flexDirection: 'row',
       alignItems: 'center',
       alignSelf: 'flex-start',
+    },
+    // 固定命中框不走 r()/fontScale；视觉 cell 仍保持原来的 sm/md 尺寸。
+    actionFrame: {
+      width: fixed.hitTarget,
+      height: fixed.hitTarget,
+      justifyContent: 'center',
+    },
+    decrementFrame: {
+      alignItems: 'flex-end',
+    },
+    incrementFrame: {
+      alignItems: 'flex-start',
+    },
+    valueFrame: {
+      minWidth: fixed.hitTarget,
+      minHeight: fixed.hitTarget,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     /** btn / value 共用的 cell 基底 —— 居中 + surface 背景 + 上下边框。
      *  左右边框 / 圆角由 btnLeft / btnRight 增量补齐;value 中间无侧边框。 */

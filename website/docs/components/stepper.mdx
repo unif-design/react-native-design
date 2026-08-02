@@ -1,7 +1,7 @@
 ---
 sidebar_position: 6
 title: Stepper 步进器
-description: "数字步进器 [−][N][+] —— 受控 value/onChange,自动夹到 [min,max](默认 0–99),step 默认 1,size='sm'(28px)/'md'(32px,默认),disabled;到达边界自动禁用对应按钮。"
+description: "数字步进器 [−][N][+] —— 三个真实至少 44pt 的交互 frame；accessibilityLabel 必填，范围和值统一归一化，边界只暴露仍有效的 action。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -29,7 +29,7 @@ export const StepperDemo = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <span className="demo-label">独立</span>
           <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
-            <Stepper value={a} onChange={setA} min={1} max={99} />
+            <Stepper value={a} onChange={setA} min={1} max={99} accessibilityLabel="独立商品数量" />
             <Text style={{ fontSize: 13, color: 'var(--ifm-color-emphasis-600)' }}>min=1, max=99</Text>
           </View>
         </div>
@@ -41,21 +41,21 @@ export const StepperDemo = () => {
                 <Text style={{ fontSize: 14, fontWeight: '500', color: 'var(--ifm-color-emphasis-800)' }}>统一冰红茶</Text>
                 <Text style={{ fontSize: 12, color: 'var(--ifm-color-emphasis-600)' }}>¥120 / 箱 · 库存 50</Text>
               </View>
-              <Stepper value={a} onChange={setA} min={0} max={50} />
+              <Stepper value={a} onChange={setA} min={0} max={50} accessibilityLabel="统一冰红茶数量" />
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: 'var(--ifm-color-emphasis-200)' }}>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 14, fontWeight: '500', color: 'var(--ifm-color-emphasis-800)' }}>阿萨姆奶茶</Text>
                 <Text style={{ fontSize: 12, color: 'var(--ifm-color-emphasis-600)' }}>¥96 / 箱 · 库存 80</Text>
               </View>
-              <Stepper value={b} onChange={setB} min={0} max={80} />
+              <Stepper value={b} onChange={setB} min={0} max={80} accessibilityLabel="阿萨姆奶茶数量" />
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 }}>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 14, fontWeight: '500', color: 'var(--ifm-color-emphasis-800)' }}>老坛酸菜面</Text>
                 <Text style={{ fontSize: 12, color: 'var(--ifm-color-emphasis-600)' }}>¥48 / 箱 · 库存 30</Text>
               </View>
-              <Stepper value={c} onChange={setC} min={0} max={30} />
+              <Stepper value={c} onChange={setC} min={0} max={30} accessibilityLabel="老坛酸菜面数量" />
             </View>
           </View>
         </div>
@@ -73,10 +73,11 @@ export const StepperDemo = () => {
 
 | 元素 | 规则 |
 |---|---|
-| 高度 | md 32px（默认）/ sm 28px（`control.sm`） |
+| 实际交互 frame | `−` / `+` outer 固定 44×44；中央 adjustable outer 至少 44×44，均直接读取 `fixed.hitTarget`，不经过 `r()` 或 fontScale |
+| visual 高度 | md 为 `r(32)`（Web / 402pt RN harness 是 32px）；sm 为 28px（`control.sm`） |
 | 圆角 | 8px（`radius.md`，外层左右两角），中间数字框无独立圆角 |
-| 按钮 | md 32×32 / sm 28×28，`±` 字号 18px（`type.h1`） |
-| 数字框 | min-width md 48 / sm 40，1px 上下边线，无左右边线，字号 md 14 / sm 13 |
+| 按钮 visual | md `r(32) × r(32)` / sm 28×28，嵌在 44×44 outer 内并朝中央贴边；`±` 字号 18px（`type.h1`） |
+| 数字 visual | md `r(48) × r(32)` / sm `r(40) × 28`，在中央 outer 内居中；1px 上下边线、无左右边线，字号 md 14 / sm 13 |
 | 背景 / 描边 | `c.surface` 底 + 1px `c.outline`（亮色 `#EDEDED`）边 |
 | 禁用 | 按钮 `opacity: 0.4`（达到 min/max 或整体 `disabled` 时；按下 0.7） |
 
@@ -87,13 +88,42 @@ import { Stepper } from '@unif/react-native-design';
 
 const [qty, setQty] = useState(12);
 
-<Stepper value={qty} onChange={setQty} min={1} max={99} />
+<Stepper
+  value={qty}
+  onChange={setQty}
+  min={1}
+  max={99}
+  accessibilityLabel="商品数量"
+/>
 
 {/* 自定义步长 */}
-<Stepper value={packs} onChange={setPacks} step={6} min={0} max={120} />
+<Stepper
+  value={packs}
+  onChange={setPacks}
+  step={6}
+  min={0}
+  max={120}
+  accessibilityLabel="整箱数量"
+/>
 
 {/* 小尺寸 */}
-<Stepper size="sm" value={n} onChange={setN} min={0} max={9} />
+<Stepper
+  size="sm"
+  value={n}
+  onChange={setN}
+  min={0}
+  max={9}
+  accessibilityLabel="套餐数量"
+/>
+
+{/* 原始 min > max 会折叠为零范围：显示 10，三个操作节点全部禁用 */}
+<Stepper
+  value={5}
+  onChange={setQty}
+  min={10}
+  max={0}
+  accessibilityLabel="异常范围数量"
+/>
 ```
 
 ## API
@@ -104,29 +134,50 @@ const [qty, setQty] = useState(12);
 |---|---|---|---|
 | `value` | `number` | — | 当前值（受控，必填） |
 | `onChange` | `(value: number) => void` | — | 变更回调（已自动夹到 `[min, max]`，必填） |
+| `accessibilityLabel` | `string` | — | 中央 adjustable 的上下文名称（必填）；左右按钮自动组合“`${label}，减少` / `${label}，增加`” |
 | `min` | `number?` | `0` | 下限（达到时 `−` 禁用） |
 | `max` | `number?` | `99` | 上限（达到时 `+` 禁用） |
 | `step` | `number?` | `1` | 步长（非正数 / 非有限数回退为 1） |
-| `size` | `'sm' \| 'md'` | `'md'` | 高度 28 / 32 |
-| `disabled` | `boolean?` | `false` | 整体禁用（两个按钮都不可点） |
-| `testID` | `string?` | — | E2E 定位（派生 `-decrement` / `-value` / `-increment`） |
+| `size` | `'sm' \| 'md'` | `'md'` | visual 高度 28 / `r(32)`；三个 outer 的 44pt 约束不变 |
+| `disabled` | `boolean?` | `false` | 整体禁用（三个操作节点都不暴露 action） |
+| `testID` | `string?` | — | 根定位；派生三个 outer `-decrement` / `-value` / `-increment` 与对应 `-*-visual` |
 
-> 健壮性：`value` 为 `NaN` 时显示为 `min`；`±Infinity` 钳到 `[min, max]`；`min > max` 时整体按 `min` 渲染（避免写出乱序值）。无 `style` prop。
+> 归一化边界：缺省仍是 `min=0`、`max=99`、`step=1`。非有限 `min` 回退 0；显式非有限 `max` 或 `max < safeMin` 时折叠到 `safeMin`，形成零范围；非正数 / 非有限 `step` 回退 1。`value=NaN` 使用 `safeMin`，`±Infinity` 分别钳到上下边界。零范围与外部 `disabled` 都不会暴露任何 action。无 `style` prop。
 
 ## 无障碍（a11y）
 
 来源：`src/components/ui/Stepper/Stepper.tsx`、`types.ts`。
 
-- 默认 `accessibilityRole`：`−` / `+` 两个 `<Pressable>` 均硬编码 `'button'`；中间数字框 `<View>` 硬编码 `'adjustable'`（可调整值容器）。根 `<View>` 不设 role。
-- a11y props：标签由源码硬编码、不可由外部传入——`−` 为 `accessibilityLabel="减少"`、`+` 为 `accessibilityLabel="增加"`，两者各带 `accessibilityHint`（`` `当前值 ${value}，减/加 ${step}` ``，动态拼当前值与步长）。数字框设 `accessibilityValue={{ min, max, now }}`，把范围与当前值暴露给 SR。`StepperProps` 不含任何 a11y prop（仅 `value` / `onChange` / `min` / `max` / `step` / `size` / `disabled` / `testID`）。
-- 状态语义：两个按钮各自 `accessibilityState={{ disabled }}`——`−` 在 `disabled || value <= min` 时禁用，`+` 在 `disabled || value >= max` 时禁用（到达边界自动禁用对应按钮）。
+- 默认 `accessibilityRole`：`−` / `+` 两个 outer `<Pressable>` 是 `'button'`；中央 outer `<View>` 是 `'adjustable'`。根 `<View>` 不设 role，内部 visual 子树隐藏出 a11y tree。
+- accessible name：必填 `accessibilityLabel` 直接命名中央 adjustable；左右按钮分别组合为“`${accessibilityLabel}，减少` / `${accessibilityLabel}，增加`”，页面存在多个 Stepper 时也保留业务上下文。
+- 单一归一化结果同时驱动可见值、disabled opacity、handler、`accessibilityValue` 和 `accessibilityActions`。到 `safeMin` 只暴露 `increment`，到 `safeMax` 只暴露 `decrement`；对应无效侧按钮同时设 disabled 并移除 handler。
+- 外部 `disabled` 或零范围时，中央上报 `disabled: true`，并完全省略 `accessibilityActions` 与 `onAccessibilityAction`；两个侧按钮也都 disabled 且没有 handler。
 
 ```tsx
-// 角色 / 标签 / hint 全部内置，无需额外 a11y prop
-<Stepper value={qty} onChange={setQty} min={1} max={99} />
+<Stepper
+  value={qty}
+  onChange={setQty}
+  min={1}
+  max={99}
+  accessibilityLabel="统一冰红茶数量"
+/>
 ```
+
+## Native / Web 人工测量
+
+在 runtime harness 的 Stepper 区用 Inspector 测量：
+
+| 节点 | testID | 预期布局 |
+|---|---|---|
+| 左右 outer RNGH Pressable | `stepper-middle-decrement` / `stepper-middle-increment` | 所有平台固定 44×44，透明、无 `hitSlop`；visual 朝中央贴边 |
+| 中央 adjustable outer | `stepper-middle-value` | 所有平台至少 44×44 |
+| md visual wrappers | 对应 `-decrement-visual` / `-value-visual` / `-increment-visual` | 实现为 `r(32)×r(32)` / `r(48)×r(32)` / `r(32)×r(32)`；Web 与 402pt RN harness 是 32×32 / 48×32 / 32×32，其他 native window 按实际 `r()` 结果 |
+| sm visual wrappers | `stepper-zero-range-*-visual` | 28×28 / `r(40)×28` / 28×28；outer 仍为固定 44×44 |
+
+用 screen reader 检查 `stepper-min-value` 只提供增加、`stepper-max-value` 只提供减少；`stepper-zero-range-value` 必须上报 disabled 且没有 adjustable action。点击无效侧按钮或零范围任意节点，harness 的 unexpected 计数必须保持 0。
 
 ## 不要
 
 - ❌ 不要在 Stepper 中间放可输入的 TextInput——下单场景请用专门的 InputNumber 控件（待规划）
+- ❌ 不要省略或复用无上下文的 `accessibilityLabel`——名称应说明正在调整哪个业务值
 - ❌ 不要去掉描边或圆角——Stepper 必须看起来"可点击"

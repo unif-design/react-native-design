@@ -6,6 +6,8 @@ export type StepperProps = {
   value: number;
   /** 值变化回调（已自动夹到 [min, max] 区间） */
   onChange: (value: number) => void;
+  /** 中央 adjustable 的上下文名称，左右按钮自动组合“${label}，减少 / 增加” */
+  accessibilityLabel: string;
   /** 最小值，默认 0 */
   min?: number;
   /** 最大值，默认 99 */
@@ -14,7 +16,7 @@ export type StepperProps = {
   step?: number;
   /** 尺寸，默认 'md' */
   size?: StepperSize;
-  /** 整体禁用（两个按钮都不可点） */
+  /** 整体禁用（三个操作节点都不暴露 action） */
   disabled?: boolean;
   /** E2E / 测试定位 */
   testID?: string;
