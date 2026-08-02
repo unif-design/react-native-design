@@ -296,23 +296,33 @@ type CellExtra =
       accessibilityText?: string;
     }
   | { kind: 'control'; node: ReactElement };
+
+type ActionableCellExtra = Exclude<CellExtra, { kind: 'control' }>;
+type StaticCellExtra =
+  | Extract<CellExtra, { kind: 'text' }>
+  | {
+      kind: 'display';
+      node: ReactElement;
+      accessibilityText?: never;
+    };
 ```
 
 渲染规则：
 
 - `text` 一律包装成库内 Text，避免 number/bigint 成为 View 的裸 child。
-- `display.node` 只允许 `ReactElement`，不能用 primitive、Iterable 或 Promise 绕过 text 分支。`accessibilityText` 未传时视为装饰；传入非空字符串时视为需要合并朗读的补充信息。
+- `display.node` 只允许 `ReactElement`，不能用 primitive、Iterable 或 Promise 绕过 text 分支。公开 `CellExtra` 保留完整三分联合，但 `accessibilityText` 只允许 actionable display 使用，并由外层 action 合并朗读。
+- static display 精确声明 `accessibilityText?: never`，始终是装饰内容；静态行需要表达语义的可见内容必须使用 `kind: 'text'`，由本地 Text 自然朗读。
 - `control` 由传入元素自己承担交互和 a11y。
 
 Cell Props 使用三分联合：
 
 1. actionable：`onPress` 必填，可使用 `arrow`、`disabled`、`accessibilityHint`，`extra` 只允许 `text` / `display`。
 2. control：`extra.kind === 'control'`，并令 `onPress`、`arrow`、`disabled`、`accessibilityLabel`、`accessibilityHint` 为 `never`。
-3. static：没有 `onPress`，同样禁止 `arrow`、`disabled`、`accessibilityLabel` 和 action hint，`extra` 只允许 `text` / `display`。
+3. static：没有 `onPress`，同样禁止 `arrow`、`disabled`、`accessibilityLabel` 和 action hint，`extra` 只允许 `text` / 不带 `accessibilityText` 的装饰 `display`。
 
 这使 `arrow: true` 必然对应真实外层操作，也禁止通过 title、desc、leading 或 extra 合法声明嵌套 control。`display` 的契约明确要求内容非交互；caller 若把交互元素谎报为 display 属于类型语义违约。
 
-actionable Cell 默认 accessible name 由 `title`、非空 `desc`、`extra.kind === 'text'` 的值或 display 的非空 `accessibilityText` 依次组合；显式 `accessibilityLabel` 可覆盖。control Cell 不创建外层 button 语义，交互和 accessible name 由 control 自身承担。
+actionable Cell 默认 accessible name 由 `title`、非空 `desc`、`extra.kind === 'text'` 的值或 actionable display 的非空 `accessibilityText` 依次组合；显式 `accessibilityLabel` 可覆盖。control Cell 不创建外层 button 语义，交互和 accessible name 由 control 自身承担。static Cell 保持普通 View，不创建用于合并名称的外层 a11y node；`title`、`desc` 与 text extra 继续作为可见 Text 自然朗读，static display 则保持装饰语义。
 
 ## 9. Stepper
 

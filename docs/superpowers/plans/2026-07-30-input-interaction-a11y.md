@@ -929,7 +929,7 @@ test('默认 action label 按 title/desc/extra 顺序组合', () => {
   ).toBe('订单，待支付，0');
 });
 
-test('display 只有非空 accessibilityText 才进入组合名称', () => {
+test('actionable display 只有非空 accessibilityText 才进入组合名称', () => {
   expect(
     buildCellAccessibilityLabel({
       title: '设备',
@@ -946,6 +946,17 @@ Extend the root import with `Cell`.
 ```tsx
 <Cell title="设置" onPress={noop} arrow />;
 <Cell title="状态" extra={{ kind: 'text', value: 0 }} />;
+const staticDisplayCellProps = {
+  title: '设备',
+  extra: {
+    kind: 'display',
+    node: <Text>在线</Text>,
+    accessibilityText: '在线',
+  },
+} as const;
+<Cell {...staticDisplayCellProps} onPress={noop} />;
+// @ts-expect-error static display 是装饰内容，不能声明 accessibilityText
+<Cell {...staticDisplayCellProps} />;
 <Cell
   title="通知"
   extra={{
@@ -988,7 +999,14 @@ export type CellExtra =
     }
   | { kind: 'control'; node: ReactElement };
 
-type DisplayExtra = Exclude<CellExtra, { kind: 'control' }>;
+type ActionableExtra = Exclude<CellExtra, { kind: 'control' }>;
+type StaticExtra =
+  | Extract<CellExtra, { kind: 'text' }>
+  | {
+      kind: 'display';
+      node: ReactElement;
+      accessibilityText?: never;
+    };
 type SharedCellProps = {
   title: CellTextValue;
   titleLines?: number;
@@ -1001,7 +1019,7 @@ type SharedCellProps = {
 
 type ActionableCellProps = {
   onPress: () => void;
-  extra?: DisplayExtra;
+  extra?: ActionableExtra;
   arrow?: boolean;
   disabled?: boolean;
   accessibilityLabel?: string;
@@ -1016,7 +1034,7 @@ type ControlCellProps = {
   accessibilityHint?: never;
 };
 type StaticCellProps = {
-  extra?: DisplayExtra;
+  extra?: StaticExtra;
   onPress?: never;
   arrow?: never;
   disabled?: never;
@@ -1029,13 +1047,13 @@ export type CellProps = SharedCellProps &
 
 - [ ] **Step 5: Render branches without heuristics**
 
-Always wrap title/desc/text-extra in library Text using `stringifyCellText`. Hide leading/display nodes with `A11Y_HIDDEN_PROPS`; a display extra with accessibility text still contributes through the outer actionable label rather than becoming a second focus.
+Always wrap title/desc/text-extra in library Text using `stringifyCellText`. Hide leading/display nodes with `A11Y_HIDDEN_PROPS`; only an actionable display extra may declare accessibility text, which contributes through the outer actionable label rather than becoming a second focus. Static display is always decorative (`accessibilityText?: never`); semantic static content uses `kind: 'text'`.
 
 Render:
 
 - actionable: outer RNGH Pressable with button semantics and derived/explicit label;
 - control: plain View, no outer accessibility element, control node owns semantics;
-- static: plain View, natural visible text only;
+- static: plain View with no outer merged a11y node; title/desc/text-extra remain natural visible Text, while display extra is decorative;
 - arrow only inside actionable branch.
 
 Delete `extraHasInteractiveNode` and `renderSlot` runtime type guessing.

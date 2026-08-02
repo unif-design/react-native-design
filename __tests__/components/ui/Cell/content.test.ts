@@ -23,7 +23,7 @@ describe('Cell content', () => {
     ).toBe('订单，待支付，0');
   });
 
-  test('display 只有非空 accessibilityText 才进入组合名称', () => {
+  test('actionable display 只有非空 accessibilityText 才进入组合名称', () => {
     expect(
       buildCellAccessibilityLabel({
         title: '设备',

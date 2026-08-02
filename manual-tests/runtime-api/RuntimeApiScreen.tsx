@@ -346,8 +346,10 @@ function CellSection(): React.JSX.Element {
         都不形成第二焦点；cell-action-display 名称为“设备，在线”，其自定义
         leading 与 display extra 同样隐藏；cell-control 与 cell-static
         外层均为本地 View、无 action/role，只有 cell-control-switch 自己承担
-        switch 名称与 checked state。禁用 action 应保留 disabled button
-        state，但 onPress 必须不存在且计数始终为 0。
+        switch 名称与 checked state。cell-static 的 title/desc/text extra
+        应作为可见 Text 自然朗读；cell-static-display 的 display extra
+        始终是装饰内容，不形成外层合并名称或独立焦点。禁用 action 应保留
+        disabled button state，但 onPress 必须不存在且计数始终为 0。
       </Text>
       <List>
         <Cell
@@ -393,6 +395,14 @@ function CellSection(): React.JSX.Element {
           desc={12n}
           extra={{ kind: 'text', value: 0 }}
           testID="cell-static"
+        />
+        <Cell
+          title="静态品牌"
+          extra={{
+            kind: 'display',
+            node: <Text style={styles.result}>装饰徽章</Text>,
+          }}
+          testID="cell-static-display"
         />
         <Cell
           title="禁用 action"

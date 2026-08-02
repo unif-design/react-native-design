@@ -113,10 +113,25 @@ const publicCellProps: CellProps = {
   leading: publicCellLeading,
   extra: publicCellExtra,
 };
+const staticDisplayCellProps = {
+  title: '设备',
+  extra: {
+    kind: 'display',
+    node: <Text>在线</Text>,
+    accessibilityText: '在线',
+  },
+} as const;
+const actionableDisplayCellProps = {
+  ...staticDisplayCellProps,
+  onPress: noop,
+};
 
 <Cell {...publicCellProps} />;
 <Cell title="设置" onPress={noop} arrow />;
 <Cell title="状态" extra={{ kind: 'text', value: 0 }} />;
+<Cell {...actionableDisplayCellProps} />;
+// @ts-expect-error static display 是装饰内容，不能声明 accessibilityText
+<Cell {...staticDisplayCellProps} />;
 <Cell
   title="通知"
   extra={{

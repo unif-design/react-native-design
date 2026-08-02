@@ -15,7 +15,14 @@ export type CellExtra =
     }
   | { kind: 'control'; node: ReactElement };
 
-type DisplayExtra = Exclude<CellExtra, { kind: 'control' }>;
+type ActionableExtra = Exclude<CellExtra, { kind: 'control' }>;
+type StaticExtra =
+  | Extract<CellExtra, { kind: 'text' }>
+  | {
+      kind: 'display';
+      node: ReactElement;
+      accessibilityText?: never;
+    };
 
 type SharedCellProps = {
   /** 主标题由库内 Text 安全渲染。 */
@@ -36,7 +43,7 @@ type SharedCellProps = {
 
 type ActionableCellProps = {
   onPress: () => void;
-  extra?: DisplayExtra;
+  extra?: ActionableExtra;
   arrow?: boolean;
   disabled?: boolean;
   /** 覆盖由 title、desc 与 extra 自动组合的 accessible name。 */
@@ -55,7 +62,7 @@ type ControlCellProps = {
 };
 
 type StaticCellProps = {
-  extra?: DisplayExtra;
+  extra?: StaticExtra;
   onPress?: never;
   arrow?: never;
   disabled?: never;

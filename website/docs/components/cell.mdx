@@ -175,7 +175,18 @@ type CellExtra =
       accessibilityText?: string;
     }
   | { kind: 'control'; node: ReactElement };
+
+type ActionableCellExtra = Exclude<CellExtra, { kind: 'control' }>;
+type StaticCellExtra =
+  | Extract<CellExtra, { kind: 'text' }>
+  | {
+      kind: 'display';
+      node: ReactElement;
+      accessibilityText?: never;
+    };
 ```
+
+公开 `CellExtra` 保持完整三分联合；`CellProps` 再按分支收紧。`accessibilityText` 只属于 actionable display，static display 精确禁止该字段。
 
 ### `<Cell>`
 
@@ -184,7 +195,7 @@ type CellExtra =
 | `title`              | `CellTextValue`        | —        | 主标题（必填）；始终由库内 `<Text>` + `stringifyCellText` 安全渲染            |
 | `titleLines`         | `number`               | `1`      | 主标题的 `numberOfLines`                                                      |
 | `desc`               | `CellTextValue`        | —        | 副标题 / 描述；始终由库内 `<Text>` 安全渲染，最多 2 行                        |
-| `extra`              | `CellExtra`            | —        | `text` / `display` / `control` 三种显式配置；可用分支受 `CellProps` 联合约束  |
+| `extra`              | `CellExtra`            | —        | 三种公开配置；actionable 可用 text/display，static 仅 text/装饰 display，control 仅 control |
 | `arrow`              | `boolean`              | `false`  | 仅 actionable 可用；显示 chevron-right，`danger` 时仍不渲染                   |
 | `leading`            | `CellLeading`          | —        | 图标名，或 `{ kind: 'display', node }` 纯展示节点                             |
 | `onPress`            | `() => void`           | —        | actionable 分支必填；control/static 禁止                                      |
@@ -199,9 +210,9 @@ type CellExtra =
 
 | 分支       | 必要条件                   | 可用 extra         | 外层语义                                                 |
 | ---------- | -------------------------- | ------------------ | -------------------------------------------------------- |
-| actionable | `onPress` 必填             | `text` / `display` | RNGH `Pressable` + `button`                              |
-| control    | `extra.kind === 'control'` | `control`          | 本地 `View`；control 自己承担交互与名称                  |
-| static     | 无 `onPress`               | `text` / `display` | 本地 `View`；禁止 `arrow` / disabled / action a11y props |
+| actionable | `onPress` 必填             | `text` / `display`                         | RNGH `Pressable` + `button`                              |
+| control    | `extra.kind === 'control'` | `control`                                  | 本地 `View`；control 自己承担交互与名称                  |
+| static     | 无 `onPress`               | `text` / 无 `accessibilityText` 的 `display` | 本地 `View`；禁止 `arrow` / disabled / action a11y props |
 
 ### `<List>`
 
@@ -217,11 +228,11 @@ type CellExtra =
 
 来源：`src/components/ui/Cell/Cell.tsx`、`content.ts`、`types.ts`。
 
-- actionable 是唯一外层可访问操作：RNGH `Pressable` 固定为 `button`。默认名称依次组合非空的 `title`、`desc` 与 extra 文本，使用中文顿隔 `，`；`display.accessibilityText` 只有非空白时才贡献。显式 `accessibilityLabel` 可覆盖。
+- actionable 是唯一外层可访问操作：RNGH `Pressable` 固定为 `button`。默认名称依次组合非空的 `title`、`desc` 与 extra 文本，使用中文顿隔 `，`；actionable display 的 `accessibilityText` 只有非空白时才贡献。显式 `accessibilityLabel` 可覆盖。
 - `disabled=true` 时 actionable 同时设置 disabled state 和 `onPress={undefined}`，不会留下可调用 handler。
-- control/static 都渲染本地 `View`，不创建外层 action 或 a11y element。control 的 node 必须自己提供 role、state、handler 与 accessible name。
-- 所有 leading、自定义 `display` extra 与 chevron 都由库内本地 `View` 包裹，并用共享隐藏属性移出 a11y tree；`display.accessibilityText` 只进入 actionable 外层名称，不形成第二焦点。
-- `title`、`desc` 与 `text` extra 始终由库内 `Text` 渲染，`0` / `bigint` 不会成为 `View` 的裸 child。
+- control/static 都渲染本地 `View`，不创建外层 action 或用于合并名称的 a11y node。control 的 node 必须自己提供 role、state、handler 与 accessible name。
+- 所有 leading、自定义 `display` extra 与 chevron 都由库内本地 `View` 包裹，并用共享隐藏属性移出 a11y tree；只有 actionable display 的 `accessibilityText` 会进入外层名称，不形成第二焦点。
+- `title`、`desc` 与 `text` extra 始终由库内 `Text` 渲染，`0` / `bigint` 不会成为 `View` 的裸 child。static 需要语义内容时必须使用 `kind: 'text'`，由可见 Text 自然朗读；static display 始终是装饰内容，类型精确禁止 `accessibilityText`。
 
 ```tsx
 // 默认读作“设备，在线”；display node 本身不形成第二焦点
@@ -248,6 +259,15 @@ type CellExtra =
       />
     ),
   }}
+/>
+
+// static 语义内容使用 text；外层保持普通 View
+<Cell title="状态" extra={{ kind: 'text', value: '在线' }} />
+
+// static display 仅作装饰，不能声明 accessibilityText
+<Cell
+  title="品牌"
+  extra={{ kind: 'display', node: <BrandBadge /> }}
 />
 ```
 
