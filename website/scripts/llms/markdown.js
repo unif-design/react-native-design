@@ -1,5 +1,7 @@
 'use strict';
 
+const path = require('node:path');
+
 const CLOSING_TO_OPENING = {
   ')': '(',
   ']': '[',
@@ -1056,6 +1058,421 @@ function collapseBlankLinesOutsideCode(source) {
   return assembleMarkdown([source]).replace(/^\n+/u, '');
 }
 
+function findMarkdownLabelEnd(source, start, limit = source.length) {
+  let depth = 0;
+  for (let cursor = start; cursor < limit; cursor += 1) {
+    const character = source[cursor];
+    if (character === '\\') {
+      cursor += 1;
+    } else if (character === '[') {
+      depth += 1;
+    } else if (character === ']') {
+      depth -= 1;
+      if (depth === 0) return cursor;
+    }
+  }
+  return -1;
+}
+
+function isAsciiPunctuation(character) {
+  const code = character?.charCodeAt(0);
+  return (
+    (code >= 0x21 && code <= 0x2f) ||
+    (code >= 0x3a && code <= 0x40) ||
+    (code >= 0x5b && code <= 0x60) ||
+    (code >= 0x7b && code <= 0x7e)
+  );
+}
+
+function unescapeAsciiPunctuation(value) {
+  let output = '';
+  for (let cursor = 0; cursor < value.length; cursor += 1) {
+    if (value[cursor] === '\\' && isAsciiPunctuation(value[cursor + 1])) {
+      cursor += 1;
+    }
+    output += value[cursor];
+  }
+  return output;
+}
+
+function normalizeReferenceLabel(value) {
+  return unescapeAsciiPunctuation(value)
+    .trim()
+    .replace(/[ \t\r\n]+/gu, ' ')
+    .toLowerCase();
+}
+
+function skipMarkdownWhitespace(source, start, limit = source.length) {
+  let cursor = start;
+  while (cursor < limit && /[ \t\r\n]/u.test(source[cursor])) cursor += 1;
+  return cursor;
+}
+
+function skipHorizontalWhitespace(source, start, limit) {
+  let cursor = start;
+  while (cursor < limit && /[ \t]/u.test(source[cursor])) cursor += 1;
+  return cursor;
+}
+
+function scanDelimitedTitle(source, start, limit) {
+  const opening = source[start];
+  const closing = opening === '(' ? ')' : opening;
+  if (opening !== '"' && opening !== "'" && opening !== '(') return -1;
+
+  for (let cursor = start + 1; cursor < limit; cursor += 1) {
+    if (source[cursor] === '\\') {
+      cursor += 1;
+    } else if (source[cursor] === closing) {
+      return cursor + 1;
+    }
+  }
+  return -1;
+}
+
+function scanInlineLinkDestination(source, openingParenthesis) {
+  let cursor = skipMarkdownWhitespace(source, openingParenthesis + 1);
+  let targetStart = cursor;
+  let targetEnd = cursor;
+
+  if (source[cursor] === '<') {
+    targetStart = cursor + 1;
+    cursor = targetStart;
+    while (cursor < source.length) {
+      if (source[cursor] === '\\') {
+        cursor += 2;
+        continue;
+      }
+      if (source[cursor] === '\n' || source[cursor] === '\r') return null;
+      if (source[cursor] === '>') break;
+      cursor += 1;
+    }
+    if (source[cursor] !== '>') return null;
+    targetEnd = cursor;
+    cursor += 1;
+  } else {
+    let parenthesisDepth = 0;
+    while (cursor < source.length) {
+      const character = source[cursor];
+      if (character === '\\') {
+        cursor += 2;
+        continue;
+      }
+      if (/[ \t\r\n]/u.test(character)) {
+        if (parenthesisDepth !== 0) return null;
+        targetEnd = cursor;
+        break;
+      }
+      if (character === '(') {
+        parenthesisDepth += 1;
+      } else if (character === ')') {
+        if (parenthesisDepth === 0) {
+          return {
+            end: cursor + 1,
+            targetEnd: cursor,
+            targetStart,
+          };
+        }
+        parenthesisDepth -= 1;
+      }
+      cursor += 1;
+    }
+    if (cursor >= source.length) return null;
+  }
+
+  cursor = skipMarkdownWhitespace(source, cursor);
+  if (source[cursor] === ')') {
+    return { end: cursor + 1, targetEnd, targetStart };
+  }
+
+  const titleEnd = scanDelimitedTitle(source, cursor, source.length);
+  if (titleEnd === -1) return null;
+  cursor = skipMarkdownWhitespace(source, titleEnd);
+  if (source[cursor] !== ')') return null;
+  return { end: cursor + 1, targetEnd, targetStart };
+}
+
+function markdownLineRange(source, start) {
+  const line = lineAt(source, start);
+  return {
+    end: start + line.text.length,
+    hasLineEnding: line.end < source.length,
+    next: line.next,
+    start,
+  };
+}
+
+function scanReferenceTarget(source, start, lineEnd) {
+  let cursor = start;
+  let targetStart = cursor;
+  let targetEnd = cursor;
+  if (source[cursor] === '<') {
+    targetStart = cursor + 1;
+    cursor = targetStart;
+    while (cursor < lineEnd) {
+      if (source[cursor] === '\\') {
+        cursor += 2;
+        continue;
+      }
+      if (source[cursor] === '>') break;
+      cursor += 1;
+    }
+    if (source[cursor] !== '>') return null;
+    targetEnd = cursor;
+    cursor += 1;
+  } else {
+    let parenthesisDepth = 0;
+    while (cursor < lineEnd && !/[ \t]/u.test(source[cursor])) {
+      if (source[cursor] === '\\') {
+        cursor += 2;
+        continue;
+      }
+      if (source[cursor] === '(') {
+        parenthesisDepth += 1;
+      } else if (source[cursor] === ')') {
+        if (parenthesisDepth === 0) return null;
+        parenthesisDepth -= 1;
+      }
+      cursor += 1;
+    }
+    if (parenthesisDepth !== 0) return null;
+    targetEnd = cursor;
+  }
+  if (targetStart === targetEnd) return null;
+  return { cursor, targetEnd, targetStart };
+}
+
+function scanReferenceDefinition(source, lineStart) {
+  const firstLine = markdownLineRange(source, lineStart);
+  let cursor = lineStart;
+  let indentation = 0;
+  while (source[cursor] === ' ' && indentation < 4) {
+    indentation += 1;
+    cursor += 1;
+  }
+  if (indentation > 3 || source[cursor] !== '[' || source[cursor + 1] === '^') {
+    return null;
+  }
+
+  const labelStart = cursor + 1;
+  const labelEnd = findMarkdownLabelEnd(source, cursor, firstLine.end);
+  if (labelEnd <= cursor + 1 || source[labelEnd + 1] !== ':') {
+    return null;
+  }
+
+  let targetLine = firstLine;
+  cursor = skipHorizontalWhitespace(source, labelEnd + 2, targetLine.end);
+  if (cursor === targetLine.end) {
+    if (!targetLine.hasLineEnding) return null;
+    targetLine = markdownLineRange(source, targetLine.next);
+    cursor = skipHorizontalWhitespace(source, targetLine.start, targetLine.end);
+    if (cursor === targetLine.end) return null;
+  }
+
+  const target = scanReferenceTarget(source, cursor, targetLine.end);
+  if (target === null) return null;
+  cursor = skipHorizontalWhitespace(source, target.cursor, targetLine.end);
+  let definitionEnd = targetLine.end;
+  if (cursor !== targetLine.end) {
+    const titleEnd = scanDelimitedTitle(source, cursor, targetLine.end);
+    if (titleEnd === -1) return null;
+    cursor = skipHorizontalWhitespace(source, titleEnd, targetLine.end);
+    if (cursor !== targetLine.end) return null;
+  } else if (targetLine.hasLineEnding) {
+    const titleLine = markdownLineRange(source, targetLine.next);
+    const titleStart = skipHorizontalWhitespace(
+      source,
+      titleLine.start,
+      titleLine.end
+    );
+    const titleEnd = scanDelimitedTitle(source, titleStart, titleLine.end);
+    if (
+      titleEnd !== -1 &&
+      skipHorizontalWhitespace(source, titleEnd, titleLine.end) ===
+        titleLine.end
+    ) {
+      definitionEnd = titleLine.end;
+    }
+  }
+
+  return {
+    end: definitionEnd,
+    label: normalizeReferenceLabel(source.slice(labelStart, labelEnd)),
+    start: lineStart,
+    targetEnd: target.targetEnd,
+    targetStart: target.targetStart,
+  };
+}
+
+function findReferenceDefinitionTargets(source) {
+  const definitions = [];
+  for (let lineStart = 0; lineStart <= source.length; ) {
+    const newline = source.indexOf('\n', lineStart);
+    const definition = scanReferenceDefinition(source, lineStart);
+    if (definition !== null) definitions.push(definition);
+    if (newline === -1) break;
+    lineStart = newline + 1;
+  }
+  return definitions;
+}
+
+function recordReferenceUsage(usages, label, isImage) {
+  if (label === '') return;
+  const usage = usages.get(label) || { image: false, link: false };
+  usage[isImage ? 'image' : 'link'] = true;
+  usages.set(label, usage);
+}
+
+function findLinkTargetsAndReferenceUsages(
+  source,
+  excludedRanges,
+  definitionLabels
+) {
+  const targets = [];
+  const usages = new Map();
+  let rangeIndex = 0;
+
+  for (let cursor = 0; cursor < source.length; ) {
+    while (
+      rangeIndex < excludedRanges.length &&
+      cursor >= excludedRanges[rangeIndex].end
+    ) {
+      rangeIndex += 1;
+    }
+    const excluded = excludedRanges[rangeIndex];
+    if (excluded !== undefined && cursor >= excluded.start) {
+      cursor = excluded.end;
+      continue;
+    }
+    if (source[cursor] !== '[' || isEscapedAt(source, cursor)) {
+      cursor += 1;
+      continue;
+    }
+
+    const labelEnd = findMarkdownLabelEnd(source, cursor);
+    if (labelEnd === -1) {
+      cursor += 1;
+      continue;
+    }
+    const isImage =
+      cursor > 0 &&
+      source[cursor - 1] === '!' &&
+      !isEscapedAt(source, cursor - 1);
+    const firstLabel = source.slice(cursor + 1, labelEnd);
+
+    if (source[labelEnd + 1] === '(') {
+      const link = scanInlineLinkDestination(source, labelEnd + 1);
+      if (link === null) {
+        cursor = labelEnd + 1;
+        continue;
+      }
+      if (!isImage && link.targetStart !== link.targetEnd) {
+        targets.push(link);
+      }
+      cursor = link.end;
+      continue;
+    }
+
+    if (source[labelEnd + 1] === '[') {
+      const referenceEnd = findMarkdownLabelEnd(source, labelEnd + 1);
+      if (referenceEnd !== -1) {
+        const explicitLabel = source.slice(labelEnd + 2, referenceEnd);
+        const label = normalizeReferenceLabel(
+          explicitLabel === '' ? firstLabel : explicitLabel
+        );
+        if (definitionLabels.has(label)) {
+          recordReferenceUsage(usages, label, isImage);
+        }
+        cursor = referenceEnd + 1;
+        continue;
+      }
+    }
+
+    const shortcutLabel = normalizeReferenceLabel(firstLabel);
+    if (definitionLabels.has(shortcutLabel)) {
+      recordReferenceUsage(usages, shortcutLabel, isImage);
+    }
+    cursor = labelEnd + 1;
+  }
+  return { targets, usages };
+}
+
+function rewriteLinkTarget(target, document, routeMap) {
+  const semanticTarget = unescapeAsciiPunctuation(target);
+  if (
+    /^(?:https?:|mailto:)/iu.test(semanticTarget) ||
+    semanticTarget.startsWith('#')
+  ) {
+    return target;
+  }
+
+  const fragmentStart = semanticTarget.indexOf('#');
+  const targetPath =
+    fragmentStart === -1
+      ? semanticTarget
+      : semanticTarget.slice(0, fragmentStart);
+  const fragment =
+    fragmentStart === -1 ? '' : semanticTarget.slice(fragmentStart);
+  const extensionlessPath = targetPath.replace(/\.mdx?$/iu, '');
+  const sourceDirectory = path.posix.dirname(document.sourceRoute);
+  const route = extensionlessPath.startsWith('/docs/')
+    ? path.posix.normalize(extensionlessPath)
+    : path.posix.resolve(sourceDirectory, extensionlessPath);
+  const destination = routeMap.resolve(route);
+  if (destination === null) {
+    throw new Error(`${document.sourceName}: missing internal route ${target}`);
+  }
+
+  const outputDirectory = path.posix.dirname(document.outputPath);
+  return `${path.posix.relative(
+    outputDirectory,
+    destination.outputPath
+  )}${fragment}`;
+}
+
+function rewriteInternalLinks(markdown, document, routeMap) {
+  const protectedSource = protectCode(markdown);
+  const definitions = findReferenceDefinitionTargets(protectedSource.source);
+  const activeDefinitions = new Map();
+  for (const definition of definitions) {
+    if (!activeDefinitions.has(definition.label)) {
+      activeDefinitions.set(definition.label, definition);
+    }
+  }
+  const definitionLabels = new Set(activeDefinitions.keys());
+  const links = findLinkTargetsAndReferenceUsages(
+    protectedSource.source,
+    definitions,
+    definitionLabels
+  );
+  const referencedDefinitions = [];
+  for (const definition of activeDefinitions.values()) {
+    const usage = links.usages.get(definition.label);
+    if (usage?.link && usage.image) {
+      throw new Error(
+        `${document.sourceName}: reference label ${definition.label} is used by both link and image`
+      );
+    }
+    if (usage?.link) referencedDefinitions.push(definition);
+  }
+  const targets = [...referencedDefinitions, ...links.targets].sort(
+    (left, right) => left.targetStart - right.targetStart
+  );
+
+  let rewritten = '';
+  let cursor = 0;
+  for (const target of targets) {
+    rewritten += protectedSource.source.slice(cursor, target.targetStart);
+    const originalTarget = protectedSource.source.slice(
+      target.targetStart,
+      target.targetEnd
+    );
+    rewritten += rewriteLinkTarget(originalTarget, document, routeMap);
+    cursor = target.targetEnd;
+  }
+  rewritten += protectedSource.source.slice(cursor);
+  return protectedSource.restore(rewritten);
+}
+
 function convertMdxBody(source, sourceName) {
   const protectedSource = protectCode(source);
   const collected = collectExportedDemos(protectedSource.source, sourceName);
@@ -1147,4 +1564,5 @@ module.exports = {
   normalizeDemoDefinition,
   parseFrontmatter,
   protectCode,
+  rewriteInternalLinks,
 };

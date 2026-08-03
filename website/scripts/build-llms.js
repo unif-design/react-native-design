@@ -19,13 +19,13 @@ const {
   assembleMarkdown,
   convertMdxBody,
   parseFrontmatter,
+  rewriteInternalLinks,
 } = require('./llms/markdown');
+const { buildRouteMap } = require('./llms/routes');
 
 const root = path.join(__dirname, '..');
 const docsDir = path.join(root, 'docs');
 const staticDir = path.join(root, 'static');
-// 每页 md 放 static/<MD_SUBDIR>/ —— 单一来源,写入路径(outDir)由它派生。
-// llms.txt 的链接(mdPath)则从写入产物 outPath 反推(见 entries),与实际文件严格一致。
 const MD_SUBDIR = 'md';
 const outDir = path.join(staticDir, MD_SUBDIR);
 
@@ -65,25 +65,60 @@ function write(file, content) {
   fs.writeFileSync(file, content, 'utf8');
 }
 
-function relSlug(file) {
-  // 去扩展名 + 统一成 POSIX 分隔(URL / section 用);跨平台把 Windows 反斜杠也转成 /。
-  // 不在这里做安全过滤 —— 写入安全统一由 safeOutPath() 用 path.resolve + 前缀校验兜底。
-  return path
-    .relative(docsDir, file)
-    .replace(/\.(mdx?|md)$/, '')
-    .split(path.sep)
-    .join('/');
+function canonicalOutputPath(outputPath) {
+  const resolved = path.resolve(staticDir, outputPath);
+  const base = path.resolve(outDir) + path.sep;
+  if (!resolved.startsWith(base)) {
+    throw new Error(`canonical output escapes ${MD_SUBDIR}/: ${outputPath}`);
+  }
+  return resolved;
 }
 
-// 把任意 slug(含来自 frontmatter 的 slug)解析成 outDir 内的安全写入绝对路径。
-// path.resolve 先吃掉 `../`、绝对路径、Windows 反斜杠等,再做严格前缀校验:
-// 不落在 outDir 内的一律拒绝(返回 null),调用方跳过 —— 杜绝路径遍历写到 static/md/ 之外。
-function safeOutPath(slug) {
-  // 显式拒绝绝对路径 slug(slug 本应相对;绝对路径会让 path.resolve 丢掉 outDir 锚点)。
-  if (path.isAbsolute(slug)) return null;
-  const resolved = path.resolve(outDir, `${slug}.md`);
-  const base = path.resolve(outDir) + path.sep;
-  return resolved.startsWith(base) ? resolved : null;
+function pageFrontmatter(raw) {
+  if (!raw.startsWith('---')) return '';
+  const end = raw.indexOf('\n---', 3);
+  return end === -1 ? '' : `${raw.slice(0, end + 4)}\n`;
+}
+
+function createIndexEntry(document) {
+  const publicRoute = document.frontmatterRoute || document.sourceRoute;
+  const publicSlug = publicRoute.slice('/docs'.length);
+  const segments = document.relSlug.split('/');
+  return {
+    title: document.title || publicSlug.slice(1),
+    mdPath: document.outputPath,
+    slug: publicSlug,
+    section: segments.length > 1 ? segments[0] : '概览',
+    description: document.description || null,
+  };
+}
+
+function formatFullMetadata(document) {
+  return `*Source: \`docs/${document.sourcePath}\` · Mirror: \`${document.outputPath}\`*`;
+}
+
+function buildLlmsIndex(siteName, entries) {
+  const bySection = {};
+  for (const entry of entries) {
+    (bySection[entry.section] = bySection[entry.section] || []).push(entry);
+  }
+
+  const lines = [
+    `# ${siteName}`,
+    '',
+    `> ${siteName} 文档索引。每个链接是该页的纯 Markdown 版(供 LLM 抓取);需要完整全文一次性喂入时用 llms-full.txt。`,
+    '',
+    '- [完整全文](llms-full.txt) — 全站全文聚合，适合一次性加载。',
+    '',
+  ];
+  for (const section of sortSections(Object.keys(bySection))) {
+    lines.push(`## ${section}`, '');
+    for (const entry of bySection[section]) {
+      lines.push(formatIndexLine(entry));
+    }
+    lines.push('');
+  }
+  return lines.join('\n');
 }
 
 function main() {
@@ -93,12 +128,25 @@ function main() {
     process.exit(0);
   }
 
-  if (fs.existsSync(outDir)) {
-    fs.rmSync(outDir, { recursive: true, force: true });
-  }
-  ensureDir(outDir);
-
   const files = walk(docsDir).sort();
+  const sourceDocuments = files.map((file) => {
+    const sourcePath = path.relative(docsDir, file).split(path.sep).join('/');
+    const sourceName = `docs/${sourcePath}`;
+    const raw = read(file);
+    const frontmatter = parseFrontmatter(raw);
+    return {
+      id: sourcePath,
+      file,
+      sourceName,
+      sourcePath,
+      raw,
+      slug: frontmatter.slug,
+      title: frontmatter.title,
+      description: frontmatter.description,
+      body: frontmatter.body,
+    };
+  });
+  const routeMap = buildRouteMap(sourceDocuments);
   const head = [
     `# ${SITE_NAME} — 全文文档聚合`,
     '',
@@ -107,99 +155,61 @@ function main() {
   ];
   const bodyBlocks = [];
   const tocTitles = [];
-
-  for (const file of files) {
-    const slug = relSlug(file);
-    const raw = read(file);
-    const { slug: fmSlug, title, body } = parseFrontmatter(raw);
-    const cleanBody = convertMdxBody(
-      body,
-      path.relative(root, file).split(path.sep).join('/')
+  const pages = routeMap.documents.map((document) => {
+    const convertedBody = convertMdxBody(document.body, document.sourceName);
+    const cleanBody = rewriteInternalLinks(convertedBody, document, routeMap);
+    const fullBody = rewriteInternalLinks(
+      convertedBody,
+      { ...document, outputPath: 'llms-full.txt' },
+      routeMap
     );
-    const finalSlug = fmSlug ? fmSlug.replace(/^\/+/, '') : slug;
 
-    // Single-page file: keep its frontmatter (title/description useful), strip MDX in body.
-    const fmEnd = raw.startsWith('---') ? raw.indexOf('\n---', 3) + 4 : 0;
-    const fmBlock = fmEnd ? raw.slice(0, fmEnd) + '\n' : '';
-    const pageOutput = assembleMarkdown([fmBlock, cleanBody]);
+    const pageOutput = assembleMarkdown([
+      pageFrontmatter(document.raw),
+      cleanBody,
+    ]);
+    const outputFile = canonicalOutputPath(document.outputPath);
 
-    const slugPath = safeOutPath(slug);
-    if (!slugPath) {
-      console.warn(`[build-llms] 跳过越界 slug(疑似路径遍历):${slug}`);
-      continue;
-    }
-    write(slugPath, pageOutput);
-
-    // frontmatter slug 同样可能含 `../` —— 也过 safeOutPath,越界只跳过这份镜像、不影响主输出。
-    if (fmSlug && finalSlug !== slug) {
-      const fmPath = safeOutPath(finalSlug);
-      if (fmPath) write(fmPath, pageOutput);
-      else console.warn(`[build-llms] 跳过越界 frontmatter slug:${finalSlug}`);
-    }
-
-    // Aggregate block — drop the per-page frontmatter, prefer a section heading
-    // (so the bundle reads as one continuous outline rather than a string of YAML).
-    tocTitles.push(title || finalSlug);
-    bodyBlocks.push(`## ${title || finalSlug}`);
+    const title =
+      document.title ||
+      (document.frontmatterRoute || document.sourceRoute).slice(
+        '/docs/'.length
+      );
+    tocTitles.push(title);
+    bodyBlocks.push(`## ${title}`);
     bodyBlocks.push('');
-    bodyBlocks.push(
-      `*Source: \`docs/${slug}${file.endsWith('.mdx') ? '.mdx' : '.md'}\` · Slug: \`/${finalSlug}\`*`
-    );
+    bodyBlocks.push(formatFullMetadata(document));
     bodyBlocks.push('');
-    bodyBlocks.push(cleanBody);
+    bodyBlocks.push(fullBody);
     bodyBlocks.push('');
-  }
+    return { outputFile, pageOutput };
+  });
 
-  // /llms-full.txt — 全文聚合(站点根,标准命名),顶部带目录
   const llmsFull = assembleMarkdown([
     ...head,
     buildToc(tocTitles),
     ...bodyBlocks,
   ]);
-  write(path.join(staticDir, 'llms-full.txt'), llmsFull);
+  const entries = routeMap.documents.map(createIndexEntry);
+  const llmsIndex = buildLlmsIndex(SITE_NAME, entries);
 
-  // /llms.txt — 标准索引(H1 + 摘要 + 按顶层目录分节的链接列表,站点根)。
-  // 链接指向每页纯 .md(供 agent 按需抓取),全文一次性喂入走 /llms-full.txt。
-  const entries = files
-    .map((f) => {
-      const slug = relSlug(f);
-      const outPath = safeOutPath(slug);
-      if (!outPath) return null; // 越界 slug 的页 md 也没写,不进索引 → 保持链接一致
-      const { slug: fmSlug, title, description } = parseFrontmatter(read(f));
-      const finalSlug = fmSlug ? fmSlug.replace(/^\/+/, '') : slug;
-      const seg = slug.split('/');
-      return {
-        title: title || finalSlug,
-        // mdPath 从规范化写入路径 outPath 反推,与实际 md 文件严格一致(不用可能含 ../ 的原始 slug)
-        mdPath:
-          '/' + path.relative(staticDir, outPath).split(path.sep).join('/'),
-        slug: `/${finalSlug}`,
-        section: seg.length > 1 ? seg[0] : '概览',
-        description: description || null,
-      };
-    })
-    .filter(Boolean);
-  const bySection = {};
-  for (const e of entries)
-    (bySection[e.section] = bySection[e.section] || []).push(e);
-  const llmsLines = [
-    `# ${SITE_NAME}`,
-    '',
-    `> ${SITE_NAME} 文档索引。每个链接是该页的纯 Markdown 版(供 LLM 抓取);需要完整全文一次性喂入时用 /llms-full.txt。`,
-    '',
-  ];
-  for (const section of sortSections(Object.keys(bySection))) {
-    llmsLines.push(`## ${section}`, '');
-    for (const e of bySection[section]) llmsLines.push(formatIndexLine(e));
-    llmsLines.push('');
+  // 所有 source、Demo、route 与链接都在内存中验证完成后才触碰正式目标。
+  if (fs.existsSync(outDir)) {
+    fs.rmSync(outDir, { recursive: true, force: true });
   }
-  write(path.join(staticDir, 'llms.txt'), llmsLines.join('\n'));
-
-  // index.json 留给站点自身用(/md/index.json)
-  write(path.join(outDir, 'index.json'), JSON.stringify(entries, null, 2));
+  ensureDir(outDir);
+  for (const page of pages) {
+    write(page.outputFile, page.pageOutput);
+  }
+  write(path.join(staticDir, 'llms-full.txt'), llmsFull);
+  write(path.join(staticDir, 'llms.txt'), llmsIndex);
+  write(
+    path.join(outDir, 'index.json'),
+    `${JSON.stringify(entries, null, 2)}\n`
+  );
 
   console.log(
-    `[build-llms] /llms.txt(索引 ${entries.length} 页) + /llms-full.txt(${(llmsFull.length / 1024).toFixed(1)} KB) + ${files.length} 页 /md/*.md`
+    `[build-llms] llms.txt(索引 ${entries.length} 页) + llms-full.txt(${(llmsFull.length / 1024).toFixed(1)} KB) + ${pages.length} 页 md/*.md`
   );
 }
 
@@ -219,9 +229,12 @@ function sortSections(keys) {
 
 module.exports = {
   assembleMarkdown,
+  buildLlmsIndex,
   buildToc,
   convertMdxBody,
+  createIndexEntry,
   formatIndexLine,
+  formatFullMetadata,
   parseFrontmatter,
   sortSections,
 };
