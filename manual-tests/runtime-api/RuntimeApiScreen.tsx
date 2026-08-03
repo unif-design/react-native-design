@@ -4,6 +4,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import {
   Button,
+  Carousel,
   Cell,
   Checkbox,
   ConfirmHost,
@@ -315,6 +316,8 @@ export function RuntimeApiScreen(): React.JSX.Element {
 
               <CellSection />
 
+              <CarouselSection />
+
               <PulseSection />
             </ScrollView>
           </SafeAreaView>
@@ -327,6 +330,75 @@ export function RuntimeApiScreen(): React.JSX.Element {
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
+  );
+}
+
+type CarouselItem = { id: string; label: string };
+
+const CAROUSEL_ITEMS: CarouselItem[] = [
+  { id: 'display', label: '展示 slide' },
+  { id: 'action', label: '可操作 slide' },
+];
+
+/**
+ * Carousel:展示 / action 判别联合、单页布局与系统 reduced motion。
+ *
+ * 本区只提供可观察的 action 计数与系统偏好；slide 的真实 View/Pressable 分支、
+ * Pagination 是否不存在及其 a11y tree 必须在 native/Web harness 人工核验。
+ */
+function CarouselSection(): React.JSX.Element {
+  const [actionPresses, setActionPresses] = useState(0);
+  const reducedMotion = usePrefersReducedMotion();
+  const oneItem = CAROUSEL_ITEMS.slice(0, 1);
+
+  return (
+    <Section title="Carousel display / action / reduced motion">
+      <Text style={styles.result}>
+        用 Inspector / screen reader 核对：carousel-display 的每张 slide 是普通
+        View、没有 button 焦点；carousel-action 的 slide 是 button，
+        名称应为“可操作 slide，第 2 项，共 2 项”，点击只递增 action
+        计数。carousel-single 必须没有 Pagination 节点且容器高度就是
+        100；系统开启 reduced motion 后 carousel-reduced 虽传 autoplay
+        也必须静止。Pagination 存在时外层本地 View 必须完整隐藏其 a11y 子树。
+      </Text>
+      <Carousel
+        data={CAROUSEL_ITEMS}
+        height={100}
+        renderItem={({ item }) => <CarouselSlide label={item.label} />}
+        testID="carousel-display"
+      />
+      <Carousel
+        data={CAROUSEL_ITEMS}
+        height={100}
+        renderItem={({ item }) => <CarouselSlide label={item.label} />}
+        onPressItem={() => setActionPresses((count) => count + 1)}
+        getAccessibilityLabel={(item) => item.label}
+        testID="carousel-action"
+      />
+      <Carousel
+        data={oneItem}
+        height={100}
+        renderItem={({ item }) => <CarouselSlide label={item.label} />}
+        testID="carousel-single"
+      />
+      <Carousel
+        data={CAROUSEL_ITEMS}
+        height={100}
+        autoplay
+        renderItem={({ item }) => <CarouselSlide label={item.label} />}
+        testID="carousel-reduced"
+      />
+      <Result label="Carousel action presses" value={String(actionPresses)} />
+      <Result label="Carousel reduced motion" value={String(reducedMotion)} />
+    </Section>
+  );
+}
+
+function CarouselSlide({ label }: { label: string }): React.JSX.Element {
+  return (
+    <View style={styles.carouselSlide}>
+      <Text style={styles.result}>{label}</Text>
+    </View>
   );
 }
 
@@ -724,6 +796,12 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   selectionRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   navBarFrame: { borderWidth: 1 },
+  carouselSlide: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
   swatch: {
     width: 28,
     height: 28,

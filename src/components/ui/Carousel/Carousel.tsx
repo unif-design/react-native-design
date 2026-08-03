@@ -5,7 +5,16 @@ import {
   Pagination,
 } from 'react-native-reanimated-carousel';
 import { useSharedValue } from 'react-native-reanimated';
-import { space, useThemedStyles } from '../../../theme';
+import {
+  space,
+  usePrefersReducedMotion,
+  useThemedStyles,
+} from '../../../theme';
+import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
+import {
+  effectiveCarouselAutoplay,
+  shouldRenderCarouselPagination,
+} from './behavior';
 import { makeCarouselStyles } from './styles';
 import type { CarouselProps, CarouselRef } from './types';
 
@@ -39,6 +48,14 @@ function CarouselInner<T>(
   const { width: screenWidth } = useWindowDimensions();
   const width = itemSize ?? screenWidth;
   const styles = useThemedStyles(makeCarouselStyles);
+  const reducedMotion = usePrefersReducedMotion();
+  const effectiveAutoplay = effectiveCarouselAutoplay(autoplay, reducedMotion);
+  const shouldRenderPagination = shouldRenderCarouselPagination(
+    showIndicator,
+    data.length
+  );
+  const isActionable =
+    onPressItem !== undefined && getAccessibilityLabel !== undefined;
   // Carousel 把逻辑页进度写进 shared value,Pagination 自动跟随。
   const progress = useSharedValue<number>(0);
 
@@ -46,7 +63,7 @@ function CarouselInner<T>(
   // 与 dotsWrapBottom 的 paddingTop=space[3]+dot height space[1] 一起跟 r() 同步缩放。
   // 'overlay-bottom-right' 不占额外高度。
   const indicatorReservedHeight =
-    showIndicator && indicatorPosition === 'bottom' ? space['7'] : 0;
+    shouldRenderPagination && indicatorPosition === 'bottom' ? space['7'] : 0;
 
   return (
     <View
@@ -60,51 +77,56 @@ function CarouselInner<T>(
         data={data}
         keyExtractor={keyExtractor}
         loop={loop}
-        autoplay={autoplay}
+        autoplay={effectiveAutoplay}
         autoplayInterval={autoplayInterval}
         progress={progress}
         ref={ref}
-        renderItem={({ item, index, relativeProgress }) => (
-          // RN Pressable 而非 RNGH Pressable:Carousel 的 GestureDetector 已挂在
-          // ReanimatedCarousel 内部,外层再套 RNGH Pressable 会产生手势冲突;
-          // 用 RN 原生 Pressable 让库自己的拖拽手势优先,tap 仍正常触发。
-          <Pressable
-            onPress={() => onPressItem?.(item, index)}
-            style={{ width, height }}
-            // [L-92] 恒产出兜底:testID 缺失时用 'carousel' 前缀而非 undefined。
-            // 与 childTestID「父缺失返 undefined」语义不同,不替换为 childTestID。
-            // 原因:renderItem 须向 ReanimatedCarousel 提供稳定可预期的子项 testID
-            // 用于 E2E 定位,哪怕调用方未传 testID 也能用 carousel-item-0 等定位;
-            // 副作用:同屏两个未传 testID 的 Carousel 会碰撞 carousel-item-N。
-            // 建议:多 Carousel 场景请务必传 testID 以避免碰撞。
-            testID={`${testID ?? 'carousel'}-item-${index}`}
-            // 只在真正可点时声明 button 语义,纯展示型不标 button 避免读屏器误导
-            {...(onPressItem
-              ? {
-                  accessibilityRole: 'button' as const,
-                  accessibilityLabel:
-                    getAccessibilityLabel?.(item, index) ??
-                    `第 ${index + 1} 项`,
-                }
-              : null)}
-          >
-            {renderItem({ item, index, relativeProgress })}
-          </Pressable>
-        )}
+        renderItem={({ item, index, relativeProgress }) => {
+          const content = renderItem({ item, index, relativeProgress });
+          const itemTestID = `${testID ?? 'carousel'}-item-${index}`;
+
+          if (isActionable) {
+            // RN Pressable 而非 RNGH Pressable:Carousel 的 GestureDetector 已挂在
+            // ReanimatedCarousel 内部,外层再套 RNGH Pressable 会产生手势冲突;
+            // 用 RN 原生 Pressable 让库自己的拖拽手势优先,tap 仍正常触发。
+            return (
+              <Pressable
+                onPress={() => onPressItem(item, index)}
+                style={{ width, height }}
+                testID={itemTestID}
+                accessibilityRole="button"
+                accessibilityLabel={`${getAccessibilityLabel(item, index)}，第 ${index + 1} 项，共 ${data.length} 项`}
+              >
+                {content}
+              </Pressable>
+            );
+          }
+
+          return (
+            <View style={{ width, height }} testID={itemTestID}>
+              {content}
+            </View>
+          );
+        }}
       />
-      {showIndicator && data.length > 1 ? (
-        // 未传 onPress 时,正式版 Pagination 会把 dots 作为纯视觉辅助从 a11y 树隐藏。
-        <Pagination
-          progress={progress}
-          count={data.length}
-          dotStyle={styles.dot}
-          activeDotStyle={styles.dotActive}
-          containerStyle={
+      {shouldRenderPagination ? (
+        // Pagination 是第三方组件，隐藏 props 必须落在本地 View，不能向其透传。
+        <View
+          {...A11Y_HIDDEN_PROPS}
+          style={
             indicatorPosition === 'overlay-bottom-right'
               ? styles.dotsWrapOverlay
               : styles.dotsWrapBottom
           }
-        />
+        >
+          <Pagination
+            progress={progress}
+            count={data.length}
+            dotStyle={styles.dot}
+            activeDotStyle={styles.dotActive}
+            containerStyle={styles.dots}
+          />
+        </View>
       ) : null}
     </View>
   );

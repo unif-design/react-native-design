@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 title: Carousel 轮播
-description: "包装 react-native-reanimated-carousel 的薄壳轮播 —— 泛型 data、autoplay、loop、内置 dot indicator(bottom / overlay-bottom-right)，条件性 a11y。"
+description: "包装 react-native-reanimated-carousel 的薄壳轮播 —— 泛型 data、严格 display/action slide、reduced-motion autoplay、内置 dot indicator。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -14,8 +14,9 @@ import { Text, View } from 'react-native';
 
 1. dot indicator 走 `c.primary` token,使用正式版 `Pagination`(`useSharedValue` + `progress` 驱动,无需自己跟 active state)
 2. `indicatorPosition` 控制指示器位置:`'bottom'` 独立行(占额外 16px 高度) / `'overlay-bottom-right'` 浮在 banner 右下角
-3. 类型泛型 `<T>` 让 `data`、`renderItem`、`keyExtractor` 和点击回调共享同一 item 类型
+3. 类型泛型 `<T>` 让 `data`、`renderItem`、`keyExtractor` 和 action slide 回调共享同一 item 类型
 4. `forwardRef` 直接透传正式版 `CarouselRef`,支持 `scrollTo` / `prev` / `next` / `getCurrentIndex`
+5. slide 是严格二选一：不传 action 字段时渲染纯展示 `View`；`onPressItem` 与 `getAccessibilityLabel` 必须同时传入才渲染可操作 `Pressable`
 
 ## 实时预览
 
@@ -105,13 +106,13 @@ const banners: Banner[] = [
 | `keyExtractor`          | `(item: T, index: number) => string`                                                        | —                             | 稳定 key 解析器,数据更新时用于保持 item 身份                                                                                                                   |
 | `height`                | `number`                                                                                    | —                             | 每张高度(宽度默认 = 屏宽,被 `itemSize` 覆盖)                                                                                                                   |
 | `itemSize`              | `number?`                                                                                   | `useWindowDimensions().width` | 每张宽度和水平翻页步长;caller 外层有 `marginHorizontal`(例如 Dashboard banner inset 16)时必须传 `屏宽 - 左右 margin*2`,否则 slide 撑满全屏宽,右侧被裁掉        |
-| `autoplay`              | `boolean?`                                                                                  | `false`                       | 是否自动播放                                                                                                                                                   |
+| `autoplay`              | `boolean?`                                                                                  | `false`                       | 是否自动播放；系统开启 reduced motion 时会强制停止                                                                                                             |
 | `autoplayInterval`      | `number?`                                                                                   | `3000`                        | 自动播放间隔 ms                                                                                                                                                |
 | `loop`                  | `boolean?`                                                                                  | `true`                        | 是否循环播放                                                                                                                                                   |
-| `showIndicator`         | `boolean?`                                                                                  | `true`                        | 是否显示底部 dot indicator                                                                                                                                     |
+| `showIndicator`         | `boolean?`                                                                                  | `true`                        | 是否显示 dot indicator；仅 `data.length > 1` 时渲染并按位置预留空间                                                                                            |
 | `indicatorPosition`     | `'bottom' \| 'overlay-bottom-right'`                                                        | `'bottom'`                    | `'bottom'` 独立行 +16px / `'overlay-bottom-right'` 浮层不占高                                                                                                  |
-| `onPressItem`           | `(item: T, index: number) => void`                                                          | —                             | 单项点击回调                                                                                                                                                   |
-| `getAccessibilityLabel` | `(item: T, index: number) => string`                                                        | —                             | 单项 a11y label 解析器,**仅 `onPressItem` 存在时启用**(Pressable 自动声明 `accessibilityRole='button'`,纯展示型轮播不声明 button 语义);未传 fallback `第 N 项` |
+| `onPressItem`           | `(item: T, index: number) => void`                                                          | —                             | action slide 的点击回调；必须与 `getAccessibilityLabel` 同时传入                                                                                                |
+| `getAccessibilityLabel` | `(item: T, index: number) => string`                                                        | —                             | action slide 的业务名称；必须与 `onPressItem` 同时传入                                                                                                         |
 | `style`                 | `StyleProp<ViewStyle>?`                                                                     | —                             | 外层 View 附加样式                                                                                                                                             |
 | `testID`                | `string?`                                                                                   | —                             | E2E / 测试定位,子项自动加 `${testID}-item-${i}`                                                                                                                |
 
@@ -146,14 +147,15 @@ const settledIndex = carouselRef.current?.getCurrentIndex();
 
 来源：`src/components/ui/Carousel/Carousel.tsx`、`types.ts`。
 
-每张 slide 都包在一个 `<Pressable>` 里，但 a11y 语义是**条件性**的：
+slide 的节点类型与 a11y 语义由严格联合决定：
 
-- 默认 `accessibilityRole`：仅当传了 `onPressItem` 时，slide 才声明 `accessibilityRole='button'`；纯展示型轮播（无 `onPressItem`）**不声明** button 语义，避免读屏器误导。
-- a11y props：`getAccessibilityLabel(item, index)` 可选，仅在 `onPressItem` 存在时启用 —— 解析为每张 slide 的 `accessibilityLabel`；不传则 fallback 为 `第 N 项`（`第 ${index + 1} 项`）。
-- 状态语义：源码未设 `selected` / 当前页等状态语义。
+- display slide：不传 `onPressItem` / `getAccessibilityLabel`，每张 slide 是普通 `<View>`，不形成 button 焦点。
+- action slide：必须同时传入 `onPressItem` 与 `getAccessibilityLabel`，每张 slide 才是 RN core `<Pressable accessibilityRole="button">`。这是 Carousel 内与第三方 `GestureDetector` 兼容的窄例外。
+- action 名称固定拼为 `${getAccessibilityLabel(item, index)}，第 ${index + 1} 项，共 ${data.length} 项`，业务名称不能缺失。
+- Pagination 仅在多页时渲染，并由本地 `View` 从 a11y tree 隐藏；隐藏 props 不会透传给第三方 Pagination。
 
 ```tsx
-// 可点轮播:role=button 自动,label 由 getAccessibilityLabel 提供
+// 可点轮播:两个 action 字段必须成对提供
 <Carousel
   data={banners}
   height={140}
@@ -173,6 +175,7 @@ const settledIndex = carouselRef.current?.getCurrentIndex();
 | Dot · active             | 12×4 长条(`space['5']`),`c.primary` @ opacity 1;每个 dot 都预留 12pt 宽避免切换时布局跳动 |
 | `'bottom'` 占位          | 容器高度 = `height + 16`(`space['7']`)                                                    |
 | `'overlay-bottom-right'` | dot 浮层 absolute 在右下角,不占额外高度                                                   |
+| 单页 / 关闭 indicator     | 不渲染 Pagination；不为 indicator 预留高度                                                 |
 | `loop`                   | 默认开启 —— 最后一张滑回第一张                                                            |
 
 ## 主题键（Tokens）
@@ -187,11 +190,12 @@ const settledIndex = carouselRef.current?.getCurrentIndex();
 ## 备注
 
 - 内部用了 `useSharedValue` + `progress`,指示器更新在 UI 线程完成,不走 JS 每帧回调
-- `autoplayInterval` 从上一段切换动画完成后开始计时;触摸和滑动期间由上游暂停,落位后恢复
+- `autoplayInterval` 从上一段切换动画完成后开始计时;触摸和滑动期间由上游暂停,落位后恢复。系统开启 reduced motion 时，即使传了 `autoplay` 也不会启动。
+- Carousel 不拥有页面可见性或导航焦点生命周期；页面隐藏、失焦或业务需要暂停时，caller 应把 `autoplay` 设为 `false`。
 - `testID` 自动生成子项 testID `carousel-item-${i}`,可用于消费者侧集成测试
 
 ## 不要
 
 - 不要把 Carousel 当 `<ScrollView horizontal>` 用 —— 简单横滚列表请用原生 `<ScrollView>` 即可
-- 不要传 `data.length <= 1` —— 单张直接渲染 `<Image>`,不必上 Carousel
+- 单页可以使用 Carousel，但不会渲染 Pagination 或保留其高度；不需要轮播能力时仍可直接渲染内容
 - 不要忘了 `itemSize` —— 一旦外层加了 `marginHorizontal`,默认全屏宽会让 slide 右侧被裁。`屏宽 - margin*2` 是稳妥值,`useWindowDimensions()` 拿屏宽

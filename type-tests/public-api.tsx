@@ -12,6 +12,7 @@ import { createRef } from 'react';
 import { Pressable, Text } from 'react-native';
 import {
   Button,
+  Carousel,
   Cell,
   Checkbox,
   IconButton,
@@ -27,6 +28,7 @@ import {
   type CellLeading,
   type CellProps,
   type CellTextValue,
+  type CarouselProps,
   type NavBarAction,
   type NavBarSlot,
   type TextFieldHandle,
@@ -223,3 +225,34 @@ inputRef.current?.clear();
 />;
 // @ts-expect-error 密码输入不接收 defaultValue
 <PasswordInput value="secret" onChangeText={setText} defaultValue="x" />;
+
+// --- Carousel:展示与动作 slide 互斥 --------------------------------------
+
+type CarouselItem = { id: string; label: string };
+const carouselItems: CarouselItem[] = [{ id: 'one', label: '第一项' }];
+const carouselRenderItem: CarouselProps<CarouselItem>['renderItem'] = ({
+  item,
+}) => <Text>{item.label}</Text>;
+
+<Carousel data={carouselItems} renderItem={carouselRenderItem} height={120} />;
+<Carousel
+  data={carouselItems}
+  renderItem={carouselRenderItem}
+  height={120}
+  onPressItem={noop}
+  getAccessibilityLabel={(item) => item.label}
+/>;
+// @ts-expect-error actionable slide 必须有业务名称
+<Carousel
+  data={carouselItems}
+  renderItem={carouselRenderItem}
+  height={120}
+  onPressItem={noop}
+/>;
+// @ts-expect-error display slide 不能单独提供 action label resolver
+<Carousel
+  data={carouselItems}
+  renderItem={carouselRenderItem}
+  height={120}
+  getAccessibilityLabel={() => 'x'}
+/>;
