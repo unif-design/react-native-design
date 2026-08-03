@@ -1,4 +1,28 @@
 import { beforeEach, describe, expect, jest, test } from '@jest/globals';
+import { normalizeFontScale, scaleFontMetric } from '../../src/theme/fontScale';
+
+describe('fontScale', () => {
+  test.each<[unknown, number]>([
+    [undefined, 1],
+    [null, 1],
+    ['2', 1],
+    [0, 1],
+    [-1, 1],
+    [Number.NaN, 1],
+    [Number.POSITIVE_INFINITY, 1],
+    [Number.NEGATIVE_INFINITY, 1],
+    [1.5, 1.5],
+    [100, 100],
+  ])('normalizeFontScale(%p) -> %p', (input, expected) => {
+    expect(normalizeFontScale(input)).toBe(expected);
+  });
+
+  test('scaleFontMetric 只按合法 factor 乘一次', () => {
+    expect(scaleFontMetric(16, 1.5)).toBe(24);
+    expect(scaleFontMetric(-0.5, 2)).toBe(-1);
+    expect(scaleFontMetric(16, Number.NaN)).toBe(16);
+  });
+});
 
 /**
  * scale.ts 在模块加载时算一次 ratio,因此每个 test 切换 Dimensions

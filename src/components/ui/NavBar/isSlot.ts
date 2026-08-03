@@ -1,9 +1,376 @@
-import type { NavBarSlotConfig } from './types';
+import React, { type ReactNode } from 'react';
+import { Text } from 'react-native';
+import { ICONS, type IconName } from '../../../icons';
+import type { NavBarAction } from './types';
+
+export type NavBarSlotClassification =
+  | { kind: 'empty' }
+  | { kind: 'action'; action: NavBarAction }
+  | { kind: 'node'; node: ReactNode }
+  | { kind: 'invalid' };
+
+type NormalizedNode = { kind: 'node'; node: ReactNode } | { kind: 'invalid' };
+
+type IteratorFactoryResult =
+  | { kind: 'none' }
+  | { kind: 'factory'; factory: () => unknown }
+  | { kind: 'invalid' };
+
+type ThenableResolutionRecord = {
+  node: ReactNode;
+  dependencies: Set<ThenableResolutionRecord>;
+};
+
+const mappedThenables = new WeakMap<object, ThenableResolutionRecord>();
+
+function isIconName(value: unknown): value is IconName {
+  return (
+    typeof value === 'string' &&
+    Object.prototype.hasOwnProperty.call(ICONS, value)
+  );
+}
 
 /**
- * Type guard：判断 left/right 是否为 NavBarSlotConfig 对象（含 icon 字段）。
- * 不是的话视为 ReactNode 自定义内容。
+ * Type guard：action 的 icon 必须真实存在于生成的 registry，且有 handler 与非空名称。
  */
-export function isSlot(v: unknown): v is NavBarSlotConfig {
-  return typeof v === 'object' && v !== null && 'icon' in v;
+export function isNavBarAction(v: unknown): v is NavBarAction {
+  if (typeof v !== 'object' || v === null) return false;
+  const slot = v as Record<string, unknown>;
+  return (
+    isIconName(slot.icon) &&
+    typeof slot.onPress === 'function' &&
+    typeof slot.accessibilityLabel === 'string' &&
+    slot.accessibilityLabel.trim().length > 0
+  );
+}
+
+function hasElementShape(value: React.ReactElement): boolean {
+  const element = value as unknown as { type: unknown; props: unknown };
+  return (
+    Object.prototype.hasOwnProperty.call(value, 'type') &&
+    Object.prototype.hasOwnProperty.call(value, 'props') &&
+    element.type !== null &&
+    element.type !== undefined &&
+    typeof element.props === 'object' &&
+    element.props !== null
+  );
+}
+
+function isThenable(value: unknown): value is ReactNode {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  try {
+    return typeof (value as { then?: unknown }).then === 'function';
+  } catch {
+    return false;
+  }
+}
+
+function normalizeFragment(
+  value: React.ReactElement,
+  activeIterables: WeakSet<object>,
+  path: string,
+  owner?: ThenableResolutionRecord
+): NormalizedNode {
+  try {
+    const props = value.props as { children?: unknown };
+    const normalized = normalizeReactNode(
+      props.children,
+      activeIterables,
+      `${path}.fragment`,
+      owner
+    );
+    if (normalized.kind === 'invalid') return normalized;
+    return {
+      kind: 'node',
+      node: React.cloneElement(value, undefined, normalized.node),
+    };
+  } catch {
+    return { kind: 'invalid' };
+  }
+}
+
+function recordReaches(
+  from: ThenableResolutionRecord,
+  target: ThenableResolutionRecord,
+  visited = new Set<ThenableResolutionRecord>()
+): boolean {
+  if (from === target) return true;
+  if (visited.has(from)) return false;
+  visited.add(from);
+  for (const dependency of from.dependencies) {
+    if (recordReaches(dependency, target, visited)) return true;
+  }
+  return false;
+}
+
+function addThenableDependency(
+  owner: ThenableResolutionRecord,
+  dependency: ThenableResolutionRecord
+): boolean {
+  // dependency 已能走回 owner 时再加边会闭环；不加边并让当前 resolution 失败关闭。
+  if (recordReaches(dependency, owner)) return false;
+  owner.dependencies.add(dependency);
+  return true;
+}
+
+function createThenableRecord(
+  value: object,
+  path: string
+): ThenableResolutionRecord {
+  let resolveMapped: (node: unknown) => void = () => {};
+  let rejectMapped: (reason?: unknown) => void = () => {};
+  const mappedPromise = new Promise<unknown>((resolve, reject) => {
+    resolveMapped = resolve;
+    rejectMapped = reject;
+  });
+  const mappedNode = mappedPromise as ReactNode;
+  const record: ThenableResolutionRecord = {
+    node: mappedNode,
+    dependencies: new Set(),
+  };
+  // 先入 cache 再调用用户 then：同步 thenable 可复用同一 record，并由依赖图识别闭环。
+  mappedThenables.set(value, record);
+
+  let claimed = false;
+  const resolveOnce = (resolved: unknown) => {
+    if (claimed) return;
+    claimed = true;
+    if (resolved === value || resolved === mappedPromise) {
+      resolveMapped(null);
+      return;
+    }
+    try {
+      const normalized = normalizeReactNode(
+        resolved,
+        new WeakSet<object>(),
+        `${path}.then`,
+        record
+      );
+      resolveMapped(normalized.kind === 'invalid' ? null : normalized.node);
+    } catch {
+      resolveMapped(null);
+    }
+  };
+  const rejectOnce = (reason: unknown) => {
+    if (claimed) return;
+    claimed = true;
+    rejectMapped(reason);
+  };
+
+  try {
+    const then = (value as { then?: unknown }).then;
+    if (typeof then !== 'function') {
+      resolveOnce(null);
+      return record;
+    }
+    then.call(value, resolveOnce, rejectOnce);
+  } catch (error) {
+    rejectOnce(error);
+  }
+
+  return record;
+}
+
+function normalizeThenable(
+  value: object,
+  path: string,
+  owner?: ThenableResolutionRecord
+): NormalizedNode {
+  const record =
+    mappedThenables.get(value) ?? createThenableRecord(value, path);
+  if (owner !== undefined && !addThenableDependency(owner, record)) {
+    return { kind: 'invalid' };
+  }
+  return { kind: 'node', node: record.node };
+}
+
+function getIteratorFactory(value: object): IteratorFactoryResult {
+  try {
+    const iterator = (value as { [Symbol.iterator]?: unknown })[
+      Symbol.iterator
+    ];
+    if (iterator === undefined || iterator === null) return { kind: 'none' };
+    if (typeof iterator !== 'function') return { kind: 'none' };
+    return { kind: 'factory', factory: iterator as () => unknown };
+  } catch {
+    return { kind: 'invalid' };
+  }
+}
+
+function isReactPortal(value: object): value is React.ReactPortal {
+  const portal = value as {
+    key?: unknown;
+    containerInfo?: unknown;
+  };
+  const hasPortalShape =
+    Object.prototype.hasOwnProperty.call(value, 'key') &&
+    Object.prototype.hasOwnProperty.call(value, 'children') &&
+    Object.prototype.hasOwnProperty.call(value, 'containerInfo') &&
+    Object.prototype.hasOwnProperty.call(value, 'implementation') &&
+    (portal.key === null || typeof portal.key === 'string') &&
+    portal.containerInfo !== null &&
+    portal.containerInfo !== undefined;
+  if (!hasPortalShape) return false;
+  try {
+    // React 没有公开 portal guard；只调用公开 Children API，且该分支已排除 iterable/
+    // thenable，避免消费 generator 或改变 Promise 语义。
+    return React.Children.count(value as ReactNode) === 1;
+  } catch {
+    return false;
+  }
+}
+
+function normalizeArray(
+  value: unknown[],
+  activeIterables: WeakSet<object>,
+  path: string,
+  owner?: ThenableResolutionRecord
+): NormalizedNode {
+  if (activeIterables.has(value)) return { kind: 'invalid' };
+  activeIterables.add(value);
+  try {
+    const nodes: ReactNode[] = [];
+    for (let index = 0; index < value.length; index += 1) {
+      const normalized = normalizeReactNode(
+        value[index],
+        activeIterables,
+        `${path}.${index}`,
+        owner
+      );
+      if (normalized.kind === 'invalid') return normalized;
+      nodes.push(normalized.node);
+    }
+    return { kind: 'node', node: nodes };
+  } catch {
+    return { kind: 'invalid' };
+  } finally {
+    activeIterables.delete(value);
+  }
+}
+
+function normalizeIterable(
+  value: object,
+  factory: () => unknown,
+  activeIterables: WeakSet<object>,
+  path: string,
+  owner?: ThenableResolutionRecord
+): NormalizedNode {
+  if (activeIterables.has(value)) return { kind: 'invalid' };
+  activeIterables.add(value);
+  let iterator: object | undefined;
+  let completed = false;
+  try {
+    const candidate = factory.call(value);
+    if (typeof candidate !== 'object' || candidate === null) {
+      return { kind: 'invalid' };
+    }
+    iterator = candidate;
+    const next = (iterator as { next?: unknown }).next;
+    if (typeof next !== 'function') return { kind: 'invalid' };
+
+    const nodes: ReactNode[] = [];
+    let index = 0;
+    for (;;) {
+      const step = next.call(iterator);
+      if (typeof step !== 'object' || step === null) {
+        return { kind: 'invalid' };
+      }
+      const result = step as { done?: unknown; value?: unknown };
+      // Iterator protocol 的 done 走 ToBoolean，而不是限制为 boolean primitive。
+      if (result.done) {
+        completed = true;
+        return { kind: 'node', node: nodes };
+      }
+
+      const normalized = normalizeReactNode(
+        result.value,
+        activeIterables,
+        `${path}.${index}`,
+        owner
+      );
+      if (normalized.kind === 'invalid') return normalized;
+      nodes.push(normalized.node);
+      index += 1;
+    }
+  } catch {
+    return { kind: 'invalid' };
+  } finally {
+    if (!completed && iterator !== undefined) {
+      try {
+        const close = (iterator as { return?: unknown }).return;
+        if (typeof close === 'function') close.call(iterator);
+      } catch {
+        // 分类已失败；关闭时的异常不能逃逸到 NavBar render。
+      }
+    }
+    activeIterables.delete(value);
+  }
+}
+
+function normalizeReactNode(
+  value: unknown,
+  activeIterables: WeakSet<object>,
+  path: string,
+  owner?: ThenableResolutionRecord
+): NormalizedNode {
+  if (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'bigint'
+  ) {
+    return {
+      kind: 'node',
+      node: React.createElement(Text, { key: path }, String(value)),
+    };
+  }
+  if (value === undefined || value === null || typeof value === 'boolean') {
+    return { kind: 'node', node: value };
+  }
+  if (React.isValidElement(value)) {
+    if (!hasElementShape(value)) return { kind: 'invalid' };
+    return value.type === React.Fragment
+      ? normalizeFragment(value, activeIterables, path, owner)
+      : { kind: 'node', node: value };
+  }
+  if (typeof value !== 'object' || value === null) {
+    return { kind: 'invalid' };
+  }
+  if (Array.isArray(value)) {
+    return normalizeArray(value, activeIterables, path, owner);
+  }
+
+  const iterator = getIteratorFactory(value);
+  if (iterator.kind === 'invalid') return iterator;
+  if (iterator.kind === 'factory') {
+    return normalizeIterable(
+      value,
+      iterator.factory,
+      activeIterables,
+      path,
+      owner
+    );
+  }
+  if (isThenable(value)) return normalizeThenable(value, path, owner);
+  if (typeof value !== 'object') return { kind: 'invalid' };
+  return isReactPortal(value)
+    ? { kind: 'node', node: value }
+    : { kind: 'invalid' };
+}
+
+/**
+ * 未类型化边界的单一分类器。React 的公开 API 无法证明 object 不可伪造；这里拒绝
+ * 结构不成立的 marker-only element 与普通 plain object，同时保留 React 19 声明的
+ * bigint、Iterable、portal、Promise/thenable 等合法 ReactNode。Fragment/Iterable
+ * 会递归验证 primitive 叶子；thenable 映射按源对象缓存，避免每次 render 制造新的
+ * suspend identity；resolution record 的依赖可达性同时拦截 direct/indirect cycle，
+ * 并把 cycle 或非法 resolved value 确定性失败关闭为 null。
+ */
+export function classifyNavBarSlot(value: unknown): NavBarSlotClassification {
+  if (value === undefined || value === null || typeof value === 'boolean') {
+    return { kind: 'empty' };
+  }
+  if (isNavBarAction(value)) return { kind: 'action', action: value };
+  return normalizeReactNode(value, new WeakSet<object>(), 'slot');
 }

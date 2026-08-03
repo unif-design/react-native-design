@@ -1,14 +1,35 @@
 import type { TextInputProps } from 'react-native';
+import type { InputProps } from '../Input';
 
-// [L-36] Omit 扩 'multiline'/'numberOfLines' —— 搜索框固定单行,这两属性无意义
-export type SearchProps = Omit<
-  TextInputProps,
-  'style' | 'multiline' | 'numberOfLines'
+type SearchBaseProps = Omit<
+  InputProps,
+  | 'value'
+  | 'defaultValue'
+  | 'onChangeText'
+  | 'leading'
+  | 'trailing'
+  | 'height'
+  | 'returnKeyType'
+  | 'accessibilityRole'
+  | 'role'
+  | 'onSubmitEditing'
+  | 'clearButtonMode'
+  | 'enterKeyHint'
 > & {
-  /** 提交回调（按下 return 键时触发） */
+  onSubmitEditing?: TextInputProps['onSubmitEditing'];
   onSubmit?: (value: string) => void;
-  /** 覆盖 placeholder（默认：搜索…） */
-  placeholder?: string;
-  /** E2E / 测试定位 */
-  testID?: string;
 };
+
+export type SearchProps = SearchBaseProps &
+  (
+    | {
+        value: string;
+        onChangeText: (value: string) => void;
+        defaultValue?: never;
+      }
+    | {
+        value?: never;
+        defaultValue?: string;
+        onChangeText?: (value: string) => void;
+      }
+  );

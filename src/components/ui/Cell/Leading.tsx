@@ -1,8 +1,9 @@
-import { type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { r, useColors } from '../../../theme';
-import { Icon, type IconName } from '../Icon';
+import { Icon } from '../Icon';
+import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { useListVariant } from './context';
+import type { CellLeading } from './types';
 
 const FLUSH_BOX_SIZE = r(28);
 const FLUSH_BOX_RADIUS = r(7);
@@ -21,7 +22,7 @@ export function Leading({
   slot,
   danger,
 }: {
-  slot: IconName | ReactNode;
+  slot: CellLeading;
   danger?: boolean;
 }) {
   const c = useColors();
@@ -32,6 +33,7 @@ export function Leading({
     if (variant === 'flush') {
       return (
         <View
+          {...A11Y_HIDDEN_PROPS}
           style={[
             sharedStyles.flushBox,
             {
@@ -39,21 +41,19 @@ export function Leading({
             },
           ]}
         >
-          <Icon
-            name={slot as IconName}
-            size={r(16)}
-            color={danger ? c.error : c.primary}
-          />
+          <Icon name={slot} size={r(16)} color={danger ? c.error : c.primary} />
         </View>
       );
     }
     return (
-      <Icon
-        name={slot as IconName}
-        size={r(22)}
-        color={danger ? c.error : c.foregroundMuted}
-      />
+      <View {...A11Y_HIDDEN_PROPS}>
+        <Icon
+          name={slot}
+          size={r(22)}
+          color={danger ? c.error : c.foregroundMuted}
+        />
+      </View>
     );
   }
-  return <View>{slot}</View>;
+  return <View {...A11Y_HIDDEN_PROPS}>{slot.node}</View>;
 }

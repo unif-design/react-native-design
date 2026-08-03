@@ -204,7 +204,9 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 
 半档微调:`smPlus`(14.5)· `xsPlus`(13.5)· `microPlus`(11.5)。Hero 档:`heroLg`(26)· `heroMd`(22)· `heroSm`(18)。完整说明见[字体](/docs/design/tokens/typography)。
 
-应用级字号缩放(app 内字体大小档):接入方传 `<ThemeProvider fontScale={…}>`(默认 1),`useThemedStyles` 出口对 maker 产物的 `fontSize / lineHeight / letterSpacing` 统一缩放 —— 与 RN `allowFontScaling` 的原生缩放范围一致,只缩文字不缩布局。与 `rf()` 正交:`rf()` 是按屏宽的静态适配,`fontScale` 是运行期用户档位。
+应用级字号缩放(app 内字体大小档):接入方传 `<ThemeProvider fontScale={…}>`(默认 1),只接受有限正数且不设上限;非法值回退 1。`useThemedStyles` 出口精确只缩放 maker 产物的 `fontSize / lineHeight / letterSpacing`,不缩 Icon、Spinner、spacing、控件尺寸、圆角或 `fixed.*`。动态文字 metric 用根导出的 `useFontScale()` + `scaleFontMetric()` 显式缩放一次;持久化值可先经根导出的 `normalizeFontScale()` 归一化。与 `rf()` 正交:`rf()` 是按屏宽的静态适配,`fontScale` 是运行期用户档位。
+
+缺少 `ThemeProvider` 时,主题 hook 使用模块级稳定 light fallback(`fontScale=1`),开发诊断只在 React effect 阶段记录,不会在 render 期间产生日志。
 
 ### 行高(惯例,非 token)
 **没有 `lineHeight` token。** 行高用字号乘系数:标题 ×1.25、正文 ×1.45(直接写 `lineHeight: t.body * 1.45`)。
@@ -290,7 +292,12 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 | `slow` | 300ms | Drawer 过渡 |
 | `pulse` | 1600ms | "思考中" spark 脉冲全周期(`usePulse` 取半周期 = `pulse / 2`) |
 
-**没有 easing token** —— 缓动由 reanimated `withTiming` 默认曲线承担(Spinner 显式用 `Easing.linear`),自定义缓动从 `react-native-reanimated` import `Easing`。
+**没有 easing token** —— native Reanimated 动画通常使用 `withTiming` 默认曲线
+（Spinner 显式用 `Easing.linear`）；Web driver 使用组件内声明的 CSS timing
+function。native-only 代码需要自定义缓动时从 `react-native-reanimated` import
+`Easing`。
+
+**Reduced motion。** `usePrefersReducedMotion(): boolean` 两端都返回真实系统偏好:native 读 Reanimated 的 `useReducedMotion()`(系统「减弱动态效果」开关),web 读 `matchMedia('(prefers-reduced-motion: reduce)')`。Reanimated 的 `ReduceMotion.System` 只覆盖它自己驱动的动画,timer / RAF / CSS transition / Modal 转场 / autoplay 都不在其管辖内 —— Pulse、Switch、Carousel、Reveal 必须显式分支到该 hook,开启后停在稳态终值而不是继续动。
 
 **按压态。** 非品牌表面 `opacity: 0.7`;品牌 CTA 切到 `c.primaryPressed`(`#D06200`);禁用 = 按钮 `opacity: 0.5` 或送出键背景 `c.surfaceContainerHighest`(`#E0E0E0`)。
 
@@ -324,35 +331,65 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 按设计系统分组。**本包(`@unif/react-native-design`)实现 38 个 ui 原子 + 4 个通用业务复合组件**;聊天 / IM 组件(Message / PromptInput 等)是同一套设计语言,但代码在 portal 仓库,这里只描述其视觉契约。
 
 ### 品牌
-- **Logo** —— `<Image>` 包装容器,接 `source` prop(母版 mark 由消费者提供)。
+- **Logo** —— `<Image>` 包装容器,接 `source` prop(母版 mark 由消费者提供)；缺省 /
+  blank `accessibilityLabel` 时是装饰图片，trim 后非空时才是 named image。
 - **Icon** —— 24×24 描边 SVG 目录。
 
 ### 通用
-- **Button** —— variant:`primary` / `secondary` / `ghost` / `outline` / `danger` / `text`;size:`sm` / `md` / `lg`;可 `block`。
-- **IconButton** —— 纯图标按钮,`accessibilityLabel` 类型必填。
-- **Avatar** —— 单字符 monogram。variant:`brand` / `info` / `soft` / `neutral`;size:`xs`(18)/ `sm`(28)/ `md`(32)/ `lg`(40)/ `xl`(56)。
+- **Button** —— `onPress` 必填；variant:`primary` / `secondary` / `ghost` /
+  `neutral` / `outline` / `danger` / `text`;size:`sm` / `md` / `lg`;可
+  `block`。`disabled` / `loading` 都移除 handler 并上报 disabled，
+  `loading` 额外上报 busy；空白 `label` 在 effect 诊断并失败关闭 action。
+- **IconButton** —— 纯图标按钮，`onPress` 与 `accessibilityLabel` 类型必填；
+  空白名称在 effect 诊断并失败关闭，disabled/loading 语义与 Button 相同。
+- **Avatar** —— 单字符 monogram。variant:`brand` / `info` / `soft` /
+  `neutral`;size:`xs`(18)/ `sm`(28)/ `md`(32)/ `lg`(40)/ `xl`(56)。
+  图片只接受有限正整数 asset、trim 后非空 URI object，或非空且逐项合法的 URI
+  source 数组；nested cycle/function/symbol/bigint/非有限数等 invalid source
+  直接 fallback，不挂 Image。class / custom prototype 对象只读取 own
+  enumerable data descriptor 并复制为 plain frozen snapshot，继承属性、
+  non-enumerable 与 accessor 无效。完整 source 字段生成 semantic key，对象 /
+  headers key 顺序不影响 identity，数组顺序与真实字段变化会影响；native 保留
+  URI 数组，Web 明确使用首个 candidate。失败 state 只属于 keyed 私有
+  attempt；等价新引用保持稳定 error handler、不重试，真实变化才重挂，
+  `A₁ → B → A₂` 后迟到的 A₁ error 不能污染 A₂。仓内
+  `yarn runtime:image-fixture` + RuntimeApiScreen 提供 request / abort /
+  release 可观测的人工验收入口；真实平台未运行前仍记 BLOCKED。
 - **Tag** —— 状态徽章,5 语义 × 2 尺寸(`md` / `lg`)。
 - **Chip** —— 胶囊形可选中 pill;`selected` 切主色边框 / 文本;可带 leading / trailing。Suggestion 底层。
-- **Confirm** —— 命令式 `confirm(): Promise<boolean>` + `<ConfirmHost />`,高风险二次确认(同一时间只 1 个对话框;裸 RN Modal + pub/sub,不依赖 @gorhom)。
+- **Confirm** —— 命令式 `confirm(): Promise<boolean>` + `<ConfirmHost />`,高风险二次确认(纯 single-owner Store 保证同一时间只 1 个 Host / active entry；裸 RN Modal,不依赖 @gorhom)。自定义确认/取消文案先 trim，空白值回退“确认”/“取消”。
 - **Thumbnail** —— 16:9.5 缩略图,`sm 64×40 / md 113×67 / lg 160×96`。
-- **Loading** —— `Spinner`(reanimated 4 旋转)+ 线性进度。
-- **Pulse** —— `usePulse` + `<Pulse>` + `<PulseDot>`,reanimated 4 worklet 通用脉冲。Skeleton / Shimmer / Reasoning 等建立其上。
-- **StatusDot** —— `done` / `active` / `pending` 圆点,`flat` / `soft` 双 tone。
+- **Loading** —— `Spinner`；native 用 Reanimated 4 线性旋转，Web 用静态 CSS
+  keyframes。
+- **Pulse** —— `usePulse` + `<Pulse>` + `<PulseDot>`,公共层统一归一化；native 用 Reanimated 4 driver，Web 用 CSS transition + timer driver。Skeleton / Shimmer / Reasoning 等建立其上。
+- **StatusDot** —— `done` / `error` / `active` / `pending` 圆点,`flat` / `soft` 双 tone。
 
 ### 表单
-- **Input** —— 单行;状态 `idle` / `focus` / `filled` / `error`。
-- **PasswordInput** —— Input + secureTextEntry + 明文切换。
-- **Textarea** —— 多行(复用 Input,顶对齐)。
-- **TextField** —— 带 label / 校验的字段封装。
-- **Search** —— 搜索条(Input 预设,`accessibilityRole='search'`)。
-- **Checkbox / Radio / Switch / Stepper** —— 选择 / 开关 / 步进。
+- **Input / Textarea / Search** —— 首次 render 锁定 strict
+  controlled/uncontrolled mode，`defaultValue` 只初始化一次；ref 仅公开
+  `focus()` / `blur()`。`leading` / `trailing` 只接受经过运行时完整校验的
+  icon/text/action `TextFieldSlot`，malformed 值在 effect 诊断并移除。
+- **PasswordInput** —— 顶层受控 Input + secureTextEntry + 明文切换，不再接受
+  嵌套 `inputProps`。
+- **TextField** —— 上述输入组件的 internal 内核，不作为公共组件导入。
+- **Checkbox / Radio / Switch** —— required string 仍会在运行时 trim；空白名称
+  移除有效 action 并在 effect 诊断。Checkbox/Radio 的显式空白覆盖会回退可见
+  label，Radio.Group 的组名也会 trim。
+- **Stepper** —— 三个真实至少 44pt frame；单一 normalizer 驱动显示、
+  native/Web handler 与 a11y state。非 number / 非有限值不会进入运算，
+  空白业务名称会移除全部有效 action。
 - **Form** —— Form / FormGroup / FormRow(行间 hairline)。
 
 ### 导航
-- **NavBar** —— 固定顶部头,44px。default(白 + hairline)/ `brand`(渐变)。
+- **NavBar** —— 固定顶部头，44px。`default` 白底 + hairline，
+  `brand` 是纯品牌橙实底白字（不是渐变），`transparent` 透明无边框 + 深字。
+  display slot 保持宽 React 19 `ReactNode`，Fragment/collection/thenable 的
+  primitive 叶子会安全归一化。
 - **TabBar** —— 固定底部 tab,50px,带 badge。
 - **Tabs / Segmented** —— 页级下划线 / 局部分段,共用 `TabItem` 形状。
-- **Drawer** —— `DrawerHeader` + `@react-navigation/drawer`。
+- **Drawer** —— `DrawerHeader` + `@react-navigation/drawer`；头像 source
+  复用 Avatar 的运行时校验、semantic identity 与 attempt-local failure
+  契约，包括 Web URI 数组首项选择；整个头像容器继续作为装饰子树隐藏。
 
 ### 反馈
 - **Toast** —— 命令式 `toast()` + `<ToastHost />`,全局轻提示,自动消失。
@@ -360,10 +397,18 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 - **Skeleton** —— 骨架占位,`shape='line'/'rect'/'circle'`(走 `usePulse`)。
 
 ### 数据展示
-- **Cell · List** —— 列表行 + List 容器,两模式互斥:**grouped**(默认,白卡 + 8px gap,无 cell 间分隔线)/ **flush**(`<List flush />`,透明底 + cell 间 hairline)。
+- **Cell · List** —— actionable / control / static 三分支；action 默认从
+  title/desc/extra 组合名称，空白显式覆盖回退组合名称，最终仍空白时不渲染
+  外层 button、handler 或 arrow。两种布局:**grouped**(默认,白卡 + 8px gap)/
+  **flush**(`<List flush />`,透明底 + cell 间 hairline)。
 - **Card** —— 内容卡。variant `default`(白底 + card shadow + 边框)/ `plain`(仅白底,无阴影无边框);`flat` 已 deprecated 等价 `plain`。
-- **Grid** —— 九宫格图标网格。
-- **Carousel** —— 轮播(包装 reanimated-carousel v5)。
+- **Grid** —— 九宫格图标网格；只有函数 `onPress` 且 item 最终名称非空时该格
+  才是 button。空白显式名称回退 label + badge；display-only 空名称不创建
+  unnamed merged a11y node。
+- **Carousel** —— display/action 严格分支(包装 reanimated-carousel v5)；
+  只有两个 action props 都是函数且当前 item getter 返回非空 string 才渲染
+  button，否则该 slide 失败关闭为 View 并在 effect 诊断。reduced motion 停止
+  autoplay，单页不渲染 Pagination 或保留高度。
 
 ### 其他 ui
 - **BlurLayer** —— BlurView + tint 双层,intensity `soft`(10)/ `strong`(40)。
@@ -372,10 +417,12 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 
 ### 业务复合(本包 4 个)
 通用部分(不耦合 navigation / store);耦合的(ScreenLayout / CellList / ModernAppCell / SmsCodeInput)留在消费者仓库。
-- **AvatarWithRing** —— 圆形头像 + ring + 品牌 shadow。
+- **AvatarWithRing** —— 圆形头像 + ring + 品牌 shadow；内部 SVG 渐变 ID 由 `useSvgId('av')` 自动生成并消毒。
 - **GlassStats** —— 玻璃数据条(BlurView + N 列)。
-- **Decorations** —— `GradientWash`(线性渐变)+ `RadialHalo`(径向柔光)+ `ScreenBackdrop`(整屏沉浸渐变,`preset="warmOrange"` + 暗色自适配),纯装饰层 `pointerEvents="none"`。
-- **VersionPill** —— 版本号药丸。
+- **Decorations** —— `GradientWash`(线性渐变)+ `RadialHalo`(径向柔光)+ `ScreenBackdrop`(整屏沉浸渐变,`preset="warmOrange"` + 暗色自适配),纯装饰层 `pointerEvents="none"`；`gradientId` 省略时自动唯一，外部值也会统一消毒。
+- **useSvgId** —— SVG ID hook；无条件消费 React `useId()`，统一消毒 prefix / override / React ID，并为非法首字符补 `svg-id-`。
+- **VersionPill** —— 带可见 `VersionStatus { label, color? }` 的版本号药丸；
+  空白状态文案回退“状态未知”并在 effect 诊断，不能只靠颜色表达状态。
 
 ### 聊天(设计语言,代码在 portal)
 Message(非对称圆角气泡)· PromptInput(4 态)· Attachments · Suggestion · Sources · Citation · Reasoning(`思考中…` → `已思考 N.Ns`)· ChainOfThought · Task · Tool · Confirmation(**内联**,绝不模态)· Shimmer · DayDivider。Conversation = 完整线程,由 chat 与 ui 原子组合而成。
@@ -397,7 +444,11 @@ Message(非对称圆角气泡)· PromptInput(4 态)· Attachments · Suggestion 
 
 ## 12. RN 落地图 {#rn-落地图}
 
-路径别名 `@/*` → `src/*`(`tsconfig.json` paths + `babel.config.js` module-resolver)。动画走 `react-native-reanimated@4` worklet;触控走 `react-native-gesture-handler`;键盘走 `react-native-keyboard-controller`。**库代码内部走相对路径,不用 `@/` 别名。**
+路径别名 `@/*` → `src/*`(`tsconfig.json` paths + `babel.config.js`
+module-resolver)。动画公共层统一语义后按平台分流：native 使用
+`react-native-reanimated@4` worklet，Web 使用组件自己的 CSS / timer / RAF driver；
+触控走 `react-native-gesture-handler`，键盘走 `react-native-keyboard-controller`。
+**库代码内部走相对路径,不用 `@/` 别名。**
 
 ```
 src/
@@ -413,8 +464,10 @@ src/
 │   ├── tokens.ts            ← type / fw / space / radius / avatar / icon / control / dim / fixed / motion(非主题)
 │   ├── scale.ts             ← r() 像素对齐缩放 / rf() 字号缩放(基准宽 402)
 │   ├── blur.ts              ← blur soft(10)/ strong(40)
-│   ├── ThemeProvider.tsx    ← context provider,读 useColorScheme();forceScheme? 可强制;fontScale?(默认 1)应用级字号缩放
-│   ├── useTheme.ts          ← useTheme / useColors / useShadow(缺 Provider 时 fallback light)
+│   ├── fontScale.ts         ← normalizeFontScale / scaleFontMetric / useFontScale(有限正数,无上限)
+│   ├── themeContext.ts      ← 私有 Context + 模块级稳定 light fallback(不从包根导出)
+│   ├── ThemeProvider.tsx    ← context provider,读 useColorScheme();forceScheme? 可强制;归一化 fontScale
+│   ├── useTheme.ts          ← useTheme / useColors / useShadow(缺 Provider 时稳定 fallback,effect 诊断)
 │   ├── useThemedStyles.ts   ← useThemedStyles(maker),含 useMemo([colors, shadow, fontScale, maker]) 缓存;出口按 fontScale 缩放 fontSize / lineHeight / letterSpacing(=1 恒等)
 │   └── index.ts             ← barrel
 │
@@ -422,7 +475,8 @@ src/
 │   └── index.ts             ← barrel(从 @unif/react-native-design 包根导出)
 │
 └── components/business/     ← 4 个通用业务复合(AvatarWithRing / Decorations / GlassStats / VersionPill)
-    └── index.ts             ← barrel
+    ├── useSvgId.ts          ← SVG ID sanitizer/builder + public useSvgId hook
+    └── index.ts             ← barrel(仅公开 useSvgId，不公开 pure test seam)
 ```
 
 公共入口 `src/index.tsx` re-export:`./theme`(token + Provider + hooks + r/rf)、`./icons`、`./utils/testID`、`./utils/logger`、`./components/ui`、`./components/business`。
@@ -491,7 +545,7 @@ toast.error('网络异常，请重试');
 ### 加新组件
 1. 读 §1(voice)与 §2(原则)。
 2. 定位(每组件一个独立目录 `<Name>/<Name>.tsx + types.ts + styles.ts + index.ts`):净新原子 → `src/components/ui/<Name>/`;通用业务复合 → `src/components/business/<Name>/`。
-3. **组合现有原子**,不重造样式(如"带 Switch 的设置行" = `<Cell title="..." extra={<Switch ... />} />`)。
+3. **组合现有原子**,不重造样式(如"带 Switch 的设置行" = `<Cell title="拜访提醒" extra={{ kind: 'control', node: <Switch value={remind} onChange={setRemind} accessibilityLabel="拜访提醒" /> }} />`)。
 4. token 从包根 import,绝不硬编码 hex / px / radius。
 5. 从本地 `index.ts` barrel 导出,并在本文 §10 / §12 登记。
 
@@ -520,8 +574,14 @@ toast.error('网络异常，请重试');
 ```tsx
 // React Native
 import { Logo } from '@unif/react-native-design';
-<Logo source={require('@/assets/logo.png')} size={64} label="Unif" />
+const source = require('@/assets/logo.png');
+
+<Logo source={source} size={64} /> // 缺省 accessibilityLabel：装饰图片
+<Logo source={source} size={64} accessibilityLabel="Unif" /> // named image
 ```
+
+`accessibilityLabel` 会先 trim。缺省或空白值把 Logo 完整移出 a11y tree；只有 trim
+后非空的值才启用 `accessible`、`role="image"` 和对应名称。
 
 文档站的 navbar / OG / favicon 三槽都指向 `website/static/img/logo.png` 这一份(`docusaurus.config.ts`)。母版是 `#EB6E00` 橙底的品牌标识,**不要重绘 / 替换 / 重新着色 / 加阴影滤镜**;最小尺寸 24×24。
 
@@ -531,7 +591,7 @@ import { Logo } from '@unif/react-native-design';
 
 接手项目时它有:
 
-- RN 0.85 / React 19,新架构(Fabric + TurboModules)默认开启。
+- RN `0.86.2` / React `19.2.3`,新架构(Fabric + TurboModules)默认开启。发布 contract 为 `react-native >=0.86.0 <0.87.0`、`react >=19.2.3 <20.0.0`;Node engine 为 `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`。运行时四件套固定在 RNGH `>=3.0.0 <4.0.0`、Reanimated `>=4.5.2 <4.6.0`、Worklets `>=0.11.0 <0.12.0`、RNRC `>=5.0.0 <6.0.0`。
 - 完整设计系统:38 ui + 4 业务复合组件,全套 token(`colors / shadow / type / fw / space / radius / avatar / icon / control / dim / fixed / motion / blur / fontMono`)在 `src/theme/`,亮 / 暗双套经 `ThemeProvider` + `useThemedStyles`;SVG 图标目录在 `src/icons/svg/` + 生成的 `src/icons/data.ts`(只读)。
 - 单元 / 集成测试在 `__tests__/`(Jest + `@testing-library/react-native`)。
 - Docusaurus 文档站在 `website/`。

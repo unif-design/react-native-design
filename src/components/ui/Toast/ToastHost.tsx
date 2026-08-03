@@ -11,15 +11,31 @@ import Animated, {
 import { useColors, useThemedStyles, motion, space } from '../../../theme';
 import { childTestID } from '../../../utils/testID';
 import { dotColorFor, makeStyles } from './styles';
-import { _subs } from './toast';
-import type { Subscriber, ToastEntry, ToastHostProps } from './types';
+import {
+  completeToast,
+  isCurrentToastDelivery,
+  registerToastHost,
+} from './toast';
+import type { ToastDelivery } from './store';
+import type { ToastHostProps } from './types';
+
+/** Host 侧的同步身份副本 —— 迟到回调据此在动 UI 前自证「我还是当前那一次投递」。 */
+type DeliveryIdentity = {
+  ownerToken: symbol;
+  leaseId: number;
+  entryId: number;
+};
 
 /**
- * 在根附近挂一次。监听 toast() 调用并渲染当前 toast。
- * 同一时间只显示一条 —— 新的会替换旧的。
+ * 在根附近挂**一次**。监听 toast() 调用并渲染当前 toast。
+ * 同一时间只显示一条 —— 新的会替换旧的(latest-wins)。
  *
  * 位置由 `entry.position`('top' / 'bottom' / 'center')决定,top/bottom 自动避让
  * safe-area;进入动画方向随位置(top 从上滑、bottom/center 从下滑)。
+ *
+ * 竞态纪律:每个 timer / 动画完成回调在改 UI 或上报完成前,都要同时通过同步 ref
+ * 与 `isCurrentToastDelivery(delivery)` 两道校验 —— 只靠其中之一都不够:ref 挡不住
+ * 「Host 重挂后同一 entry 的新投递」,Store 挡不住 React 批处理造成的 state 滞后。
  */
 export function ToastHost({
   testID,
@@ -27,34 +43,70 @@ export function ToastHost({
   const c = useColors();
   const styles = useThemedStyles(makeStyles);
   const insets = useSafeAreaInsets();
-  const [entry, setEntry] = useState<ToastEntry | null>(null);
+  const [delivery, setDelivery] = useState<ToastDelivery | null>(null);
+  const [inert, setInert] = useState(false);
   const op = useSharedValue(0);
   const ty = useSharedValue(8);
   const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const currentDeliveryRef = useRef<DeliveryIdentity | null>(null);
 
   useEffect(() => {
-    const sub: Subscriber = (next) => {
-      if (dismissTimer.current) clearTimeout(dismissTimer.current);
-      setEntry(next);
+    const subscriber = (next: ToastDelivery) => {
+      // 顺序固定:先撤销旧回调 → 再写同步身份 ref → 最后才动 React state。
+      if (dismissTimer.current) {
+        clearTimeout(dismissTimer.current);
+        dismissTimer.current = null;
+      }
+      cancelAnimation(op);
+      cancelAnimation(ty);
+      currentDeliveryRef.current = {
+        ownerToken: next.ownerToken,
+        leaseId: next.leaseId,
+        entryId: next.entry.id,
+      };
+      setDelivery(next);
     };
-    _subs.add(sub);
+    const lease = registerToastHost(subscriber);
+    if (!lease) {
+      setInert(true);
+      return;
+    }
     return () => {
-      _subs.delete(sub);
+      // 顺序固定:先清身份 ref(让所有在途回调立刻失效)→ 撤销 timer/动画 → 最后释放 owner。
+      currentDeliveryRef.current = null;
+      if (dismissTimer.current) {
+        clearTimeout(dismissTimer.current);
+        dismissTimer.current = null;
+      }
+      cancelAnimation(op);
+      cancelAnimation(ty);
+      lease.release();
     };
-  }, []);
+  }, [op, ty]);
 
-  // 退场完成只清「仍是自己」的 entry:withTiming 完成回调经 runOnJS 跨线程异步投递,
-  // 投递到执行之间若来了新 toast,无 id 守卫的 setEntry(null) 会把新 toast 瞬时清掉([M-14])。
-  const dismissIfCurrent = useCallback((id: number) => {
-    setEntry((cur) => (cur?.id === id ? null : cur));
+  /** 退场完成:双重校验通过才清 UI 并上报完成,避免抹掉竞态期到达的新 toast([M-14])。 */
+  const finishIfCurrent = useCallback((finished: ToastDelivery) => {
+    const identity = currentDeliveryRef.current;
+    if (
+      !identity ||
+      identity.ownerToken !== finished.ownerToken ||
+      identity.leaseId !== finished.leaseId ||
+      identity.entryId !== finished.entry.id
+    ) {
+      return;
+    }
+    if (!isCurrentToastDelivery(finished)) return;
+    completeToast(finished.ownerToken, finished.leaseId, finished.entry.id);
+    currentDeliveryRef.current = null;
+    setDelivery((current) => (current === finished ? null : current));
   }, []);
 
   useEffect(() => {
-    if (!entry) return;
+    if (!delivery) return;
+    const entry = delivery.entry;
     // [M-15] toast 出现时主动播报 —— 容器 pointerEvents="none" + 3s 自动消失,
     // SR 用户对一闪而过的反馈本无任何感知通道。
     AccessibilityInfo.announceForAccessibility(entry.message);
-    const id = entry.id;
     // 进入方向:top 从上(-8)滑入,bottom / center 从下(8)滑入
     const from = entry.position === 'top' ? -8 : 8;
     cancelAnimation(op);
@@ -65,25 +117,32 @@ export function ToastHost({
     ty.value = withTiming(0, { duration: motion.base });
 
     dismissTimer.current = setTimeout(() => {
+      // 定时器触发时可能早已不是当前投递(新 toast 抢先)—— 先自证再播退场动画。
+      if (!isCurrentToastDelivery(delivery)) return;
       op.value = withTiming(0, { duration: motion.base });
-      ty.value = withTiming(from, { duration: motion.base }, (finished) => {
-        if (finished) runOnJS(dismissIfCurrent)(id);
+      ty.value = withTiming(from, { duration: motion.base }, (done) => {
+        if (done) runOnJS(finishIfCurrent)(delivery);
       });
     }, entry.duration);
 
     return () => {
-      if (dismissTimer.current) clearTimeout(dismissTimer.current);
+      if (dismissTimer.current) {
+        clearTimeout(dismissTimer.current);
+        dismissTimer.current = null;
+      }
       cancelAnimation(op);
       cancelAnimation(ty);
     };
-  }, [entry, op, ty, dismissIfCurrent]);
+  }, [delivery, op, ty, finishIfCurrent]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: op.value,
     transform: [{ translateY: ty.value }],
   }));
 
-  if (!entry) return null;
+  if (inert || !delivery) return null;
+
+  const entry = delivery.entry;
 
   // 位置:top=顶部(safe-area + 间距)/ center=屏幕居中 / bottom=底部(默认)
   const posStyle =

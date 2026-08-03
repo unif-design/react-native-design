@@ -1,0 +1,152 @@
+---
+sidebar_position: 1
+title: Decorations 装饰图元
+description: "沉浸式屏 / hero 装饰原子(react-native-svg)—— GradientWash 线性渐变带、RadialHalo 径向光晕、ScreenBackdrop 整屏渐变 + halo 预设(warmOrange)，全 absolute 纯装饰不接管 hit area。"
+---
+
+# Decorations 装饰图元
+
+3 个用于沉浸式屏 / hero 区的视觉装饰原子,全部基于 `react-native-svg` 渲染,可与任何容器组合用。**它们是 absolute 定位的纯装饰,不接管 hit area / 布局,放在屏底部图层即可。**
+
+| 组件 | 用途 |
+|---|---|
+| `GradientWash` | 线性渐变带 —— 屏顶 / 屏底 的颜色淡入淡出 |
+| `RadialHalo` | 圆 / 椭圆径向光晕 —— hero 区点缀光斑 |
+| `ScreenBackdrop` | 整屏沉浸式预设 —— 渐变底 + 多个 halo 组合(如 `warmOrange`) |
+
+## 实时预览
+
+下方渲染的就是 `src/components/business/Decorations/*.tsx` 本体。
+
+```tsx
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">GradientWash · 单色顶部 wash</span>
+      <div style={{ height: 120, position: 'relative', background: '#fff', borderRadius: 8, overflow: 'hidden' }}>
+        <GradientWash height={120} color="#EB6E00" fromOpacity={0.15} toOpacity={0} />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">RadialHalo · 单光晕</span>
+      <div style={{ height: 160, position: 'relative', background: '#fff', borderRadius: 8, overflow: 'hidden' }}>
+        <RadialHalo size={200} color="#EB6E00" maxOpacity={0.25} style={{ position: 'absolute', top: -20, left: 60 }} />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">ScreenBackdrop warmOrange · 整屏预设(在 ScreenBackdrop 内层叠加 wash + 3 个 halo)</span>
+      <div style={{ height: 240, width: 320, position: 'relative', borderRadius: 8, overflow: 'hidden' }}>
+        <ScreenBackdrop preset="warmOrange" />
+      </div>
+    </div>
+  </div>
+```
+
+## 用法
+
+```tsx
+import { GradientWash, RadialHalo, ScreenBackdrop } from '@unif/react-native-design';
+
+{/* 名片屏整屏沉浸式背景(预设) */}
+<View style={{ flex: 1 }}>
+  <ScreenBackdrop preset="warmOrange" />
+  {/* 真实内容 */}
+</View>
+
+{/* 自定义 hero 区:屏顶橙色 wash + 右上 halo 点缀 */}
+<View style={{ height: 220, position: 'relative' }}>
+  <GradientWash height={220} color={c.primary} fromOpacity={0.18} toOpacity={0} />
+  <RadialHalo
+    size={180}
+    color={c.primary}
+    maxOpacity={0.20}
+    style={{ position: 'absolute', top: -30, right: -30 }}
+  />
+  <View>{/* hero 内容 */}</View>
+</View>
+```
+
+## GradientWash API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `height` | `number` | — | 渐变带高度 |
+| `color` | `string` | — | 单色模式必填(顶 fromOpacity → 底 toOpacity) |
+| `fromOpacity` | `number?` | `0.1` | 顶部透明度(单色模式) |
+| `toOpacity` | `number?` | `0` | 底部透明度(单色模式) |
+| `stops` | `ReadonlyArray<GradientStop>?` | — | 完全自定义 stops(与 color/fromOpacity 互斥) |
+| `gradientId` | `string?` | 自动 | 可选外部 id；内部统一消毒，消毒后为空则回退自动唯一 id |
+| `style` | `StyleProp<ViewStyle>` | — | 容器附加样式 |
+
+## RadialHalo API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `size` | `number` | — | 宽(圆模式即直径) |
+| `height` | `number?` | `size` | 椭圆高度,不传 = 圆 |
+| `color` | `string` | — | 中心颜色 |
+| `maxOpacity` | `number?` | `0.16` | 简化用法的中心最大透明度,自动生成 3 stop |
+| `stops` | `ReadonlyArray<{offset, opacity}>?` | — | 完全自定义透明度分布(覆盖 maxOpacity) |
+| `gradientId` | `string?` | 自动 | 可选外部 id；内部统一消毒，消毒后为空则回退自动唯一 id |
+| `style` | `StyleProp<ViewStyle>` | — | absolute 定位用 |
+
+## ScreenBackdrop API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `preset` | `ScreenBackdropPreset` | — | 预设名,目前只有 `'warmOrange'`(暖橙渐变 + 3 halo)。**不传且无 `stops`/`halos` 时仅渲染 `c.background` 实色外壳** |
+| `stops` | `{ light: GradientStop[]; dark: GradientStop[] }` | preset 推算 | 自定义全屏渐变 stops(scheme-aware),覆盖 preset |
+| `halos` | `ReadonlyArray<ScreenBackdropHalo>` | preset 推算 | 自定义 halo 列表,覆盖 preset |
+| `children` | `ReactNode` | — | 内容层(渲染在装饰层之上) |
+| `style` | `StyleProp<ViewStyle>` | — | 外层附加样式 |
+
+`ScreenBackdropHalo`:`{ size, height?, color?(默认 c.primary), maxOpacity?(默认 0.16), top?, bottom?, left?, right?, centerX? }`。
+
+## useSvgId（生成 gradientId）
+
+`useSvgId(prefix, override?)` —— 公共 hook,生成**稳定且 SVG 安全**的渐变 id,用来喂 `GradientWash` / `RadialHalo` 的 `gradientId`(或你自建 SVG 渐变的 `<LinearGradient id>` / `<RadialGradient id>`)。
+
+React `useId()` 的字符串格式由 renderer 决定，不应依赖某一种分隔符。`useSvgId` 会无条件取得该 React ID，再对 `prefix`、`override` 和 React ID 使用同一规则：连续非法字符替换为 `-`，只保留 `[A-Za-z0-9_.-]`，去掉首尾的 `.` / `-`，并确保最终结果以字母或 `_` 开头。未传 `override` 时按消毒后的 `prefix + React ID` 自动生成；传入值会先消毒，消毒后为空也会回退自动路径，不会产生多实例共用的固定空 ID。
+
+```tsx
+import { GradientWash, useSvgId } from '@unif/react-native-design';
+
+function Hero() {
+  const gid = useSvgId('hero-wash');
+  return (
+    <GradientWash gradientId={gid} height={220} color="#EB6E00" fromOpacity={0.18} toOpacity={0} />
+  );
+}
+```
+
+| 参数 | Type | 说明 |
+|---|---|---|
+| `prefix` | `string` | 短前缀,区分同屏多 gradient(如 `"gw"` / `"rh"` / `"av"`);会先消毒 |
+| `override` | `string?` | 外部受控 id;会先消毒，非空时优先，空结果回退自动 id；不会跳过 `useId()` |
+
+## 主题键（Tokens）
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.background` | `useColors()` | `ScreenBackdrop` 外壳实色底 |
+| `c.primary` | `useColors()` | `ScreenBackdrop` halo 默认色(`color` 缺省时) |
+| `warmOrangePalette` | `@unif/react-native-design` | `warmOrange` preset 的 4 stop 渐变(light / dark) |
+
+> `GradientWash` / `RadialHalo` 本身不读主题色 —— 颜色全由 `color` / `stops` 入参决定(`ScreenBackdrop` 内部才注入 `c.background` / `c.primary`)。
+
+## 无障碍（a11y）
+
+来源：`src/components/business/Decorations/{GradientWash,RadialHalo,ScreenBackdrop}.tsx`、`types.ts`。
+
+3 个组件都是纯视觉装饰图层,均**无 `accessibilityRole` / `accessibilityLabel`**,也无可传的 a11y prop。
+
+- `GradientWash` / `RadialHalo`:根 `<View>` 显式设 `pointerEvents="none"`,不拦截触摸、不暴露给 SR,只渲染 SVG 渐变。
+- `ScreenBackdrop`:外壳 `<View>` 本身不设 a11y(它在装饰层之上承载 `children`);其内部叠加的 `GradientWash` / `RadialHalo` 子层各自 `pointerEvents="none"`。
+
+语义应由这些装饰所承载 / 覆盖的内容(`children` 或上层业务屏)自行提供,不要给装饰图元挂交互或 a11y。
+
+## 不要
+
+- 不要在装饰组件上挂 onPress —— 它们是纯视觉图层,加交互会拦截真内容的 hit
+- 不要在屏内放超过 3 个 RadialHalo —— SVG 太多影响渲染性能,真要多就考虑 Image 静态导出
+- 不要把 ScreenBackdrop 用在普通业务屏 —— 用于品牌 hero(名片 / Splash / 扫码屏);普通 ScreenLayout 自带白底就够了
+- 不要手工拼接未经消毒的 `gradientId` —— 通常省略即可获得基于 React `useId()` 的自动唯一 id；确需外部受控时交给组件或 `useSvgId` 统一消毒

@@ -77,7 +77,7 @@ import { GradientWash, RadialHalo, ScreenBackdrop } from '@unif/react-native-des
 | `fromOpacity` | `number?` | `0.1` | 顶部透明度(单色模式) |
 | `toOpacity` | `number?` | `0` | 底部透明度(单色模式) |
 | `stops` | `ReadonlyArray<GradientStop>?` | — | 完全自定义 stops(与 color/fromOpacity 互斥) |
-| `gradientId` | `string?` | 自动 | 同屏多 GradientWash 需要不同 id |
+| `gradientId` | `string?` | 自动 | 可选外部 id；内部统一消毒，消毒后为空则回退自动唯一 id |
 | `style` | `StyleProp<ViewStyle>` | — | 容器附加样式 |
 
 ## RadialHalo API
@@ -89,7 +89,7 @@ import { GradientWash, RadialHalo, ScreenBackdrop } from '@unif/react-native-des
 | `color` | `string` | — | 中心颜色 |
 | `maxOpacity` | `number?` | `0.16` | 简化用法的中心最大透明度,自动生成 3 stop |
 | `stops` | `ReadonlyArray<{offset, opacity}>?` | — | 完全自定义透明度分布(覆盖 maxOpacity) |
-| `gradientId` | `string?` | 自动 | 同屏多 halo 需要不同 id |
+| `gradientId` | `string?` | 自动 | 可选外部 id；内部统一消毒，消毒后为空则回退自动唯一 id |
 | `style` | `StyleProp<ViewStyle>` | — | absolute 定位用 |
 
 ## ScreenBackdrop API
@@ -106,9 +106,9 @@ import { GradientWash, RadialHalo, ScreenBackdrop } from '@unif/react-native-des
 
 ## useSvgId（生成 gradientId）
 
-`useSvgId(prefix, override?)` —— 公共 hook,生成**唯一且 SVG 合法**的渐变 id,用来喂 `GradientWash` / `RadialHalo` 的 `gradientId`(或你自建 SVG 渐变的 `<LinearGradient id>` / `<RadialGradient id>`)。
+`useSvgId(prefix, override?)` —— 公共 hook,生成**稳定且 SVG 安全**的渐变 id,用来喂 `GradientWash` / `RadialHalo` 的 `gradientId`(或你自建 SVG 渐变的 `<LinearGradient id>` / `<RadialGradient id>`)。
 
-React 19 的 `useId()` 返回含冒号的串(`:r0:`),不是合法的 SVG id(XML NCName);`useSvgId` 消毒冒号后拼上 `prefix`,保证同屏多渐变 id 互不覆盖 —— 正是上文「不要忘传 `gradientId`」的标准解法。
+React `useId()` 的字符串格式由 renderer 决定，不应依赖某一种分隔符。`useSvgId` 会无条件取得该 React ID，再对 `prefix`、`override` 和 React ID 使用同一规则：连续非法字符替换为 `-`，只保留 `[A-Za-z0-9_.-]`，去掉首尾的 `.` / `-`，并确保最终结果以字母或 `_` 开头。未传 `override` 时按消毒后的 `prefix + React ID` 自动生成；传入值会先消毒，消毒后为空也会回退自动路径，不会产生多实例共用的固定空 ID。
 
 ```tsx
 import { GradientWash, useSvgId } from '@unif/react-native-design';
@@ -123,8 +123,8 @@ function Hero() {
 
 | 参数 | Type | 说明 |
 |---|---|---|
-| `prefix` | `string` | 短前缀,区分同屏多 gradient(如 `"gw"` / `"rh"` / `"av"`) |
-| `override` | `string?` | 有值时直接返回(跳过 `useId` 分配),用于外部受控 id |
+| `prefix` | `string` | 短前缀,区分同屏多 gradient(如 `"gw"` / `"rh"` / `"av"`);会先消毒 |
+| `override` | `string?` | 外部受控 id;会先消毒，非空时优先，空结果回退自动 id；不会跳过 `useId()` |
 
 ## 主题键（Tokens）
 
@@ -152,4 +152,4 @@ function Hero() {
 - 不要在装饰组件上挂 onPress —— 它们是纯视觉图层,加交互会拦截真内容的 hit
 - 不要在屏内放超过 3 个 RadialHalo —— SVG 太多影响渲染性能,真要多就考虑 Image 静态导出
 - 不要把 ScreenBackdrop 用在普通业务屏 —— 用于品牌 hero(名片 / Splash / 扫码屏);普通 ScreenLayout 自带白底就够了
-- 不要忘传 `gradientId` —— 同屏多 GradientWash / RadialHalo 共享一个默认 id,SVG defs 互覆盖导致后一个生效
+- 不要手工拼接未经消毒的 `gradientId` —— 通常省略即可获得基于 React `useId()` 的自动唯一 id；确需外部受控时交给组件或 `useSvgId` 统一消毒

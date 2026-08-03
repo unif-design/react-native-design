@@ -1,2 +1,6 @@
 export { Thumbnail } from './Thumbnail';
-export type { ThumbnailProps, ThumbnailSize } from './types';
+export type {
+  ThumbnailImageStyle,
+  ThumbnailProps,
+  ThumbnailSize,
+} from './types';

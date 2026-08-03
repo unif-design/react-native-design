@@ -2,7 +2,7 @@
 slug: /migration
 sidebar_position: 11
 title: 升级 / 迁移
-description: "@unif/react-native-design 迁移指南：旧顶层 colors / shadow 静态导出 → 运行期 useColors() / useThemedStyles() hook（含旧 token → 新 role grep 对照），reanimated 4 升级，以及 0.6.0 移除 BottomSheet / Confirm。"
+description: "@unif/react-native-design 迁移指南：旧顶层 colors / shadow 静态导出 → 运行期 useColors() / useThemedStyles() hook（含旧 token → 新 role grep 对照），reanimated 4 升级，以及 BottomSheet / Confirm 的当前迁移状态。"
 ---
 
 # 升级 / 迁移
@@ -95,25 +95,47 @@ import { space, radius, type as t, fw, fontMono, motion } from '@unif/react-nati
 
 ### 为什么不能继续用静态导出 {#为什么不能继续用静态导出}
 
-`ThemeProvider` 读 `useColorScheme()` 动态算亮 / 暗,并以 `scheme` 为唯一 `useMemo` 依赖,把稳定的 `colors` / `shadow` 引用注入 Context。`useThemedStyles(maker)` 的 `useMemo([colors, shadow, maker])` 依赖这个引用 —— 静态顶层导出永远只有亮色值,亮暗切换对它无效。
+`ThemeProvider` 读 `useColorScheme()` 动态算亮 / 暗,并以 `[scheme, fontScale]` 为 `useMemo` 依赖,把稳定的 `colors` / `shadow` 引用和字号倍数注入 Context。`useThemedStyles(maker)` 的 `useMemo([colors, shadow, fontScale, maker])` 依赖这些值 —— 静态顶层导出永远只有亮色值,亮暗切换和应用级字号档位都对它无效。
 
 ---
 
 ## 版本升级注意事项 {#版本升级注意事项}
 
-### 0.6.0：移除 BottomSheet / Confirm（去 @gorhom） {#0-6-0}
+### 0.6.0 移除 BottomSheet；当前 Confirm 已重新提供 {#0-6-0}
 
-0.6.0 起移除了 `BottomSheet` 与 `Confirm` 组件、去掉 `@gorhom/bottom-sheet` 依赖 —— 设计系统不再内置 sheet / 命令式弹层实现，交由消费方按导航与交互需求自选：
+0.6.0 曾同时移除 `BottomSheet` 与旧 Confirm 实现，并去掉
+`@gorhom/bottom-sheet` 依赖。**当前版本仍不提供 `BottomSheet`，但已经重新公开
+`confirm()`、`<ConfirmHost />` 与 `ConfirmOptions`**；新的 Confirm 使用裸 RN
+`Modal` + 单 owner Store，不依赖 `@gorhom`。
 
 ```tsx
-// ❌ 0.6.0 已移除，不再从包根导出
-import { BottomSheet, confirm } from '@unif/react-native-design';
+// ❌ BottomSheet 当前仍未从包根导出
+import { BottomSheet } from '@unif/react-native-design';
+
+// ✅ 当前命令式确认 API
+import { ConfirmHost, confirm } from '@unif/react-native-design';
+
+// App 根附近挂一次
+function AppOverlays() {
+  return <ConfirmHost />;
+}
+
+async function requestDelete() {
+  const accepted = await confirm({
+    title: '确认删除?',
+    destructive: true,
+  });
+  // 根据 accepted 决定是否继续
+}
 ```
 
 迁移建议：
 
-- **底部 sheet / 弹层** → 用 React Navigation 的 `presentation: 'formSheet'`（原生 sheet，系统接管手势 / 动画 / 变暗），或自持 sheet 容器。
-- **命令式确认** → 自持 `confirm()`（pub/sub + RN `Modal`），或用 `Alert.alert`。
+- **底部 sheet / 弹层** → 用 React Navigation 的 `presentation: 'formSheet'`
+  （原生 sheet，系统接管手势 / 动画 / 变暗），或自持 sheet 容器。
+- **命令式确认** → 使用包根导出的 `confirm()`，并在
+  `SafeAreaProvider` 内挂一个 `<ConfirmHost />`。生命周期、重入和无 Host 语义见
+  [Confirm](/docs/components/confirm)。
 
 同时 `Toast` 新增 `position`（`'top' | 'bottom' | 'center'`，默认 `'bottom'`），详见 [Toast](/docs/components/toast)。
 

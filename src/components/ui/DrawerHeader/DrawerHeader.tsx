@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Image, Text, View } from 'react-native';
+import React from 'react';
+import { Text, View } from 'react-native';
 import { useThemedStyles } from '../../../theme';
+import { resolveImageSource } from '../../../utils/imageSource';
+import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
+import { ImageAttempt } from '../shared/ImageAttempt';
 import { makeStyles } from './styles';
 import type { DrawerHeaderProps } from './types';
 
@@ -16,38 +19,30 @@ export function DrawerHeader({
   testID,
 }: DrawerHeaderProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
-  const [imageFailed, setImageFailed] = useState(false);
-
-  // [M-20] React 18+ 已移除 unmount 后 setState 的 warning,mountedRef 守卫为死码,删除。
-  // [L-44] source 变化时重置 imageFailed,否则换图 URL 后仍展示 fallback 文字。
-  const uri =
-    source != null && typeof source === 'object' && 'uri' in source
-      ? (source as { uri?: string }).uri
-      : null;
-  useEffect(() => {
-    setImageFailed(false);
-  }, [uri, source]);
-
-  const handleImageError = () => {
-    setImageFailed(true);
-  };
   // [L-51] 码点级取首字,防 emoji / 代理对被截断为乱码。
   const initial = [...name.trim()][0] ?? '?';
-  const showImage = source != null && !imageFailed;
+  const resolvedSource = resolveImageSource(source);
+  const fallback = <Text style={styles.avatarText}>{initial}</Text>;
+
   return (
     <View style={[styles.header, style]} testID={testID}>
-      <View style={[styles.avatar, showImage && styles.avatarImageMode]}>
-        {showImage ? (
-          <Image
-            source={source}
-            onError={handleImageError}
+      <View
+        {...A11Y_HIDDEN_PROPS}
+        style={[
+          styles.avatar,
+          resolvedSource !== undefined && styles.avatarImageMode,
+        ]}
+      >
+        {resolvedSource === undefined ? (
+          fallback
+        ) : (
+          <ImageAttempt
+            key={resolvedSource.key}
+            source={resolvedSource.source}
+            fallback={fallback}
             style={styles.avatarImage}
             resizeMode="cover"
-            accessible={!!name}
-            accessibilityLabel={name}
           />
-        ) : (
-          <Text style={styles.avatarText}>{initial}</Text>
         )}
       </View>
       <Text style={styles.name} numberOfLines={1}>

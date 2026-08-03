@@ -1,35 +1,40 @@
-import React, { type ComponentRef, forwardRef, useState } from 'react';
-import { Text, TextInput, View } from 'react-native';
-import { control, r, space, useColors, useThemedStyles } from '../../../theme';
+import React, {
+  type ComponentRef,
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from 'react';
+import { Platform, Text, TextInput, View } from 'react-native';
+import type { TextInputProps } from 'react-native';
+import { fixed, space, useColors, useThemedStyles } from '../../../theme';
 import { childTestID } from '../../../utils/testID';
+import { createLogger } from '../../../utils/logger';
+import {
+  normalizeInputHeight,
+  normalizeTextareaHeights,
+  sanitizeTextFieldContainerStyle,
+} from './normalize';
 import { makeStyles } from './styles';
-import type { TextFieldBaseProps } from './types';
+import { TextFieldSlot } from './TextFieldSlot';
+import type { TextFieldBaseProps, TextFieldHandle } from './types';
+import { useErrorAnnouncement } from './useErrorAnnouncement';
+import { useTextFieldValue } from './useTextFieldValue';
 
-/** `TextInput` 在 react-native-strict-api 下是组件类型(`TextInputType`),
- *  ref 实例类型走 `ComponentRef<typeof TextInput>`(对应内部 `_TextInputInstance`)。 */
-export type TextInputRef = ComponentRef<typeof TextInput>;
+const log = createLogger('TextField');
 
-/**
- * Input / Textarea 共享 primitive —— internal,不在主 barrel 导出。
- *
- * 行为:
- * - 视觉 4 态:idle(浅灰)/ focus(白底 brand 边)/ filled(白底 outline 边)/ error
- * - leading / trailing 左右 slot
- * - disabled 优先于 editable
- * - multiline=false → 单行 fixed height(默认 control.lg)
- * - multiline=true → 多行 minHeight/maxHeight,文字顶对齐,wrap 上下加 padding
- * - forwardRef<TextInput> —— 业务表单 inputRef.current?.focus() 聚焦
- *
- * 公开 API 是 Input / Textarea(本组件不直接给业务用)。
- */
-export const TextFieldBase = forwardRef<TextInputRef, TextFieldBaseProps>(
-  function TextFieldBase(
-    {
-      multiline = false,
-      height = control.lg,
-      // [L-81] multiline minHeight 裸 96 → r(96),随设备缩放
-      minHeight = r(96),
+/** internal native ref type;公开 ref 一律用 TextFieldHandle。 */
+type NativeTextInputRef = ComponentRef<typeof TextInput>;
+
+/** Input / Textarea / Search 共享的严格输入 primitive — internal,不进公共 barrel。 */
+export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
+  function TextFieldBase(props, forwardedRef): React.JSX.Element {
+    const {
+      multiline,
+      height,
+      minHeight,
       maxHeight,
+      searchLayout,
       leading,
       trailing,
       error,
@@ -37,29 +42,96 @@ export const TextFieldBase = forwardRef<TextInputRef, TextFieldBaseProps>(
       editable,
       containerStyle,
       value,
+      defaultValue,
+      onChangeText,
+      accessibilityState,
+      accessibilityRole,
+      placeholderTextColor: callerPlaceholder,
       onFocus,
       onBlur,
-      onChangeText,
       testID,
-      ...rest
-    },
-    ref
-  ): React.JSX.Element {
-    const c = useColors();
+      style: _style,
+      numberOfLines: _numberOfLines,
+      ['aria-disabled']: _ariaDisabled,
+      readOnly: _readOnly,
+      role: _role,
+      enterKeyHint: _enterKeyHint,
+      clearTextOnFocus: _clearTextOnFocus,
+      ...allowedNativeProps
+    } = props as TextFieldBaseProps & Record<string, unknown>;
+    const removedNativeAliasKey = Object.entries({
+      'style': _style,
+      'numberOfLines': _numberOfLines,
+      'aria-disabled': _ariaDisabled,
+      'readOnly': _readOnly,
+      'role': _role,
+      'enterKeyHint': _enterKeyHint,
+      'clearTextOnFocus': _clearTextOnFocus,
+    })
+      .filter(([, entry]) => entry !== undefined)
+      .map(([name]) => name)
+      .join(',');
+    const colors = useColors();
     const styles = useThemedStyles(makeStyles);
     const [focused, setFocused] = useState(false);
-    // [M-9] 内部镜像 state:非受控场景 value 不传,用 _mirror 做 hasValue 判断
-    const [_mirror, setMirror] = useState('');
-    // [M-9] filled 在受控 value 和内部镜像 state 之间取 hasValue,
-    // 保证非受控场景 filled 视觉态能正确响应用户输入,且受控用法行为不变
-    const filled =
-      value != null ? String(value).length > 0 : _mirror.length > 0;
-    const isEditable = disabled ? false : editable;
-    // [L-31] editable=false(非 disabled)时也应进入 disabled a11y state
-    const isDisabledA11y = disabled || editable === false;
+    const nativeRef = React.useRef<NativeTextInputRef>(null);
+    const scope = multiline ? 'Textarea' : 'Input';
+    const controller = useTextFieldValue(
+      {
+        value,
+        defaultValue,
+        onChangeText:
+          typeof onChangeText === 'function'
+            ? (onChangeText as (next: string) => void)
+            : undefined,
+      },
+      scope
+    );
+    const normalizedInputHeight = normalizeInputHeight(
+      height === undefined ? fixed.hitTarget : height
+    );
+    const normalizedTextareaHeights = normalizeTextareaHeights(
+      minHeight,
+      maxHeight
+    );
+    const sanitizedContainer = sanitizeTextFieldContainerStyle(containerStyle);
+    const effectiveEditable = disabled !== true && editable !== false;
+    const mergedAccessibilityState = {
+      ...accessibilityState,
+      disabled: !effectiveEditable,
+    };
+    const normalizedHeight = multiline
+      ? normalizedTextareaHeights.minHeight
+      : normalizedInputHeight.value;
+    const filled = controller.value.length > 0;
+    const diagnostics = [
+      ...normalizedInputHeight.diagnostics,
+      ...normalizedTextareaHeights.diagnostics,
+      ...sanitizedContainer.diagnostics,
+    ];
+    const diagnosticKey = diagnostics.join(',');
 
-    // 视觉态优先级:error > focused > filled > idle。
-    // active 三态(focus/filled/error)共享 wrapActive 白底,各自只覆 borderColor 差量。
+    useEffect(() => {
+      if (diagnosticKey.length > 0) {
+        log.warn(`${scope}: 非法布局值(${diagnosticKey})已回退。`);
+      }
+    }, [diagnosticKey, scope]);
+    useEffect(() => {
+      if (removedNativeAliasKey.length > 0) {
+        log.warn(`${scope}: 已忽略受管原生 props(${removedNativeAliasKey})。`);
+      }
+    }, [removedNativeAliasKey, scope]);
+    useErrorAnnouncement(error);
+
+    useImperativeHandle(
+      forwardedRef,
+      () => ({
+        focus: () => nativeRef.current?.focus(),
+        blur: () => nativeRef.current?.blur(),
+      }),
+      []
+    );
+
     const wrapStateStyles = error
       ? [styles.wrapActive, styles.wrapError]
       : focused
@@ -67,62 +139,95 @@ export const TextFieldBase = forwardRef<TextInputRef, TextFieldBaseProps>(
         : filled
           ? [styles.wrapActive, styles.wrapFilled]
           : [styles.wrapIdle];
+    const interactiveHeight =
+      searchLayout?.interactiveHeight ?? normalizedHeight;
 
     return (
       <View
-        style={[containerStyle, disabled && styles.containerDisabled]}
+        style={[
+          sanitizedContainer.style,
+          !effectiveEditable && styles.containerDisabled,
+          searchLayout !== undefined && !multiline && styles.rootCentered,
+          { minWidth: fixed.hitTarget, minHeight: normalizedHeight },
+        ]}
         testID={testID}
       >
         <View
           style={[
             styles.wrap,
             multiline && styles.wrapMultiline,
-            ...wrapStateStyles,
+            searchLayout === undefined && wrapStateStyles,
+            searchLayout !== undefined && styles.searchInteractiveRow,
             multiline
-              ? { minHeight, ...(maxHeight != null && { maxHeight }) }
-              : { height },
+              ? {
+                  minHeight: normalizedHeight,
+                  ...(normalizedTextareaHeights.maxHeight !== undefined && {
+                    maxHeight: normalizedTextareaHeights.maxHeight,
+                  }),
+                }
+              : { height: interactiveHeight },
           ]}
         >
-          {leading != null ? <View>{leading}</View> : null}
+          {searchLayout ? (
+            <View
+              pointerEvents="none"
+              style={[
+                styles.searchVisibleSurface,
+                ...wrapStateStyles,
+                {
+                  top: searchLayout.verticalInset,
+                  bottom: searchLayout.verticalInset,
+                },
+              ]}
+            />
+          ) : null}
+          <TextFieldSlot
+            slot={leading}
+            effectiveEditable={effectiveEditable}
+            testID={childTestID(testID, 'leading')}
+          />
           <TextInput
-            ref={ref}
-            {...rest}
-            editable={isEditable}
-            value={value}
-            onChangeText={(text) => {
-              // [M-9] 同步内部镜像,非受控场景 filled 视觉态依赖此 state
-              setMirror(text);
-              onChangeText?.(text);
-            }}
+            ref={nativeRef}
+            {...(allowedNativeProps as TextInputProps)}
+            value={controller.value}
+            onChangeText={controller.onChangeText}
+            editable={effectiveEditable}
             multiline={multiline}
-            onFocus={(e) => {
+            onFocus={(event) => {
               setFocused(true);
-              onFocus?.(e);
+              onFocus?.(event);
             }}
-            onBlur={(e) => {
+            onBlur={(event) => {
               setFocused(false);
-              onBlur?.(e);
+              onBlur?.(event);
             }}
             style={[
               styles.input,
               multiline && styles.inputMultiline,
-              // multiline:wrap 上下 padding 为 space[4]*2=20,input 内部 minHeight 减掉避免溢出
               multiline && {
-                minHeight: Math.max(0, minHeight - space[4] * 2),
+                minHeight: Math.max(0, normalizedHeight - space[4] * 2),
+              },
+              searchLayout !== undefined && {
+                minHeight: searchLayout.interactiveHeight,
               },
             ]}
-            placeholderTextColor={c.foregroundSubtle}
-            // [L-31] editable=false 并入 disabled a11y state,SR 能正确播报不可编辑
-            accessibilityState={isDisabledA11y ? { disabled: true } : undefined}
+            placeholderTextColor={callerPlaceholder ?? colors.foregroundSubtle}
+            accessibilityRole={accessibilityRole}
+            accessibilityState={mergedAccessibilityState}
             testID={childTestID(testID, 'input')}
           />
-          {trailing != null ? <View>{trailing}</View> : null}
+          <TextFieldSlot
+            slot={trailing}
+            effectiveEditable={effectiveEditable}
+            testID={childTestID(testID, 'trailing')}
+          />
         </View>
-        {/* [L-31] error Text 补 accessibilityLiveRegion="polite" —— 错误出现时 SR 自动播报 */}
         {error ? (
           <Text
             style={styles.errorMsg}
-            accessibilityLiveRegion="polite"
+            accessibilityLiveRegion={
+              Platform.OS === 'android' ? 'polite' : undefined
+            }
             testID={childTestID(testID, 'error')}
           >
             {error}

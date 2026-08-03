@@ -22,8 +22,12 @@ export type ToastInput =
       position?: ToastPosition;
     };
 
+/**
+ * 归一化后的一条 toast。`id` 是**内部身份**,与 `ToastDelivery` 的 ownerToken /
+ * leaseId 一起构成竞态守卫,不保证跨版本稳定 —— 业务不要依赖它的具体取值。
+ */
 export type ToastEntry = {
-  /** 唯一 id（自增）—— 退场守卫用:ToastHost 只清「仍是当前」的 toast,避免清掉竞态期到达的新 toast */
+  /** 内部自增 id —— 竞态守卫的一环,Host 只处理「仍是当前投递」的回调 */
   id: number;
   /** 消息文本 */
   message: string;
@@ -35,8 +39,8 @@ export type ToastEntry = {
   position: ToastPosition;
 };
 
-/** Toast 订阅者函数签名（ToastHost 内部用） */
-export type Subscriber = (entry: ToastEntry) => void;
+// delivery / lease / subscriber 类型都在 `store.ts` —— 它们是 Host 与 Store 之间的
+// 内部协议,不进公共 barrel。
 
 export type ToastHostProps = {
   /** E2E / 测试定位（业务读 toast 文本时用） */

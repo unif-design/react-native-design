@@ -70,6 +70,7 @@ const sidebars: SidebarsConfig = {
       collapsed: true,
       items: [
         'components/navbar',
+        'components/drawer-header',
         'components/tabbar',
         'components/tabs',
       ],

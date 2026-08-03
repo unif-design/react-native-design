@@ -11,20 +11,24 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { space, useThemedStyles } from '../../../theme';
 import { Button } from '../Button';
-import { _subs } from './confirm';
+import { registerConfirmHost, settleConfirm } from './confirm';
+import { resolveConfirmLabels } from './labels';
 import { makeStyles } from './styles';
-import type { ConfirmEntry, Subscriber } from './types';
+import type { ConfirmEntry, ConfirmEvent } from './store';
 
 /** 遮罩淡入 / 淡出时长(ms)—— 出场略长于入场,与 Modal slide 退场(~300ms)大致同步收完。 */
 const SCRIM_IN_MS = 220;
 const SCRIM_OUT_MS = 260;
 
 /**
- * Confirm 对话框宿主 —— App 根挂一次,监听 `confirm()` 调用并渲染。
+ * Confirm 对话框宿主 —— App 根挂**一次**,监听 `confirm()` 调用并渲染。
  *
  * 原生 RN `Modal`(transparent + animationType slide)从底部滑入,backdrop 点击
- * 取消、内层 sheet 拦截点击不冒泡。**不依赖 @gorhom**(0.6.0 去 @gorhom 后改为
- * 纯 RN Modal + pub/sub 实现)。
+ * 取消、内层 sheet 拦截点击不冒泡。**不依赖 @gorhom**。
+ *
+ * 唯一 owner:重复挂载的实例拿到 `null` lease,永久惰性、不渲染 —— 不会出现两个
+ * Host 争抢同一个对话框。所有关闭路径统一走 `settleConfirm(entry, result)`,
+ * 组件内不直接调用 entry 的 resolver。
  */
 export function ConfirmHost(): React.JSX.Element | null {
   const styles = useThemedStyles(makeStyles);
@@ -32,36 +36,55 @@ export function ConfirmHost(): React.JSX.Element | null {
   const { height: screenH } = useWindowDimensions();
   const [entry, setEntry] = useState<ConfirmEntry | null>(null);
 
-  // 跟踪当前未决 entry,供 unmount cleanup resolve(false)。
+  // 同步权威副本:effect cleanup 与迟到回调都读它,不受 React state 批处理延迟影响。
   const pendingRef = useRef<ConfirmEntry | null>(null);
-  pendingRef.current = entry;
+
+  // 注册失败(已有 owner)时保持惰性:不订阅、不渲染。
+  const [inert, setInert] = useState(false);
 
   // 保留最后一次显示的 entry:关闭时 entry 立即置 null,但 slide 退场动画期 Modal 仍可见,
   // 渲染 lastEntry 才不会滑出一个只剩 padding 的空 sheet([M-17])。
   const lastEntryRef = useRef<ConfirmEntry | null>(null);
   if (entry) lastEntryRef.current = entry;
   const display = entry ?? lastEntryRef.current;
+  const labels = resolveConfirmLabels({
+    confirmLabel: display?.options.confirmLabel,
+    cancelLabel: display?.options.cancelLabel,
+  });
 
   useEffect(() => {
-    // [L-101] Subscriber 不再接收 null —— 收到新 entry 即显示;关闭路径由 resolve() 驱动
-    const sub: Subscriber = (next) => setEntry(next);
-    _subs.add(sub);
+    const subscriber = (event: ConfirmEvent) => {
+      // 先写同步 ref 再置 React state —— cleanup 与迟到回调依赖 ref 的即时正确性。
+      if (event.type === 'show') {
+        pendingRef.current = event.entry;
+        setEntry(event.entry);
+        return;
+      }
+      if (pendingRef.current?.id === event.id) {
+        pendingRef.current = null;
+        setEntry((current) => (current?.id === event.id ? null : current));
+      }
+    };
+    const lease = registerConfirmHost(subscriber);
+    if (!lease) {
+      setInert(true);
+      return;
+    }
     return () => {
-      _subs.delete(sub);
-      // Host 卸载时若对话框仍未决(error boundary 重置 / 根 re-key 切语言主题等),
-      // resolve(false) —— 否则 confirm() 的 Promise 永久悬挂、_activeEntry 锁死([H-5])。
-      pendingRef.current?.resolve(false);
+      // 卸载时若对话框仍未决(error boundary 重置 / 根 re-key 切语言主题等),
+      // Store 把它 settle(false) —— 否则 confirm() 的 Promise 永久悬挂并锁死单例([H-5])。
+      const held = pendingRef.current;
+      pendingRef.current = null;
+      lease.release(held);
     };
   }, []);
 
   const handleConfirm = useCallback(() => {
-    entry?.resolve(true);
-    setEntry(null);
+    if (entry) settleConfirm(entry, true);
   }, [entry]);
 
   const handleCancel = useCallback(() => {
-    entry?.resolve(false);
-    setEntry(null);
+    if (entry) settleConfirm(entry, false);
   }, [entry]);
 
   // 遮罩自持淡入 / 淡出(不蹭 Modal 的位移动画,理由见下方 scrim 注释)。退场也要淡:
@@ -75,6 +98,8 @@ export function ConfirmHost(): React.JSX.Element | null {
       useNativeDriver: true,
     }).start();
   }, [entry, scrimOpacity]);
+
+  if (inert) return null;
 
   return (
     <Modal
@@ -113,25 +138,25 @@ export function ConfirmHost(): React.JSX.Element | null {
             <>
               <View style={styles.body}>
                 <Text style={styles.title} accessibilityRole="header">
-                  {display.title}
+                  {display.options.title}
                 </Text>
-                {display.message ? (
-                  <Text style={styles.message}>{display.message}</Text>
+                {display.options.message ? (
+                  <Text style={styles.message}>{display.options.message}</Text>
                 ) : null}
               </View>
               <View style={styles.actions}>
                 <Button
                   testID="confirm-cancel"
-                  label={display.cancelLabel ?? '取消'}
+                  label={labels.cancelLabel}
                   variant="secondary"
-                  block
+                  style={styles.action}
                   onPress={handleCancel}
                 />
                 <Button
                   testID="confirm-ok"
-                  label={display.confirmLabel ?? '确认'}
-                  variant={display.destructive ? 'danger' : 'primary'}
-                  block
+                  label={labels.confirmLabel}
+                  variant={display.options.destructive ? 'danger' : 'primary'}
+                  style={styles.action}
                   onPress={handleConfirm}
                 />
               </View>

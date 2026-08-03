@@ -1,12 +1,14 @@
 import { describe, expect, test } from '@jest/globals';
 import {
+  cleanSvgSource,
   collectSvgIssues,
   parseSvg,
   runBuild,
+  scanSvgDocument,
 } from '../../scripts/build-icons';
 
 const SVG = (body: string) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">${body}</svg>`;
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
 
 describe('parseSvg — 属性抽取', () => {
   test('抽取元素级 opacity(svg `opacity` → element.opacity)', () => {
@@ -27,8 +29,8 @@ describe('parseSvg — 属性抽取', () => {
     });
   });
 
-  test('元素级 stroke 非 none 值不抽取(描边色应继承主题,不硬编码进 data)', () => {
-    const def = parseSvg(SVG('<path d="M2 2" stroke="#f00"></path>'));
+  test('元素级 currentColor stroke 不重复写入 data(描边色继承主题)', () => {
+    const def = parseSvg(SVG('<path d="M2 2" stroke="currentColor"></path>'));
     expect(def.elements[0]).not.toHaveProperty('stroke');
   });
 
@@ -49,58 +51,165 @@ describe('parseSvg — 属性抽取', () => {
 
 const errorsOf = (src: string) =>
   collectSvgIssues(src, 'test').filter((i) => i.level === 'error');
-const warnsOf = (src: string) =>
-  collectSvgIssues(src, 'test').filter((i) => i.level === 'warn');
 
 describe('collectSvgIssues — fail-fast 校验', () => {
-  test('不支持元素(polyline)→ error,且 msg 指出标签名', () => {
-    const issues = errorsOf(
-      SVG('<path d="M2 2"></path><polyline points="0,0"></polyline>')
-    );
-    expect(issues.some((i) => /polyline/.test(i.msg))).toBe(true);
-  });
-
-  test('单引号属性 → error(attr 只认双引号会静默丢)', () => {
-    expect(errorsOf(SVG("<path d='M2 2'></path>"))).not.toHaveLength(0);
-  });
-
   test('无任何支持元素(空图标)→ error', () => {
     const issues = errorsOf(SVG(''));
     expect(issues.some((i) => /空|无.*元素/.test(i.msg))).toBe(true);
   });
 
-  test('viewBox 非 0 0 24 24 → error(运行时按 24 网格渲染会缩放失真)', () => {
-    const src =
-      '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M2 2"></path></svg>';
-    expect(errorsOf(src).some((i) => /viewBox/.test(i.msg))).toBe(true);
+  test.each([
+    [
+      'viewBox',
+      SVG('<path d="M2 2"></path>').replace('0 0 24 24', '0 0 16 16'),
+    ],
+    [
+      'fill',
+      SVG('<path d="M2 2"></path>').replace('fill="none"', 'fill="red"'),
+    ],
+    [
+      'stroke',
+      SVG('<path d="M2 2"></path>').replace(
+        'stroke="currentColor"',
+        'stroke="#000"'
+      ),
+    ],
+    [
+      'stroke-width',
+      SVG('<path d="M2 2"></path>').replace(
+        'stroke-width="1.75"',
+        'stroke-width="0"'
+      ),
+    ],
+    [
+      'stroke-width',
+      SVG('<path d="M2 2"></path>').replace(
+        'stroke-width="1.75"',
+        'stroke-width="2"'
+      ),
+    ],
+    [
+      'stroke-linecap',
+      SVG('<path d="M2 2"></path>').replace(
+        'stroke-linecap="round"',
+        'stroke-linecap="butt"'
+      ),
+    ],
+    [
+      'stroke-linejoin',
+      SVG('<path d="M2 2"></path>').replace(
+        'stroke-linejoin="round"',
+        'stroke-linejoin="bevel"'
+      ),
+    ],
+  ])('根 %s 不符合规范 → error', (field, src) => {
+    expect(errorsOf(src).some((i) => i.msg.includes(field))).toBe(true);
   });
 
-  test('受支持元素属性值含 / 致整元素被丢 → 开标签计数交叉校验 error', () => {
-    // regex `[^/>]*` 在属性值含 `/` 时整个元素匹配失败,被静默丢弃。
-    const issues = errorsOf(SVG('<path d="M2 2" class="a/b"></path>'));
-    expect(issues.some((i) => /计数|抽取/.test(i.msg))).toBe(true);
+  test.each([
+    ['xmlns', ''],
+    ['viewBox', ''],
+    ['fill', ''],
+    ['stroke', ''],
+    ['stroke-width', ''],
+    ['stroke-linecap', ''],
+    ['stroke-linejoin', ''],
+  ])('根缺少 %s → error', (field) => {
+    const src = SVG('<path d="M2 2"></path>').replace(
+      new RegExp(` ${field}="[^"]*"`),
+      ''
+    );
+    expect(errorsOf(src).some((i) => i.msg.includes(field))).toBe(true);
   });
 
-  test('非 round linecap → warn(Icon 强制 round,源非 round 会误导)', () => {
-    const src =
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt"><path d="M2 2"></path></svg>';
-    expect(warnsOf(src).some((i) => /linecap|round/.test(i.msg))).toBe(true);
+  test.each([
+    ['空 path d', SVG('<path d="  "></path>'), /path.*d/u],
+    ['rect 缺 width', SVG('<rect height="2"></rect>'), /rect.*width/u],
+    [
+      'rect width 非正数',
+      SVG('<rect width="0" height="2"></rect>'),
+      /rect.*width/u,
+    ],
+    [
+      'rect height 非正数',
+      SVG('<rect width="2" height="-1"></rect>'),
+      /rect.*height/u,
+    ],
+    [
+      'rect rx 为负数',
+      SVG('<rect width="2" height="2" rx="-1"></rect>'),
+      /rect.*rx/u,
+    ],
+    ['circle 缺 r', SVG('<circle cx="1" cy="1"></circle>'), /circle.*r/u],
+    ['circle 缺 cx', SVG('<circle cy="1" r="1"></circle>'), /circle.*cx/u],
+    ['circle 缺 cy', SVG('<circle cx="1" r="1"></circle>'), /circle.*cy/u],
+    [
+      'circle 同时缺 cx/cy',
+      SVG('<circle r="1"></circle>'),
+      /circle.*(?:cx|cy)/u,
+    ],
+    [
+      'circle r 非正数',
+      SVG('<circle cx="1" cy="1" r="0"></circle>'),
+      /circle.*r/u,
+    ],
+    [
+      '非法数字语法',
+      SVG('<circle cx="1e2" cy="1" r="1"></circle>'),
+      /circle.*cx/u,
+    ],
+    ['opacity 小于 0', SVG('<path d="M2 2" opacity="-.1"></path>'), /opacity/u],
+    ['opacity 大于 1', SVG('<path d="M2 2" opacity="1.1"></path>'), /opacity/u],
+  ])('%s → error', (_label, src, expected) => {
+    expect(errorsOf(src).some((i) => expected.test(i.msg))).toBe(true);
   });
 
-  test('元素级 stroke-width → warn(脚本只读根 stroke-width,元素级会被丢)', () => {
-    expect(
-      warnsOf(SVG('<path d="M2 2" stroke-width="3"></path>')).some((i) =>
-        /stroke-width/.test(i.msg)
-      )
-    ).toBe(true);
+  test.each([
+    [
+      'root unknown',
+      SVG('<path d="M2 2"></path>').replace('<svg ', '<svg id="x" '),
+    ],
+    ['path unknown', SVG('<path d="M2 2" stroke-width="3"></path>')],
+    ['rect unknown', SVG('<rect width="2" height="2" ry="1"></rect>')],
+    ['circle unknown', SVG('<circle r="1" class="dot"></circle>')],
+    ['single quote', SVG("<path d='M2 2'></path>")],
+    ['hard-coded fill', SVG('<path d="M2 2" fill="#f00"></path>')],
+    ['hard-coded stroke', SVG('<path d="M2 2" stroke="red"></path>')],
+  ])('%s 属性 → error', (_label, src) => {
+    expect(errorsOf(src)).not.toHaveLength(0);
   });
 
-  test('元素级 stroke 非 none → warn(被 parseSvg 忽略,描边色应继承主题)', () => {
-    expect(
-      warnsOf(SVG('<path d="M2 2" stroke="#f00"></path>')).some((i) =>
-        /stroke/.test(i.msg)
-      )
-    ).toBe(true);
+  test.each([
+    ['polyline', '<polyline points="0,0"></polyline>'],
+    ['symbol', '<symbol></symbol>'],
+    ['title', '<title>icon</title>'],
+    ['future-widget', '<future-widget></future-widget>'],
+  ])('未知标签 <%s> → error', (tag, body) => {
+    expect(errorsOf(SVG(body)).some((i) => i.msg.includes(tag))).toBe(true);
+  });
+
+  test.each([
+    [
+      '多个根',
+      `${SVG('<path d="M2 2"></path>')}${SVG('<path d="M3 3"></path>')}`,
+    ],
+    ['闭合标签不匹配', SVG('<path d="M2 2"></circle>')],
+    [
+      '未闭合标签',
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2">',
+    ],
+    ['shape 嵌套 shape', SVG('<path d="M2 2"><circle r="1"></circle></path>')],
+    ['shape 不在根的直接子层', SVG('<g><path d="M2 2"></path></g>')],
+  ])('%s → error', (_label, src) => {
+    expect(errorsOf(src)).not.toHaveLength(0);
+  });
+
+  test('注释中的 shape 同时被校验和生成忽略', () => {
+    const source = SVG('<!-- <path d="M0 0"></path> --><path d="M2 2"></path>');
+    const result = runBuild(['one'], [source]);
+    expect(result.errors).toEqual([]);
+    expect(result.dataTs).toContain('M2 2');
+    expect(result.dataTs).not.toContain('M0 0');
   });
 
   test('合规 svg(含 stroke=none / opacity)→ 无 issue', () => {
@@ -112,6 +221,23 @@ describe('collectSvgIssues — fail-fast 校验', () => {
         'test'
       )
     ).toHaveLength(0);
+  });
+});
+
+describe('scanSvgDocument — 完整文档扫描', () => {
+  test('cleanSvgSource 只移除注释，scanner 保留真实叶子顺序', () => {
+    const clean = cleanSvgSource(
+      SVG(
+        '<!-- <path d="ignored"></path> --><path d="first"></path><circle r="1"></circle>'
+      )
+    );
+    const scan = scanSvgDocument(clean, 'order.svg');
+    expect(scan.shapes.map((shape) => shape.name)).toEqual(['path', 'circle']);
+  });
+
+  test('属性值含 slash 不再让合法元素静默丢失，而由属性 allowlist 明确报错', () => {
+    const issues = errorsOf(SVG('<path d="M2/2" data-source="a/b"></path>'));
+    expect(issues.some((i) => /data-source/u.test(i.msg))).toBe(true);
   });
 });
 

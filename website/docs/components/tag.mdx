@@ -70,7 +70,9 @@ import { Tag } from '@unif/react-native-design';
 | `info` | `c.infoContainer` | `c.info` | — |
 | `outline` | 透明 | `c.foregroundMuted` | `c.outline`（1px） |
 
-尺寸：`md` = 高 22 / 横向 padding 8 / 字号 12；`lg` = 高 26 / padding 10 / 字号 13。圆角统一 `radius.sm`（6）。
+尺寸：`md` = 高 22 / 横向 padding 8 / 基准字号 12；`lg` = 高 26 / padding 10 / 基准字号 13。圆角统一 `radius.sm`（6）。
+
+`ThemeProvider fontScale` 只把 label 字号缩放一次。Tag 的固定高度、水平 padding、边框和圆角保持原值，不随字号档位放大。
 
 ## 无障碍（a11y）
 

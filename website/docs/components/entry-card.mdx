@@ -83,10 +83,10 @@ import { View } from 'react-native';
 |---|---|---|---|
 | `icon` | `IconName` | — | 左侧 icon tile 内的图标 |
 | `title` | `string` | — | 主标题(13.5 medium,numberOfLines=1) |
-| `sub` | `string` | — | 副标题(11 muted),省略不渲染该行 |
-| `onPress` | `() => void` | — | 点击回调;不传时不挂 Pressable,静态展示 |
-| `style` | `StyleProp<ViewStyle>` | — | 外层附加样式,常用于 grid 列设 `flex: 1` |
-| `testID` | `string` | — | E2E / 测试定位 |
+| `sub` | `string?` | — | 副标题(11 muted),省略或空字符串时不渲染该行 |
+| `onPress` | `(() => void)?` | — | 点击回调;不传时不挂 Pressable,静态展示 |
+| `style` | `StyleProp<ViewStyle>?` | — | 外层附加样式,常用于 grid 列设 `flex: 1` |
+| `testID` | `string?` | — | E2E / 测试定位 |
 
 ## 主题键（Tokens）
 
@@ -107,11 +107,13 @@ import { View } from 'react-native';
 a11y 语义是**条件性**的:仅当传了 `onPress` 时,EntryCard 才用 `<Pressable>` 包裹并声明语义;无 `onPress` 时渲染为纯 `<View>`,无 a11y 角色（与「不响应按压」一致）。
 
 - 默认 `accessibilityRole`：可点时为 `'button'`(`onPress` 缺省则无角色)。
-- a11y props(仅 `onPress` 时生效):`accessibilityLabel` 取自必填的 `title`(`<Pressable accessibilityLabel={title}>`),无需另传。
+- a11y 名称(仅 `onPress` 时生效):有 `sub` 时精确组合为
+  `` `${title},${sub}` ``，没有 `sub` 时只使用 `title`；组件没有额外的
+  `accessibilityLabel` prop。
 - 状态语义:源码未设 `accessibilityState`(无 disabled/selected/checked 概念)。
 
 ```tsx
-// 可点:role=button、label 自动取 title
+// 可点:role=button、label 自动组合为“设置,账号 / 通知 / 权限”
 <EntryCard icon="settings" title="设置" sub="账号 / 通知 / 权限" onPress={() => ...} />
 ```
 

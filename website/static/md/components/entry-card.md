@@ -1,0 +1,121 @@
+---
+sidebar_position: 11
+title: EntryCard 入口卡
+description: "横向入口小卡 —— 左 30×30 灰底 icon tile + 右 title/sub，独立 surface 视觉(无 arrow / extra)，适合 grid 双列等宽入口，可点带按压态。"
+---
+
+# EntryCard 入口卡
+
+入口小卡 —— 横向 row,左 30×30 灰底 icon tile + 右 title/sub column。
+
+跟 [Cell](cell.md) 的区别:
+- **独立 surface 小卡视觉**(bg + radius 14 + padding 12/14),不依赖 List 容器
+- icon tile **灰底**(`surfaceContainer`)+ `foregroundMuted` icon,语义弱化
+- **无 arrow / extra**,纯入口语义,适合放在 grid 双列里靠 caller `style={{flex:1}}` 撑等宽
+
+retail biz2 设计稿 v7:Me 屏底部"设置 / 关于"两个入口从纵向 CellList 退化成 2×1 grid 横向小卡,省纵向空间。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/EntryCard/EntryCard.tsx` 本体,通过 `react-native-web` 翻译成浏览器节点。
+
+```tsx
+  <div style={{ display: 'flex', flexDirection: 'row', gap: 10, maxWidth: 360 }}>
+    <EntryCard
+      icon="settings"
+      title="设置"
+      sub="账号 / 通知 / 权限"
+      onPress={() => {}}
+      style={{ flex: 1 }}
+    />
+    <EntryCard
+      icon="info"
+      title="关于 Unif"
+      sub="V 2.6.0"
+      onPress={() => {}}
+      style={{ flex: 1 }}
+    />
+  </div>
+```
+
+## 视觉规范
+
+| 元素 | 规则 |
+|---|---|
+| 容器 | `bg: surface`,radius 14,padding `12px 14px` |
+| 排布 | flex row + align center,gap 10 |
+| icon tile | 30×30,radius 9,`bg: surfaceContainer`,内部 icon 16px `foregroundMuted` |
+| title | 13.5 / medium / letterSpacing -0.2,`foreground` |
+| sub | 11,`foregroundMuted`,可选省略 |
+| 按下 | opacity 0.7(仅 `onPress` 存在时) |
+
+## 用法
+
+```tsx
+import { EntryCard } from '@unif/react-native-design';
+import { View } from 'react-native';
+
+{/* grid 双列入口 —— Me 屏底部"设置 / 关于" */}
+<View style={{ flexDirection: 'row', gap: 10 }}>
+  <EntryCard
+    icon="settings"
+    title="设置"
+    sub="账号 / 通知 / 权限"
+    onPress={() => navigation.navigate('Setting')}
+    style={{ flex: 1 }}
+  />
+  <EntryCard
+    icon="info"
+    title={`关于 ${env.appName}`}
+    sub={`V ${APP_VERSION}`}
+    onPress={() => navigation.navigate('About')}
+    style={{ flex: 1 }}
+  />
+</View>
+```
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `icon` | `IconName` | — | 左侧 icon tile 内的图标 |
+| `title` | `string` | — | 主标题(13.5 medium,numberOfLines=1) |
+| `sub` | `string?` | — | 副标题(11 muted),省略或空字符串时不渲染该行 |
+| `onPress` | `(() => void)?` | — | 点击回调;不传时不挂 Pressable,静态展示 |
+| `style` | `StyleProp<ViewStyle>?` | — | 外层附加样式,常用于 grid 列设 `flex: 1` |
+| `testID` | `string?` | — | E2E / 测试定位 |
+
+## 主题键（Tokens）
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.surface` | `useColors()` | 卡片背景色 |
+| `c.surfaceContainer` | `useColors()` | icon tile 灰底色 |
+| `c.foregroundMuted` | `useColors()` | tile 内 icon 色 + sub 文字色 |
+| `c.foreground` | `useColors()` | title 文字色 |
+| `radius['2xl']` | `@unif/react-native-design` | 卡片圆角(14) |
+| `icon.lg` | `@unif/react-native-design` | icon tile 尺寸(30) |
+| `space['4']` / `space['5']` / `space['6']` | `@unif/react-native-design` | row gap(10)/ 垂直 padding(12)/ 水平 padding(14) |
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/EntryCard/EntryCard.tsx`、`types.ts`。
+
+a11y 语义是**条件性**的:仅当传了 `onPress` 时,EntryCard 才用 `<Pressable>` 包裹并声明语义;无 `onPress` 时渲染为纯 `<View>`,无 a11y 角色（与「不响应按压」一致）。
+
+- 默认 `accessibilityRole`：可点时为 `'button'`(`onPress` 缺省则无角色)。
+- a11y 名称(仅 `onPress` 时生效):有 `sub` 时精确组合为
+  `` `${title},${sub}` ``，没有 `sub` 时只使用 `title`；组件没有额外的
+  `accessibilityLabel` prop。
+- 状态语义:源码未设 `accessibilityState`(无 disabled/selected/checked 概念)。
+
+```tsx
+// 可点:role=button、label 自动组合为“设置,账号 / 通知 / 权限”
+<EntryCard icon="settings" title="设置" sub="账号 / 通知 / 权限" onPress={() => ...} />
+```
+
+## 不要
+
+- ❌ 不要在 EntryCard 内放 arrow —— 它的语义是"独立入口卡",不是 List 行。需要 chevron 用 [Cell](cell.md)。
+- ❌ 不要把 title 拉长到换行 —— 单卡是紧凑入口,设计上只 numberOfLines=1。长文本用 [Card](card.md) + 自渲。
+- ❌ 不要做超过 4 张并排 —— 4 张以上信息密度过高,改用 [Grid](grid.md) + ModernAppCell。

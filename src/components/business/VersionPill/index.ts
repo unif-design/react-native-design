@@ -1,2 +1,2 @@
 export { VersionPill } from './VersionPill';
-export type { VersionPillProps } from './types';
+export type { VersionPillProps, VersionStatus } from './types';

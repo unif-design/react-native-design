@@ -1,7 +1,7 @@
 ---
 sidebar_position: 3
 title: Checkbox 复选框
-description: "受控多选框 —— 20×20 盒子，square / circle 两种形状，未选透明描边 / 已选主橙实心 + 白勾 / 禁用半透明，可选 label。"
+description: "受控多选框 —— 20×20 盒子，square / circle 两种形状；可见 label 或显式 accessibilityLabel 必须至少提供一个。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -50,7 +50,7 @@ export const CheckboxDemo = () => {
 | 状态 | 视觉 |
 |---|---|
 | 未选 | 20×20 盒子,1.5px 描边 `c.outline`,透明背景 |
-| 已选 | 20×20 `c.primary` 背景 + `c.onPrimary` 白勾(check,strokeWidth 2.5) |
+| 已选 | 20×20 `c.primary` 背景 + `c.onPrimary` 白勾(check,strokeWidth 3.5) |
 | 禁用 | `opacity: 0.5` |
 
 ## 用法
@@ -59,6 +59,13 @@ export const CheckboxDemo = () => {
 import { Checkbox } from '@unif/react-native-design';
 
 <Checkbox checked={agree} onChange={setAgree} label="同意服务条款" />
+
+{/* 无可见旁标时显式命名 */}
+<Checkbox
+  checked={selected}
+  onChange={setSelected}
+  accessibilityLabel="选择全部客户"
+/>
 
 {/* 多项选择 */}
 {customers.map(c => (
@@ -77,10 +84,15 @@ import { Checkbox } from '@unif/react-native-design';
 |---|---|---|---|
 | `checked` | `boolean` | — | 当前是否选中(受控) |
 | `onChange` | `(checked: boolean) => void` | — | 状态变更回调,传入新的 `checked` 值 |
-| `label` | `string` | — | 旁标文字(不传则只渲染勾选盒子) |
+| `label` | `string` | 与 `accessibilityLabel` 二选一 | 可见旁标，同时作为默认 accessible name |
+| `accessibilityLabel` | `string` | 与 `label` 二选一 | 无可见旁标时必填；有 `label` 时可覆盖读屏文案 |
 | `shape` | `'square' \| 'circle'` | `'square'` | 形状;`'circle'` 用于强调的必勾项(如协议同意) |
-| `disabled` | `boolean` | `false` | 禁用 |
+| `disabled` | `boolean` | `false` | 禁用时移除 handler、上报 disabled 并半透明 |
 | `testID` | `string` | — | E2E / 测试定位 |
+
+`CheckboxProps` 是 named union：`label: string` 分支可选
+`accessibilityLabel`；不渲染 `label` 的分支必须提供
+`accessibilityLabel: string`。不存在“只画方框但没有 accessible name”的合法调用。
 
 ## 主题键（Tokens）
 
@@ -99,10 +111,19 @@ import { Checkbox } from '@unif/react-native-design';
 来源：`src/components/ui/Checkbox/Checkbox.tsx`、`types.ts`。
 
 - 默认 `accessibilityRole`：`'checkbox'`（在 `<Pressable>` 上硬编码）。
-- a11y props：`accessibilityLabel` 取自 `label`，但 `label` 是**可选**的 —— 不传 `label` 时（仅渲染勾选方框）无朗读文案，此时应由外部上下文或包裹元素提供语义。
+- accessible name：优先 trim 后非空的 `accessibilityLabel`，否则回退 trim 后非空的可见 `label`。两者最终都空白时移除 handler/action 语义，并在 effect 诊断。
 - 状态语义：`accessibilityState={{ checked, disabled: !!disabled }}` —— `checked` 直接映射受控的 `checked` prop，`disabled` 映射 `disabled` prop。
+- 禁用语义：同时传 `disabled={true}` 与 `onPress={undefined}`，不是在 handler 内静默 no-op。
+- 视觉方框、Icon 与可见文字是外层 checkbox 的 display descendants；它们只在本地 RN `View` / `Text` 上复用共享 `A11Y_HIDDEN_PROPS`，不会生成重复焦点，也不会把隐藏 props 透传给第三方 Icon。
 
 ```tsx
 // label 同时作为 SR 朗读文案
 <Checkbox checked={agree} onChange={setAgree} label="同意服务条款" />
+
+// 仅显示方框时必须显式命名
+<Checkbox
+  checked={selected}
+  onChange={setSelected}
+  accessibilityLabel="选择全部客户"
+/>
 ```

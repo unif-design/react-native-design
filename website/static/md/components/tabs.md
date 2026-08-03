@@ -1,0 +1,153 @@
+---
+sidebar_position: 3
+title: Tabs 标签页
+description: "页面内分类切换 —— 下划线 Tabs(页面级,44px 高 + 2px 主色下划线)与分段控件 Segmented(局部灰底胶囊,size sm/md;md 默认 44px 触控达标 / sm 28px 紧凑);均受控 value/onChange + items(id/label),role='tab' + selected。"
+---
+
+# Tabs 标签页
+
+页面内分类切换 · 两种风格：**下划线 Tabs**（页面级）/ **分段控件 Segmented**（局部分组）。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Tabs/Tabs.tsx` 与 `src/components/ui/Segmented/Segmented.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+```tsx
+const TabsDemo = () => {
+  const [tab, setTab] = useState('all');
+  const [range, setRange] = useState('week');
+  return (
+    <>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">下划线 Tabs · 页面级</span>
+          <Tabs
+            value={tab}
+            onChange={setTab}
+            items={[
+              { id: 'all',     label: '全部' },
+              { id: 'pending', label: '待跟进' },
+              { id: 'done',    label: '已完成' },
+            ]}
+          />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">分段控件 · 局部 · md（默认）</span>
+          <Segmented
+            value={range}
+            onChange={setRange}
+            items={[
+              { id: 'day',   label: '日' },
+              { id: 'week',  label: '周' },
+              { id: 'month', label: '月' },
+            ]}
+          />
+          <span className="demo-label">分段控件 · sm（紧凑，模型下拉等局促位）</span>
+          <Segmented
+            size="sm"
+            value={range}
+            onChange={setRange}
+            items={[
+              { id: 'day',   label: '日' },
+              { id: 'week',  label: '周' },
+              { id: 'month', label: '月' },
+            ]}
+          />
+        </div>
+      </div>
+    </>
+  );
+};
+```
+
+## 下划线 Tabs
+
+页面级分类切换，全宽分布。来源：`src/components/ui/Tabs/styles.ts`、`Tabs.tsx`。
+
+| 元素 | 规则 |
+|---|---|
+| 容器 | 高 44px（`fixed.hitTarget`），背景 `c.surface`，底部 hairline `c.outline` |
+| Tab 项 | `flex: 1` 平分，`14px`（`type.sm`），激活态 `c.primary` + 字重 600（非激活 `c.foregroundMuted` + 500） |
+| 下划线 | 2px `c.primary`，宽 36px（`icon.xl`，居中、非随 label），底对齐 |
+
+## 分段控件
+
+局部分组（如 Filter "全部 / 已完成 / 待跟进"）。来源：`src/components/ui/Segmented/styles.ts`、`Segmented.tsx`。
+
+| 元素 | 规则 |
+|---|---|
+| 容器 | `alignSelf: 'flex-start'` 内容自适应宽，背景 `c.surfaceContainerHigh`（亮色 `#F0F0F0`），圆角 8（`radius.md`），内 padding 2 |
+| 项 | 内容宽（非平分）；`minHeight` / 水平 padding / 基准字号随 `size`：`md` 44 / 16 / 13（`fixed.hitTarget`·`space[7]`·`type.xs`，默认、触控达标）· `sm` 28 / 12 / 12（高 28pt 物理常量·`space[5]`·`type.xxs`，紧凑、触控 < 44px） |
+| 激活 | 白底 thumb（暗色 `surfaceContainerHighest`），圆角 6（`radius.sm`），亮色态柔阴影 |
+
+`ThemeProvider fontScale` 只把 Segmented label 的基准字号缩放一次。track、item `minHeight`、水平 padding、内外圆角和阴影均保持原几何，不随字号档位放大。
+
+## 用法
+
+```tsx
+import { Tabs, Segmented } from '@unif/react-native-design';
+
+{/* 页面级 */}
+<Tabs
+  value={tab}
+  onChange={setTab}
+  items={[
+    { id: 'all',       label: '全部' },
+    { id: 'pending',   label: '待跟进' },
+    { id: 'done',      label: '已完成' },
+  ]}
+/>
+
+{/* 局部分段 */}
+<Segmented
+  value={range}
+  onChange={setRange}
+  items={[
+    { id: 'day',   label: '日' },
+    { id: 'week',  label: '周' },
+    { id: 'month', label: '月' },
+  ]}
+/>
+```
+
+## API
+
+来源：`src/components/ui/Tabs/types.ts`、`src/components/ui/Segmented/types.ts`。`Tabs` 与 `Segmented` props 形状一致，共用 `TabItem`。
+
+`TabsProps` / `SegmentedProps`：
+
+| Prop | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `value` | `string` | — | 当前选中项的 `id`（必填） |
+| `onChange` | `(id: string) => void` | — | 切换回调，回传点中项的 `id`（必填） |
+| `items` | `TabItem[]` | — | 列表项（Tabs ≥2 项才有意义；必填） |
+| `size` | `'sm' \| 'md'` | `'md'` | **仅 Segmented**；`'md'` 默认（高 44px / 基准字号 13，触控达标），`'sm'` 紧凑（高 28px / 基准字号 12，给模型下拉等局促位用，触控 < 44px）；fontScale 只缩放文字 |
+| `testID` | `string?` | — | 容器 testID；item testID 自动派生为 `${testID}-${id}` |
+
+`TabItem`：
+
+| 字段 | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `id` | `string` | — | 唯一标识，用作 key 与选中判定 |
+| `label` | `string` | — | 显示文本（同时作 `accessibilityLabel`） |
+| `testID` | `string?` | — | 单 item testID（默认 `${tabsTestID}-${id}`） |
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Tabs/Tabs.tsx`、`src/components/ui/Segmented/Segmented.tsx`、`types.ts`（两者 a11y 实现一致，共用 `TabItem` 形状）。
+
+- 默认 `accessibilityRole`：`Tabs` 与 `Segmented` 的每个项 `<Pressable>` 上都硬编码 `'tab'`。外层容器是普通 `<View>`，源码**未**设置 `tablist` role（仅作布局）。
+- a11y props：每个项的 `accessibilityLabel` 取自 `item.label`，而 `label` 在 `TabItem` 中是**必填**的——每个 tab 默认都有朗读文案。
+- 状态语义：`accessibilityState={{ selected: on }}`——`selected` 由 `item.id === value` 派生。无 `disabled` 语义（`TabItem` 无 `disabled` 字段）。
+
+```tsx
+// 每个 tab 自动 role=tab、label=item.label、selected 由 value 决定
+<Tabs
+  value={tab}
+  onChange={setTab}
+  items={[
+    { id: 'all',     label: '全部' },
+    { id: 'pending', label: '待跟进' },
+  ]}
+/>
+```

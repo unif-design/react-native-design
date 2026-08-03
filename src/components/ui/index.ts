@@ -9,7 +9,13 @@ export type { CardProps, CardVariant } from './Card';
 export { Carousel } from './Carousel';
 export type { CarouselProps, CarouselRef } from './Carousel';
 export { Cell, List } from './Cell';
-export type { CellProps, ListProps } from './Cell';
+export type {
+  CellExtra,
+  CellLeading,
+  CellProps,
+  CellTextValue,
+  ListProps,
+} from './Cell';
 export { Checkbox } from './Checkbox';
 export type { CheckboxProps } from './Checkbox';
 export { Chip } from './Chip';
@@ -31,11 +37,16 @@ export type { IconName, IconProps } from './Icon';
 export { IconButton } from './IconButton';
 export type { IconButtonProps } from './IconButton';
 export { Input } from './Input';
-export type { InputProps } from './Input';
+export type {
+  InputProps,
+  TextFieldContainerStyle,
+  TextFieldHandle,
+  TextFieldSlot,
+} from './Input';
 export { Logo } from './Logo';
 export type { LogoProps } from './Logo';
 export { NavBar } from './NavBar';
-export type { NavBarProps, NavBarSlotConfig } from './NavBar';
+export type { NavBarAction, NavBarProps, NavBarSlot } from './NavBar';
 export { PasswordInput } from './PasswordInput';
 export type { PasswordInputProps } from './PasswordInput';
 export { Pulse, PulseDot, usePulse } from './Pulse';
@@ -71,7 +82,11 @@ export type { TagProps, TagSize, TagVariant } from './Tag';
 export { Textarea } from './Textarea';
 export type { TextareaProps } from './Textarea';
 export { Thumbnail } from './Thumbnail';
-export type { ThumbnailProps, ThumbnailSize } from './Thumbnail';
+export type {
+  ThumbnailImageStyle,
+  ThumbnailProps,
+  ThumbnailSize,
+} from './Thumbnail';
 export { toast, ToastHost } from './Toast';
 export type {
   ToastEntry,

@@ -15,7 +15,7 @@ extra_instructions = """
 """
 
 [pr_code_suggestions]
-extra_instructions = "用中文,引用具体行号,给可落地的代码改进(不要给"考虑重构"这种空泛建议)。"
+extra_instructions = '用中文,引用具体行号,给可落地的代码改进(不要给"考虑重构"这种空泛建议)。'
 
 [pr_description]
 extra_instructions = "用中文,1-2 句概括 + 列变更点。如果有 BREAKING CHANGE 必须在 body 显式标注。"

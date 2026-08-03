@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type { ImageStyle, TextStyle, ViewStyle } from 'react-native';
 import type { ColorTokens } from './colors';
+import { normalizeFontScale, scaleFontMetric } from './fontScale';
 import type { ShadowTokens } from './shadow';
 import { useTheme } from './useTheme';
 
@@ -27,12 +28,14 @@ function scaleTextStyle(style: TextStyle, factor: number): TextStyle {
   }
   return {
     ...style,
-    ...(typeof fontSize === 'number' ? { fontSize: fontSize * factor } : null),
+    ...(typeof fontSize === 'number'
+      ? { fontSize: scaleFontMetric(fontSize, factor) }
+      : null),
     ...(typeof lineHeight === 'number'
-      ? { lineHeight: lineHeight * factor }
+      ? { lineHeight: scaleFontMetric(lineHeight, factor) }
       : null),
     ...(typeof letterSpacing === 'number'
-      ? { letterSpacing: letterSpacing * factor }
+      ? { letterSpacing: scaleFontMetric(letterSpacing, factor) }
       : null),
   };
 }
@@ -42,9 +45,10 @@ function scaleTextStyle(style: TextStyle, factor: number): TextStyle {
  *  导出仅供单测,不进 barrel。 */
 export function scaleNamedStyles<S extends NamedStyles<S>>(
   styles: S,
-  factor: number
+  factor: unknown
 ): S {
-  if (factor === 1) return styles;
+  const fontScale = normalizeFontScale(factor);
+  if (fontScale === 1) return styles;
   const out: Record<string, ViewStyle | TextStyle | ImageStyle> = {};
   for (const [key, style] of Object.entries(
     styles as Record<string, ViewStyle | TextStyle | ImageStyle>
@@ -52,7 +56,7 @@ export function scaleNamedStyles<S extends NamedStyles<S>>(
     // ViewStyle / ImageStyle 无字号三属性,按 TextStyle 探测后恒等返回原引用。
     out[key] =
       style && typeof style === 'object'
-        ? scaleTextStyle(style as TextStyle, factor)
+        ? scaleTextStyle(style as TextStyle, fontScale)
         : style;
   }
   return out as S;
@@ -70,7 +74,8 @@ export function scaleNamedStyles<S extends NamedStyles<S>>(
 export function useThemedStyles<S extends NamedStyles<S>>(
   maker: StylesMaker<S>
 ): S {
-  const { colors, shadow, fontScale } = useTheme();
+  const { colors, shadow, fontScale: rawFontScale } = useTheme();
+  const fontScale = normalizeFontScale(rawFontScale);
   return useMemo(
     () => scaleNamedStyles(maker(colors, shadow), fontScale),
     [colors, shadow, fontScale, maker]

@@ -1,2 +1,2 @@
 export { NavBar } from './NavBar';
-export type { NavBarProps, NavBarSlotConfig } from './types';
+export type { NavBarAction, NavBarProps, NavBarSlot } from './types';

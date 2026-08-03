@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { View } from 'react-native';
 import Animated, {
   cancelAnimation,
   Easing,
@@ -9,16 +10,17 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { r, useColors } from '../../../theme';
-import { sanitizeSpinnerProps } from './shared';
+import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
+import { sanitizeSpinnerProps, SPINNER_CENTER_STYLE } from './shared';
 import type { SpinnerProps } from './types';
 
 export function Spinner({
   size = r(18),
   color,
   thickness = r(2),
-  style,
+  style: outerStyle,
   testID,
-}: SpinnerProps) {
+}: SpinnerProps): React.JSX.Element {
   const c = useColors();
   const angle = useSharedValue(0);
   const stroke = color ?? c.primary;
@@ -47,22 +49,28 @@ export function Spinner({
   }));
 
   return (
-    <Animated.View
+    <View
       style={[
-        {
-          width: safeSize,
-          height: safeSize,
-          borderRadius: safeSize / 2,
-          borderWidth: safeThickness,
-          borderColor: c.outline,
-          borderTopColor: stroke,
-        },
-        animatedStyle,
-        style,
+        { width: safeSize, height: safeSize },
+        outerStyle,
+        SPINNER_CENTER_STYLE,
       ]}
       testID={testID}
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-    />
+      {...A11Y_HIDDEN_PROPS}
+    >
+      <Animated.View
+        style={[
+          {
+            width: safeSize,
+            height: safeSize,
+            borderRadius: safeSize / 2,
+            borderWidth: safeThickness,
+            borderColor: c.outline,
+            borderTopColor: stroke,
+          },
+          animatedStyle,
+        ]}
+      />
+    </View>
   );
 }

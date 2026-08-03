@@ -9,7 +9,7 @@ import { Avatar } from '@unif/react-native-design';
 
 # Avatar 头像
 
-圆形 monogram 头像(建议 1–2 字符)。`brand` / `info` / `soft` / `neutral` · `xs` 18 / `sm` 28 / `md` 32 / `lg` 40 / `xl` 56。可传 `source` 渲染真实头像图片,加载失败时自动回退到 `label` 文字。
+圆形 monogram 头像(建议 1–2 字符)。`brand` / `info` / `soft` / `neutral` · `xs` 18 / `sm` 28 / `md` 32 / `lg` 40 / `xl` 56。可传合法 `source` 渲染真实头像图片,加载失败或运行时 source 非法时自动回退到 `label` 文字。
 
 :::warning 蓝色规则
 `info` 变体（蓝底 `#3775F6`）**专用于用户头像**。其它头像用 `brand` / `soft` / `neutral`。
@@ -67,12 +67,23 @@ import { Avatar } from '@unif/react-native-design';
 | Prop | Type | 默认 | 说明 |
 |---|---|---|---|
 | `label` | `string` | — | 显示文字(建议 1–2 字符);同时作为 a11y label,图片加载失败时回退展示 |
-| `size` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | 18 / 28 / 32 / 40 / 56 |
-| `variant` | `'brand' \| 'info' \| 'soft' \| 'neutral'` | `'neutral'` | 配色变体(仅在显示 label 时生效,有 `source` 时被图片覆盖) |
-| `source` | `ImageSourcePropType` | — | 真实头像图片(`{ uri }` 或 `require(...)`);优先渲染,`onError` 后回退 label |
-| `testID` | `string` | — | E2E / 测试定位 |
+| `size` | `('xs' \| 'sm' \| 'md' \| 'lg' \| 'xl')?` | `'md'` | 18 / 28 / 32 / 40 / 56 |
+| `variant` | `('brand' \| 'info' \| 'soft' \| 'neutral')?` | `'neutral'` | 配色变体(仅在显示 label 时生效,有 `source` 时被图片覆盖) |
+| `source` | `ImageSourcePropType?` | — | 真实头像图片(`{ uri }`、URI source 数组或 `require(...)`);合法时优先渲染,`onError` 后回退 label |
+| `style` | `StyleProp<ViewStyle>?` | — | 容器附加样式（margin / position 等布局微调） |
+| `testID` | `string?` | — | E2E / 测试定位 |
 
 `xs`（18px）专为内联序号 / 脚注引用使用 —— 例如 Sources 列表里的来源编号 badge。
+
+`ThemeProvider fontScale` 只缩放 fallback label 的字号，且只缩放一次。`avatar.xs … avatar.xl` 对应的圆形容器直径、圆角和图片尺寸不随 fontScale 改变；有 `source` 时图片本身也不会缩放。
+
+### 图片 source identity 与失败隔离
+
+运行时只接受三类 source：有限正整数的本地 asset、`uri` 经 trim 后非空的 object，以及非空且每项都满足前述 URI 规则的数组。对象可以来自 class、custom prototype 或跨 realm 风格容器，但只读取 own enumerable data descriptor，并复制成 plain frozen snapshot；继承属性、non-enumerable 属性和 accessor 都无效且不会执行 getter。空 object / 数组、空白 URI、非法 asset，或含 cycle、function、symbol、bigint、非有限数等 nested runtime value 的 source 都直接显示 fallback，不挂载 `Image`。
+
+合法 source 使用完整语义值识别一次图片尝试：`uri`、headers、dimensions、scale、cache 等字段都会参与；object key / header 插入顺序不影响 identity，数组顺序会影响。native 保留完整 URI candidate 数组；`react-native-web` 0.21 不支持该数组形式，因此 Web 明确选择第一个 candidate，空数组仍直接 fallback，避免静默空白。等价的新 object 引用不会重挂或重试已失败的图片，其稳定 `onError` 也不会让 RNW 中止并重发同一请求；真实字段或本地 asset 变化才创建新 attempt。失败 state 只属于 keyed attempt，因此 `A₁ → B → A₂` 后迟到的 `onError(A₁)` 不能把已经成功的 A₂ 改回 fallback。
+
+`yarn runtime:image-fixture` 启动仓内零依赖受控 HTTP driver，`manual-tests/runtime-api/RuntimeApiScreen.tsx` 提供等价 pending/release、真实 source 变化、nested-invalid、status 计数和 `A₁ → B → A₂ → late error` 操作入口；具体 origin 与平台差异见 `manual-tests/runtime-api/IMAGE_FIXTURE.md`。没有实际运行 native/Web fixture 并观察事件前，不得将这些生命周期用例记为 PASS。
 
 ## 主题键（Tokens）
 
@@ -89,7 +100,12 @@ import { Avatar } from '@unif/react-native-design';
 
 来源：`src/components/ui/Avatar/Avatar.tsx`、`types.ts`。
 
-本组件为展示用，无交互（渲染为 `<View>`，不接收点击）。源码在根 `<View>` 上设了 `accessibilityLabel={label}`，且 `label` 为必填，因此 screen reader 会朗读该文字（即使 `source` 图片加载成功，朗读的仍是 `label`；图片加载失败时也回退展示 `label`）。无 `accessibilityRole`，继承底层 `<View>` 默认。如需让头像可点击，请由父级可点区域承载语义。
+本组件为展示用，无交互（渲染为 `<View>`，不接收点击）。源码在根 `<View>`
+上设置 `accessibilityLabel={label}`；当必填的 `label` 是非空字符串时，screen reader
+会朗读该文字（即使 `source` 图片加载成功，朗读的仍是 `label`；图片加载失败时也回退
+展示 `label`）。运行时若传入空字符串，`accessible={false}` 会关闭头像自己的可访问
+节点。无 `accessibilityRole`，继承底层 `<View>` 默认。如需让头像可点击，请由父级可点
+区域承载语义。
 
 ```tsx
 // label 同时作为 SR 朗读文案

@@ -1,0 +1,143 @@
+---
+sidebar_position: 2
+title: Card 卡片
+description: "通用内容卡片 —— default(白底 + 卡片阴影)/ plain(仅圆角无阴影)，12px 圆角、14px padding，可加状态彩边 borderColor，bare 抑制内边距，fill 撑满 flex 父。"
+---
+
+# Card 卡片
+
+通用内容卡片——白底，12px 圆角，14px padding，唯一的卡片阴影。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Card/Card.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+```tsx
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <span className="demo-label">default · 带阴影</span>
+    <Card>
+      <Text style={{ fontSize: 15, fontWeight: '600', color: 'var(--ifm-color-emphasis-800)', marginBottom: 6 }}>东方便利店 · 浦东店</Text>
+      <Text style={{ fontSize: 13, lineHeight: 20, color: '#666' }}>
+        本月订单合计 ¥12,480，主要采购统一冰红茶、阿萨姆奶茶。距离 1.2 km。
+      </Text>
+    </Card>
+    <span className="demo-label">flat · (deprecated 等价 plain，新代码请用 plain)</span>
+    <Card variant="flat">
+      <Text style={{ fontSize: 15, fontWeight: '600', color: 'var(--ifm-color-emphasis-800)', marginBottom: 6 }}>说明</Text>
+      <Text style={{ fontSize: 13, lineHeight: 20, color: '#666' }}>
+        历史 variant，视觉与 plain 一致。新代码改用 plain。
+      </Text>
+    </Card>
+    <span className="demo-label">plain · 仅圆角，无阴影无描边（嵌套用）</span>
+    <View style={{ backgroundColor: 'var(--ifm-color-emphasis-100)', padding: 12, borderRadius: 12 }}>
+      <Card variant="plain">
+        <Text style={{ fontSize: 13, lineHeight: 20, color: '#666' }}>
+          plain 卡片不带视觉外延 —— 嵌套到已有 surface 容器内时仅靠 padding + radius 区分内容。
+        </Text>
+      </Card>
+    </View>
+    <span className="demo-label">plain + borderColor · 状态彩边（如 Confirmation）</span>
+    <Card variant="plain" borderColor="#EB6E00" borderWidth={2}>
+      <Text style={{ fontSize: 13, lineHeight: 20, color: '#666' }}>
+        2px 主橙描边，用于操作确认这种需要"挑出来看一眼"的卡片。
+      </Text>
+    </Card>
+    <span className="demo-label">组合内容</span>
+    <Card>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+        <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#52C41A', marginRight: 8 }} />
+        <Text style={{ fontSize: 15, fontWeight: '600', color: 'var(--ifm-color-emphasis-800)' }}>已完成 · 拜访</Text>
+        <Text style={{ fontSize: 12, color: 'var(--ifm-color-emphasis-600)', marginLeft: 'auto' }}>14:02</Text>
+      </View>
+      <Text style={{ fontSize: 13, lineHeight: 20, color: '#666' }}>已完成本日全部 4 个客户拜访，待提交日报。</Text>
+    </Card>
+  </div>
+```
+
+## 视觉规范
+
+| 元素 | 规则 |
+|---|---|
+| 背景 | `#FFFFFF` |
+| 圆角 | 12px (`radius.xl`) |
+| Padding | 14px (`space.6`) |
+| 阴影 | `0 1px 4px rgba(0,0,0,0.08)` (`shadow.card`) |
+| Variant `plain` | 无阴影、无描边（嵌套场景；`flat` 已 deprecated 等价 `plain`） |
+
+## 主题键（Tokens）
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.surface` | `useColors()` | 卡片背景色（白 / 暗色 surface） |
+| `radius.xl` | `@unif/react-native-design` | 默认圆角（12，可被 `borderRadius` 覆盖） |
+| `space['6']` | `@unif/react-native-design` | 默认内边距（14，可被 `padding` 覆盖） |
+| `s.card` | `useShadow()` | `default` 变体卡片阴影（暗色置零） |
+
+## 用法
+
+```tsx
+import { Card } from '@unif/react-native-design';
+
+{/* default — 白卡 + 阴影 */}
+<Card>
+  <Text>普通卡片</Text>
+</Card>
+
+{/* plain — 仅圆角，无阴影无描边（嵌套场景） */}
+<Card variant="plain">
+  <Text>嵌套用</Text>
+</Card>
+
+{/* 状态色边框（如 Confirmation）— 2px 彩边，颜色走 useColors() */}
+function Confirm() {
+  const c = useColors();
+  return (
+    <Card variant="plain" borderColor={c.primary}>
+      <Text>操作确认</Text>
+    </Card>
+  );
+}
+
+{/* bare — 内容自控 padding（如 Tool 卡片头/体不同 padding）*/}
+<Card variant="plain" bare>
+  <Header />
+  <Body />
+</Card>
+
+{/* fill — Card 撑满 flex 父 + 内部列表滚动（如 Me 屏会话列表）*/}
+<View style={{ flex: 1 }}>
+  <Card variant="plain" fill>
+    <Header />
+    <ScrollView style={{ flex: 1 }}>{/* 长列表 */}</ScrollView>
+  </Card>
+</View>
+```
+
+> `variant="flat"` 已 deprecated，等价 `plain`，新代码请用 `plain`。
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `children` | `ReactNode` | — | 卡片内容 |
+| `variant` | `'default' \| 'flat' \| 'plain'` | `'default'` | 带阴影 / 仅圆角无阴影。`'flat'` 已 deprecated 等价 `'plain'` |
+| `padding` | `number` | `14`（`space['6']`） | 内边距 |
+| `borderRadius` | `number` | `12`（`radius.xl`） | 圆角 |
+| `borderColor` | `string` | — | 强调描边色（任意 variant 均生效;启用时默认 2px） |
+| `borderWidth` | `number` | `2` | 与 `borderColor` 配合 |
+| `bare` | `boolean` | `false` | 抑制内边距,内容自控（与 variant 正交） |
+| `fill` | `boolean` | `false` | 撑满模式:外层 + 内层 clip 均 `flex:1`,Card 在 flex 父里撑满、内容区填满外层（内部 `flex:1` 滚动列表据此拿到高度） |
+| `style` | `StyleProp<ViewStyle>` | — | 额外样式覆盖 |
+| `testID` | `string` | — | E2E / 测试定位 |
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Card/Card.tsx`、`types.ts`。
+
+本组件为展示 / 容器用，无交互（渲染为 `<View>`，仅负责背景 / 圆角 / 阴影 / 内边距）。源码未设置任何 a11y prop，继承底层 `<View>` 默认。a11y 语义由其 `children` 内容自行承载；若整张卡片需可点击，请在 `children` 内放可点区域（如 [Cell](cell.md) 的 `onPress` 或 [Button](button.md)），不要把点击语义挂在 Card 本身。
+
+## 不要
+
+- ❌ 不要叠加多层阴影——卡片只有一种阴影
+- ❌ 不要把 List 行做成 Card——List 行用 [Cell](cell.md)
+- ❌ 不要给 Card 加渐变背景——只有 logo 和 drawer header 允许渐变

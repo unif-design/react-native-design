@@ -1,0 +1,118 @@
+---
+sidebar_position: 3
+title: Grid 九宫格
+description: "图标入口宫格 —— 1..6 列（默认 4），每格 icon + label（+ 可选 badge 角标）；只有 Grid 提供 onPress 时每格才是 button。"
+---
+
+# Grid 九宫格
+
+主页或分类页的图标入口——3 列 / 4 列网格，每格 icon + label。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Grid/Grid.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+```tsx
+const items = [
+  { id: 'visit',    icon: 'location', label: '拜访' },
+  { id: 'orders',   icon: 'paperclip', label: '订单', badge: '3' },
+  { id: 'sku',      icon: 'tag',      label: '商品' },
+  { id: 'reports',  icon: 'list',     label: '报表' },
+  { id: 'msg',      icon: 'mail',     label: '消息', badge: 0 },
+  { id: 'team',     icon: 'user',     label: '团队' },
+  { id: 'settings', icon: 'settings', label: '设置' },
+  { id: 'more',     icon: 'more-h',   label: '更多' },
+];
+
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <span className="demo-label">4 列</span>
+    <Grid columns={4} items={items} />
+    <span className="demo-label">3 列</span>
+    <Grid columns={3} items={items.slice(0, 6)} />
+    <span className="demo-label">2 列 · 大图标卡片入口</span>
+    <Grid columns={2} items={items.slice(0, 4)} />
+    <span className="demo-label">6 列 · 紧凑入口</span>
+    <Grid columns={6} items={items.slice(0, 6)} />
+    <span className="demo-label">{'card={false} · 嵌套已有白卡，去掉外层背景'}</span>
+    <View style={{ backgroundColor: '#fff', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: 'var(--ifm-color-emphasis-200)' }}>
+      <Grid columns={4} items={items.slice(0, 4)} card={false} />
+    </View>
+  </div>
+```
+
+## API
+
+来源：`src/components/ui/Grid/types.ts`、`Grid.tsx`。
+
+### `<Grid>`
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `items` | `GridItem[]` | — | 入口列表（见下） |
+| `columns` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | `4` | 列数；类型外的值（如 `7`）会**静默回退到 4 列**并打 warn |
+| `onPress` | `(item: GridItem) => void` | — | 点击某格回调；提供时每格是 `button`，缺省时保持展示 `View` |
+| `card` | `boolean` | `true` | 是否套白色卡片；`false` 则背景透明（嵌进已有白卡时用） |
+| `testID` | `string?` | — | 容器 testID；每格自动派生为 `${testID}-${item.id}` |
+
+### `GridItem`
+
+| 字段 | Type | 默认 | 说明 |
+|---|---|---|---|
+| `id` | `string` | — | 唯一键，也用于派生 testID |
+| `icon` | `IconName` | — | 图标名（[图标 catalog](icons.md)） |
+| `label` | `string` | — | 格子文字，同时作为该格 `accessibilityLabel` |
+| `accessibilityLabel` | `string?` | — | trim 后非空时覆盖名称；空白值回退到默认名称 |
+| `badge` | `number \| string?` | — | icon 右上角标（用 string 才能写 `'99+'`） |
+| `testID` | `string?` | — | 单格 testID（不传则自动用 `${gridTestID}-${id}`） |
+
+## 视觉规范
+
+来源：`src/components/ui/Grid/styles.ts`（值取自 `src/theme/tokens.ts`）。
+
+| 元素 | 规则 |
+|---|---|
+| 容器（`card`） | `c.surface` 白底，`radius.xl`（12）圆角，`paddingVertical: space[5]`（12）/ `paddingHorizontal: space[3]`（8），1px `c.outline` 边框 |
+| 列宽 | 等宽，按 `columns` 取 `100% / 50% / 33.3% / 25% / 20% / 16.7%`（StyleSheet 预生成） |
+| 单格 | `paddingVertical: space[5]`（12），居中 icon + label，`gap: space[2]`（6） |
+| Icon | `size=28`（介于 `icon.md`/`icon.lg`），色固定 `c.foregroundMuted` |
+| Label | `t.xxs`（12）/ `fw.medium`（500）/ `c.foreground` |
+| Badge | 叠在 icon 右上的小红角标：`c.error` 底、`c.onError` 字、`t.nano`（10）、`fw.bold` |
+
+## 用法
+
+```tsx
+import { Grid } from '@unif/react-native-design';
+
+<Grid
+  columns={4}
+  items={[
+    { id: 'visit',   icon: 'location', label: '拜访' },
+    { id: 'orders',  icon: 'order',    label: '订单', badge: 3 },
+    { id: 'sku',     icon: 'box-list', label: '商品' },
+    { id: 'reports', icon: 'list',     label: '报表' },
+    { id: 'msg',     icon: 'mail',     label: '消息', badge: 0 },
+    { id: 'team',    icon: 'user',     label: '团队' },
+    { id: 'settings',icon: 'settings', label: '设置' },
+    { id: 'more',    icon: 'more-h',   label: '更多' },
+  ]}
+  onPress={(item) => navigation.push(item.id)}
+/>
+```
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Grid/Grid.tsx`、`types.ts`。
+
+- 默认 `accessibilityRole`：只有 Grid 级 `onPress` 存在时，每格才渲染为 `<Pressable accessibilityRole="button">`；纯展示 Grid 使用本地 `<View>`，不伪装成操作。
+- a11y 名称：trim 后非空的 `item.accessibilityLabel` 优先；空白覆盖回退 trim 后非空的 `item.label`，并在 `badge != null` 时组合角标。最终名称为空时，action Grid 的该格失败关闭为 display-only 并在 effect 诊断；display Grid 不创建 unnamed merged a11y node。
+- icon 与 badge 视觉子树对 SR 隐藏，外层 cell 是唯一的合并名称，不产生重复焦点。
+- 状态语义：源码未设 `accessibilityState`（无 selected/disabled/checked 概念）。
+
+```tsx
+// role=button、默认名称“消息，0”
+<Grid
+  columns={4}
+  items={[{ id: 'msg', icon: 'mail', label: '消息', badge: 0 }]}
+  onPress={(item) => navigation.push(item.id)}
+/>
+```

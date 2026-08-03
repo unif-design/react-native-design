@@ -14,7 +14,7 @@ import { View } from 'react-native';
 
 ## 实时预览
 
-下方渲染的就是 `src/components/ui/Skeleton/*` 本体（reanimated 4 worklet 驱动 opacity 脉冲），通过 `react-native-web` 翻译成浏览器节点。
+下方渲染的就是 `src/components/ui/Skeleton/*` 本体（native 走 reanimated 4 worklet、web 走 CSS transition 驱动 opacity 脉冲），通过 `react-native-web` 翻译成浏览器节点。
 
 <LiveDemo>
   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -43,7 +43,7 @@ import { View } from 'react-native';
 |---|---|
 | 颜色 | `c.surfaceContainerHigh`（亮色 `#F0F0F0`） |
 | 圆角 | line：3px / rect：8px / circle：`size/2`（均可用 `radius` 覆盖） |
-| 动画 | opacity 脉冲（共享 [`usePulse`](./pulse) hook，传 `from: 0.5`），半周期 700ms、全周期 1.4s，`0.5 ↔ 1` 循环 |
+| 动画 | opacity 脉冲（与 [`usePulse`](./pulse) 同一条归一化 + driver 链路，内部默认 `from: 0.5`），半周期 700ms、全周期 1.4s，`0.5 ↔ 1` 循环；系统开启减弱动效时静止在 `1` |
 
 ## 形状
 

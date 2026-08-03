@@ -1,0 +1,84 @@
+---
+sidebar_position: 3
+title: BlurLayer 玻璃模糊层
+description: "BlurView + 颜色 tint 双层玻璃层 —— intensity soft(blur 10)/ strong(blur 40)，blurType 随亮 / 暗主题自动切换，纯装饰 pointerEvents='none'。"
+---
+
+# BlurLayer 玻璃模糊层
+
+封装 `@sbaiahmed1/react-native-blur` 的 `BlurView` + 颜色 tint 双层,
+对齐设计稿 backdrop-filter 二档 token(soft 10 / strong 40)。`blurType`
+跟主题 scheme 自动切(亮 'light' / 暗 'dark'),避免暗色叠暗底变奶白雾。
+
+## 实时预览
+
+```tsx
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <span className="demo-label">soft —— 玻璃数据条小区域(blurAmount 10)</span>
+    <View style={{ position: 'relative', height: 80, backgroundColor: 'linear-gradient(135deg, #F49443, #EB6E00)', borderRadius: 14, overflow: 'hidden' }}>
+      <BlurLayer intensity="soft" />
+      <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: 'var(--ifm-color-emphasis-800)', fontWeight: '600' }}>soft blur</Text>
+      </View>
+    </View>
+    <span className="demo-label">strong —— 焦点引导大面积 backdrop(blurAmount 40)</span>
+    <View style={{ position: 'relative', height: 80, backgroundColor: 'linear-gradient(135deg, #F49443, #EB6E00)', borderRadius: 14, overflow: 'hidden' }}>
+      <BlurLayer intensity="strong" />
+      <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: 'var(--ifm-color-emphasis-800)', fontWeight: '600' }}>strong blur</Text>
+      </View>
+    </View>
+  </div>
+```
+
+## 用法
+
+```tsx
+import { BlurLayer } from '@unif/react-native-design';
+
+{/* GlassStats 玻璃数据条 backdrop */}
+<View style={{ position: 'relative' }}>
+  <BlurLayer intensity="soft" />
+  <View>...</View>
+</View>
+
+{/* 自定义 tint override */}
+<BlurLayer intensity="soft" tint="rgba(255,255,255,0.3)" />
+```
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `intensity` | `'soft' \| 'strong'` | — | 模糊强度(必传)。`'soft'` 对齐 `blur(10)`,`'strong'` 对齐 `blur(40)` |
+| `tint` | `string?` | 推算 | 不传按 intensity 推:soft → `c.glassTintLight` / strong → `c.sheetBackdrop` |
+| `style` | `StyleProp<ViewStyle>` | `StyleSheet.absoluteFill` | 附加样式,通常不需要传 |
+| `testID` | `string` | — | E2E / 测试定位 |
+
+## 主题键（Tokens）
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.glassTintLight` | `useColors()` | `soft` 默认 tint(0.55 白纱) |
+| `c.sheetBackdrop` | `useColors()` | `strong` 默认 tint(0.72 浅灰焦点引导) |
+| `blur.soft` / `blur.strong` | `@unif/react-native-design` | BlurView `blurAmount`(10 / 40) |
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/BlurLayer/BlurLayer.tsx`、`BlurLayer.web.tsx`、`types.ts`。
+
+本组件为纯装饰用的视觉模糊层，无交互，无任何 a11y 语义：源码根 `<View>` 显式设 `pointerEvents="none"`（native 与 web 两份实现一致），不拦截触摸、不暴露给 screen reader。无 `accessibilityRole` / `accessibilityLabel`。语义应由其覆盖 / 承载的内容自行提供。
+
+## 设计稿对照
+
+| intensity | blurAmount | 默认 tint | 设计稿语义 |
+|---|---|---|---|
+| `soft` | 10 | `glassTintLight 0.55 白` | 玻璃数据条 / 小区域玻璃感(`blur(10) saturate(160%)`) |
+| `strong` | 40 | `sheetBackdrop 0.72 浅灰` | 焦点引导大面积 backdrop(`blur(40) saturate(180%)`) |
+
+CSS `saturate(N%)` 部分 RN BlurView 无对应 prop,在我们项目暂不实现。
+
+## 不要
+
+- ❌ 不要把 `<BlurLayer>` 放到没有相对定位的父容器内 —— `absoluteFill` 会撑到屏顶
+- ❌ 不要传 hardcode blurAmount —— 走 `intensity` token,设计稿更新时单点改 `theme/blur.ts`

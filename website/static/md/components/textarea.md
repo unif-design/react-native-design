@@ -1,0 +1,44 @@
+---
+sidebar_position: 2
+title: Textarea 多行输入
+description: '严格多行输入：一次性 defaultValue、44pt 最小高度、slot/a11y 与窄 ref。'
+---
+
+# Textarea 多行输入
+
+Textarea 固定 `multiline` 并顶对齐；单行请用 [Input](input.md)。它与 Input 使用相同严格受控/非受控 union、slot、错误和 ref 契约。
+
+```tsx
+const TextareaDemo = () => {
+  const [note, setNote] = useState('');
+  return (
+    <>
+      <Textarea
+        value={note}
+        onChangeText={setNote}
+        placeholder="拜访备注"
+        accessibilityLabel="拜访备注"
+      />
+    </>
+  );
+};
+```
+
+## 用法
+
+```tsx
+<Textarea defaultValue="首次草稿" minHeight={120} maxHeight={240} />
+<Textarea value={note} onChangeText={setNote} error={note ? undefined : '请输入备注'} />
+```
+
+`defaultValue` 只用于首次初始化；受控模式必须同时传 `value` 和 `onChangeText`，两种 mode 不能中途切换。
+
+## 高度与 a11y
+
+- `minHeight` 默认 96，必须是有限且至少 44 的数；非法值回退 96。
+- `maxHeight` 缺省时不限制；只有有限且不小于归一化后的 min 时生效，否则回退为无上限。
+- `containerStyle` 不能覆盖高度、min/max 尺寸、min/max 宽或 `overflow`，运行时 JS 传入也会剥除。
+- `leading`/`trailing` 只接受 `TextFieldSlot`。action slot 有 44×44pt 实际 frame，字段不可编辑时 action 也不可操作。
+- ref 是 `TextFieldHandle`，只有 `focus()` / `blur()`；`readOnly` 改用 `editable={false}`。
+
+错误文字 Android 使用 polite live region；iOS 只播报挂载后的非空错误变更。请给没有可见标签的字段传 `accessibilityLabel`。

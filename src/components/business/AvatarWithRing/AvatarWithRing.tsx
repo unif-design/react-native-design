@@ -6,7 +6,7 @@ import Svg, {
   Rect,
   Stop,
 } from 'react-native-svg';
-import { avatarGradient, useTheme } from '../../../theme';
+import { avatarGradient, useFontScale, useTheme } from '../../../theme';
 import { useSvgId } from '../useSvgId';
 import { makeAvatarStyles } from './styles';
 import type { AvatarWithRingProps } from './types';
@@ -26,11 +26,18 @@ export function AvatarWithRing({
   testID,
 }: AvatarWithRingProps): React.JSX.Element {
   const { colors: c, shadow } = useTheme();
+  const fontScale = useFontScale();
   const id = useSvgId('av');
   const { inner, styles } = useMemo(
     () =>
-      makeAvatarStyles(size, ringColor ?? c.avatarRing, shadow.brandAvatar, c),
-    [size, ringColor, c, shadow.brandAvatar]
+      makeAvatarStyles(
+        size,
+        ringColor ?? c.avatarRing,
+        shadow.brandAvatar,
+        c,
+        fontScale
+      ),
+    [size, ringColor, c, shadow.brandAvatar, fontScale]
   );
   return (
     <View style={[styles.shell, style]} testID={testID}>
@@ -60,7 +67,7 @@ export function AvatarWithRing({
             fill={`url(#${id})`}
           />
         </Svg>
-        <Text style={[styles.label, { lineHeight: inner }]}>{label}</Text>
+        <Text style={styles.label}>{label}</Text>
       </View>
     </View>
   );

@@ -48,4 +48,8 @@ export const makeStyles = (c: ColorTokens) =>
       paddingHorizontal: space['9'],
       paddingTop: space['7'],
     },
+    // action row 的两个直接 Button 平分横向主轴；不借用 Button.block 的交叉轴语义。
+    action: {
+      flex: 1,
+    },
   });

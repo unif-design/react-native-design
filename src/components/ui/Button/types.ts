@@ -1,4 +1,4 @@
-import type { StyleProp, ViewStyle } from 'react-native';
+import type { AccessibilityState, StyleProp, ViewStyle } from 'react-native';
 import type { IconName } from '../Icon';
 
 /** Button 尺寸：sm=28 / md=36 / lg=44（对应 control.sm/md/lg） */
@@ -28,12 +28,12 @@ export type ButtonProps = {
   /** 按钮文案；icon-only 场景请用 IconButton */
   label: string;
   /** 点击回调；disabled / loading 时不触发 */
-  onPress?: () => void;
+  onPress: () => void;
   /** 尺寸，默认 'md' */
   size?: ButtonSize;
   /** 视觉变体，默认 'primary' */
   variant?: ButtonVariant;
-  /** 撑满父容器宽度（alignSelf: stretch + flexGrow: 1） */
+  /** 撑满父容器交叉轴宽度（alignSelf: stretch） */
   block?: boolean;
   /** 整体禁用：透明度 0.5 + 不响应 onPress */
   disabled?: boolean;
@@ -49,6 +49,8 @@ export type ButtonProps = {
   testID?: string;
   /** SR 朗读 label 后的行为说明 hint。仅在"行为不显然"时加(如 "切换主题")。 */
   accessibilityHint?: string;
+  /** 额外 a11y 状态；disabled / busy 由组件根据 disabled / loading 统一上报。 */
+  accessibilityState?: Omit<AccessibilityState, 'disabled' | 'busy'>;
 };
 
 /** ButtonBase 内部根据 size 算出的视觉参数集合,通过 render prop 暴露给消费者。 */

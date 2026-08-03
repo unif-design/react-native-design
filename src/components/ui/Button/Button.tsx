@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Text } from 'react-native';
-import { useThemedStyles } from '../../../theme';
+import { scaleFontMetric, useFontScale, useThemedStyles } from '../../../theme';
+import { createLogger } from '../../../utils/logger';
 import { Icon } from '../Icon';
+import { normalizeNonBlankText } from '../shared/accessibilityName';
 import { ButtonBase } from './ButtonBase';
 import { makeStyles } from './styles';
 import type { ButtonProps } from './types';
+
+const log = createLogger('Button');
 
 /**
  * 7 variant × 3 size 文本按钮。
@@ -26,37 +30,52 @@ export function Button({
   style,
   testID,
   accessibilityHint,
+  accessibilityState,
 }: ButtonProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
+  const fontScale = useFontScale();
+  const accessibleName = normalizeNonBlankText(label);
+  const hasBlankLabel = accessibleName === undefined;
+
+  useEffect(() => {
+    if (hasBlankLabel) {
+      log.warn('Button label 不能为空白，当前 action 已禁用。');
+    }
+  }, [hasBlankLabel]);
+
   return (
     <ButtonBase
       onPress={onPress}
       size={size}
       variant={variant}
       block={block}
-      disabled={disabled}
+      disabled={disabled === true || hasBlankLabel}
       loading={loading}
-      accessibilityLabel={label}
+      accessibilityLabel={accessibleName}
       accessibilityHint={accessibilityHint}
+      accessibilityState={accessibilityState}
       style={style}
       testID={testID}
     >
-      {({ sizing, palette }) => (
-        <>
-          {leftIcon ? (
-            <Icon name={leftIcon} size={sizing.fs + 2} color={palette.fg} />
-          ) : null}
-          <Text
-            style={[styles.label, { color: palette.fg, fontSize: sizing.fs }]}
-            numberOfLines={1}
-          >
-            {label}
-          </Text>
-          {rightIcon ? (
-            <Icon name={rightIcon} size={sizing.fs + 2} color={palette.fg} />
-          ) : null}
-        </>
-      )}
+      {({ sizing, palette }) => {
+        const textSize = scaleFontMetric(sizing.fs, fontScale);
+        return (
+          <>
+            {leftIcon ? (
+              <Icon name={leftIcon} size={sizing.fs + 2} color={palette.fg} />
+            ) : null}
+            <Text
+              style={[styles.label, { color: palette.fg, fontSize: textSize }]}
+              numberOfLines={1}
+            >
+              {label}
+            </Text>
+            {rightIcon ? (
+              <Icon name={rightIcon} size={sizing.fs + 2} color={palette.fg} />
+            ) : null}
+          </>
+        );
+      }}
     </ButtonBase>
   );
 }

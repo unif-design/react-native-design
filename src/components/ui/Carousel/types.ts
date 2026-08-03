@@ -11,7 +11,7 @@ export type { CarouselRef };
  *  - 'overlay-bottom-right':指示器 absolute 浮在 Carousel 右下角,不占额外高度 */
 export type CarouselIndicatorPosition = 'bottom' | 'overlay-bottom-right';
 
-export type CarouselProps<T> = {
+type CarouselBaseProps<T> = {
   /** 数组数据 */
   data: T[];
   /** 单项渲染 */
@@ -34,13 +34,25 @@ export type CarouselProps<T> = {
   showIndicator?: boolean;
   /** indicator 位置策略,默认 'bottom' */
   indicatorPosition?: CarouselIndicatorPosition;
-  /** 单项点击 */
-  onPressItem?: (item: T, index: number) => void;
-  /** 单项 a11y label 解析器。仅 `onPressItem` 存在时启用 —— Pressable 拿来作
-   *  `accessibilityLabel`(role 自动设 button)。不传则 fallback `第 N 项`。 */
-  getAccessibilityLabel?: (item: T, index: number) => string;
   /** 外层 View 附加样式 */
   style?: StyleProp<ViewStyle>;
   /** E2E / 测试定位 */
   testID?: string;
 };
+
+type CarouselAction<T> = {
+  /** 单项点击。action slide 必须同时声明业务名称。 */
+  onPressItem: (item: T, index: number) => void;
+  /** 单项业务名称，供读屏器区分每个可操作 slide。 */
+  getAccessibilityLabel: (item: T, index: number) => string;
+};
+
+type CarouselDisplay = {
+  /** 纯展示 slide 不创建可点击节点。 */
+  onPressItem?: never;
+  getAccessibilityLabel?: never;
+};
+
+/** 轮播只有纯展示或可操作两种 slide，不能只提供其中一个 action 字段。 */
+export type CarouselProps<T> = CarouselBaseProps<T> &
+  (CarouselAction<T> | CarouselDisplay);

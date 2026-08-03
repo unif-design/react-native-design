@@ -4,7 +4,7 @@ import type { ColorTokens } from '../../../theme';
 import type { StepperSize } from './types';
 
 /** Stepper 静态 + themed base —— btn / value 容器共用 cell 基底,radius / border 走 token。
- *  尺寸(高 / 宽 / 字号)由 sizingFor 派生,sm 走 control.sm,md 走 r(32)(介于
+ *  尺寸(高 / 宽 / 字号)由 sizingFor 派生,sm 走 control.sm (`r(28)`),md 走 r(32)(介于
  *  control.sm 与 control.md 之间,与 avatar.md / dim.sendBtn 同值但语义独立)。 */
 export const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({
@@ -12,6 +12,13 @@ export const makeStyles = (c: ColorTokens) =>
       flexDirection: 'row',
       alignItems: 'center',
       alignSelf: 'flex-start',
+    },
+    actionFrame: {
+      justifyContent: 'center',
+    },
+    valueFrame: {
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     /** btn / value 共用的 cell 基底 —— 居中 + surface 背景 + 上下边框。
      *  左右边框 / 圆角由 btnLeft / btnRight 增量补齐;value 中间无侧边框。 */
@@ -45,7 +52,7 @@ export const makeStyles = (c: ColorTokens) =>
     },
   });
 
-/** Stepper 尺寸推导:sm(control.sm=28 高 / 28 按钮 / 40 值宽 / xs 字)/
+/** Stepper 尺寸推导:sm(control.sm=`r(28)` 高 / `r(28)` 按钮 / r(40) 值宽 / xs 字)/
  *  md(r(32) 高 / r(32) 按钮 / r(48) 值宽 / sm 字)。
  *  新增 size 在 types.ts 加 union + 这里加 case。 */
 export function sizingFor(size: StepperSize): {

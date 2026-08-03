@@ -1,5 +1,7 @@
 import { forwardRef } from 'react';
-import { TextFieldBase, type TextInputRef } from '../TextField/TextFieldBase';
+import { TextFieldBase } from '../TextField/TextFieldBase';
+import { sanitizeTextFieldWrapperProps } from '../TextField/normalize';
+import type { TextFieldHandle } from '../TextField/types';
 import type { InputProps } from './types';
 
 /**
@@ -7,14 +9,22 @@ import type { InputProps } from './types';
  *
  * 视觉状态由 props 隐式驱动:idle / focus / filled / error / disabled。
  *
- * 实现层走 `<TextFieldBase multiline={false}>`,本组件是薄 wrap,
- * 公开 API 跟历史完全一致。
+ * 实现层走 `<TextFieldBase multiline={false}>`,本组件是薄 wrap。
  *
- * Ref:forwardRef<TextInput> —— 业务表单调 `inputRef.current?.focus()` 聚焦错误字段。
+ * Ref:forwardRef<TextFieldHandle> —— 业务表单只能调 focus()/blur(),不会绕过值状态机。
  */
-export const Input = forwardRef<TextInputRef, InputProps>(
+export const Input = forwardRef<TextFieldHandle, InputProps>(
   function Input(props, ref) {
-    return <TextFieldBase ref={ref} multiline={false} {...props} />;
+    const { props: safeProps } = sanitizeTextFieldWrapperProps(
+      props as InputProps & Record<string, unknown>
+    );
+    return (
+      <TextFieldBase
+        ref={ref}
+        {...(safeProps as InputProps)}
+        multiline={false}
+      />
+    );
   }
 );
 

@@ -4,21 +4,24 @@
  * 业务任意位置 `const ok = await confirm({title, message, ...})`,
  * 不用维护 useState / open / onClose。
  *
- * 同一时间只允许 1 个 confirm 活跃;若已有正在显示,新请求立即 resolve(false) 并 warn。
+ * 状态机全部在 `store.ts`(纯逻辑、可单测);本文件只持有唯一的模块级实例,
+ * 并把内部入口暴露给 `ConfirmHost.tsx`。这两个内部导出**不进公共 barrel**。
  */
 import { createLogger } from '../../../utils/logger';
-import type { ConfirmOptions, ConfirmEntry, Subscriber } from './types';
+import { createConfirmStore } from './store';
+import type { ConfirmOptions } from './types';
 
 const log = createLogger('confirm');
 
-let _id = 0;
-let _activeEntry: ConfirmEntry | null = null;
-export const _subs = new Set<Subscriber>();
+const store = createConfirmStore(log);
 
 /**
  * 弹出确认对话框,返回 Promise<boolean>。
  * - 用户点确认 → resolve(true)
- * - 用户点取消 / 点 backdrop / 拖关闭 → resolve(false)
+ * - 用户点取消 / 点 backdrop / 系统返回 → resolve(false)
+ * - 未挂 `<ConfirmHost />`、已有对话框在显示、Host 渲染抛错、Host 卸载 → resolve(false)
+ *
+ * 任何路径都必然 settle,不会悬挂。
  *
  * 示例:
  * ```ts
@@ -31,31 +34,11 @@ export const _subs = new Set<Subscriber>();
  * if (ok) doLogout();
  * ```
  */
-export function confirm(options: ConfirmOptions): Promise<boolean> {
-  if (_activeEntry) {
-    log.warn(
-      'confirm() 已有一个对话框在显示,新请求被拒绝(同一时间只 1 个,避免叠加)。'
-    );
-    return Promise.resolve(false);
-  }
-  // 没有 ConfirmHost 订阅 → entry 无人接收,Promise 会永久悬挂、调用方 await 卡死。
-  // 立即 resolve(false) 并告警,且不占 _activeEntry(否则后续 confirm 全被重入分支锁死)。
-  if (_subs.size === 0) {
-    log.warn(
-      'confirm() 调用时未挂载 <ConfirmHost />,对话框无法显示,已 resolve(false)。请在 app 根附近挂一次 <ConfirmHost />。'
-    );
-    return Promise.resolve(false);
-  }
-  return new Promise<boolean>((resolve) => {
-    const entry: ConfirmEntry = {
-      id: ++_id,
-      ...options,
-      resolve: (confirmed: boolean) => {
-        _activeEntry = null;
-        resolve(confirmed);
-      },
-    };
-    _activeEntry = entry;
-    _subs.forEach((s) => s(entry));
-  });
-}
+export const confirm = (options: ConfirmOptions): Promise<boolean> =>
+  store.request(options);
+
+/** 内部:ConfirmHost 挂载时注册唯一 owner;重复挂载得到 null。 */
+export const registerConfirmHost = store.registerHost;
+
+/** 内部:所有关闭路径的唯一出口(identity-guarded + 幂等)。 */
+export const settleConfirm = store.settle;

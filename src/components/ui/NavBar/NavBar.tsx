@@ -1,38 +1,35 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Text, View } from 'react-native';
 import { useColors, useThemedStyles } from '../../../theme';
+import { createLogger } from '../../../utils/logger';
 import { IconButton } from '../IconButton';
-import { isSlot } from './isSlot';
+import { classifyNavBarSlot, type NavBarSlotClassification } from './isSlot';
 import { makeStyles } from './styles';
-import type { NavBarProps, NavBarSlotConfig } from './types';
+import type { NavBarAction, NavBarProps } from './types';
 
-/** NavBarSlotConfig → IconButton(variant='ghost' + 外部 tint)。 */
-function renderSlot(slot: NavBarSlotConfig, tint: string) {
-  // [L-50] 缺 accessibilityLabel 时 dev 告警 —— 回退读英文 icon 名(如 "menu")体验不佳。
-  if (!slot.accessibilityLabel && typeof __DEV__ !== 'undefined' && __DEV__) {
-    console.warn(
-      `NavBar slot(icon="${slot.icon}")未传 accessibilityLabel,SR 将读出 icon 名,请传人类可读短语。`
-    );
-  }
+const log = createLogger('NavBar');
+
+/** NavBarAction → IconButton(variant='ghost' + 外部 tint)。 */
+function renderSlot(slot: NavBarAction, tint: string) {
   return (
     <IconButton
       icon={slot.icon}
       onPress={slot.onPress}
       variant="ghost"
       color={tint}
-      accessibilityLabel={slot.accessibilityLabel ?? slot.icon}
+      accessibilityLabel={slot.accessibilityLabel}
     />
   );
 }
 
-/** left / right slot:NavBarSlotConfig → IconButton,ReactNode → 原样。 */
+/** left / right slot:NavBarAction → IconButton,已归一化 display node → 原样。 */
 function resolveSlot(
-  slot: NavBarProps['left'] | NavBarProps['right'],
+  slot: NavBarSlotClassification,
   tint: string
 ): React.ReactNode {
-  if (!slot) return null;
-  if (isSlot(slot)) return renderSlot(slot, tint);
-  return slot;
+  if (slot.kind === 'action') return renderSlot(slot.action, tint);
+  if (slot.kind === 'node') return slot.node;
+  return null;
 }
 
 /**
@@ -55,6 +52,17 @@ export function NavBar({
   const styles = useThemedStyles(makeStyles);
   const isBrand = variant === 'brand';
   const isTransparent = variant === 'transparent';
+  const leftSlot = classifyNavBarSlot(left);
+  const rightSlot = classifyNavBarSlot(right);
+  const warnedInvalidSlot = useRef(false);
+  const hasInvalidSlot =
+    leftSlot.kind === 'invalid' || rightSlot.kind === 'invalid';
+  useEffect(() => {
+    if (hasInvalidSlot && !warnedInvalidSlot.current) {
+      warnedInvalidSlot.current = true;
+      log.warn('忽略无效的 NavBar action；请传 NavBarAction 或 ReactNode');
+    }
+  }, [hasInvalidSlot]);
   // brand 实底白字;default + transparent 都走深字(transparent 用在浅色
   // hero 渐变之上,白字看不清)。后续若有"相机 / 地图"等深色浮层场景需要
   // 白字 transparent navbar,再加 'transparentLight' variant。
@@ -70,7 +78,7 @@ export function NavBar({
       ]}
       testID={testID}
     >
-      <View style={styles.side}>{resolveSlot(left, tint)}</View>
+      <View style={styles.side}>{resolveSlot(leftSlot, tint)}</View>
       <View style={styles.center}>
         <Text style={[styles.title, { color: tint }]} numberOfLines={1}>
           {title}
@@ -82,7 +90,7 @@ export function NavBar({
         ) : null}
       </View>
       <View style={[styles.side, styles.sideRight]}>
-        {resolveSlot(right, tint)}
+        {resolveSlot(rightSlot, tint)}
       </View>
     </View>
   );

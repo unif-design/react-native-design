@@ -1,0 +1,126 @@
+---
+sidebar_position: 1
+title: NavBar 导航栏
+description: "顶部导航栏 —— 44px 高、居中标题 + 可选副标题、左右槽（传 config 自动用 IconButton 渲染）；3 variant default（白底 hairline）/ brand（橙底白字）/ transparent（透明 + 深字，浮在浅色 hero 上）。"
+---
+
+# NavBar 导航栏
+
+顶部导航 · 44px 高 · 三变体：`default` 白底 hairline · `brand` 品牌橙底白字 · `transparent` 透明无边框 + **深字**（`c.foreground`，用于浮在浅色 hero 渐变之上的子页）。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/NavBar/NavBar.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+```tsx
+const NavBarDemo = () => {
+  const [action, setAction] = useState('尚未操作');
+  return (
+    <>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <span className="demo-label">默认 · 含副标题</span>
+    <View style={{ borderWidth: 1, borderColor: 'var(--ifm-color-emphasis-200)', borderRadius: 12, overflow: 'hidden' }}>
+      <NavBar
+        title="AI 助手"
+        subtitle="在线 · 已同步"
+        left={{ icon: 'menu', onPress: () => setAction('打开抽屉'), accessibilityLabel: '抽屉' }}
+        right={{ icon: 'more-h', onPress: () => setAction('打开更多菜单'), accessibilityLabel: '更多' }}
+      />
+    </View>
+    <span className="demo-label">品牌橙底 · variant="brand"</span>
+    <View style={{ borderWidth: 1, borderColor: 'var(--ifm-color-emphasis-200)', borderRadius: 12, overflow: 'hidden' }}>
+      <NavBar
+        title="登录"
+        variant="brand"
+        left={{ icon: 'arrow-left', onPress: () => setAction('返回登录页'), accessibilityLabel: '返回' }}
+        right={{ icon: 'more-h', onPress: () => setAction('打开登录页菜单'), accessibilityLabel: '更多' }}
+      />
+    </View>
+    <span className="demo-label">透明无边框 · variant="transparent"（深字，浮在浅色 hero 渐变上）</span>
+    <View style={{ borderWidth: 1, borderColor: 'var(--ifm-color-emphasis-200)', borderRadius: 12, overflow: 'hidden', background: 'linear-gradient(180deg, #FFE3C8, #FFF0DD)' }}>
+      <NavBar
+        title="我的名片"
+        variant="transparent"
+        left={{ icon: 'arrow-left', onPress: () => setAction('返回名片列表'), accessibilityLabel: '返回' }}
+        right={{ icon: 'more-h', onPress: () => setAction('打开名片菜单'), accessibilityLabel: '更多' }}
+      />
+    </View>
+        <span className="demo-label">最近操作：{action}</span>
+      </div>
+    </>
+  );
+};
+```
+
+## 用法
+
+```tsx
+import { NavBar } from '@unif/react-native-design';
+
+<NavBar
+  title="AI 助手"
+  subtitle="在线 · 已同步"
+  left={{ icon: 'menu', onPress: openDrawer, accessibilityLabel: '打开抽屉' }}
+  right={{ icon: 'more-h', onPress: openMenu, accessibilityLabel: '打开更多菜单' }}
+/>
+
+{/* 品牌橙底 */}
+<NavBar title="登录" variant="brand" />
+
+{/* 透明浮层（深字）—— 浮在浅色 hero 渐变之上的子页 */}
+<NavBar title="我的名片" variant="transparent" left={{ icon: 'arrow-left', onPress: goBack, accessibilityLabel: '返回' }} />
+```
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `title` | `string` | — | 居中标题 |
+| `subtitle` | `string?` | — | 副标题（小字号，主标题下方） |
+| `left` | `NavBarSlot` | — | 左槽：严格 `NavBarAction { icon, onPress, accessibilityLabel }` 或展示用 `ReactNode` |
+| `right` | `NavBarSlot` | — | 右槽，同 `left` |
+| `variant` | `'default' \| 'brand' \| 'transparent'` | `'default'` | 视觉变体：`default` 白底 hairline + 深字 / `brand` 品牌橙底 + 白字 / `transparent` 透明无边框 + **深字 `c.foreground`**（浮在浅色 hero 上；若需白字深色浮层后续加 `transparentLight`） |
+| `style` | `StyleProp<ViewStyle>?` | — | 根容器附加样式（margin / position 等布局微调） |
+| `testID` | `string?` | — | E2E 定位 |
+
+> `left` / `right` 传完整 `NavBarAction` 时渲染为内部 `IconButton`（`variant='ghost'`，icon 必须是生成的 `IconName`）。展示节点中的 `string` / `number` / `bigint`（包括 Fragment、nested collection 与 thenable resolved value 内的 primitive）会递归包装为本地 `Text`；非 Fragment element / portal 保持原有语义。thenable 映射按稳定源对象缓存，拒绝原因保持不变，非法 resolved value 失败关闭。缺字段、非法 icon 或 malformed node 会在 effect 中诊断并渲染为空。
+
+## 安全区（Safe Area）
+
+**NavBar 不内置 top safe-area inset**，由宿主页面负责。推荐做法：
+
+```tsx
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+// 方式 A：SafeAreaView 包裹
+<SafeAreaView edges={['top']}>
+  <NavBar title="首页" />
+</SafeAreaView>
+
+// 方式 B：react-navigation Stack.Screen header 配置
+// headerStatusBarHeight 会自动注入 inset，无需手动包裹
+```
+
+这样 NavBar 本体可在任何场景复用（modal、底部抽屉 header、全屏画中画等不需要 top inset 的场景）。
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/NavBar/NavBar.tsx`、`isSlot.ts`、`types.ts`。
+
+- 默认 `accessibilityRole`：NavBar 根 `<View>` **未**设置 role（无 `header` 等），`title` / `subtitle` 渲染为普通 `<Text>`，按文本默认对 SR 可读。
+- a11y props：`left` / `right` 槽的 `NavBarAction.accessibilityLabel` **必填且非空**；action 同时必须有函数 `onPress`。若传展示用 `ReactNode`，React element 自行负责 a11y，primitive 文本由库内本地 `Text` 自然朗读。
+- 状态语义：NavBar 自身无可切换状态，不附加 `accessibilityState`。
+
+```tsx
+// action 的 icon、onPress、accessibilityLabel 都必填
+<NavBar
+  title="登录"
+  left={{ icon: 'arrow-left', onPress: goBack, accessibilityLabel: '返回' }}
+  right={{ icon: 'more-h', onPress: openMenu, accessibilityLabel: '更多' }}
+/>
+```
+
+## 关联组件
+
+- [DrawerHeader](drawer-header.md) —— `@react-navigation/drawer` 顶部的品牌面板
+- [TabBar](tabbar.md) —— 固定底部主导航

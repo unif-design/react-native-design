@@ -5,20 +5,18 @@ export const makeCarouselStyles = (c: ColorTokens) =>
   StyleSheet.create({
     /** 'bottom' 模式:独立行容器,让 dot 居中紧贴。 */
     dotsWrapBottom: {
-      justifyContent: 'center',
       alignItems: 'center',
-      // 正式版按 active 最大宽度为每个 dot 预留 12pt,额外保留 3pt 间距。
-      gap: r(3),
       paddingTop: space['3'],
     },
-    /** 'overlay-bottom-right' 模式:absolute 浮在 Carousel 右下角,
-     *  override `justifyContent` → 'flex-end' 让 dot 群靠右。 */
+    /** 'overlay-bottom-right' 模式：用 absolute bottom/right 固定在右下角。 */
     dotsWrapOverlay: {
       position: 'absolute',
       bottom: space['3'],
       right: space['5'],
-      justifyContent: 'flex-end',
-      alignItems: 'center',
+    },
+    /** Pagination 本体保持第三方所需的横向 layout，只承载视觉 dot。 */
+    dots: {
+      // 正式版按 active 最大宽度为每个 dot 预留 12pt,额外保留 3pt 间距。
       gap: r(3),
     },
     dot: {

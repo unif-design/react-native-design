@@ -1,0 +1,137 @@
+---
+sidebar_position: 1
+title: Logo 主标
+description: "品牌主标容器组件 —— 标准化尺寸（默认 64）/ 圆角（默认 size/4 squircle）；source 由 consumer 必传，非空 accessibilityLabel 决定有意义图片语义。"
+---
+
+# Logo 主标
+
+Unif 品牌主标——白色简化飞鸟剪影 + 底部"健康快乐"中文标语，整体置于主橙 `#EB6E00` 背景上。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Logo/Logo.tsx` 本体,通过 `react-native-web` 翻译成浏览器节点。`source` 由 consumer 自传(品牌资产由消费者持有),文档站这里通过本地包装传入 `static/img/logo.png`。
+
+```tsx
+const Logo = (props) => {
+  const uri = useBaseUrl('/img/logo.png');
+  return <RnLogo source={{ uri }} {...props} />;
+};
+
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">装饰 Logo · 默认 size=64</span>
+      <Logo />
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">有意义图片 · role=image / label=Unif</span>
+      <Logo accessibilityLabel="Unif" />
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">尺寸档位 32 / 64 / 96 / 120</span>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16 }}>
+        <Logo size={32} />
+        <Logo size={64} />
+        <Logo size={96} />
+        <Logo size={120} />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">borderRadius 覆盖</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <Logo size={64} borderRadius={0} />
+        <Logo size={64} />
+        <Logo size={64} borderRadius={32} />
+      </div>
+      <span style={{ fontSize: 12, color: '#999' }}>0 直角 · 默认 squircle · 32 满圆</span>
+    </div>
+  </div>
+```
+
+## 资源位置
+
+| 用途 | 路径 | 说明 |
+|---|---|---|
+| RN App | 消费端自有资源（例如 `@/assets/logo.png`） | `Logo` 只接收 `source`，npm 包不携带品牌图片 |
+| 文档站 navbar / OG image / Favicon | `website/static/img/logo.png` | 同源镜像，`docusaurus.config.ts` 内三处都引用同一份 |
+
+## 用法
+
+### React Native（推荐：用 `<Logo>` 组件）
+
+```tsx
+import { Logo } from '@unif/react-native-design';
+
+const source = require('@/assets/logo.png');
+
+<Logo source={source} />                                  // 装饰图片
+<Logo source={source} accessibilityLabel="Unif" />        // 有意义图片
+<Logo source={source} size={32} borderRadius={32} />      // 满圆
+```
+
+### Web / Docusaurus（静态资源）
+
+```tsx
+import useBaseUrl from '@docusaurus/useBaseUrl';
+
+function BrandImage() {
+  return (
+    <img
+      src={useBaseUrl('/img/logo.png')}
+      alt="Unif"
+      width="64"
+      height="64"
+    />
+  );
+}
+```
+
+### App Icon 预设尺寸
+
+| 平台 | 输出尺寸 |
+|---|---|
+| iOS App icon | 1024×1024（源文件即用） |
+| iOS @1x/@2x/@3x | 60 / 120 / 180 |
+| Android `mdpi → xxxhdpi` | 48 / 72 / 96 / 144 / 192 |
+| 浏览器 favicon | 32 / 48 / 64 |
+
+消费端若持有 1024×1024 主标源文件，可按需下采样；组件本身不负责生成或分发这些尺寸。
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `source` | `ImageSourcePropType` | — | **必填** —— 品牌 logo 图片源（`require('./logo.png')` / `{ uri: '...' }`）；组件不持有任何资产 |
+| `size` | `number?` | `64` | 渲染正方形边长 |
+| `borderRadius` | `number?` | `size / 4` | 圆角；不传走柔和的 squircle |
+| `accessibilityLabel` | `string?` | — | trim 后非空时设为图片名称，并启用 `role="image"`；缺省/空白时按装饰图片处理 |
+| `style` | `StyleProp<ImageStyle>?` | — | 附加样式 |
+| `testID` | `string?` | — | E2E 定位 |
+
+> 底层渲染为单个 `<Image>`，`resizeMode="cover"`。
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Logo/Logo.tsx`、`types.ts`。
+
+本组件渲染为单个本地 RN `<Image>`。`accessibilityLabel` trim 后非空时，图片设置 `accessible`、`accessibilityRole="image"` 与对应名称；缺省或空白时，完整使用内部装饰隐藏属性移出 a11y tree。空白值仍按装饰图片处理，并在 dev effect 中为每个实例诊断一次。
+
+```tsx
+<Logo source={require('@/assets/logo.png')} /> // 装饰
+<Logo
+  source={require('@/assets/logo.png')}
+  accessibilityLabel="Unif 健康快乐"
+/>
+```
+
+## 用法规则
+
+- **背景色** 主橙 `#EB6E00`，**不要换其它底色**。如需放在浅色背景上，外层包一层主橙圆角容器或留 padding。
+- **不要变形** 等比缩放可以；扁平拉伸 / 改色 / 加阴影 / 加描边都不行。
+- **最小尺寸 24×24** 飞鸟主标在 ≥24px 清晰可读；更小尺寸（如 16×16 浏览器 tab）就接受糊感，或临时用一张降采样后的 PNG，不要为了清晰度重画 logo。
+- **不要替换 "健康快乐" 标语** 这是 logo 内嵌文字，不是 caption——不要外加自定义副标。
+- **不要重新绘制飞鸟** 使用 `<Logo>` 组件并传入消费端持有的正式品牌资源，不要用 SVG 重画。
+
+## Favicon
+
+文档站 (`docusaurus.config.ts`) 的 `favicon` / `themeConfig.image` / `navbar.logo.src` 三处都指向同一份 `img/logo.png` —— 站点视觉一致性优先于小尺寸辨识度。

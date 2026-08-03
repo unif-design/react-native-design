@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { View } from 'react-native';
 import { r, useColors } from '../../../theme';
-import { sanitizeSpinnerProps } from './shared';
+import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
+import { sanitizeSpinnerProps, SPINNER_CENTER_STYLE } from './shared';
 import type { SpinnerProps } from './types';
 
 // React-Native-Web 上 reanimated 4 + worklets 0.9.x 的 useAnimatedStyle 链路在
@@ -34,13 +35,11 @@ export function Spinner({
   size = r(18),
   color,
   thickness = r(2),
-  style,
+  style: outerStyle,
   testID,
 }: SpinnerProps): React.JSX.Element {
   const c = useColors();
-  // ref 用 any —— RN View ref 在 web bundle 实际拿到 HTMLDivElement,
-  // RN 端拿到 View 实例,统一 any 兼容两端。
-
+  // tsconfig 不带 DOM lib；Web View ref 实际拿到带 style 的 HTMLElement。
   const ref = useRef<any>(null);
   const stroke = color ?? c.primary;
   const { safeSize, safeThickness } = sanitizeSpinnerProps(size, thickness);
@@ -59,21 +58,27 @@ export function Spinner({
 
   return (
     <View
-      ref={ref}
       style={[
-        {
-          width: safeSize,
-          height: safeSize,
-          borderRadius: safeSize / 2,
-          borderWidth: safeThickness,
-          borderColor: c.outline,
-          borderTopColor: stroke,
-        },
-        style,
+        { width: safeSize, height: safeSize },
+        outerStyle,
+        SPINNER_CENTER_STYLE,
       ]}
       testID={testID}
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-    />
+      {...A11Y_HIDDEN_PROPS}
+    >
+      <View
+        ref={ref}
+        style={[
+          {
+            width: safeSize,
+            height: safeSize,
+            borderRadius: safeSize / 2,
+            borderWidth: safeThickness,
+            borderColor: c.outline,
+            borderTopColor: stroke,
+          },
+        ]}
+      />
+    </View>
   );
 }
