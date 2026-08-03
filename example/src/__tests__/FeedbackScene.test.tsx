@@ -8,10 +8,13 @@ import {
 } from '@testing-library/react-native';
 import {
   BlurLayer,
+  Empty,
   Pulse,
   PulseDot,
   Reveal,
   Skeleton,
+  Spinner,
+  toast,
 } from '@unif/react-native-design';
 import App from '../App';
 import {
@@ -106,7 +109,11 @@ test('Feedback 展示 Empty、三种 Skeleton 与具备外层加载语义的 Spi
   enterFeedback();
 
   expect(screen.getByTestId('feedback-screen')).toBeOnTheScreen();
-  expect(screen.getByText('暂无反馈记录')).toBeOnTheScreen();
+  expect(screen.UNSAFE_getByType(Empty).props).toMatchObject({
+    title: '暂无反馈记录',
+    desc: '触发下方动作后可在结果面板查看安全摘要。',
+    icon: 'clipboard',
+  });
   expect(
     screen
       .UNSAFE_getAllByType(Skeleton)
@@ -125,10 +132,16 @@ test('Feedback 展示 Empty、三种 Skeleton 与具备外层加载语义的 Spi
       importantForAccessibility: 'no-hide-descendants',
     });
   }
+  expect(screen.UNSAFE_getByType(Spinner).props).toMatchObject({
+    size: 24,
+    color: expect.any(String),
+  });
   expect(
     screen.getByRole('progressbar', { name: '正在加载示例' }).props
-      .accessibilityState
-  ).toMatchObject({ busy: true });
+  ).toMatchObject({
+    accessibilityState: { busy: true },
+    accessibilityLiveRegion: 'polite',
+  });
   expect(screen.getByText('加载中')).toBeOnTheScreen();
 });
 
@@ -185,11 +198,18 @@ test('BlurLayer 初始不挂载，用户开启后只在有限容器中切换 sof
   enterFeedback();
 
   expect(screen.queryByTestId('feedback-blur-layer')).not.toBeOnTheScreen();
-  fireEvent.press(screen.getByRole('button', { name: '加载真实模糊演示' }));
+  expect(screen.getByText('BlurLayer 组件未挂载')).toBeOnTheScreen();
+  expect(
+    screen.getByText(
+      '自动化只证明组件是否已挂载；实际模糊效果需在已链接原生模块的真机或模拟器验证。'
+    )
+  ).toBeOnTheScreen();
+  fireEvent.press(screen.getByRole('button', { name: '挂载 BlurLayer 演示' }));
   expect(screen.getByTestId('feedback-blur-container')).toHaveStyle({
     position: 'relative',
     overflow: 'hidden',
   });
+  expect(screen.getByText('BlurLayer 组件已挂载')).toBeOnTheScreen();
   expect(
     componentByTestID(BlurLayer, 'feedback-blur-layer').props.intensity
   ).toBe('soft');
@@ -197,14 +217,23 @@ test('BlurLayer 初始不挂载，用户开启后只在有限容器中切换 sof
   expect(
     componentByTestID(BlurLayer, 'feedback-blur-layer').props.intensity
   ).toBe('strong');
-  fireEvent.press(screen.getByRole('button', { name: '卸载真实模糊演示' }));
+  fireEvent.press(screen.getByRole('button', { name: '卸载 BlurLayer 演示' }));
   expect(screen.queryByTestId('feedback-blur-layer')).not.toBeOnTheScreen();
+  expect(screen.getByText('BlurLayer 组件未挂载')).toBeOnTheScreen();
 });
 
 test.each(toastCases)(
   'Toast 真实展示%s提示与%s位置并写入请求事实',
   (kind, position) => {
     jest.useFakeTimers();
+    const infoSpy = jest.spyOn(toast, 'info');
+    const successSpy = jest.spyOn(toast, 'success');
+    const errorSpy = jest.spyOn(toast, 'error');
+    const spies = {
+      信息: infoSpy,
+      成功: successSpy,
+      错误: errorSpy,
+    } as const;
     render(<App />);
     enterFeedback();
 
@@ -218,6 +247,16 @@ test.each(toastCases)(
         `最新结果：Toast · 请求展示 · 已请求展示：${kind}、${position}`
       )
     ).toBeOnTheScreen();
+    expect(spies[kind]).toHaveBeenCalledTimes(1);
+    expect(spies[kind]).toHaveBeenCalledWith({
+      message: `${kind}提示 · ${position}`,
+      position:
+        position === '顶部' ? 'top' : position === '居中' ? 'center' : 'bottom',
+      duration: 10_000,
+    });
+    for (const [otherKind, spy] of Object.entries(spies)) {
+      if (otherKind !== kind) expect(spy).not.toHaveBeenCalled();
+    }
     act(() => {
       jest.advanceTimersByTime(10_000);
     });
@@ -292,7 +331,7 @@ test('Reveal 与 Blur draft 跨路由保留，重置只影响 Feedback', () => {
   enterFeedback();
 
   fireEvent.press(screen.getByRole('button', { name: '隐藏淡入内容' }));
-  fireEvent.press(screen.getByRole('button', { name: '加载真实模糊演示' }));
+  fireEvent.press(screen.getByRole('button', { name: '挂载 BlurLayer 演示' }));
   fireEvent.press(screen.getByRole('tab', { name: '强模糊' }));
   fireEvent.press(screen.getByRole('button', { name: '返回首页' }));
   enterFeedback();
@@ -305,4 +344,8 @@ test('Reveal 与 Blur draft 跨路由保留，重置只影响 Feedback', () => {
   fireEvent.press(screen.getByRole('button', { name: '重置本场景' }));
   expect(screen.getByTestId('feedback-reveal')).toBeOnTheScreen();
   expect(screen.queryByTestId('feedback-blur-layer')).not.toBeOnTheScreen();
+  fireEvent.press(screen.getByRole('button', { name: '挂载 BlurLayer 演示' }));
+  expect(
+    componentByTestID(BlurLayer, 'feedback-blur-layer').props.intensity
+  ).toBe('soft');
 });

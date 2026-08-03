@@ -274,8 +274,11 @@ export function FeedbackScene(): React.JSX.Element {
 
         <SectionCard
           title="原生模糊"
-          description="仅在用户明确开启后加载真实原生模糊层。"
+          description="仅在用户明确操作后挂载 BlurLayer 组件。"
         >
+          <Text style={styles.fact}>
+            自动化只证明组件是否已挂载；实际模糊效果需在已链接原生模块的真机或模拟器验证。
+          </Text>
           <Segmented
             value={draft.blurIntensity}
             items={blurIntensityItems}
@@ -289,7 +292,9 @@ export function FeedbackScene(): React.JSX.Element {
           />
           <Button
             label={
-              draft.blurDemoEnabled ? '卸载真实模糊演示' : '加载真实模糊演示'
+              draft.blurDemoEnabled
+                ? '卸载 BlurLayer 演示'
+                : '挂载 BlurLayer 演示'
             }
             variant="secondary"
             onPress={() =>
@@ -308,8 +313,8 @@ export function FeedbackScene(): React.JSX.Element {
             ) : null}
             <Text style={styles.blurContent}>
               {draft.blurDemoEnabled
-                ? '真实模糊层已加载'
-                : '原生模糊层尚未加载'}
+                ? 'BlurLayer 组件已挂载'
+                : 'BlurLayer 组件未挂载'}
             </Text>
           </View>
         </SectionCard>

@@ -106,6 +106,7 @@ test('scene draft 提供跨路由复现与按需挂载所需的最小字段', ()
   expect(state.scenes.feedback).toMatchObject({
     revealVisible: true,
     blurDemoEnabled: false,
+    blurIntensity: 'soft',
   });
   expect(state.scenes.collections).toMatchObject({
     cardVariant: 'default',
@@ -113,6 +114,21 @@ test('scene draft 提供跨路由复现与按需挂载所需的最小字段', ()
     cardFill: false,
     carouselEnabled: false,
   });
+});
+
+test('Feedback blurIntensity 初始化与 reset 都回到 soft', () => {
+  const initial = createInitialShowcaseState();
+  expect(initial.scenes.feedback.blurIntensity).toBe('soft');
+
+  const strong = updateShowcaseScene(initial, 'feedback', (current) => ({
+    ...current,
+    blurIntensity: 'strong',
+  }));
+  expect(strong.scenes.feedback.blurIntensity).toBe('strong');
+
+  const reset = resetShowcaseScene(strong, 'feedback');
+  expect(reset.scenes.feedback.blurIntensity).toBe('soft');
+  expect(reset.scenes.feedback.blurDemoEnabled).toBe(false);
 });
 
 test('reset 只新建目标 draft 并保留 route、偏好、结果、id 与其他引用', () => {
