@@ -5,7 +5,11 @@ export type DrawerHeaderProps = {
   name: string;
   /** 副标题（comGroup · role 之类的辅助信息） */
   subtitle?: string;
-  /** 真实头像图片（URL 或 require）；提供时优先渲染 image，加载失败 fallback 到 letter */
+  /**
+   * 真实头像图片（URI object / 数组或 require）。
+   * 运行时校验后用 immutable semantic snapshot 隔离 keyed attempt；非法 source
+   * 或当前 attempt 加载失败时 fallback 到首字符，失败 state 不跨 source 共享。
+   */
   source?: ImageSourcePropType;
   /** 容器附加样式(margin / position 等布局微调)。 */
   style?: StyleProp<ViewStyle>;

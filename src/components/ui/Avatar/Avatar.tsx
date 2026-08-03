@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { scaleFontMetric, useColors, useFontScale } from '../../../theme';
-import { imageSourceKey, isValidImageSource } from '../../../utils/imageSource';
+import { resolveImageSource } from '../../../utils/imageSource';
 import { ImageAttempt } from '../shared/ImageAttempt';
 import { paletteFor, sizingFor, styles } from './styles';
 import type { AvatarProps } from './types';
@@ -25,7 +25,7 @@ export function Avatar({
   const dims = sizingFor(size);
   const palette = paletteFor(variant, c);
   const labelFontSize = scaleFontMetric(dims.fs, fontScale);
-  const validSource = isValidImageSource(source) ? source : undefined;
+  const resolvedSource = resolveImageSource(source);
   const fallback = (
     <Text
       style={[styles.label, { fontSize: labelFontSize, color: palette.fg }]}
@@ -51,12 +51,12 @@ export function Avatar({
       accessibilityLabel={label}
       testID={testID}
     >
-      {validSource === undefined ? (
+      {resolvedSource === undefined ? (
         fallback
       ) : (
         <ImageAttempt
-          key={imageSourceKey(validSource)}
-          source={validSource}
+          key={resolvedSource.key}
+          source={resolvedSource.source}
           fallback={fallback}
           style={styles.image}
           resizeMode="cover"

@@ -3,6 +3,7 @@ import {
   canonicalSourceValue,
   imageSourceKey,
   isValidImageSource,
+  resolveImageSource,
 } from '../../src/utils/imageSource';
 
 describe('canonicalSourceValue / imageSourceKey', () => {
@@ -204,5 +205,264 @@ describe('isValidImageSource', () => {
       expect(() => isValidImageSource(source)).not.toThrow();
       expect(isValidImageSource(source)).toBe(false);
     }
+  });
+
+  test('只认可 own enumerable data uri，不接受继承、隐藏或动态读取', () => {
+    const inheritedUri = Object.create({ uri: 'https://x/inherited.png' });
+    const nonEnumerableUri = {};
+    Object.defineProperty(nonEnumerableUri, 'uri', {
+      configurable: true,
+      enumerable: false,
+      value: 'https://x/hidden.png',
+      writable: true,
+    });
+    let getterReads = 0;
+    const dynamicUri = {};
+    Object.defineProperty(dynamicUri, 'uri', {
+      configurable: true,
+      enumerable: true,
+      get() {
+        getterReads += 1;
+        return getterReads === 1 ? 'https://x/a.png' : 'https://x/b.png';
+      },
+    });
+    const ownKeysHiddenUri = new Proxy(
+      { uri: 'https://x/proxy.png' },
+      { ownKeys: () => [] }
+    );
+
+    for (const source of [
+      inheritedUri,
+      nonEnumerableUri,
+      dynamicUri,
+      ownKeysHiddenUri,
+    ]) {
+      expect(isValidImageSource(source)).toBe(false);
+    }
+    expect(getterReads).toBe(0);
+  });
+});
+
+describe('resolveImageSource', () => {
+  test('拒绝 inherited、non-enumerable 和 accessor uri，且不执行 getter', () => {
+    const inheritedUri = Object.create({ uri: 'https://x/inherited.png' });
+    const nonEnumerableUri = {};
+    Object.defineProperty(nonEnumerableUri, 'uri', {
+      configurable: true,
+      enumerable: false,
+      value: 'https://x/hidden.png',
+      writable: true,
+    });
+    let getterReads = 0;
+    const accessorUri = {};
+    Object.defineProperty(accessorUri, 'uri', {
+      configurable: true,
+      enumerable: true,
+      get() {
+        getterReads += 1;
+        throw new Error('uri getter 不得执行');
+      },
+    });
+
+    for (const source of [inheritedUri, nonEnumerableUri, accessorUri]) {
+      expect(() => resolveImageSource(source)).not.toThrow();
+      expect(resolveImageSource(source)).toBeUndefined();
+      expect(isValidImageSource(source)).toBe(false);
+    }
+    expect(getterReads).toBe(0);
+  });
+
+  test('拒绝 symbol、non-enumerable、accessor nested field 和非 plain object', () => {
+    const symbolField = {
+      uri: 'https://x/a.png',
+      [Symbol('hidden')]: 'value',
+    };
+    const nonEnumerableField = { uri: 'https://x/a.png' };
+    Object.defineProperty(nonEnumerableField, 'hidden', {
+      configurable: true,
+      enumerable: false,
+      value: 'value',
+      writable: true,
+    });
+    let nestedGetterReads = 0;
+    const accessorField = { uri: 'https://x/a.png' };
+    Object.defineProperty(accessorField, 'dynamic', {
+      configurable: true,
+      enumerable: true,
+      get() {
+        nestedGetterReads += 1;
+        return 'value';
+      },
+    });
+    class ClassSource {
+      uri = 'https://x/a.png';
+    }
+
+    for (const source of [
+      symbolField,
+      nonEnumerableField,
+      accessorField,
+      new ClassSource(),
+    ]) {
+      expect(resolveImageSource(source)).toBeUndefined();
+      expect(isValidImageSource(source)).toBe(false);
+    }
+    expect(nestedGetterReads).toBe(0);
+  });
+
+  test('ownKeys 隐藏 uri 或返回 invalid descriptor 时失败关闭', () => {
+    const hiddenUri = new Proxy(
+      { uri: 'https://x/hidden.png' },
+      {
+        ownKeys: () => [],
+      }
+    );
+    const missingDescriptor = new Proxy(
+      {},
+      {
+        ownKeys: () => ['uri'],
+        getOwnPropertyDescriptor: () => undefined,
+        get: (_target, key) =>
+          key === 'uri' ? 'https://x/descriptor.png' : undefined,
+      }
+    );
+
+    for (const source of [hiddenUri, missingDescriptor]) {
+      expect(() => resolveImageSource(source)).not.toThrow();
+      expect(resolveImageSource(source)).toBeUndefined();
+      expect(isValidImageSource(source)).toBe(false);
+    }
+  });
+
+  test('ownKeys、prototype 和 descriptor 异常永不逃逸', () => {
+    const ownKeysThrows = new Proxy(
+      {},
+      {
+        ownKeys() {
+          throw new Error('ownKeys failed');
+        },
+      }
+    );
+    const prototypeThrows = new Proxy(
+      {},
+      {
+        getPrototypeOf() {
+          throw new Error('prototype failed');
+        },
+      }
+    );
+    const descriptorThrows = new Proxy(
+      {},
+      {
+        ownKeys: () => ['uri'],
+        getOwnPropertyDescriptor() {
+          throw new Error('descriptor failed');
+        },
+      }
+    );
+
+    for (const source of [ownKeysThrows, prototypeThrows, descriptorThrows]) {
+      expect(() => resolveImageSource(source)).not.toThrow();
+      expect(resolveImageSource(source)).toBeUndefined();
+      expect(isValidImageSource(source)).toBe(false);
+    }
+  });
+
+  test('Proxy descriptor 只读取一次，snapshot 与 key 使用同一份值', () => {
+    let descriptorReads = 0;
+    const dynamicDescriptor = new Proxy(
+      {},
+      {
+        ownKeys: () => ['uri'],
+        getOwnPropertyDescriptor: () => {
+          descriptorReads += 1;
+          return {
+            configurable: true,
+            enumerable: true,
+            value:
+              descriptorReads === 1 ? 'https://x/a.png' : 'https://x/b.png',
+            writable: true,
+          };
+        },
+      }
+    );
+
+    const resolved = resolveImageSource(dynamicDescriptor);
+
+    expect(descriptorReads).toBe(1);
+    expect(resolved).toEqual({
+      source: { uri: 'https://x/a.png' },
+      key: imageSourceKey({ uri: 'https://x/a.png' }),
+    });
+    expect(Object.isFrozen(resolved?.source)).toBe(true);
+  });
+
+  test('普通 URI source 的 headers 与 unknown JSON-safe 字段被深拷贝并冻结', () => {
+    const source = {
+      uri: 'https://x/a.png',
+      headers: { Authorization: 'token' },
+      cache: 'reload',
+      width: 20,
+      metadata: {
+        retry: 2,
+        flags: ['primary', null, true],
+      },
+      optional: undefined,
+    };
+    const expectedKey = imageSourceKey(source as never);
+
+    const resolved = resolveImageSource(source);
+    const snapshot = resolved?.source as typeof source | undefined;
+
+    expect(resolved?.key).toBe(expectedKey);
+    expect(snapshot).toEqual(source);
+    expect(snapshot).not.toBe(source);
+    expect(snapshot?.headers).not.toBe(source.headers);
+    expect(snapshot?.metadata).not.toBe(source.metadata);
+    expect(Object.isFrozen(snapshot)).toBe(true);
+    expect(Object.isFrozen(snapshot?.headers)).toBe(true);
+    expect(Object.isFrozen(snapshot?.metadata)).toBe(true);
+    expect(Object.isFrozen(snapshot?.metadata.flags)).toBe(true);
+
+    source.uri = 'https://x/mutated.png';
+    source.headers.Authorization = 'mutated';
+    source.metadata.flags[0] = 'mutated';
+
+    expect(snapshot).toEqual({
+      uri: 'https://x/a.png',
+      headers: { Authorization: 'token' },
+      cache: 'reload',
+      width: 20,
+      metadata: {
+        retry: 2,
+        flags: ['primary', null, true],
+      },
+      optional: undefined,
+    });
+    expect(resolved?.key).toBe(expectedKey);
+  });
+
+  test('URI source array 保留顺序并冻结 array、item 与 headers', () => {
+    const source = [
+      { uri: 'https://x/a.png', headers: { token: 'a' } },
+      { uri: 'https://x/b.png', custom: { priority: 2 } },
+    ];
+    const resolved = resolveImageSource(source);
+    const snapshot = resolved?.source as typeof source | undefined;
+
+    expect(snapshot).toEqual(source);
+    expect(snapshot).not.toBe(source);
+    expect(Object.isFrozen(snapshot)).toBe(true);
+    expect(Object.isFrozen(snapshot?.[0])).toBe(true);
+    expect(Object.isFrozen(snapshot?.[0]?.headers)).toBe(true);
+    expect(Object.isFrozen(snapshot?.[1]?.custom)).toBe(true);
+    expect(resolved?.key).toBe(imageSourceKey(source));
+  });
+
+  test('本地 asset snapshot 保留有限正整数及对应 key', () => {
+    expect(resolveImageSource(7)).toEqual({
+      source: 7,
+      key: imageSourceKey(7),
+    });
   });
 });
