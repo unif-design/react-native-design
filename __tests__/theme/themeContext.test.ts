@@ -4,6 +4,7 @@ import {
   resolveThemeContext,
   shouldWarnMissingThemeProvider,
 } from '../../src/theme/themeContext';
+import type { ThemeContextValue } from '../../src/theme/ThemeProvider';
 
 describe('themeContext', () => {
   test('缺 Provider 总是返回同一个 fallback 引用', () => {
@@ -12,7 +13,13 @@ describe('themeContext', () => {
   });
 
   test('已有 Provider 时返回原 context 引用', () => {
-    expect(resolveThemeContext(FALLBACK_THEME)).toBe(FALLBACK_THEME);
+    const providedTheme: ThemeContextValue = {
+      ...FALLBACK_THEME,
+      scheme: 'dark',
+      fontScale: 2,
+    };
+
+    expect(resolveThemeContext(providedTheme)).toBe(providedTheme);
   });
 
   test('只有 dev + missing 才标记诊断', () => {

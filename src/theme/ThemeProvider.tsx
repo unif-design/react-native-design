@@ -4,6 +4,7 @@ import { lightColors, darkColors, type ColorTokens } from './colors';
 import { normalizeFontScale } from './fontScale';
 import { lightShadow, darkShadow, type ShadowTokens } from './shadow';
 import { ThemeContext } from './themeContext';
+import { createInvalidFontScaleDiagnostic } from './themeDiagnostics';
 import { createLogger } from '../utils/logger';
 
 export type ColorScheme = 'light' | 'dark';
@@ -28,7 +29,7 @@ type ThemeProviderProps = {
 
 const isDev = typeof __DEV__ !== 'undefined' && __DEV__;
 const log = createLogger('ThemeProvider');
-const warnedInvalidFontScales = new Set<string>();
+const reportInvalidFontScale = createInvalidFontScaleDiagnostic(log.warn);
 
 export function ThemeProvider({
   children,
@@ -41,15 +42,7 @@ export function ThemeProvider({
   const normalizedFontScale = normalizeFontScale(fontScale);
 
   useEffect(() => {
-    const warningKey = `${typeof fontScale}:${String(fontScale)}`;
-    if (
-      isDev &&
-      normalizedFontScale !== fontScale &&
-      !warnedInvalidFontScales.has(warningKey)
-    ) {
-      warnedInvalidFontScales.add(warningKey);
-      log.warn(`fontScale=${String(fontScale)} 无效，已回退为 1`);
-    }
+    reportInvalidFontScale(fontScale, normalizedFontScale, isDev);
   }, [fontScale, normalizedFontScale]);
 
   // useMemo 必须依赖 scheme,不要依赖 light/dark 对象本身 —— 这是 useThemedStyles
