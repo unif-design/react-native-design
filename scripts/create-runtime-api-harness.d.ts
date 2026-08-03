@@ -55,6 +55,14 @@ export declare function assertRuntimeScreenWebFixtureSource(
   pluginSource: string
 ): void;
 
+/** 验证 Reveal 人工用例提供卸载、重触发和快速重挂控制。 */
+export declare function assertRuntimeScreenAnimationControls(): void;
+
+/** source-injectable pure seam；验证 keyed conditional Reveal 与三组控制。 */
+export declare function assertRuntimeScreenAnimationControlsSource(
+  source: string
+): void;
+
 export declare function buildScaffoldArgs(
   templatePath: string,
   targetDirectory: string

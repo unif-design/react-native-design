@@ -6,6 +6,8 @@ import {
   assertRuntimeScreenSafeArea,
   assertRuntimeScreenWebFixture,
   assertRuntimeScreenWebFixtureSource,
+  assertRuntimeScreenAnimationControls,
+  assertRuntimeScreenAnimationControlsSource,
   assertLockChecksums,
   assertNoDestinationArgument,
   assertOutsideExample,
@@ -631,8 +633,9 @@ describe('Runtime API screen Web fixture contract', () => {
   test('复制 screen、缺 BrowserOnly、外层 Provider 或 Babel 漏目录均拒绝', () => {
     const validPage = `
 import { RuntimeApiScreen } from '../../../manual-tests/runtime-api/RuntimeApiScreen';
+const frameStyle = { display: 'flex', height: '100dvh', overflow: 'hidden' };
 export default function Page() {
-  return <BrowserOnly>{() => <RuntimeApiScreen />}</BrowserOnly>;
+  return <BrowserOnly>{() => <div style={frameStyle}><RuntimeApiScreen /></div>}</BrowserOnly>;
 }
 `;
     const validPlugin = `
@@ -664,6 +667,58 @@ const rule = { include: [srcDir, runtimeManualDir, rnPackagesPattern] };
         validPlugin.replace('runtimeManualDir, ', '')
       )
     ).toThrow('Babel');
+    expect(() =>
+      assertRuntimeScreenWebFixtureSource(
+        validPage.replace("display: 'flex', ", ''),
+        validPlugin
+      )
+    ).toThrow('flex');
+  });
+});
+
+describe('Runtime API screen Reveal controls contract', () => {
+  test('共享 fixture 可卸载、重触发并快速重挂 Reveal', () => {
+    expect(() => assertRuntimeScreenAnimationControls()).not.toThrow();
+  });
+
+  const source = `
+function AnimationContainersSection() {
+  const [revealMounted, setRevealMounted] = useState(true);
+  const [revealRun, setRevealRun] = useState(0);
+  return (
+    <>
+      <Button testID="reveal-unmount" onPress={() => setRevealMounted(false)} />
+      <Button testID="reveal-remount" onPress={() => setRevealRun((run) => run + 1)} />
+      <Button testID="reveal-rapid-remount" onPress={rapidlyRemountReveal} />
+      {revealMounted ? (
+        <Reveal key={\`reveal-\${revealRun}\`}>
+          <View />
+        </Reveal>
+      ) : null}
+    </>
+  );
+}
+`;
+
+  test('缺少任一控制或 keyed conditional mount 时拒绝', () => {
+    expect(() =>
+      assertRuntimeScreenAnimationControlsSource(source)
+    ).not.toThrow();
+    expect(() =>
+      assertRuntimeScreenAnimationControlsSource(
+        source.replace('testID="reveal-rapid-remount"', '')
+      )
+    ).toThrow('Reveal');
+    expect(() =>
+      assertRuntimeScreenAnimationControlsSource(
+        source.replace('key={`reveal-${revealRun}`}', '')
+      )
+    ).toThrow('Reveal');
+    expect(() =>
+      assertRuntimeScreenAnimationControlsSource(
+        source.replace('revealMounted ? (', 'true ? (')
+      )
+    ).toThrow('Reveal');
   });
 });
 

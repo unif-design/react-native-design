@@ -3,6 +3,8 @@ import BrowserOnly from '@docusaurus/BrowserOnly';
 import { RuntimeApiScreen } from '../../../manual-tests/runtime-api/RuntimeApiScreen';
 
 const frameStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
   width: '100%',
   height: '100dvh',
   minHeight: '100vh',

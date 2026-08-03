@@ -91,7 +91,7 @@ function assertRuntimeScreenSafeAreaSource(source) {
 
   if (
     !safeAreaImport.test(source) ||
-    !source.includes('safeArea: { flex: 1 }') ||
+    !/safeArea:\s*\{[^}]*\bflex:\s*1\b/u.test(source) ||
     providerOpen < 0 ||
     providerClose < providerOpen ||
     themeOpen < providerOpen ||
@@ -138,11 +138,12 @@ function assertRuntimeScreenWebFixtureSource(pageSource, pluginSource) {
     !pageSource.includes('<BrowserOnly') ||
     !pageSource.includes('<RuntimeApiScreen />') ||
     pageSource.includes('<ThemeProvider') ||
+    !/display:\s*['"]flex['"]/u.test(pageSource) ||
     !manualDirectory.test(pluginSource) ||
     !pluginSource.includes('include: [srcDir, runtimeManualDir')
   ) {
     throw new Error(
-      'Website /runtime-api 必须通过 BrowserOnly 直接挂载共享 RuntimeApiScreen，并由 Babel 编译 manual-tests/runtime-api；页面不得添加外层 ThemeProvider。'
+      'Website /runtime-api 必须通过 BrowserOnly 在有界 flex frame 中直接挂载共享 RuntimeApiScreen，并由 Babel 编译 manual-tests/runtime-api；页面不得添加外层 ThemeProvider。'
     );
   }
 }
@@ -157,6 +158,35 @@ function assertRuntimeScreenWebFixture() {
     'utf8'
   );
   assertRuntimeScreenWebFixtureSource(pageSource, pluginSource);
+}
+
+/**
+ * Reveal 人工用例必须能确定性重建组件，才能观察双 RAF、旧 RAF cleanup 与系统
+ * reduced-motion 改变后的首次 render；只常驻一个实例无法执行这些矩阵行。
+ */
+function assertRuntimeScreenAnimationControlsSource(source) {
+  const hasConditionalKeyedReveal =
+    /\{revealMounted\s*\?\s*\(\s*<Reveal\b[^>]*\bkey=\{`reveal-\$\{revealRun\}`\}/u.test(
+      source
+    );
+  if (
+    !source.includes('testID="reveal-unmount"') ||
+    !source.includes('testID="reveal-remount"') ||
+    !source.includes('testID="reveal-rapid-remount"') ||
+    !hasConditionalKeyedReveal
+  ) {
+    throw new Error(
+      'RuntimeApiScreen 的 Reveal 用例必须提供卸载、重触发、快速重挂和 keyed conditional mount 控制。'
+    );
+  }
+}
+
+function assertRuntimeScreenAnimationControls() {
+  const source = fs.readFileSync(
+    path.join(REPO_ROOT, 'manual-tests/runtime-api/RuntimeApiScreen.tsx'),
+    'utf8'
+  );
+  assertRuntimeScreenAnimationControlsSource(source);
 }
 
 /** 在 yarn.lock 中定位 `<name>@npm:<version>` 条目块,返回其 checksum(无则 null)。 */
@@ -611,6 +641,7 @@ function main() {
   assertNoDestinationArgument(process.argv.slice(2));
   assertRuntimeScreenSafeArea();
   assertRuntimeScreenWebFixture();
+  assertRuntimeScreenAnimationControls();
 
   const rootManifest = readJson(path.join(REPO_ROOT, 'package.json'));
   const lockText = fs.readFileSync(path.join(REPO_ROOT, 'yarn.lock'), 'utf8');
@@ -746,6 +777,8 @@ module.exports = {
   assertOutsideExample,
   assertRuntimeScreenSafeArea,
   assertRuntimeScreenSafeAreaSource,
+  assertRuntimeScreenAnimationControls,
+  assertRuntimeScreenAnimationControlsSource,
   assertRuntimeScreenWebFixture,
   assertRuntimeScreenWebFixtureSource,
   assertTemplateManifest,

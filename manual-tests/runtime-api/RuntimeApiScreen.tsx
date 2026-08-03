@@ -1,4 +1,4 @@
-import React, { Suspense, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -894,6 +894,64 @@ function ThumbnailSection(): React.JSX.Element {
  */
 function AnimationContainersSection(): React.JSX.Element {
   const reduced = usePrefersReducedMotion();
+  const [revealMounted, setRevealMounted] = useState(true);
+  const [revealRun, setRevealRun] = useState(0);
+  const [revealAction, setRevealAction] = useState('首次挂载');
+  const rapidRemountTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(
+    new Set()
+  );
+
+  const cancelRapidRemount = () => {
+    for (const timer of rapidRemountTimersRef.current) {
+      clearTimeout(timer);
+    }
+    rapidRemountTimersRef.current.clear();
+  };
+
+  const queueRapidRemountStep = (run: () => void) => {
+    const timer = setTimeout(() => {
+      rapidRemountTimersRef.current.delete(timer);
+      run();
+    }, 0);
+    rapidRemountTimersRef.current.add(timer);
+  };
+
+  useEffect(
+    () => () => {
+      cancelRapidRemount();
+    },
+    []
+  );
+
+  const unmountReveal = () => {
+    cancelRapidRemount();
+    setRevealMounted(false);
+    setRevealAction('已卸载');
+  };
+
+  const remountReveal = () => {
+    cancelRapidRemount();
+    setRevealMounted(true);
+    setRevealRun((run) => run + 1);
+    setRevealAction('已挂载并重触发 transition');
+  };
+
+  const rapidlyRemountReveal = () => {
+    cancelRapidRemount();
+    setRevealMounted(false);
+    setRevealAction('快速重挂进行中');
+
+    // 两个独立 macrotask 强制产生 mount → keyed remount，第二次发生在 Reveal
+    // 的双 RAF 完成前，用于现场确认旧 generation 的 cleanup 不会写入新实例。
+    queueRapidRemountStep(() => {
+      setRevealMounted(true);
+      setRevealRun((run) => run + 1);
+      queueRapidRemountStep(() => {
+        setRevealRun((run) => run + 1);
+        setRevealAction('快速重挂完成');
+      });
+    });
+  };
 
   return (
     <Section title="Reveal / Spinner platform containers">
@@ -906,16 +964,43 @@ function AnimationContainersSection(): React.JSX.Element {
         淡入，不能先显示再反向隐藏。当前 reduced=
         {String(reduced)}。真实 native/Web 未核验前不得记 PASS。
       </Text>
+      <View style={styles.revealControls}>
+        <Button
+          label="卸载 Reveal"
+          variant="secondary"
+          testID="reveal-unmount"
+          onPress={unmountReveal}
+        />
+        <Button
+          label="挂载 / 重触发 Reveal"
+          variant="secondary"
+          testID="reveal-remount"
+          onPress={remountReveal}
+        />
+        <Button
+          label="快速重挂 Reveal"
+          variant="secondary"
+          testID="reveal-rapid-remount"
+          onPress={rapidlyRemountReveal}
+        />
+      </View>
+      <Result
+        label="Reveal fixture"
+        value={`${revealAction}; mounted=${String(revealMounted)}; run=${revealRun}`}
+      />
       <View style={styles.revealProbeRow}>
-        <Reveal
-          style={styles.revealLayoutProbe}
-          duration={600}
-          testID="reveal-layout-probe"
-        >
-          <View style={styles.revealProbeContent}>
-            <Text>Reveal flex + opacity 0.35</Text>
-          </View>
-        </Reveal>
+        {revealMounted ? (
+          <Reveal
+            key={`reveal-${revealRun}`}
+            style={styles.revealLayoutProbe}
+            duration={600}
+            testID="reveal-layout-probe"
+          >
+            <View style={styles.revealProbeContent}>
+              <Text>Reveal flex + opacity 0.35</Text>
+            </View>
+          </Reveal>
+        ) : null}
         <View style={styles.revealProbeSibling} />
       </View>
 
@@ -1650,8 +1735,8 @@ function Result({
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  safeArea: { flex: 1 },
+  root: { flex: 1, minHeight: 0 },
+  safeArea: { flex: 1, minHeight: 0 },
   missingThemeModal: {
     flex: 1,
     justifyContent: 'center',
@@ -1668,6 +1753,12 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: '600' },
   result: { fontSize: 14, flexShrink: 1 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  revealControls: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 12,
+  },
   fontScaleSample: {
     flexDirection: 'row',
     flexWrap: 'wrap',
