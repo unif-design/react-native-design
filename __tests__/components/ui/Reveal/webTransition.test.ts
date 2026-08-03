@@ -106,6 +106,19 @@ describe('resolveRevealWebStyle', () => {
       targetOpacity: 1,
     });
   });
+
+  test('RNW template literal 无法转换 transform value 时失败关闭', () => {
+    const hostileStyle = {
+      opacity: 0.35,
+      transform: [{ rotate: Symbol('hostile') }],
+    } as unknown as Record<string, unknown>;
+
+    expect(() => reactNativeWebPreprocess(hostileStyle)).toThrow(TypeError);
+    expect(resolveRevealWebStyle(hostileStyle)).toEqual({
+      callerStyle: undefined,
+      targetOpacity: 1,
+    });
+  });
 });
 
 describe('createRevealWebAnimatedStyle', () => {

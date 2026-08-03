@@ -36,6 +36,11 @@ function isEmptyStyleInput(value: unknown): boolean {
   return value.every(isEmptyStyleInput);
 }
 
+function interpolateLikeReactNativeWeb(value: unknown): string {
+  // String(Symbol()) 不抛错，但 RNW 的 `${value}` 会抛错，必须使用同一 coercion。
+  return `${value}`;
+}
+
 /**
  * RNW 会对 transform array 做深层 Object.keys / join / string coercion；
  * StyleSheet.flatten 只做浅合并，不能证明这条后续路径安全。
@@ -62,9 +67,9 @@ function isSafeWebTransform(transform: unknown): boolean {
 
       if (key === 'matrix' || key === 'matrix3d') {
         if (!Array.isArray(value)) return false;
-        value.join(',');
+        interpolateLikeReactNativeWeb(value.join(','));
       } else {
-        String(value);
+        interpolateLikeReactNativeWeb(value);
       }
       return true;
     });
