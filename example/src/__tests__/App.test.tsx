@@ -265,7 +265,10 @@ test('Home 只挂八个中文 scene 入口，并在前进与返回时互斥挂�
   fireEvent.press(screen.getByRole('button', { name: '返回首页' }));
 
   fireEvent.press(screen.getByRole('button', { name: /表单与输入/ }));
-  expect(screen.getByTestId('pending-screen')).toBeOnTheScreen();
+  expect(screen.getByTestId('forms-screen')).toBeOnTheScreen();
+  fireEvent.press(screen.getByRole('button', { name: '返回首页' }));
+  fireEvent.press(screen.getByRole('button', { name: /导航组件/ }));
+  expect(screen.getByTestId('navigation-screen')).toBeOnTheScreen();
 });
 
 test('Android BackHandler 只订阅一次，child consume、Home 不 consume，卸载只 remove 一次', () => {

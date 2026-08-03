@@ -8,12 +8,18 @@ import { useShowcase } from '../state/useShowcase';
 import { ActionsScene } from '../showcases/actions/ActionsScene';
 import { FeedbackScene } from '../showcases/feedback/FeedbackScene';
 import { FoundationScene } from '../showcases/foundation/FoundationScene';
+import { FormsScene } from '../showcases/forms/FormsScene';
+import { NavigationScene } from '../showcases/navigation/NavigationScene';
 
 const pendingSceneTitles: Readonly<
-  Record<Exclude<SceneId, 'foundation' | 'actions' | 'feedback'>, string>
+  Record<
+    Exclude<
+      SceneId,
+      'foundation' | 'actions' | 'feedback' | 'forms' | 'navigation'
+    >,
+    string
+  >
 > = {
-  forms: '表单与输入',
-  navigation: '导航组件',
   collections: '容器与集合',
   media: '媒体展示',
   business: '业务复合组件',
@@ -22,7 +28,10 @@ const pendingSceneTitles: Readonly<
 function PendingScene({
   scene,
 }: {
-  scene: Exclude<SceneId, 'foundation' | 'actions' | 'feedback'>;
+  scene: Exclude<
+    SceneId,
+    'foundation' | 'actions' | 'feedback' | 'forms' | 'navigation'
+  >;
 }): React.JSX.Element {
   const { back } = useShowcase();
 
@@ -63,5 +72,7 @@ export function ExampleRouter(): React.JSX.Element {
   if (route === 'foundation') return <FoundationScene />;
   if (route === 'actions') return <ActionsScene />;
   if (route === 'feedback') return <FeedbackScene />;
+  if (route === 'forms') return <FormsScene />;
+  if (route === 'navigation') return <NavigationScene />;
   return <PendingScene scene={route} />;
 }

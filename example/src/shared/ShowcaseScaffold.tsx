@@ -18,6 +18,7 @@ type ShowcaseScaffoldProps = Readonly<{
   children: ReactNode;
   scene?: SceneId;
   onBack?: () => void;
+  onReset?: () => void;
   testID?: string;
 }>;
 
@@ -45,6 +46,7 @@ export function ShowcaseScaffold({
   children,
   scene,
   onBack,
+  onReset,
   testID,
 }: ShowcaseScaffoldProps): React.JSX.Element {
   const { resetScene } = useShowcase();
@@ -77,7 +79,10 @@ export function ShowcaseScaffold({
                 <Button
                   label="重置本场景"
                   variant="secondary"
-                  onPress={() => resetScene(scene)}
+                  onPress={() => {
+                    resetScene(scene);
+                    onReset?.();
+                  }}
                 />
                 <ResultPanel />
               </View>
