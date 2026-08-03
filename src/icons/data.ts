@@ -679,7 +679,7 @@ export const ICONS: Record<IconName, IconDef> = {
     ],
   },
   'check': {
-    strokeWidth: 2,
+    strokeWidth: 1.75,
     elements: [
       {
         kind: 'path',
