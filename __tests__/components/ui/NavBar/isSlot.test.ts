@@ -1,5 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 import React from 'react';
+import { Text } from 'react-native';
 import {
   classifyNavBarSlot,
   isNavBarAction,
@@ -7,6 +8,13 @@ import {
 
 const onPress = () => {};
 const currentElementMarker = Symbol.for('react.transitional.element');
+
+function expectTextNode(node: React.ReactNode, value: string): void {
+  expect(React.isValidElement(node)).toBe(true);
+  if (!React.isValidElement(node)) return;
+  expect(node.type).toBe(Text);
+  expect(node.props).toMatchObject({ children: value });
+}
 
 // RN 不公开 portal creator；此 fixture 仅用 React 的公开 Children 行为刻画 portal
 // 边界，production 不读取 `$$typeof` 或 renderer internals。
@@ -63,11 +71,46 @@ describe('NavBar slot classification', () => {
 
   test('keeps renderable React nodes instead of treating zero as empty', () => {
     const element = React.createElement(React.Fragment, null, '只读');
-    const arrayNode = [0, React.createElement(React.Fragment, { key: 'node' })];
 
-    expect(classifyNavBarSlot(0).kind).toBe('node');
+    const zero = classifyNavBarSlot(0);
+    expect(zero.kind).toBe('node');
+    if (zero.kind === 'node') expectTextNode(zero.node, '0');
     expect(classifyNavBarSlot(element).kind).toBe('node');
-    expect(classifyNavBarSlot(arrayNode).kind).toBe('node');
+  });
+
+  test.each([
+    ['只读', '只读'],
+    [0, '0'],
+    [12n, '12'],
+  ])(
+    'wraps top-level primitive display node %s in native Text',
+    (node, text) => {
+      const result = classifyNavBarSlot(node);
+
+      expect(result.kind).toBe('node');
+      if (result.kind === 'node') expectTextNode(result.node, text);
+    }
+  );
+
+  test('wraps primitive leaves in arrays and normalized iterables', () => {
+    const generator = (function* (): Generator<React.ReactNode> {
+      yield 'generator';
+      yield 2n;
+    })();
+    const result = classifyNavBarSlot([1, ['nested'], generator]);
+
+    expect(result.kind).toBe('node');
+    if (result.kind !== 'node' || !Array.isArray(result.node)) return;
+    expectTextNode(result.node[0], '1');
+    const nested = result.node[1];
+    expect(Array.isArray(nested)).toBe(true);
+    if (Array.isArray(nested)) expectTextNode(nested[0], 'nested');
+    const iterable = result.node[2];
+    expect(Array.isArray(iterable)).toBe(true);
+    if (Array.isArray(iterable)) {
+      expectTextNode(iterable[0], 'generator');
+      expectTextNode(iterable[1], '2');
+    }
   });
 
   test('treats only React intrinsic non-render values as empty', () => {
@@ -108,7 +151,13 @@ describe('NavBar slot classification', () => {
     expect(generatorResult.kind).toBe('node');
     expect(promiseResult.kind).toBe('node');
     if (generatorResult.kind === 'node') {
-      expect(generatorResult.node).toEqual([null, 0, false, 'generator node']);
+      expect(Array.isArray(generatorResult.node)).toBe(true);
+      if (Array.isArray(generatorResult.node)) {
+        expect(generatorResult.node[0]).toBeNull();
+        expectTextNode(generatorResult.node[1], '0');
+        expect(generatorResult.node[2]).toBe(false);
+        expectTextNode(generatorResult.node[3], 'generator node');
+      }
       expect(generatorResult.node).not.toBe(generator);
       expect([...generator]).toEqual([]);
     }
@@ -132,14 +181,21 @@ describe('NavBar slot classification', () => {
 
     expect(result.kind).toBe('node');
     if (result.kind === 'node') {
-      expect(result.node).toEqual([
-        1n,
-        promise,
-        element,
-        portal,
-        null,
-        [undefined, false, 'nested node'],
-      ]);
+      expect(Array.isArray(result.node)).toBe(true);
+      if (Array.isArray(result.node)) {
+        expectTextNode(result.node[0], '1');
+        expect(result.node[1]).toBe(promise);
+        expect(result.node[2]).toBe(element);
+        expect(result.node[3]).toBe(portal);
+        expect(result.node[4]).toBeNull();
+        const nestedNodes = result.node[5];
+        expect(Array.isArray(nestedNodes)).toBe(true);
+        if (Array.isArray(nestedNodes)) {
+          expect(nestedNodes[0]).toBeUndefined();
+          expect(nestedNodes[1]).toBe(false);
+          expectTextNode(nestedNodes[2], 'nested node');
+        }
+      }
       expect(result.node).not.toBe(nested);
     }
   });

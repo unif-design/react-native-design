@@ -22,7 +22,7 @@ function renderSlot(slot: NavBarAction, tint: string) {
   );
 }
 
-/** left / right slot:NavBarAction → IconButton,ReactNode → 原样。 */
+/** left / right slot:NavBarAction → IconButton,已归一化 display node → 原样。 */
 function resolveSlot(
   slot: NavBarSlotClassification,
   tint: string

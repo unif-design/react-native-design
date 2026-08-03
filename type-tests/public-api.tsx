@@ -41,6 +41,7 @@ const setText = (_value: string) => {};
 const noop = () => {};
 const inputRef = createRef<TextFieldHandle>();
 const tooShortContainer = { height: 20 };
+const safeContainerStyle = { marginTop: 8 };
 const logoSource = { uri: 'https://example.test/logo.png' } as const;
 
 // --- Button / IconButton / NavBar:所有操作必须显式可达 --------------------
@@ -49,8 +50,13 @@ const logoSource = { uri: 'https://example.test/logo.png' } as const;
 <Button label="保存" />;
 // @ts-expect-error IconButton 始终是操作
 <IconButton icon="close" accessibilityLabel="关闭" />;
-// @ts-expect-error NavBar action object 必须有 handler 和名称
-<NavBar title="标题" left={{ icon: 'arrow-left' }} />;
+<NavBar
+  title="标题"
+  // @ts-expect-error NavBar action object 必须有 handler
+  left={{ icon: 'arrow-left', accessibilityLabel: '返回' }}
+/>;
+// @ts-expect-error NavBar action object 必须有名称
+<NavBar title="标题" left={{ icon: 'arrow-left', onPress: noop }} />;
 
 <Button label="保存" onPress={noop} accessibilityState={{ expanded: false }} />;
 <IconButton
@@ -182,17 +188,31 @@ const actionableDisplayCellProps = {
 <Input value="ok" onChangeText={setText} />;
 <Input defaultValue="seed" />;
 <Input ref={inputRef} defaultValue="seed" />;
+<Input
+  defaultValue=""
+  editable={false}
+  returnKeyType="done"
+  containerStyle={safeContainerStyle}
+/>;
 <Textarea value="ok" onChangeText={setText} />;
 <Textarea defaultValue="seed" minHeight={120} maxHeight={200} />;
+inputRef.current?.focus();
+inputRef.current?.blur();
 
 // @ts-expect-error controlled Input 必须有更新入口
 <Input value="locked" />;
 // @ts-expect-error value/defaultValue 互斥
 <Input value="x" defaultValue="y" onChangeText={setText} />;
+// @ts-expect-error controlled Textarea 必须有更新入口
+<Textarea value="locked" />;
+// @ts-expect-error Textarea 的 value/defaultValue 互斥
+<Textarea value="x" defaultValue="y" onChangeText={setText} />;
 // @ts-expect-error readOnly 已删除，使用 editable={false}
 <Input readOnly />;
 // @ts-expect-error 原生 clear 不能从公开 handle 取得
 inputRef.current?.clear();
+// @ts-expect-error 原生 setNativeProps 不能从公开 handle 取得
+inputRef.current?.setNativeProps({ text: 'bypass' });
 // @ts-expect-error 任意 ReactElement 不再是 slot
 <Input trailing={<Pressable />} />;
 // @ts-expect-error containerStyle 不能改最小 frame
@@ -223,6 +243,8 @@ inputRef.current?.clear();
 <Search value="query" onChangeText={setText} />;
 // @ts-expect-error controlled Search 必须有 updater
 <Search value="query" />;
+// @ts-expect-error Search 的 value/defaultValue 互斥
+<Search value="query" defaultValue="seed" onChangeText={setText} />;
 // @ts-expect-error Search owns leading slot
 <Search leading={{ kind: 'icon', icon: 'search' }} />;
 // @ts-expect-error Search 不公开原生 clearButtonMode

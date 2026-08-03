@@ -1,4 +1,5 @@
 import React, { type ReactNode } from 'react';
+import { Text } from 'react-native';
 import { ICONS, type IconName } from '../../../icons';
 import type { NavBarAction } from './types';
 
@@ -97,14 +98,19 @@ function isReactPortal(value: object): value is React.ReactPortal {
 
 function normalizeArray(
   value: unknown[],
-  activeIterables: WeakSet<object>
+  activeIterables: WeakSet<object>,
+  path: string
 ): NormalizedNode {
   if (activeIterables.has(value)) return { kind: 'invalid' };
   activeIterables.add(value);
   try {
     const nodes: ReactNode[] = [];
     for (let index = 0; index < value.length; index += 1) {
-      const normalized = normalizeReactNode(value[index], activeIterables);
+      const normalized = normalizeReactNode(
+        value[index],
+        activeIterables,
+        `${path}.${index}`
+      );
       if (normalized.kind === 'invalid') return normalized;
       nodes.push(normalized.node);
     }
@@ -119,7 +125,8 @@ function normalizeArray(
 function normalizeIterable(
   value: object,
   factory: () => unknown,
-  activeIterables: WeakSet<object>
+  activeIterables: WeakSet<object>,
+  path: string
 ): NormalizedNode {
   if (activeIterables.has(value)) return { kind: 'invalid' };
   activeIterables.add(value);
@@ -135,6 +142,7 @@ function normalizeIterable(
     if (typeof next !== 'function') return { kind: 'invalid' };
 
     const nodes: ReactNode[] = [];
+    let index = 0;
     for (;;) {
       const step = next.call(iterator);
       if (typeof step !== 'object' || step === null) {
@@ -147,9 +155,14 @@ function normalizeIterable(
         return { kind: 'node', node: nodes };
       }
 
-      const normalized = normalizeReactNode(result.value, activeIterables);
+      const normalized = normalizeReactNode(
+        result.value,
+        activeIterables,
+        `${path}.${index}`
+      );
       if (normalized.kind === 'invalid') return normalized;
       nodes.push(normalized.node);
+      index += 1;
     }
   } catch {
     return { kind: 'invalid' };
@@ -168,14 +181,18 @@ function normalizeIterable(
 
 function normalizeReactNode(
   value: unknown,
-  activeIterables: WeakSet<object>
+  activeIterables: WeakSet<object>,
+  path: string
 ): NormalizedNode {
   if (
     typeof value === 'string' ||
     typeof value === 'number' ||
     typeof value === 'bigint'
   ) {
-    return { kind: 'node', node: value };
+    return {
+      kind: 'node',
+      node: React.createElement(Text, { key: path }, String(value)),
+    };
   }
   if (value === undefined || value === null || typeof value === 'boolean') {
     return { kind: 'node', node: value };
@@ -188,12 +205,14 @@ function normalizeReactNode(
   if (typeof value !== 'object' || value === null) {
     return { kind: 'invalid' };
   }
-  if (Array.isArray(value)) return normalizeArray(value, activeIterables);
+  if (Array.isArray(value)) {
+    return normalizeArray(value, activeIterables, path);
+  }
 
   const iterator = getIteratorFactory(value);
   if (iterator.kind === 'invalid') return iterator;
   if (iterator.kind === 'factory') {
-    return normalizeIterable(value, iterator.factory, activeIterables);
+    return normalizeIterable(value, iterator.factory, activeIterables, path);
   }
   if (isThenable(value)) return { kind: 'node', node: value };
   if (typeof value !== 'object') return { kind: 'invalid' };
@@ -213,5 +232,5 @@ export function classifyNavBarSlot(value: unknown): NavBarSlotClassification {
     return { kind: 'empty' };
   }
   if (isNavBarAction(value)) return { kind: 'action', action: value };
-  return normalizeReactNode(value, new WeakSet<object>());
+  return normalizeReactNode(value, new WeakSet<object>(), 'slot');
 }

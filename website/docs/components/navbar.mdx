@@ -87,7 +87,7 @@ import { NavBar } from '@unif/react-native-design';
 | `variant` | `'default' \| 'brand' \| 'transparent'` | `'default'` | 视觉变体：`default` 白底 hairline + 深字 / `brand` 品牌橙底 + 白字 / `transparent` 透明无边框 + **深字 `c.foreground`**（浮在浅色 hero 上；若需白字深色浮层后续加 `transparentLight`） |
 | `testID` | `string?` | — | E2E 定位 |
 
-> `left` / `right` 传完整 `NavBarAction` 时渲染为内部 `IconButton`（`variant='ghost'`，icon 必须是生成的 `IconName`，色按 variant tint：brand 用 `c.onPrimary`、其余 `c.foreground`）；展示节点直接原样渲染（包括 `0`）。缺字段、非法 icon 或伪造 React 标记的非类型安全 plain object 会在 effect 中诊断一次并渲染为空，不会伪造 handler 或英文 icon 名。标题用 `t.h3 + 0.5` / `fw.semi` / `letterSpacing: -0.2`，副标题 `t.micro`（11）。
+> `left` / `right` 传完整 `NavBarAction` 时渲染为内部 `IconButton`（`variant='ghost'`，icon 必须是生成的 `IconName`，色按 variant tint：brand 用 `c.onPrimary`、其余 `c.foreground`）；展示节点中的 `string` / `number` / `bigint`（包括 `0`）会递归包装为本地 `Text`，React element / Promise / portal 保持原有语义。缺字段、非法 icon 或伪造 React 标记的非类型安全 plain object 会在 effect 中诊断一次并渲染为空，不会伪造 handler 或英文 icon 名。标题用 `t.h3 + 0.5` / `fw.semi` / `letterSpacing: -0.2`，副标题 `t.micro`（11）。
 
 ## 安全区（Safe Area）
 
@@ -109,10 +109,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 ## 无障碍（a11y）
 
-来源：`src/components/ui/NavBar/NavBar.tsx`、`types.ts`。
+来源：`src/components/ui/NavBar/NavBar.tsx`、`isSlot.ts`、`types.ts`。
 
 - 默认 `accessibilityRole`：NavBar 根 `<View>` **未**设置 role（无 `header` 等），`title` / `subtitle` 渲染为普通 `<Text>`，按文本默认对 SR 可读。
-- a11y props：`left` / `right` 槽的 `NavBarAction.accessibilityLabel` **必填且非空**；action 同时必须有函数 `onPress`。若直接传 `ReactNode`，则 a11y 由该节点自行负责。
+- a11y props：`left` / `right` 槽的 `NavBarAction.accessibilityLabel` **必填且非空**；action 同时必须有函数 `onPress`。若传展示用 `ReactNode`，React element 自行负责 a11y，primitive 文本由库内本地 `Text` 自然朗读。
 - 状态语义：NavBar 自身无可切换状态，不附加 `accessibilityState`。
 
 ```tsx
