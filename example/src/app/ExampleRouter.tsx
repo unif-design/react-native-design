@@ -5,13 +5,13 @@ import type { SceneId } from '../catalog/componentCatalog';
 import { HomeScreen } from '../screens/HomeScreen';
 import { ShowcaseScaffold } from '../shared/ShowcaseScaffold';
 import { useShowcase } from '../state/useShowcase';
+import { ActionsScene } from '../showcases/actions/ActionsScene';
+import { FeedbackScene } from '../showcases/feedback/FeedbackScene';
 import { FoundationScene } from '../showcases/foundation/FoundationScene';
 
 const pendingSceneTitles: Readonly<
-  Record<Exclude<SceneId, 'foundation'>, string>
+  Record<Exclude<SceneId, 'foundation' | 'actions' | 'feedback'>, string>
 > = {
-  actions: '操作与状态',
-  feedback: '反馈与浮层',
   forms: '表单与输入',
   navigation: '导航组件',
   collections: '容器与集合',
@@ -22,7 +22,7 @@ const pendingSceneTitles: Readonly<
 function PendingScene({
   scene,
 }: {
-  scene: Exclude<SceneId, 'foundation'>;
+  scene: Exclude<SceneId, 'foundation' | 'actions' | 'feedback'>;
 }): React.JSX.Element {
   const { back } = useShowcase();
 
@@ -61,5 +61,7 @@ export function ExampleRouter(): React.JSX.Element {
 
   if (route === 'home') return <HomeScreen />;
   if (route === 'foundation') return <FoundationScene />;
+  if (route === 'actions') return <ActionsScene />;
+  if (route === 'feedback') return <FeedbackScene />;
   return <PendingScene scene={route} />;
 }

@@ -254,10 +254,18 @@ test('Home 只挂八个中文 scene 入口，并在前进与返回时互斥挂�
   expect(screen.queryByTestId('foundation-screen')).not.toBeOnTheScreen();
 
   fireEvent.press(screen.getByRole('button', { name: /操作与状态/ }));
-  expect(screen.getByTestId('pending-screen')).toBeOnTheScreen();
+  expect(screen.getByTestId('actions-screen')).toBeOnTheScreen();
   expect(screen.queryByText('设计系统示例')).not.toBeOnTheScreen();
   fireEvent.press(screen.getByRole('button', { name: '返回首页' }));
   expect(screen.getByText('设计系统示例')).toBeOnTheScreen();
+
+  fireEvent.press(screen.getByRole('button', { name: /反馈与浮层/ }));
+  expect(screen.getByTestId('feedback-screen')).toBeOnTheScreen();
+  expect(screen.queryByTestId('actions-screen')).not.toBeOnTheScreen();
+  fireEvent.press(screen.getByRole('button', { name: '返回首页' }));
+
+  fireEvent.press(screen.getByRole('button', { name: /表单与输入/ }));
+  expect(screen.getByTestId('pending-screen')).toBeOnTheScreen();
 });
 
 test('Android BackHandler 只订阅一次，child consume、Home 不 consume，卸载只 remove 一次', () => {

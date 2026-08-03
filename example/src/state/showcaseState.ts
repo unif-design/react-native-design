@@ -13,7 +13,14 @@ export type FoundationSceneState = Readonly<{
 }>;
 
 export type ActionsSceneState = Readonly<{
-  buttonVariant: 'primary' | 'secondary' | 'ghost';
+  buttonVariant:
+    | 'primary'
+    | 'secondary'
+    | 'ghost'
+    | 'neutral'
+    | 'outline'
+    | 'danger'
+    | 'text';
   buttonSize: 'sm' | 'md' | 'lg';
   buttonLoading: boolean;
   chipSelected: boolean;
@@ -25,6 +32,7 @@ export type FeedbackSceneState = Readonly<{
   revealDuration: 0 | 200 | 500;
   revealVisible: boolean;
   blurDemoEnabled: boolean;
+  blurIntensity: 'soft' | 'strong';
 }>;
 
 export type FormsSceneState = Readonly<{
@@ -114,6 +122,7 @@ const sceneStateFactories: {
     revealDuration: 200,
     revealVisible: true,
     blurDemoEnabled: false,
+    blurIntensity: 'soft',
   }),
   forms: () => ({
     inputValue: '',
