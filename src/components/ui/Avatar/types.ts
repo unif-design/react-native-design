@@ -25,6 +25,8 @@ export type AvatarProps = {
   /**
    * 真实头像图片（URL `{ uri: '...' }`、URI source 数组或 `require(...)`）。
    * 运行时先校验并生成 immutable semantic snapshot；非法 source 直接 fallback。
+   * Web 对 URI source 数组明确使用首个 candidate，native 保留完整数组。
+   * class / custom prototype 只读取 own enumerable data，继承属性与 accessor 无效。
    * 等价 source 沿用同一 keyed attempt，真实字段变化才重试；失败 state 不跨
    * attempt 共享。
    */

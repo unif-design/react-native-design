@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Image } from 'react-native';
 import type { ImageProps, ImageSourcePropType } from 'react-native';
+import { selectImageAttemptSource } from './selectImageAttemptSource';
 
 type ImageAttemptProps = Omit<ImageProps, 'onError' | 'source'> & {
   source: ImageSourcePropType;
@@ -17,10 +18,13 @@ export function ImageAttempt({
   ...imageProps
 }: ImageAttemptProps): React.JSX.Element {
   const [failed, setFailed] = useState(false);
+  // RNW 的加载 effect 依赖 onError identity；等价 render 不应中止并重发请求。
+  const handleError = useCallback(() => setFailed(true), []);
+  const selectedSource = selectImageAttemptSource(source);
 
-  return failed ? (
+  return failed || selectedSource === undefined ? (
     <>{fallback}</>
   ) : (
-    <Image {...imageProps} source={source} onError={() => setFailed(true)} />
+    <Image {...imageProps} source={selectedSource} onError={handleError} />
   );
 }

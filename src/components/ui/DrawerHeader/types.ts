@@ -9,6 +9,8 @@ export type DrawerHeaderProps = {
    * 真实头像图片（URI object / 数组或 require）。
    * 运行时校验后用 immutable semantic snapshot 隔离 keyed attempt；非法 source
    * 或当前 attempt 加载失败时 fallback 到首字符，失败 state 不跨 source 共享。
+   * Web 对数组使用首个 candidate，native 保留完整数组；对象只读取 own
+   * enumerable data，继承属性、non-enumerable 与 accessor 不参与。
    */
   source?: ImageSourcePropType;
   /** 容器附加样式(margin / position 等布局微调)。 */

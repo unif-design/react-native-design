@@ -272,7 +272,7 @@ describe('resolveImageSource', () => {
     expect(getterReads).toBe(0);
   });
 
-  test('拒绝 symbol、non-enumerable、accessor nested field 和非 plain object', () => {
+  test('拒绝 symbol、non-enumerable 和 accessor nested field', () => {
     const symbolField = {
       uri: 'https://x/a.png',
       [Symbol('hidden')]: 'value',
@@ -294,20 +294,56 @@ describe('resolveImageSource', () => {
         return 'value';
       },
     });
-    class ClassSource {
-      uri = 'https://x/a.png';
-    }
-
-    for (const source of [
-      symbolField,
-      nonEnumerableField,
-      accessorField,
-      new ClassSource(),
-    ]) {
+    for (const source of [symbolField, nonEnumerableField, accessorField]) {
       expect(resolveImageSource(source)).toBeUndefined();
       expect(isValidImageSource(source)).toBe(false);
     }
     expect(nestedGetterReads).toBe(0);
+  });
+
+  test('接受任意 prototype 上安全的 own enumerable data，并输出 plain frozen snapshot', () => {
+    class ClassSource {
+      uri = 'https://x/class.png';
+      metadata = { kind: 'class' };
+    }
+
+    const customPrototype = Object.assign(
+      Object.create({ inherited: 'ignored' }) as Record<string, unknown>,
+      {
+        uri: 'https://x/custom.png',
+        metadata: { kind: 'custom' },
+      }
+    );
+    const prototypeTrap = new Proxy(
+      {
+        uri: 'https://x/cross-realm.png',
+        metadata: { kind: 'cross-realm-style' },
+      },
+      {
+        getPrototypeOf() {
+          throw new Error('不得读取 prototype');
+        },
+      }
+    );
+
+    for (const source of [new ClassSource(), customPrototype, prototypeTrap]) {
+      const resolved = resolveImageSource(source);
+      const snapshot = resolved?.source as
+        | {
+            uri: string;
+            metadata: { kind: string };
+            inherited?: string;
+          }
+        | undefined;
+
+      expect(resolved).toBeDefined();
+      expect(snapshot).not.toBe(source);
+      expect(Object.getPrototypeOf(snapshot)).toBe(Object.prototype);
+      expect(Object.isFrozen(snapshot)).toBe(true);
+      expect(Object.isFrozen(snapshot?.metadata)).toBe(true);
+      expect(snapshot).not.toHaveProperty('inherited');
+      expect(isValidImageSource(source)).toBe(true);
+    }
   });
 
   test('ownKeys 隐藏 uri 或返回 invalid descriptor 时失败关闭', () => {
@@ -334,20 +370,12 @@ describe('resolveImageSource', () => {
     }
   });
 
-  test('ownKeys、prototype 和 descriptor 异常永不逃逸', () => {
+  test('ownKeys 和 descriptor 异常永不逃逸', () => {
     const ownKeysThrows = new Proxy(
       {},
       {
         ownKeys() {
           throw new Error('ownKeys failed');
-        },
-      }
-    );
-    const prototypeThrows = new Proxy(
-      {},
-      {
-        getPrototypeOf() {
-          throw new Error('prototype failed');
         },
       }
     );
@@ -361,7 +389,7 @@ describe('resolveImageSource', () => {
       }
     );
 
-    for (const source of [ownKeysThrows, prototypeThrows, descriptorThrows]) {
+    for (const source of [ownKeysThrows, descriptorThrows]) {
       expect(() => resolveImageSource(source)).not.toThrow();
       expect(resolveImageSource(source)).toBeUndefined();
       expect(isValidImageSource(source)).toBe(false);

@@ -343,9 +343,12 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
   `neutral`;size:`xs`(18)/ `sm`(28)/ `md`(32)/ `lg`(40)/ `xl`(56)。
   图片只接受有限正整数 asset、trim 后非空 URI object，或非空且逐项合法的 URI
   source 数组；nested cycle/function/symbol/bigint/非有限数等 invalid source
-  直接 fallback，不挂 Image。完整 source 字段生成 semantic key，对象 /
-  headers key 顺序不影响 identity，数组顺序与真实字段变化会影响。失败 state
-  只属于 keyed 私有 attempt；等价新引用不重试，真实变化才重挂，
+  直接 fallback，不挂 Image。class / custom prototype 对象只读取 own
+  enumerable data descriptor 并复制为 plain frozen snapshot，继承属性、
+  non-enumerable 与 accessor 无效。完整 source 字段生成 semantic key，对象 /
+  headers key 顺序不影响 identity，数组顺序与真实字段变化会影响；native 保留
+  URI 数组，Web 明确使用首个 candidate。失败 state 只属于 keyed 私有
+  attempt；等价新引用保持稳定 error handler、不重试，真实变化才重挂，
   `A₁ → B → A₂` 后迟到的 A₁ error 不能污染 A₂。
 - **Tag** —— 状态徽章,5 语义 × 2 尺寸(`md` / `lg`)。
 - **Chip** —— 胶囊形可选中 pill;`selected` 切主色边框 / 文本;可带 leading / trailing。Suggestion 底层。
@@ -380,7 +383,7 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 - **Tabs / Segmented** —— 页级下划线 / 局部分段,共用 `TabItem` 形状。
 - **Drawer** —— `DrawerHeader` + `@react-navigation/drawer`；头像 source
   复用 Avatar 的运行时校验、semantic identity 与 attempt-local failure
-  契约，整个头像容器继续作为装饰子树隐藏。
+  契约，包括 Web URI 数组首项选择；整个头像容器继续作为装饰子树隐藏。
 
 ### 反馈
 - **Toast** —— 命令式 `toast()` + `<ToastHost />`,全局轻提示,自动消失。

@@ -78,9 +78,9 @@ import { Avatar } from '@unif/react-native-design';
 
 ### 图片 source identity 与失败隔离
 
-运行时只接受三类 source：有限正整数的本地 asset、`uri` 经 trim 后非空的 object，以及非空且每项都满足前述 URI 规则的数组。空 object / 数组、空白 URI、非法 asset，或含 cycle、function、symbol、bigint、非有限数等 nested runtime value 的 source 都直接显示 fallback，不挂载 `Image`。
+运行时只接受三类 source：有限正整数的本地 asset、`uri` 经 trim 后非空的 object，以及非空且每项都满足前述 URI 规则的数组。对象可以来自 class、custom prototype 或跨 realm 风格容器，但只读取 own enumerable data descriptor，并复制成 plain frozen snapshot；继承属性、non-enumerable 属性和 accessor 都无效且不会执行 getter。空 object / 数组、空白 URI、非法 asset，或含 cycle、function、symbol、bigint、非有限数等 nested runtime value 的 source 都直接显示 fallback，不挂载 `Image`。
 
-合法 source 使用完整语义值识别一次图片尝试：`uri`、headers、dimensions、scale、cache 等字段都会参与；object key / header 插入顺序不影响 identity，数组顺序会影响。等价的新 object 引用不会重挂或重试已失败的图片；真实字段或本地 asset 变化才创建新 attempt。失败 state 只属于 keyed attempt，因此 `A₁ → B → A₂` 后迟到的 `onError(A₁)` 不能把已经成功的 A₂ 改回 fallback。
+合法 source 使用完整语义值识别一次图片尝试：`uri`、headers、dimensions、scale、cache 等字段都会参与；object key / header 插入顺序不影响 identity，数组顺序会影响。native 保留完整 URI candidate 数组；`react-native-web` 0.21 不支持该数组形式，因此 Web 明确选择第一个 candidate，空数组仍直接 fallback，避免静默空白。等价的新 object 引用不会重挂或重试已失败的图片，其稳定 `onError` 也不会让 RNW 中止并重发同一请求；真实字段或本地 asset 变化才创建新 attempt。失败 state 只属于 keyed attempt，因此 `A₁ → B → A₂` 后迟到的 `onError(A₁)` 不能把已经成功的 A₂ 改回 fallback。
 
 `manual-tests/runtime-api/RuntimeApiScreen.tsx` 提供等价引用、真实 source 变化、nested-invalid 和受控 fixture 的 `A₁ → B → A₂ → late error` 操作入口；没有实际运行 native/Web fixture 并观察事件前，不得将这些生命周期用例记为 PASS。
 

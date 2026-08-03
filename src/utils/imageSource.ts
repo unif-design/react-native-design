@@ -163,13 +163,6 @@ function visit(value: unknown, seen: WeakSet<object>): SnapshotResult {
     if (seen.has(value)) return invalid('cycle');
 
     const isArray = Array.isArray(value);
-    const prototype = Object.getPrototypeOf(value);
-    if (isArray) {
-      if (prototype !== Array.prototype) return invalid('prototype');
-    } else if (prototype !== Object.prototype && prototype !== null) {
-      return invalid('prototype');
-    }
-
     const ownKeys = Reflect.ownKeys(value);
     const keys: string[] = [];
     for (const key of ownKeys) {
