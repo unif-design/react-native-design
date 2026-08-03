@@ -3,7 +3,8 @@
  *   - `react-native` → `react-native-web` 别名
  *   - `@unif/react-native-design$` → `<repo>/src/index.tsx`(显式 alias 兜底,
  *      webpack 5 不识 package.json 的 `exports.source` 条件;同时保持源码 hot reload)
- *   - 把 `<repo>/src/**` 与 ESM-shipped 的几个 RN 库纳入 babel-loader 处理范围
+ *   - 把 `<repo>/src/**`、共享 runtime manual screen 与 ESM-shipped 的几个 RN
+ *     库纳入 babel-loader 处理范围
  *   - reanimated 4 需要 `react-native-worklets/plugin`,必须放在 babel plugins 链最后
  *
  * 在 docusaurus.config.ts 的 plugins 数组里 require 这个文件即可。
@@ -28,6 +29,10 @@ module.exports = function reactNativeWebPlugin(context) {
   // context.siteDir = <repo>/website ; 上一级是 <repo>(design 仓根)。
   const projectRoot = path.resolve(context.siteDir, '..');
   const srcDir = path.join(projectRoot, 'src');
+  const runtimeManualDir = path.join(
+    projectRoot,
+    'manual-tests/runtime-api',
+  );
   const rnghPressableShim = path.join(__dirname, 'shims/RnghPressable.js');
   const siteModules = path.join(context.siteDir, 'node_modules');
 
@@ -129,7 +134,7 @@ module.exports = function reactNativeWebPlugin(context) {
           rules: [
             {
               test: /\.(tsx|ts|jsx|mjs|js)$/,
-              include: [srcDir, rnPackagesPattern],
+              include: [srcDir, runtimeManualDir, rnPackagesPattern],
               use: {
                 loader: require.resolve('babel-loader'),
                 options: {

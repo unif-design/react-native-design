@@ -46,6 +46,15 @@ export declare function assertRuntimeScreenSafeArea(): void;
 /** source-injectable pure seam;验证 Provider 包住 Theme / 内容 / 全屏 Hosts 的结构。 */
 export declare function assertRuntimeScreenSafeAreaSource(source: string): void;
 
+/** 验证 Website 通过 BrowserOnly 直接复用 manual screen，且 Babel 覆盖其目录。 */
+export declare function assertRuntimeScreenWebFixture(): void;
+
+/** source-injectable pure seam；拒绝复制 fixture、外层 ThemeProvider 或 Babel 漏配。 */
+export declare function assertRuntimeScreenWebFixtureSource(
+  pageSource: string,
+  pluginSource: string
+): void;
+
 export declare function buildScaffoldArgs(
   templatePath: string,
   targetDirectory: string

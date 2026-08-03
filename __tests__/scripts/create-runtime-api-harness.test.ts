@@ -4,6 +4,8 @@ import {
   assertExactVersion,
   assertRuntimeScreenSafeAreaSource,
   assertRuntimeScreenSafeArea,
+  assertRuntimeScreenWebFixture,
+  assertRuntimeScreenWebFixtureSource,
   assertLockChecksums,
   assertNoDestinationArgument,
   assertOutsideExample,
@@ -618,6 +620,50 @@ const styles = StyleSheet.create({
     expect(() =>
       assertRuntimeScreenSafeAreaSource(providerOnlyWrapsContent)
     ).toThrow('SafeAreaProvider');
+  });
+});
+
+describe('Runtime API screen Web fixture contract', () => {
+  test('Website 直接挂载同一份 manual screen 且不添加外层 ThemeProvider', () => {
+    expect(() => assertRuntimeScreenWebFixture()).not.toThrow();
+  });
+
+  test('复制 screen、缺 BrowserOnly、外层 Provider 或 Babel 漏目录均拒绝', () => {
+    const validPage = `
+import { RuntimeApiScreen } from '../../../manual-tests/runtime-api/RuntimeApiScreen';
+export default function Page() {
+  return <BrowserOnly>{() => <RuntimeApiScreen />}</BrowserOnly>;
+}
+`;
+    const validPlugin = `
+const runtimeManualDir = path.join(projectRoot, 'manual-tests/runtime-api');
+const rule = { include: [srcDir, runtimeManualDir, rnPackagesPattern] };
+`;
+
+    expect(() =>
+      assertRuntimeScreenWebFixtureSource(validPage, validPlugin)
+    ).not.toThrow();
+    expect(() =>
+      assertRuntimeScreenWebFixtureSource(
+        validPage.replace(
+          '<RuntimeApiScreen />',
+          '<ThemeProvider><RuntimeApiScreen /></ThemeProvider>'
+        ),
+        validPlugin
+      )
+    ).toThrow('ThemeProvider');
+    expect(() =>
+      assertRuntimeScreenWebFixtureSource(
+        validPage.replace('<BrowserOnly>', '<React.Fragment>'),
+        validPlugin
+      )
+    ).toThrow('BrowserOnly');
+    expect(() =>
+      assertRuntimeScreenWebFixtureSource(
+        validPage,
+        validPlugin.replace('runtimeManualDir, ', '')
+      )
+    ).toThrow('Babel');
   });
 });
 

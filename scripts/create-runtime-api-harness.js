@@ -123,6 +123,42 @@ function assertRuntimeScreenSafeArea() {
   assertRuntimeScreenSafeAreaSource(source);
 }
 
+/**
+ * Website 必须直接复用同一份 manual screen；复制一份 Web fixture 会让两端矩阵漂移。
+ * 页面自身不能再包 ThemeProvider，否则缺 Provider fallback 用例会被外层 context 污染。
+ */
+function assertRuntimeScreenWebFixtureSource(pageSource, pluginSource) {
+  const sharedScreenImport =
+    /from '\.\.\/\.\.\/\.\.\/manual-tests\/runtime-api\/RuntimeApiScreen';/u;
+  const manualDirectory =
+    /path\.join\(\s*projectRoot,\s*'manual-tests\/runtime-api',?\s*\)/u;
+
+  if (
+    !sharedScreenImport.test(pageSource) ||
+    !pageSource.includes('<BrowserOnly') ||
+    !pageSource.includes('<RuntimeApiScreen />') ||
+    pageSource.includes('<ThemeProvider') ||
+    !manualDirectory.test(pluginSource) ||
+    !pluginSource.includes('include: [srcDir, runtimeManualDir')
+  ) {
+    throw new Error(
+      'Website /runtime-api 必须通过 BrowserOnly 直接挂载共享 RuntimeApiScreen，并由 Babel 编译 manual-tests/runtime-api；页面不得添加外层 ThemeProvider。'
+    );
+  }
+}
+
+function assertRuntimeScreenWebFixture() {
+  const pageSource = fs.readFileSync(
+    path.join(REPO_ROOT, 'website/src/pages/runtime-api.tsx'),
+    'utf8'
+  );
+  const pluginSource = fs.readFileSync(
+    path.join(REPO_ROOT, 'website/src/plugins/docusaurus-rnw/index.js'),
+    'utf8'
+  );
+  assertRuntimeScreenWebFixtureSource(pageSource, pluginSource);
+}
+
 /** 在 yarn.lock 中定位 `<name>@npm:<version>` 条目块,返回其 checksum(无则 null)。 */
 function findLockChecksum(lockText, name, version) {
   const lines = lockText.split(/\r?\n/u);
@@ -574,6 +610,7 @@ function runtimeImageFixtureInstructions(port = 8099) {
 function main() {
   assertNoDestinationArgument(process.argv.slice(2));
   assertRuntimeScreenSafeArea();
+  assertRuntimeScreenWebFixture();
 
   const rootManifest = readJson(path.join(REPO_ROOT, 'package.json'));
   const lockText = fs.readFileSync(path.join(REPO_ROOT, 'yarn.lock'), 'utf8');
@@ -709,6 +746,8 @@ module.exports = {
   assertOutsideExample,
   assertRuntimeScreenSafeArea,
   assertRuntimeScreenSafeAreaSource,
+  assertRuntimeScreenWebFixture,
+  assertRuntimeScreenWebFixtureSource,
   assertTemplateManifest,
   buildHarnessManifest,
   buildNativeTemplateSnapshot,
