@@ -103,6 +103,90 @@ function loadWebReveal(reduced: boolean) {
   return { Reveal, effects, stateUpdates };
 }
 
+function loadRerenderableWebReveal() {
+  let reduced = false;
+  let visibleState: boolean | undefined;
+  let latestEffect: Effect | undefined;
+  let activeCleanup: (() => void) | undefined;
+  let refCursor = 0;
+  const refs: Array<{ current: unknown }> = [];
+  const actualReact = jest.requireActual<typeof import('react')>('react');
+
+  jest.doMock('react', () => ({
+    ...actualReact,
+    useEffect: (effect: Effect) => {
+      latestEffect = effect;
+    },
+    useRef: <T,>(initial: T) => {
+      const index = refCursor++;
+      const existing = refs[index];
+      if (existing) return existing as { current: T };
+      const created = { current: initial };
+      refs[index] = created;
+      return created;
+    },
+    useState: <T,>(initial: T | (() => T)) => {
+      if (visibleState === undefined) {
+        visibleState = (
+          typeof initial === 'function' ? (initial as () => T)() : initial
+        ) as boolean;
+      }
+      return [
+        visibleState as T,
+        (value: T | ((current: T) => T)) => {
+          visibleState = (
+            typeof value === 'function'
+              ? (value as (current: T) => T)(visibleState as T)
+              : value
+          ) as boolean;
+        },
+      ];
+    },
+  }));
+  jest.doMock('react-native', () => ({
+    StyleSheet: {
+      flatten(style: unknown): unknown {
+        return style;
+      },
+    },
+    View: 'View',
+  }));
+  jest.doMock('../../../../src/theme', () => ({
+    motion: { base: 200 },
+    usePrefersReducedMotion: () => reduced,
+  }));
+
+  const Reveal = require('../../../../src/components/ui/Reveal/Reveal.web')
+    .Reveal as typeof import('../../../../src/components/ui/Reveal/Reveal.web').Reveal;
+
+  const runLatestEffect = () => {
+    activeCleanup?.();
+    const cleanup = latestEffect?.();
+    activeCleanup = typeof cleanup === 'function' ? cleanup : undefined;
+  };
+
+  return {
+    render(nextReduced: boolean) {
+      reduced = nextReduced;
+      refCursor = 0;
+      latestEffect = undefined;
+      return Reveal({
+        children: 'content',
+        duration: 320,
+        style: { opacity: 0.35 },
+      }) as ReactElement<WebRevealElementProps>;
+    },
+    flushEffect(options?: { strictReplay?: boolean }) {
+      runLatestEffect();
+      if (options?.strictReplay === true) runLatestEffect();
+    },
+    cleanup() {
+      activeCleanup?.();
+      activeCleanup = undefined;
+    },
+  };
+}
+
 beforeEach(() => {
   jest.resetModules();
   restoreFrameApi();
@@ -190,5 +274,33 @@ describe('Reveal Web', () => {
     ]);
     expect(effects[0]).toBeDefined();
     expect(effects[0]?.()).not.toThrow();
+  });
+
+  test('preference false→true→false 与 StrictMode replay 不产生先显示再隐藏', () => {
+    const frames = createFrameHarness();
+    const reveal = loadRerenderableWebReveal();
+
+    let element = reveal.render(false);
+    expect(element.props.style[1].opacity).toBe(0);
+    reveal.flushEffect({ strictReplay: true });
+    expect(frames.requestedIds).toEqual([1, 2]);
+
+    // StrictMode 第一轮已 cleanup；即使旧 callback 被强制释放，也不能注册下一帧。
+    frames.run(1);
+    expect(frames.requestedIds).toEqual([1, 2]);
+    frames.run(2);
+    frames.run(3);
+    element = reveal.render(false);
+    expect(element.props.style[1].opacity).toBe(0.35);
+
+    element = reveal.render(true);
+    expect(element.props.style[1]).toEqual({ opacity: 0.35 });
+    reveal.flushEffect();
+
+    // 从 reduced 切回可动画状态的这一帧就必须是 0，不能等 effect 再反向隐藏。
+    element = reveal.render(false);
+    expect(element.props.style[1].opacity).toBe(0);
+    reveal.flushEffect();
+    reveal.cleanup();
   });
 });

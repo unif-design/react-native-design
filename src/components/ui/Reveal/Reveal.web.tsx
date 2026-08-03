@@ -55,10 +55,14 @@ export function Reveal({
   const canAnimate = !reduced && frameApi !== undefined;
   const [visible, setVisible] = useState(() => !canAnimate);
   const generationRef = useRef(0);
+  const previousCanAnimateRef = useRef(canAnimate);
+  const animationJustEnabled =
+    canAnimate && previousCanAnimateRef.current === false;
 
   useEffect(() => {
     const generation = generationRef.current + 1;
     generationRef.current = generation;
+    previousCanAnimateRef.current = canAnimate;
 
     if (!canAnimate) {
       setVisible(true);
@@ -87,7 +91,7 @@ export function Reveal({
   const resolvedStyle = resolveRevealWebStyle(style);
   const animatedWebStyle = createRevealWebAnimatedStyle({
     targetOpacity: resolvedStyle.targetOpacity,
-    visible: canAnimate ? visible : true,
+    visible: canAnimate ? !animationJustEnabled && visible : true,
     animate: canAnimate,
     duration,
   });

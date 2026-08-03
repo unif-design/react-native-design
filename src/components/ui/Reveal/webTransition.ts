@@ -37,8 +37,45 @@ function isEmptyStyleInput(value: unknown): boolean {
 }
 
 /**
+ * RNW 会对 transform array 做深层 Object.keys / join / string coercion；
+ * StyleSheet.flatten 只做浅合并，不能证明这条后续路径安全。
+ */
+function isSafeWebTransform(transform: unknown): boolean {
+  if (transform === undefined || typeof transform === 'string') return true;
+  if (!Array.isArray(transform)) return false;
+
+  try {
+    return transform.every((operation) => {
+      if (
+        operation === null ||
+        typeof operation !== 'object' ||
+        Array.isArray(operation)
+      ) {
+        return false;
+      }
+
+      const keys = Object.keys(operation);
+      if (keys.length !== 1) return false;
+      const key = keys[0];
+      if (key === undefined) return false;
+      const value = (operation as Record<string, unknown>)[key];
+
+      if (key === 'matrix' || key === 'matrix3d') {
+        if (!Array.isArray(value)) return false;
+        value.join(',');
+      } else {
+        String(value);
+      }
+      return true;
+    });
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Web Reveal 只读取 caller 最终 opacity，不修改合法 caller style。
- * flatten 或 runtime 输入异常时丢弃 hostile style，避免把同一异常继续传给 View。
+ * flatten 或 RNW transform preprocessing 不安全时丢弃整份 hostile style。
  */
 export function resolveRevealWebStyle(
   style: unknown
@@ -60,7 +97,12 @@ export function resolveRevealWebStyle(
       return { callerStyle: undefined, targetOpacity: 1 };
     }
 
-    const opacity = (flattened as ViewStyle).opacity;
+    const flattenedStyle = flattened as ViewStyle;
+    if (!isSafeWebTransform(flattenedStyle.transform)) {
+      return { callerStyle: undefined, targetOpacity: 1 };
+    }
+
+    const opacity = flattenedStyle.opacity;
     return {
       callerStyle: style as StyleProp<ViewStyle>,
       targetOpacity:

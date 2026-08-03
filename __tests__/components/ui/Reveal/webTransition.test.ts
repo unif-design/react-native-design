@@ -8,6 +8,15 @@ import {
 import type { RevealAnimationFrameApi } from '../../../../src/components/ui/Reveal/webTransition';
 
 type FrameCallback = () => void;
+type ReactNativeWebPreprocess = (
+  style: Record<string, unknown>
+) => Record<string, unknown>;
+
+const reactNativeWebPreprocess = (
+  require('../../../../website/node_modules/react-native-web/dist/cjs/exports/StyleSheet/preprocess') as {
+    default: ReactNativeWebPreprocess;
+  }
+).default;
 
 function createFrameHarness() {
   let nextId = 1;
@@ -79,6 +88,19 @@ describe('resolveRevealWebStyle', () => {
     });
 
     expect(() => resolveRevealWebStyle(hostileStyle)).not.toThrow();
+    expect(resolveRevealWebStyle(hostileStyle)).toEqual({
+      callerStyle: undefined,
+      targetOpacity: 1,
+    });
+  });
+
+  test('flatten 成功但 RNW 深层 transform preprocessing 会抛错时失败关闭', () => {
+    const hostileStyle = {
+      opacity: 0.35,
+      transform: [null],
+    } as unknown as Record<string, unknown>;
+
+    expect(() => reactNativeWebPreprocess(hostileStyle)).toThrow();
     expect(resolveRevealWebStyle(hostileStyle)).toEqual({
       callerStyle: undefined,
       targetOpacity: 1,

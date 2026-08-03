@@ -88,7 +88,9 @@ import { Reveal } from '@unif/react-native-design';
 
 > 需要 web 端也有退场动画的场景不要依赖 `<Reveal>`(web 退场是直接移除);native-only 代码里直接用 reanimated 也可以,但**共享代码必须走 `<Reveal>`**。
 
-Web 不渲染额外 `<div>` 或 wrapper；`style`、`testID` 和 children 全部落在同一个 RN View。动画使用 `[callerStyle, animatedStyle]`，从 `opacity: 0` 过渡到 caller 最终合法 opacity（`0..1`），而不是固定到 `1`。两个 RAF 分别跟踪并在 cleanup 取消，generation guard 阻止旧回调写入新一轮；RAF API 不可用时失败关闭为立即显示。
+Web 不渲染额外 `<div>` 或 wrapper；`style`、`testID` 和 children 全部落在同一个 RN View。动画使用 `[callerStyle, animatedStyle]`，从 `opacity: 0` 过渡到 caller 最终合法 opacity（`0..1`），而不是固定到 `1`。两个 RAF 分别跟踪并在 cleanup 取消，generation guard 阻止旧回调写入新一轮；RAF API 不可用时失败关闭为立即显示。运行时从 reduced 切回允许动画时，同一 render 就回到 `opacity: 0` 再启动双 RAF，不会先显示后反向淡出。
+
+普通 JavaScript 若绕过类型传入 RNW 无法安全深处理的 `transform`（例如含 `null` 的 transform array），Web 会丢弃整份 caller style 并以目标 opacity `1` 失败关闭，避免异常结构继续进入 View preprocessing。
 
 ## 无障碍(a11y)
 

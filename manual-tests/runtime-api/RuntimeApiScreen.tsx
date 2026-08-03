@@ -796,7 +796,8 @@ function AnimationContainersSection(): React.JSX.Element {
         中占满剩余宽度； 淡入完成后 opacity 必须保持 0.35。未开启 reduced motion
         时必须经过两个独立 RAF；切换/卸载后旧 RAF 不得写入新一轮。开启 reduced
         motion 后重新挂载本屏， 首帧必须直接显示 0.35，且不得注册 RAF /
-        transition。当前 reduced=
+        transition；再切回未 reduced 时必须直接从 0
+        淡入，不能先显示再反向隐藏。当前 reduced=
         {String(reduced)}。真实 native/Web 未核验前不得记 PASS。
       </Text>
       <View style={styles.revealProbeRow}>
