@@ -1,5 +1,5 @@
-import React, { Suspense, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { Suspense, useRef, useState } from 'react';
+import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -11,6 +11,7 @@ import {
   Checkbox,
   ConfirmHost,
   DrawerHeader,
+  GradientWash,
   Grid,
   Icon,
   IconButton,
@@ -22,6 +23,7 @@ import {
   Pulse,
   PulseDot,
   Radio,
+  RadialHalo,
   Reveal,
   Search,
   Segmented,
@@ -39,7 +41,10 @@ import {
   r,
   toast,
   useColors,
+  useFontScale,
   usePrefersReducedMotion,
+  useSvgId,
+  useTheme,
   type NavBarSlot,
   type TextFieldSlot,
 } from '@unif/react-native-design';
@@ -74,6 +79,8 @@ export function RuntimeApiScreen(): React.JSX.Element {
   const [buttonPresses, setButtonPresses] = useState(0);
   const [unexpectedPresses, setUnexpectedPresses] = useState(0);
   const [navBarAction, setNavBarAction] = useState('—');
+  const [missingThemeProbeVisible, setMissingThemeProbeVisible] =
+    useState(false);
   const error = INPUT_ERROR_STATES[errorIndex] ?? '';
   const modeSwitchProps = modeSwitched
     ? { value: '后来受控', onChangeText: setControlledInput }
@@ -260,13 +267,17 @@ export function RuntimeApiScreen(): React.JSX.Element {
                 </Text>
               </Section>
 
-              <FontScaleSection />
+              <FontScaleSection
+                onOpenMissingProvider={() => setMissingThemeProbeVisible(true)}
+              />
 
               <ImageSourceAttemptSection />
 
               <ThumbnailSection />
 
               <AnimationContainersSection />
+
+              <SvgIdSection />
 
               <Section title="Toast">
                 <Button
@@ -424,6 +435,17 @@ export function RuntimeApiScreen(): React.JSX.Element {
             <ToastHost key={toastHostKey} testID="toast-host" />
           ) : null}
         </ThemeProvider>
+        <Modal
+          visible={missingThemeProbeVisible}
+          animationType="none"
+          onRequestClose={() => setMissingThemeProbeVisible(false)}
+        >
+          <SafeAreaView style={styles.missingThemeModal}>
+            <MissingThemeProviderProbe
+              onClose={() => setMissingThemeProbeVisible(false)}
+            />
+          </SafeAreaView>
+        </Modal>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
@@ -432,22 +454,40 @@ export function RuntimeApiScreen(): React.JSX.Element {
 /**
  * fontScale:render-time dynamic metric 与 maker metric 都只缩放一次。
  *
- * Inspector 对比 normal / large 两组同名 testID：文字应按 1 → 1.5 放大；
- * Button 内 Icon 和独立 20pt Icon、Avatar/AvatarWithRing 直径、Segmented
- * track、Stepper visual/44pt outer、Tag 高度及 ruler 都必须保持同样几何。
+ * Inspector 对比 normal / valid-1.5 / invalid-NaN / large-3：合法值原样保留，
+ * 非法值回退 1。Button 内 Icon 和独立 20pt Icon、Avatar/AvatarWithRing 直径、
+ * Segmented track、Stepper visual/44pt outer、Tag 高度及 ruler 都保持原几何。
  */
-function FontScaleSection(): React.JSX.Element {
+function FontScaleSection({
+  onOpenMissingProvider,
+}: {
+  onOpenMissingProvider: () => void;
+}): React.JSX.Element {
   return (
-    <Section title="fontScale 1.0 / 1.5 typography">
+    <Section title="fontScale normalization / typography / fallback">
       <Text style={styles.result}>
-        用 Inspector 并排测量 normal / large：Button、Avatar、Segmented、
-        Stepper、Tag、AvatarWithRing 的文字应放大 1.5 倍且只放大一次。Button 内
-        Icon 与 standalone Icon 均不得放大。所有容器、padding 和圆角均保持原值；
-        Stepper 44pt outer / visual frame、Tag 高度和 ruler 几何必须不变。此区
-        真实 native/Web 测量前不得记为 PASS。
+        用 Inspector 并排测量 normal / valid-1.5 / invalid-NaN /
+        large-3：invalid 必须回退 1，large 必须保留
+        3（不设上限）。Button、Avatar、 Segmented、Stepper、Tag、AvatarWithRing
+        的文字按归一化值放大且只放大一次。Button 内 Icon 与 standalone Icon
+        均不得放大；所有容器、padding 和圆角保持原值，Stepper 44pt outer /
+        visual frame、Tag 高度和 ruler 几何不变。真实 native/Web 测量前不得记为
+        PASS。
       </Text>
-      <FontScaleSample id="normal" fontScale={1} />
-      <FontScaleSample id="large" fontScale={1.5} />
+      <FontScaleSample id="normal" fontScale={1} expectedScale={1} />
+      <FontScaleSample id="valid-1-5" fontScale={1.5} expectedScale={1.5} />
+      <FontScaleSample
+        id="invalid-nan"
+        fontScale={Number.NaN}
+        expectedScale={1}
+      />
+      <FontScaleSample id="large-3" fontScale={3} expectedScale={3} />
+      <Button
+        label="打开缺 ThemeProvider fallback probe"
+        variant="secondary"
+        onPress={onOpenMissingProvider}
+        testID="open-missing-theme-provider-probe"
+      />
     </Section>
   );
 }
@@ -455,9 +495,11 @@ function FontScaleSection(): React.JSX.Element {
 function FontScaleSample({
   id,
   fontScale,
+  expectedScale,
 }: {
   id: string;
   fontScale: number;
+  expectedScale: number;
 }): React.JSX.Element {
   const [segment, setSegment] = useState('first');
   const [stepper, setStepper] = useState(1);
@@ -465,8 +507,9 @@ function FontScaleSample({
   return (
     <ThemeProvider fontScale={fontScale}>
       <View style={styles.fontScaleSample} testID={`font-scale-${id}`}>
+        <FontScaleValueProbe id={id} expectedScale={expectedScale} />
         <Button
-          label={`Button ${fontScale}`}
+          label={`Button ${id}`}
           leftIcon="check"
           onPress={() => {}}
           testID={`font-scale-${id}-button`}
@@ -496,10 +539,10 @@ function FontScaleSample({
           onChange={setStepper}
           min={0}
           max={9}
-          accessibilityLabel={`fontScale ${fontScale} 数量`}
+          accessibilityLabel={`fontScale ${id} 数量`}
           testID={`font-scale-${id}-stepper`}
         />
-        <Tag label={`Tag ${fontScale}`} testID={`font-scale-${id}-tag`} />
+        <Tag label={`Tag ${id}`} testID={`font-scale-${id}-tag`} />
         <AvatarWithRing
           label="字"
           size={64}
@@ -508,6 +551,69 @@ function FontScaleSample({
         <View style={styles.fontScaleRuler} testID={`font-scale-${id}-ruler`} />
       </View>
     </ThemeProvider>
+  );
+}
+
+function FontScaleValueProbe({
+  id,
+  expectedScale,
+}: {
+  id: string;
+  expectedScale: number;
+}): React.JSX.Element {
+  const normalizedScale = useFontScale();
+  return (
+    <Result
+      label={`fontScale ${id}`}
+      value={`normalized=${normalizedScale}; expected=${expectedScale}`}
+    />
+  );
+}
+
+/**
+ * 该组件只挂在 ThemeProvider 兄弟 Modal 中，确保 React context 路径上没有 Provider。
+ * 首帧必须先用稳定 light fallback 渲染，dev 诊断随后才由 effect 发出。
+ */
+function MissingThemeProviderProbe({
+  onClose,
+}: {
+  onClose: () => void;
+}): React.JSX.Element {
+  const theme = useTheme();
+  const initialTheme = useRef(theme);
+  const [rerenders, setRerenders] = useState(0);
+
+  return (
+    <View
+      style={[
+        styles.missingThemeProbe,
+        { backgroundColor: theme.colors.background },
+      ]}
+      testID="missing-theme-provider-probe"
+    >
+      <Text style={[styles.sectionTitle, { color: theme.colors.foreground }]}>
+        Missing ThemeProvider fallback
+      </Text>
+      <Result
+        label="missing provider"
+        value={`scheme=${theme.scheme}; fontScale=${theme.fontScale}; stable=${String(
+          initialTheme.current === theme
+        )}; rerenders=${rerenders}`}
+      />
+      <Text style={[styles.result, { color: theme.colors.foregroundMuted }]}>
+        首次内容必须正常显示，再在 effect 后输出一次 dev 诊断；点击重渲染后
+        stable 仍为 true，且不得重复诊断。真实日志与首帧未核验前不得记 PASS。
+      </Text>
+      <Button
+        label="重渲染 fallback probe"
+        onPress={() => setRerenders((count) => count + 1)}
+      />
+      <Button
+        label="关闭 fallback probe"
+        variant="secondary"
+        onPress={onClose}
+      />
+    </View>
   );
 }
 
@@ -825,6 +931,78 @@ function AnimationContainersSection(): React.JSX.Element {
         style={styles.spinnerOuterProbe}
         testID="spinner-layout-probe"
       />
+    </Section>
+  );
+}
+
+/**
+ * React useId、dirty prefix/override 与多实例 SVG definition 隔离。
+ *
+ * DOM/native Inspector 中每个 id 都必须满足 XML/SVG 名称约束，引用必须与 definition
+ * 一致；真实两端检查前只能记 BLOCKED。
+ */
+function SvgIdSection(): React.JSX.Element {
+  const dirtyPrefixA = useSvgId('9 dirty:prefix A');
+  const dirtyPrefixB = useSvgId('9 dirty:prefix B');
+  const emptyPartsFallback = useSvgId(':::', ':::');
+  const controlledOverride = useSvgId('ignored prefix', 'custom:id value');
+  const isSafeId = (value: string) => /^[A-Za-z_][A-Za-z0-9_.-]*$/u.test(value);
+
+  return (
+    <Section title="SVG ID sanitization / instance isolation">
+      <Text style={styles.result}>
+        Inspector 核对所有 gradient definition id 与 fill
+        url(#id)：不得含空格、冒号或 非法开头。相同 dirty/空 override
+        的不同实例必须回退各自 useId，不能碰撞； 两个 AvatarWithRing 自动 id
+        也必须不同。dirty prefix、空 prefix + override、非空 dirty override
+        都应稳定跨重渲染。真实 native/Web 节点未检查前不得记 PASS。
+      </Text>
+      <Result
+        label="dirty prefix A"
+        value={`${dirtyPrefixA}; safe=${String(isSafeId(dirtyPrefixA))}`}
+      />
+      <Result
+        label="dirty prefix B"
+        value={`${dirtyPrefixB}; safe=${String(isSafeId(dirtyPrefixB))}`}
+      />
+      <Result
+        label="empty parts fallback"
+        value={`${emptyPartsFallback}; safe=${String(
+          isSafeId(emptyPartsFallback)
+        )}`}
+      />
+      <Result
+        label="controlled override"
+        value={`${controlledOverride}; expected=custom-id-value`}
+      />
+      <View style={styles.svgIdProbeRow}>
+        <View style={styles.decorationProbe} testID="svg-id-gradient-dirty-a">
+          <GradientWash
+            height={56}
+            color="#EB6E00"
+            fromOpacity={0.5}
+            toOpacity={0}
+            gradientId="9 wash:id A"
+          />
+        </View>
+        <View style={styles.decorationProbe} testID="svg-id-gradient-dirty-b">
+          <GradientWash
+            height={56}
+            color="#EB6E00"
+            fromOpacity={0.5}
+            toOpacity={0}
+            gradientId="9 wash:id B"
+          />
+        </View>
+        <View testID="svg-id-halo-empty-a">
+          <RadialHalo size={56} color="#EB6E00" gradientId=":::" />
+        </View>
+        <View testID="svg-id-halo-empty-b">
+          <RadialHalo size={56} color="#EB6E00" gradientId=":::" />
+        </View>
+        <AvatarWithRing label="甲" size={56} testID="svg-id-avatar-ring-a" />
+        <AvatarWithRing label="乙" size={56} testID="svg-id-avatar-ring-b" />
+      </View>
     </Section>
   );
 }
@@ -1474,6 +1652,17 @@ function Result({
 const styles = StyleSheet.create({
   root: { flex: 1 },
   safeArea: { flex: 1 },
+  missingThemeModal: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 24,
+  },
+  missingThemeProbe: {
+    gap: 12,
+    padding: 20,
+    borderWidth: 1,
+    borderRadius: 12,
+  },
   content: { padding: 16, gap: 24 },
   section: { gap: 12 },
   sectionTitle: { fontSize: 18, fontWeight: '600' },
@@ -1536,6 +1725,17 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'flex-end',
     transform: [{ translateX: 4 }, { scale: 1.2 }],
+    borderWidth: 1,
+  },
+  svgIdProbeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 12,
+  },
+  decorationProbe: {
+    width: 96,
+    height: 56,
     borderWidth: 1,
   },
   selectionRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
