@@ -4,9 +4,10 @@
 /**
  * runtime peer 漂移门禁。
  *
- * 唯一被允许的 peer 失败是 react-native-reanimated-carousel@5.0.0 对
- * react-native-gesture-handler 的错误 metadata(`>=2.9.0 <3.0.0`)——该组合已在本仓
- * 实测适配。除此之外任何 runtime peer 失败都必须让命令退出非零。
+ * 唯一被允许的 peer 失败类型是 react-native-reanimated-carousel@5.0.0 对
+ * react-native-gesture-handler 的错误 metadata(`>=2.9.0 <3.0.0`)。root、example、
+ * website 三个 workspace 各有一条该已验证例外;除此之外任何 runtime peer 失败都必须
+ * 让命令退出非零。
  *
  * 为什么不用全局 peer 忽略 / --legacy-peer-deps:那会连同真实的 major 漂移一起吞掉。
  * 这里把 allowlist 收窄到「包名 + 请求方 locator + 精确 range + provider major」四重匹配,
@@ -25,6 +26,7 @@ const RUNTIME_PACKAGES = new Set([
 ]);
 const REQUIRED_PROVIDERS = new Set([
   '@unif/react-native-design@workspace:.',
+  '@unif/react-native-design-example@workspace:example',
   '@unif/react-native-design-website@workspace:website',
 ]);
 const KNOWN_REQUESTER = 'react-native-reanimated-carousel@npm:5.0.0';

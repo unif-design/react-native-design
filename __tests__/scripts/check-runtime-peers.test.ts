@@ -7,6 +7,7 @@ import {
 
 const LIST = [
   'pc850d5 → ✘ @unif/react-native-design@workspace:. provides react-native-gesture-handler@npm:3.1.0',
+  'pexample → ✘ @unif/react-native-design-example@workspace:example provides react-native-gesture-handler@npm:3.1.0',
   'pwebsite → ✘ @unif/react-native-design-website@workspace:website provides react-native-gesture-handler@npm:3.1.0',
   'punrelated → ✘ @unif/react-native-design@workspace:. provides react@npm:19.2.3',
 ].join('\n');
@@ -26,11 +27,16 @@ const websiteDetail = rootDetail.replaceAll(
   '@unif/react-native-design@workspace:.',
   '@unif/react-native-design-website@workspace:website'
 );
+const exampleDetail = rootDetail.replaceAll(
+  '@unif/react-native-design@workspace:.',
+  '@unif/react-native-design-example@workspace:example'
+);
 
 // Yarn 4.11 真实输出:请求方 locator 后面还挂着 `[hash]` 虚拟实例标记。
 // 逐字复制自本仓 `yarn explain peer-requirements pc850d5 / p86ac4b`。
 const REAL_LIST = [
   'p86ac4b → ✘ @unif/react-native-design-website@workspace:website provides react-native-gesture-handler@npm:3.1.0 [53762] to @gorhom/bottom-sheet@npm:5.2.14 [53762] and 2 other dependencies',
+  'pexample → ✘ @unif/react-native-design-example@workspace:example provides react-native-gesture-handler@npm:3.1.0 [e1234] to react-native-reanimated-carousel@npm:5.0.0 [e1234]',
   'pc850d5 → ✘ @unif/react-native-design@workspace:. provides react-native-gesture-handler@npm:3.1.0 [c9356] to react-native-reanimated-carousel@npm:5.0.0 [c9356]',
 ].join('\n');
 
@@ -56,12 +62,23 @@ const REAL_WEBSITE_DETAIL = [
   '  Unfortunately, the requested ranges have no overlap',
 ].join('\n');
 
+const REAL_EXAMPLE_DETAIL = REAL_ROOT_DETAIL.replaceAll(
+  '@unif/react-native-design@workspace:.',
+  '@unif/react-native-design-example@workspace:example'
+).replaceAll('[c9356]', '[e1234]');
+
 describe('parseRequirementList — yarn explain peer-requirements 列表', () => {
   test('只抽取失败(✘)行的 hash / provider / 包名 / 版本', () => {
     expect(parseRequirementList(LIST)).toEqual([
       {
         hash: 'pc850d5',
         providerLocator: '@unif/react-native-design@workspace:.',
+        packageName: 'react-native-gesture-handler',
+        providerVersion: '3.1.0',
+      },
+      {
+        hash: 'pexample',
+        providerLocator: '@unif/react-native-design-example@workspace:example',
         packageName: 'react-native-gesture-handler',
         providerVersion: '3.1.0',
       },
@@ -112,14 +129,15 @@ describe('parseRequirementDetail — 明细解析', () => {
 });
 
 describe('auditRuntimePeers — 严格 allowlist', () => {
-  test('只接受 root 与 website 的 RNRC 5.0.0/RNGH 3 已知例外', () => {
+  test('只接受 root、example 与 website 的 RNRC 5.0.0/RNGH 3 三条已知例外', () => {
     const summaries = parseRequirementList(LIST);
     const details = new Map([
       ['pc850d5', parseRequirementDetail('pc850d5', rootDetail)],
+      ['pexample', parseRequirementDetail('pexample', exampleDetail)],
       ['pwebsite', parseRequirementDetail('pwebsite', websiteDetail)],
     ]);
     expect(auditRuntimePeers(summaries, details)).toEqual({
-      knownExceptions: ['pc850d5', 'pwebsite'],
+      knownExceptions: ['pc850d5', 'pexample', 'pwebsite'],
       errors: [],
     });
   });
@@ -135,7 +153,7 @@ describe('auditRuntimePeers — 严格 allowlist', () => {
     ]);
     const result = auditRuntimePeers(summaries, details);
     expect(result.errors).not.toHaveLength(0);
-    // 漂移必须被拒绝为例外本身,而不是只靠「缺少 website 审计项」凑出 error。
+    // 漂移必须被拒绝为例外本身,而不是只靠「缺少其他 workspace 审计项」凑出 error。
     expect(result.knownExceptions).toHaveLength(0);
   });
 
@@ -143,11 +161,13 @@ describe('auditRuntimePeers — 严格 allowlist', () => {
     const summaries = parseRequirementList(LIST);
     const details = new Map([
       ['pc850d5', parseRequirementDetail('pc850d5', rootDetail)],
+      ['pexample', parseRequirementDetail('pexample', exampleDetail)],
       ['pwebsite', parseRequirementDetail('pwebsite', websiteDetail)],
       ['punrelated', parseRequirementDetail('punrelated', rootDetail)],
     ]);
     expect(auditRuntimePeers(summaries, details).knownExceptions).toEqual([
       'pc850d5',
+      'pexample',
       'pwebsite',
     ]);
   });
@@ -159,7 +179,7 @@ describe('auditRuntimePeers — 严格 allowlist', () => {
     expect(result.knownExceptions).toHaveLength(0);
   });
 
-  test('root 与 website 任一缺失审计项都失败', () => {
+  test('root、example 与 website 任一缺失审计项都失败', () => {
     const summaries = parseRequirementList(LIST.split('\n')[0] ?? '');
     const details = new Map([
       ['pc850d5', parseRequirementDetail('pc850d5', rootDetail)],
@@ -171,28 +191,30 @@ describe('auditRuntimePeers — 严格 allowlist', () => {
     );
   });
 
-  test('额外的第三 workspace provider 不得进入窄例外', () => {
-    const thirdProvider = '@unif/runtime-third@workspace:runtime-third';
-    const thirdDetail = rootDetail.replaceAll(
+  test('额外的第四 workspace provider 不得进入窄例外', () => {
+    const fourthProvider = '@unif/runtime-fourth@workspace:runtime-fourth';
+    const fourthDetail = rootDetail.replaceAll(
       '@unif/react-native-design@workspace:.',
-      thirdProvider
+      fourthProvider
     );
     const summaries = parseRequirementList(
       [
         LIST.split('\n')[0],
         LIST.split('\n')[1],
-        'pthird → ✘ @unif/runtime-third@workspace:runtime-third provides react-native-gesture-handler@npm:3.1.0',
+        LIST.split('\n')[2],
+        'pfourth → ✘ @unif/runtime-fourth@workspace:runtime-fourth provides react-native-gesture-handler@npm:3.1.0',
       ].join('\n')
     );
     const details = new Map([
       ['pc850d5', parseRequirementDetail('pc850d5', rootDetail)],
+      ['pexample', parseRequirementDetail('pexample', exampleDetail)],
       ['pwebsite', parseRequirementDetail('pwebsite', websiteDetail)],
-      ['pthird', parseRequirementDetail('pthird', thirdDetail)],
+      ['pfourth', parseRequirementDetail('pfourth', fourthDetail)],
     ]);
 
     const result = auditRuntimePeers(summaries, details);
-    expect(result.errors.join('\n')).toContain(thirdProvider);
-    expect(result.knownExceptions).toEqual(['pc850d5', 'pwebsite']);
+    expect(result.errors.join('\n')).toContain(fourthProvider);
+    expect(result.knownExceptions).toEqual(['pc850d5', 'pexample', 'pwebsite']);
   });
 
   test.each([
@@ -226,7 +248,7 @@ describe('auditRuntimePeers — 严格 allowlist', () => {
     ],
   ])('summary/detail 的 %s 身份不一致时失败', (_field, mismatchedDetail) => {
     const summaries = parseRequirementList(
-      [LIST.split('\n')[0], LIST.split('\n')[1]].join('\n')
+      [LIST.split('\n')[0], LIST.split('\n')[2]].join('\n')
     );
     const details = new Map([
       ['pc850d5', mismatchedDetail],
@@ -243,7 +265,7 @@ describe('auditRuntimePeers — 严格 allowlist', () => {
       [
         LIST.split('\n')[0],
         'pduplicate → ✘ @unif/react-native-design@workspace:. provides react-native-gesture-handler@npm:3.1.0',
-        LIST.split('\n')[1],
+        LIST.split('\n')[2],
       ].join('\n')
     );
     const details = new Map([
@@ -259,19 +281,24 @@ describe('auditRuntimePeers — 严格 allowlist', () => {
 
   test('真实 Yarn 4.11 输出(requester 带 [hash] 虚拟实例后缀)被接受', () => {
     const summaries = parseRequirementList(REAL_LIST);
-    expect(summaries.map((item) => item.hash)).toEqual(['p86ac4b', 'pc850d5']);
+    expect(summaries.map((item) => item.hash)).toEqual([
+      'p86ac4b',
+      'pexample',
+      'pc850d5',
+    ]);
     const details = new Map([
       ['p86ac4b', parseRequirementDetail('p86ac4b', REAL_WEBSITE_DETAIL)],
+      ['pexample', parseRequirementDetail('pexample', REAL_EXAMPLE_DETAIL)],
       ['pc850d5', parseRequirementDetail('pc850d5', REAL_ROOT_DETAIL)],
     ]);
     expect(auditRuntimePeers(summaries, details)).toEqual({
-      knownExceptions: ['p86ac4b', 'pc850d5'],
+      knownExceptions: ['p86ac4b', 'pexample', 'pc850d5'],
       errors: [],
     });
   });
 
   test('虚拟实例后缀不会掩盖真实的 RNRC 版本漂移', () => {
-    const summaries = parseRequirementList(REAL_LIST.split('\n')[1] ?? '');
+    const summaries = parseRequirementList(REAL_LIST.split('\n')[2] ?? '');
     const details = new Map([
       [
         'pc850d5',
