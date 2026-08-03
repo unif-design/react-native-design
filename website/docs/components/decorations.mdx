@@ -108,7 +108,7 @@ import { GradientWash, RadialHalo, ScreenBackdrop } from '@unif/react-native-des
 
 `useSvgId(prefix, override?)` —— 公共 hook,生成**稳定且 SVG 安全**的渐变 id,用来喂 `GradientWash` / `RadialHalo` 的 `gradientId`(或你自建 SVG 渐变的 `<LinearGradient id>` / `<RadialGradient id>`)。
 
-React 19 的 `useId()` 会返回含冒号的串(`:r0:`)。`useSvgId` 会无条件取得该 React ID，再对 `prefix`、`override` 和 React ID 使用同一规则：连续非法字符替换为 `-`，只保留 `[A-Za-z0-9_.-]`，去掉首尾的 `.` / `-`，并确保最终结果以字母或 `_` 开头。未传 `override` 时按消毒后的 `prefix + React ID` 自动生成；传入值会先消毒，消毒后为空也会回退自动路径，不会产生多实例共用的固定空 ID。
+React `useId()` 的字符串格式由 renderer 决定，不应依赖某一种分隔符。`useSvgId` 会无条件取得该 React ID，再对 `prefix`、`override` 和 React ID 使用同一规则：连续非法字符替换为 `-`，只保留 `[A-Za-z0-9_.-]`，去掉首尾的 `.` / `-`，并确保最终结果以字母或 `_` 开头。未传 `override` 时按消毒后的 `prefix + React ID` 自动生成；传入值会先消毒，消毒后为空也会回退自动路径，不会产生多实例共用的固定空 ID。
 
 ```tsx
 import { GradientWash, useSvgId } from '@unif/react-native-design';

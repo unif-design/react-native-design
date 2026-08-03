@@ -24,11 +24,10 @@ export function buildSvgId(
 }
 
 /**
- * SVG 渐变 id 生成 hook —— 消毒 prefix、override 与 React 19 useId。
+ * SVG 渐变 id 生成 hook —— 消毒 prefix、override 与 React useId。
  *
- * Why:React 19 的 useId() 会返回含冒号(`:r0:`)的字符串,caller 传入的 prefix
- * 与 override 也可能包含空白或标点；统一消毒并保证合法首字符后，SVG 引用才能
- * 跨平台稳定。
+ * Why:useId() 的字符串格式由 renderer 决定，caller 传入的 prefix 与 override
+ * 也可能包含空白或标点；统一消毒并保证合法首字符后，SVG 引用才能跨平台稳定。
  *
  * @param prefix  短前缀,区分同屏多 gradient(如 "gw" / "rh" / "av")。
  * @param override 可选:外部传入的 gradientId;消毒后非空时优先使用。

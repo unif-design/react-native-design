@@ -7,6 +7,7 @@ import {
 describe('sanitizeSvgIdPart', () => {
   test.each([
     ['a:b c', 'a-b-c'],
+    ['a::: b', 'a-b'],
     ['..a__b--', 'a__b'],
     ['___', '___'],
     [':::', ''],
@@ -30,5 +31,17 @@ describe('buildSvgId', () => {
 
   test('消毒并优先使用非空 override', () => {
     expect(buildSvgId('grad', 'custom:id', ':r2:')).toBe('custom-id');
+  });
+
+  test.each([
+    [':::', ':r3:', 'r3'],
+    ['grad', ':::', 'grad'],
+  ])('自动路径过滤空 part：%p + %p -> %p', (prefix, reactId, expected) => {
+    expect(buildSvgId(prefix, undefined, reactId)).toBe(expected);
+  });
+
+  test('相同输入重复构建返回稳定结果', () => {
+    expect(buildSvgId('hero wash', undefined, ':r4:')).toBe('hero-wash-r4');
+    expect(buildSvgId('hero wash', undefined, ':r4:')).toBe('hero-wash-r4');
   });
 });
