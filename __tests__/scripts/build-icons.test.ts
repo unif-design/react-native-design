@@ -141,6 +141,13 @@ describe('collectSvgIssues — fail-fast 校验', () => {
       /rect.*rx/u,
     ],
     ['circle 缺 r', SVG('<circle cx="1" cy="1"></circle>'), /circle.*r/u],
+    ['circle 缺 cx', SVG('<circle cy="1" r="1"></circle>'), /circle.*cx/u],
+    ['circle 缺 cy', SVG('<circle cx="1" r="1"></circle>'), /circle.*cy/u],
+    [
+      'circle 同时缺 cx/cy',
+      SVG('<circle r="1"></circle>'),
+      /circle.*(?:cx|cy)/u,
+    ],
     [
       'circle r 非正数',
       SVG('<circle cx="1" cy="1" r="0"></circle>'),

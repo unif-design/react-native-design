@@ -396,8 +396,8 @@ function collectScannedSvgIssues(scan) {
       });
       checkNumberAttribute(scan, shape, 'rx', { nonNegative: true });
     } else if (shape.name === 'circle') {
-      checkNumberAttribute(scan, shape, 'cx');
-      checkNumberAttribute(scan, shape, 'cy');
+      checkNumberAttribute(scan, shape, 'cx', { required: true });
+      checkNumberAttribute(scan, shape, 'cy', { required: true });
       checkNumberAttribute(scan, shape, 'r', {
         required: true,
         positive: true,
@@ -444,8 +444,8 @@ function parseScannedSvg(scan) {
     }
     return {
       kind: 'circle',
-      cx: Number(attributes.cx ?? 0),
-      cy: Number(attributes.cy ?? 0),
+      cx: Number(attributes.cx),
+      cy: Number(attributes.cy),
       r: Number(attributes.r),
       ...style,
     };
