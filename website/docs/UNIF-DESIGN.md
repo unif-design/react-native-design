@@ -339,7 +339,14 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
   `loading` 额外上报 busy；空白 `label` 在 effect 诊断并失败关闭 action。
 - **IconButton** —— 纯图标按钮，`onPress` 与 `accessibilityLabel` 类型必填；
   空白名称在 effect 诊断并失败关闭，disabled/loading 语义与 Button 相同。
-- **Avatar** —— 单字符 monogram。variant:`brand` / `info` / `soft` / `neutral`;size:`xs`(18)/ `sm`(28)/ `md`(32)/ `lg`(40)/ `xl`(56)。
+- **Avatar** —— 单字符 monogram。variant:`brand` / `info` / `soft` /
+  `neutral`;size:`xs`(18)/ `sm`(28)/ `md`(32)/ `lg`(40)/ `xl`(56)。
+  图片只接受有限正整数 asset、trim 后非空 URI object，或非空且逐项合法的 URI
+  source 数组；nested cycle/function/symbol/bigint/非有限数等 invalid source
+  直接 fallback，不挂 Image。完整 source 字段生成 semantic key，对象 /
+  headers key 顺序不影响 identity，数组顺序与真实字段变化会影响。失败 state
+  只属于 keyed 私有 attempt；等价新引用不重试，真实变化才重挂，
+  `A₁ → B → A₂` 后迟到的 A₁ error 不能污染 A₂。
 - **Tag** —— 状态徽章,5 语义 × 2 尺寸(`md` / `lg`)。
 - **Chip** —— 胶囊形可选中 pill;`selected` 切主色边框 / 文本;可带 leading / trailing。Suggestion 底层。
 - **Confirm** —— 命令式 `confirm(): Promise<boolean>` + `<ConfirmHost />`,高风险二次确认(纯 single-owner Store 保证同一时间只 1 个 Host / active entry；裸 RN Modal,不依赖 @gorhom)。自定义确认/取消文案先 trim，空白值回退“确认”/“取消”。
@@ -371,7 +378,9 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
   primitive 叶子会安全归一化。
 - **TabBar** —— 固定底部 tab,50px,带 badge。
 - **Tabs / Segmented** —— 页级下划线 / 局部分段,共用 `TabItem` 形状。
-- **Drawer** —— `DrawerHeader` + `@react-navigation/drawer`。
+- **Drawer** —— `DrawerHeader` + `@react-navigation/drawer`；头像 source
+  复用 Avatar 的运行时校验、semantic identity 与 attempt-local failure
+  契约，整个头像容器继续作为装饰子树隐藏。
 
 ### 反馈
 - **Toast** —— 命令式 `toast()` + `<ToastHost />`,全局轻提示,自动消失。

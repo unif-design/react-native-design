@@ -258,6 +258,8 @@ export function RuntimeApiScreen(): React.JSX.Element {
 
               <FontScaleSection />
 
+              <ImageSourceAttemptSection />
+
               <Section title="Toast">
                 <Button
                   label="① Host 关闭时发布(应保留到挂上再显示)"
@@ -504,6 +506,161 @@ function FontScaleSample({
 const DISPLAY_IMAGE_SOURCE = {
   uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
 } as const;
+
+type ImageAttemptStep = 'a1' | 'b' | 'a2';
+
+/**
+ * 图片 attempt identity 与 ABA 隔离。
+ *
+ * fixture origin 需提供:
+ * - GET /equivalent.png?run=N:首次立即失败；日志证明等价新对象没有第 2 次请求。
+ * - GET /aba.png?run=N:同一 run 第 1 次请求保持 pending，第 2 次返回合法 PNG。
+ * - POST /release-a1?run=N:让该 run 仍 pending 的第 1 次 /aba.png 返回错误。
+ *
+ * 真实 fixture、native/Web Image 事件和可见结果均实际核验前，本区只能记 BLOCKED。
+ */
+function ImageSourceAttemptSection(): React.JSX.Element {
+  const [fixtureOriginDraft, setFixtureOriginDraft] = useState('');
+  const [fixtureOrigin, setFixtureOrigin] = useState('');
+  const [fixtureRun, setFixtureRun] = useState(0);
+  const [equivalentRevision, setEquivalentRevision] = useState(0);
+  const [step, setStep] = useState<ImageAttemptStep>('a1');
+  const [releaseResult, setReleaseResult] = useState('—');
+  const origin = fixtureOrigin.trim().replace(/\/+$/u, '');
+  const runQuery = `run=${fixtureRun}`;
+  const equivalentSource = {
+    uri: origin.length > 0 ? `${origin}/equivalent.png?${runQuery}` : ' ',
+    headers: { Accept: 'image/png' },
+    cache: 'reload' as const,
+  };
+  const sourceA = {
+    uri: origin.length > 0 ? `${origin}/aba.png?${runQuery}` : ' ',
+    headers: { Accept: 'image/png' },
+    width: 1,
+    height: 1,
+    scale: 1,
+    cache: 'reload' as const,
+  };
+  const abaSource = step === 'b' ? DISPLAY_IMAGE_SOURCE : sourceA;
+  const invalidNestedSource = {
+    uri: origin.length > 0 ? `${origin}/must-not-request.png?${runQuery}` : ' ',
+    headers: { token: Symbol('invalid-header') },
+  } as never;
+
+  const applyFixtureOrigin = () => {
+    setFixtureOrigin(fixtureOriginDraft);
+    setFixtureRun((run) => run + 1);
+    setEquivalentRevision(0);
+    setStep('a1');
+    setReleaseResult('—');
+  };
+
+  const releaseLateA1 = async () => {
+    if (origin.length === 0) {
+      setReleaseResult('fixture origin 为空');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${origin}/release-a1?${runQuery}`, {
+        method: 'POST',
+      });
+      setReleaseResult(`HTTP ${response.status}`);
+    } catch (error) {
+      setReleaseResult(
+        error instanceof Error ? error.message : 'fixture release failed'
+      );
+    }
+  };
+
+  return (
+    <Section title="Image source identity / attempt ABA">
+      <Text style={styles.result}>
+        填入设备可访问的受控 HTTP fixture origin 后，点击“应用 fixture origin /
+        新 run”。equivalent.png 首次失败并显示 E；点击“等价 A 新对象”后 key
+        相同，失败 attempt 不得重挂，服务端也不得收到第 2 次请求。
+      </Text>
+      <Text style={styles.result}>
+        ABA 用例依次点击 A₁ → B → A₂：A₁ 请求保持 pending，B 显示图片，A₂ 以与
+        A₁ 完全相同的 semantic source 发起第 2 次请求并成功。最后点击“释放 A₁
+        late error”，A₂ 图片不得回退。
+      </Text>
+      <Text style={styles.result}>
+        invalid-nested-avatar / drawer 的 Symbol header 必须直接显示
+        fallback，服务端不得收到 must-not-request.png。真实 native/Web 与
+        fixture 事件未执行前不得记 PASS。
+      </Text>
+      <Input
+        value={fixtureOriginDraft}
+        onChangeText={setFixtureOriginDraft}
+        accessibilityLabel="图片 attempt fixture origin"
+        placeholder="https://device-reachable-fixture"
+        testID="image-attempt-fixture-origin"
+      />
+      <Button
+        label="应用 fixture origin / 新 run"
+        variant="secondary"
+        onPress={applyFixtureOrigin}
+      />
+      <Result label="fixture run" value={String(fixtureRun)} />
+      <Row label="等价新对象不重试">
+        <Avatar
+          label="E"
+          source={equivalentSource}
+          size="lg"
+          testID="image-attempt-equivalent"
+        />
+        <Button
+          label="等价 A 新对象"
+          variant="secondary"
+          onPress={() => setEquivalentRevision((revision) => revision + 1)}
+        />
+      </Row>
+      <Result
+        label="equivalent object revision"
+        value={String(equivalentRevision)}
+      />
+      <Row label={`ABA current=${step}`}>
+        <Avatar
+          label="A"
+          source={abaSource}
+          size="lg"
+          testID={`image-attempt-${step}`}
+        />
+      </Row>
+      <View style={styles.imageAttemptControls}>
+        <Button
+          label="A₁（首请求 pending）"
+          variant="secondary"
+          onPress={() => setStep('a1')}
+        />
+        <Button
+          label="B（真实变化）"
+          variant="secondary"
+          onPress={() => setStep('b')}
+        />
+        <Button
+          label="A₂（与 A₁ 等价）"
+          variant="secondary"
+          onPress={() => setStep('a2')}
+        />
+        <Button label="释放 A₁ late error" onPress={releaseLateA1} />
+      </View>
+      <Result label="release A₁" value={releaseResult} />
+      <Avatar
+        label="I"
+        source={invalidNestedSource}
+        size="lg"
+        testID="invalid-nested-avatar"
+      />
+      <DrawerHeader
+        name="Invalid Nested"
+        source={invalidNestedSource}
+        testID="invalid-nested-drawer"
+      />
+    </Section>
+  );
+}
 
 /**
  * Logo / Grid / DrawerHeader / VersionPill 展示语义。
@@ -1166,6 +1323,12 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 8,
     borderWidth: 1,
+  },
+  imageAttemptControls: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 12,
   },
   selectionRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   navBarFrame: { borderWidth: 1 },
