@@ -77,10 +77,11 @@
 ```text
 GestureHandlerRootView
 └─ SafeAreaProvider
+   └─ ShowcaseProvider
       └─ ThemeProvider(forceScheme, fontScale)
-      ├─ ShowcaseApp
-      ├─ ConfirmHost（唯一）
-      └─ ToastHost（唯一）
+         ├─ ShowcaseApp
+         ├─ ConfirmHost（唯一）
+         └─ ToastHost（唯一）
 ```
 
 - `react-native-gesture-handler` side-effect import 位于 entry 最前。
@@ -353,7 +354,10 @@ deep import、硬编码颜色与缺 README 命令会失败。
 ## 11. CI 与 Turbo
 
 - 根脚本修复为真实 `@unif/react-native-design-example` workspace。
-- CI 显式运行：
+- `.github/workflows/ci.yml` 由组织级 template 同步，本任务保持它与
+  `/Users/liulijun/tongyi/design/.github/templates/workflows/ci.yml` 一致，不做单仓 drift。
+- 新增 repo-specific `example-showcase.yml`，且不使用会让 required check 永久 pending 的
+  workflow-level `on.paths`。它显式运行：
   - `yarn check:config`
   - `yarn check:runtime-peers`
   - `yarn check:icons`
@@ -364,8 +368,9 @@ deep import、硬编码颜色与缺 README 命令会失败。
 - Turbo 只生成 Design example 的 native tasks，使用 `$TURBO_ROOT$` inputs：
   root package/lock/config/src、example package/config/src、目标平台 native 文件；
   Android/iOS 对侧 generated 目录不参与。
-- CI path filters 覆盖 example source、Jest/Babel/Metro、contract scripts、lock/native 文件，
-  不因纯 Website 文档变更运行 native build。
+- 共享 CI 已把 `example/**` 纳入 `shared/code` 与双端 native build；repo-specific workflow
+  补 JS/example gates。Turbo 负责把 native task 收束到 Design example，不能产生 Website
+  phantom task。
 
 ## 12. 文档
 
