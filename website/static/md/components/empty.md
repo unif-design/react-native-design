@@ -1,0 +1,75 @@
+---
+sidebar_position: 5
+title: Empty 空态
+description: "空态 / 占位 —— 56×56 浅橙圆盘 + icon 插画(默认 spark)+ 大字标题 + 小字描述，icon 可换强语义图标(camera-off / permission-denied 等)。"
+---
+
+# Empty 空态
+
+无内容状态——浅橙圆盘 illust（默认橙色 spark）+ 大字标题 + 小字描述。`icon` 可换成强语义图标(相机 / 权限 / 出错场景),常配合 SuggestionList 给出下一步操作。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Empty/Empty.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+```tsx
+  <Empty title="你好，我是 AI 助手" desc="告诉我你今天的工作目标，我来帮你规划" />
+```
+
+## 用法
+
+```tsx
+import { Empty } from '@unif/react-native-design';
+
+<Empty
+  title="你好，我是 AI 助手"
+  desc="告诉我你今天的工作目标，我来帮你规划"
+/>
+```
+
+通常配合 SuggestionList 使用，给用户初始话术：
+
+```tsx
+<Empty title="..." desc="..." />
+<SuggestionList align="center" items={[
+  { label: '今天的安排', leading: 'spark' },
+  { label: '帮我查询数据', leading: 'spark' },
+  { label: '新建一条记录', leading: 'spark' },
+]} onPress={(item) => sendMessage(item.label)} />
+```
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `title` | `string` | — | 大字标题（如「暂无数据」,15px / 600） |
+| `desc` | `string` | — | 小字描述（建议下一步操作,13px / 400 / `c.foregroundSubtle`） |
+| `icon` | `IconName` | `'spark'` | 圆盘内图标;相机域可传 `'camera-off'` / `'permission-denied'` / `'error-alert'` 等 |
+| `testID` | `string` | — | E2E / 测试定位 |
+
+## 主题键（Tokens）
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.primaryContainer` | `useColors()` | 圆盘背景色（浅橙） |
+| `c.primary` | `useColors()` | 圆盘内 icon 色 |
+| `c.foreground` | `useColors()` | 标题文字色 |
+| `c.foregroundSubtle` | `useColors()` | 描述文字色 |
+| `icon['2xl']` | `@unif/react-native-design` | 圆盘尺寸（56） |
+| `type.h3` / `type.xs` | `@unif/react-native-design` | 标题（15）/ 描述（13）字号 |
+| `space['4']` / `space['3']` / `space['7']` | `@unif/react-native-design` | gap（10）/ 水平 padding（8）/ 垂直 padding（16） |
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Empty/Empty.tsx`、`types.ts`。
+
+本组件为展示型空态,无交互。源码是 `<View>` + 圆盘 `<Icon>` + 标题 `<Text>` +（可选）描述 `<Text>`,**未设置任何 a11y prop**(无 `accessibilityRole` / `accessibilityLabel`),也无可传的 a11y prop（仅 `title` / `desc` / `icon` / `testID`）。`title` / `desc` 文本默认对 SR 可读;圆盘内的 `<Icon>` 按其自身实现对 SR 隐藏（见 [图标](icons.md)），故朗读内容即标题 + 描述。若需把「建议操作」做成可点项,放在 Empty 之外的 SuggestionList / [Button](button.md) 上,各自带交互语义。
+
+## 视觉规范
+
+| 元素 | 规则 |
+|---|---|
+| illust | 56×56 圆（`icon['2xl']`），背景 `c.primaryContainer`，icon 28px `c.primary` |
+| title | 15px / 600 / `c.foreground`（`type.h3` + `fw.semi`） |
+| desc | 13px / 400 / `c.foregroundSubtle`（`type.xs`），居中 |
+| 间距 | gap 10（`space['4']`），整体居中 |

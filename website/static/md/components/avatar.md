@@ -4,9 +4,6 @@ title: Avatar 头像
 description: "圆形 monogram 头像 —— brand / info / soft / neutral 四配色 × xs/sm/md/lg/xl 五档(18/28/32/40/56),支持图片 source 与加载失败回退 label。"
 ---
 
-import { LiveDemo } from '@site/src/components/LiveDemo';
-import { Avatar } from '@unif/react-native-design';
-
 # Avatar 头像
 
 圆形 monogram 头像(建议 1–2 字符)。`brand` / `info` / `soft` / `neutral` · `xs` 18 / `sm` 28 / `md` 32 / `lg` 40 / `xl` 56。可传合法 `source` 渲染真实头像图片,加载失败或运行时 source 非法时自动回退到 `label` 文字。
@@ -19,7 +16,7 @@ import { Avatar } from '@unif/react-native-design';
 
 下方渲染的就是 `src/components/ui/Avatar/Avatar.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
 
-<LiveDemo>
+```tsx
   <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span className="demo-label">变体</span>
@@ -49,7 +46,7 @@ import { Avatar } from '@unif/react-native-design';
       </div>
     </div>
   </div>
-</LiveDemo>
+```
 
 ## 用法
 

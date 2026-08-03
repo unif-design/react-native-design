@@ -19,24 +19,24 @@ description: "@unif/react-native-design 组件索引（40+ 组件，按场景分
 
 | 组件 | 说明 |
 |---|---|
-| [Logo](/docs/components/logo) | 品牌标识(`<Image>` 包装 `assets/logo.png`) |
+| [Logo](/docs/components/logo) | 品牌标识容器；图片 `source` 由消费端持有并必传 |
 | [图标 Icon](/docs/components/icons) | 24×24 描边 SVG 目录,`<Icon name="..." />` |
 
 ## 通用 {#通用}
 
 | 组件 | 说明 |
 |---|---|
-| [Button](/docs/components/button) | 主操作按钮,6 variant × 3 size,可 block |
+| [Button](/docs/components/button) | 主操作按钮,7 variant × 3 size,可 block |
 | [IconButton](/docs/components/icon-button) | 纯图标按钮,`accessibilityLabel` 类型必填 |
 | [Avatar](/docs/components/avatar) | 单字符 monogram 头像,variant `brand`/`info`/`soft`/`neutral` |
 | [Tag](/docs/components/tag) | 状态徽章,5 语义 × 2 尺寸 |
 | [Chip](/docs/components/chip) | 胶囊形可选中 pill(Suggestion 底层) |
 | [Confirm](/docs/components/confirm) | 命令式 `confirm()` + `<ConfirmHost />` 高风险二次确认 |
 | [Thumbnail](/docs/components/thumbnail) | 16:9.5 缩略图,sm / md / lg 三档 |
-| [Loading](/docs/components/loading) | `Spinner`(reanimated 4 旋转)+ 线性进度 |
+| [Loading](/docs/components/loading) | `Spinner`：native Reanimated 旋转 / Web CSS keyframes |
 | [Pulse](/docs/components/pulse) | `usePulse` + `<Pulse>` + `<PulseDot>`,通用脉冲底座 |
-| [Reveal](/docs/components/reveal) | 入/出场淡入容器,收口 reanimated layout 动画的 web 特化 |
-| [StatusDot](/docs/components/status-dot) | `done`/`active`/`pending` 圆点,`flat`/`soft` 双 tone |
+| [Reveal](/docs/components/reveal) | 淡入容器：native Reanimated 入/退场 / Web CSS 入场 |
+| [StatusDot](/docs/components/status-dot) | `done`/`error`/`active`/`pending` 圆点,`flat`/`soft` 双 tone |
 
 ## 表单 {#表单}
 
@@ -49,7 +49,7 @@ description: "@unif/react-native-design 组件索引（40+ 组件，按场景分
 | [Search](/docs/components/search) | 搜索条(Input 预设 + 清除按钮) |
 | [Checkbox](/docs/components/checkbox) | 复选 |
 | [Radio](/docs/components/radio) | 单选 + RadioGroup |
-| [Switch](/docs/components/switch) | 开关(reanimated 4 worklet) |
+| [Switch](/docs/components/switch) | 开关：native Reanimated / Web CSS transition |
 | [Stepper](/docs/components/stepper) | `[−] N [+]` 步进 |
 | [Form](/docs/components/form) | Form / FormGroup / FormRow(行间 hairline) |
 
@@ -57,11 +57,10 @@ description: "@unif/react-native-design 组件索引（40+ 组件，按场景分
 
 | 组件 | 说明 |
 |---|---|
-| [NavBar](/docs/components/navbar) | 固定顶部头,44px,default / brand variant |
+| [NavBar](/docs/components/navbar) | 固定顶部头,44px,default / brand / transparent variant |
+| [DrawerHeader](/docs/components/drawer-header) | 抽屉顶部品牌面板 + 图片头像失败回退 |
 | [TabBar](/docs/components/tabbar) | 固定底部 tab,50px,带 badge |
 | [Tabs](/docs/components/tabs) | 页级下划线 tabs(局部分段用 `Segmented`) |
-
-> Drawer 用 `DrawerHeader` + `@react-navigation/drawer` 组合,无独立组件页。
 
 ## 反馈 {#反馈}
 

@@ -4,10 +4,6 @@ title: Button 按钮
 description: "文本按钮 —— 7 variant(primary/secondary/ghost/neutral/outline/danger/text)× 3 size(sm/md/lg，高 28/36/44)，支持 block 块级、loading、leftIcon / rightIcon。"
 ---
 
-import { LiveDemo } from '@site/src/components/LiveDemo';
-import { Button } from '@unif/react-native-design';
-import { useState } from 'react';
-
 # Button 按钮
 
 文本按钮,7 视觉变体 × 3 尺寸 · 支持块级 / 内联。变体:`primary` 主操作 · `secondary` 次操作 · `ghost` 透明底品牌橙字 · `neutral` 透明底主文字色(多 icon 场景避免全染主橙)· `outline` 白底灰边 · `danger` 破坏性操作 · `text` 纯文字。
@@ -16,11 +12,12 @@ import { useState } from 'react';
 
 下方渲染的就是 `src/components/ui/Button/Button.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
 
-export const ButtonDemo = () => {
+```tsx
+const ButtonDemo = () => {
   const [count, setCount] = useState(0);
   const onPress = () => setCount((value) => value + 1);
   return (
-    <LiveDemo>
+    <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span className="demo-label">Button · 变体</span>
@@ -51,11 +48,10 @@ export const ButtonDemo = () => {
     </div>
         <span className="demo-label">已触发 {count} 次</span>
       </div>
-    </LiveDemo>
+    </>
   );
 };
-
-<ButtonDemo />
+```
 
 ## 用法
 

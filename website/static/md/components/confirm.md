@@ -1,0 +1,146 @@
+---
+sidebar_position: 6
+title: Confirm 确认对话框
+description: "命令式 await confirm() → Promise<boolean> —— 高风险操作二次确认，ConfirmHost 裸 RN Modal 底部弹层（不依赖 @gorhom），destructive 红确认按钮，同一时间仅 1 个。"
+---
+
+# Confirm 确认对话框
+
+命令式 `await confirm(...)` 返回 `Promise<boolean>`,跟 Toast 同款 imperative API,
+不需要 caller 维护 `useState / open / onClose`。背后是 `<ConfirmHost />`(裸 RN
+`Modal` + 单 owner 状态机,**不依赖 @gorhom**),App 根挂**一次**。
+
+:::tip Promise 必然 settle
+`confirm()` 在任何路径下都会 resolve,不会悬挂 —— 包括没挂 Host、重入、Host 渲染抛错和 Host 卸载。详见下方[生命周期契约](#生命周期契约)。
+:::
+
+## 用法
+
+```tsx
+import { confirm } from '@unif/react-native-design';
+
+const ok = await confirm({
+  title: '确认注销账号?',
+  message: '注销后所有数据将被删除,且无法恢复。',
+  confirmLabel: '确认注销',
+  destructive: true,        // 红色按钮 c.error
+});
+if (ok) doLogout();
+```
+
+## API
+
+| Prop | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `title` | `string` | — | 主标题(必传),短句:`确认注销账号?` / `确认退出登录?` |
+| `message` | `string?` | — | 说明文本(可选)1-2 句解释操作后果 |
+| `confirmLabel` | `string?` | `'确认'` | 确认按钮文案 |
+| `cancelLabel` | `string?` | `'取消'` | 取消按钮文案 |
+| `destructive` | `boolean?` | `false` | 标记破坏性操作 → 确认按钮变红(`c.error`)|
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Confirm/ConfirmHost.tsx`、`confirm.ts`、`types.ts`。
+
+`confirm()` 是命令式 API，`ConfirmOptions` 里**没有任何 a11y 入参**，a11y 全部来自底层组合：
+
+- 对话框容器走 RN 原生 `<Modal transparent animationType="slide">`。backdrop 虽可供触屏用户点击取消，但显式 `accessible={false}`，**不会**以“关闭”按钮进入 a11y tree，避免把标题、说明和两个 action 合并成一个节点。
+- 标题 / 说明用 `<Text>`（`entry.options.title` / `entry.options.message`）渲染，screen reader 可读到文字。
+- 取消 / 确认两个按钮用本库 [Button](button.md) 渲染。自定义 `cancelLabel` / `confirmLabel` 会先 trim；空白值分别回退“取消”/“确认”，因此不会把空名称传给 Button。
+- screen reader 的取消路径是可见的取消按钮；Android 系统返回走 Modal 的 `onRequestClose`，同样结算为 `false`。
+
+要让 SR 读到清晰语义，给 `title`（必填）/ `confirmLabel` / `cancelLabel` 传明确文案即可；组件层无额外 a11y 旋钮。
+
+```tsx
+// title 必填即标题语义;按钮文案即按钮 a11y label
+await confirm({ title: '确认注销账号?', confirmLabel: '确认注销', destructive: true });
+```
+
+## 返回值
+
+`Promise<boolean>`:
+- `true` — 用户点确认按钮
+- `false` — 用户点取消 / 点 backdrop / 系统返回,以及下表所有兜底路径
+
+## 生命周期契约 {#生命周期契约}
+
+`confirm()` 由一个纯状态机驱动(`src/components/ui/Confirm/store.ts`),两条不变量:
+**同一时间只有一个 Host owner**、**同一时间只有一个未决对话框**。所有关闭路径汇聚到同一个
+identity-guarded、幂等的 `settle`。
+
+| 场景 | 结果 | 说明 |
+|---|---|---|
+| 未挂 `<ConfirmHost />` | 立即 `false` + dev warn | 不占单例锁 —— 之后挂上 Host 仍能正常弹出 |
+| 已有对话框在显示时再调用 | 立即 `false` + dev warn | 拒绝重入,已显示的那个**不受影响** |
+| 挂了多个 `<ConfirmHost />` | 只有第一个生效 | 重复挂载的实例拿不到 owner,永久惰性、不渲染、不接收事件 |
+| Host 渲染 / 订阅回调抛错 | `false` | 只作废该 owner;新 Host 挂上后可正常接管 |
+| Host 卸载时对话框仍未决 | `false` | 由 Store 结算,Promise 不会永久悬挂 |
+| 同一次对话框被 settle 两次 | 第二次无效 | 幂等,结果以第一次为准 |
+| 旧对话框的迟到回调 | 无效 | identity guard:旧 entry 引用永远匹配不上新的 active,不会误关新对话框 |
+
+:::danger 只挂一次
+`<ConfirmHost />` 在 App 根挂**一次**。多挂的实例不会「都渲染一遍」,而是静默惰性 —— 但这意味着如果你把唯一那次挂在了会被卸载的子树里,卸载瞬间未决的对话框会被结算为 `false`。
+:::
+
+`ConfirmEntry` / `ConfirmEvent` / lease 等标识类型是 Host 与 Store 之间的**内部协议**,不从包根导出,也不保证跨版本稳定。
+
+## 设计稿对照
+
+| 视觉态 | 规则 |
+|---|---|
+| 容器 | RN `<Modal transparent animationType="slide">` + backdrop,底部弹层卡片 |
+| 标题 | `t.heroSm`(18)+ `fw.semi` + `c.foreground` |
+| 说明 | `t.body`(15)+ `c.foregroundMuted` + `lineHeight 1.45` |
+| 按钮行 | 两个 `<Button>` 是 Confirm action row 的直接 children，并由内部 `flex: 1` 平分横向主轴 |
+
+## 主题键（Tokens）
+
+读取来源:`src/components/ui/Confirm/styles.ts`、`ConfirmHost.tsx`。
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.surface` | `useColors()` | sheet 背景色 |
+| `c.foreground` | `useColors()` | 标题文字色 |
+| `c.foregroundMuted` | `useColors()` | 说明文字色 |
+| `type.heroSm` | `@unif/react-native-design` | 标题字号(18) |
+| `type.body` | `@unif/react-native-design` | 说明字号(15) |
+| `fw.semi` | `@unif/react-native-design` | 标题字重 |
+| `space['9']` / `space['4']` / `space['5']` / `space['7']` | `@unif/react-native-design` | sheet / actions 内边距与 gap |
+
+## 业务消费示例
+
+- **注销账号**(`AccountSecurity.tsx`)— `destructive: true`,取消则不调用注销 API
+- **退出登录**(`Setting.tsx`)— `destructive: true`,取消则保持 `authed=true`
+- 未来:删除会话 / 取消订单 / webview 跳转前提示(根据 UX 决策)
+
+## 业务侧 loading
+
+`confirm()` 立即关闭对话框 + resolve,**不内置 loading**。caller 自行处理:
+
+```tsx
+const [loggingOut, setLoggingOut] = useState(false);
+
+const handleLogout = async () => {
+  const ok = await confirm({ title: '确认退出?', destructive: true });
+  if (!ok) return;
+  setLoggingOut(true);
+  try {
+    await logout();
+  } catch {
+    setLoggingOut(false);
+  }
+};
+
+// 在 cell title 上展示 "退出中…" + disabled
+```
+
+## 不要
+
+- ❌ 不要嵌套 confirm(同一时间只允许 1 个,新请求被拒绝 + dev warn)
+- ❌ 不要把"信息提示"用 confirm(用 `toast()`),confirm 只用于"用户决策"
+- ❌ 不要挂多个 `<ConfirmHost />` —— 多余的实例惰性,并不会提高可用性
+- ❌ 不要把 `<ConfirmHost />` 挂在会被条件卸载的子树里 —— 卸载会把未决对话框结算为 `false`
+
+## 关联组件
+
+- [Toast](toast.md)— 单向反馈(不需用户决策)

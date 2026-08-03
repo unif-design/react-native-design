@@ -1,0 +1,158 @@
+---
+sidebar_position: 5
+title: Switch 开关
+description: "布尔开关 —— 真实 44×44 Pressable 内居中 32×20 轨道；accessibilityLabel 必填，disabled 移除 handler，reduced motion 停在终值。"
+---
+
+# Switch 开关
+
+布尔开关——透明 44×44 交互 frame 内居中 32×20 轨道 + 16×16 圆形 thumb。关时灰底 thumb 在左，开时主橙底 thumb 在右；系统允许动画时使用 200ms 缓动。
+
+## 实时预览
+
+下方通过平台解析渲染 `Switch.web.tsx`；native 使用 `Switch.tsx` 的 Reanimated 动画，Web 使用受 reduced-motion 控制的 CSS transition。
+
+```tsx
+const SwitchDemo = () => {
+  const [a, setA] = useState(false);
+  const [b, setB] = useState(true);
+  const [notify, setNotify] = useState(true);
+  const [team, setTeam] = useState(false);
+  const [voice, setVoice] = useState(true);
+  return (
+    <>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <Switch value={a} onChange={setA} accessibilityLabel="示例开关 A" />
+            <span style={{ fontFamily: 'Menlo', fontSize: 11, color: 'var(--ifm-color-emphasis-600)' }}>关</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <Switch value={b} onChange={setB} accessibilityLabel="示例开关 B" />
+            <span style={{ fontFamily: 'Menlo', fontSize: 11, color: 'var(--ifm-color-emphasis-600)' }}>开</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <Switch value={true} onChange={() => {}} accessibilityLabel="禁用示例开关" disabled />
+            <span style={{ fontFamily: 'Menlo', fontSize: 11, color: 'var(--ifm-color-emphasis-600)' }}>禁用</span>
+          </div>
+        </div>
+        <List>
+          <Cell title="拜访提醒" desc="按计划自动推送提醒" extra={{ kind: 'control', node: <Switch value={notify} onChange={setNotify} accessibilityLabel="拜访提醒" /> }} />
+          <Cell title="同步给团队" desc="拜访完成后通知主管" extra={{ kind: 'control', node: <Switch value={team} onChange={setTeam} accessibilityLabel="同步给团队" /> }} />
+          <Cell title="语音输入" desc="长按说话输入消息" extra={{ kind: 'control', node: <Switch value={voice} onChange={setVoice} accessibilityLabel="语音输入" /> }} />
+        </List>
+      </div>
+    </>
+  );
+};
+```
+
+## 状态
+
+来源：`src/components/ui/Switch/styles.ts`、`Switch.tsx`。
+
+| 状态 | 视觉 |
+|---|---|
+| 关 | 32×20 灰底 `c.surfaceContainerHighest`（亮色 `#E0E0E0`），16×16 白圆 thumb（`c.onPrimary`）在左 |
+| 开 | 32×20 主橙底 `c.primary`（`#EB6E00`），16×16 白圆 thumb 在右 |
+| 禁用 | 44×44 outer frame 保留，视觉子树 `opacity: 0.5`，handler 被移除 |
+
+outer RNGH `Pressable` 是透明的 44×44 真实布局 frame，尺寸直接读取
+`fixed.hitTarget`，不经过 `r()` 或 fontScale，也不再使用 `hitSlop`。32×20 visual
+frame 始终在其中居中。
+
+切换动画：thumb 水平移动 12px（off `x=2` → on `x=14`），背景颜色插值，200ms（`motion.base`）。native 走 Reanimated；系统开启 reduced motion 时先取消旧动画，再同步写入 0/1 终值。Web 开启 reduced motion 时直接更新稳态值，并且完全不输出 `transitionProperty`、`transitionDuration` 或 `transitionTimingFunction`。
+
+## 用法
+
+```tsx
+import { Switch, Cell, List } from '@unif/react-native-design';
+
+{/* 独立使用 */}
+<Switch
+  value={enabled}
+  onChange={setEnabled}
+  accessibilityLabel="启用通知"
+/>
+
+{/* 设置场景 — 配 Cell 使用，Switch 作为 extra */}
+<List>
+  <Cell
+    title="拜访提醒"
+    desc="按计划自动推送提醒"
+    extra={{
+      kind: 'control',
+      node: (
+        <Switch
+          value={notify}
+          onChange={setNotify}
+          accessibilityLabel="拜访提醒"
+        />
+      ),
+    }}
+  />
+  <Cell
+    title="语音输入"
+    desc="长按说话输入消息"
+    extra={{
+      kind: 'control',
+      node: (
+        <Switch
+          value={voice}
+          onChange={setVoice}
+          accessibilityLabel="语音输入"
+        />
+      ),
+    }}
+  />
+</List>
+```
+
+## API
+
+来源：`src/components/ui/Switch/types.ts`、`Switch.tsx`。
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `value` | `boolean` | — | 当前状态（受控，必填） |
+| `onChange` | `(value: boolean) => void` | — | 切换回调（必填） |
+| `accessibilityLabel` | `string` | — | Switch 没有内置可见文字，因此 accessible name 必填 |
+| `disabled` | `boolean?` | — | 禁用时移除 handler、上报 disabled 并半透明 |
+| `testID` | `string?` | — | outer frame 定位；自动派生 `${testID}-visual` / `-track` / `-thumb` 后代 |
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Switch/Switch.tsx`、`Switch.web.tsx`、`types.ts`（native 与 web 两份实现 a11y 完全一致）。
+
+- 默认 `accessibilityRole`：包裹的 `<Pressable>` 上硬编码 `'switch'`。
+- accessible name：`accessibilityLabel` 是类型必填且运行时会 trim；空白值移除 handler/action 语义并在 effect 诊断。即使视觉文字位于相邻 Cell / FormRow，也必须显式传入非空名称。
+- 放在 Cell 行尾时必须使用 `extra={{ kind: 'control', node: <Switch ... /> }}`；Cell 外层保持普通 `View`，Switch 是唯一交互与 a11y owner。
+- 状态语义：`accessibilityState={{ checked: value, disabled: !!disabled }}`——`checked` 直接映射必填的 `value`，`disabled` 映射 `disabled` prop。
+- 禁用语义：同时传 `disabled={true}` 与 `onPress={undefined}`。
+- visual frame 是本地 RN `View`，复用共享 `A11Y_HIDDEN_PROPS` 隐藏整个展示子树；该 wrapper 再包住 native 的第三方 `Animated.View`，隐藏 props 不会透传给第三方。
+
+```tsx
+// accessibilityLabel 始终必填；checked 由 value 自动上报
+<Switch value={enabled} onChange={setEnabled} accessibilityLabel="拜访提醒" />
+```
+
+## Native / Web 人工测量
+
+在 runtime harness 的选择控件区用 Inspector 测量：
+
+| 节点 | testID | 预期布局 |
+|---|---|---|
+| outer RNGH Pressable | `selection-switch` | 所有平台固定 44×44，透明、无 `hitSlop` |
+| 本地 visual wrapper | `selection-switch-visual` | 实现为 `r(32) × r(20)`，位于 outer 正中央；Web 与 402pt RN harness 实测应为 32×20，其他 native window 按实际 `r()` 结果验证 |
+
+打开系统 reduced motion 后反复切换：native 必须取消进行中的动画并立即到终值。Web
+展开 visual wrapper，分别检查 `selection-switch-track` 与
+`selection-switch-thumb`：前者和后者的 inline style 都不得存在任何
+`transition*` property。关闭偏好后，track 恢复 `background-color` transition，
+thumb 恢复 `transform` transition，两端恢复 200ms 动画。
+
+## 不要
+
+- ❌ 不要换其它颜色——开必须是主橙（这是品牌一致性）
+- ❌ 不要省略 `accessibilityLabel`——相邻 Cell / FormRow 的视觉 label 不会替代控件自身的 required name
+- ❌ 不要做"中间态"——Switch 只有开/关，三态用 [Radio](radio.md)

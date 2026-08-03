@@ -4,15 +4,6 @@ title: Logo 主标
 description: "品牌主标容器组件 —— 标准化尺寸（默认 64）/ 圆角（默认 size/4 squircle）；source 由 consumer 必传，非空 accessibilityLabel 决定有意义图片语义。"
 ---
 
-import useBaseUrl from '@docusaurus/useBaseUrl';
-import { LiveDemo } from '@site/src/components/LiveDemo';
-import { Logo as RnLogo } from '@unif/react-native-design';
-
-export const Logo = (props) => {
-  const uri = useBaseUrl('/img/logo.png');
-  return <RnLogo source={{ uri }} {...props} />;
-};
-
 # Logo 主标
 
 Unif 品牌主标——白色简化飞鸟剪影 + 底部"健康快乐"中文标语，整体置于主橙 `#EB6E00` 背景上。
@@ -21,7 +12,12 @@ Unif 品牌主标——白色简化飞鸟剪影 + 底部"健康快乐"中文标�
 
 下方渲染的就是 `src/components/ui/Logo/Logo.tsx` 本体,通过 `react-native-web` 翻译成浏览器节点。`source` 由 consumer 自传(品牌资产由消费者持有),文档站这里通过本地包装传入 `static/img/logo.png`。
 
-<LiveDemo>
+```tsx
+const Logo = (props) => {
+  const uri = useBaseUrl('/img/logo.png');
+  return <RnLogo source={{ uri }} {...props} />;
+};
+
   <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span className="demo-label">装饰 Logo · 默认 size=64</span>
@@ -50,7 +46,7 @@ Unif 品牌主标——白色简化飞鸟剪影 + 底部"健康快乐"中文标�
       <span style={{ fontSize: 12, color: '#999' }}>0 直角 · 默认 squircle · 32 满圆</span>
     </div>
   </div>
-</LiveDemo>
+```
 
 ## 资源位置
 

@@ -1,0 +1,78 @@
+---
+sidebar_position: 3
+title: Tag 标签
+description: "纯展示状态标签 —— variant='neutral'(默认)/'brand'/'success'/'error'/'info'/'outline' 六种配色,size='md'(22h,默认)/'lg'(26h),label 必填,numberOfLines 默认 1 超长省略。"
+---
+
+# Tag 标签
+
+纯展示状态标签 · 6 种配色变体 · 2 种尺寸。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Tag/Tag.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+```tsx
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+      <Tag label="VIP 客户" variant="brand" />
+      <Tag label="已完成" variant="success" />
+      <Tag label="已取消" variant="error" />
+      <Tag label="新单" variant="info" />
+      <Tag label="待跟进" variant="neutral" />
+      <Tag label="描边" variant="outline" />
+    </div>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+      <Tag label="Lg" variant="brand" size="lg" />
+      <Tag label="Md" variant="brand" size="md" />
+    </div>
+  </div>
+```
+
+## 用法
+
+```tsx
+import { Tag } from '@unif/react-native-design';
+
+<Tag label="VIP 客户" variant="brand" />
+<Tag label="已完成" variant="success" />
+<Tag label="已取消" variant="error" />
+<Tag label="新单" variant="info" />
+<Tag label="待跟进" variant="neutral" />
+```
+
+## API
+
+来源：`src/components/ui/Tag/types.ts`、`Tag.tsx`。
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `label` | `string` | — | 标签文字（必填） |
+| `variant` | `'neutral' \| 'brand' \| 'success' \| 'error' \| 'info' \| 'outline'` | `'neutral'` | 配色变体 |
+| `size` | `'md' \| 'lg'` | `'md'` | 高度 22 / 26 |
+| `numberOfLines` | `number?` | `1` | 文本行数（超长 ellipsis） |
+| `style` | `StyleProp<ViewStyle>?` | — | 额外样式覆盖 |
+| `testID` | `string?` | — | E2E / 测试定位 |
+
+## 配色（Tokens）
+
+来源：`src/components/ui/Tag/styles.ts`（`paletteFor` / `sizingFor`）。
+
+| variant | 底色 | 文字 | 边框 |
+|---|---|---|---|
+| `neutral`（默认） | `c.surfaceContainerHigh` | `c.foregroundMuted` | — |
+| `brand` | `c.primaryContainer` | `c.primary` | — |
+| `success` | `c.successContainer` | `c.success` | — |
+| `error` | `c.errorContainer` | `c.error` | — |
+| `info` | `c.infoContainer` | `c.info` | — |
+| `outline` | 透明 | `c.foregroundMuted` | `c.outline`（1px） |
+
+尺寸：`md` = 高 22 / 横向 padding 8 / 基准字号 12；`lg` = 高 26 / padding 10 / 基准字号 13。圆角统一 `radius.sm`（6）。
+
+`ThemeProvider fontScale` 只把 label 字号缩放一次。Tag 的固定高度、水平 padding、边框和圆角保持原值，不随字号档位放大。
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Tag/Tag.tsx`、`types.ts`。
+
+Tag 是**纯展示**标签，源码是 `<View>` + `<Text>`（无 `onPress`、无交互变体），**未设置任何 `accessibilityRole`**，也没有可传的 a11y prop（无 `accessibilityLabel`）。底层 `<Text>` 默认对 screen reader 可读，会朗读必填的 `label`；`variant` 只是配色语义，不会被读出（如需把"成功 / 失败"读给 SR，应在 `label` 文字本身体现，例如 `label="已完成"`）。无受控状态（`checked` / `selected` / `disabled` 均不适用）。

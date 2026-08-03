@@ -41,7 +41,7 @@ description: "@unif/react-native-design 排障决策树（症状 → 因 → 解
 
 文档站 MDX 和其他共享代码优先使用 `<Pulse>` / `usePulse` / `<Reveal>` /
 `<Spinner>`，不要直接写依赖 native worklet 的 `useAnimatedStyle` 或 layout
-decorator。详见[动效](/docs/design/tokens/motion#在代码中使用)。
+decorator。详见[动效](design/tokens/motion.md#在代码中使用)。
 
 ---
 
@@ -74,13 +74,13 @@ function MyComponent() {
 
 **原因。** 颜色硬编码成 hex / rgba,只有亮色值,不随主题切换。
 
-**解法。** 用 `useColors()` 返回的 role token(`c.primary` / `c.surface` / `c.foreground`…),不要内联 `#EB6E00` 或 `rgba(...)`。仅视觉锁定(QR 白卡 / 固定商标色)时允许硬编码,且必须加注释说明锁定理由。取色规则见[颜色 → 取色优先级链](/docs/design/tokens/colors#取色优先级链)。
+**解法。** 用 `useColors()` 返回的 role token(`c.primary` / `c.surface` / `c.foreground`…),不要内联 `#EB6E00` 或 `rgba(...)`。仅视觉锁定(QR 白卡 / 固定商标色)时允许硬编码,且必须加注释说明锁定理由。取色规则见[颜色 → 取色优先级链](design/tokens/colors.md#取色优先级链)。
 
 ---
 
 ### 症状:缺 ThemeProvider 时颜色还能出(但不切暗色) {#缺-themeprovider}
 
-✅ **这是预期兜底,不是 bug。** `useTheme()` 在没有 `ThemeProvider` 时返回同一个模块级亮色 fallback(`lightColors` / `lightShadow` / `fontScale=1`),保证组件不崩且引用稳定。但这样**不会跟随系统暗色**。开发环境会在 React effect 阶段一次性记录诊断,render 期间不会写日志。正确做法是按[快速开始 → 根挂 ThemeProvider](/docs/getting-started#根挂-themeprovider) 在 App 根挂一次。
+✅ **这是预期兜底,不是 bug。** `useTheme()` 在没有 `ThemeProvider` 时返回同一个模块级亮色 fallback(`lightColors` / `lightShadow` / `fontScale=1`),保证组件不崩且引用稳定。但这样**不会跟随系统暗色**。开发环境会在 React effect 阶段一次性记录诊断,render 期间不会写日志。正确做法是按[快速开始 → 根挂 ThemeProvider](getting-started.md#根挂-themeprovider) 在 App 根挂一次。
 
 ---
 
@@ -98,7 +98,7 @@ function MyComponent() {
 
 **原因。** peerDeps **缺一即崩**,本库不打包它们。
 
-**解法。** 按[快速开始 → 安装依赖](/docs/getting-started#安装依赖)逐一装齐:
+**解法。** 按[快速开始 → 安装依赖](getting-started.md#安装依赖)逐一装齐:
 
 ```sh
 yarn add react-native-svg \
@@ -112,7 +112,7 @@ yarn add react-native-svg \
 
 iOS 装完还需 `cd ios && bundle exec pod install`。
 
-版本范围见[快速开始 → 环境要求](/docs/getting-started#环境要求)。本库只支持 `react-native >=0.86.0 <0.87.0` + `react >=19.2.3 <20.0.0`;RN `0.85.x` 与 `0.87+` 都会因 peer 不满足而失败,这是有意收紧的 contract,不要用忽略 peer 的方式绕过。
+版本范围见[快速开始 → 环境要求](getting-started.md#环境要求)。本库只支持 `react-native >=0.86.0 <0.87.0` + `react >=19.2.3 <20.0.0`;RN `0.85.x` 与 `0.87+` 都会因 peer 不满足而失败,这是有意收紧的 contract,不要用忽略 peer 的方式绕过。
 
 ---
 
@@ -157,4 +157,4 @@ cd ios && bundle exec pod install --repo-update
 
 ---
 
-> 没覆盖到的问题:对照[设计令牌](/docs/design/tokens/colors)核对 token 名,或按需 fetch 远程 [llms.txt](https://unif-design.github.io/react-native-design/llms.txt) 查逐组件 API。
+> 没覆盖到的问题:对照[设计令牌](design/tokens/colors.md)核对 token 名,或按需 fetch 远程 [llms.txt](https://unif-design.github.io/react-native-design/llms.txt) 查逐组件 API。

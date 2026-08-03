@@ -10,7 +10,7 @@ sidebar_label: 完整规范
 **品牌:** Unif(统一企业 / Uni-President China)
 **真相源代码:** `src/theme/`、`src/components/ui/`、`src/components/business/`
 
-> 这是一份**单文件设计宪法** —— 把品牌、原则、token、组件、Don'ts 收在一处,供整体把握与 AI 全量索引(llms-full 锚点)。逐项详情见各拆分页:[原则](/docs/design/principles)、[颜色](/docs/design/tokens/colors)、[字体](/docs/design/tokens/typography)、[间距·圆角·阴影](/docs/design/tokens/spacing-radii-shadows)、[动效](/docs/design/tokens/motion)、[组件概览](/docs/components)。所有 token 值取自 `src/theme`,与代码冲突时以代码为准。
+> 这是一份**单文件设计宪法** —— 把品牌、原则、token、组件、Don'ts 收在一处,供整体把握与 AI 全量索引(llms-full 锚点)。逐项详情见各拆分页:[原则](design/principles.md)、[颜色](design/tokens/colors.md)、[字体](design/tokens/typography.md)、[间距·圆角·阴影](design/tokens/spacing-radii-shadows.md)、[动效](design/tokens/motion.md)、[组件概览](components/overview.md)。所有 token 值取自 `src/theme`,与代码冲突时以代码为准。
 
 ---
 
@@ -61,7 +61,7 @@ sidebar_label: 完整规范
 ### Emoji
 **禁用。** 无国旗 emoji、贴纸、装饰字符。功能性状态走图标。字符不传递信息就不该出现。
 
-> 详见[语调与文案](/docs/design/voice)。
+> 详见[语调与文案](design/voice.md)。
 
 ---
 
@@ -73,7 +73,7 @@ sidebar_label: 完整规范
 4. **列表用 gap,不用 border。** 每行独立白卡,行间 gap 形成分组(iOS 17 / 微信新版风格)。
 5. **气泡内角方。** 聊天气泡 14px 圆角,但指向头像的内角**直角(0)**。这是 Unif 最辨识度的视觉签名。
 
-> 详见[设计原则](/docs/design/principles);硬性禁忌见[全局 Don'ts](/docs/design/donts)与本文 §14。
+> 详见[设计原则](design/principles.md);硬性禁忌见[全局 Don'ts](design/donts.md)与本文 §14。
 
 ---
 
@@ -175,7 +175,7 @@ sidebar_label: 完整规范
 - 无近黑、无米白、无染色灰,中性色保持纯净。
 - 品牌橙只在主按钮 / 用户气泡 / 活动标签 / 关键强调。
 - 蓝色(`info`)专属用户头像(Tag info variant 历史沿用,不扩散)。
-- **绝不内联 hex / rgba** —— 走 `useColors()` role token,新硬编码挂 CI。取色优先级链见[颜色 → 取色优先级链](/docs/design/tokens/colors#取色优先级链)。旧 token → 新 role 的 grep 对照见[迁移](/docs/migration#旧-token-名--新-role-名)。
+- **绝不内联 hex / rgba** —— 走 `useColors()` role token,新硬编码挂 CI。取色优先级链见[颜色 → 取色优先级链](design/tokens/colors.md#取色优先级链)。旧 token → 新 role 的 grep 对照见[迁移](migration.md#旧-token-名--新-role-名)。
 
 ---
 
@@ -202,7 +202,7 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 | `micro` | 11 | 徽章、工具名 |
 | `nano` | 10 | TabBar / Grid / Citation / Sources 角标 |
 
-半档微调:`smPlus`(14.5)· `xsPlus`(13.5)· `microPlus`(11.5)。Hero 档:`heroLg`(26)· `heroMd`(22)· `heroSm`(18)。完整说明见[字体](/docs/design/tokens/typography)。
+半档微调:`smPlus`(14.5)· `xsPlus`(13.5)· `microPlus`(11.5)。Hero 档:`heroLg`(26)· `heroMd`(22)· `heroSm`(18)。完整说明见[字体](design/tokens/typography.md)。
 
 应用级字号缩放(app 内字体大小档):接入方传 `<ThemeProvider fontScale={…}>`(默认 1),只接受有限正数且不设上限;非法值回退 1。`useThemedStyles` 出口精确只缩放 maker 产物的 `fontSize / lineHeight / letterSpacing`,不缩 Icon、Spinner、spacing、控件尺寸、圆角或 `fixed.*`。动态文字 metric 用根导出的 `useFontScale()` + `scaleFontMetric()` 显式缩放一次;持久化值可先经根导出的 `normalizeFontScale()` 归一化。与 `rf()` 正交:`rf()` 是按屏宽的静态适配,`fontScale` 是运行期用户档位。
 
@@ -322,7 +322,7 @@ function。native-only 代码需要自定义缓动时从 `react-native-reanimate
 
 **RN 实现。** `src/components/ui/Icon/Icon.tsx` 用 `react-native-svg`(`<Svg>` + `<Path>` / `<Circle>` / `<Rect>`),从 `src/icons` 目录读路径数据。源 SVG 在 `src/icons/svg/<name>.svg`,生成的目录在 `src/icons/data.ts`(由 `scripts/build-icons.js` 离线生成,**不要手改**,头部有 `AUTO-GENERATED — DO NOT EDIT BY HAND`)。
 
-**加新图标:** 扔 SVG 到 `src/icons/svg/<name>.svg` → 跑 `node scripts/build-icons.js` → `yarn lint --fix`(prettier 把 `IconName` union 拆行)→ `yarn typecheck`。`IconName` 是闭集,组件 prop 类型自动同步;文档站镜像在 `website/src/components/iconsCatalog.ts`。详见[图标页](/docs/components/icons)。
+**加新图标:** 扔 SVG 到 `src/icons/svg/<name>.svg` → 跑 `node scripts/build-icons.js` → `yarn lint --fix`(prettier 把 `IconName` union 拆行)→ `yarn typecheck`。`IconName` 是闭集,组件 prop 类型自动同步;文档站镜像在 `website/src/components/iconsCatalog.ts`。详见[图标页](components/icons.md)。
 
 ---
 
@@ -427,7 +427,7 @@ function。native-only 代码需要自定义缓动时从 `react-native-reanimate
 ### 聊天(设计语言,代码在 portal)
 Message(非对称圆角气泡)· PromptInput(4 态)· Attachments · Suggestion · Sources · Citation · Reasoning(`思考中…` → `已思考 N.Ns`)· ChainOfThought · Task · Tool · Confirmation(**内联**,绝不模态)· Shimmer · DayDivider。Conversation = 完整线程,由 chat 与 ui 原子组合而成。
 
-> 逐组件 API / props / variant / size 见各[组件页](/docs/components)与远程 [llms.txt](https://unif-design.github.io/react-native-design/llms.txt)。
+> 逐组件 API / props / variant / size 见各[组件页](components/overview.md)与远程 [llms.txt](https://unif-design.github.io/react-native-design/llms.txt)。
 
 ---
 
@@ -563,7 +563,7 @@ toast.error('网络异常，请重试');
 - ❌ 列表行不用 `border-bottom`,用白卡 + 8px gap。
 - ❌ 不硬编码颜色 / 字号 / 间距;不把 `makeStyles` 内联进组件。
 
-> 完整清单见[全局 Don'ts](/docs/design/donts)。
+> 完整清单见[全局 Don'ts](design/donts.md)。
 
 ---
 

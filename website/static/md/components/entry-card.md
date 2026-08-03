@@ -4,14 +4,11 @@ title: EntryCard 入口卡
 description: "横向入口小卡 —— 左 30×30 灰底 icon tile + 右 title/sub，独立 surface 视觉(无 arrow / extra)，适合 grid 双列等宽入口，可点带按压态。"
 ---
 
-import { LiveDemo } from '@site/src/components/LiveDemo';
-import { EntryCard } from '@unif/react-native-design';
-
 # EntryCard 入口卡
 
 入口小卡 —— 横向 row,左 30×30 灰底 icon tile + 右 title/sub column。
 
-跟 [Cell](./cell) 的区别:
+跟 [Cell](cell.md) 的区别:
 - **独立 surface 小卡视觉**(bg + radius 14 + padding 12/14),不依赖 List 容器
 - icon tile **灰底**(`surfaceContainer`)+ `foregroundMuted` icon,语义弱化
 - **无 arrow / extra**,纯入口语义,适合放在 grid 双列里靠 caller `style={{flex:1}}` 撑等宽
@@ -22,7 +19,7 @@ retail biz2 设计稿 v7:Me 屏底部"设置 / 关于"两个入口从纵向 Cell
 
 下方渲染的就是 `src/components/ui/EntryCard/EntryCard.tsx` 本体,通过 `react-native-web` 翻译成浏览器节点。
 
-<LiveDemo>
+```tsx
   <div style={{ display: 'flex', flexDirection: 'row', gap: 10, maxWidth: 360 }}>
     <EntryCard
       icon="settings"
@@ -39,7 +36,7 @@ retail biz2 设计稿 v7:Me 屏底部"设置 / 关于"两个入口从纵向 Cell
       style={{ flex: 1 }}
     />
   </div>
-</LiveDemo>
+```
 
 ## 视觉规范
 
@@ -119,6 +116,6 @@ a11y 语义是**条件性**的:仅当传了 `onPress` 时,EntryCard 才用 `<Pre
 
 ## 不要
 
-- ❌ 不要在 EntryCard 内放 arrow —— 它的语义是"独立入口卡",不是 List 行。需要 chevron 用 [Cell](./cell)。
-- ❌ 不要把 title 拉长到换行 —— 单卡是紧凑入口,设计上只 numberOfLines=1。长文本用 [Card](./card) + 自渲。
-- ❌ 不要做超过 4 张并排 —— 4 张以上信息密度过高,改用 [Grid](./grid) + ModernAppCell。
+- ❌ 不要在 EntryCard 内放 arrow —— 它的语义是"独立入口卡",不是 List 行。需要 chevron 用 [Cell](cell.md)。
+- ❌ 不要把 title 拉长到换行 —— 单卡是紧凑入口,设计上只 numberOfLines=1。长文本用 [Card](card.md) + 自渲。
+- ❌ 不要做超过 4 张并排 —— 4 张以上信息密度过高,改用 [Grid](grid.md) + ModernAppCell。

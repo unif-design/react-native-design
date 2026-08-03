@@ -1,0 +1,125 @@
+---
+sidebar_position: 4
+title: Radio 单选
+description: "单选控件 —— Radio.Group 必须命名；每个 Radio 用可见 label 或 accessibilityLabel 命名，同组只能选一个。"
+---
+
+# Radio 单选
+
+单选控件——20×20 圆，未选透明描边、已选主橙描边 + 中心 8×8 主橙圆点。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Radio/Radio.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+```tsx
+const RadioDemo = () => {
+  const [report, setReport] = useState('day');
+  const [tier, setTier] = useState('vip');
+  return (
+    <>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <span className="demo-label">报表周期</span>
+          <Radio.Group value={report} onChange={setReport} accessibilityLabel="报表周期">
+            <Radio value="day"    label="日报" />
+            <Radio value="week"   label="周报" />
+            <Radio value="month"  label="月报" />
+            <Radio value="custom" label="自定义（暂未开放）" disabled />
+          </Radio.Group>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <span className="demo-label">客户等级</span>
+          <Radio.Group value={tier} onChange={setTier} accessibilityLabel="客户等级">
+            <Radio value="vip"     label="VIP 客户" />
+            <Radio value="normal"  label="普通客户" />
+            <Radio value="pending" label="待审核客户" />
+          </Radio.Group>
+        </div>
+        <span style={{ fontSize: 13, color: 'var(--ifm-color-emphasis-600)', marginTop: 6 }}>
+          当前：{report === 'day' ? '日报' : report === 'week' ? '周报' : '月报'} · {tier === 'vip' ? 'VIP' : tier === 'normal' ? '普通' : '待审'}
+        </span>
+      </div>
+    </>
+  );
+};
+```
+
+## 状态
+
+| 状态 | 视觉 |
+|---|---|
+| 未选 | 20×20 圆，1.5px 描边 `c.outline` |
+| 已选 | 20×20 圆，1.5px 主橙描边 + 中心 8×8 主橙圆点 |
+| 禁用 | `opacity: 0.5` |
+
+## 用法
+
+```tsx
+import { Radio } from '@unif/react-native-design';
+
+<Radio.Group value={tier} onChange={setTier} accessibilityLabel="客户等级">
+  <Radio value="vip"     label="VIP 客户" />
+  <Radio value="normal"  label="普通客户" />
+  <Radio value="pending" accessibilityLabel="待审核客户" />
+</Radio.Group>
+```
+
+## API
+
+### `<Radio.Group>`
+
+来源：`src/components/ui/Radio/types.ts`、`RadioGroup.tsx`。
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `value` | `string \| number` | — | 当前选中值（受控） |
+| `onChange` | `(value: string \| number) => void` | — | 切换回调 |
+| `accessibilityLabel` | `string` | — | 单选组自身的 accessible name（必填） |
+| `children` | `ReactNode` | — | `<Radio>` 列表（渲染为普通 `<View>`，组内 `gap: space[1]`） |
+| `testID` | `string?` | — | 容器 testID；每个 `Radio` 自动派生 `${testID}-${value}` |
+
+### `<Radio>`
+
+来源：`src/components/ui/Radio/types.ts`、`Radio.tsx`。
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `value` | `string \| number` | — | 此项的值（与 Group 的 `value` 比较得 checked） |
+| `label` | `string` | 与 `accessibilityLabel` 二选一 | 可见右侧文字，同时作为默认 accessible name |
+| `accessibilityLabel` | `string` | 与 `label` 二选一 | 无可见文字时必填；有 `label` 时可覆盖读屏文案 |
+| `disabled` | `boolean?` | `false` | 禁用时移除 handler、上报 disabled 并半透明 |
+| `testID` | `string?` | — | 单项 testID（不传则从父 Group 派生 `${groupTestID}-${value}`） |
+
+> `<Radio>` 必须放在 `<Radio.Group>` 内使用；脱离 Group 会打 warn 并渲染空 `<View>`。
+
+`RadioProps` 是 named union：`label: string` 分支可选
+`accessibilityLabel`；不渲染 `label` 的分支必须提供
+`accessibilityLabel: string`。
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Radio/Radio.tsx`、`RadioGroup.tsx`、`types.ts`。
+
+- 默认 role：每个有效命名的 `<Radio>` 是 `'radio'`；`<Radio.Group>` 的本地 `<View>` 是 `'radiogroup'`。组名会 trim，空白时在 effect 诊断。
+- 单项 accessible name：优先 trim 后非空的 `accessibilityLabel`，否则回退可见 `label`；最终仍空白时移除 handler/action 语义并在 effect 诊断。
+- 状态语义：`accessibilityState={{ checked, disabled: !!disabled }}`——`checked` 由 `Radio.Group` 的受控 `value` 派生（`ctx.value === value`），`disabled` 映射本项 `disabled` prop。
+- 禁用语义：同时传 `disabled={true}` 与 `onPress={undefined}`，不是在 handler 内静默 no-op。
+- 圆形指示器与可见文字只在本地 RN `View` / `Text` 上复用共享 `A11Y_HIDDEN_PROPS`，外层 radio 是唯一的选项焦点。
+
+```tsx
+// label 同时作为 SR 朗读文案；checked 由 Group 的 value 决定
+<Radio.Group value={tier} onChange={setTier} accessibilityLabel="客户等级">
+  <Radio value="vip" label="VIP 客户" />
+  <Radio value="normal" accessibilityLabel="普通客户" />
+</Radio.Group>
+```
+
+## 与 Checkbox 的区别
+
+| Radio | Checkbox |
+|---|---|
+| 同组只能选一个 | 多选 |
+| 圆形指示器 | 方形指示器 |
+| 用 `<Radio.Group>` 包裹 | 独立使用，多个 `<Checkbox>` |
+| 适合"在 N 个选项中选一个"| 适合"勾选若干项" |

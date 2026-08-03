@@ -4,10 +4,6 @@ title: IconButton 图标按钮
 description: "icon-only 方形按钮 —— size sm/md/lg（28/36/44）、variant 走 Button 同套 palette（默认 ghost）、accessibilityLabel TypeScript 强制必填。"
 ---
 
-import { LiveDemo } from '@site/src/components/LiveDemo';
-import { IconButton } from '@unif/react-native-design';
-import { useState } from 'react';
-
 # IconButton 图标按钮
 
 只放 icon 的方形按钮,常用于 NavBar 左右 slot、卡片右上 action、列表行 trailing。区别于 Button,IconButton 没文本,**必须显式传 `accessibilityLabel`** 给 SR 用户。
@@ -19,11 +15,12 @@ IconButton 精确排除会撕掉方形高度的 `'text'`，默认是透明底 `'
 
 下方渲染的就是 `src/components/ui/IconButton/IconButton.tsx` 本体。
 
-export const IconButtonDemo = () => {
+```tsx
+const IconButtonDemo = () => {
   const [count, setCount] = useState(0);
   const onPress = () => setCount((value) => value + 1);
   return (
-    <LiveDemo>
+    <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span className="demo-label">size · sm 28 / md 36 / lg 44</span>
@@ -49,11 +46,10 @@ export const IconButtonDemo = () => {
     </div>
         <span className="demo-label">已触发 {count} 次</span>
       </div>
-    </LiveDemo>
+    </>
   );
 };
-
-<IconButtonDemo />
+```
 
 ## 用法
 
@@ -113,4 +109,4 @@ import { IconButton } from '@unif/react-native-design';
 ## 不要
 
 - 不要把 icon 当装饰用 IconButton —— 装饰用 `<Icon>` 即可,没 hit area 浪费
-- 不要在 IconButton 内文字 + icon 混搭 —— 用 [Button](./button.mdx) 的 `rightIcon` / `leftIcon` prop
+- 不要在 IconButton 内文字 + icon 混搭 —— 用 [Button](button.md) 的 `rightIcon` / `leftIcon` prop

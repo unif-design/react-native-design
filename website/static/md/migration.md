@@ -7,7 +7,7 @@ description: "@unif/react-native-design 迁移指南：旧顶层 colors / shadow
 
 # 升级 / 迁移
 
-破坏性变更与迁移方法。当前版本的完整 token 见[设计令牌](/docs/design/tokens/colors),组件 API 见[组件概览](/docs/components)。
+破坏性变更与迁移方法。当前版本的完整 token 见[设计令牌](design/tokens/colors.md),组件 API 见[组件概览](components/overview.md)。
 
 ---
 
@@ -91,7 +91,7 @@ import { space, radius, type as t, fw, fontMono, motion } from '@unif/react-nati
 | `colors.info300` / `infoBg` | `c.info` / `c.infoContainer` |
 | `colors.border` / `borderSoft` / `borderFaint` | `c.outline` / `c.outlineVariant` / `c.outlineFaint` |
 
-> 旧 `brandGradient` / `primary100/200/400/600` 等强度档已随死代码清理移除(0 消费方)。完整迁移表见[完整规范 → Migration map](/docs/unif-design)。
+> 旧 `brandGradient` / `primary100/200/400/600` 等强度档已随死代码清理移除(0 消费方)。完整迁移表见[完整规范 → Migration map](UNIF-DESIGN.md)。
 
 ### 为什么不能继续用静态导出 {#为什么不能继续用静态导出}
 
@@ -135,9 +135,9 @@ async function requestDelete() {
   （原生 sheet，系统接管手势 / 动画 / 变暗），或自持 sheet 容器。
 - **命令式确认** → 使用包根导出的 `confirm()`，并在
   `SafeAreaProvider` 内挂一个 `<ConfirmHost />`。生命周期、重入和无 Host 语义见
-  [Confirm](/docs/components/confirm)。
+  [Confirm](components/confirm.md)。
 
-同时 `Toast` 新增 `position`（`'top' | 'bottom' | 'center'`，默认 `'bottom'`），详见 [Toast](/docs/components/toast)。
+同时 `Toast` 新增 `position`（`'top' | 'bottom' | 'center'`，默认 `'bottom'`），详见 [Toast](components/toast.md)。
 
 ### 升级 react-native-reanimated 4.x {#升级-reanimated-4}
 

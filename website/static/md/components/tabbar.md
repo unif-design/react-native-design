@@ -1,0 +1,119 @@
+---
+sidebar_position: 2
+title: TabBar 底部 tab 栏
+description: "固定底部主导航 tab 栏 —— 50px 高 + 顶部 hairline,各 tab icon+文字垂直居中,激活 c.primary;受控 active/onChange,items 含 id/icon/label/可选 badge,role='tab' + selected。"
+---
+
+# TabBar 底部 tab 栏
+
+固定底部主导航 · 50px 高 · 各 tab `icon + 文字` 垂直居中。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/TabBar/TabBar.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+```tsx
+const items = [
+  { id: 'home',     icon: 'home',     label: '首页' },
+  { id: 'visits',   icon: 'location', label: '拜访', badge: '3' },
+  { id: 'agent',    icon: 'spark',    label: 'AI' },
+  { id: 'me',       icon: 'user',     label: '我的' },
+];
+
+const TabBarDemo = () => {
+  const [active, setActive] = useState('home');
+  const current = items.find((i) => i.id === active);
+  return (
+    <>
+      <View style={{ borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: 'var(--ifm-color-emphasis-200)', backgroundColor: 'var(--ifm-background-surface-color)' }}>
+        <View style={{ height: 200, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ fontSize: 13, color: 'var(--ifm-color-emphasis-600)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>当前页面</Text>
+          <Text style={{ fontSize: 28, fontWeight: '700', color: 'var(--ifm-color-emphasis-800)' }}>{current.label}</Text>
+        </View>
+        <TabBar active={active} onChange={setActive} items={items} />
+      </View>
+    </>
+  );
+};
+```
+
+## 视觉规范
+
+来源：`src/components/ui/TabBar/styles.ts`、`TabBar.tsx`。
+
+| 元素 | 规则 |
+|---|---|
+| 高度 | 50px（`fixed.tabbarH`，物理常量不缩放） |
+| 背景 | `c.surface`（亮色 `#FFFFFF`） |
+| 顶部边线 | hairline `c.outline`（亮色 `#EDEDED`） |
+| Tab 项 | `flex: 1`，垂直居中 icon + 文字 |
+| Icon | 22×22（`icon.sm`），`c.foregroundSubtle`（亮色 `#999`，默认）/ `c.primary`（`#EB6E00`，active） |
+| 文字 | 10px（`type.nano`）/ 500，与 icon 同色 |
+| Badge | `c.error` 底数字徽章（`number \| string`），叠在 icon 右上 |
+| 安全区 | bottom inset（iOS home indicator 34px）不计入 50px——外面包 `<SafeAreaView edges={['bottom']}>` |
+
+## 用法
+
+```tsx
+import { TabBar } from '@unif/react-native-design';
+
+<TabBar
+  active="home"
+  onChange={setActive}
+  items={[
+    { id: 'home',     icon: 'home',     label: '首页' },
+    { id: 'visits',   icon: 'location', label: '拜访', badge: 3 },
+    { id: 'agent',    icon: 'spark',    label: 'AI' },
+    { id: 'me',       icon: 'user',     label: '我的' },
+  ]}
+/>
+```
+
+## API
+
+来源：`src/components/ui/TabBar/types.ts`、`TabBar.tsx`。
+
+`TabBarProps`：
+
+| Prop | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `active` | `string` | — | 当前激活 tab 的 `id`（必填） |
+| `onChange` | `(id: string) => void` | — | 切换回调，回传点中 tab 的 `id`（必填） |
+| `items` | `TabBarItem[]` | — | tab 列表（必填） |
+| `testID` | `string?` | — | 容器 testID；item testID 自动派生为 `${testID}-${id}` |
+
+`TabBarItem`：
+
+| 字段 | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `id` | `string` | — | 唯一标识，用作 key 与选中判定 |
+| `icon` | `IconName` | — | 图标名（见 [图标](icons.md)） |
+| `label` | `string` | — | tab 文字（同时作 `accessibilityLabel`） |
+| `badge` | `number \| string` | — | 图标右上角数字角标（用 `string` 才能写 `'99+'`） |
+| `testID` | `string?` | — | 单 tab testID（默认 `${barTestID}-${id}`） |
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/TabBar/TabBar.tsx`、`types.ts`。
+
+- 默认 `accessibilityRole`：每个 tab 的 `<Pressable>` 上硬编码 `'tab'`。外层容器是普通 `<View>`，源码**未**设置 `tablist` role（仅作 50px 高的布局栏）。
+- a11y props：每个 tab 的 `accessibilityLabel` 取自 `item.label`，而 `label` 在 `TabBarItem` 中是**必填**的——所以每个 tab 默认都有朗读文案。`badge` 仅作视觉角标渲染，不进入 a11y 文案。
+- 状态语义：`accessibilityState={{ selected: on }}`——`selected` 由 `item.id === active` 派生。无 `disabled` 语义（`TabBarItem` 无 `disabled` 字段）。
+
+```tsx
+// 每个 tab 自动 role=tab、label=item.label、selected 由 active 决定
+<TabBar
+  active={active}
+  onChange={setActive}
+  items={[
+    { id: 'home',   icon: 'home',     label: '首页' },
+    { id: 'visits', icon: 'location', label: '拜访', badge: 3 },
+  ]}
+/>
+```
+
+## 不要
+
+- ❌ 不要做 5 个以上 tab——超过就用左侧 Drawer
+- ❌ 不要在 active 状态用其他颜色——必须主橙
+- ❌ 不要在 TabBar 里加按钮（"发布"等）——用单独的 FAB 或 NavBar 右槽

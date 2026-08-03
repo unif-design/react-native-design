@@ -1,0 +1,108 @@
+---
+sidebar_position: 4
+title: DrawerHeader 抽屉头
+description: 'React Navigation Drawer 顶部品牌面板：名称 + 可选副标题 + 56pt 图片头像，非法 source 或当前图片加载失败时回退姓名首码点。'
+---
+
+# DrawerHeader 抽屉头
+
+`DrawerHeader` 是 `@react-navigation/drawer` 的展示型顶部面板：品牌橙背景、56pt
+头像、名称与可选副标题。它不持有 navigation、菜单或用户 Store，也没有点击行为。
+
+## 实时预览
+
+```tsx
+  <div
+    style={{
+      width: '100%',
+      maxWidth: 320,
+      overflow: 'hidden',
+      borderRadius: 12,
+    }}
+  >
+    <DrawerHeader name="王小明" subtitle="华东区 · 管理员" />
+  </div>
+```
+
+## 用法
+
+```tsx
+import { DrawerHeader } from '@unif/react-native-design';
+import { DrawerContentScrollView } from '@react-navigation/drawer';
+
+function AppDrawerContent(props) {
+  return (
+    <DrawerContentScrollView
+      {...props}
+      contentContainerStyle={{ paddingTop: 0 }}
+    >
+      <DrawerHeader
+        name={user.name}
+        subtitle={`${user.comGroup} · ${user.role}`}
+        source={user.avatarUrl ? { uri: user.avatarUrl } : undefined}
+      />
+      {/* DrawerItemList / 其他内容 */}
+    </DrawerContentScrollView>
+  );
+}
+```
+
+## API
+
+来源：`src/components/ui/DrawerHeader/types.ts`、`DrawerHeader.tsx`。
+
+| Prop       | Type                    | 默认 | 说明                                                                                                           |
+| ---------- | ----------------------- | ---- | -------------------------------------------------------------------------------------------------------------- |
+| `name`     | `string`                | —    | **必填**名称；显示为单行文字，头像 fallback 取 `name.trim()` 的首个 Unicode 码点，空白时使用 `?`               |
+| `subtitle` | `string?`               | —    | 单行辅助信息；省略或空字符串时不渲染                                                                           |
+| `source`   | `ImageSourcePropType?`  | —    | 真实头像图片（URI object / URI source 数组 / `require(...)`）；非法 source 或当前 attempt 加载失败时回退首字符 |
+| `style`    | `StyleProp<ViewStyle>?` | —    | 根品牌面板的附加样式                                                                                           |
+| `testID`   | `string?`               | —    | 根面板的 E2E / 测试定位                                                                                        |
+
+### 图片 source identity 与失败隔离
+
+`source` 与 [Avatar](avatar.md#图片-source-identity-与失败隔离) 复用同一套运行时解析和
+`ImageAttempt`：
+
+- 有限正整数本地 asset、非空 URI object、非空且逐项合法的 URI source 数组有效；
+- nested cycle、function、symbol、bigint、非有限数、accessor 或非法 descriptor
+  失败关闭，不挂载 `Image`；
+- native 保留完整 URI candidate 数组，Web 明确选择第一项；
+- 等价 source 沿用同一 attempt，真实语义值变化才重挂；旧 attempt 的迟到错误不能污染
+  新图片。
+
+真实 native / Web 图片生命周期仍以 `yarn runtime:image-fixture` 和
+`manual-tests/runtime-api/RuntimeApiScreen.tsx` 的人工验证为准。
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/DrawerHeader/DrawerHeader.tsx`。
+
+根面板是普通 `<View>`，没有 role、合并 label 或交互状态。`name` / `subtitle` 由本地
+`<Text>` 自然进入 a11y tree；头像容器（包括图片或首字符 fallback）显式使用共享隐藏
+属性，不会重复朗读名称，也不会产生额外 image 焦点。
+
+因此不要把 DrawerHeader 当按钮使用。需要“打开个人资料”等操作时，由 Drawer 中独立的
+可点击项承载 `onPress`、role 与 accessible name。
+
+## 主题键（Tokens）
+
+来源：`src/components/ui/DrawerHeader/styles.ts`。
+
+| Token                                       | 作用                   |
+| ------------------------------------------- | ---------------------- |
+| `c.primary`                                 | 根面板品牌橙背景       |
+| `c.primaryPressed`                          | fallback 头像底色      |
+| `c.onPrimary`                               | 姓名与 fallback 首字符 |
+| `c.onPrimaryMuted`                          | 副标题                 |
+| `avatar.xl`                                 | 头像固定 56pt frame    |
+| `type.h2` / `type.xxs`                      | 姓名 / 副标题字号      |
+| `space['3']` / `space['9']` / `space['10']` | 文本间距与面板内边距   |
+
+`ThemeProvider fontScale` 会经 `useThemedStyles` 缩放姓名、副标题与 fallback 首字符的
+文字 metric；头像 56pt frame、面板 padding 和 gap 不随 fontScale 改变。
+
+## 关联组件
+
+- [NavBar](navbar.md) —— 页面顶部导航栏
+- [Avatar](avatar.md) —— 可复用的通用头像原子

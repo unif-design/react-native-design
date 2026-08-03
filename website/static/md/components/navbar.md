@@ -4,11 +4,6 @@ title: NavBar 导航栏
 description: "顶部导航栏 —— 44px 高、居中标题 + 可选副标题、左右槽（传 config 自动用 IconButton 渲染）；3 variant default（白底 hairline）/ brand（橙底白字）/ transparent（透明 + 深字，浮在浅色 hero 上）。"
 ---
 
-import { LiveDemo } from '@site/src/components/LiveDemo';
-import { NavBar } from '@unif/react-native-design';
-import { View } from 'react-native';
-import { useState } from 'react';
-
 # NavBar 导航栏
 
 顶部导航 · 44px 高 · 三变体：`default` 白底 hairline · `brand` 品牌橙底白字 · `transparent` 透明无边框 + **深字**（`c.foreground`，用于浮在浅色 hero 渐变之上的子页）。
@@ -17,10 +12,11 @@ import { useState } from 'react';
 
 下方渲染的就是 `src/components/ui/NavBar/NavBar.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
 
-export const NavBarDemo = () => {
+```tsx
+const NavBarDemo = () => {
   const [action, setAction] = useState('尚未操作');
   return (
-    <LiveDemo>
+    <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
     <span className="demo-label">默认 · 含副标题</span>
     <View style={{ borderWidth: 1, borderColor: 'var(--ifm-color-emphasis-200)', borderRadius: 12, overflow: 'hidden' }}>
@@ -51,11 +47,10 @@ export const NavBarDemo = () => {
     </View>
         <span className="demo-label">最近操作：{action}</span>
       </div>
-    </LiveDemo>
+    </>
   );
 };
-
-<NavBarDemo />
+```
 
 ## 用法
 
@@ -127,5 +122,5 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 ## 关联组件
 
-- [DrawerHeader](./drawer-header) —— `@react-navigation/drawer` 顶部的品牌面板
-- [TabBar](./tabbar) —— 固定底部主导航
+- [DrawerHeader](drawer-header.md) —— `@react-navigation/drawer` 顶部的品牌面板
+- [TabBar](tabbar.md) —— 固定底部主导航

@@ -4,9 +4,6 @@ title: StatusDot 状态点
 description: "status='pending'/'active'/'done'/'error' 状态圆点 —— done=success 底+白勾、error=error 底+白叉、active=primary 边框+内嵌 PulseDot、pending=outline 描边；tone='flat'(默认,透明底)/'soft'(柔色底),size 默认 r(16)。"
 ---
 
-import { LiveDemo } from '@site/src/components/LiveDemo';
-import { StatusDot } from '@unif/react-native-design';
-
 # StatusDot 状态点
 
 任务列表 / 推理链通用的状态圆点。四态（done / error / active / pending）× 两风格（flat / soft）。
@@ -23,7 +20,7 @@ import { StatusDot } from '@unif/react-native-design';
 
 ## 实时预览
 
-<LiveDemo>
+```tsx
   <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span className="demo-label">flat（任务列表风格）</span>
@@ -68,7 +65,7 @@ import { StatusDot } from '@unif/react-native-design';
       </div>
     </div>
   </div>
-</LiveDemo>
+```
 
 ## 用法
 

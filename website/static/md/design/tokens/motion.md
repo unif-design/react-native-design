@@ -25,7 +25,7 @@ description: "Unif Design 的 motion 时长 token（fast/base/slow/pulse）与�
 :::tip pulse 是全周期,usePulse 取半周期
 `motion.pulse`(1600ms)是脉冲一来一回的**全周期**。`usePulse` / `<Pulse>` 的 `duration` 是**半周期**(一个方向),所以脉冲场景常传 `motion.pulse / 2`(800ms)。
 
-`duration` 合法域 `[1, 2³¹)`、`delay` 合法域 `[0, 2³¹)`、`from` / `to` 合法域 `[0, 1]`。非法值**整体回退默认值 + dev warn**,不做 clamp 也不取整;`from === to` 为静态。详见 [Pulse → 参数校验规则](/docs/components/pulse#参数校验规则)。
+`duration` 合法域 `[1, 2³¹)`、`delay` 合法域 `[0, 2³¹)`、`from` / `to` 合法域 `[0, 1]`。非法值**整体回退默认值 + dev warn**,不做 clamp 也不取整;`from === to` 为静态。详见 [Pulse → 参数校验规则](../../components/pulse.md#参数校验规则)。
 :::
 
 ## Reduced motion / `usePrefersReducedMotion` {#reduced-motion}
@@ -100,7 +100,7 @@ import { Pulse, PulseDot, Icon, motion } from '@unif/react-native-design';
 ```
 
 需要组合自定义容器时可使用 `usePulse`；其返回值同样由平台 driver 提供。共享代码优先用
-`<Pulse>`，完整签名与 Web 非 worklet 约束见 [Pulse 文档页](/docs/components/pulse)。
+`<Pulse>`，完整签名与 Web 非 worklet 约束见 [Pulse 文档页](../../components/pulse.md)。
 
 ### 进出过渡(替代 LayoutAnimation) {#进出过渡}
 
@@ -113,4 +113,4 @@ import { Reveal } from '@unif/react-native-design';
 iOS Fabric 下不依赖 `LayoutAnimation`。共享代码使用 `<Reveal>`：native 解析为 Reanimated
 `entering` / `exiting`，Web 解析为 CSS 入场并在卸载时直接移除。只有 native-only 代码
 才直接使用 Reanimated decorator；文档站 MDX 不要直接用 `useAnimatedStyle`（见
-[常见问题 → 文档站动画崩溃](/docs/troubleshooting#useanimatedstyle--layout-动画在文档站崩溃)）。
+[常见问题 → 文档站动画崩溃](../../troubleshooting.md#useanimatedstyle--layout-动画在文档站崩溃)）。

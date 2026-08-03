@@ -1,0 +1,192 @@
+---
+sidebar_position: 4
+title: Chip 标签
+description: "胶囊形可点击 / 可选中 pill —— 默认白底细边 / 选中主橙边 + 浅橙底 / 按下半透明，支持 leading / trailing 插槽，Suggestion 与多选筛选的底层组件。"
+---
+
+# Chip 标签
+
+胶囊形（pill）标签：圆角 999、可点击、可选中。Suggestion / 多选筛选 / 内联标记等场景的底层组件。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Chip/Chip.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+```tsx
+const ChipDemo = () => {
+  const [filter, setFilter] = useState('pending');
+  const [tags, setTags] = useState(['王经理', '张组长', '李区域']);
+  const [busy, setBusy] = useState(null);
+  return (
+    <>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">单选 · selected 切换</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <Chip label="待跟进" selected={filter === 'pending'} onPress={() => setFilter('pending')} />
+            <Chip label="已完成" selected={filter === 'done'} onPress={() => setFilter('done')} />
+            <Chip label="已取消" selected={filter === 'cancelled'} onPress={() => setFilter('cancelled')} />
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">leading icon · 建议气泡</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <Chip label="今天的安排" leading={<Icon name="spark" size={12} />} onPress={() => {}} />
+            <Chip label="新建拜访" leading={<Icon name="plus" size={12} />} onPress={() => {}} />
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">trailing close · 多选 token</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {tags.map(name => (
+              <Chip
+                key={name}
+                label={name}
+                selected
+                trailing={<Icon name="close" size={12} />}
+                onPress={() => setTags(tags.filter(x => x !== name))}
+              />
+            ))}
+            {tags.length === 0 && (
+              <button
+                style={{ fontSize: 12, color: '#999', background: 'none', border: 'none', cursor: 'pointer' }}
+                onClick={() => setTags(['王经理', '张组长', '李区域'])}
+              >
+                重置
+              </button>
+            )}
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">busy · 点了就转（请求在飞，二次点击被吞）</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <Chip
+              label="今日拜访计划"
+              leading={<Icon name="spark" size={12} />}
+              busy={busy === 'plan'}
+              onPress={() => { setBusy('plan'); setTimeout(() => setBusy(null), 1600); }}
+            />
+            <Chip
+              label="确认这一家"
+              selected
+              busy={busy === 'pick'}
+              onPress={() => { setBusy('pick'); setTimeout(() => setBusy(null), 1600); }}
+            />
+            <Chip label="不能点（disabled）" disabled onPress={() => {}} />
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">静态展示（无 onPress · 不响应按压）</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <Chip label="VIP" />
+            <Chip label="拜访周期 7 天" />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+```
+
+## 状态
+
+| 状态 | 视觉 |
+|---|---|
+| 默认 | `c.surface` 白底 + 1px `c.outline` 细边框,`c.foreground` 文本 |
+| 选中 (`selected`) | `c.primary` 边框 + `c.primaryContainerSubtle` 浅橙底 + `c.primary` 文本 |
+| 按下 | 透明度 0.7（仅当传 `onPress` 时） |
+| 禁用 (`disabled`) | 透明度 0.5 + 不响应 `onPress` |
+| 处理中 (`busy`) | leading 位换 spinner + 透明度 0.6 + 不响应二次点击（label 保留） |
+| 非交互（无 `onPress`） | 不响应按压、不显示按压态 |
+
+`disabled` 与 `busy` 的分工：**`disabled` = 现在不能点**（更暗、无动效）；**`busy` = 点过了，正在办**（spinner 传达进行中）。两者同时为真按 `disabled` 的视觉走。
+
+## 用法
+
+```tsx
+import { Chip, Icon } from '@unif/react-native-design';
+
+{/* 单个可选中 chip */}
+<Chip
+  label="待跟进"
+  selected={filter === 'pending'}
+  onPress={() => setFilter('pending')}
+/>
+
+{/* 带 leading icon */}
+<Chip
+  label="今天的安排"
+  leading={<Icon name="spark" size={12} />}
+  onPress={onSuggestion}
+/>
+
+{/* 静态展示（消息气泡里附带的 meta 标签等） */}
+<Chip label="VIP" />
+
+{/* 带 trailing 关闭按钮（多选 token 风格） */}
+<Chip
+  label="王经理"
+  selected
+  trailing={<Icon name="close" size={12} />}
+  onPress={() => removeFilter('manager-wang')}
+/>
+
+{/* 点了就发请求的 chip：busy 顶住等待窗口，同时吞掉二次点击 */}
+<Chip
+  label="今日拜访计划"
+  leading={<Icon name="spark" size={12} />}
+  busy={pending === 'plan'}
+  onPress={openTodayPlan}
+/>
+```
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `label` | `string` | — | 显示文本(单行 numberOfLines=1 截断) |
+| `selected` | `boolean` | `false` | 选中态（主色边框 + 浅橙底 + 主色文本） |
+| `onPress` | `() => void` | — | 点击回调；不传时 chip 渲染为静态 `<View>`，不响应按压 |
+| `disabled` | `boolean` | `false` | 禁用（透明度 0.5 + 不响应 `onPress`） |
+| `busy` | `boolean` | `false` | 处理中（leading 换 spinner + 透明度 0.6 + 吞掉二次点击） |
+| `leading` | `ReactNode` | — | 前置插槽（图标 / 小圆点等） |
+| `trailing` | `ReactNode` | — | 后置插槽（关闭按钮等） |
+| `style` | `StyleProp<ViewStyle>` | — | 附加样式 |
+| `testID` | `string` | — | E2E / 测试定位 |
+
+## 主题键（Tokens）
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.surface` | `useColors()` | 默认背景色 |
+| `c.outline` | `useColors()` | 默认边框色 |
+| `c.primary` | `useColors()` | 选中边框 + 文本色 |
+| `c.primaryContainerSubtle` | `useColors()` | 选中浅橙底色 |
+| `c.foreground` | `useColors()` | 默认文本色（`busy` spinner 也跟随它 / 选中时跟 `c.primary`） |
+| `radius.pill` | `@unif/react-native-design` | 胶囊圆角 |
+| `space['2']` / `space['5']` / `space['3']` | `@unif/react-native-design` | 内容 gap(6)/ 水平内边距(12)/ 垂直内边距(8) |
+| `type.xs` | `@unif/react-native-design` | 文本字号 |
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Chip/Chip.tsx`、`types.ts`。
+
+a11y 语义是**条件性**的：仅当传了 `onPress` 时，Chip 才用 `<Pressable>` 包裹并声明语义；静态展示型（无 `onPress`）渲染为纯 `<View>`，无 a11y 角色（与「不响应按压」一致）。
+
+- 默认 `accessibilityRole`：可点时为 `'button'`（`onPress` 缺省则无角色）。
+- a11y props（仅 `onPress` 时生效）：`accessibilityLabel` 取自必填的 `label`。
+- 状态语义：可点时上报 `accessibilityState={{ selected, disabled, busy }}` —— `disabled` 为 `disabled || busy`（两者都不可点），`busy` 单独映射，读屏据此念出「忙碌」而不是「已停用」。
+
+```tsx
+// 可点 + 可选中:role=button、label=label、state.selected 自动
+<Chip label="待跟进" selected={filter === 'pending'} onPress={() => setFilter('pending')} />
+
+// 处理中:state.busy=true、state.disabled=true（点击被吞，读屏念「忙碌」）
+<Chip label="今日拜访计划" busy onPress={openTodayPlan} />
+```
+
+## 不要
+
+- ❌ 不要把 `<Chip>` 当成"按钮的小号版" —— 实际按钮（包括小号）走 [Button](button.md) `size="sm"`。Chip 的视觉重心在"可选状态"，不在"主操作"。
+- ❌ 不要在 Chip 内嵌长文本 —— 单行 numberOfLines=1 截断；超过两个字的多选项考虑用 [Cell](cell.md) 列表。
+- ❌ 不要用 Chip 表达状态语义（`done`/`error`）—— 那是 [Tag](tag.md) 的领域。

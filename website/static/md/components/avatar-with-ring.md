@@ -1,0 +1,102 @@
+---
+sidebar_position: 1
+title: AvatarWithRing 圆环头像
+description: "个人名片 hero 头像 —— 品牌橙渐变底 + 外圈 ring + 品牌橙 shadow，默认 64 直径，size / ringColor 可调。"
+---
+
+# AvatarWithRing 圆环头像
+
+中心字符(userName 首字)+ **品牌橙渐变内核** + 外圈 ring + 品牌橙 shadow,用于个人名片 / 头像区。比 `<Avatar>` 多一圈强调边,适合视觉重心。
+
+内核底色固定为品牌橙渐变(`#F49443 → #EB6E00`),`ringColor` 只控制外圈 ring 的颜色;label 基准字号约 `size * 0.40`,ring 宽度约 `size * 0.0625`(随 `size` 缩放)。`ThemeProvider fontScale` 只缩放 label 的字号与字距；总直径、ring、内核、渐变和 shadow 均保持原几何。
+
+内部 SVG 渐变通过 `useSvgId('av')` 生成并消毒实例级 ID；同屏多个头像不会复用同一个渐变定义，也无需消费者传入或手工拼接 ID。
+
+## 实时预览
+
+下方渲染的就是 `src/components/business/AvatarWithRing/AvatarWithRing.tsx` 本体。
+
+```tsx
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">默认 · 64 直径 · c.avatarRing ring</span>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <AvatarWithRing label="刘" />
+        <AvatarWithRing label="A" />
+        <AvatarWithRing label="张" />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">size · 48 / 64 / 88 / 120</span>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'flex-end' }}>
+        <AvatarWithRing label="刘" size={48} />
+        <AvatarWithRing label="刘" size={64} />
+        <AvatarWithRing label="刘" size={88} />
+        <AvatarWithRing label="刘" size={120} />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">ringColor · 自定义 hex</span>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <AvatarWithRing label="A" ringColor="#3775F6" />
+        <AvatarWithRing label="B" ringColor="#22A56E" />
+        <AvatarWithRing label="C" ringColor="#8C8C8C" />
+      </div>
+    </div>
+  </div>
+```
+
+## 用法
+
+```tsx
+import { AvatarWithRing } from '@unif/react-native-design';
+
+{/* 个人名片屏 hero 头像 */}
+<AvatarWithRing label={userName.charAt(0)} size={96} />
+
+{/* 自定义品牌色 ring */}
+<AvatarWithRing label="A" ringColor="#3775F6" size={64} />
+```
+
+## API
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `label` | `string` | — | 中心文字(通常 1 字符,姓名首字) |
+| `size` | `number` | `64` | 总直径(含 ring),`r()` 缩放在内部处理 |
+| `ringColor` | `string` | `c.avatarRing` | **外圈 ring** 颜色(内核底色固定为品牌橙渐变,不受此控制) |
+| `style` | `StyleProp<ViewStyle>` | — | 容器附加样式(margin / position) |
+
+## 无障碍（a11y）
+
+来源：`src/components/business/AvatarWithRing/AvatarWithRing.tsx`、`types.ts`。
+
+本组件为展示 / 装饰用，无交互（渲染为 `<View>` 外壳，内含 SVG 渐变 + `<Text>` label）。源码**未设置任何 a11y prop**（既无 `accessibilityRole` 也无 `accessibilityLabel`）——中心 `label` 仅作为可见 `<Text>` 渲染，因此 screen reader 默认会读到该文字，但不会带头像语义。如需承载语义（如可点击进入资料页），请由父级可点区域设置 `accessibilityLabel` / `accessibilityRole`。
+
+## 主题键（Tokens）
+
+| Token | 来源 | 作用 |
+|---|---|---|
+| `c.avatarRing` | `useColors()` | 外圈 ring 默认色(可被 `ringColor` 覆盖) |
+| `c.onPrimary` | `useColors()` | 中心 label 文字色(恒定白) |
+| `avatarGradient` | `@unif/react-native-design` | 内核渐变底(`#F49443 → #EB6E00`,亮 / 暗共用) |
+| `s.brandAvatar` | `useTheme().shadow` | 品牌橙光晕 shadow(暗色保留橙晕托起头像) |
+| `fw.bold` | `@unif/react-native-design` | label 字重 |
+
+## 视觉规范
+
+| 元素 | 比例 / 取值 |
+|---|---|
+| label 字号 | 基准 `size × 0.40`，按 fontScale 缩放一次 |
+| label 字距 | 基准 `-0.5`，按 fontScale 缩放一次；垂直方向只由 `avatarCore` flex 居中 |
+| ring 宽度 | `size × 0.0625`(下限 2px) |
+| 内核底色 | `avatarGradient`(135° 品牌橙渐变,固定) |
+| 渐变 ID | `useSvgId('av')` 自动生成；消毒 React ID 并保证合法开头 |
+| label 色 | `c.onPrimary`(恒定) |
+| shadow | `s.brandAvatar`(品牌橙 elevation) |
+
+## 不要
+
+- 不要塞多字符 label —— 设计是单字符(姓名首字 / 字母),多了会溢出
+- 不要替代 `<Avatar>` —— Avatar 是基础原子(无 ring),AvatarWithRing 是装饰强化版,仅用于视觉重心场景
+- 不要把 `ringColor` 当随机调色板 —— 优先复用 token(`c.primary` / `c.info` / `c.success`)

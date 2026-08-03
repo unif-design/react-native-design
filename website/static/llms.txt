@@ -1,0 +1,68 @@
+# Unif Design
+
+> Unif Design 文档索引。每个链接是该页的纯 Markdown 版(供 LLM 抓取);需要完整全文一次性喂入时用 llms-full.txt。
+
+- [完整全文](llms-full.txt) — 全站全文聚合，适合一次性加载。
+
+## 概览
+
+- [完整规范](md/UNIF-DESIGN.md) — Unif Design 单文件设计宪法：品牌 / voice / 5 原则 / role-based token（颜色·字体·间距·圆角·阴影·动效）/ 图标 / 组件库 / Don'ts / RN 落地图。所有 token 值取自 src/theme，是 llms-full 的全量锚点。
+- [快速开始](md/getting-started.md) — 5 分钟上手 @unif/react-native-design：装 peerDeps、根挂 ThemeProvider、用 useColors / useThemedStyles 写第一个主题化组件。面向 RN 0.86 新架构。
+- [升级 / 迁移](md/migration.md) — @unif/react-native-design 迁移指南：旧顶层 colors / shadow 静态导出 → 运行期 useColors() / useThemedStyles() hook（含旧 token → 新 role grep 对照），reanimated 4 升级，以及 BottomSheet / Confirm 的当前迁移状态。
+- [AI Skill](md/skills.md) — design 是一个 Agent Skill,教 AI 编码助手正确调用 @unif/react-native-design 的 API、避免常见幻觉。
+- [常见问题](md/troubleshooting.md) — @unif/react-native-design 排障决策树（症状 → 因 → 解）：Web / 文档站点击无响应与动画崩溃、主题样式不切换 / useThemedStyles 缓存失效、peerDeps 缺失与 iOS 链接错误。
+
+## components
+
+- [AvatarWithRing 圆环头像](md/components/avatar-with-ring.md) — 个人名片 hero 头像 —— 品牌橙渐变底 + 外圈 ring + 品牌橙 shadow，默认 64 直径，size / ringColor 可调。
+- [Avatar 头像](md/components/avatar.md) — 圆形 monogram 头像 —— brand / info / soft / neutral 四配色 × xs/sm/md/lg/xl 五档(18/28/32/40/56),支持图片 source 与加载失败回退 label。
+- [BlurLayer 玻璃模糊层](md/components/blur-layer.md) — BlurView + 颜色 tint 双层玻璃层 —— intensity soft(blur 10)/ strong(blur 40)，blurType 随亮 / 暗主题自动切换，纯装饰 pointerEvents='none'。
+- [Button 按钮](md/components/button.md) — 文本按钮 —— 7 variant(primary/secondary/ghost/neutral/outline/danger/text)× 3 size(sm/md/lg，高 28/36/44)，支持 block 块级、loading、leftIcon / rightIcon。
+- [Card 卡片](md/components/card.md) — 通用内容卡片 —— default(白底 + 卡片阴影)/ plain(仅圆角无阴影)，12px 圆角、14px padding，可加状态彩边 borderColor，bare 抑制内边距，fill 撑满 flex 父。
+- [Carousel 轮播](md/components/carousel.md) — 包装 react-native-reanimated-carousel 的薄壳轮播 —— 泛型 data、严格 display/action slide、reduced-motion autoplay、内置 dot indicator。
+- [Cell · List 列表行](md/components/cell.md) — 列表行 + List 容器 —— actionable / control / static 三个显式分支，primitive 文本安全渲染，grouped / flush 两种布局。
+- [Checkbox 复选框](md/components/checkbox.md) — 受控多选框 —— 20×20 盒子，square / circle 两种形状；可见 label 或显式 accessibilityLabel 必须至少提供一个。
+- [Chip 标签](md/components/chip.md) — 胶囊形可点击 / 可选中 pill —— 默认白底细边 / 选中主橙边 + 浅橙底 / 按下半透明，支持 leading / trailing 插槽，Suggestion 与多选筛选的底层组件。
+- [Confirm 确认对话框](md/components/confirm.md) — 命令式 await confirm() → Promise<boolean> —— 高风险操作二次确认，ConfirmHost 裸 RN Modal 底部弹层（不依赖 @gorhom），destructive 红确认按钮，同一时间仅 1 个。
+- [Decorations 装饰图元](md/components/decorations.md) — 沉浸式屏 / hero 装饰原子(react-native-svg)—— GradientWash 线性渐变带、RadialHalo 径向光晕、ScreenBackdrop 整屏渐变 + halo 预设(warmOrange)，全 absolute 纯装饰不接管 hit area。
+- [DrawerHeader 抽屉头](md/components/drawer-header.md) — React Navigation Drawer 顶部品牌面板：名称 + 可选副标题 + 56pt 图片头像，非法 source 或当前图片加载失败时回退姓名首码点。
+- [Empty 空态](md/components/empty.md) — 空态 / 占位 —— 56×56 浅橙圆盘 + icon 插画(默认 spark)+ 大字标题 + 小字描述，icon 可换强语义图标(camera-off / permission-denied 等)。
+- [EntryCard 入口卡](md/components/entry-card.md) — 横向入口小卡 —— 左 30×30 灰底 icon tile + 右 title/sub，独立 surface 视觉(无 arrow / extra)，适合 grid 双列等宽入口，可点带按压态。
+- [Form 表单](md/components/form.md) — 表单容器三件套 Form / FormGroup / FormRow —— 白卡分组 + 行（label + 控件）+ 行间 hairline 分隔（表单不用 gap 的例外）。
+- [GlassStats 玻璃数据条](md/components/glass-stats.md) — 横向多列数据条，每格一个数字 + 标签；玻璃质感（BlurLayer backdrop + 半透白纱），数据用 [count, label] 元组、count 需预先格式化好再传入。
+- [Grid 九宫格](md/components/grid.md) — 图标入口宫格 —— 1..6 列（默认 4），每格 icon + label（+ 可选 badge 角标）；只有 Grid 提供 onPress 时每格才是 button。
+- [IconButton 图标按钮](md/components/icon-button.md) — icon-only 方形按钮 —— size sm/md/lg（28/36/44）、variant 走 Button 同套 palette（默认 ghost）、accessibilityLabel TypeScript 强制必填。
+- [图标](md/components/icons.md) — 手绘 24×24 描边 SVG 图标系统 —— 统一绘制规则、IconName 字面量联合类型自动补全；<Icon> 刻意对屏幕阅读器隐藏，语义由承载它的可交互父组件提供。
+- [Input 输入框](md/components/input.md) — 严格单行输入：受控/非受控 mode、44pt 最小 frame、可验证 slot 与窄 ref。
+- [Loading 加载](md/components/loading.md) — 旋转加载指示器 Spinner —— outer 承载 caller layout/transform，inner 固定视觉环独立旋转；900ms 线性一圈，native 走 reanimated 4、Web 走静态 CSS keyframes。
+- [Logo 主标](md/components/logo.md) — 品牌主标容器组件 —— 标准化尺寸（默认 64）/ 圆角（默认 size/4 squircle）；source 由 consumer 必传，非空 accessibilityLabel 决定有意义图片语义。
+- [NavBar 导航栏](md/components/navbar.md) — 顶部导航栏 —— 44px 高、居中标题 + 可选副标题、左右槽（传 config 自动用 IconButton 渲染）；3 variant default（白底 hairline）/ brand（橙底白字）/ transparent（透明 + 深字，浮在浅色 hero 上）。
+- [组件概览](md/components/overview.md) — @unif/react-native-design 组件索引（40+ 组件，按场景分组：品牌 / 通用 / 表单 / 导航 / 反馈 / 数据展示 / 业务复合）。每个组件一页，逐组件 API 见各页与远程 llms.txt。
+- [PasswordInput 密码输入](md/components/password-input.md) — 受控密码输入：顶层 native props、受管显示/隐藏 action 与窄 ref。
+- [Pulse · PulseDot · usePulse](md/components/pulse.md) — 跨平台脉冲原语 —— usePulse(opacity 循环 hook) + <Pulse>(包装组件) + <PulseDot>(默认 6×6 主橙圆点)；统一归一化后由 native Reanimated / Web CSS driver 执行，纯视觉对屏幕阅读器隐藏。
+- [Radio 单选](md/components/radio.md) — 单选控件 —— Radio.Group 必须命名；每个 Radio 用可见 label 或 accessibilityLabel 命名，同组只能选一个。
+- [Reveal](md/components/reveal.md) — 内容入/出场淡入淡出容器 —— native 走 reanimated FadeIn/FadeOut，Web 用单一 RN View + CSS opacity transition；保留 caller flex/opacity，并显式尊重 reduced motion。
+- [Search 搜索框](md/components/search.md) — 严格受控/非受控 Search：单一 current value、库自管 action、44pt root 与 36pt surface。
+- [Skeleton 骨架屏](md/components/skeleton.md) — 页面级加载占位骨架 —— shape='line'/'rect'/'circle' 三形态(默认 rect),width/height/size/radius 可覆盖；共享 usePulse opacity 脉冲(0.5↔1,半周期 700ms),对 SR 隐藏。
+- [StatusDot 状态点](md/components/status-dot.md) — status='pending'/'active'/'done'/'error' 状态圆点 —— done=success 底+白勾、error=error 底+白叉、active=primary 边框+内嵌 PulseDot、pending=outline 描边；tone='flat'(默认,透明底)/'soft'(柔色底),size 默认 r(16)。
+- [Stepper 步进器](md/components/stepper.md) — 数字步进器 [−][N][+] —— 三个真实至少 44pt 的交互 frame；accessibilityLabel 必填，范围和值统一归一化，边界过滤 custom action 并让无效标准方向 no-op。
+- [Switch 开关](md/components/switch.md) — 布尔开关 —— 真实 44×44 Pressable 内居中 32×20 轨道；accessibilityLabel 必填，disabled 移除 handler，reduced motion 停在终值。
+- [TabBar 底部 tab 栏](md/components/tabbar.md) — 固定底部主导航 tab 栏 —— 50px 高 + 顶部 hairline,各 tab icon+文字垂直居中,激活 c.primary;受控 active/onChange,items 含 id/icon/label/可选 badge,role='tab' + selected。
+- [Tabs 标签页](md/components/tabs.md) — 页面内分类切换 —— 下划线 Tabs(页面级,44px 高 + 2px 主色下划线)与分段控件 Segmented(局部灰底胶囊,size sm/md;md 默认 44px 触控达标 / sm 28px 紧凑);均受控 value/onChange + items(id/label),role='tab' + selected。
+- [Tag 标签](md/components/tag.md) — 纯展示状态标签 —— variant='neutral'(默认)/'brand'/'success'/'error'/'info'/'outline' 六种配色,size='md'(22h,默认)/'lg'(26h),label 必填,numberOfLines 默认 1 超长省略。
+- [TextField 输入共享内核（internal）](md/components/text-field.md) — Input、Textarea、Search 与 PasswordInput 的严格 value、slot、44pt frame 与错误播报内核；不作为公共组件导入。
+- [Textarea 多行输入](md/components/textarea.md) — 严格多行输入：一次性 defaultValue、44pt 最小高度、slot/a11y 与窄 ref。
+- [Thumbnail 缩略图](md/components/thumbnail.md) — 列表 / 卡片 / chat 通用 16:9.5 小图 —— size='sm'(64×40)/'md'(113×67,默认)/'lg'(160×96),uri 或 source 严格二选一,稳定 placeholder 与 2pt selected ring,layout / image style 分层。
+- [Toast 轻提示](md/components/toast.md) — 命令式全局轻提示 —— toast(msg) / toast.success / .error / .info,或 {message,kind,duration};配根部挂一次 <ToastHost />,inverseSurface 底胶囊 + 可选状态点,默认 3000ms 后 fade+slide 自动消失,同时最多 1 条。
+- [VersionPill 版本号药丸](md/components/version-pill.md) — 版本徽章胶囊 —— 可见状态 + 「版本 {version}」+ 可选「· build {build}」mono 后缀；默认状态为 success 色的“正常”。
+
+## design
+
+- [全局 Don'ts](md/design/donts.md) — Unif Design 硬性禁忌清单：不引入新渐变 / 蓝色装饰 / 装饰 emoji / 英文 UI / 新字体；不破坏气泡内角方；不用 border-bottom；不硬编码 token；动效仅 fade + layout。
+- [设计系统](md/design/intro.md) — Unif Design 设计系统总览：品牌理念（中文优先、橙色克制、无装饰）、role-based token、组件视觉契约的入口；面向 React Native 0.86 新架构。
+- [设计原则](md/design/principles.md) — Unif Design 5 条不可违背的规则：中文优先、橙色克制、无装饰、列表用 gap 不用 border、气泡内角方。新增组件 / 改样式前必读。
+- [颜色](md/design/tokens/colors.md) — Unif Design 颜色 token：role-based 角色 token（c.primary / c.surface / c.foreground…），亮/暗各一套 hex，跟随系统切换；含取色优先级链与代码用法。
+- [动效](md/design/tokens/motion.md) — Unif Design 的 motion 时长 token（fast/base/slow/pulse）与跨平台动效约定：native 使用 Reanimated，Web 使用 CSS/timer/RAF driver，复用 usePulse / Pulse / Reveal。值取自 src/theme/tokens.ts。
+- [间距 · 圆角 · 阴影](md/design/tokens/spacing-radii-shadows.md) — Unif Design 的 space（4px 网格）/ radius（含气泡非对称圆角）/ shadow（themed，brandLg 等品牌光晕，暗色趋零）token，值取自 src/theme。
+- [字体](md/design/tokens/typography.md) — Unif Design 字体 token：type 字号阶梯 + fw 字重 + fontMono 等宽栈；仅系统字体（CJK 走 PingFang SC），不引入 webfont。值取自 src/theme/tokens.ts。
+- [语调与文案](md/design/voice.md) — Unif Design 文案规范：品牌大小写（Unif）、人称（AI / 我）、状态文案速查、建议 chip 语气、全角标点、禁用装饰 emoji。

@@ -1,0 +1,197 @@
+---
+sidebar_position: 4
+title: Carousel 轮播
+description: "包装 react-native-reanimated-carousel 的薄壳轮播 —— 泛型 data、严格 display/action slide、reduced-motion autoplay、内置 dot indicator。"
+---
+
+# Carousel 轮播
+
+包装 `react-native-reanimated-carousel@5.0.0` 正式版的薄壳层,沿用上游正式命名并收口本设计系统需要的布局与交互:
+
+1. dot indicator 走 `c.primary` token,使用正式版 `Pagination`(`useSharedValue` + `progress` 驱动,无需自己跟 active state)
+2. `indicatorPosition` 控制指示器位置:`'bottom'` 独立行(占额外 16px 高度) / `'overlay-bottom-right'` 浮在 banner 右下角
+3. 类型泛型 `<T>` 让 `data`、`renderItem`、`keyExtractor` 和 action slide 回调共享同一 item 类型
+4. `forwardRef` 直接透传正式版 `CarouselRef`,支持 `scrollTo` / `prev` / `next` / `getCurrentIndex`
+5. slide 是严格二选一：不传 action 字段时渲染纯展示 `View`；`onPressItem` 与 `getAccessibilityLabel` 必须同时传入才渲染可操作 `Pressable`
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Carousel/Carousel.tsx` 本体,通过 `react-native-web` 翻译成浏览器节点。
+
+```tsx
+  <div
+    style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 360 }}
+  >
+    <span className="demo-label">
+      3 张色块 · autoplay 3.5s · 底部 dot 指示器
+    </span>
+    <Carousel
+      data={[
+        { id: '1', color: '#EB6E00', label: 'A' },
+        { id: '2', color: '#3775F6', label: 'B' },
+        { id: '3', color: '#52C41A', label: 'C' },
+      ]}
+      height={120}
+      itemSize={360}
+      autoplay
+      autoplayInterval={3500}
+      keyExtractor={(item) => item.id}
+      showIndicator
+      renderItem={({ item }) => (
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: item.color,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 12,
+            margin: 4,
+          }}
+        >
+          <Text style={{ color: '#fff', fontSize: 32, fontWeight: '600' }}>
+            {item.label}
+          </Text>
+        </View>
+      )}
+    />
+  </div>
+```
+
+## 用法
+
+```tsx
+import { Carousel } from '@unif/react-native-design';
+import { Image } from 'react-native';
+
+type Banner = {
+  id: string;
+  imageUrl: string;
+  linkUrl?: string;
+  title?: string;
+};
+
+const banners: Banner[] = [
+  /* … */
+];
+
+<Carousel<Banner>
+  data={banners}
+  height={140}
+  autoplay
+  autoplayInterval={3500}
+  keyExtractor={(item) => item.id}
+  showIndicator
+  indicatorPosition="overlay-bottom-right"
+  onPressItem={(item) => {
+    if (item.linkUrl) openWebview(item.linkUrl);
+  }}
+  getAccessibilityLabel={(item) => item.title ?? 'Banner'}
+  renderItem={({ item }) => (
+    <Image source={{ uri: item.imageUrl }} style={{ flex: 1 }} />
+  )}
+  testID="dashboard-carousel"
+/>;
+```
+
+## API
+
+| Prop                    | Type                                                                                        | 默认                          | 说明                                                                                                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`                  | `T[]`                                                                                       | —                             | 数据数组;空数组建议 caller 自行 `return null`                                                                                                                  |
+| `renderItem`            | `(info: { item: T; index: number; relativeProgress: SharedValue<number> }) => ReactElement` | —                             | 单项渲染,参数与上游正式 API 一致                                                                                                                               |
+| `keyExtractor`          | `(item: T, index: number) => string`                                                        | —                             | 稳定 key 解析器,数据更新时用于保持 item 身份                                                                                                                   |
+| `height`                | `number`                                                                                    | —                             | 每张高度(宽度默认 = 屏宽,被 `itemSize` 覆盖)                                                                                                                   |
+| `itemSize`              | `number?`                                                                                   | `useWindowDimensions().width` | 每张宽度和水平翻页步长;caller 外层有 `marginHorizontal`(例如 Dashboard banner inset 16)时必须传 `屏宽 - 左右 margin*2`,否则 slide 撑满全屏宽,右侧被裁掉        |
+| `autoplay`              | `boolean?`                                                                                  | `false`                       | 是否自动播放；系统开启 reduced motion 时会强制停止                                                                                                             |
+| `autoplayInterval`      | `number?`                                                                                   | `3000`                        | 自动播放间隔 ms                                                                                                                                                |
+| `loop`                  | `boolean?`                                                                                  | `true`                        | 是否循环播放                                                                                                                                                   |
+| `showIndicator`         | `boolean?`                                                                                  | `true`                        | 是否显示 dot indicator；仅 `data.length > 1` 时渲染并按位置预留空间                                                                                            |
+| `indicatorPosition`     | `'bottom' \| 'overlay-bottom-right'`                                                        | `'bottom'`                    | `'bottom'` 独立行 +16px / `'overlay-bottom-right'` 浮层不占高                                                                                                  |
+| `onPressItem`           | `(item: T, index: number) => void`                                                          | —                             | action slide 的点击回调；必须与 `getAccessibilityLabel` 同时传入                                                                                                |
+| `getAccessibilityLabel` | `(item: T, index: number) => string`                                                        | —                             | action slide 的业务名称；必须与 `onPressItem` 同时传入                                                                                                         |
+| `style`                 | `StyleProp<ViewStyle>?`                                                                     | —                             | 外层 View 附加样式                                                                                                                                             |
+| `testID`                | `string?`                                                                                   | —                             | E2E / 测试定位,子项自动加 `${testID}-item-${i}`                                                                                                                |
+
+## 命令式 ref
+
+组件直接透传并导出上游正式版 `CarouselRef`:
+
+```tsx
+import { useRef } from 'react';
+import { Carousel, type CarouselRef } from '@unif/react-native-design';
+
+const carouselRef = useRef<CarouselRef>(null);
+
+<Carousel
+  ref={carouselRef}
+  data={banners}
+  height={140}
+  renderItem={({ item }) => (
+    <Image source={{ uri: item.imageUrl }} style={{ flex: 1 }} />
+  )}
+/>;
+
+carouselRef.current?.next({ animated: true });
+carouselRef.current?.prev({ count: 2, animated: false });
+carouselRef.current?.scrollTo({ index: 0, animated: false });
+const settledIndex = carouselRef.current?.getCurrentIndex();
+```
+
+`getCurrentIndex()` 返回最后一次完成落位的 index;滑动或动画进行中仍返回上一次 settled index。`scrollTo` 只接受绝对 `index`,相对移动请使用 `next` / `prev`。
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Carousel/Carousel.tsx`、`types.ts`。
+
+slide 的节点类型与 a11y 语义由严格联合决定：
+
+- display slide：不传 `onPressItem` / `getAccessibilityLabel`，每张 slide 是普通 `<View>`，不形成 button 焦点。
+- action slide：运行时只有 `onPressItem` 与 `getAccessibilityLabel` **都是函数**才进入 action 配置；partial 或非函数未类型化值会让整组回退 display-only，并在 effect 诊断。
+- 每个 item 的 getter 结果还会单独验证：trim 后非空 string 才拼为 `${业务名称}，第 ${index + 1} 项，共 ${data.length} 项` 并渲染 RN core button；空白、非 string 或 getter 抛错只让对应 slide 失败关闭为 View，并在 effect 诊断，不生成“第 N 项”兜底按钮名。
+- Pagination 仅在多页时渲染，并由本地 `View` 从 a11y tree 隐藏；隐藏 props 不会透传给第三方 Pagination。
+
+```tsx
+// 可点轮播:两个 action 字段必须成对提供
+<Carousel
+  data={banners}
+  height={140}
+  onPressItem={(item) => openWebview(item.linkUrl)}
+  getAccessibilityLabel={(item) => item.title ?? 'Banner'}
+  renderItem={({ item }) => (
+    <Image source={{ uri: item.imageUrl }} style={{ flex: 1 }} />
+  )}
+/>
+```
+
+## 视觉规范
+
+| 元素                     | 规则                                                                                      |
+| ------------------------ | ----------------------------------------------------------------------------------------- |
+| Dot · 默认               | 4×4 圆(`space['1']`),`c.primary` @ opacity 0.32                                           |
+| Dot · active             | 12×4 长条(`space['5']`),`c.primary` @ opacity 1;每个 dot 都预留 12pt 宽避免切换时布局跳动 |
+| `'bottom'` 占位          | 容器高度 = `height + 16`(`space['7']`)                                                    |
+| `'overlay-bottom-right'` | dot 浮层 absolute 在右下角,不占额外高度                                                   |
+| 单页 / 关闭 indicator     | 不渲染 Pagination；不为 indicator 预留高度                                                 |
+| `loop`                   | 默认开启 —— 最后一张滑回第一张                                                            |
+
+## 主题键（Tokens）
+
+| Token                       | 来源                        | 作用                                             |
+| --------------------------- | --------------------------- | ------------------------------------------------ |
+| `c.primary`                 | `useColors()`               | dot indicator 颜色(默认 0.32 / active 1 opacity) |
+| `space['1']` / `space['5']` | `@unif/react-native-design` | dot 尺寸(4)/ active dot 宽(12)                   |
+| `space['7']`                | `@unif/react-native-design` | `'bottom'` 模式指示器预留行高(16)                |
+| `radius.pill`               | `@unif/react-native-design` | dot 圆角(clamp 成圆)                             |
+
+## 备注
+
+- 内部用了 `useSharedValue` + `progress`,指示器更新在 UI 线程完成,不走 JS 每帧回调
+- `autoplayInterval` 从上一段切换动画完成后开始计时;触摸和滑动期间由上游暂停,落位后恢复。系统开启 reduced motion 时，即使传了 `autoplay` 也不会启动。
+- Carousel 不拥有页面可见性或导航焦点生命周期；页面隐藏、失焦或业务需要暂停时，caller 应把 `autoplay` 设为 `false`。
+- `testID` 自动生成子项 testID `carousel-item-${i}`,可用于消费者侧集成测试
+
+## 不要
+
+- 不要把 Carousel 当 `<ScrollView horizontal>` 用 —— 简单横滚列表请用原生 `<ScrollView>` 即可
+- 单页可以使用 Carousel，但不会渲染 Pagination 或保留其高度；不需要轮播能力时仍可直接渲染内容
+- 不要忘了 `itemSize` —— 一旦外层加了 `marginHorizontal`,默认全屏宽会让 slide 右侧被裁。`屏宽 - margin*2` 是稳妥值,`useWindowDimensions()` 拿屏宽

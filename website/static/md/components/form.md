@@ -1,0 +1,196 @@
+---
+sidebar_position: 4
+title: Form 表单
+description: '表单容器三件套 Form / FormGroup / FormRow —— 白卡分组 + 行（label + 控件）+ 行间 hairline 分隔（表单不用 gap 的例外）。'
+---
+
+# Form 表单
+
+表单容器——分组标题 + 行（label + 控件）+ 行间 hairline 分隔。
+
+## 实时预览
+
+下方渲染的就是 `src/components/ui/Form/Form.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+
+```tsx
+const FormDemo = () => {
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('1581234');
+  const [remind, setRemind] = useState(true);
+  const [team, setTeam] = useState(false);
+  const phoneError =
+    phone.length > 0 && phone.length < 11 ? '格式不正确' : undefined;
+  return (
+    <>
+      <Form>
+        <FormGroup label="基本信息">
+          <FormRow label="姓名" required>
+            <Input value={name} onChangeText={setName} placeholder="请输入" />
+          </FormRow>
+          <FormRow label="手机号" required error={phoneError}>
+            <Input
+              value={phone}
+              onChangeText={setPhone}
+              placeholder="11 位手机号"
+              keyboardType="phone-pad"
+            />
+          </FormRow>
+        </FormGroup>
+        <FormGroup label="拜访设置">
+          <FormRow label="拜访提醒">
+            <Switch
+              value={remind}
+              onChange={setRemind}
+              accessibilityLabel="拜访提醒"
+            />
+          </FormRow>
+          <FormRow label="同步给团队">
+            <Switch
+              value={team}
+              onChange={setTeam}
+              accessibilityLabel="同步给团队"
+            />
+          </FormRow>
+        </FormGroup>
+      </Form>
+    </>
+  );
+};
+```
+
+## API
+
+来源：`src/components/ui/Form/types.ts`、`{Form,FormGroup,FormRow}.tsx`。
+
+### `<Form>`
+
+| Prop       | Type        | 默认 | 说明                                                                           |
+| ---------- | ----------- | ---- | ------------------------------------------------------------------------------ |
+| `children` | `ReactNode` | —    | 通常是若干 `FormGroup` / `FormRow`；根容器纵向堆叠，组间 `gap: space[7]`（16） |
+| `testID`   | `string?`   | —    | E2E / 测试定位                                                                 |
+
+### `<FormGroup>`
+
+| Prop       | Type        | 默认 | 说明                                                             |
+| ---------- | ----------- | ---- | ---------------------------------------------------------------- |
+| `label`    | `string?`   | —    | 分组标题（uppercase 小标签风格）；不传则不渲染标题行             |
+| `children` | `ReactNode` | —    | 该分组下若干 `FormRow`；行间自动插 1px hairline 分隔（除首行外） |
+| `testID`   | `string?`   | —    | E2E / 测试定位                                                   |
+
+### `<FormRow>`
+
+| Prop       | Type        | 默认    | 说明                                             |
+| ---------- | ----------- | ------- | ------------------------------------------------ |
+| `label`    | `string`    | —       | 字段标题（左侧）                                 |
+| `children` | `ReactNode` | —       | 字段控件（Input / Switch 等，右侧）              |
+| `required` | `boolean?`  | `false` | 必填标记，label 后渲染红色 `*`（色值 `c.error`） |
+| `error`    | `string?`   | —       | 错误信息，渲染在该行下方（红字）                 |
+| `testID`   | `string?`   | —       | E2E / 测试定位                                   |
+
+> `FormGroup` 动态列表（运行时增删 `FormRow`）必须给每个 child 传稳定 `key`；不传时 fallback 到 `__row-${i}`，仅适用于**静态**列表，动态列表会导致 state 漂移。
+
+## 视觉规范
+
+来源：`src/components/ui/Form/styles.ts`（值取自 `src/theme/tokens.ts`）。
+
+| 元素     | 规则                                                                                                                 |
+| -------- | -------------------------------------------------------------------------------------------------------------------- |
+| 分组标题 | `t.xs`（13）/ `fw.semi`（600）/ `c.foregroundSubtle`，全大写、`letterSpacing: 1`、`paddingHorizontal: space[1]`（4） |
+| 分组卡片 | `c.surface` 白底，`radius.lg`（10）圆角，`overflow: hidden`，组内 `gap: space[3]`（8）                               |
+| Form Row | `minHeight: 48`，左 label + 右控件，`paddingHorizontal: space[7]`（16）/ `paddingVertical: space[5]`（12）           |
+| 行 label | `t.sm`（14）/ `fw.medium`（500）/ `c.foreground`                                                                     |
+| 行间分隔 | `StyleSheet.hairlineWidth`、`c.outline`（亮色 `#EDEDED`）（这是 form 的例外，**不**用 gap）                          |
+| 必填标记 | label 后带 `*`，色 `c.error`（亮色 `#F4511E`）                                                                       |
+| 错误提示 | 行下方 `t.micro`（11）/ `c.error` 红字                                                                               |
+
+## 用法
+
+```tsx
+import {
+  Form,
+  FormGroup,
+  FormRow,
+  Input,
+  Switch,
+} from '@unif/react-native-design';
+
+<Form>
+  <FormGroup label="基本信息">
+    <FormRow label="姓名" required>
+      <Input value={name} onChangeText={setName} placeholder="请输入" />
+    </FormRow>
+    <FormRow label="手机号" error="格式不正确">
+      <Input value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+    </FormRow>
+  </FormGroup>
+
+  <FormGroup label="拜访设置">
+    <FormRow label="提醒">
+      <Switch value={remind} onChange={setRemind} accessibilityLabel="提醒" />
+    </FormRow>
+  </FormGroup>
+</Form>;
+```
+
+## Input / Textarea 严格模式
+
+表单里的文本控件必须明确选择一种模式：受控时同时传 `value` 和 `onChangeText`；非受控时使用一次性的 `defaultValue`。不要混传 `value` 与 `defaultValue`，也不要用已删除的 `readOnly`（改为 `editable={false}`）。
+
+```tsx
+<FormRow label="姓名">
+  <Input value={name} onChangeText={setName} accessibilityLabel="姓名" />
+</FormRow>
+<FormRow label="草稿">
+  <Textarea defaultValue="首次草稿" accessibilityLabel="草稿" />
+</FormRow>
+<FormRow label="拜访提醒">
+  <Switch
+    value={remind}
+    onChange={setRemind}
+    accessibilityLabel="拜访提醒"
+  />
+</FormRow>
+```
+
+## 无障碍（a11y）
+
+来源：`src/components/ui/Form/{Form,FormGroup,FormRow}.tsx`、`types.ts`。
+
+`Form` / `FormGroup` / `FormRow` 都是纯布局容器,源码全是 `<View>` + `<Text>`(分组标题 / 字段 label / 必填星号 / 错误文字),**三者均未设置任何 a11y prop**(无 `accessibilityRole` / `accessibilityLabel` / state),也无可传的 a11y prop。
+
+- 真正的 a11y 语义来自传入 `FormRow` 的**控件 children**(如 [Input](input.md) 的 `<TextInput>`、[Switch](switch.md)),由控件自身承载 role / label / state；Switch 的 `accessibilityLabel` 是必填，必须与行标题一致或提供更明确的名称。
+- `FormRow` 的 `label`、必填 `*`、`error` 文字渲染为相邻 `<Text>`,默认对 SR 可读,但**未与控件做程序化关联**(无 `accessibilityLabelledBy` / describedBy)。为确保 SR 把字段名读到对应控件上,建议在控件上显式补 `accessibilityLabel`(如 `<Input accessibilityLabel="姓名" />`),错误态可补 `accessibilityHint`。
+
+```tsx
+// label 是视觉文本;控件上显式补 accessibilityLabel 把字段名关联到输入
+<FormRow label="姓名" required>
+  <Input value={name} onChangeText={setName} accessibilityLabel="姓名" />
+</FormRow>
+```
+
+## 与 Cell · List 的区别
+
+| 用途                         | 选哪个                             |
+| ---------------------------- | ---------------------------------- |
+| 数据展示（设置项、客户列表） | [Cell · List](cell.md) — 白卡 + gap |
+| 数据录入（表单）             | **Form** — 白卡 + 行间 hairline    |
+
+录入场景密度更高，hairline 分隔比 gap 更高效；展示场景反之。设置列表若把
+Switch / Stepper 放在 Cell 行尾，必须选择 Cell 的显式 control 分支，不能把控件
+当作任意 `ReactNode` extra，也不能同时给 Cell 外层 `onPress`：
+
+```tsx
+<Cell
+  title="拜访提醒"
+  extra={{
+    kind: 'control',
+    node: (
+      <Switch
+        value={remind}
+        onChange={setRemind}
+        accessibilityLabel="拜访提醒"
+      />
+    ),
+  }}
+/>
+```
