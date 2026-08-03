@@ -1,3 +1,4 @@
+import type { ViewStyle } from 'react-native';
 import { createLogger } from '../../../utils/logger';
 
 const log = createLogger('Spinner');
@@ -10,6 +11,12 @@ const log = createLogger('Spinner');
  */
 
 const warnedKeys = new Set<string>();
+
+/** caller 的 alignItems / justifyContent 不能改变固定视觉环的居中位置。 */
+export const SPINNER_CENTER_STYLE = {
+  alignItems: 'center',
+  justifyContent: 'center',
+} as const satisfies ViewStyle;
 
 function warnOnce(key: string, msg: string) {
   if (warnedKeys.has(key)) return;

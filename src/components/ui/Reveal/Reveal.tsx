@@ -1,6 +1,6 @@
 import React from 'react';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { motion } from '../../../theme';
+import { motion, usePrefersReducedMotion } from '../../../theme';
 import type { RevealProps } from './types';
 
 /**
@@ -16,10 +16,12 @@ export function Reveal({
   duration = motion.base,
   testID,
 }: RevealProps): React.JSX.Element {
+  const reduced = usePrefersReducedMotion();
+
   return (
     <Animated.View
-      entering={FadeIn.duration(duration)}
-      exiting={FadeOut.duration(duration)}
+      entering={reduced ? undefined : FadeIn.duration(duration)}
+      exiting={reduced ? undefined : FadeOut.duration(duration)}
       style={style}
       testID={testID}
     >

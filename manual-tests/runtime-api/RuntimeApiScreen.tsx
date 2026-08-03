@@ -22,9 +22,11 @@ import {
   Pulse,
   PulseDot,
   Radio,
+  Reveal,
   Search,
   Segmented,
   Skeleton,
+  Spinner,
   Stepper,
   Switch,
   Tag,
@@ -263,6 +265,8 @@ export function RuntimeApiScreen(): React.JSX.Element {
               <ImageSourceAttemptSection />
 
               <ThumbnailSection />
+
+              <AnimationContainersSection />
 
               <Section title="Toast">
                 <Button
@@ -772,6 +776,54 @@ function ThumbnailSection(): React.JSX.Element {
         ring，不挂 Image、不返回 null；dev 诊断必须来自 effect。
       </Text>
       <Thumbnail uri="   " size="sm" testID="thumbnail-invalid-placeholder" />
+    </Section>
+  );
+}
+
+/**
+ * Reveal / Spinner 的公开 layout 与内部动画职责。
+ *
+ * 必须在真实 native/Web Inspector 与 reduced-motion 环境逐项记录；本区存在不代表
+ * 已验收，未运行前只能记 BLOCKED。
+ */
+function AnimationContainersSection(): React.JSX.Element {
+  const reduced = usePrefersReducedMotion();
+
+  return (
+    <Section title="Reveal / Spinner platform containers">
+      <Text style={styles.result}>
+        reveal-layout-probe 必须只有一个公开 RN View，在 flex row
+        中占满剩余宽度； 淡入完成后 opacity 必须保持 0.35。未开启 reduced motion
+        时必须经过两个独立 RAF；切换/卸载后旧 RAF 不得写入新一轮。开启 reduced
+        motion 后重新挂载本屏， 首帧必须直接显示 0.35，且不得注册 RAF /
+        transition。当前 reduced=
+        {String(reduced)}。真实 native/Web 未核验前不得记 PASS。
+      </Text>
+      <View style={styles.revealProbeRow}>
+        <Reveal
+          style={styles.revealLayoutProbe}
+          duration={600}
+          testID="reveal-layout-probe"
+        >
+          <View style={styles.revealProbeContent}>
+            <Text>Reveal flex + opacity 0.35</Text>
+          </View>
+        </Reveal>
+        <View style={styles.revealProbeSibling} />
+      </View>
+
+      <Text style={styles.result}>
+        spinner-layout-probe 的 outer 必须实测 96×64，并保留 translate + scale；
+        caller 的 flex-start/flex-end 不能移动 inner。inner ring 必须保持 24×24
+        居中并独立旋转，outer transform 与 inner rotate 必须同时生效。testID
+        与完整 a11y 隐藏只在 outer。真实 native/Web 未核验前不得记 PASS。
+      </Text>
+      <Spinner
+        size={24}
+        thickness={3}
+        style={styles.spinnerOuterProbe}
+        testID="spinner-layout-probe"
+      />
     </Section>
   );
 }
@@ -1455,6 +1507,35 @@ const styles = StyleSheet.create({
     top: 12,
     width: 999,
     height: 999,
+  },
+  revealProbeRow: {
+    width: 260,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  revealLayoutProbe: {
+    flex: 1,
+    opacity: 0.35,
+  },
+  revealProbeContent: {
+    height: 44,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  revealProbeSibling: {
+    width: 44,
+    height: 44,
+    borderWidth: 1,
+  },
+  spinnerOuterProbe: {
+    width: 96,
+    height: 64,
+    alignItems: 'flex-start',
+    justifyContent: 'flex-end',
+    transform: [{ translateX: 4 }, { scale: 1.2 }],
+    borderWidth: 1,
   },
   selectionRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   navBarFrame: { borderWidth: 1 },
