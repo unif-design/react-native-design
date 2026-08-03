@@ -46,6 +46,7 @@
     "test": "jest --passWithNoTests",
     "check:runtime-peers": "node scripts/check-runtime-peers.js",
     "create:runtime-harness": "node scripts/create-runtime-api-harness.js",
+    "runtime:image-fixture": "node scripts/runtime-image-fixture.js",
     "release": "release-it --only-version"
   },
   "keywords": [

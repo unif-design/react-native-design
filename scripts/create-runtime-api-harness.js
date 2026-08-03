@@ -558,6 +558,19 @@ AppRegistry.registerComponent(appName, () => RuntimeApiScreen);
   );
 }
 
+function runtimeImageFixtureInstructions(port = 8099) {
+  if (!Number.isInteger(port) || port < 1 || port > 65_535) {
+    throw new Error('runtime image fixture port 必须是 1..65535 的整数');
+  }
+  return [
+    '图片 fixture（在主仓另一个终端执行）:',
+    `  yarn runtime:image-fixture --host 0.0.0.0 --port ${port}`,
+    `  iOS simulator / Web: http://127.0.0.1:${port}`,
+    `  Android emulator: http://10.0.2.2:${port}`,
+    `  physical device: http://<host-lan-ip>:${port}`,
+  ];
+}
+
 function main() {
   assertNoDestinationArgument(process.argv.slice(2));
   assertRuntimeScreenSafeArea();
@@ -680,6 +693,10 @@ function main() {
     console.log('后续在该目录中执行:');
     console.log('  yarn android');
     console.log('  yarn ios');
+    console.log('');
+    for (const line of runtimeImageFixtureInstructions()) {
+      console.log(line);
+    }
   });
 }
 
@@ -699,6 +716,7 @@ module.exports = {
   findLockChecksum,
   installHarnessDependencies,
   resolveLockedDependency,
+  runtimeImageFixtureInstructions,
   runWithOwnedTempCleanup,
 };
 

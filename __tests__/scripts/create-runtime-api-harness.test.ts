@@ -14,6 +14,7 @@ import {
   findLockChecksum,
   installHarnessDependencies,
   resolveLockedDependency,
+  runtimeImageFixtureInstructions,
   runWithOwnedTempCleanup,
   assertNativeTemplateSnapshot,
 } from '../../scripts/create-runtime-api-harness';
@@ -617,5 +618,17 @@ const styles = StyleSheet.create({
     expect(() =>
       assertRuntimeScreenSafeAreaSource(providerOnlyWrapsContent)
     ).toThrow('SafeAreaProvider');
+  });
+});
+
+describe('runtime image fixture instructions', () => {
+  test('harness 明确给出启动命令和每个平台的 origin', () => {
+    expect(runtimeImageFixtureInstructions()).toEqual([
+      '图片 fixture（在主仓另一个终端执行）:',
+      '  yarn runtime:image-fixture --host 0.0.0.0 --port 8099',
+      '  iOS simulator / Web: http://127.0.0.1:8099',
+      '  Android emulator: http://10.0.2.2:8099',
+      '  physical device: http://<host-lan-ip>:8099',
+    ]);
   });
 });

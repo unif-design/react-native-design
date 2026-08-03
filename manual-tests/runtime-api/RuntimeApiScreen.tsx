@@ -512,10 +512,12 @@ type ImageAttemptStep = 'a1' | 'b' | 'a2';
 /**
  * 图片 attempt identity 与 ABA 隔离。
  *
- * fixture origin 需提供:
- * - GET /equivalent.png?run=N:首次立即失败；日志证明等价新对象没有第 2 次请求。
+ * `yarn runtime:image-fixture` 提供:
+ * - GET /equivalent.png?run=N:保持 pending，release 前可核对等价 render 没有重发。
+ * - POST /release-equivalent?run=N:让当前 pending equivalent 请求返回合法 PNG。
  * - GET /aba.png?run=N:同一 run 第 1 次请求保持 pending，第 2 次返回合法 PNG。
  * - POST /release-a1?run=N:让该 run 仍 pending 的第 1 次 /aba.png 返回错误。
+ * - GET /status?run=N:返回 request / abort / pending / release 计数。
  *
  * 真实 fixture、native/Web Image 事件和可见结果均实际核验前，本区只能记 BLOCKED。
  */
@@ -525,7 +527,9 @@ function ImageSourceAttemptSection(): React.JSX.Element {
   const [fixtureRun, setFixtureRun] = useState(0);
   const [equivalentRevision, setEquivalentRevision] = useState(0);
   const [step, setStep] = useState<ImageAttemptStep>('a1');
+  const [equivalentReleaseResult, setEquivalentReleaseResult] = useState('—');
   const [releaseResult, setReleaseResult] = useState('—');
+  const [fixtureStatus, setFixtureStatus] = useState('—');
   const origin = fixtureOrigin.trim().replace(/\/+$/u, '');
   const runQuery = `run=${fixtureRun}`;
   const equivalentSource = {
@@ -552,7 +556,29 @@ function ImageSourceAttemptSection(): React.JSX.Element {
     setFixtureRun((run) => run + 1);
     setEquivalentRevision(0);
     setStep('a1');
+    setEquivalentReleaseResult('—');
     setReleaseResult('—');
+    setFixtureStatus('—');
+  };
+
+  const releaseEquivalent = async () => {
+    if (origin.length === 0) {
+      setEquivalentReleaseResult('fixture origin 为空');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${origin}/release-equivalent?${runQuery}`, {
+        method: 'POST',
+      });
+      setEquivalentReleaseResult(
+        `HTTP ${response.status} ${(await response.text()).trim()}`
+      );
+    } catch (error) {
+      setEquivalentReleaseResult(
+        error instanceof Error ? error.message : 'fixture release failed'
+      );
+    }
   };
 
   const releaseLateA1 = async () => {
@@ -573,17 +599,43 @@ function ImageSourceAttemptSection(): React.JSX.Element {
     }
   };
 
+  const refreshFixtureStatus = async () => {
+    if (origin.length === 0) {
+      setFixtureStatus('fixture origin 为空');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${origin}/status?${runQuery}`);
+      setFixtureStatus(
+        `HTTP ${response.status} ${(await response.text()).trim()}`
+      );
+    } catch (error) {
+      setFixtureStatus(
+        error instanceof Error ? error.message : 'fixture status failed'
+      );
+    }
+  };
+
   return (
     <Section title="Image source identity / attempt ABA">
       <Text style={styles.result}>
-        填入设备可访问的受控 HTTP fixture origin 后，点击“应用 fixture origin /
-        新 run”。equivalent.png 首次失败并显示 E；点击“等价 A 新对象”后 key
-        相同，失败 attempt 不得重挂，服务端也不得收到第 2 次请求。
+        在主仓运行 yarn runtime:image-fixture --host 0.0.0.0 --port 8099。iOS
+        simulator / Web 使用 http://127.0.0.1:8099，Android emulator 使用
+        http://10.0.2.2:8099，真机使用 host LAN IP。
+      </Text>
+      <Text style={styles.result}>
+        应用新 run 后 equivalent.png 保持 pending；刷新 status 应为 requests=1 /
+        aborts=0 / pending=1。点击“等价 A
+        新对象”再刷新，计数必须仍相同；这会抓住 RNW 因 onError identity 变化而
+        abort + 重发。最后 release equivalent success，头像应显示图片。
       </Text>
       <Text style={styles.result}>
         ABA 用例依次点击 A₁ → B → A₂：A₁ 请求保持 pending，B 显示图片，A₂ 以与
         A₁ 完全相同的 semantic source 发起第 2 次请求并成功。最后点击“释放 A₁
-        late error”，A₂ 图片不得回退。
+        late error”，A₂ 图片不得回退。Web 在 B 卸载时通常会 abort A₁，因此
+        release 可能返回 released=0 / lateReleasesWithoutClient=1；这不代表网络
+        触发了旧 handler，旧 closure 不写 A₂ 由 ImageAttempt 单测确定性证明。
       </Text>
       <Text style={styles.result}>
         invalid-nested-avatar / drawer 的 Symbol header 必须直接显示
@@ -594,7 +646,7 @@ function ImageSourceAttemptSection(): React.JSX.Element {
         value={fixtureOriginDraft}
         onChangeText={setFixtureOriginDraft}
         accessibilityLabel="图片 attempt fixture origin"
-        placeholder="https://device-reachable-fixture"
+        placeholder="http://127.0.0.1:8099"
         testID="image-attempt-fixture-origin"
       />
       <Button
@@ -620,6 +672,15 @@ function ImageSourceAttemptSection(): React.JSX.Element {
         label="equivalent object revision"
         value={String(equivalentRevision)}
       />
+      <View style={styles.imageAttemptControls}>
+        <Button label="释放 equivalent success" onPress={releaseEquivalent} />
+        <Button
+          label="刷新 fixture status"
+          variant="secondary"
+          onPress={refreshFixtureStatus}
+        />
+      </View>
+      <Result label="release equivalent" value={equivalentReleaseResult} />
       <Row label={`ABA current=${step}`}>
         <Avatar
           label="A"
@@ -647,6 +708,7 @@ function ImageSourceAttemptSection(): React.JSX.Element {
         <Button label="释放 A₁ late error" onPress={releaseLateA1} />
       </View>
       <Result label="release A₁" value={releaseResult} />
+      <Result label="fixture status" value={fixtureStatus} />
       <Avatar
         label="I"
         source={invalidNestedSource}

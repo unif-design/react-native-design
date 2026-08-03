@@ -349,7 +349,9 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
   headers key 顺序不影响 identity，数组顺序与真实字段变化会影响；native 保留
   URI 数组，Web 明确使用首个 candidate。失败 state 只属于 keyed 私有
   attempt；等价新引用保持稳定 error handler、不重试，真实变化才重挂，
-  `A₁ → B → A₂` 后迟到的 A₁ error 不能污染 A₂。
+  `A₁ → B → A₂` 后迟到的 A₁ error 不能污染 A₂。仓内
+  `yarn runtime:image-fixture` + RuntimeApiScreen 提供 request / abort /
+  release 可观测的人工验收入口；真实平台未运行前仍记 BLOCKED。
 - **Tag** —— 状态徽章,5 语义 × 2 尺寸(`md` / `lg`)。
 - **Chip** —— 胶囊形可选中 pill;`selected` 切主色边框 / 文本;可带 leading / trailing。Suggestion 底层。
 - **Confirm** —— 命令式 `confirm(): Promise<boolean>` + `<ConfirmHost />`,高风险二次确认(纯 single-owner Store 保证同一时间只 1 个 Host / active entry；裸 RN Modal,不依赖 @gorhom)。自定义确认/取消文案先 trim，空白值回退“确认”/“取消”。

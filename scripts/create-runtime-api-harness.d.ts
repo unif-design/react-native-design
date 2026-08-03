@@ -99,3 +99,8 @@ export declare function runWithOwnedTempCleanup<T>(
   operation: () => T,
   seam?: OwnedTempCleanupSeam
 ): T;
+
+/** 返回 harness 使用图片 fixture 时的启动命令与平台 origin。 */
+export declare function runtimeImageFixtureInstructions(
+  port?: number
+): string[];
