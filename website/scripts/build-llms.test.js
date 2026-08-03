@@ -1,19 +1,31 @@
 'use strict';
 
 const assert = require('node:assert');
+const childProcess = require('node:child_process');
+const crypto = require('node:crypto');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
-const b = require('./build-llms.js');
 const {
+  assembleMarkdown,
+  convertMdxBody,
   findBalancedEnd,
+  parseFrontmatter,
   protectCode,
   rewriteInternalLinks,
 } = require('./llms/markdown');
+const bundle = require('./llms/bundle');
 const {
   buildRouteMap,
   collisionKey,
   normalizeRelSlug,
 } = require('./llms/routes');
+const b = {
+  ...bundle,
+  assembleMarkdown,
+  convertMdxBody,
+  parseFrontmatter,
+};
 
 function test(name, run) {
   try {
@@ -27,6 +39,176 @@ function test(name, run) {
 
 const count = (value, needle) => value.split(needle).length - 1;
 
+function writeFixture(file, content) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, content);
+}
+
+function withTempDirectory(run) {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'react-native-design-llms-')
+  );
+  try {
+    return run(directory);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+}
+
+function sha256(content) {
+  return crypto.createHash('sha256').update(content).digest('hex');
+}
+
+function snapshotTree(directory) {
+  if (!fs.existsSync(directory)) return null;
+  const files = {};
+  const visit = (current) => {
+    for (const name of fs.readdirSync(current).sort()) {
+      const absolutePath = path.join(current, name);
+      const relativePath = path
+        .relative(directory, absolutePath)
+        .split(path.sep)
+        .join('/');
+      const stat = fs.statSync(absolutePath);
+      if (stat.isDirectory()) {
+        visit(absolutePath);
+      } else {
+        files[relativePath] = {
+          bytes: fs.readFileSync(absolutePath).toString('base64'),
+          hash: sha256(fs.readFileSync(absolutePath)),
+        };
+      }
+    }
+  };
+  visit(directory);
+  return files;
+}
+
+function createTempSite(directory, options = {}) {
+  const siteRoot = path.join(directory, 'website');
+  const docsDir = path.join(siteRoot, 'docs');
+  const staticDir = path.join(siteRoot, 'static');
+  writeFixture(
+    path.join(siteRoot, 'docusaurus.config.ts'),
+    "export default { title: 'Fixture Design' };\n"
+  );
+  writeFixture(
+    path.join(docsDir, 'UNIF-DESIGN.md'),
+    [
+      '---',
+      'title: UNIF Design',
+      'slug: /unif-design',
+      'description: 总览',
+      '---',
+      '',
+      options.deadLink
+        ? '[缺失页面](/docs/does-not-exist)'
+        : '[Button](/docs/components/button)',
+    ].join('\n')
+  );
+  writeFixture(
+    path.join(docsDir, 'getting-started.md'),
+    [
+      '---',
+      'title: Getting Started',
+      '---',
+      '',
+      '[总览](/docs/unif-design#intro)',
+    ].join('\n')
+  );
+  writeFixture(
+    path.join(docsDir, 'components/button.mdx'),
+    [
+      '---',
+      'title: Button 按钮',
+      'description: 操作按钮',
+      '---',
+      '',
+      "import { LiveDemo } from '@site/src/components/LiveDemo';",
+      '',
+      'export const ButtonDemo = () => (',
+      '  <LiveDemo><Button label="保存" onPress={() => undefined} /></LiveDemo>',
+      ');',
+      '',
+      options.unknownDemo ? '<MissingDemo />' : '<ButtonDemo />',
+      '',
+      '<LiveDemo>',
+      '  <Text>直接示例</Text>',
+      '</LiveDemo>',
+      '',
+      '[开始](../getting-started)',
+    ].join('\n')
+  );
+  writeFixture(path.join(staticDir, 'llms.txt'), 'old index\n');
+  writeFixture(path.join(staticDir, 'llms-full.txt'), 'old full\n');
+  writeFixture(path.join(staticDir, 'md/old-stale.md'), 'old stale\n');
+  writeFixture(
+    path.join(staticDir, 'img/sentinel.bin'),
+    Buffer.from([0, 1, 2, 3, 255])
+  );
+  return {
+    docsDir,
+    root: siteRoot,
+    staticDir,
+  };
+}
+
+function transientDirectories(staticDir) {
+  return fs
+    .readdirSync(staticDir)
+    .filter(
+      (name) =>
+        name.startsWith('.llms-stage-') || name.startsWith('.llms-backup-')
+    );
+}
+
+function overrideFileOps(overrides = {}) {
+  return Object.fromEntries(
+    Object.entries(bundle.REAL_FILE_OPS).map(([name, operation]) => [
+      name,
+      overrides[name] === undefined
+        ? operation
+        : (...args) => overrides[name](operation, ...args),
+    ])
+  );
+}
+
+function isInsideTransient(target, prefix) {
+  return target.split(path.sep).some((segment) => segment.startsWith(prefix));
+}
+
+function createFormalFixture(directory, present = bundle.FORMAL_TARGETS) {
+  const staticDir = path.join(directory, 'static');
+  const oldContents = {
+    'llms.txt': Buffer.from('old index\n'),
+    'llms-full.txt': Buffer.from('old full\n'),
+    'md': {
+      'index.json': Buffer.from('old index json\n'),
+      'old.md': Buffer.from('old page\n'),
+    },
+  };
+  fs.mkdirSync(staticDir, { recursive: true });
+  if (present.includes('llms.txt')) {
+    writeFixture(path.join(staticDir, 'llms.txt'), oldContents['llms.txt']);
+  }
+  if (present.includes('llms-full.txt')) {
+    writeFixture(
+      path.join(staticDir, 'llms-full.txt'),
+      oldContents['llms-full.txt']
+    );
+  }
+  if (present.includes('md')) {
+    for (const [name, content] of Object.entries(oldContents.md)) {
+      writeFixture(path.join(staticDir, 'md', name), content);
+    }
+  }
+  writeFixture(
+    path.join(staticDir, 'img/sentinel.bin'),
+    Buffer.from([7, 8, 9, 255])
+  );
+  return { oldContents, staticDir };
+}
+
 function document(sourcePath, frontmatter = {}) {
   return {
     id: sourcePath,
@@ -35,6 +217,1036 @@ function document(sourcePath, frontmatter = {}) {
     ...frontmatter,
   };
 }
+
+function minimalBundle(overrides = {}) {
+  const entries = [
+    {
+      title: 'Guide',
+      mdPath: 'md/guide.md',
+      slug: '/guide',
+      section: '概览',
+      description: null,
+    },
+  ];
+  return {
+    'llms.txt': Buffer.from(
+      [
+        '# Fixture',
+        '',
+        '- [完整全文](llms-full.txt)',
+        '- [Guide](md/guide.md)',
+        '',
+      ].join('\n')
+    ),
+    'llms-full.txt': Buffer.from('# Fixture\n\nFull text.\n'),
+    'md/index.json': Buffer.from(`${JSON.stringify(entries, null, 2)}\n`),
+    'md/guide.md': Buffer.from('# Guide\n\n[External](https://example.com)\n'),
+    ...overrides,
+  };
+}
+
+test('bundle is built in memory and installs idempotently without touching unrelated static files', () => {
+  withTempDirectory((directory) => {
+    const site = createTempSite(directory);
+    const beforeBuild = snapshotTree(site.staticDir);
+    const firstBundle = b.buildBundle(site);
+
+    assert.deepStrictEqual(snapshotTree(site.staticDir), beforeBuild);
+    assert(
+      Object.keys(firstBundle).every(
+        (name) =>
+          name === 'llms.txt' ||
+          name === 'llms-full.txt' ||
+          name === 'md/index.json' ||
+          /^md\/.+\.md$/u.test(name)
+      )
+    );
+    assert(Object.values(firstBundle).every(Buffer.isBuffer));
+
+    b.validateBundle(firstBundle);
+    b.commitBundle(site.staticDir, firstBundle);
+    const firstSnapshot = snapshotTree(site.staticDir);
+
+    assert(fs.existsSync(path.join(site.staticDir, 'md/UNIF-DESIGN.md')));
+    assert(
+      fs.readdirSync(path.join(site.staticDir, 'md')).includes('UNIF-DESIGN.md')
+    );
+    assert(
+      !fs
+        .readdirSync(path.join(site.staticDir, 'md'))
+        .includes('unif-design.md')
+    );
+    assert(!fs.existsSync(path.join(site.staticDir, 'md/old-stale.md')));
+    assert.strictEqual(
+      firstSnapshot['img/sentinel.bin'].hash,
+      beforeBuild['img/sentinel.bin'].hash
+    );
+    assert.deepStrictEqual(transientDirectories(site.staticDir), []);
+
+    const secondBundle = b.buildBundle(site);
+    b.commitBundle(site.staticDir, secondBundle);
+    const secondSnapshot = snapshotTree(site.staticDir);
+
+    assert.deepStrictEqual(secondSnapshot, firstSnapshot);
+    assert.deepStrictEqual(
+      Object.keys(secondSnapshot).sort(),
+      Object.keys(firstSnapshot).sort()
+    );
+    assert.deepStrictEqual(transientDirectories(site.staticDir), []);
+  });
+});
+
+test('unknown Demo and dead internal links fail before staging and preserve every old byte', () => {
+  for (const failure of [
+    { name: 'unknown Demo', options: { unknownDemo: true } },
+    { name: 'dead link', options: { deadLink: true } },
+  ]) {
+    withTempDirectory((directory) => {
+      const site = createTempSite(directory, failure.options);
+      const before = snapshotTree(site.staticDir);
+
+      assert.throws(
+        () => b.buildBundle(site),
+        failure.name === 'unknown Demo'
+          ? /unknown Demo MissingDemo/u
+          : /missing internal route \/docs\/does-not-exist/u
+      );
+      assert.deepStrictEqual(snapshotTree(site.staticDir), before);
+      assert.deepStrictEqual(transientDirectories(site.staticDir), []);
+    });
+  }
+});
+
+test('empty or missing docs fail instead of producing an empty successful bundle', () => {
+  withTempDirectory((directory) => {
+    const emptyRoot = path.join(directory, 'empty-site');
+    fs.mkdirSync(path.join(emptyRoot, 'docs'), { recursive: true });
+    assert.throws(
+      () => b.buildBundle({ root: emptyRoot }),
+      /docs.*no Markdown documents/iu
+    );
+
+    const missingRoot = path.join(directory, 'missing-site');
+    fs.mkdirSync(missingRoot, { recursive: true });
+    assert.throws(
+      () => b.buildBundle({ root: missingRoot }),
+      /docs.*not found/iu
+    );
+  });
+});
+
+test('unsafe and colliding bundle keys fail before mkdtemp', () => {
+  withTempDirectory((directory) => {
+    const staticDir = path.join(directory, 'static');
+    fs.mkdirSync(staticDir, { recursive: true });
+    const fixtures = [
+      ['parent traversal', { '../img/evil.bin': Buffer.from('evil') }],
+      ['nested traversal', { 'md/../../img/evil.bin': Buffer.from('evil') }],
+      [
+        'case collision',
+        {
+          'md/A.md': Buffer.from('# A\n'),
+          'md/a.md': Buffer.from('# a\n'),
+        },
+      ],
+      [
+        'NFC collision',
+        {
+          'md/café.md': Buffer.from('# composed\n'),
+          'md/cafe\u0301.md': Buffer.from('# decomposed\n'),
+        },
+      ],
+    ];
+
+    for (const [name, additions] of fixtures) {
+      let mkdtempCalls = 0;
+      const fileOps = {
+        ...b.REAL_FILE_OPS,
+        mkdtempSync(...args) {
+          mkdtempCalls += 1;
+          return fs.mkdtempSync(...args);
+        },
+      };
+      assert.throws(
+        () =>
+          b.commitBundle(
+            staticDir,
+            { ...minimalBundle(), ...additions },
+            fileOps
+          ),
+        name.includes('collision') ? /collision/iu : /unsafe.*target/iu
+      );
+      assert.strictEqual(mkdtempCalls, 0, name);
+      assert.deepStrictEqual(transientDirectories(staticDir), []);
+    }
+  });
+});
+
+test('single non-NFC target and every unprocessed Demo name fail before mkdtemp', () => {
+  withTempDirectory((directory) => {
+    const staticDir = path.join(directory, 'static');
+    fs.mkdirSync(staticDir, { recursive: true });
+    const decomposedPath = 'md/cafe\u0301.md';
+    const decomposedEntries = [
+      {
+        title: 'Cafe',
+        mdPath: decomposedPath,
+        slug: '/cafe',
+        section: '概览',
+        description: null,
+      },
+    ];
+    const fixtures = [
+      {
+        expected: /NFC.*target|target.*NFC/iu,
+        value: {
+          'llms.txt': Buffer.from(`- [Cafe](${decomposedPath})\n`),
+          'llms-full.txt': Buffer.from('# Full\n'),
+          'md/index.json': Buffer.from(
+            `${JSON.stringify(decomposedEntries, null, 2)}\n`
+          ),
+          [decomposedPath]: Buffer.from('# Cafe\n'),
+        },
+      },
+      ...['Demo', 'fooDemo', '_fooDemo', '$fooDemo'].map((name) => ({
+        expected: /unprocessed Demo markup/u,
+        value: minimalBundle({
+          'md/guide.md': Buffer.from(`# Guide\n\n<${name} />\n`),
+        }),
+      })),
+    ];
+
+    for (const fixture of fixtures) {
+      let mkdtempCalls = 0;
+      const fileOps = overrideFileOps({
+        mkdtempSync(real, ...args) {
+          mkdtempCalls += 1;
+          return real(...args);
+        },
+      });
+      assert.throws(
+        () => b.commitBundle(staticDir, fixture.value, fileOps),
+        fixture.expected
+      );
+      assert.strictEqual(mkdtempCalls, 0);
+    }
+  });
+});
+
+test('file-directory and directory spelling collisions fail before staging and name both targets', () => {
+  withTempDirectory((directory) => {
+    const staticDir = path.join(directory, 'static');
+    fs.mkdirSync(staticDir, { recursive: true });
+    const fixtures = [
+      {
+        additions: {
+          'md/index.json/guide.md': Buffer.from('# Descendant\n'),
+        },
+        left: 'md/index.json',
+        right: 'md/index.json/guide.md',
+      },
+      {
+        additions: {
+          'md/Group/a.md': Buffer.from('# A\n'),
+          'md/group/b.md': Buffer.from('# B\n'),
+        },
+        left: 'md/Group/a.md',
+        right: 'md/group/b.md',
+      },
+      {
+        additions: {
+          'md/Café/a.md': Buffer.from('# A\n'),
+          'md/Cafe\u0301/b.md': Buffer.from('# B\n'),
+        },
+        left: 'md/Café/a.md',
+        right: 'md/Cafe\u0301/b.md',
+      },
+    ];
+
+    for (const fixture of fixtures) {
+      const candidate = { ...minimalBundle(), ...fixture.additions };
+      const namesBothTargets = (error) =>
+        error instanceof Error &&
+        error.message.includes(fixture.left) &&
+        error.message.includes(fixture.right);
+
+      assert.throws(() => b.validateBundle(candidate), namesBothTargets);
+      let mkdtempCalls = 0;
+      const fileOps = overrideFileOps({
+        mkdtempSync(real, ...args) {
+          mkdtempCalls += 1;
+          return real(...args);
+        },
+      });
+      assert.throws(
+        () => b.commitBundle(staticDir, candidate, fileOps),
+        namesBothTargets
+      );
+      assert.strictEqual(mkdtempCalls, 0);
+    }
+  });
+});
+
+test('fileOps injection surface stays restricted to the nine planned methods', () => {
+  assert.deepStrictEqual(Object.keys(b.REAL_FILE_OPS).sort(), [
+    'existsSync',
+    'mkdirSync',
+    'mkdtempSync',
+    'readFileSync',
+    'readdirSync',
+    'renameSync',
+    'rmSync',
+    'statSync',
+    'writeFileSync',
+  ]);
+});
+
+test('stage write, read, and second validation failures remove only stage', () => {
+  const scenarios = [
+    {
+      name: 'write',
+      expected: /stage write fault/u,
+      createOps() {
+        let writes = 0;
+        return overrideFileOps({
+          writeFileSync(real, ...args) {
+            writes += 1;
+            if (writes === 2) throw new Error('stage write fault');
+            return real(...args);
+          },
+        });
+      },
+    },
+    {
+      name: 'read',
+      expected: /stage read fault/u,
+      createOps() {
+        let reads = 0;
+        return overrideFileOps({
+          readFileSync(real, target, ...args) {
+            if (isInsideTransient(target, '.llms-stage-')) {
+              reads += 1;
+              if (reads === 2) throw new Error('stage read fault');
+            }
+            return real(target, ...args);
+          },
+        });
+      },
+    },
+    {
+      name: 'second validation',
+      expected: /missing internal route missing\.md/u,
+      createOps(candidate) {
+        return overrideFileOps({
+          writeFileSync(real, target, content, ...args) {
+            if (target.endsWith(path.join('md', 'guide.md'))) {
+              const invalid = Buffer.from('# Guide\n\n[Dead](missing.md)\n');
+              candidate['md/guide.md'] = invalid;
+              return real(target, invalid, ...args);
+            }
+            return real(target, content, ...args);
+          },
+        });
+      },
+    },
+    {
+      name: 'staged Demo validation',
+      expected: /unprocessed Demo markup/u,
+      createOps(candidate) {
+        return overrideFileOps({
+          writeFileSync(real, target, content, ...args) {
+            if (target.endsWith(path.join('md', 'guide.md'))) {
+              const invalid = Buffer.from('# Guide\n\n<fooDemo />\n');
+              candidate['md/guide.md'] = invalid;
+              return real(target, invalid, ...args);
+            }
+            return real(target, content, ...args);
+          },
+        });
+      },
+    },
+    {
+      name: 'unexpected staged target',
+      expected: /staged bundle tree.*unexpected/iu,
+      createOps() {
+        return overrideFileOps({
+          writeFileSync(real, target, content, ...args) {
+            const result = real(target, content, ...args);
+            if (target.endsWith(path.join('md', 'guide.md'))) {
+              real(
+                path.join(path.dirname(target), 'unexpected.md'),
+                '# extra\n'
+              );
+            }
+            return result;
+          },
+        });
+      },
+    },
+  ];
+
+  for (const scenario of scenarios) {
+    withTempDirectory((directory) => {
+      const { staticDir } = createFormalFixture(directory);
+      const before = snapshotTree(staticDir);
+      const candidate = minimalBundle();
+
+      assert.throws(
+        () =>
+          b.commitBundle(staticDir, candidate, scenario.createOps(candidate)),
+        scenario.expected,
+        scenario.name
+      );
+      assert.deepStrictEqual(snapshotTree(staticDir), before, scenario.name);
+      assert.deepStrictEqual(
+        transientDirectories(staticDir),
+        [],
+        scenario.name
+      );
+    });
+  }
+});
+
+test('bundle validation uses full Markdown reference semantics for staged links', () => {
+  const candidate = minimalBundle({
+    'md/guide.md': Buffer.from(
+      [
+        '# Guide',
+        '',
+        '[Dead reference][target]',
+        '',
+        '[target]:',
+        '  missing.md "title"',
+        '',
+      ].join('\n')
+    ),
+  });
+
+  assert.throws(
+    () => b.validateBundle(candidate),
+    /missing internal route missing\.md/u
+  );
+});
+
+test('mid-install failure restores all three originally present targets', () => {
+  withTempDirectory((directory) => {
+    const { staticDir } = createFormalFixture(directory);
+    const before = snapshotTree(staticDir);
+    const commitFault = new Error('install llms-full fault');
+    const fileOps = overrideFileOps({
+      renameSync(real, source, destination) {
+        if (
+          isInsideTransient(source, '.llms-stage-') &&
+          path.basename(source) === 'llms-full.txt'
+        ) {
+          throw commitFault;
+        }
+        return real(source, destination);
+      },
+    });
+
+    let caught;
+    try {
+      b.commitBundle(staticDir, minimalBundle(), fileOps);
+    } catch (error) {
+      caught = error;
+    }
+
+    assert(caught instanceof Error);
+    assert.strictEqual(caught.cause, commitFault);
+    assert.deepStrictEqual(snapshotTree(staticDir), before);
+    assert.deepStrictEqual(transientDirectories(staticDir), []);
+  });
+});
+
+test('mid-install failure restores originally present targets and keeps absent targets absent', () => {
+  withTempDirectory((directory) => {
+    const { staticDir } = createFormalFixture(directory, ['llms.txt']);
+    const before = snapshotTree(staticDir);
+    const commitFault = new Error('partial install fault');
+    const fileOps = overrideFileOps({
+      renameSync(real, source, destination) {
+        if (
+          isInsideTransient(source, '.llms-stage-') &&
+          path.basename(source) === 'llms-full.txt'
+        ) {
+          throw commitFault;
+        }
+        return real(source, destination);
+      },
+    });
+
+    let caught;
+    try {
+      b.commitBundle(staticDir, minimalBundle(), fileOps);
+    } catch (error) {
+      caught = error;
+    }
+
+    assert(caught instanceof Error);
+    assert.strictEqual(caught.cause, commitFault);
+    assert.deepStrictEqual(snapshotTree(staticDir), before);
+    assert(!fs.existsSync(path.join(staticDir, 'llms-full.txt')));
+    assert(!fs.existsSync(path.join(staticDir, 'md')));
+    assert.deepStrictEqual(transientDirectories(staticDir), []);
+  });
+});
+
+test('backup-phase failure restores only the first moved target and preserves untouched targets', () => {
+  withTempDirectory((directory) => {
+    const { staticDir } = createFormalFixture(directory);
+    const before = snapshotTree(staticDir);
+    const backupFault = new Error('backup llms-full fault');
+    const fileOps = overrideFileOps({
+      renameSync(real, source, destination) {
+        if (
+          isInsideTransient(destination, '.llms-backup-') &&
+          path.basename(source) === 'llms-full.txt'
+        ) {
+          throw backupFault;
+        }
+        return real(source, destination);
+      },
+    });
+
+    let caught;
+    try {
+      b.commitBundle(staticDir, minimalBundle(), fileOps);
+    } catch (error) {
+      caught = error;
+    }
+
+    assert(caught instanceof Error);
+    assert.strictEqual(caught.cause, backupFault);
+    assert.deepStrictEqual(snapshotTree(staticDir), before);
+    assert.deepStrictEqual(transientDirectories(staticDir), []);
+  });
+});
+
+test('backup directory creation failure removes stage without touching formal targets', () => {
+  withTempDirectory((directory) => {
+    const { staticDir } = createFormalFixture(directory);
+    const before = snapshotTree(staticDir);
+    const backupCreationFault = new Error('backup creation fault');
+    let temporaryDirectoryCalls = 0;
+    const fileOps = overrideFileOps({
+      mkdtempSync(real, ...args) {
+        temporaryDirectoryCalls += 1;
+        if (temporaryDirectoryCalls === 2) throw backupCreationFault;
+        return real(...args);
+      },
+    });
+
+    let caught;
+    try {
+      b.commitBundle(staticDir, minimalBundle(), fileOps);
+    } catch (error) {
+      caught = error;
+    }
+
+    assert.strictEqual(caught, backupCreationFault);
+    assert.deepStrictEqual(snapshotTree(staticDir), before);
+    assert.deepStrictEqual(transientDirectories(staticDir), []);
+  });
+});
+
+test('backup creation plus stage cleanup failure retains both causes and the exact stage path', () => {
+  withTempDirectory((directory) => {
+    const { staticDir } = createFormalFixture(directory);
+    const before = snapshotTree(staticDir);
+    const backupCreationFault = new Error('backup creation fault');
+    const stageCleanupFault = new Error('precommit stage cleanup fault');
+    let temporaryDirectoryCalls = 0;
+    const fileOps = overrideFileOps({
+      mkdtempSync(real, ...args) {
+        temporaryDirectoryCalls += 1;
+        if (temporaryDirectoryCalls === 2) throw backupCreationFault;
+        return real(...args);
+      },
+      rmSync(real, target, options) {
+        if (path.basename(target).startsWith('.llms-stage-')) {
+          throw stageCleanupFault;
+        }
+        return real(target, options);
+      },
+    });
+
+    let caught;
+    try {
+      b.commitBundle(staticDir, minimalBundle(), fileOps);
+    } catch (error) {
+      caught = error;
+    }
+
+    assert(caught instanceof Error);
+    assert.strictEqual(caught.cause, backupCreationFault);
+    assert.deepStrictEqual(caught.cleanupErrors, [stageCleanupFault]);
+    assert.strictEqual(caught.recoveryPaths.length, 1);
+    assert(fs.existsSync(caught.recoveryPaths[0]));
+    assert(caught.message.includes(caught.recoveryPaths[0]));
+    assert.deepStrictEqual(
+      Object.fromEntries(
+        Object.entries(snapshotTree(staticDir)).filter(
+          ([name]) => !name.startsWith('.llms-stage-')
+        )
+      ),
+      before
+    );
+    assert(
+      transientDirectories(staticDir).every((name) =>
+        name.startsWith('.llms-stage-')
+      )
+    );
+  });
+});
+
+test('rollback stage cleanup failure reports both staged files and retained empty backup', () => {
+  withTempDirectory((directory) => {
+    const { staticDir } = createFormalFixture(directory);
+    const before = snapshotTree(staticDir);
+    const candidate = minimalBundle();
+    const commitFault = new Error('install fault before llms-full');
+    const stageCleanupFault = new Error('rollback stage cleanup fault');
+    const fileOps = overrideFileOps({
+      renameSync(real, source, destination) {
+        if (
+          isInsideTransient(source, '.llms-stage-') &&
+          path.basename(source) === 'llms-full.txt'
+        ) {
+          throw commitFault;
+        }
+        return real(source, destination);
+      },
+      rmSync(real, target, options) {
+        if (path.basename(target).startsWith('.llms-stage-')) {
+          throw stageCleanupFault;
+        }
+        return real(target, options);
+      },
+    });
+
+    let caught;
+    try {
+      b.commitBundle(staticDir, candidate, fileOps);
+    } catch (error) {
+      caught = error;
+    }
+
+    assert(caught instanceof Error);
+    assert.strictEqual(caught.cause, commitFault);
+    assert.deepStrictEqual(caught.rollbackErrors, [stageCleanupFault]);
+    const transientPaths = transientDirectories(staticDir)
+      .map((name) => path.join(staticDir, name))
+      .sort();
+    assert(Array.isArray(caught.recoveryPaths));
+    assert.deepStrictEqual([...caught.recoveryPaths].sort(), transientPaths);
+    assert.strictEqual(caught.recoveryPath, undefined);
+    assert(
+      caught.recoveryPaths.every((target) => caught.message.includes(target))
+    );
+
+    const stage = caught.recoveryPaths.find((target) =>
+      path.basename(target).startsWith('.llms-stage-')
+    );
+    const backup = caught.recoveryPaths.find((target) =>
+      path.basename(target).startsWith('.llms-backup-')
+    );
+    assert.deepStrictEqual(Object.keys(snapshotTree(stage)).sort(), [
+      'llms-full.txt',
+      'md/guide.md',
+      'md/index.json',
+    ]);
+    assert.deepStrictEqual(
+      fs.readFileSync(path.join(stage, 'llms-full.txt')),
+      candidate['llms-full.txt']
+    );
+    assert.deepStrictEqual(snapshotTree(backup), {});
+    assert.deepStrictEqual(
+      Object.fromEntries(
+        Object.entries(snapshotTree(staticDir)).filter(
+          ([name]) =>
+            !name.startsWith('.llms-stage-') &&
+            !name.startsWith('.llms-backup-')
+        )
+      ),
+      before
+    );
+  });
+});
+
+test('rollback reports installed removal, restore, and stage cleanup errors without replacing commit cause', () => {
+  withTempDirectory((directory) => {
+    const { staticDir } = createFormalFixture(directory);
+    const sentinelBefore = fs.readFileSync(
+      path.join(staticDir, 'img/sentinel.bin')
+    );
+    const commitFault = new Error('commit fault');
+    const installedRemovalFault = new Error('installed removal fault');
+    const restoreFault = new Error('restore fault');
+    const stageRemovalFault = new Error('stage removal fault');
+    const fileOps = overrideFileOps({
+      renameSync(real, source, destination) {
+        if (
+          isInsideTransient(source, '.llms-stage-') &&
+          path.basename(source) === 'llms-full.txt'
+        ) {
+          throw commitFault;
+        }
+        if (
+          isInsideTransient(source, '.llms-backup-') &&
+          path.basename(source) === 'llms-full.txt'
+        ) {
+          throw restoreFault;
+        }
+        return real(source, destination);
+      },
+      rmSync(real, target, options) {
+        if (target === path.join(staticDir, 'llms.txt')) {
+          throw installedRemovalFault;
+        }
+        if (path.basename(target).startsWith('.llms-stage-')) {
+          throw stageRemovalFault;
+        }
+        return real(target, options);
+      },
+    });
+
+    let caught;
+    try {
+      b.commitBundle(staticDir, minimalBundle(), fileOps);
+    } catch (error) {
+      caught = error;
+    }
+
+    assert(caught instanceof Error);
+    assert.strictEqual(caught.cause, commitFault);
+    assert.deepStrictEqual(caught.rollbackErrors, [
+      installedRemovalFault,
+      restoreFault,
+      stageRemovalFault,
+    ]);
+    const transientPaths = transientDirectories(staticDir)
+      .map((name) => path.join(staticDir, name))
+      .sort();
+    assert(Array.isArray(caught.recoveryPaths));
+    assert.deepStrictEqual([...caught.recoveryPaths].sort(), transientPaths);
+    assert.strictEqual(caught.recoveryPath, undefined);
+    assert(
+      caught.recoveryPaths.every(
+        (target) => fs.existsSync(target) && caught.message.includes(target)
+      )
+    );
+    assert.deepStrictEqual(
+      fs.readFileSync(path.join(staticDir, 'img/sentinel.bin')),
+      sentinelBefore
+    );
+    assert.strictEqual(transientDirectories(staticDir).length, 2);
+  });
+});
+
+test('rollback backup cleanup failure preserves the exact recovery path and restored formal targets', () => {
+  withTempDirectory((directory) => {
+    const { staticDir } = createFormalFixture(directory);
+    const before = snapshotTree(staticDir);
+    const commitFault = new Error('commit before backup cleanup');
+    const backupRemovalFault = new Error('rollback backup removal fault');
+    const fileOps = overrideFileOps({
+      renameSync(real, source, destination) {
+        if (
+          isInsideTransient(source, '.llms-stage-') &&
+          path.basename(source) === 'llms-full.txt'
+        ) {
+          throw commitFault;
+        }
+        return real(source, destination);
+      },
+      rmSync(real, target, options) {
+        if (path.basename(target).startsWith('.llms-backup-')) {
+          throw backupRemovalFault;
+        }
+        return real(target, options);
+      },
+    });
+
+    let caught;
+    try {
+      b.commitBundle(staticDir, minimalBundle(), fileOps);
+    } catch (error) {
+      caught = error;
+    }
+
+    assert(caught instanceof Error);
+    assert.strictEqual(caught.cause, commitFault);
+    assert.deepStrictEqual(caught.rollbackErrors, [backupRemovalFault]);
+    assert(Array.isArray(caught.recoveryPaths));
+    assert.strictEqual(caught.recoveryPaths.length, 1);
+    assert(path.basename(caught.recoveryPaths[0]).startsWith('.llms-backup-'));
+    assert(fs.existsSync(caught.recoveryPaths[0]));
+    assert(caught.message.includes(caught.recoveryPaths[0]));
+    assert.strictEqual(caught.recoveryPath, undefined);
+    assert.deepStrictEqual(
+      Object.fromEntries(
+        Object.entries(snapshotTree(staticDir)).filter(
+          ([name]) => !name.startsWith('.llms-backup-')
+        )
+      ),
+      before
+    );
+    assert.deepStrictEqual(
+      transientDirectories(staticDir).filter((name) =>
+        name.startsWith('.llms-stage-')
+      ),
+      []
+    );
+  });
+});
+
+test('originally absent cleanup errors are appended while the original commit cause is retained', () => {
+  withTempDirectory((directory) => {
+    const { staticDir } = createFormalFixture(directory, ['llms.txt']);
+    const before = snapshotTree(staticDir);
+    const commitFault = new Error('partial commit fault');
+    const absentCleanupFault = new Error('absent md cleanup fault');
+    const fileOps = overrideFileOps({
+      renameSync(real, source, destination) {
+        if (
+          isInsideTransient(source, '.llms-stage-') &&
+          path.basename(source) === 'llms-full.txt'
+        ) {
+          throw commitFault;
+        }
+        return real(source, destination);
+      },
+      rmSync(real, target, options) {
+        if (target === path.join(staticDir, 'md')) {
+          throw absentCleanupFault;
+        }
+        return real(target, options);
+      },
+    });
+
+    let caught;
+    try {
+      b.commitBundle(staticDir, minimalBundle(), fileOps);
+    } catch (error) {
+      caught = error;
+    }
+
+    assert(caught instanceof Error);
+    assert.strictEqual(caught.cause, commitFault);
+    assert.deepStrictEqual(caught.rollbackErrors, [absentCleanupFault]);
+    assert(Array.isArray(caught.recoveryPaths));
+    assert.strictEqual(caught.recoveryPaths.length, 1);
+    assert(path.basename(caught.recoveryPaths[0]).startsWith('.llms-backup-'));
+    assert(fs.existsSync(caught.recoveryPaths[0]));
+    assert(caught.message.includes(caught.recoveryPaths[0]));
+    assert.strictEqual(caught.recoveryPath, undefined);
+    assert.deepStrictEqual(
+      Object.fromEntries(
+        Object.entries(snapshotTree(staticDir)).filter(
+          ([name]) => !name.startsWith('.llms-backup-')
+        )
+      ),
+      before
+    );
+  });
+});
+
+test('stage failure plus stage cleanup failure keeps the original cause and recovery path', () => {
+  withTempDirectory((directory) => {
+    const { staticDir } = createFormalFixture(directory);
+    const before = snapshotTree(staticDir);
+    const writeFault = new Error('prepare write fault');
+    const cleanupFault = new Error('prepare cleanup fault');
+    let writes = 0;
+    const fileOps = overrideFileOps({
+      writeFileSync(real, ...args) {
+        writes += 1;
+        if (writes === 2) throw writeFault;
+        return real(...args);
+      },
+      rmSync(real, target, options) {
+        if (path.basename(target).startsWith('.llms-stage-')) {
+          throw cleanupFault;
+        }
+        return real(target, options);
+      },
+    });
+
+    let caught;
+    try {
+      b.commitBundle(staticDir, minimalBundle(), fileOps);
+    } catch (error) {
+      caught = error;
+    }
+
+    assert(caught instanceof Error);
+    assert.strictEqual(caught.cause, writeFault);
+    assert.deepStrictEqual(caught.cleanupErrors, [cleanupFault]);
+    assert.strictEqual(caught.recoveryPaths.length, 1);
+    assert(fs.existsSync(caught.recoveryPaths[0]));
+    assert(caught.message.includes(caught.recoveryPaths[0]));
+    assert.deepStrictEqual(
+      Object.fromEntries(
+        Object.entries(snapshotTree(staticDir)).filter(
+          ([name]) => !name.startsWith('.llms-stage-')
+        )
+      ),
+      before
+    );
+  });
+});
+
+test('post-install cleanup faults report complete formal targets and never roll back', () => {
+  for (const failedTarget of ['stage', 'backup']) {
+    withTempDirectory((directory) => {
+      const { staticDir } = createFormalFixture(directory);
+      const candidate = minimalBundle();
+      const sentinelBefore = fs.readFileSync(
+        path.join(staticDir, 'img/sentinel.bin')
+      );
+      const cleanupFault = new Error(`${failedTarget} cleanup fault`);
+      let restoreCalls = 0;
+      const fileOps = overrideFileOps({
+        renameSync(real, source, destination) {
+          if (isInsideTransient(source, '.llms-backup-')) restoreCalls += 1;
+          return real(source, destination);
+        },
+        rmSync(real, target, options) {
+          if (path.basename(target).startsWith(`.llms-${failedTarget}-`)) {
+            throw cleanupFault;
+          }
+          return real(target, options);
+        },
+      });
+
+      let caught;
+      try {
+        b.commitBundle(staticDir, candidate, fileOps);
+      } catch (error) {
+        caught = error;
+      }
+
+      assert(caught instanceof Error);
+      assert.strictEqual(caught.cause, cleanupFault);
+      assert.strictEqual(caught.formalTargetsComplete, true);
+      assert.strictEqual(restoreCalls, 0);
+      assert.deepStrictEqual(
+        fs.readFileSync(path.join(staticDir, 'llms.txt')),
+        candidate['llms.txt']
+      );
+      assert.deepStrictEqual(
+        fs.readFileSync(path.join(staticDir, 'llms-full.txt')),
+        candidate['llms-full.txt']
+      );
+      assert.deepStrictEqual(
+        fs.readFileSync(path.join(staticDir, 'md/guide.md')),
+        candidate['md/guide.md']
+      );
+      assert.deepStrictEqual(
+        fs.readFileSync(path.join(staticDir, 'img/sentinel.bin')),
+        sentinelBefore
+      );
+      assert(
+        caught.recoveryPaths.every((target) => fs.existsSync(target)),
+        failedTarget
+      );
+      assert(
+        caught.recoveryPaths.every((target) => caught.message.includes(target)),
+        failedTarget
+      );
+      assert.strictEqual(
+        transientDirectories(staticDir).some((name) =>
+          name.startsWith(`.llms-${failedTarget}-`)
+        ),
+        true
+      );
+    });
+  }
+});
+
+test('post-install partial cleanup reports only recovery paths that still exist', () => {
+  for (const failedTarget of ['stage', 'backup']) {
+    withTempDirectory((directory) => {
+      const { staticDir } = createFormalFixture(directory);
+      const candidate = minimalBundle();
+      const cleanupFault = new Error(`${failedTarget} partial cleanup fault`);
+      let restoreCalls = 0;
+      const fileOps = overrideFileOps({
+        renameSync(real, source, destination) {
+          if (isInsideTransient(source, '.llms-backup-')) restoreCalls += 1;
+          return real(source, destination);
+        },
+        rmSync(real, target, options) {
+          if (path.basename(target).startsWith(`.llms-${failedTarget}-`)) {
+            real(target, options);
+            throw cleanupFault;
+          }
+          return real(target, options);
+        },
+      });
+
+      let caught;
+      try {
+        b.commitBundle(staticDir, candidate, fileOps);
+      } catch (error) {
+        caught = error;
+      }
+
+      assert(caught instanceof Error);
+      assert.strictEqual(caught.cause, cleanupFault);
+      assert.strictEqual(caught.formalTargetsComplete, true);
+      assert.strictEqual(restoreCalls, 0);
+      assert(
+        caught.recoveryPaths.every((target) => fs.existsSync(target)),
+        failedTarget
+      );
+      assert.deepStrictEqual(
+        caught.recoveryPaths.map((target) => path.basename(target)),
+        failedTarget === 'stage'
+          ? [
+              transientDirectories(staticDir).find((name) =>
+                name.startsWith('.llms-backup-')
+              ),
+            ]
+          : []
+      );
+      assert.deepStrictEqual(
+        fs.readFileSync(path.join(staticDir, 'llms.txt')),
+        candidate['llms.txt']
+      );
+    });
+  }
+});
+
+test('build-llms is a require-guarded thin CLI with no helper exports', () => {
+  assert.deepStrictEqual(require('./build-llms.js'), {});
+});
+
+test('build-llms CLI exits nonzero when docs are missing', () => {
+  withTempDirectory((directory) => {
+    const temporaryScripts = path.join(directory, 'website', 'scripts');
+    fs.mkdirSync(temporaryScripts, { recursive: true });
+    fs.copyFileSync(
+      path.join(__dirname, 'build-llms.js'),
+      path.join(temporaryScripts, 'build-llms.js')
+    );
+    fs.cpSync(
+      path.join(__dirname, 'llms'),
+      path.join(temporaryScripts, 'llms'),
+      { recursive: true }
+    );
+    const result = childProcess.spawnSync(
+      process.execPath,
+      [path.join(temporaryScripts, 'build-llms.js')],
+      { encoding: 'utf8' }
+    );
+
+    assert.strictEqual(result.status, 1, result.stderr);
+    assert.match(result.stderr, /docs\/ directory not found/iu);
+    assert(!fs.existsSync(path.join(directory, 'website', 'static')));
+  });
+});
 
 function loadWebsiteDocuments() {
   const docsDirectory = path.join(__dirname, '..', 'docs');
@@ -1288,6 +2500,28 @@ test('index formatting helpers keep their existing behavior', () => {
   ]);
   assert(b.buildToc(['A', 'B']).startsWith('## 目录'));
   assert(b.buildToc(['A', 'B']).includes('- A'));
+});
+
+test('LLM index groups prototype-named sections as ordinary headings', () => {
+  const output = b.buildLlmsIndex('Fixture', [
+    {
+      title: 'Prototype Guide',
+      mdPath: 'md/prototype.md',
+      section: '__proto__',
+      description: null,
+    },
+    {
+      title: 'Constructor Guide',
+      mdPath: 'md/constructor.md',
+      section: 'constructor',
+      description: null,
+    },
+  ]);
+
+  assert(output.includes('## __proto__'));
+  assert(output.includes('- [Prototype Guide](md/prototype.md)'));
+  assert(output.includes('## constructor'));
+  assert(output.includes('- [Constructor Guide](md/constructor.md)'));
 });
 
 process.stdout.write('ALL PASS\n');

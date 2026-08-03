@@ -10,6 +10,10 @@ const CLOSING_TO_OPENING = {
 
 const DEMO_NAME_PATTERN = '(?:[A-Za-z_$][\\w$]*)?Demo';
 const DEMO_NAME_REGEXP = new RegExp(`^${DEMO_NAME_PATTERN}$`, 'u');
+const UNPROCESSED_DEMO_REGEXP = new RegExp(
+  `<\\/?(${DEMO_NAME_PATTERN})\\b`,
+  'u'
+);
 const EXPRESSION_PREFIX_KEYWORDS = new Set([
   'await',
   'case',
@@ -1543,17 +1547,20 @@ function convertMdxBody(source, sourceName) {
   if (/<\/?LiveDemo\b/u.test(maskedOutput)) {
     throw new Error(`${sourceName}: unprocessed LiveDemo`);
   }
-  const remainingDemo = new RegExp(`<\\/?(${DEMO_NAME_PATTERN})\\b`, 'u').exec(
-    maskedOutput
-  );
-  if (remainingDemo) {
-    if (!collected.demos.has(remainingDemo[1])) {
-      throw new Error(`${sourceName}: unknown Demo ${remainingDemo[1]}`);
+  const remainingDemo = findUnprocessedDemo(restoredOutput);
+  if (remainingDemo !== null) {
+    if (!collected.demos.has(remainingDemo)) {
+      throw new Error(`${sourceName}: unknown Demo ${remainingDemo}`);
     }
-    throw new Error(`${sourceName}: unprocessed Demo ${remainingDemo[1]}`);
+    throw new Error(`${sourceName}: unprocessed Demo ${remainingDemo}`);
   }
 
   return collapseBlankLinesOutsideCode(restoredOutput);
+}
+
+function findUnprocessedDemo(markdown) {
+  const match = UNPROCESSED_DEMO_REGEXP.exec(protectCode(markdown).source);
+  return match === null ? null : match[1];
 }
 
 module.exports = {
@@ -1561,6 +1568,7 @@ module.exports = {
   collectExportedDemos,
   convertMdxBody,
   findBalancedEnd,
+  findUnprocessedDemo,
   normalizeDemoDefinition,
   parseFrontmatter,
   protectCode,
