@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.21.0](https://github.com/unif-design/react-native-design/compare/v0.20.0...v0.21.0) (2026-08-03)
+
+
+### Features
+
+* remediate runtime API contracts ([#104](https://github.com/unif-design/react-native-design/issues/104)) ([9dd1d52](https://github.com/unif-design/react-native-design/commit/9dd1d52d382a666bdb4f32f62592c1129c0638c6))
+
 # [0.20.0](https://github.com/unif-design/react-native-design/compare/v0.19.0...v0.20.0) (2026-07-30)
 
 
