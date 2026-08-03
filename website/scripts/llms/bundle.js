@@ -116,6 +116,10 @@ function buildToc(titles) {
   return ['## 目录', '', ...titles.map((title) => `- ${title}`), ''].join('\n');
 }
 
+function withSingleTrailingNewline(value) {
+  return `${value.replace(/(?:\r?\n)(?:[ \t]*(?:\r?\n))*$/u, '')}\n`;
+}
+
 function attachBundleMeta(bundle, meta) {
   Object.defineProperty(bundle, BUNDLE_META, {
     configurable: false,
@@ -193,14 +197,16 @@ function buildBundle(site) {
     );
   }
 
-  const llmsFull = assembleMarkdown([
-    `# ${siteName} — 全文文档聚合`,
-    '',
-    '> 单文件聚合版。每段都带源路径与标题，方便整体粘贴给 LLM。',
-    '',
-    buildToc(tocTitles),
-    ...bodyBlocks,
-  ]);
+  const llmsFull = withSingleTrailingNewline(
+    assembleMarkdown([
+      `# ${siteName} — 全文文档聚合`,
+      '',
+      '> 单文件聚合版。每段都带源路径与标题，方便整体粘贴给 LLM。',
+      '',
+      buildToc(tocTitles),
+      ...bodyBlocks,
+    ])
+  );
   const entries = routeMap.documents.map(createIndexEntry);
   const bundle = {
     'llms.txt': Buffer.from(buildLlmsIndex(siteName, entries)),

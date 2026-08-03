@@ -296,6 +296,23 @@ test('bundle is built in memory and installs idempotently without touching unrel
   });
 });
 
+test('full bundle ends with exactly one newline', () => {
+  withTempDirectory((directory) => {
+    const site = createTempSite(directory);
+    for (const sourcePath of [
+      'UNIF-DESIGN.md',
+      'getting-started.md',
+      'components/button.mdx',
+    ]) {
+      fs.appendFileSync(path.join(site.docsDir, sourcePath), '\n');
+    }
+    const candidate = b.buildBundle(site);
+    const ending = candidate['llms-full.txt'].toString('utf8').match(/\n*$/u);
+
+    assert.strictEqual(ending?.[0], '\n');
+  });
+});
+
 test('unknown Demo and dead internal links fail before staging and preserve every old byte', () => {
   for (const failure of [
     { name: 'unknown Demo', options: { unknownDemo: true } },
