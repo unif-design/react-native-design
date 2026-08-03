@@ -66,7 +66,15 @@ function MyComponent() {
 
 ### 症状:缺 ThemeProvider 时颜色还能出(但不切暗色) {#缺-themeprovider}
 
-✅ **这是预期兜底,不是 bug。** `useTheme()` 在没有 `ThemeProvider` 时 fallback 到亮色(`lightColors` / `lightShadow`),保证组件不崩。但这样**不会跟随系统暗色**。正确做法是按[快速开始 → 根挂 ThemeProvider](/docs/getting-started#根挂-themeprovider) 在 App 根挂一次。
+✅ **这是预期兜底,不是 bug。** `useTheme()` 在没有 `ThemeProvider` 时返回同一个模块级亮色 fallback(`lightColors` / `lightShadow` / `fontScale=1`),保证组件不崩且引用稳定。但这样**不会跟随系统暗色**。开发环境会在 React effect 阶段一次性记录诊断,render 期间不会写日志。正确做法是按[快速开始 → 根挂 ThemeProvider](/docs/getting-started#根挂-themeprovider) 在 App 根挂一次。
+
+---
+
+### 症状:传入 fontScale 后字号未变化或出现非法值 {#fontscale-非法}
+
+**原因。** `ThemeProvider fontScale` 只接受有限正数;`0`、负数、`NaN`、`Infinity` 或非数字运行时输入都会回退为 `1`。缩放不设上限,因此很大的有限正数仍会按原值生效。
+
+**解法。** 持久化值先用包根导出的 `normalizeFontScale(value)` 归一化。`useThemedStyles` 只缩放 maker 产物中的 `fontSize / lineHeight / letterSpacing`;render 期间动态拼入的文字 metric 用 `useFontScale()` 取当前 factor,再用 `scaleFontMetric(value, factor)` 显式乘一次。不要重复缩放,也不要期待 padding、Icon 或控件高度随字号档位改变。
 
 ---
 

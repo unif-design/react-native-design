@@ -23,6 +23,13 @@ describe('theme/scaleNamedStyles', () => {
     expect(scaleNamedStyles(styles, 1)).toBe(styles);
   });
 
+  test.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])(
+    '非法 factor=%p 归一化为 1 并返回原引用',
+    (factor) => {
+      expect(scaleNamedStyles(styles, factor)).toBe(styles);
+    }
+  );
+
   test('factor = 1.3 缩放字号三属性,布局与颜色不动', () => {
     const out = scaleNamedStyles(styles, 1.3);
     expect(out.title.fontSize).toBeCloseTo(19.5);

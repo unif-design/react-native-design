@@ -204,7 +204,9 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 
 半档微调:`smPlus`(14.5)· `xsPlus`(13.5)· `microPlus`(11.5)。Hero 档:`heroLg`(26)· `heroMd`(22)· `heroSm`(18)。完整说明见[字体](/docs/design/tokens/typography)。
 
-应用级字号缩放(app 内字体大小档):接入方传 `<ThemeProvider fontScale={…}>`(默认 1),`useThemedStyles` 出口对 maker 产物的 `fontSize / lineHeight / letterSpacing` 统一缩放 —— 与 RN `allowFontScaling` 的原生缩放范围一致,只缩文字不缩布局。与 `rf()` 正交:`rf()` 是按屏宽的静态适配,`fontScale` 是运行期用户档位。
+应用级字号缩放(app 内字体大小档):接入方传 `<ThemeProvider fontScale={…}>`(默认 1),只接受有限正数且不设上限;非法值回退 1。`useThemedStyles` 出口精确只缩放 maker 产物的 `fontSize / lineHeight / letterSpacing`,不缩 Icon、Spinner、spacing、控件尺寸、圆角或 `fixed.*`。动态文字 metric 用根导出的 `useFontScale()` + `scaleFontMetric()` 显式缩放一次;持久化值可先经根导出的 `normalizeFontScale()` 归一化。与 `rf()` 正交:`rf()` 是按屏宽的静态适配,`fontScale` 是运行期用户档位。
+
+缺少 `ThemeProvider` 时,主题 hook 使用模块级稳定 light fallback(`fontScale=1`),开发诊断只在 React effect 阶段记录,不会在 render 期间产生日志。
 
 ### 行高(惯例,非 token)
 **没有 `lineHeight` token。** 行高用字号乘系数:标题 ×1.25、正文 ×1.45(直接写 `lineHeight: t.body * 1.45`)。
@@ -439,8 +441,10 @@ src/
 │   ├── tokens.ts            ← type / fw / space / radius / avatar / icon / control / dim / fixed / motion(非主题)
 │   ├── scale.ts             ← r() 像素对齐缩放 / rf() 字号缩放(基准宽 402)
 │   ├── blur.ts              ← blur soft(10)/ strong(40)
-│   ├── ThemeProvider.tsx    ← context provider,读 useColorScheme();forceScheme? 可强制;fontScale?(默认 1)应用级字号缩放
-│   ├── useTheme.ts          ← useTheme / useColors / useShadow(缺 Provider 时 fallback light)
+│   ├── fontScale.ts         ← normalizeFontScale / scaleFontMetric / useFontScale(有限正数,无上限)
+│   ├── themeContext.ts      ← 私有 Context + 模块级稳定 light fallback(不从包根导出)
+│   ├── ThemeProvider.tsx    ← context provider,读 useColorScheme();forceScheme? 可强制;归一化 fontScale
+│   ├── useTheme.ts          ← useTheme / useColors / useShadow(缺 Provider 时稳定 fallback,effect 诊断)
 │   ├── useThemedStyles.ts   ← useThemedStyles(maker),含 useMemo([colors, shadow, fontScale, maker]) 缓存;出口按 fontScale 缩放 fontSize / lineHeight / letterSpacing(=1 恒等)
 │   └── index.ts             ← barrel
 │

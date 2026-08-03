@@ -131,8 +131,28 @@ function Article() {
 
 app 内「字体大小」档位经 `<ThemeProvider fontScale={…}>` 传入(默认 `1`),`useThemedStyles` 出口对 maker 产物的 `fontSize / lineHeight / letterSpacing` 统一缩放:
 
-- 与 RN `allowFontScaling` 的原生缩放范围一致 —— **只缩文字,不缩 padding / 高度等布局尺寸**;
+- 只接受**有限正数**,不设人为上限;`0`、负数、`NaN`、`Infinity` 和非数字值均回退为 `1`;
+- 精确只缩放 `fontSize`、`lineHeight`、`letterSpacing`;Icon、Spinner、spacing、控件尺寸、圆角和 `fixed.*` 均不缩放;
 - `fontScale = 1` 时恒等返回原引用,未接入的消费方(web 文档站等)行为与引用完全不变;
 - 与 `rf()` 正交:`rf()` 是按屏宽的**静态**适配(模块加载时算一次),`fontScale` 是**运行期**用户档位(变更即触发全树 themed 样式重算)。
 
-接入方自持档位状态(persist store 等);组件层零改动 —— 所有走 `useThemedStyles` 的样式自动生效。
+接入方自持档位状态(persist store 等)。`useThemedStyles` 只处理 maker 产物;render 期间另外拼入的动态文字 metric 必须显式缩放:
+
+```tsx
+import {
+  normalizeFontScale,
+  scaleFontMetric,
+  useFontScale,
+} from '@unif/react-native-design';
+
+const savedScale = normalizeFontScale(settings.fontScale);
+
+function DynamicLabel({ size }: { size: number }) {
+  const fontScale = useFontScale();
+  return <Text style={{ fontSize: scaleFontMetric(size, fontScale) }} />;
+}
+```
+
+`normalizeFontScale(value)` 和 `scaleFontMetric(value, factor)` 都是无副作用纯函数;后者会先归一化 factor,再且仅再乘一次。不要把已经由 `useThemedStyles` 缩放过的值再次传给 `scaleFontMetric`。
+
+缺少 `ThemeProvider` 时,主题 hook 返回同一个模块级 light fallback(`lightColors` / `lightShadow` / `fontScale=1`),保证引用稳定。开发环境会在 React effect 阶段一次性记录诊断;render 期间不会写日志。
