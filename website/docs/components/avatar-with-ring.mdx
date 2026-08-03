@@ -13,6 +13,8 @@ import { AvatarWithRing } from '@unif/react-native-design';
 
 内核底色固定为品牌橙渐变(`#F49443 → #EB6E00`),`ringColor` 只控制外圈 ring 的颜色;label 基准字号约 `size * 0.40`,ring 宽度约 `size * 0.0625`(随 `size` 缩放)。`ThemeProvider fontScale` 只缩放 label 的字号与字距；总直径、ring、内核、渐变和 shadow 均保持原几何。
 
+内部 SVG 渐变通过 `useSvgId('av')` 生成并消毒实例级 ID；同屏多个头像不会复用同一个渐变定义，也无需消费者传入或手工拼接 ID。
+
 ## 实时预览
 
 下方渲染的就是 `src/components/business/AvatarWithRing/AvatarWithRing.tsx` 本体。
@@ -92,6 +94,7 @@ import { AvatarWithRing } from '@unif/react-native-design';
 | label 字距 | 基准 `-0.5`，按 fontScale 缩放一次；垂直方向只由 `avatarCore` flex 居中 |
 | ring 宽度 | `size × 0.0625`(下限 2px) |
 | 内核底色 | `avatarGradient`(135° 品牌橙渐变,固定) |
+| 渐变 ID | `useSvgId('av')` 自动生成；消毒 React ID 并保证合法开头 |
 | label 色 | `c.onPrimary`(恒定) |
 | shadow | `s.brandAvatar`(品牌橙 elevation) |
 

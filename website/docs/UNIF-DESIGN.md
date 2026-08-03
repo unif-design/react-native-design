@@ -413,9 +413,10 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 
 ### 业务复合(本包 4 个)
 通用部分(不耦合 navigation / store);耦合的(ScreenLayout / CellList / ModernAppCell / SmsCodeInput)留在消费者仓库。
-- **AvatarWithRing** —— 圆形头像 + ring + 品牌 shadow。
+- **AvatarWithRing** —— 圆形头像 + ring + 品牌 shadow；内部 SVG 渐变 ID 由 `useSvgId('av')` 自动生成并消毒。
 - **GlassStats** —— 玻璃数据条(BlurView + N 列)。
-- **Decorations** —— `GradientWash`(线性渐变)+ `RadialHalo`(径向柔光)+ `ScreenBackdrop`(整屏沉浸渐变,`preset="warmOrange"` + 暗色自适配),纯装饰层 `pointerEvents="none"`。
+- **Decorations** —— `GradientWash`(线性渐变)+ `RadialHalo`(径向柔光)+ `ScreenBackdrop`(整屏沉浸渐变,`preset="warmOrange"` + 暗色自适配),纯装饰层 `pointerEvents="none"`；`gradientId` 省略时自动唯一，外部值也会统一消毒。
+- **useSvgId** —— SVG ID hook；无条件消费 React `useId()`，统一消毒 prefix / override / React ID，并为非法首字符补 `svg-id-`。
 - **VersionPill** —— 带可见 `VersionStatus { label, color? }` 的版本号药丸；
   空白状态文案回退“状态未知”并在 effect 诊断，不能只靠颜色表达状态。
 
@@ -466,7 +467,8 @@ src/
 │   └── index.ts             ← barrel(从 @unif/react-native-design 包根导出)
 │
 └── components/business/     ← 4 个通用业务复合(AvatarWithRing / Decorations / GlassStats / VersionPill)
-    └── index.ts             ← barrel
+    ├── useSvgId.ts          ← SVG ID sanitizer/builder + public useSvgId hook
+    └── index.ts             ← barrel(仅公开 useSvgId，不公开 pure test seam)
 ```
 
 公共入口 `src/index.tsx` re-export:`./theme`(token + Provider + hooks + r/rf)、`./icons`、`./utils/testID`、`./utils/logger`、`./components/ui`、`./components/business`。
