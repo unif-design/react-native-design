@@ -16,7 +16,12 @@ type IteratorFactoryResult =
   | { kind: 'factory'; factory: () => unknown }
   | { kind: 'invalid' };
 
-const mappedThenables = new WeakMap<object, ReactNode>();
+type ThenableResolutionRecord = {
+  node: ReactNode;
+  dependencies: Set<ThenableResolutionRecord>;
+};
+
+const mappedThenables = new WeakMap<object, ThenableResolutionRecord>();
 
 function isIconName(value: unknown): value is IconName {
   return (
@@ -65,14 +70,16 @@ function isThenable(value: unknown): value is ReactNode {
 function normalizeFragment(
   value: React.ReactElement,
   activeIterables: WeakSet<object>,
-  path: string
+  path: string,
+  owner?: ThenableResolutionRecord
 ): NormalizedNode {
   try {
     const props = value.props as { children?: unknown };
     const normalized = normalizeReactNode(
       props.children,
       activeIterables,
-      `${path}.fragment`
+      `${path}.fragment`,
+      owner
     );
     if (normalized.kind === 'invalid') return normalized;
     return {
@@ -84,10 +91,34 @@ function normalizeFragment(
   }
 }
 
-function normalizeThenable(value: object, path: string): NormalizedNode {
-  const cached = mappedThenables.get(value);
-  if (cached !== undefined) return { kind: 'node', node: cached };
+function recordReaches(
+  from: ThenableResolutionRecord,
+  target: ThenableResolutionRecord,
+  visited = new Set<ThenableResolutionRecord>()
+): boolean {
+  if (from === target) return true;
+  if (visited.has(from)) return false;
+  visited.add(from);
+  for (const dependency of from.dependencies) {
+    if (recordReaches(dependency, target, visited)) return true;
+  }
+  return false;
+}
 
+function addThenableDependency(
+  owner: ThenableResolutionRecord,
+  dependency: ThenableResolutionRecord
+): boolean {
+  // dependency 已能走回 owner 时再加边会闭环；不加边并让当前 resolution 失败关闭。
+  if (recordReaches(dependency, owner)) return false;
+  owner.dependencies.add(dependency);
+  return true;
+}
+
+function createThenableRecord(
+  value: object,
+  path: string
+): ThenableResolutionRecord {
   let resolveMapped: (node: unknown) => void = () => {};
   let rejectMapped: (reason?: unknown) => void = () => {};
   const mappedPromise = new Promise<unknown>((resolve, reject) => {
@@ -95,40 +126,64 @@ function normalizeThenable(value: object, path: string): NormalizedNode {
     rejectMapped = reject;
   });
   const mappedNode = mappedPromise as ReactNode;
-  // 先入 cache 再调用用户 then：同步 thenable 或循环引用也不会递归创建新映射。
-  mappedThenables.set(value, mappedNode);
+  const record: ThenableResolutionRecord = {
+    node: mappedNode,
+    dependencies: new Set(),
+  };
+  // 先入 cache 再调用用户 then：同步 thenable 可复用同一 record，并由依赖图识别闭环。
+  mappedThenables.set(value, record);
+
+  let claimed = false;
+  const resolveOnce = (resolved: unknown) => {
+    if (claimed) return;
+    claimed = true;
+    if (resolved === value || resolved === mappedPromise) {
+      resolveMapped(null);
+      return;
+    }
+    try {
+      const normalized = normalizeReactNode(
+        resolved,
+        new WeakSet<object>(),
+        `${path}.then`,
+        record
+      );
+      resolveMapped(normalized.kind === 'invalid' ? null : normalized.node);
+    } catch {
+      resolveMapped(null);
+    }
+  };
+  const rejectOnce = (reason: unknown) => {
+    if (claimed) return;
+    claimed = true;
+    rejectMapped(reason);
+  };
 
   try {
     const then = (value as { then?: unknown }).then;
     if (typeof then !== 'function') {
-      resolveMapped(null);
-      return { kind: 'node', node: mappedNode };
+      resolveOnce(null);
+      return record;
     }
-    then.call(
-      value,
-      (resolved: unknown) => {
-        if (resolved === value || resolved === mappedPromise) {
-          resolveMapped(null);
-          return;
-        }
-        try {
-          const normalized = normalizeReactNode(
-            resolved,
-            new WeakSet<object>(),
-            `${path}.then`
-          );
-          resolveMapped(normalized.kind === 'invalid' ? null : normalized.node);
-        } catch {
-          resolveMapped(null);
-        }
-      },
-      (reason: unknown) => rejectMapped(reason)
-    );
+    then.call(value, resolveOnce, rejectOnce);
   } catch (error) {
-    rejectMapped(error);
+    rejectOnce(error);
   }
 
-  return { kind: 'node', node: mappedNode };
+  return record;
+}
+
+function normalizeThenable(
+  value: object,
+  path: string,
+  owner?: ThenableResolutionRecord
+): NormalizedNode {
+  const record =
+    mappedThenables.get(value) ?? createThenableRecord(value, path);
+  if (owner !== undefined && !addThenableDependency(owner, record)) {
+    return { kind: 'invalid' };
+  }
+  return { kind: 'node', node: record.node };
 }
 
 function getIteratorFactory(value: object): IteratorFactoryResult {
@@ -170,7 +225,8 @@ function isReactPortal(value: object): value is React.ReactPortal {
 function normalizeArray(
   value: unknown[],
   activeIterables: WeakSet<object>,
-  path: string
+  path: string,
+  owner?: ThenableResolutionRecord
 ): NormalizedNode {
   if (activeIterables.has(value)) return { kind: 'invalid' };
   activeIterables.add(value);
@@ -180,7 +236,8 @@ function normalizeArray(
       const normalized = normalizeReactNode(
         value[index],
         activeIterables,
-        `${path}.${index}`
+        `${path}.${index}`,
+        owner
       );
       if (normalized.kind === 'invalid') return normalized;
       nodes.push(normalized.node);
@@ -197,7 +254,8 @@ function normalizeIterable(
   value: object,
   factory: () => unknown,
   activeIterables: WeakSet<object>,
-  path: string
+  path: string,
+  owner?: ThenableResolutionRecord
 ): NormalizedNode {
   if (activeIterables.has(value)) return { kind: 'invalid' };
   activeIterables.add(value);
@@ -229,7 +287,8 @@ function normalizeIterable(
       const normalized = normalizeReactNode(
         result.value,
         activeIterables,
-        `${path}.${index}`
+        `${path}.${index}`,
+        owner
       );
       if (normalized.kind === 'invalid') return normalized;
       nodes.push(normalized.node);
@@ -253,7 +312,8 @@ function normalizeIterable(
 function normalizeReactNode(
   value: unknown,
   activeIterables: WeakSet<object>,
-  path: string
+  path: string,
+  owner?: ThenableResolutionRecord
 ): NormalizedNode {
   if (
     typeof value === 'string' ||
@@ -271,22 +331,28 @@ function normalizeReactNode(
   if (React.isValidElement(value)) {
     if (!hasElementShape(value)) return { kind: 'invalid' };
     return value.type === React.Fragment
-      ? normalizeFragment(value, activeIterables, path)
+      ? normalizeFragment(value, activeIterables, path, owner)
       : { kind: 'node', node: value };
   }
   if (typeof value !== 'object' || value === null) {
     return { kind: 'invalid' };
   }
   if (Array.isArray(value)) {
-    return normalizeArray(value, activeIterables, path);
+    return normalizeArray(value, activeIterables, path, owner);
   }
 
   const iterator = getIteratorFactory(value);
   if (iterator.kind === 'invalid') return iterator;
   if (iterator.kind === 'factory') {
-    return normalizeIterable(value, iterator.factory, activeIterables, path);
+    return normalizeIterable(
+      value,
+      iterator.factory,
+      activeIterables,
+      path,
+      owner
+    );
   }
-  if (isThenable(value)) return normalizeThenable(value, path);
+  if (isThenable(value)) return normalizeThenable(value, path, owner);
   if (typeof value !== 'object') return { kind: 'invalid' };
   return isReactPortal(value)
     ? { kind: 'node', node: value }
@@ -298,7 +364,8 @@ function normalizeReactNode(
  * 结构不成立的 marker-only element 与普通 plain object，同时保留 React 19 声明的
  * bigint、Iterable、portal、Promise/thenable 等合法 ReactNode。Fragment/Iterable
  * 会递归验证 primitive 叶子；thenable 映射按源对象缓存，避免每次 render 制造新的
- * suspend identity，并把非法 resolved value 失败关闭为 null。
+ * suspend identity；resolution record 的依赖可达性同时拦截 direct/indirect cycle，
+ * 并把 cycle 或非法 resolved value 确定性失败关闭为 null。
  */
 export function classifyNavBarSlot(value: unknown): NavBarSlotClassification {
   if (value === undefined || value === null || typeof value === 'boolean') {

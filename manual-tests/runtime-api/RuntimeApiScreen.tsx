@@ -726,6 +726,8 @@ function SelectionControlsSection(): React.JSX.Element {
   const [radioValue, setRadioValue] = useState('daily');
   const [switchValue, setSwitchValue] = useState(false);
   const [unexpectedPresses, setUnexpectedPresses] = useState(0);
+  const [blankRadioUnexpected, setBlankRadioUnexpected] = useState(0);
+  const [blankGroupValidActions, setBlankGroupValidActions] = useState(0);
   const reduced = usePrefersReducedMotion();
 
   return (
@@ -736,9 +738,11 @@ function SelectionControlsSection(): React.JSX.Element {
         selection-switch-visual 实现为 r(32)×r(20)，Web / 402pt RN harness 应为
         32×20，其他 native 宽度按实际 r() 结果验证。系统开启 reduced motion
         后切换应立即到终值。Web 检查 selection-switch-track /
-        selection-switch-thumb：两者都不得出现任何 transition* style。三个 blank
-        item 不得触发 unexpected 计数或形成 unnamed action；空白 Radio.Group
-        只诊断组名，内部有名称的 Radio 仍拥有 action。
+        selection-switch-thumb：两者都不得出现任何 transition* style。blank
+        Checkbox/Switch 不得增加 disabled selection actions；blank Radio
+        不得形成 unnamed action，blank Radio unexpected 必须保持 0。空白
+        Radio.Group 只诊断组名，点击内部有名称的 Radio 必须增加 blank Group
+        valid actions。
       </Text>
       <Checkbox checked={checked} onChange={setChecked} label="接收纸质账单" />
       <Checkbox
@@ -765,6 +769,8 @@ function SelectionControlsSection(): React.JSX.Element {
         onChange={(nextValue) => {
           if (nextValue === 'disabled') {
             setUnexpectedPresses((count) => count + 1);
+          } else if (nextValue === 'blank') {
+            setBlankRadioUnexpected((count) => count + 1);
           } else {
             setRadioValue(String(nextValue));
           }
@@ -775,15 +781,24 @@ function SelectionControlsSection(): React.JSX.Element {
         <Radio value="daily" label="日报" />
         <Radio value="weekly" accessibilityLabel="周报（无可见 label）" />
         <Radio value="disabled" label="禁用选项（不应触发）" disabled />
-        <Radio value="blank" label="   " accessibilityLabel={'\t'} />
+        <Radio
+          value="blank"
+          label="   "
+          accessibilityLabel={'\t'}
+          testID="selection-radio-item-blank"
+        />
       </Radio.Group>
       <Radio.Group
         value="named"
-        onChange={() => setUnexpectedPresses((count) => count + 1)}
+        onChange={() => setBlankGroupValidActions((count) => count + 1)}
         accessibilityLabel="   "
-        testID="selection-radio-group-blank"
+        testID="selection-radio-group-name-blank"
       >
-        <Radio value="named" label="组名空白但 item 有名称" />
+        <Radio
+          value="named"
+          label="组名空白但 item 有名称"
+          testID="selection-radio-group-name-blank-item"
+        />
       </Radio.Group>
       <View style={styles.selectionRow}>
         <Switch
@@ -813,6 +828,14 @@ function SelectionControlsSection(): React.JSX.Element {
       <Result
         label="disabled selection actions"
         value={String(unexpectedPresses)}
+      />
+      <Result
+        label="blank Radio unexpected"
+        value={String(blankRadioUnexpected)}
+      />
+      <Result
+        label="blank Group valid actions"
+        value={String(blankGroupValidActions)}
       />
     </Section>
   );

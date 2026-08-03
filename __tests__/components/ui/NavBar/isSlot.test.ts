@@ -26,6 +26,40 @@ function expectTextNodeKey(
   expect(node.key).toBe(key);
 }
 
+type SyncThenable = {
+  then(
+    resolve: (value: unknown) => void,
+    reject?: (reason: unknown) => void
+  ): void;
+};
+
+async function expectMappedThenableSettlesNull(
+  result: ReturnType<typeof classifyNavBarSlot>
+): Promise<void> {
+  expect(result.kind).toBe('node');
+  if (result.kind !== 'node') return;
+
+  const observation: {
+    status: 'pending' | 'fulfilled' | 'rejected';
+    value?: unknown;
+  } = { status: 'pending' };
+  (result.node as Promise<React.ReactNode>).then(
+    (value) => {
+      observation.status = 'fulfilled';
+      observation.value = value;
+    },
+    (reason: unknown) => {
+      observation.status = 'rejected';
+      observation.value = reason;
+    }
+  );
+
+  // 同步 thenable 的依赖图已在 classify 返回前完整建立；这里只让已确定的
+  // Promise reaction 执行，不靠 timeout 猜测 pending 状态。
+  await Promise.resolve();
+  expect(observation).toEqual({ status: 'fulfilled', value: null });
+}
+
 // RN 不公开 portal creator；此 fixture 仅用 React 的公开 Children 行为刻画 portal
 // 边界，production 不读取 `$$typeof` 或 renderer internals。
 const portal = {
@@ -281,6 +315,91 @@ describe('NavBar slot classification', () => {
     expect(result.kind).toBe('node');
     if (result.kind !== 'node') return;
     await expect(result.node as Promise<React.ReactNode>).resolves.toBeNull();
+  });
+
+  test('fails closed for a two-record A to B to A thenable cycle', async () => {
+    let a!: SyncThenable;
+    let b!: SyncThenable;
+    a = { then: (resolve) => resolve(b) };
+    b = { then: (resolve) => resolve(a) };
+
+    await expectMappedThenableSettlesNull(classifyNavBarSlot(a));
+  });
+
+  test('fails closed for a three-record A to B to C to A thenable cycle', async () => {
+    let a!: SyncThenable;
+    let b!: SyncThenable;
+    let c!: SyncThenable;
+    a = { then: (resolve) => resolve(b) };
+    b = { then: (resolve) => resolve(c) };
+    c = { then: (resolve) => resolve(a) };
+
+    await expectMappedThenableSettlesNull(classifyNavBarSlot(a));
+  });
+
+  test('fails closed when a thenable resolves to an Array containing itself', async () => {
+    let selfInArray!: SyncThenable;
+    selfInArray = { then: (resolve) => resolve([selfInArray]) };
+
+    await expectMappedThenableSettlesNull(classifyNavBarSlot(selfInArray));
+  });
+
+  test('fails closed when a thenable resolves to a Fragment containing itself', async () => {
+    let selfInFragment!: SyncThenable;
+    selfInFragment = {
+      then: (resolve) =>
+        resolve(
+          React.createElement(
+            React.Fragment,
+            null,
+            selfInFragment as unknown as React.ReactNode
+          )
+        ),
+    };
+
+    await expectMappedThenableSettlesNull(classifyNavBarSlot(selfInFragment));
+  });
+
+  test('preserves acyclic thenable chains and nested collections', async () => {
+    const leaf: SyncThenable = {
+      then: (resolve) => resolve('leaf'),
+    };
+    const chain: SyncThenable = {
+      then: (resolve) => resolve(leaf),
+    };
+    const collection: SyncThenable = {
+      then: (resolve) =>
+        resolve([
+          leaf,
+          React.createElement(React.Fragment, null, 'fragment leaf'),
+        ]),
+    };
+
+    const chainResult = classifyNavBarSlot(chain);
+    expect(chainResult.kind).toBe('node');
+    if (chainResult.kind === 'node') {
+      expectTextNode(
+        await (chainResult.node as Promise<React.ReactNode>),
+        'leaf'
+      );
+    }
+
+    const collectionResult = classifyNavBarSlot(collection);
+    expect(collectionResult.kind).toBe('node');
+    if (collectionResult.kind !== 'node') return;
+    const resolved = await (collectionResult.node as Promise<React.ReactNode>);
+    expect(Array.isArray(resolved)).toBe(true);
+    if (!Array.isArray(resolved)) return;
+    expectTextNode(await (resolved[0] as Promise<React.ReactNode>), 'leaf');
+    const fragment = resolved[1];
+    expect(React.isValidElement(fragment)).toBe(true);
+    if (React.isValidElement(fragment)) {
+      expect(fragment.type).toBe(React.Fragment);
+      expectTextNode(
+        (fragment.props as { children?: React.ReactNode }).children,
+        'fragment leaf'
+      );
+    }
   });
 
   test('preserves a thenable rejection reason', async () => {
