@@ -8,7 +8,7 @@ function Placeholder() {
 
   return (
     <Text style={[styles.placeholder, { color: colors.foreground }]}>
-      Design Showcase
+      设计系统示例
     </Text>
   );
 }

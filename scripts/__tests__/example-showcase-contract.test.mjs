@@ -43,18 +43,22 @@ function withFixture(relativePaths, run) {
   }
 }
 
-function runVerifier(fixture, testNamePattern) {
+function runContractMutation(fixture, testNamePattern) {
   const env = {
     ...process.env,
-    EXAMPLE_SHOWCASE_TEST_NAME_PATTERN: testNamePattern,
+    EXAMPLE_SHOWCASE_ROOT: fixture,
   };
-  // 外层 node:test 的私有标记会让 verifier 启动的子测试被误判为递归而整组跳过。
+  delete env.EXAMPLE_SHOWCASE_TEST_NAME_PATTERN;
   delete env.NODE_TEST_CONTEXT;
   return spawnSync(
     process.execPath,
     [
-      path.join(repositoryRoot, 'scripts/verify-example-showcase.mjs'),
-      fixture,
+      '--test',
+      `--test-name-pattern=${testNamePattern}`,
+      path.join(
+        repositoryRoot,
+        'scripts/__tests__/example-showcase-contract.test.mjs'
+      ),
     ],
     {
       cwd: repositoryRoot,
@@ -149,6 +153,31 @@ test('workspace scripts 暴露真实 example 及完整本地 gate', () => {
   assert.equal(
     read('example/.eslintrc.js'),
     "module.exports = {\n  root: true,\n  extends: '@react-native',\n};\n"
+  );
+});
+
+test('Yarn 不全局丢弃 peer warning', () => {
+  const result = spawnSync(
+    process.execPath,
+    [
+      path.join(root, '.yarn/releases/yarn-4.11.0.cjs'),
+      'config',
+      'get',
+      'logFilters',
+      '--json',
+    ],
+    {
+      cwd: root,
+      encoding: 'utf8',
+    }
+  );
+  const output = `${result.stdout}\n${result.stderr}`;
+  assert.equal(result.status, 0, output);
+  const filters = JSON.parse(result.stdout);
+
+  assert.deepEqual(
+    filters.filter((filter) => filter.level === 'discard'),
+    []
   );
 });
 
@@ -331,14 +360,14 @@ test('Gem/Pod locks 存在且没有被 ignore', () => {
   }
 });
 
-test('verifier 拒绝 runtime manifest 的精确版本漂移', () => {
+test('mutation gate 拒绝 runtime manifest 的精确版本漂移', () => {
   withFixture(['package.json', 'example/package.json'], (fixture) => {
     const manifestPath = path.join(fixture, 'example/package.json');
     const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
     manifest.dependencies['react-native-safe-area-context'] = '5.7.0';
     writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
-    const result = runVerifier(
+    const result = runContractMutation(
       fixture,
       'example workspace 提供 Design 的完整 RN 0.86.2 runtime graph'
     );
@@ -348,7 +377,7 @@ test('verifier 拒绝 runtime manifest 的精确版本漂移', () => {
   });
 });
 
-test('verifier 拒绝 Android namespace 的 identity 漂移', () => {
+test('mutation gate 拒绝 Android namespace 的 identity 漂移', () => {
   const files = [
     'package.json',
     'example/package.json',
@@ -374,7 +403,7 @@ test('verifier 拒绝 Android namespace 的 identity 漂移', () => {
       )
     );
 
-    const result = runVerifier(
+    const result = runContractMutation(
       fixture,
       'app registry 与 Android identity 原子同步并保留 New Architecture'
     );
