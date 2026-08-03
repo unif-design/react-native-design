@@ -134,12 +134,21 @@ const FN = (s: string) => <span className="tok-fn">{s}</span>;
 const DIM = (s: string) => <span className="tok-dim">{s}</span>;
 
 const CODE_LINES: CodeLine[] = [
-  <>{K('import')} <span className="tok-id">{'{ ThemeProvider, Button }'}</span></>,
+  <>{K('import')} <span className="tok-id">{'{ useState }'}</span> {K('from')} {ST("'react'")}</>,
+  <>{K('import')} <span className="tok-id">{'{ Button, ThemeProvider }'}</span></>,
   <>{'  '}{K('from')} {ST("'@unif/react-native-design'")}</>,
   <>{' '}</>,
-  <>{DIM('<')}{FN('ThemeProvider')} forceScheme={'{'}{ST("'dark'")}{'}'}{DIM('>')}</>,
-  <>{'  '}{DIM('<')}{FN('Button')} label={ST('"提交"')} variant={ST('"primary"')} onPress={'{'}FN('submit'){'}'} {DIM('/>')}</>,
-  <>{DIM('</')}{FN('ThemeProvider')}{DIM('>')}</>,
+  <>{K('export function')} {FN('App')}() {'{'}</>,
+  <>{'  '}{K('const')} [started, setStarted] = {FN('useState')}({K('false')});</>,
+  <>{'  '}{K('return')} (</>,
+  <>{'    '}{DIM('<')}{FN('ThemeProvider')} forceScheme={ST('"dark"')}{DIM('>')}</>,
+  <>{'      '}{DIM('<')}{FN('Button')}</>,
+  <>{'        '}label={'{'}started ? {ST("'已开始'")} : {ST("'开始使用'")}{'}'}</>,
+  <>{'        '}onPress={'{'}() =&gt; {FN('setStarted')}({K('true')}){'}'}</>,
+  <>{'      '}{DIM('/>')}</>,
+  <>{'    '}{DIM('</')}{FN('ThemeProvider')}{DIM('>')}</>,
+  <>{'  '});</>,
+  <>{"}"}</>,
 ];
 
 /* ─── Feature card data ─── */
@@ -215,7 +224,7 @@ export default function Home(): React.JSX.Element {
                 <CodeWindow
                   file="App.tsx"
                   tag="ThemeProvider"
-                  hl={5}
+                  hl={11}
                   lines={CODE_LINES}
                 />
               </div>
