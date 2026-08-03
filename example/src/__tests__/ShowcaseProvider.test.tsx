@@ -7,20 +7,12 @@ import {
 } from '@unif/react-native-design';
 import * as DesignRuntime from '@unif/react-native-design';
 import {
+  installShowcaseLoggerTransport,
   ShowcaseProvider,
   type ShowcaseContextValue,
+  type ShowcaseLoggerLifecycle,
 } from '../state/ShowcaseProvider';
 import { useShowcase } from '../state/useShowcase';
-
-jest.mock('@unif/react-native-design', () => {
-  const actual = jest.requireActual(
-    '@unif/react-native-design'
-  ) as typeof import('@unif/react-native-design');
-  return {
-    ...actual,
-    removeTransport: jest.fn(actual.removeTransport),
-  };
-});
 
 let showcase: ShowcaseContextValue | undefined;
 
@@ -143,15 +135,58 @@ test('custom logger transport 只映射白名单安全摘要并在 unmount 恢�
   expect(JSON.stringify(showcase?.state)).not.toContain(password);
   expect(JSON.stringify(showcase?.state)).not.toContain(imageUri);
 
-  const stateBeforeUnmount = showcase?.state;
   mounted.unmount();
-  expect(DesignRuntime.removeTransport).toHaveBeenCalledTimes(1);
-  expect(DesignRuntime.removeTransport).toHaveBeenCalledWith(
-    'react-native-design-example-showcase'
-  );
   expect(getLogLevel()).toBe('error');
-  buttonLog.error('Button label 不能为空白，当前 action 已禁用。', password);
-  expect(showcase?.state).toBe(stateBeforeUnmount);
 
   setLogLevel(originalLevel);
+});
+
+test('logger cleanup 先移除 active transport 再恢复旧 level', () => {
+  const originalLevel = getLogLevel();
+  setLogLevel('error');
+  const events: string[] = [];
+  const appendResult = jest.fn();
+  const lifecycle: ShowcaseLoggerLifecycle = {
+    getLogLevel() {
+      return getLogLevel();
+    },
+    setLogLevel(level) {
+      events.push(`set:${level}`);
+      setLogLevel(level);
+    },
+    addTransport(transport) {
+      events.push(`add:${transport.id}`);
+      DesignRuntime.addTransport(transport);
+    },
+    removeTransport(id) {
+      events.push(`remove:${id}`);
+      DesignRuntime.removeTransport(id);
+    },
+  };
+  const cleanup = installShowcaseLoggerTransport(appendResult, lifecycle);
+  let cleanedUp = false;
+
+  try {
+    createLogger('FoundationScene').info('主题诊断示例已记录', {
+      password: 'ignored-before-cleanup',
+    });
+    expect(appendResult).toHaveBeenCalledTimes(1);
+
+    const cleanupEventStart = events.length;
+    cleanup();
+    cleanedUp = true;
+    expect(events.slice(cleanupEventStart)).toEqual([
+      'remove:react-native-design-example-showcase',
+      'set:error',
+    ]);
+
+    createLogger('Button').error(
+      'Button label 不能为空白，当前 action 已禁用。',
+      'must-not-reach-removed-transport'
+    );
+    expect(appendResult).toHaveBeenCalledTimes(1);
+  } finally {
+    if (!cleanedUp) cleanup();
+    setLogLevel(originalLevel);
+  }
 });

@@ -12,6 +12,7 @@ import {
   getLogLevel,
   removeTransport,
   setLogLevel,
+  type LogLevel,
   type LogRecord,
   type LogTransport,
 } from '@unif/react-native-design';
@@ -87,6 +88,41 @@ function safeResultForLog(record: LogRecord): SafeResultInput | undefined {
     (mapping) =>
       mapping.scope === record.scope && mapping.message === record.message
   )?.result;
+}
+
+export type ShowcaseLoggerLifecycle = Readonly<{
+  getLogLevel: () => LogLevel;
+  setLogLevel: (level: LogLevel) => void;
+  addTransport: (transport: LogTransport) => void;
+  removeTransport: (id: string) => void;
+}>;
+
+const defaultShowcaseLoggerLifecycle: ShowcaseLoggerLifecycle = {
+  getLogLevel,
+  setLogLevel,
+  addTransport,
+  removeTransport,
+};
+
+export function installShowcaseLoggerTransport(
+  appendResult: (input: SafeResultInput) => void,
+  lifecycle: ShowcaseLoggerLifecycle = defaultShowcaseLoggerLifecycle
+): () => void {
+  const previousLevel = lifecycle.getLogLevel();
+  const transport: LogTransport = {
+    id: SHOWCASE_LOG_TRANSPORT_ID,
+    log(record) {
+      const safeResult = safeResultForLog(record);
+      if (safeResult) appendResult(safeResult);
+    },
+  };
+
+  lifecycle.setLogLevel('info');
+  lifecycle.addTransport(transport);
+  return () => {
+    lifecycle.removeTransport(SHOWCASE_LOG_TRANSPORT_ID);
+    lifecycle.setLogLevel(previousLevel);
+  };
 }
 
 export const ShowcaseContext = createContext<ShowcaseContextValue | undefined>(
@@ -176,23 +212,7 @@ export function ShowcaseProvider({
     commit(clearShowcaseResults);
   }, [commit]);
 
-  useEffect(() => {
-    const previousLevel = getLogLevel();
-    const transport: LogTransport = {
-      id: SHOWCASE_LOG_TRANSPORT_ID,
-      log(record) {
-        const safeResult = safeResultForLog(record);
-        if (safeResult) appendResult(safeResult);
-      },
-    };
-
-    setLogLevel('info');
-    addTransport(transport);
-    return () => {
-      removeTransport(SHOWCASE_LOG_TRANSPORT_ID);
-      setLogLevel(previousLevel);
-    };
-  }, [appendResult]);
+  useEffect(() => installShowcaseLoggerTransport(appendResult), [appendResult]);
 
   const value = useMemo<ShowcaseContextValue>(
     () => ({

@@ -9,6 +9,18 @@ import ts from 'typescript';
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptsDir, '..');
 
+export class ExampleShowcaseVerificationError extends Error {
+  constructor(code, message) {
+    super(message);
+    this.name = 'ExampleShowcaseVerificationError';
+    this.code = code;
+  }
+}
+
+function failVerification(code, message) {
+  throw new ExampleShowcaseVerificationError(code, message);
+}
+
 const expectedScenes = [
   'foundation',
   'actions',
@@ -153,9 +165,18 @@ const expectedRuntimeApis = [
 ];
 
 function parseSource(filePath) {
+  let source;
+  try {
+    source = readFileSync(filePath, 'utf8');
+  } catch (error) {
+    failVerification(
+      'SOURCE_READ',
+      `无法读取 TypeScript source: ${filePath}；${String(error)}`
+    );
+  }
   return ts.createSourceFile(
     filePath,
-    readFileSync(filePath, 'utf8'),
+    source,
     ts.ScriptTarget.Latest,
     true,
     filePath.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS
@@ -185,18 +206,24 @@ function findStaticArray(sourceFile, variableName) {
       ) {
         const initializer = unwrapExpression(declaration.initializer);
         if (!ts.isArrayLiteralExpression(initializer)) {
-          throw new Error(`${variableName} 必须是静态数组`);
+          failVerification(
+            'CATALOG_STATIC_SHAPE',
+            `${variableName} 必须是静态数组`
+          );
         }
         return initializer;
       }
     }
   }
-  throw new Error(`catalog 缺少 ${variableName} 静态数组`);
+  failVerification(
+    'CATALOG_STATIC_SHAPE',
+    `catalog 缺少 ${variableName} 静态数组`
+  );
 }
 
 function stringLiteralValue(node, label) {
   if (!node || !ts.isStringLiteral(node)) {
-    throw new Error(`${label} 必须是字符串 literal`);
+    failVerification('CATALOG_STATIC_SHAPE', `${label} 必须是字符串 literal`);
   }
   return node.text;
 }
@@ -213,18 +240,27 @@ function propertyInitializer(object, propertyName) {
       return property.initializer;
     }
   }
-  throw new Error(`component catalog 项缺少 ${propertyName}`);
+  failVerification(
+    'CATALOG_STATIC_SHAPE',
+    `component catalog 项缺少 ${propertyName}`
+  );
 }
 
 function readCatalogEntries(catalogPath) {
   const array = findStaticArray(parseSource(catalogPath), 'componentCatalog');
   return array.elements.map((element, index) => {
     if (!ts.isObjectLiteralExpression(element)) {
-      throw new Error(`component catalog 第 ${index + 1} 项必须是对象 literal`);
+      failVerification(
+        'CATALOG_STATIC_SHAPE',
+        `component catalog 第 ${index + 1} 项必须是对象 literal`
+      );
     }
     const states = unwrapExpression(propertyInitializer(element, 'states'));
     if (!ts.isArrayLiteralExpression(states) || states.elements.length === 0) {
-      throw new Error(`component catalog 第 ${index + 1} 项 states 必须非空`);
+      failVerification(
+        'CATALOG_STATIC_SHAPE',
+        `component catalog 第 ${index + 1} 项 states 必须非空`
+      );
     }
     return {
       id: stringLiteralValue(
@@ -262,7 +298,8 @@ function resolveModuleFile(fromFile, moduleName) {
   ];
   const resolved = candidates.find((candidate) => existsSync(candidate));
   if (!resolved) {
-    throw new Error(
+    failVerification(
+      'MODULE_RESOLUTION',
       `无法解析 TypeScript module: ${moduleName} from ${fromFile}`
     );
   }
@@ -337,7 +374,15 @@ function isUppercasePublicName(name) {
   return firstCode >= 65 && firstCode <= 90;
 }
 
-function assertExactSet(label, actualValues, expectedValues) {
+function assertExactSet(
+  label,
+  actualValues,
+  expectedValues,
+  {
+    duplicateCode = 'EXACT_SET_DUPLICATE',
+    mismatchCode = 'EXACT_SET_MISMATCH',
+  } = {}
+) {
   const actual = new Set(actualValues);
   const expected = new Set(expectedValues);
   const duplicates = actualValues.filter(
@@ -346,8 +391,15 @@ function assertExactSet(label, actualValues, expectedValues) {
   const missing = expectedValues.filter((value) => !actual.has(value));
   const extra = actualValues.filter((value) => !expected.has(value));
 
-  if (duplicates.length || missing.length || extra.length) {
-    throw new Error(
+  if (duplicates.length) {
+    failVerification(
+      duplicateCode,
+      `${label} contract 漂移；重复: ${duplicates.join(', ')}`
+    );
+  }
+  if (missing.length || extra.length) {
+    failVerification(
+      mismatchCode,
       `${label} contract 漂移；重复: ${duplicates.join(', ') || '无'}；缺少: ${
         missing.join(', ') || '无'
       }；多出: ${extra.join(', ') || '无'}`
@@ -367,13 +419,17 @@ export function verifyExampleShowcase(root) {
     ...expectedUiComponents,
     ...expectedBusinessComponents,
   ];
-  assertExactSet('component catalog', catalogIds, expectedComponents);
+  assertExactSet('component catalog', catalogIds, expectedComponents, {
+    duplicateCode: 'CATALOG_COMPONENT_DUPLICATE',
+    mismatchCode: 'CATALOG_COMPONENT_SET',
+  });
 
   const invalidScenes = entries
     .map((entry) => entry.scene)
     .filter((scene) => !expectedScenes.includes(scene));
   if (invalidScenes.length) {
-    throw new Error(
+    failVerification(
+      'CATALOG_SCENE_INVALID',
       `component catalog scene 非法: ${invalidScenes.join(', ')}`
     );
   }
@@ -381,7 +437,8 @@ export function verifyExampleShowcase(root) {
     (scene) => !entries.some((entry) => entry.scene === scene)
   );
   if (emptyScenes.length) {
-    throw new Error(
+    failVerification(
+      'CATALOG_SCENE_MAPPING',
       `component catalog scene 无主归属: ${emptyScenes.join(', ')}`
     );
   }
@@ -389,7 +446,11 @@ export function verifyExampleShowcase(root) {
     assertExactSet(
       `component catalog scene ${scene}`,
       entries.filter((entry) => entry.scene === scene).map((entry) => entry.id),
-      expectedComponentsByScene[scene]
+      expectedComponentsByScene[scene],
+      {
+        duplicateCode: 'CATALOG_SCENE_MAPPING',
+        mismatchCode: 'CATALOG_SCENE_MAPPING',
+      }
     );
   }
 
@@ -401,23 +462,39 @@ export function verifyExampleShowcase(root) {
       path.join(root, 'src/components/business/index.ts')
     ),
   ].filter(isUppercasePublicName);
-  assertExactSet('UI component runtime', uiRuntime, expectedUiComponents);
+  assertExactSet('UI component runtime', uiRuntime, expectedUiComponents, {
+    duplicateCode: 'UI_RUNTIME_DUPLICATE',
+    mismatchCode: 'UI_RUNTIME_SET',
+  });
   assertExactSet(
     'business component runtime',
     businessRuntime,
-    expectedBusinessComponents
+    expectedBusinessComponents,
+    {
+      duplicateCode: 'BUSINESS_RUNTIME_DUPLICATE',
+      mismatchCode: 'BUSINESS_RUNTIME_SET',
+    }
   );
-  assertExactSet('component catalog/public runtime', catalogIds, [
-    ...uiRuntime,
-    ...businessRuntime,
-  ]);
+  assertExactSet(
+    'component catalog/public runtime',
+    catalogIds,
+    [...uiRuntime, ...businessRuntime],
+    {
+      duplicateCode: 'CATALOG_PUBLIC_RUNTIME_DUPLICATE',
+      mismatchCode: 'CATALOG_PUBLIC_RUNTIME_SET',
+    }
+  );
 
   const runtimeApis = readStaticStrings(catalogSource, 'requiredRuntimeApis');
-  assertExactSet('required runtime API', runtimeApis, expectedRuntimeApis);
+  assertExactSet('required runtime API', runtimeApis, expectedRuntimeApis, {
+    duplicateCode: 'REQUIRED_RUNTIME_API_DUPLICATE',
+    mismatchCode: 'REQUIRED_RUNTIME_API_SET',
+  });
   const rootRuntime = collectRuntimeExports(path.join(root, 'src/index.tsx'));
   const unavailable = runtimeApis.filter((name) => !rootRuntime.has(name));
   if (unavailable.length) {
-    throw new Error(
+    failVerification(
+      'REQUIRED_RUNTIME_API_UNAVAILABLE',
       `required runtime API 未从 public barrel 导出: ${unavailable.join(', ')}`
     );
   }

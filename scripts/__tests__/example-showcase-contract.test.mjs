@@ -376,6 +376,10 @@ test('Gem/Pod locks 存在且没有被 ignore', () => {
 
 test('catalog 与 public runtime barrels 保持 exhaustive contract', () => {
   assert.equal(typeof showcaseVerifier.verifyExampleShowcase, 'function');
+  assert.equal(
+    typeof showcaseVerifier.ExampleShowcaseVerificationError,
+    'function'
+  );
   assert.doesNotThrow(() => showcaseVerifier.verifyExampleShowcase(root));
 });
 
@@ -383,6 +387,7 @@ test('catalog mutation gate 拒绝缺项、重复 id 与错误 scene', () => {
   const mutations = [
     {
       name: '缺项',
+      expectedCode: 'CATALOG_COMPONENT_SET',
       mutate(source) {
         return source.replace(
           "  {\n    id: 'Avatar',\n    scene: 'media',\n    states: ['brand/info/soft/neutral', 'xs/sm/md/lg/xl', '图片', '回退文字'],\n  },\n",
@@ -392,12 +397,14 @@ test('catalog mutation gate 拒绝缺项、重复 id 与错误 scene', () => {
     },
     {
       name: '重复 id',
+      expectedCode: 'CATALOG_COMPONENT_DUPLICATE',
       mutate(source) {
         return source.replace("    id: 'BlurLayer',", "    id: 'Avatar',");
       },
     },
     {
       name: '错误 scene',
+      expectedCode: 'CATALOG_SCENE_MAPPING',
       mutate(source) {
         return source.replace(
           "    id: 'Icon',\n    scene: 'foundation',",
@@ -409,6 +416,10 @@ test('catalog mutation gate 拒绝缺项、重复 id 与错误 scene', () => {
 
   for (const mutation of mutations) {
     withFixture(catalogContractFiles, (fixture) => {
+      assert.doesNotThrow(
+        () => showcaseVerifier.verifyExampleShowcase(fixture),
+        `${mutation.name} clean fixture 必须先完整通过`
+      );
       const catalogPath = path.join(
         fixture,
         'example/src/catalog/componentCatalog.ts'
@@ -420,8 +431,14 @@ test('catalog mutation gate 拒绝缺项、重复 id 与错误 scene', () => {
 
       assert.throws(
         () => showcaseVerifier.verifyExampleShowcase(fixture),
-        /catalog|scene|component/iu,
-        mutation.name
+        (error) => {
+          assert.ok(
+            error instanceof showcaseVerifier.ExampleShowcaseVerificationError,
+            `${mutation.name} 必须抛 typed verifier error`
+          );
+          assert.equal(error.code, mutation.expectedCode, mutation.name);
+          return true;
+        }
       );
     });
   }
