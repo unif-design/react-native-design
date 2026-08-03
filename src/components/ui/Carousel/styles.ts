@@ -8,8 +8,7 @@ export const makeCarouselStyles = (c: ColorTokens) =>
       alignItems: 'center',
       paddingTop: space['3'],
     },
-    /** 'overlay-bottom-right' 模式:absolute 浮在 Carousel 右下角,
-     *  override `justifyContent` → 'flex-end' 让 dot 群靠右。 */
+    /** 'overlay-bottom-right' 模式：用 absolute bottom/right 固定在右下角。 */
     dotsWrapOverlay: {
       position: 'absolute',
       bottom: space['3'],
