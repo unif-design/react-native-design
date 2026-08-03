@@ -131,6 +131,39 @@ test('Feedback blurIntensity 初始化与 reset 都回到 soft', () => {
   expect(reset.scenes.feedback.blurDemoEnabled).toBe(false);
 });
 
+test('Media 只持久化稳定 HTTPS fixture，Business reset 回到暖橙预设', () => {
+  const initial = createInitialShowcaseState();
+  expect(initial.scenes.media.remoteUri).toBe(
+    'https://images.example.com/unif-avatar.png'
+  );
+  expect(initial.scenes.business.backdropPreset).toBe('warmOrange');
+
+  const customizedMedia = updateShowcaseScene(initial, 'media', (current) => ({
+    ...current,
+    remoteUri: 'https://cdn.example.com/avatar.png',
+  }));
+  const customizedBusiness = updateShowcaseScene(
+    customizedMedia,
+    'business',
+    (current) => ({
+      ...current,
+      backdropPreset: 'custom',
+    })
+  );
+
+  expect(customizedBusiness.scenes.media.remoteUri).toBe(
+    'https://cdn.example.com/avatar.png'
+  );
+  expect(customizedBusiness.scenes.business.backdropPreset).toBe('custom');
+  expect(
+    resetShowcaseScene(customizedBusiness, 'media').scenes.media.remoteUri
+  ).toBe('https://images.example.com/unif-avatar.png');
+  expect(
+    resetShowcaseScene(customizedBusiness, 'business').scenes.business
+      .backdropPreset
+  ).toBe('warmOrange');
+});
+
 test('reset 只新建目标 draft 并保留 route、偏好、结果、id 与其他引用', () => {
   let state = createInitialShowcaseState();
   state = {

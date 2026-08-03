@@ -68,10 +68,11 @@ export type MediaSceneState = Readonly<{
   thumbnailSize: 'sm' | 'md' | 'lg';
   thumbnailSelected: boolean;
   logoSize: number;
+  remoteUri: string;
 }>;
 
 export type BusinessSceneState = Readonly<{
-  backdropPreset: 'warmOrange';
+  backdropPreset: 'warmOrange' | 'custom';
   versionStatus: string;
 }>;
 
@@ -154,6 +155,7 @@ const sceneStateFactories: {
     thumbnailSize: 'md',
     thumbnailSelected: false,
     logoSize: 64,
+    remoteUri: 'https://images.example.com/unif-avatar.png',
   }),
   business: () => ({
     backdropPreset: 'warmOrange',
