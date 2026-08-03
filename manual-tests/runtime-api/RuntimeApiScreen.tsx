@@ -514,7 +514,7 @@ function SelectionControlsSection(): React.JSX.Element {
  * Inspector 应验证 side outer = max(44, visual button width) × max(44, visual height)，
  * value outer = max(44, visual value width) × max(44, visual height)。sm visual 是
  * r(28)×r(28) / r(40)×r(28) / r(28)×r(28)；只有 Web / 402pt RN harness 得到
- * 28/32/40/48 基准值。
+ * 28/32/40/48 基准值。宽屏 native outer 必须包住完整 scaled visual。
  */
 function StepperSection(): React.JSX.Element {
   const [middleValue, setMiddleValue] = useState(1);
@@ -533,10 +533,14 @@ function StepperSection(): React.JSX.Element {
         sm；visual 是 r(28)×r(28) / r(40)×r(28) / r(28)×r(28)。
       </Text>
       <Text style={styles.result}>
-        用 screen reader 检查：中间值同时有增加/减少；min 只提供增加，max
-        只提供减少；min/max 无效侧按钮没有 handler。原始 min=10/max=0 折叠为
-        now=min=max=10，中央上报 disabled 且完全没有 action，左右名称均保留
-        “异常范围数量”上下文。尝试无效操作后 unexpected 必须始终为 0。
+        Web Inspector 检查中央 role=slider、aria-valuemin/max/now、disabled 与
+        tab order；键盘逐一验证 ArrowUp/Right、ArrowDown/Left、Home、End。iOS
+        分别检查过滤后的 custom actions 与标准 adjustable 手势：边界无效标准方向
+        即使派发，也必须让业务值和 unexpected 计数保持不变。min/max
+        无效侧按钮没有 handler。原始 min=10/max=0 折叠为
+        now=min=max=10，中央上报 disabled 且完全没有
+        handler，左右名称均保留“异常范围数量”上下文。不能根据源码或 Website
+        build 标记 PASS。
       </Text>
       <Row label="范围中间（md）">
         <Stepper

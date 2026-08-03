@@ -1082,7 +1082,15 @@ git commit -m "feat: model cell content and actions explicitly"
 **Files:**
 
 - Create: `src/components/ui/Stepper/normalizeStepper.ts`
+- Create: `src/components/ui/Stepper/accessibility.types.ts`
+- Create: `src/components/ui/Stepper/accessibility.ts`
+- Create: `src/components/ui/Stepper/accessibility.web.ts`
+- Create: `src/components/ui/Stepper/StepperPressable.tsx`
+- Create: `src/components/ui/Stepper/StepperPressable.web.tsx`
 - Create: `__tests__/components/ui/Stepper/normalizeStepper.test.ts`
+- Create: `__tests__/components/ui/Stepper/layout.test.ts`
+- Create: `__tests__/components/ui/Stepper/accessibility.test.ts`
+- Create: `__tests__/components/ui/Stepper/accessibility.web.test.ts`
 - Modify: `src/components/ui/Stepper/types.ts`
 - Modify: `src/components/ui/Stepper/Stepper.tsx`
 - Modify: `src/components/ui/Stepper/styles.ts`
@@ -1096,7 +1104,9 @@ git commit -m "feat: model cell content and actions explicitly"
 - Produces:
   - required `StepperProps.accessibilityLabel: string`
   - `normalizeStepper(input): NormalizedStepper`
-  - contextual increment/decrement action data.
+  - contextual increment/decrement action data
+  - native/Web central accessibility drivers
+  - platform-resolved `StepperPressable`.
 
 - [ ] **Step 1: Add pure boundary tests**
 
@@ -1174,7 +1184,17 @@ Labels are:
 `${accessibilityLabel}，减少``${accessibilityLabel}，增加`;
 ```
 
-When `rangeDisabled`, omit both `accessibilityActions` and `onAccessibilityAction`. At a boundary expose only the valid action. Invalid side buttons pass no handler.
+When `rangeDisabled`, omit both `accessibilityActions` and
+`onAccessibilityAction`. Filtered native `accessibilityActions` only describe valid custom actions;
+standard adjustable gestures may still dispatch an invalid boundary direction, which must be
+capability-guarded into a no-op before `onChange`. Invalid side buttons pass no handler.
+
+The Web central slider explicitly maps normalized state to `aria-disabled`,
+`aria-valuemin/max/now` and tab order. Its driver handles ArrowUp/Right, ArrowDown/Left, Home and
+End, prevents the default behavior for every recognized key, and only emits real value changes.
+Zero-range/external-disabled states omit native and Web handlers. Native side actions use RNGH
+`Pressable`; Web side actions use an RN core `Pressable` platform seam. All outer frames use the
+dynamic formulas above and remain at least 44pt.
 
 - [ ] **Step 6: Verify, document, and commit**
 

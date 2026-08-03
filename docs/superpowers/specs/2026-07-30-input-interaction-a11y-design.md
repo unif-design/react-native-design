@@ -330,8 +330,10 @@ actionable Cell 默认 accessible name 由 `title`、非空 `desc`、`extra.kind
 - 左右 Pressable 的内部视觉 cell 仍朝中央贴边；中央 adjustable 的 visual cell 仍居中。sm visual 是 `r(28)×r(28) / r(40)×r(28) / r(28)×r(28)`，不是物理 28 常量；只有 Web / 402pt RN harness 才得到 28/32/40/48 的基准值。
 - `StepperProps.accessibilityLabel: string` 改为必填，作为中央 adjustable 的名称；左右按钮分别组合为“`${label}，减少` / `${label}，增加`”，避免页面上多个 Stepper 都只读“增加/减少”。
 - 整体 disabled 或归一化后的 `safeMin === safeMax` 时，上报 disabled，删除 `accessibilityActions` 和 `onAccessibilityAction`；这同时覆盖原始 `min > max`、非有限边界等最终折叠为零范围的情况。
-- 到达 `min` 时只暴露仍有效的 increment action；到达 `max` 时只暴露 decrement action。
+- native custom `accessibilityActions` 只描述 normalized 后仍有效的方向；标准 adjustable 手势仍可能派发边界处的无效方向，handler 必须通过同一 capability 结果将其确定性 no-op，不能声称平台隐藏了该标准方向。
+- Web 中央 slider 显式提供 `aria-disabled`、`aria-valuemin/max/now`、tab order 与 ArrowUp/Right、ArrowDown/Left、Home、End 键盘 driver；零范围或整体 disabled 时移出 tab order 并省略键盘 handler。
 - 两侧按钮在边界处同步 disabled 并移除 handler，不能出现视觉 disabled 但 a11y action 仍可触发的状态。
+- native 两侧使用 RNGH `Pressable`，Web 两侧通过 platform seam 使用 RN core `Pressable`；三个 outer 都按动态公式覆盖完整 visual，且至少 44pt。
 
 ## 10. 其他组件
 

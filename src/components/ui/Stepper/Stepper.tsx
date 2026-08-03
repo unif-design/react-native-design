@@ -1,12 +1,13 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import { Pressable } from 'react-native-gesture-handler';
 import { pressedOpacity, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
+import { getStepperValueAccessibilityProps } from './accessibility';
 import { resolveStepperLayout } from './layout';
 import { nextStepperValue, normalizeStepper } from './normalizeStepper';
+import { StepperPressable } from './StepperPressable';
 import { makeStyles, sizingFor } from './styles';
 import type { StepperProps } from './types';
 
@@ -43,18 +44,14 @@ export function Stepper({
     step,
     disabled,
   });
-  const {
-    safeMin,
-    safeMax,
-    safeStep,
-    safeValue,
-    rangeDisabled,
-    canDecrement,
-    canIncrement,
-    accessibilityActions,
-  } = normalized;
+  const { safeMin, safeStep, safeValue, canDecrement, canIncrement } =
+    normalized;
   const decrementValue = nextStepperValue(normalized, 'decrement');
   const incrementValue = nextStepperValue(normalized, 'increment');
+  const valueAccessibilityProps = getStepperValueAccessibilityProps({
+    normalized,
+    onChange,
+  });
 
   // [L-30] step 口径对齐:非有限数(NaN/Infinity)也告警,与 min>max 告警保持一致
   // 告警也读取归一化结果,避免提示 fallback 与实际 render/action 使用不同数值。
@@ -86,7 +83,7 @@ export function Stepper({
 
   return (
     <View style={styles.wrap} testID={testID}>
-      <Pressable
+      <StepperPressable
         onPress={
           decrementValue === undefined
             ? undefined
@@ -117,31 +114,12 @@ export function Stepper({
         >
           <Text style={styles.btnText}>−</Text>
         </View>
-      </Pressable>
+      </StepperPressable>
       <View
         accessible
         accessibilityRole="adjustable"
         accessibilityLabel={accessibilityLabel}
-        accessibilityState={{ disabled: rangeDisabled }}
-        accessibilityValue={{ min: safeMin, max: safeMax, now: safeValue }}
-        accessibilityActions={rangeDisabled ? undefined : accessibilityActions}
-        onAccessibilityAction={
-          rangeDisabled
-            ? undefined
-            : (event) => {
-                if (
-                  event.nativeEvent.actionName === 'increment' &&
-                  incrementValue !== undefined
-                ) {
-                  onChange(incrementValue);
-                } else if (
-                  event.nativeEvent.actionName === 'decrement' &&
-                  decrementValue !== undefined
-                ) {
-                  onChange(decrementValue);
-                }
-              }
-        }
+        {...valueAccessibilityProps}
         style={[styles.valueFrame, layout.valueFrame]}
         testID={valueTestID}
       >
@@ -155,7 +133,7 @@ export function Stepper({
           </Text>
         </View>
       </View>
-      <Pressable
+      <StepperPressable
         onPress={
           incrementValue === undefined
             ? undefined
@@ -186,7 +164,7 @@ export function Stepper({
         >
           <Text style={styles.btnText}>+</Text>
         </View>
-      </Pressable>
+      </StepperPressable>
     </View>
   );
 }
