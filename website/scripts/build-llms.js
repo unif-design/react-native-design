@@ -5,8 +5,8 @@
  *   static/llms-full.txt   → /llms-full.txt:全站全文聚合(一次性喂大 context window)
  *   static/md/<slug>.md    → 每页纯 Markdown(llms.txt 的链接指向这些)
  *
- * MDX noise (`import ...;`, `export const ... = ...;`, `<LiveDemo>...</LiveDemo>`)
- * 被清理成纯 Markdown(`<LiveDemo>...</LiveDemo>` 内层 JSX 提取为 ```tsx 源码块,组件用法,反幻觉素材),适合喂给 LLM。
+ * MDX noise 会转换为纯 Markdown：代码示例保持原样，exported Demo 与直接
+ * `<LiveDemo>` 生成完整的 ```tsx 源码块，供 LLM 获取可执行组件用法。
  *
  * 【由 package.json 的 build/start 显式调用】(`node scripts/build-llms.js && docusaurus ...`)——
  * 不挂 prebuild/prestart 钩子,因为 yarn 4(berry)不触发 npm-style 生命周期钩子,会被跳过。
@@ -15,6 +15,11 @@
 
 const fs = require('fs');
 const path = require('path');
+const {
+  assembleMarkdown,
+  convertMdxBody,
+  parseFrontmatter,
+} = require('./llms/markdown');
 
 const root = path.join(__dirname, '..');
 const docsDir = path.join(root, 'docs');
@@ -63,7 +68,11 @@ function write(file, content) {
 function relSlug(file) {
   // 去扩展名 + 统一成 POSIX 分隔(URL / section 用);跨平台把 Windows 反斜杠也转成 /。
   // 不在这里做安全过滤 —— 写入安全统一由 safeOutPath() 用 path.resolve + 前缀校验兜底。
-  return path.relative(docsDir, file).replace(/\.(mdx?|md)$/, '').split(path.sep).join('/');
+  return path
+    .relative(docsDir, file)
+    .replace(/\.(mdx?|md)$/, '')
+    .split(path.sep)
+    .join('/');
 }
 
 // 把任意 slug(含来自 frontmatter 的 slug)解析成 outDir 内的安全写入绝对路径。
@@ -75,114 +84,6 @@ function safeOutPath(slug) {
   const resolved = path.resolve(outDir, `${slug}.md`);
   const base = path.resolve(outDir) + path.sep;
   return resolved.startsWith(base) ? resolved : null;
-}
-
-/** Pull the `slug:` / `title:` values out of a frontmatter block. */
-function parseFrontmatter(content) {
-  if (!content.startsWith('---')) return { slug: null, title: null, description: null, body: content };
-  const end = content.indexOf('\n---', 3);
-  if (end === -1) return { slug: null, title: null, description: null, body: content };
-  const block = content.slice(3, end);
-  const body = content.slice(end + 4).replace(/^\n/, '');
-  const slugM = block.match(/^\s*slug:\s*(.+)\s*$/m);
-  const titleM = block.match(/^\s*title:\s*(.+)\s*$/m);
-  const descM = block.match(/^\s*description:\s*(.+)\s*$/m);
-  const unq = s => s && s.trim().replace(/^['"]|['"]$/g, '');
-  return { slug: unq(slugM && slugM[1]), title: unq(titleM && titleM[1]), description: unq(descM && descM[1]), body };
-}
-
-/**
- * Strip MDX-specific noise from a doc body so the output is plain Markdown:
- *   - top-level `import ... from '...';` lines (single- or multi-line)
- *   - top-level `export const ... = ...;` blocks (single- or multi-line, brace-matched)
- *   - `<LiveDemo>...</LiveDemo>` blocks, replaced with a short note
- * Code fences are preserved verbatim; we never touch text inside ``` blocks.
- */
-function stripMdxNoise(src) {
-  const lines = src.split('\n');
-  const out = [];
-  let i = 0;
-  let inFence = false;
-
-  while (i < lines.length) {
-    const line = lines[i];
-
-    // Track ``` fences so we never strip from inside them.
-    if (/^\s*```/.test(line)) {
-      inFence = !inFence;
-      out.push(line);
-      i++;
-      continue;
-    }
-
-    if (inFence) {
-      out.push(line);
-      i++;
-      continue;
-    }
-
-    // Strip `import ... ;` — may span multiple lines until first `;`.
-    if (/^import\b/.test(line)) {
-      let chunk = line;
-      while (!/;\s*$/.test(chunk) && i + 1 < lines.length) {
-        i++;
-        chunk = lines[i];
-      }
-      i++;
-      continue;
-    }
-
-    // Strip `export const X = ...;` / `export const X = { ... };`
-    // — brace-match until balanced and ending `;`.
-    if (/^export\s+(const|let|var|function|default)\b/.test(line)) {
-      let depth = 0;
-      let started = false;
-      let j = i;
-      while (j < lines.length) {
-        const l = lines[j];
-        for (const ch of l) {
-          if (ch === '{' || ch === '[' || ch === '(') {
-            depth++;
-            started = true;
-          } else if (ch === '}' || ch === ']' || ch === ')') {
-            depth--;
-          }
-        }
-        if (started && depth === 0 && /[;}]\s*$/.test(l)) {
-          j++;
-          break;
-        }
-        if (!started && /;\s*$/.test(l)) {
-          j++;
-          break;
-        }
-        j++;
-      }
-      i = j;
-      continue;
-    }
-
-    // Convert `<LiveDemo>...</LiveDemo>` into a fenced ```tsx block so the
-    // component usage survives as readable source for the LLM.
-    if (/^\s*<LiveDemo[\s>]/.test(line)) {
-      let j = i + 1;
-      const inner = [];
-      while (j < lines.length && !/<\/LiveDemo>/.test(lines[j])) { inner.push(lines[j]); j++; }
-      const fence = inner.some(l => /```/.test(l)) ? '````' : '```';
-      out.push(fence + 'tsx');
-      out.push('// web demo 源码,组件用法可参考');
-      out.push(...inner);
-      out.push(fence);
-      i = j + 1;
-      continue;
-    }
-
-    out.push(line);
-    i++;
-  }
-
-  // Collapse 3+ blank lines to 2.
-  return out.join('\n').replace(/\n{3,}/g, '\n\n').replace(/^\n+/, '');
 }
 
 function main() {
@@ -211,13 +112,16 @@ function main() {
     const slug = relSlug(file);
     const raw = read(file);
     const { slug: fmSlug, title, body } = parseFrontmatter(raw);
-    const cleanBody = stripMdxNoise(body);
+    const cleanBody = convertMdxBody(
+      body,
+      path.relative(root, file).split(path.sep).join('/')
+    );
     const finalSlug = fmSlug ? fmSlug.replace(/^\/+/, '') : slug;
 
     // Single-page file: keep its frontmatter (title/description useful), strip MDX in body.
     const fmEnd = raw.startsWith('---') ? raw.indexOf('\n---', 3) + 4 : 0;
     const fmBlock = fmEnd ? raw.slice(0, fmEnd) + '\n' : '';
-    const pageOutput = `${fmBlock}\n${cleanBody}`.replace(/\n{3,}/g, '\n\n');
+    const pageOutput = assembleMarkdown([fmBlock, cleanBody]);
 
     const slugPath = safeOutPath(slug);
     if (!slugPath) {
@@ -238,36 +142,46 @@ function main() {
     tocTitles.push(title || finalSlug);
     bodyBlocks.push(`## ${title || finalSlug}`);
     bodyBlocks.push('');
-    bodyBlocks.push(`*Source: \`docs/${slug}${file.endsWith('.mdx') ? '.mdx' : '.md'}\` · Slug: \`/${finalSlug}\`*`);
+    bodyBlocks.push(
+      `*Source: \`docs/${slug}${file.endsWith('.mdx') ? '.mdx' : '.md'}\` · Slug: \`/${finalSlug}\`*`
+    );
     bodyBlocks.push('');
     bodyBlocks.push(cleanBody);
     bodyBlocks.push('');
   }
 
   // /llms-full.txt — 全文聚合(站点根,标准命名),顶部带目录
-  const llmsFull = [...head, buildToc(tocTitles), ...bodyBlocks].join('\n').replace(/\n{3,}/g, '\n\n');
+  const llmsFull = assembleMarkdown([
+    ...head,
+    buildToc(tocTitles),
+    ...bodyBlocks,
+  ]);
   write(path.join(staticDir, 'llms-full.txt'), llmsFull);
 
   // /llms.txt — 标准索引(H1 + 摘要 + 按顶层目录分节的链接列表,站点根)。
   // 链接指向每页纯 .md(供 agent 按需抓取),全文一次性喂入走 /llms-full.txt。
-  const entries = files.map(f => {
-    const slug = relSlug(f);
-    const outPath = safeOutPath(slug);
-    if (!outPath) return null; // 越界 slug 的页 md 也没写,不进索引 → 保持链接一致
-    const { slug: fmSlug, title, description } = parseFrontmatter(read(f));
-    const finalSlug = fmSlug ? fmSlug.replace(/^\/+/, '') : slug;
-    const seg = slug.split('/');
-    return {
-      title: title || finalSlug,
-      // mdPath 从规范化写入路径 outPath 反推,与实际 md 文件严格一致(不用可能含 ../ 的原始 slug)
-      mdPath: '/' + path.relative(staticDir, outPath).split(path.sep).join('/'),
-      slug: `/${finalSlug}`,
-      section: seg.length > 1 ? seg[0] : '概览',
-      description: description || null,
-    };
-  }).filter(Boolean);
+  const entries = files
+    .map((f) => {
+      const slug = relSlug(f);
+      const outPath = safeOutPath(slug);
+      if (!outPath) return null; // 越界 slug 的页 md 也没写,不进索引 → 保持链接一致
+      const { slug: fmSlug, title, description } = parseFrontmatter(read(f));
+      const finalSlug = fmSlug ? fmSlug.replace(/^\/+/, '') : slug;
+      const seg = slug.split('/');
+      return {
+        title: title || finalSlug,
+        // mdPath 从规范化写入路径 outPath 反推,与实际 md 文件严格一致(不用可能含 ../ 的原始 slug)
+        mdPath:
+          '/' + path.relative(staticDir, outPath).split(path.sep).join('/'),
+        slug: `/${finalSlug}`,
+        section: seg.length > 1 ? seg[0] : '概览',
+        description: description || null,
+      };
+    })
+    .filter(Boolean);
   const bySection = {};
-  for (const e of entries) (bySection[e.section] = bySection[e.section] || []).push(e);
+  for (const e of entries)
+    (bySection[e.section] = bySection[e.section] || []).push(e);
   const llmsLines = [
     `# ${SITE_NAME}`,
     '',
@@ -290,15 +204,26 @@ function main() {
 }
 
 function buildToc(titles) {
-  return ['## 目录', '', ...titles.map(t => `- ${t}`), ''].join('\n');
+  return ['## 目录', '', ...titles.map((t) => `- ${t}`), ''].join('\n');
 }
 function formatIndexLine(e) {
-  return e.description ? `- [${e.title}](${e.mdPath}) — ${e.description}` : `- [${e.title}](${e.mdPath})`;
+  return e.description
+    ? `- [${e.title}](${e.mdPath}) — ${e.description}`
+    : `- [${e.title}](${e.mdPath})`;
 }
 function sortSections(keys) {
-  return [...keys].sort((a, b) => (a === '概览' ? -1 : b === '概览' ? 1 : a.localeCompare(b)));
+  return [...keys].sort((a, b) =>
+    a === '概览' ? -1 : b === '概览' ? 1 : a.localeCompare(b)
+  );
 }
 
-module.exports = { parseFrontmatter, stripMdxNoise, buildToc, formatIndexLine, sortSections };
+module.exports = {
+  assembleMarkdown,
+  buildToc,
+  convertMdxBody,
+  formatIndexLine,
+  parseFrontmatter,
+  sortSections,
+};
 
 if (require.main === module) main();
