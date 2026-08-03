@@ -155,4 +155,6 @@ function DynamicLabel({ size }: { size: number }) {
 
 `normalizeFontScale(value)` 和 `scaleFontMetric(value, factor)` 都是无副作用纯函数;后者会先归一化 factor,再且仅再乘一次。不要把已经由 `useThemedStyles` 缩放过的值再次传给 `scaleFontMetric`。
 
+库内 render-time dynamic typography 已按同一规则接线：Button、Avatar、Segmented、Stepper 中央值、Tag 与 AvatarWithRing 使用原始字号调用 `scaleFontMetric` 一次；Button Icon、Avatar / AvatarWithRing 容器、Segmented track、Stepper visual 与 44pt outer、Tag 高度均保留原尺寸。其余 `styles.ts` maker 产物只由 `useThemedStyles` 统一处理，不再在组件调用点重复缩放。
+
 缺少 `ThemeProvider` 时,主题 hook 返回同一个模块级 light fallback(`lightColors` / `lightShadow` / `fontScale=1`),保证引用稳定。开发环境会在 React effect 阶段一次性记录诊断;render 期间不会写日志。

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Text } from 'react-native';
-import { useThemedStyles } from '../../../theme';
+import { scaleFontMetric, useFontScale, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { Icon } from '../Icon';
 import { normalizeNonBlankText } from '../shared/accessibilityName';
@@ -33,6 +33,7 @@ export function Button({
   accessibilityState,
 }: ButtonProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
+  const fontScale = useFontScale();
   const accessibleName = normalizeNonBlankText(label);
   const hasBlankLabel = accessibleName === undefined;
 
@@ -56,22 +57,25 @@ export function Button({
       style={style}
       testID={testID}
     >
-      {({ sizing, palette }) => (
-        <>
-          {leftIcon ? (
-            <Icon name={leftIcon} size={sizing.fs + 2} color={palette.fg} />
-          ) : null}
-          <Text
-            style={[styles.label, { color: palette.fg, fontSize: sizing.fs }]}
-            numberOfLines={1}
-          >
-            {label}
-          </Text>
-          {rightIcon ? (
-            <Icon name={rightIcon} size={sizing.fs + 2} color={palette.fg} />
-          ) : null}
-        </>
-      )}
+      {({ sizing, palette }) => {
+        const textSize = scaleFontMetric(sizing.fs, fontScale);
+        return (
+          <>
+            {leftIcon ? (
+              <Icon name={leftIcon} size={sizing.fs + 2} color={palette.fg} />
+            ) : null}
+            <Text
+              style={[styles.label, { color: palette.fg, fontSize: textSize }]}
+              numberOfLines={1}
+            >
+              {label}
+            </Text>
+            {rightIcon ? (
+              <Icon name={rightIcon} size={sizing.fs + 2} color={palette.fg} />
+            ) : null}
+          </>
+        );
+      }}
     </ButtonBase>
   );
 }

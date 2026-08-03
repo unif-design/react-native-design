@@ -1,6 +1,11 @@
 import React, { useEffect } from 'react';
 import { Text, View } from 'react-native';
-import { pressedOpacity, useThemedStyles } from '../../../theme';
+import {
+  pressedOpacity,
+  scaleFontMetric,
+  useFontScale,
+  useThemedStyles,
+} from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
@@ -36,7 +41,9 @@ export function Stepper({
   testID,
 }: StepperProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
+  const fontScale = useFontScale();
   const dims = sizingFor(size);
+  const valueFontSize = scaleFontMetric(dims.fs, fontScale);
   const layout = resolveStepperLayout(dims);
   const accessibleName = normalizeNonBlankText(accessibilityLabel);
   const hasBlankLabel = accessibleName === undefined;
@@ -154,7 +161,7 @@ export function Stepper({
           style={[styles.cell, { width: dims.w, height: dims.h }]}
           testID={childTestID(testID, 'value-visual')}
         >
-          <Text style={[styles.valueText, { fontSize: dims.fs }]}>
+          <Text style={[styles.valueText, { fontSize: valueFontSize }]}>
             {safeValue}
           </Text>
         </View>

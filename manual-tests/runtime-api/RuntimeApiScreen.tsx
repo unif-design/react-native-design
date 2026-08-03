@@ -3,6 +3,8 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import {
+  Avatar,
+  AvatarWithRing,
   Button,
   Carousel,
   Cell,
@@ -10,6 +12,7 @@ import {
   ConfirmHost,
   DrawerHeader,
   Grid,
+  Icon,
   IconButton,
   Input,
   List,
@@ -20,9 +23,11 @@ import {
   PulseDot,
   Radio,
   Search,
+  Segmented,
   Skeleton,
   Stepper,
   Switch,
+  Tag,
   Textarea,
   ThemeProvider,
   ToastHost,
@@ -251,6 +256,8 @@ export function RuntimeApiScreen(): React.JSX.Element {
                 </Text>
               </Section>
 
+              <FontScaleSection />
+
               <Section title="Toast">
                 <Button
                   label="① Host 关闭时发布(应保留到挂上再显示)"
@@ -409,6 +416,88 @@ export function RuntimeApiScreen(): React.JSX.Element {
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
+  );
+}
+
+/**
+ * fontScale:render-time dynamic metric 与 maker metric 都只缩放一次。
+ *
+ * Inspector 对比 normal / large 两组同名 testID：文字应按 1 → 1.5 放大；
+ * Button 内 Icon 和独立 20pt Icon、Avatar/AvatarWithRing 直径、Segmented
+ * track、Stepper visual/44pt outer、Tag 高度及 ruler 都必须保持同样几何。
+ */
+function FontScaleSection(): React.JSX.Element {
+  return (
+    <Section title="fontScale 1.0 / 1.5 typography">
+      <Text style={styles.result}>
+        用 Inspector 并排测量 normal / large：Button、Avatar、Segmented、
+        Stepper、Tag、AvatarWithRing 的文字应放大 1.5 倍且只放大一次。Button 内
+        Icon 与 standalone Icon 均不得放大。所有容器、padding 和圆角均保持原值；
+        Stepper 44pt outer / visual frame、Tag 高度和 ruler 几何必须不变。此区
+        真实 native/Web 测量前不得记为 PASS。
+      </Text>
+      <FontScaleSample id="normal" fontScale={1} />
+      <FontScaleSample id="large" fontScale={1.5} />
+    </Section>
+  );
+}
+
+function FontScaleSample({
+  id,
+  fontScale,
+}: {
+  id: string;
+  fontScale: number;
+}): React.JSX.Element {
+  const [segment, setSegment] = useState('first');
+  const [stepper, setStepper] = useState(1);
+
+  return (
+    <ThemeProvider fontScale={fontScale}>
+      <View style={styles.fontScaleSample} testID={`font-scale-${id}`}>
+        <Button
+          label={`Button ${fontScale}`}
+          leftIcon="check"
+          onPress={() => {}}
+          testID={`font-scale-${id}-button`}
+        />
+        <Icon
+          name="check"
+          size={20}
+          testID={`font-scale-${id}-standalone-icon`}
+        />
+        <Avatar
+          label="字"
+          size="lg"
+          variant="brand"
+          testID={`font-scale-${id}-avatar`}
+        />
+        <Segmented
+          value={segment}
+          onChange={setSegment}
+          items={[
+            { id: 'first', label: '选项一' },
+            { id: 'second', label: '选项二' },
+          ]}
+          testID={`font-scale-${id}-segmented`}
+        />
+        <Stepper
+          value={stepper}
+          onChange={setStepper}
+          min={0}
+          max={9}
+          accessibilityLabel={`fontScale ${fontScale} 数量`}
+          testID={`font-scale-${id}-stepper`}
+        />
+        <Tag label={`Tag ${fontScale}`} testID={`font-scale-${id}-tag`} />
+        <AvatarWithRing
+          label="字"
+          size={64}
+          testID={`font-scale-${id}-avatar-with-ring`}
+        />
+        <View style={styles.fontScaleRuler} testID={`font-scale-${id}-ruler`} />
+      </View>
+    </ThemeProvider>
   );
 }
 
@@ -1066,6 +1155,18 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: '600' },
   result: { fontSize: 14, flexShrink: 1 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  fontScaleSample: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 12,
+  },
+  fontScaleRuler: {
+    width: 44,
+    height: 44,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
   selectionRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   navBarFrame: { borderWidth: 1 },
   carouselSlide: {

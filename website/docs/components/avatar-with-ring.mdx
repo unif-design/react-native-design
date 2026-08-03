@@ -11,7 +11,7 @@ import { AvatarWithRing } from '@unif/react-native-design';
 
 中心字符(userName 首字)+ **品牌橙渐变内核** + 外圈 ring + 品牌橙 shadow,用于个人名片 / 头像区。比 `<Avatar>` 多一圈强调边,适合视觉重心。
 
-内核底色固定为品牌橙渐变(`#F49443 → #EB6E00`),`ringColor` 只控制外圈 ring 的颜色;label 字号约 `size * 0.40`,ring 宽度约 `size * 0.0625`(随 `size` 缩放)。
+内核底色固定为品牌橙渐变(`#F49443 → #EB6E00`),`ringColor` 只控制外圈 ring 的颜色;label 基准字号约 `size * 0.40`,ring 宽度约 `size * 0.0625`(随 `size` 缩放)。`ThemeProvider fontScale` 只缩放 label 的字号与字距；总直径、ring、内核、渐变和 shadow 均保持原几何。
 
 ## 实时预览
 
@@ -88,7 +88,8 @@ import { AvatarWithRing } from '@unif/react-native-design';
 
 | 元素 | 比例 / 取值 |
 |---|---|
-| label 字号 | `size × 0.40` |
+| label 字号 | 基准 `size × 0.40`，按 fontScale 缩放一次 |
+| label 字距 | 基准 `-0.5`，按 fontScale 缩放一次；垂直方向只由 `avatarCore` flex 居中 |
 | ring 宽度 | `size × 0.0625`(下限 2px) |
 | 内核底色 | `avatarGradient`(135° 品牌橙渐变,固定) |
 | label 色 | `c.onPrimary`(恒定) |

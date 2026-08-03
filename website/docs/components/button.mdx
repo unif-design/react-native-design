@@ -80,8 +80,8 @@ import { Button } from '@unif/react-native-design';
 | `block` | `boolean` | `false` | 仅撑满父容器交叉轴（`alignSelf: stretch`）；主轴尺寸由父容器或 `style` 决定 |
 | `disabled` | `boolean` | `false` | 禁用（opacity 0.5 + 不响应 onPress） |
 | `loading` | `boolean` | `false` | 加载态:用 `ActivityIndicator` 替代 label,自动 disabled |
-| `leftIcon` | `IconName` | — | 左侧图标,与文本同色同高 |
-| `rightIcon` | `IconName` | — | 右侧图标,与文本同色同高 |
+| `leftIcon` | `IconName` | — | 左侧图标,与文本同色；尺寸由 Button size 固定，不随 fontScale 放大 |
+| `rightIcon` | `IconName` | — | 右侧图标,与文本同色；尺寸由 Button size 固定，不随 fontScale 放大 |
 | `style` | `StyleProp<ViewStyle>` | — | 额外样式覆盖（merge 到末尾） |
 | `testID` | `string` | — | E2E / 测试定位 |
 | `accessibilityHint` | `string` | — | SR 行为说明 hint,仅在「行为不显然」时加 |
@@ -120,3 +120,7 @@ import { Button } from '@unif/react-native-design';
 | `space['2']` / `space['1']` | 静态 token | 内容 gap(`lg`/`md` 用 `'2'`,`sm` 用 `'1'`) |
 | `fw.semi` | 静态 token | 按钮文字字重（`600`） |
 | `type.body` / `type.sm` / `type.xxs` | 静态 token | 按 `size='lg'/'md'/'sm'` 对应字号 |
+
+## fontScale
+
+`ThemeProvider fontScale` 只把 Button label 字号缩放一次。Button 高度、水平 padding、gap、圆角和左右 Icon 尺寸仍由原始 `size` token 决定，不随字号档位改变。例如 `fontScale={1.5}` 会放大文字，但 `md` 仍保持 `control.md` 的原有几何，Icon 仍使用未缩放的 `type.sm + 2`。

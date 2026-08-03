@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Image, Text, View } from 'react-native';
-import { useColors } from '../../../theme';
+import { scaleFontMetric, useColors, useFontScale } from '../../../theme';
 import { paletteFor, sizingFor, styles } from './styles';
 import type { AvatarProps } from './types';
 
@@ -19,6 +19,7 @@ export function Avatar({
   testID,
 }: AvatarProps): React.JSX.Element {
   const c = useColors();
+  const fontScale = useFontScale();
   const [imageFailed, setImageFailed] = useState(false);
 
   // [M-20] React 18+ 已移除 unmount 后 setState 的 warning,mountedRef 守卫为死码,删除。
@@ -37,6 +38,7 @@ export function Avatar({
   };
   const dims = sizingFor(size);
   const palette = paletteFor(variant, c);
+  const labelFontSize = scaleFontMetric(dims.fs, fontScale);
 
   const showImage = source != null && !imageFailed;
 
@@ -65,7 +67,7 @@ export function Avatar({
         />
       ) : (
         <Text
-          style={[styles.label, { fontSize: dims.fs, color: palette.fg }]}
+          style={[styles.label, { fontSize: labelFontSize, color: palette.fg }]}
           numberOfLines={1}
         >
           {label}

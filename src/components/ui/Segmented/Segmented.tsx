@@ -1,7 +1,13 @@
 import React, { useMemo } from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { fw, useTheme, useThemedStyles } from '../../../theme';
+import {
+  fw,
+  scaleFontMetric,
+  useFontScale,
+  useTheme,
+  useThemedStyles,
+} from '../../../theme';
 import { childTestID } from '../../../utils/testID';
 import { makeStyles, sizingFor } from './styles';
 import type { SegmentedProps } from './types';
@@ -24,7 +30,9 @@ export function Segmented({
 }: SegmentedProps): React.JSX.Element {
   const { colors: c, scheme, shadow } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const fontScale = useFontScale();
   const sizing = useMemo(() => sizingFor(size), [size]);
+  const textSize = scaleFontMetric(sizing.fs, fontScale);
   const activeBg = scheme === 'dark' ? c.surfaceContainerHighest : c.surface;
   const activeShadow = scheme === 'dark' ? null : shadow.subtle;
 
@@ -55,7 +63,7 @@ export function Segmented({
           >
             <Text
               style={{
-                fontSize: sizing.fs,
+                fontSize: textSize,
                 color: on ? c.foreground : c.foregroundSubtle,
                 fontWeight: on ? fw.semi : fw.medium,
               }}

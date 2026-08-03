@@ -1,5 +1,5 @@
 import { Text, View } from 'react-native';
-import { useColors } from '../../../theme';
+import { scaleFontMetric, useColors, useFontScale } from '../../../theme';
 import { paletteFor, sizingFor, styles } from './styles';
 import type { TagProps } from './types';
 
@@ -12,6 +12,7 @@ export function Tag({
   testID,
 }: TagProps) {
   const c = useColors();
+  const fontScale = useFontScale();
   const palette = paletteFor(variant, c);
   const sizing = sizingFor(size);
 
@@ -22,7 +23,10 @@ export function Tag({
     borderColor: palette.border ?? 'transparent',
     borderWidth: palette.border ? 1 : 0,
   };
-  const dynamicTextStyle = { color: palette.fg, fontSize: sizing.fs };
+  const dynamicTextStyle = {
+    color: palette.fg,
+    fontSize: scaleFontMetric(sizing.fs, fontScale),
+  };
 
   return (
     <View style={[styles.base, dynamicStyle, style]} testID={testID}>
