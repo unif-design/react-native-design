@@ -8,9 +8,12 @@ import {
   Cell,
   Checkbox,
   ConfirmHost,
+  DrawerHeader,
+  Grid,
   IconButton,
   Input,
   List,
+  Logo,
   NavBar,
   PasswordInput,
   Pulse,
@@ -23,6 +26,7 @@ import {
   Textarea,
   ThemeProvider,
   ToastHost,
+  VersionPill,
   confirm,
   toast,
   useColors,
@@ -316,6 +320,8 @@ export function RuntimeApiScreen(): React.JSX.Element {
 
               <CellSection />
 
+              <DisplaySemanticsSection />
+
               <CarouselSection />
 
               <PulseSection />
@@ -330,6 +336,75 @@ export function RuntimeApiScreen(): React.JSX.Element {
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
+  );
+}
+
+const DISPLAY_LOGO_SOURCE = {
+  uri: 'https://reactnative.dev/img/tiny_logo.png',
+} as const;
+
+/**
+ * Logo / Grid / DrawerHeader / VersionPill 展示语义。
+ *
+ * 这里只提供真实节点与 action 计数；每个焦点、名称和隐藏子树必须在 native/Web
+ * harness 逐项人工核验。
+ */
+function DisplaySemanticsSection(): React.JSX.Element {
+  const [gridPresses, setGridPresses] = useState(0);
+  const gridItems = [
+    { id: 'messages', icon: 'mail', label: '消息', badge: 0 },
+  ] as const;
+
+  return (
+    <Section title="Logo / Grid / DrawerHeader / VersionPill display a11y">
+      <Text style={styles.result}>
+        用 Inspector / screen reader 核对：logo-decorative 完整隐藏； logo-named
+        是 role=image、名称“Unif”；logo-blank 同样隐藏且每个实例只在 effect
+        后输出一次 dev 诊断。grid-display 是无 button role 的展示节点，
+        grid-action 是 button，两者名称均为“消息，0”，badge 视觉子树不产生第二
+        焦点。drawer-header-avatar 的整个头像容器隐藏，名称/副标题仍自然可读。
+        version-pill-default 名称为“版本 1.0.0，正常”，version-pill-custom
+        名称为“版本 2.0.0，build
+        12，测试中”，且状态文字可见、子节点不形成重复焦点。
+      </Text>
+      <View style={styles.row}>
+        <Logo source={DISPLAY_LOGO_SOURCE} testID="logo-decorative" size={40} />
+        <Logo
+          source={DISPLAY_LOGO_SOURCE}
+          accessibilityLabel="Unif"
+          testID="logo-named"
+          size={40}
+        />
+        <Logo
+          source={DISPLAY_LOGO_SOURCE}
+          accessibilityLabel="  "
+          testID="logo-blank"
+          size={40}
+        />
+      </View>
+      <Grid items={[...gridItems]} columns={1} testID="grid-display" />
+      <Grid
+        items={[...gridItems]}
+        columns={1}
+        onPress={() => setGridPresses((count) => count + 1)}
+        testID="grid-action"
+      />
+      <Result label="Grid action presses" value={String(gridPresses)} />
+      <DrawerHeader
+        name="张三"
+        subtitle="华东团队"
+        testID="drawer-header-avatar"
+      />
+      <View style={styles.row}>
+        <VersionPill version="1.0.0" testID="version-pill-default" />
+        <VersionPill
+          version="2.0.0"
+          build="12"
+          status={{ label: '测试中' }}
+          testID="version-pill-custom"
+        />
+      </View>
+    </Section>
   );
 }
 

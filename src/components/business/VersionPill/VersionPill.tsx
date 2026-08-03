@@ -1,6 +1,8 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { useColors, useThemedStyles } from '../../../theme';
+import { A11Y_HIDDEN_PROPS } from '../../ui/shared/a11y';
+import { buildVersionPillLabel, resolveVersionStatus } from './content';
 import { makeVersionPillStyles } from './styles';
 import type { VersionPillProps } from './types';
 
@@ -8,7 +10,7 @@ import type { VersionPillProps } from './types';
 export function VersionPill({
   version,
   build,
-  statusColor,
+  status,
   versionPrefix = '版本 ',
   buildPrefix = 'build ',
   style,
@@ -16,13 +18,17 @@ export function VersionPill({
 }: VersionPillProps): React.JSX.Element {
   const c = useColors();
   const styles = useThemedStyles(makeVersionPillStyles);
-  const dotColor = statusColor ?? c.success;
+  const resolvedStatus = resolveVersionStatus(status, c);
   // build 的「省略」契约:undefined / null / "" 均视为空;字符串 "0" 不省略。
   const hasBuild = build != null && build !== '';
-  // 状态点用颜色传达语义,SR 无法感知;整个 pill 作为分组提供无障碍合并读出。
-  const a11yLabel = hasBuild
-    ? `${versionPrefix}${version},${buildPrefix}${build}`
-    : `${versionPrefix}${version}`;
+  // 可见状态补齐颜色之外的语义；外层仍负责把全部片段合并成单一读屏名称。
+  const a11yLabel = buildVersionPillLabel({
+    version,
+    build,
+    statusLabel: resolvedStatus.label,
+    versionPrefix,
+    buildPrefix,
+  });
   return (
     <View
       accessible
@@ -32,33 +38,23 @@ export function VersionPill({
     >
       {/* 状态点仅颜色通道,屏幕阅读器由外层容器统一朗读,此处隐藏 */}
       <View
-        style={[styles.dot, { backgroundColor: dotColor }]}
-        accessibilityElementsHidden
-        importantForAccessibility="no"
+        {...A11Y_HIDDEN_PROPS}
+        style={[styles.dot, { backgroundColor: resolvedStatus.color }]}
       />
-      <Text
-        style={styles.version}
-        accessibilityElementsHidden
-        importantForAccessibility="no"
-      >
+      <Text {...A11Y_HIDDEN_PROPS} style={styles.status}>
+        {resolvedStatus.label}
+      </Text>
+      <Text {...A11Y_HIDDEN_PROPS} style={styles.version}>
         {versionPrefix}
         {version}
       </Text>
       {hasBuild ? (
         <>
           {/* 分隔符「·」无语义,隐藏于无障碍树 */}
-          <Text
-            style={styles.sep}
-            accessibilityElementsHidden
-            importantForAccessibility="no"
-          >
+          <Text {...A11Y_HIDDEN_PROPS} style={styles.sep}>
             ·
           </Text>
-          <Text
-            style={styles.build}
-            accessibilityElementsHidden
-            importantForAccessibility="no"
-          >
+          <Text {...A11Y_HIDDEN_PROPS} style={styles.build}>
             {buildPrefix}
             {build}
           </Text>

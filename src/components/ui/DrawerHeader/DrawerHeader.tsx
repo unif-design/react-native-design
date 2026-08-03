@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Image, Text, View } from 'react-native';
 import { useThemedStyles } from '../../../theme';
+import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { makeStyles } from './styles';
 import type { DrawerHeaderProps } from './types';
 
@@ -36,15 +37,16 @@ export function DrawerHeader({
   const showImage = source != null && !imageFailed;
   return (
     <View style={[styles.header, style]} testID={testID}>
-      <View style={[styles.avatar, showImage && styles.avatarImageMode]}>
+      <View
+        {...A11Y_HIDDEN_PROPS}
+        style={[styles.avatar, showImage && styles.avatarImageMode]}
+      >
         {showImage ? (
           <Image
             source={source}
             onError={handleImageError}
             style={styles.avatarImage}
             resizeMode="cover"
-            accessible={!!name}
-            accessibilityLabel={name}
           />
         ) : (
           <Text style={styles.avatarText}>{initial}</Text>

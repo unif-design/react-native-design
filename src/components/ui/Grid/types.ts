@@ -5,6 +5,8 @@ export type GridItem = {
   id: string;
   icon: IconName;
   label: string;
+  /** 覆盖单格的可访问名称；空白值回退到 label + 可选 badge。 */
+  accessibilityLabel?: string;
   /** 图标右上角的数字角标（用 string 才能写 '99+'） */
   badge?: number | string;
   /** 单 cell 测试定位（不传则自动用 `${gridTestID}-${id}`） */

@@ -28,6 +28,10 @@ export const makeVersionPillStyles = (c: ColorTokens) =>
       height: r(5),
       borderRadius: radius.pill,
     },
+    status: {
+      fontSize: type.microPlus,
+      color: c.foregroundMuted,
+    },
     version: {
       fontSize: type.microPlus,
       color: c.foregroundMuted,

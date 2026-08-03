@@ -17,6 +17,7 @@ import {
   Checkbox,
   IconButton,
   Input,
+  Logo,
   NavBar,
   PasswordInput,
   Radio,
@@ -24,6 +25,7 @@ import {
   Stepper,
   Switch,
   Textarea,
+  VersionPill,
   type CellExtra,
   type CellLeading,
   type CellProps,
@@ -32,12 +34,14 @@ import {
   type NavBarAction,
   type NavBarSlot,
   type TextFieldHandle,
+  type VersionStatus,
 } from '../src';
 
 const setText = (_value: string) => {};
 const noop = () => {};
 const inputRef = createRef<TextFieldHandle>();
 const tooShortContainer = { height: 20 };
+const logoSource = { uri: 'https://example.test/logo.png' } as const;
 
 // --- Button / IconButton / NavBar:所有操作必须显式可达 --------------------
 
@@ -106,6 +110,18 @@ const navBarDisplaySlot: NavBarSlot = <Text>只读</Text>;
 // @ts-expect-error adjustable 必须有上下文名称
 <Stepper value={1} onChange={noop} />;
 <Stepper value={1} onChange={noop} accessibilityLabel="商品数量" />;
+
+// --- Logo / VersionPill:展示内容显式命名 ---------------------------------
+
+<Logo source={logoSource} accessibilityLabel="Unif" />;
+<Logo source={logoSource} />;
+// @ts-expect-error label alias removed
+<Logo source={logoSource} label="Unif" />;
+
+const publicVersionStatus: VersionStatus = { label: '测试中' };
+<VersionPill version="1.0.0" status={publicVersionStatus} />;
+// @ts-expect-error color-only status removed
+<VersionPill version="1.0.0" statusColor="red" />;
 
 // --- Cell:文本 / 展示 / control 三分联合 -------------------------------
 

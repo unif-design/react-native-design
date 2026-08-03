@@ -24,4 +24,4 @@ export { AvatarWithRing } from './AvatarWithRing';
 export type { AvatarWithRingProps } from './AvatarWithRing';
 
 export { VersionPill } from './VersionPill';
-export type { VersionPillProps } from './VersionPill';
+export type { VersionPillProps, VersionStatus } from './VersionPill';

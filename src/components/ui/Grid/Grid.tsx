@@ -5,6 +5,8 @@ import { pressedOpacity, r, useColors, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
 import { Icon } from '../Icon';
+import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
+import { gridItemAccessibilityLabel } from './accessibility';
 import { colWidth, makeStyles } from './styles';
 import type { GridProps } from './types';
 
@@ -39,13 +41,14 @@ export function Grid({
       <View style={styles.inner}>
         {items.map((item) => {
           const itemTestID = childTestID(testID, item.id, item.testID);
+          const accessibilityLabel = gridItemAccessibilityLabel(item);
           const cellContent = (
             <>
               <View>
                 {/* 28pt 介于 icon.md(26) / icon.lg(30) 之间的设计稿专定字形尺寸 */}
                 <Icon name={item.icon} size={r(28)} color={c.foregroundMuted} />
                 {item.badge != null ? (
-                  <View style={styles.badge}>
+                  <View {...A11Y_HIDDEN_PROPS} style={styles.badge}>
                     <Text style={styles.badgeText}>{item.badge}</Text>
                   </View>
                 ) : null}
@@ -62,7 +65,7 @@ export function Grid({
                 <Pressable
                   onPress={() => onPress(item)}
                   accessibilityRole="button"
-                  accessibilityLabel={item.label}
+                  accessibilityLabel={accessibilityLabel}
                   testID={itemTestID}
                   style={({ pressed }) => [
                     styles.cell,
@@ -72,7 +75,12 @@ export function Grid({
                   {cellContent}
                 </Pressable>
               ) : (
-                <View style={styles.cell} testID={itemTestID}>
+                <View
+                  accessible
+                  accessibilityLabel={accessibilityLabel}
+                  style={styles.cell}
+                  testID={itemTestID}
+                >
                   {cellContent}
                 </View>
               )}
