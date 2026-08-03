@@ -14,6 +14,7 @@ import os from 'node:os';
 import { test } from 'node:test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import * as showcaseVerifier from '../verify-example-showcase.mjs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(testDir, '../..');
@@ -91,6 +92,19 @@ const expectedTemplateDevDependencies = {
   '@react-native/metro-config': '0.86.2',
   '@react-native/typescript-config': '0.86.2',
 };
+
+const catalogContractFiles = [
+  'example/src/catalog/componentCatalog.ts',
+  'src/index.tsx',
+  'src/components/ui/index.ts',
+  'src/components/business/index.ts',
+  'src/theme/index.ts',
+  'src/icons/index.ts',
+  'src/icons/types.ts',
+  'src/icons/data.ts',
+  'src/utils/testID/index.ts',
+  'src/utils/logger/index.ts',
+];
 
 function plistArray(plist, key) {
   const match = plist.match(
@@ -357,6 +371,59 @@ test('Gem/Pod locks 存在且没有被 ignore', () => {
       1,
       `${relativePath} 不得被 .gitignore 排除`
     );
+  }
+});
+
+test('catalog 与 public runtime barrels 保持 exhaustive contract', () => {
+  assert.equal(typeof showcaseVerifier.verifyExampleShowcase, 'function');
+  assert.doesNotThrow(() => showcaseVerifier.verifyExampleShowcase(root));
+});
+
+test('catalog mutation gate 拒绝缺项、重复 id 与错误 scene', () => {
+  const mutations = [
+    {
+      name: '缺项',
+      mutate(source) {
+        return source.replace(
+          "  {\n    id: 'Avatar',\n    scene: 'media',\n    states: ['brand/info/soft/neutral', 'xs/sm/md/lg/xl', '图片', '回退文字'],\n  },\n",
+          ''
+        );
+      },
+    },
+    {
+      name: '重复 id',
+      mutate(source) {
+        return source.replace("    id: 'BlurLayer',", "    id: 'Avatar',");
+      },
+    },
+    {
+      name: '错误 scene',
+      mutate(source) {
+        return source.replace(
+          "    id: 'Icon',\n    scene: 'foundation',",
+          "    id: 'Icon',\n    scene: 'actions',"
+        );
+      },
+    },
+  ];
+
+  for (const mutation of mutations) {
+    withFixture(catalogContractFiles, (fixture) => {
+      const catalogPath = path.join(
+        fixture,
+        'example/src/catalog/componentCatalog.ts'
+      );
+      const source = readFileSync(catalogPath, 'utf8');
+      const mutated = mutation.mutate(source);
+      assert.notEqual(mutated, source, `${mutation.name} fixture 未发生变化`);
+      writeFileSync(catalogPath, mutated);
+
+      assert.throws(
+        () => showcaseVerifier.verifyExampleShowcase(fixture),
+        /catalog|scene|component/iu,
+        mutation.name
+      );
+    });
   }
 });
 
