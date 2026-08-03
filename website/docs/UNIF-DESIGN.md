@@ -326,7 +326,8 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 按设计系统分组。**本包(`@unif/react-native-design`)实现 38 个 ui 原子 + 4 个通用业务复合组件**;聊天 / IM 组件(Message / PromptInput 等)是同一套设计语言,但代码在 portal 仓库,这里只描述其视觉契约。
 
 ### 品牌
-- **Logo** —— `<Image>` 包装容器,接 `source` prop(母版 mark 由消费者提供)。
+- **Logo** —— `<Image>` 包装容器,接 `source` prop(母版 mark 由消费者提供)；缺省 /
+  blank `accessibilityLabel` 时是装饰图片，trim 后非空时才是 named image。
 - **Icon** —— 24×24 描边 SVG 目录。
 
 ### 通用
@@ -364,7 +365,8 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 ### 数据展示
 - **Cell · List** —— 列表行 + List 容器,两模式互斥:**grouped**(默认,白卡 + 8px gap,无 cell 间分隔线)/ **flush**(`<List flush />`,透明底 + cell 间 hairline)。
 - **Card** —— 内容卡。variant `default`(白底 + card shadow + 边框)/ `plain`(仅白底,无阴影无边框);`flat` 已 deprecated 等价 `plain`。
-- **Grid** —— 九宫格图标网格。
+- **Grid** —— 九宫格图标网格；只有传 `onPress` 才是 action，默认 accessible
+  name 包含 `badge != null` 的角标（包括 `0`）。
 - **Carousel** —— 轮播(包装 reanimated-carousel v5)。
 
 ### 其他 ui
@@ -377,7 +379,8 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 - **AvatarWithRing** —— 圆形头像 + ring + 品牌 shadow。
 - **GlassStats** —— 玻璃数据条(BlurView + N 列)。
 - **Decorations** —— `GradientWash`(线性渐变)+ `RadialHalo`(径向柔光)+ `ScreenBackdrop`(整屏沉浸渐变,`preset="warmOrange"` + 暗色自适配),纯装饰层 `pointerEvents="none"`。
-- **VersionPill** —— 版本号药丸。
+- **VersionPill** —— 带可见 `VersionStatus { label, color? }` 的版本号药丸；
+  状态文案必需，不能只传颜色。
 
 ### 聊天(设计语言,代码在 portal)
 Message(非对称圆角气泡)· PromptInput(4 态)· Attachments · Suggestion · Sources · Citation · Reasoning(`思考中…` → `已思考 N.Ns`)· ChainOfThought · Task · Tool · Confirmation(**内联**,绝不模态)· Shimmer · DayDivider。Conversation = 完整线程,由 chat 与 ui 原子组合而成。
@@ -522,8 +525,14 @@ toast.error('网络异常，请重试');
 ```tsx
 // React Native
 import { Logo } from '@unif/react-native-design';
-<Logo source={require('@/assets/logo.png')} size={64} label="Unif" />
+const source = require('@/assets/logo.png');
+
+<Logo source={source} size={64} /> // 缺省 accessibilityLabel：装饰图片
+<Logo source={source} size={64} accessibilityLabel="Unif" /> // named image
 ```
+
+`accessibilityLabel` 会先 trim。缺省或空白值把 Logo 完整移出 a11y tree；只有 trim
+后非空的值才启用 `accessible`、`role="image"` 和对应名称。
 
 文档站的 navbar / OG / favicon 三槽都指向 `website/static/img/logo.png` 这一份(`docusaurus.config.ts`)。母版是 `#EB6E00` 橙底的品牌标识,**不要重绘 / 替换 / 重新着色 / 加阴影滤镜**;最小尺寸 24×24。
 

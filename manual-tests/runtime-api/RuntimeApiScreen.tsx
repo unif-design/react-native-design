@@ -339,8 +339,8 @@ export function RuntimeApiScreen(): React.JSX.Element {
   );
 }
 
-const DISPLAY_LOGO_SOURCE = {
-  uri: 'https://reactnative.dev/img/tiny_logo.png',
+const DISPLAY_IMAGE_SOURCE = {
+  uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl0hZIAAAAASUVORK5CYII=',
 } as const;
 
 /**
@@ -359,26 +359,38 @@ function DisplaySemanticsSection(): React.JSX.Element {
     <Section title="Logo / Grid / DrawerHeader / VersionPill display a11y">
       <Text style={styles.result}>
         用 Inspector / screen reader 核对：logo-decorative 完整隐藏； logo-named
-        是 role=image、名称“Unif”；logo-blank 同样隐藏且每个实例只在 effect
-        后输出一次 dev 诊断。grid-display 是无 button role 的展示节点，
-        grid-action 是 button，两者名称均为“消息，0”，badge 视觉子树不产生第二
-        焦点。drawer-header-avatar 的整个头像容器隐藏，名称/副标题仍自然可读。
-        version-pill-default 名称为“版本 1.0.0，正常”，version-pill-custom
-        名称为“版本 2.0.0，build
+        是 role=image、名称“Unif”；logo-blank-a / logo-blank-b 同样隐藏，两个
+        实例各自在首个 effect 输出一次 dev 诊断。点击 grid-action 会重渲染本
+        section，两个 blank Logo 均不得重复诊断。grid-display 是无 button role
+        的展示节点，grid-action 是 button，两者名称均为“消息，0”，badge
+        视觉子树不产生第二焦点。drawer-header-image 与 drawer-header-fallback
+        分别稳定提供 source Image / fallback initial
+        分支；两者整个头像容器都隐藏，名称/副标题仍自然可读。version-pill-default
+        名称为“版本 1.0.0，正常”，version-pill-custom 名称为“版本 2.0.0，build
         12，测试中”，且状态文字可见、子节点不形成重复焦点。
       </Text>
       <View style={styles.row}>
-        <Logo source={DISPLAY_LOGO_SOURCE} testID="logo-decorative" size={40} />
         <Logo
-          source={DISPLAY_LOGO_SOURCE}
+          source={DISPLAY_IMAGE_SOURCE}
+          testID="logo-decorative"
+          size={40}
+        />
+        <Logo
+          source={DISPLAY_IMAGE_SOURCE}
           accessibilityLabel="Unif"
           testID="logo-named"
           size={40}
         />
         <Logo
-          source={DISPLAY_LOGO_SOURCE}
+          source={DISPLAY_IMAGE_SOURCE}
           accessibilityLabel="  "
-          testID="logo-blank"
+          testID="logo-blank-a"
+          size={40}
+        />
+        <Logo
+          source={DISPLAY_IMAGE_SOURCE}
+          accessibilityLabel={'\t'}
+          testID="logo-blank-b"
           size={40}
         />
       </View>
@@ -393,7 +405,13 @@ function DisplaySemanticsSection(): React.JSX.Element {
       <DrawerHeader
         name="张三"
         subtitle="华东团队"
-        testID="drawer-header-avatar"
+        source={DISPLAY_IMAGE_SOURCE}
+        testID="drawer-header-image"
+      />
+      <DrawerHeader
+        name="李四"
+        subtitle="华南团队"
+        testID="drawer-header-fallback"
       />
       <View style={styles.row}>
         <VersionPill version="1.0.0" testID="version-pill-default" />

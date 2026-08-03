@@ -17,6 +17,18 @@ describe('VersionPill content', () => {
     });
   });
 
+  test('caller 显式 color 原样保留', () => {
+    expect(
+      resolveVersionStatus(
+        { label: '已废', color: lightColors.error },
+        lightColors
+      )
+    ).toEqual({
+      label: '已废',
+      color: lightColors.error,
+    });
+  });
+
   test('组合名称含 version、build 和 status', () => {
     expect(
       buildVersionPillLabel({

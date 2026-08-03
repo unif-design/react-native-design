@@ -8,6 +8,10 @@ describe('gridItemAccessibilityLabel', () => {
     );
   });
 
+  test('badge 缺省时只返回 label', () => {
+    expect(gridItemAccessibilityLabel({ label: '设置' })).toBe('设置');
+  });
+
   test('非空显式名称优先于默认名称', () => {
     expect(
       gridItemAccessibilityLabel({
