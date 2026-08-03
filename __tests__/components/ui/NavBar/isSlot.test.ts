@@ -16,6 +16,16 @@ function expectTextNode(node: React.ReactNode, value: string): void {
   expect(node.props).toMatchObject({ children: value });
 }
 
+function expectTextNodeKey(
+  node: React.ReactNode,
+  value: string,
+  key: string
+): void {
+  expectTextNode(node, value);
+  if (!React.isValidElement(node)) return;
+  expect(node.key).toBe(key);
+}
+
 // RN 不公开 portal creator；此 fixture 仅用 React 的公开 Children 行为刻画 portal
 // 边界，production 不读取 `$$typeof` 或 renderer internals。
 const portal = {
@@ -111,6 +121,44 @@ describe('NavBar slot classification', () => {
       expectTextNode(iterable[0], 'generator');
       expectTextNode(iterable[1], '2');
     }
+  });
+
+  test('keeps primitive wrapper keys stable across repeated normalization', () => {
+    const first = classifyNavBarSlot([0, ['nested', 1n]]);
+    const second = classifyNavBarSlot([0, ['nested', 1n]]);
+
+    for (const result of [first, second]) {
+      expect(result.kind).toBe('node');
+      if (result.kind !== 'node' || !Array.isArray(result.node)) continue;
+      expectTextNodeKey(result.node[0], '0', 'slot.0');
+      const nested = result.node[1];
+      expect(Array.isArray(nested)).toBe(true);
+      if (!Array.isArray(nested)) continue;
+      expectTextNodeKey(nested[0], 'nested', 'slot.1.0');
+      expectTextNodeKey(nested[1], '1', 'slot.1.1');
+    }
+  });
+
+  test('assigns unique path keys to nested primitive siblings', () => {
+    const result = classifyNavBarSlot([
+      ['left', 'right'],
+      ['left', 'right'],
+    ]);
+
+    expect(result.kind).toBe('node');
+    if (result.kind !== 'node' || !Array.isArray(result.node)) return;
+    const first = result.node[0];
+    const second = result.node[1];
+    expect(Array.isArray(first)).toBe(true);
+    expect(Array.isArray(second)).toBe(true);
+    if (!Array.isArray(first) || !Array.isArray(second)) return;
+
+    const nodes = [...first, ...second];
+    const keys = nodes.map((node) =>
+      React.isValidElement(node) ? node.key : null
+    );
+    expect(keys).toEqual(['slot.0.0', 'slot.0.1', 'slot.1.0', 'slot.1.1']);
+    expect(new Set(keys).size).toBe(keys.length);
   });
 
   test('treats only React intrinsic non-render values as empty', () => {

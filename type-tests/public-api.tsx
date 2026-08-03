@@ -31,6 +31,7 @@ import {
   type CellProps,
   type CellTextValue,
   type CarouselProps,
+  type InputProps,
   type NavBarAction,
   type NavBarSlot,
   type TextFieldHandle,
@@ -187,6 +188,7 @@ const actionableDisplayCellProps = {
 
 <Input value="ok" onChangeText={setText} />;
 <Input defaultValue="seed" />;
+<Input value={undefined} defaultValue="seed" onChangeText={setText} />;
 <Input ref={inputRef} defaultValue="seed" />;
 <Input
   defaultValue=""
@@ -196,6 +198,12 @@ const actionableDisplayCellProps = {
 />;
 <Textarea value="ok" onChangeText={setText} />;
 <Textarea defaultValue="seed" minHeight={120} maxHeight={200} />;
+<Textarea
+  value={undefined}
+  defaultValue="seed"
+  onChangeText={setText}
+  minHeight={120}
+/>;
 inputRef.current?.focus();
 inputRef.current?.blur();
 
@@ -209,6 +217,19 @@ inputRef.current?.blur();
 <Textarea value="x" defaultValue="y" onChangeText={setText} />;
 // @ts-expect-error readOnly 已删除，使用 editable={false}
 <Input readOnly />;
+<Input
+  defaultValue=""
+  {...({
+    // @ts-expect-error aria-disabled 已删除，使用 disabled / accessibilityState
+    'aria-disabled': true,
+  } satisfies InputProps)}
+/>;
+// @ts-expect-error role 已删除，使用 accessibilityRole
+<Textarea role="textbox" />;
+// @ts-expect-error enterKeyHint 已删除，使用 returnKeyType
+<Search enterKeyHint="search" />;
+// @ts-expect-error clearTextOnFocus 已删除，由受控值状态管理
+<Input clearTextOnFocus />;
 // @ts-expect-error 原生 clear 不能从公开 handle 取得
 inputRef.current?.clear();
 // @ts-expect-error 原生 setNativeProps 不能从公开 handle 取得
@@ -241,6 +262,12 @@ inputRef.current?.setNativeProps({ text: 'bypass' });
 
 <Search defaultValue="seed" onSubmit={setText} />;
 <Search value="query" onChangeText={setText} />;
+<Search
+  value={undefined}
+  defaultValue="seed"
+  onChangeText={setText}
+  onSubmit={setText}
+/>;
 // @ts-expect-error controlled Search 必须有 updater
 <Search value="query" />;
 // @ts-expect-error Search 的 value/defaultValue 互斥
