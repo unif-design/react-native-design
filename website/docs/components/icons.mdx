@@ -10,7 +10,7 @@ import IconCatalog from '@site/src/components/IconCatalog';
 
 手绘 24×24 描边 SVG。所有图标遵守同一组绘制规则。**无 icon font、无 Unicode 承载 UI、无装饰 emoji。**
 
-按业务语义分 15 类堆栈展示,顶部搜索框 `⌘K` 聚焦,点击 cell 复制图标语义名。
+目录以 `ICON_NAMES` 为完整源清单：手工语义类别按顺序展示，任何尚未归类的合法图标自动进入末尾“未分类”。顶部搜索框 `⌘K` 聚焦，点击 cell 复制图标语义名。
 
 <IconCatalog />
 
@@ -74,11 +74,13 @@ function Demo() {
 3. 运行 `yarn check:icons`。该命令在两个独立临时目录调用真实生成器，并逐字节比较两份临时结果与已提交的 `src/icons/data.ts`；它不会改工作区
 4. 文档站走的 `website/src/components/iconsCatalog.ts` 是从 `@unif/react-native-design` barrel re-export 的薄壳（`ICONS` / `ICON_NAMES` / `IconName`），自动同步，无需再生成
 5. `IconName` TypeScript 字面量类型自动包含新名字，IDE 立即给出补全
-6. 若新图标属于某个语义类别，把它加进 `website/src/components/IconCatalog.tsx` 的 `CATEGORIES` 数组对应组里；若它是某个 appId 的图标，补 `APP_MAPPINGS`
+6. 若新图标属于某个语义类别，把它加进 `website/src/components/IconCatalog.tsx` 的 `MANUAL_CATEGORIES` 对应组；未手工归类时仍会自动显示在“未分类”。分类中出现未知名或重复名会让 Website build 立即失败
 
 ## 实现细节
 
 `src/components/ui/Icon/Icon.tsx` 用 `react-native-svg` 渲染——`<Svg>` + `<Path>` / `<Circle>` / `<Rect>`，路径数据来自 `src/icons/data.ts`。`color` prop 传给 `stroke`，`strokeWidth` 走每图标默认值或可覆盖。
+
+Website 的总数直接取 `ICON_NAMES.length`，搜索遍历完整计算分类。预览渲染会把每个 shape 的 `fill`、`stroke`、`opacity` 原样映射到 SVG，确保实心图元和半透明笔画与 RN `<Icon>` 一致。
 
 ```tsx
 // 摘录
