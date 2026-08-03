@@ -108,7 +108,7 @@ import { Grid } from '@unif/react-native-design';
 来源：`src/components/ui/Grid/Grid.tsx`、`types.ts`。
 
 - 默认 `accessibilityRole`：只有 Grid 级 `onPress` 存在时，每格才渲染为 `<Pressable accessibilityRole="button">`；纯展示 Grid 使用本地 `<View>`，不伪装成操作。
-- a11y 名称：trim 后非空的 `item.accessibilityLabel` 优先；否则取 `item.label`，并在 `badge != null` 时用全角逗号组合角标，例如 `badge={0}` 得到“消息，0”。
+- a11y 名称：trim 后非空的 `item.accessibilityLabel` 优先；空白覆盖回退 trim 后非空的 `item.label`，并在 `badge != null` 时组合角标。最终名称为空时，action Grid 的该格失败关闭为 display-only 并在 effect 诊断；display Grid 不创建 unnamed merged a11y node。
 - icon 与 badge 视觉子树对 SR 隐藏，外层 cell 是唯一的合并名称，不产生重复焦点。
 - 状态语义：源码未设 `accessibilityState`（无 selected/disabled/checked 概念）。
 

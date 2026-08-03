@@ -1,4 +1,5 @@
 import type { CellExtra, CellTextValue } from './types';
+import { normalizeNonBlankText } from '../shared/accessibilityName';
 
 type CellAccessibilityExtra = Exclude<CellExtra, { kind: 'control' }>;
 
@@ -7,7 +8,8 @@ export function stringifyCellText(value: CellTextValue): string {
 }
 
 function appendNonBlank(parts: string[], value: string): void {
-  if (value.trim().length > 0) parts.push(value);
+  const normalized = normalizeNonBlankText(value);
+  if (normalized !== undefined) parts.push(normalized);
 }
 
 export function buildCellAccessibilityLabel({
@@ -33,4 +35,19 @@ export function buildCellAccessibilityLabel({
   }
 
   return parts.join('，');
+}
+
+export function resolveCellActionAccessibilityLabel({
+  accessibilityLabel,
+  ...content
+}: {
+  accessibilityLabel?: unknown;
+  title: CellTextValue;
+  desc?: CellTextValue;
+  extra?: CellAccessibilityExtra;
+}): string | undefined {
+  return (
+    normalizeNonBlankText(accessibilityLabel) ??
+    normalizeNonBlankText(buildCellAccessibilityLabel(content))
+  );
 }

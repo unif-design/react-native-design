@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Pressable } from 'react-native-gesture-handler';
 import { View } from 'react-native';
 import {
@@ -7,10 +7,14 @@ import {
   usePrefersReducedMotion,
   useThemedStyles,
 } from '../../../theme';
+import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
+import { normalizeNonBlankText } from '../shared/accessibilityName';
 import { makeStyles, THUMB_OFF_X, THUMB_ON_X } from './styles';
 import type { SwitchProps } from './types';
+
+const log = createLogger('Switch');
 
 /**
  * Web 端 Switch —— RN-Web 上 reanimated 4 + worklets 0.9.x 的 useAnimatedStyle
@@ -32,7 +36,15 @@ export function Switch({
   const c = useColors();
   const styles = useThemedStyles(makeStyles);
   const reducedMotion = usePrefersReducedMotion();
-  const isDisabled = disabled === true;
+  const accessibleName = normalizeNonBlankText(accessibilityLabel);
+  const hasBlankLabel = accessibleName === undefined;
+  const isDisabled = disabled === true || hasBlankLabel;
+
+  useEffect(() => {
+    if (hasBlankLabel) {
+      log.warn('Switch accessibilityLabel 不能为空白，当前 action 已禁用。');
+    }
+  }, [hasBlankLabel]);
 
   // 给 RN style 数组追加 web-only 字段；reduced motion 时连 transition key
   // 都不输出，避免浏览器仍创建零时长 transition。
@@ -62,12 +74,15 @@ export function Switch({
 
   return (
     <Pressable
+      accessible={!hasBlankLabel}
       onPress={isDisabled ? undefined : () => onChange(!value)}
       disabled={isDisabled}
       style={[styles.pressable, isDisabled && styles.pressableDisabled]}
-      accessibilityRole="switch"
-      accessibilityState={{ checked: value, disabled: isDisabled }}
-      accessibilityLabel={accessibilityLabel}
+      accessibilityRole={hasBlankLabel ? undefined : 'switch'}
+      accessibilityState={
+        hasBlankLabel ? undefined : { checked: value, disabled: isDisabled }
+      }
+      accessibilityLabel={accessibleName}
       testID={testID}
     >
       <View

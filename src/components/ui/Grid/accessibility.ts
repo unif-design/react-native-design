@@ -1,4 +1,5 @@
 import type { GridItem } from './types';
+import { normalizeNonBlankText } from '../shared/accessibilityName';
 
 type GridItemAccessibilityContent = Pick<
   GridItem,
@@ -7,10 +8,14 @@ type GridItemAccessibilityContent = Pick<
 
 export function gridItemAccessibilityLabel(
   item: GridItemAccessibilityContent
-): string {
-  const explicitLabel = item.accessibilityLabel?.trim();
-  if (explicitLabel) {
+): string | undefined {
+  const explicitLabel = normalizeNonBlankText(item.accessibilityLabel);
+  if (explicitLabel !== undefined) {
     return explicitLabel;
   }
-  return item.badge != null ? `${item.label}，${item.badge}` : item.label;
+  const visibleLabel = normalizeNonBlankText(item.label);
+  if (visibleLabel === undefined) return undefined;
+  return item.badge != null
+    ? `${visibleLabel}，${String(item.badge).trim()}`
+    : visibleLabel;
 }

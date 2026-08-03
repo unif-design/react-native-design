@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
 import {
@@ -12,6 +12,7 @@ import {
 import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
+import { normalizeNonBlankText } from '../shared/accessibilityName';
 import { RadioContext } from './RadioContext';
 import { RadioGroup } from './RadioGroup';
 import { makeStyles } from './styles';
@@ -35,17 +36,32 @@ export function Radio({
   const c = useColors();
   const styles = useThemedStyles(makeStyles);
   const ctx = useContext(RadioContext);
-  if (!ctx) {
-    // [L-30] 去重:同一 value 的 warn 只打一次,避免渲染阶段反复刷屏
-    const warnKey = `no-ctx:${String(value)}`;
-    if (!_warnedCtx.has(warnKey)) {
-      _warnedCtx.add(warnKey);
-      log.warn('<Radio> must be used inside <Radio.Group>');
+  const accessibleName =
+    normalizeNonBlankText(accessibilityLabel) ?? normalizeNonBlankText(label);
+  const hasMissingName = accessibleName === undefined;
+
+  useEffect(() => {
+    if (!ctx) {
+      const warnKey = `no-ctx:${String(value)}`;
+      if (!_warnedCtx.has(warnKey)) {
+        _warnedCtx.add(warnKey);
+        log.warn('<Radio> must be used inside <Radio.Group>');
+      }
     }
+  }, [ctx, value]);
+  useEffect(() => {
+    if (hasMissingName) {
+      log.warn(
+        'Radio 需要非空的 accessibilityLabel 或可见 label，当前 action 已禁用。'
+      );
+    }
+  }, [hasMissingName]);
+
+  if (!ctx) {
     return <View />;
   }
   const checked = ctx.value === value;
-  const isDisabled = disabled === true;
+  const isDisabled = disabled === true || hasMissingName;
   // [L-92] 改用 childTestID:收口 parent+id 拼接逻辑,保持空串 override 回落拼接语义
   const resolvedTestID = childTestID(ctx.groupTestID, value, testID);
 
@@ -58,12 +74,15 @@ export function Radio({
 
   return (
     <Pressable
+      accessible={!hasMissingName}
       onPress={isDisabled ? undefined : () => ctx.onChange(value)}
       disabled={isDisabled}
       hitSlop={hitSlopV}
-      accessibilityRole="radio"
-      accessibilityState={{ checked, disabled: isDisabled }}
-      accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityRole={hasMissingName ? undefined : 'radio'}
+      accessibilityState={
+        hasMissingName ? undefined : { checked, disabled: isDisabled }
+      }
+      accessibilityLabel={accessibleName}
       testID={resolvedTestID}
       style={({ pressed }) => [
         styles.row,

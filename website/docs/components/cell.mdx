@@ -228,7 +228,7 @@ type StaticCellExtra =
 
 来源：`src/components/ui/Cell/Cell.tsx`、`content.ts`、`types.ts`。
 
-- actionable 是唯一外层可访问操作：RNGH `Pressable` 固定为 `button`。默认名称依次组合非空的 `title`、`desc` 与 extra 文本，使用中文顿隔 `，`；actionable display 的 `accessibilityText` 只有非空白时才贡献。显式 `accessibilityLabel` 可覆盖。
+- actionable 是唯一外层可访问操作：RNGH `Pressable` 固定为 `button`。默认名称依次组合 trim 后非空的 `title`、`desc` 与 extra 文本，使用中文顿隔 `，`；actionable display 的 `accessibilityText` 只有非空白时才贡献。trim 后非空的显式 `accessibilityLabel` 优先，空白覆盖回退自动名称；最终名称仍为空时整行失败关闭为本地 View，不保留外层 handler/button/arrow，并在 effect 诊断。
 - `disabled=true` 时 actionable 同时设置 disabled state 和 `onPress={undefined}`，不会留下可调用 handler。
 - control/static 都渲染本地 `View`，不创建外层 action 或用于合并名称的 a11y node。control 的 node 必须自己提供 role、state、handler 与 accessible name。
 - 所有 leading、自定义 `display` extra 与 chevron 都由库内本地 `View` 包裹，并用共享隐藏属性移出 a11y tree；只有 actionable display 的 `accessibilityText` 会进入外层名称，不形成第二焦点。

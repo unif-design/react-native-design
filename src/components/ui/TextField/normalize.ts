@@ -1,6 +1,8 @@
 import { StyleSheet } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { fixed } from '../../../theme';
+import { ICONS, type IconName } from '../../../icons';
+import { normalizeNonBlankText } from '../shared/accessibilityName';
 import type {
   SearchFieldLayout,
   TextFieldContainerStyle,
@@ -101,23 +103,90 @@ export type NormalizedTextFieldSlot = {
   diagnostics: readonly string[];
 };
 
-/** 未类型化 JS 的 action 也必须同时有真 handler 和非空可访问名称。 */
+function isIconName(value: unknown): value is IconName {
+  return (
+    typeof value === 'string' &&
+    Object.prototype.hasOwnProperty.call(ICONS, value)
+  );
+}
+
+/** 未类型化 JS 必须完整匹配一个受支持分支，不能靠 discriminant 后 cast 绕过校验。 */
 export function normalizeTextFieldSlot(slot: unknown): NormalizedTextFieldSlot {
-  if (!slot || typeof slot !== 'object') {
+  if (slot === undefined) {
     return { slot: undefined, diagnostics: [] };
   }
+  if (typeof slot !== 'object' || slot === null) {
+    return { slot: undefined, diagnostics: ['slot'] };
+  }
   const candidate = slot as Record<string, unknown>;
-  if (candidate.kind !== 'action') {
-    return { slot: slot as TextFieldSlot, diagnostics: [] };
+  switch (candidate.kind) {
+    case 'icon': {
+      const size =
+        typeof candidate.size === 'number' && Number.isFinite(candidate.size)
+          ? candidate.size
+          : undefined;
+      const color =
+        typeof candidate.color === 'string' ? candidate.color : undefined;
+      const hasValidSize = candidate.size === undefined || size !== undefined;
+      const hasValidColor =
+        candidate.color === undefined || color !== undefined;
+      if (!isIconName(candidate.icon) || !hasValidSize || !hasValidColor) {
+        return { slot: undefined, diagnostics: ['slot.icon'] };
+      }
+      return {
+        slot: {
+          kind: 'icon',
+          icon: candidate.icon,
+          ...(size !== undefined && { size }),
+          ...(color !== undefined && { color }),
+        },
+        diagnostics: [],
+      };
+    }
+    case 'text':
+      if (
+        typeof candidate.value !== 'string' &&
+        typeof candidate.value !== 'number'
+      ) {
+        return { slot: undefined, diagnostics: ['slot.text'] };
+      }
+      return {
+        slot: { kind: 'text', value: candidate.value },
+        diagnostics: [],
+      };
+    case 'action': {
+      const accessibilityLabel = normalizeNonBlankText(
+        candidate.accessibilityLabel
+      );
+      const hasValidDisabled =
+        candidate.disabled === undefined ||
+        typeof candidate.disabled === 'boolean';
+      const slotDisabled =
+        typeof candidate.disabled === 'boolean'
+          ? candidate.disabled
+          : undefined;
+      if (
+        !isIconName(candidate.icon) ||
+        typeof candidate.onPress !== 'function' ||
+        accessibilityLabel === undefined ||
+        !hasValidDisabled
+      ) {
+        return { slot: undefined, diagnostics: ['slot.action'] };
+      }
+      return {
+        slot: {
+          kind: 'action',
+          icon: candidate.icon,
+          onPress: candidate.onPress as () => void,
+          accessibilityLabel,
+          ...(slotDisabled !== undefined && { disabled: slotDisabled }),
+        },
+        diagnostics: [],
+      };
+    }
+    default:
+      return { slot: undefined, diagnostics: ['slot.kind'] };
   }
-  if (
-    typeof candidate.onPress !== 'function' ||
-    typeof candidate.accessibilityLabel !== 'string' ||
-    candidate.accessibilityLabel.trim().length === 0
-  ) {
-    return { slot: undefined, diagnostics: ['slot.action'] };
-  }
-  return { slot: slot as TextFieldSlot, diagnostics: [] };
 }
 
 export type NormalizedSearchLayout = SearchFieldLayout & {

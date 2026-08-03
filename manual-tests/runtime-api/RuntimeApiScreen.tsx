@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -32,7 +32,15 @@ import {
   useColors,
   usePrefersReducedMotion,
   type NavBarSlot,
+  type TextFieldSlot,
 } from '@unif/react-native-design';
+
+const NAV_BAR_PROMISE_SLOT = Promise.resolve('Promise primitive') as NavBarSlot;
+const INPUT_ERROR_STATES = [
+  '',
+  '错误 A：请输入有效内容',
+  '错误 B：内容格式仍不正确',
+] as const;
 
 /**
  * Runtime API 人工验证屏 —— 由 `yarn create:runtime-harness` 拷进临时的
@@ -51,12 +59,13 @@ export function RuntimeApiScreen(): React.JSX.Element {
   const [toastHostKey, setToastHostKey] = useState(0);
   const [controlledInput, setControlledInput] = useState('受控初值');
   const [modeSwitched, setModeSwitched] = useState(false);
-  const [error, setError] = useState('');
+  const [errorIndex, setErrorIndex] = useState(0);
   const [search, setSearch] = useState('查询');
   const [searchResult, setSearchResult] = useState('—');
   const [buttonPresses, setButtonPresses] = useState(0);
   const [unexpectedPresses, setUnexpectedPresses] = useState(0);
   const [navBarAction, setNavBarAction] = useState('—');
+  const error = INPUT_ERROR_STATES[errorIndex] ?? '';
   const modeSwitchProps = modeSwitched
     ? { value: '后来受控', onChangeText: setControlledInput }
     : { defaultValue: '首次非受控' };
@@ -90,6 +99,15 @@ export function RuntimeApiScreen(): React.JSX.Element {
     setConfirmResult(`destructive=${String(result)}`);
   };
 
+  const runBlankConfirmLabels = async () => {
+    const result = await confirm({
+      title: '空白按钮文案回退',
+      confirmLabel: '   ',
+      cancelLabel: '\t',
+    });
+    setConfirmResult(`blank-labels=${String(result)}`);
+  };
+
   // 显式 unknown seam：模拟 JS 消费者绕过 TypeScript 传入的伪 React object。
   // 它必须在 effect 中给出 Metro warning、渲染为空，且绝不调用其中 handler。
   const malformedNavBarSlot: unknown = {
@@ -118,6 +136,11 @@ export function RuntimeApiScreen(): React.JSX.Element {
                   variant="danger"
                   onPress={runDestructive}
                 />
+                <Button
+                  label="空白 Confirm label（应显示确认 / 取消）"
+                  variant="secondary"
+                  onPress={runBlankConfirmLabels}
+                />
                 <Result label="confirm 结果" value={confirmResult} />
                 <Result label="重入 B 结果" value={reentryResult} />
               </Section>
@@ -126,7 +149,9 @@ export function RuntimeApiScreen(): React.JSX.Element {
                 <Text style={styles.result}>
                   用 Inspector 或 screen reader 确认 disabled / loading 均移除
                   handler 并上报 disabled；loading 额外上报 busy。点击 enabled
-                  操作应递增，另两项必须保持 0。
+                  操作应递增，disabled/loading/blank Button 与 blank IconButton
+                  均不得递增 unexpected 计数；两个 blank action 不应形成 unnamed
+                  button，并各自在 effect 输出诊断。
                 </Text>
                 <Button
                   label="enabled Button"
@@ -145,11 +170,22 @@ export function RuntimeApiScreen(): React.JSX.Element {
                   testID="action-button-loading"
                   onPress={() => setUnexpectedPresses((count) => count + 1)}
                 />
+                <Button
+                  label="   "
+                  testID="action-button-blank"
+                  onPress={() => setUnexpectedPresses((count) => count + 1)}
+                />
                 <IconButton
                   icon="check"
                   accessibilityLabel="enabled IconButton"
                   testID="action-icon-enabled"
                   onPress={() => setButtonPresses((count) => count + 1)}
+                />
+                <IconButton
+                  icon="close"
+                  accessibilityLabel={'\t'}
+                  testID="action-icon-blank"
+                  onPress={() => setUnexpectedPresses((count) => count + 1)}
                 />
                 <IconButton
                   icon="close"
@@ -182,6 +218,25 @@ export function RuntimeApiScreen(): React.JSX.Element {
                 </View>
                 <View style={styles.navBarFrame}>
                   <NavBar
+                    title="Fragment primitive"
+                    right={
+                      <>
+                        Fragment primitive
+                        <React.Fragment> + nested</React.Fragment>
+                      </>
+                    }
+                  />
+                </View>
+                <View style={styles.navBarFrame}>
+                  <Suspense fallback={<Text>Promise loading</Text>}>
+                    <NavBar
+                      title="stable Promise primitive"
+                      right={NAV_BAR_PROMISE_SLOT}
+                    />
+                  </Suspense>
+                </View>
+                <View style={styles.navBarFrame}>
+                  <NavBar
                     title="无类型 malformed action 应为空"
                     left={malformedNavBarLeft}
                   />
@@ -189,7 +244,10 @@ export function RuntimeApiScreen(): React.JSX.Element {
                 <Result label="NavBar action" value={navBarAction} />
                 <Text style={styles.result}>
                   malformed NavBar 在首次挂载后应只在 Metro 输出一次警告，left
-                  slot 不显示。
+                  slot 不显示。Fragment 的两段 primitive 与 stable Promise
+                  primitive 都应显示为 Text，不触发 native raw text
+                  错误；Promise 必须由当前 Suspense 稳定完成，不能永久停在
+                  fallback。
                 </Text>
               </Section>
 
@@ -225,7 +283,9 @@ export function RuntimeApiScreen(): React.JSX.Element {
               <Section title="严格文本输入 / a11y">
                 <Text style={styles.result}>
                   以下项目用于人工确认受控/非受控、44pt action frame、归一化和
-                  iOS 错误播报。
+                  iOS 错误播报。malformed-text-slot 必须为空并在 effect 诊断。
+                  错误按钮依次走空→A→B→空，用于确认 iOS 初次 A 播报及 A→B
+                  重新播报。
                 </Text>
                 <Input
                   defaultValue="只在首次初始化"
@@ -271,6 +331,17 @@ export function RuntimeApiScreen(): React.JSX.Element {
                 />
                 <Input
                   defaultValue=""
+                  leading={
+                    {
+                      kind: 'text',
+                      value: { malformed: true },
+                    } as unknown as TextFieldSlot
+                  }
+                  placeholder="malformed text slot 应移除并 effect 诊断"
+                  testID="malformed-text-slot"
+                />
+                <Input
+                  defaultValue=""
                   height={20}
                   placeholder="非法 height=20（应回退 44）"
                 />
@@ -282,10 +353,12 @@ export function RuntimeApiScreen(): React.JSX.Element {
                 />
                 <PlaceholderPriorityCase />
                 <Button
-                  label="切换错误（iOS 后续变化才播报）"
+                  label="循环错误：空 → A → B → 空"
                   variant="secondary"
                   onPress={() =>
-                    setError((current) => (current ? '' : '请输入有效内容'))
+                    setErrorIndex(
+                      (current) => (current + 1) % INPUT_ERROR_STATES.length
+                    )
                   }
                 />
                 <Input
@@ -367,7 +440,9 @@ function DisplaySemanticsSection(): React.JSX.Element {
         分别稳定提供 source Image / fallback initial
         分支；两者整个头像容器都隐藏，名称/副标题仍自然可读。version-pill-default
         名称为“版本 1.0.0，正常”，version-pill-custom 名称为“版本 2.0.0，build
-        12，测试中”，且状态文字可见、子节点不形成重复焦点。
+        12，测试中”，version-pill-blank-status 必须显示/朗读“状态未知”并在
+        effect 诊断。grid-blank-action 不得形成 button 或触发计数，且不能创建
+        unnamed merged node。
       </Text>
       <View style={styles.row}>
         <Logo
@@ -421,7 +496,18 @@ function DisplaySemanticsSection(): React.JSX.Element {
           status={{ label: '测试中' }}
           testID="version-pill-custom"
         />
+        <VersionPill
+          version="3.0.0"
+          status={{ label: '   ' }}
+          testID="version-pill-blank-status"
+        />
       </View>
+      <Grid
+        items={[{ id: 'blank', icon: 'mail', label: '   ' }]}
+        columns={1}
+        onPress={() => setGridPresses((count) => count + 1)}
+        testID="grid-blank-action"
+      />
     </Section>
   );
 }
@@ -443,6 +529,13 @@ function CarouselSection(): React.JSX.Element {
   const [actionPresses, setActionPresses] = useState(0);
   const reducedMotion = usePrefersReducedMotion();
   const oneItem = CAROUSEL_ITEMS.slice(0, 1);
+  const invalidActionProps = {
+    onPressItem: true,
+    getAccessibilityLabel: { invalid: true },
+  } as unknown as {
+    onPressItem: (item: CarouselItem, index: number) => void;
+    getAccessibilityLabel: (item: CarouselItem, index: number) => string;
+  };
 
   return (
     <Section title="Carousel display / action / reduced motion">
@@ -450,9 +543,11 @@ function CarouselSection(): React.JSX.Element {
         用 Inspector / screen reader 核对：carousel-display 的每张 slide 是普通
         View、没有 button 焦点；carousel-action 的 slide 是 button，
         名称应为“可操作 slide，第 2 项，共 2 项”，点击只递增 action
-        计数。carousel-single 必须没有 Pagination 节点且容器高度就是
-        100；系统开启 reduced motion 后 carousel-reduced 虽传 autoplay
-        也必须静止。Pagination 存在时外层本地 View 必须完整隐藏其 a11y 子树。
+        计数。carousel-blank-item-name 的空白 item 与
+        carousel-invalid-action-config 全部必须是 display-only，并在 effect
+        诊断。carousel-single 必须没有 Pagination 节点且容器高度就是 100；
+        系统开启 reduced motion 后 carousel-reduced 虽传 autoplay 也必须静止。
+        Pagination 存在时外层本地 View 必须完整隐藏其 a11y 子树。
       </Text>
       <Carousel
         data={CAROUSEL_ITEMS}
@@ -467,6 +562,23 @@ function CarouselSection(): React.JSX.Element {
         onPressItem={() => setActionPresses((count) => count + 1)}
         getAccessibilityLabel={(item) => item.label}
         testID="carousel-action"
+      />
+      <Carousel
+        data={CAROUSEL_ITEMS}
+        height={100}
+        renderItem={({ item }) => <CarouselSlide label={item.label} />}
+        onPressItem={() => setActionPresses((count) => count + 1)}
+        getAccessibilityLabel={(item) =>
+          item.id === 'display' ? '   ' : item.label
+        }
+        testID="carousel-blank-item-name"
+      />
+      <Carousel
+        data={CAROUSEL_ITEMS}
+        height={100}
+        renderItem={({ item }) => <CarouselSlide label={item.label} />}
+        {...invalidActionProps}
+        testID="carousel-invalid-action-config"
       />
       <Carousel
         data={oneItem}
@@ -518,6 +630,8 @@ function CellSection(): React.JSX.Element {
         应作为可见 Text 自然朗读；cell-static-display 的 display extra
         始终是装饰内容，不形成外层合并名称或独立焦点。禁用 action 应保留
         disabled button state，但 onPress 必须不存在且计数始终为 0。
+        cell-action-blank-name 必须回退为本地 View，无 button/handler/arrow，
+        并在 effect 诊断。
       </Text>
       <List>
         <Cell
@@ -580,6 +694,13 @@ function CellSection(): React.JSX.Element {
           onPress={() => setUnexpectedPresses((count) => count + 1)}
           testID="cell-action-disabled"
         />
+        <Cell
+          title="   "
+          accessibilityLabel={'\t'}
+          arrow
+          onPress={() => setUnexpectedPresses((count) => count + 1)}
+          testID="cell-action-blank-name"
+        />
       </List>
       <Result label="Cell action presses" value={String(actionPresses)} />
       <Result label="Cell control" value={String(notify)} />
@@ -615,7 +736,9 @@ function SelectionControlsSection(): React.JSX.Element {
         selection-switch-visual 实现为 r(32)×r(20)，Web / 402pt RN harness 应为
         32×20，其他 native 宽度按实际 r() 结果验证。系统开启 reduced motion
         后切换应立即到终值。Web 检查 selection-switch-track /
-        selection-switch-thumb：两者都不得出现任何 transition* style。
+        selection-switch-thumb：两者都不得出现任何 transition* style。三个 blank
+        item 不得触发 unexpected 计数或形成 unnamed action；空白 Radio.Group
+        只诊断组名，内部有名称的 Radio 仍拥有 action。
       </Text>
       <Checkbox checked={checked} onChange={setChecked} label="接收纸质账单" />
       <Checkbox
@@ -629,6 +752,13 @@ function SelectionControlsSection(): React.JSX.Element {
         onChange={() => setUnexpectedPresses((count) => count + 1)}
         label="禁用 Checkbox（不应触发）"
         disabled
+      />
+      <Checkbox
+        checked={checked}
+        onChange={() => setUnexpectedPresses((count) => count + 1)}
+        label="   "
+        accessibilityLabel={'\t'}
+        testID="selection-checkbox-blank"
       />
       <Radio.Group
         value={radioValue}
@@ -645,6 +775,15 @@ function SelectionControlsSection(): React.JSX.Element {
         <Radio value="daily" label="日报" />
         <Radio value="weekly" accessibilityLabel="周报（无可见 label）" />
         <Radio value="disabled" label="禁用选项（不应触发）" disabled />
+        <Radio value="blank" label="   " accessibilityLabel={'\t'} />
+      </Radio.Group>
+      <Radio.Group
+        value="named"
+        onChange={() => setUnexpectedPresses((count) => count + 1)}
+        accessibilityLabel="   "
+        testID="selection-radio-group-blank"
+      >
+        <Radio value="named" label="组名空白但 item 有名称" />
       </Radio.Group>
       <View style={styles.selectionRow}>
         <Switch
@@ -659,6 +798,12 @@ function SelectionControlsSection(): React.JSX.Element {
           accessibilityLabel="禁用提醒（不应触发）"
           disabled
           testID="selection-switch-disabled"
+        />
+        <Switch
+          value={switchValue}
+          onChange={() => setUnexpectedPresses((count) => count + 1)}
+          accessibilityLabel="   "
+          testID="selection-switch-blank"
         />
       </View>
       <Result label="selection checked" value={String(checked)} />
@@ -705,7 +850,8 @@ function StepperSection(): React.JSX.Element {
         无效侧按钮没有 handler。原始 min=10/max=0 折叠为
         now=min=max=10，中央上报 disabled 且完全没有
         handler，左右名称均保留“异常范围数量”上下文。不能根据源码或 Website
-        build 标记 PASS。
+        build 标记 PASS。stepper-blank-name 的三个节点不得保留 action/role 或
+        handler，并在 effect 诊断。
       </Text>
       <Row label="范围中间（md）">
         <Stepper
@@ -758,6 +904,16 @@ function StepperSection(): React.JSX.Element {
           size="sm"
           accessibilityLabel="异常范围数量"
           testID="stepper-zero-range"
+        />
+      </Row>
+      <Row label="空白名称（全部 action 失败关闭）">
+        <Stepper
+          value={1}
+          onChange={() => setUnexpectedActions((count) => count + 1)}
+          min={0}
+          max={2}
+          accessibilityLabel="   "
+          testID="stepper-blank-name"
         />
       </Row>
       <Result label="Stepper middle value" value={String(middleValue)} />

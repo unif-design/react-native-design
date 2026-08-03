@@ -90,7 +90,7 @@ import { IconButton } from '@unif/react-native-design';
 | `color` | `string?` | variant fg | icon 描色 override(仅 icon 色,bg/border 仍由 variant 决定) |
 | `disabled` | `boolean` | `false` | 不响应 + opacity 0.5 |
 | `loading` | `boolean` | `false` | 以 ActivityIndicator 替代 icon，自动 disabled + busy |
-| `accessibilityLabel` | `string` | — | **必填** —— icon-only 按钮 SR 用户唯一信息源 |
+| `accessibilityLabel` | `string` | — | **必填且运行时必须非空** —— icon-only 按钮 SR 用户唯一信息源；空白值失败关闭并在 effect 诊断 |
 | `accessibilityHint` | `string?` | — | 行为不显然时填(如"打开扫描器") |
 | `style` | `StyleProp<ViewStyle>` | — | 容器附加样式 |
 | `testID` | `string?` | — | E2E / 测试定位 |
@@ -100,7 +100,7 @@ import { IconButton } from '@unif/react-native-design';
 来源：`src/components/ui/IconButton/types.ts`、`IconButton.tsx`、`Button/ButtonBase.tsx`。
 
 - 默认 `accessibilityRole`：`'button'`（IconButton 透传给共享的 `ButtonBase`，其 `accessibilityRole = 'button'` 为默认参数）。
-- a11y props：`accessibilityLabel` **是 TS 强制必填**（`types.ts` 中 `accessibilityLabel: string`，无 `?`）—— icon-only 无可见文本，缺则编译报错；`accessibilityHint` 可选，仅在「行为不显然」时补（如「切换密码可见」），普通「确认 / 取消 / 返回」不必加。
+- a11y props：`accessibilityLabel` **是 TS 强制必填**，运行时还会 trim；空白值会移除 handler/action 语义并在 effect 诊断，不会形成 unnamed button。`accessibilityHint` 可选，仅在「行为不显然」时补。
 - 状态语义：disabled 或 loading 时自动上报 `accessibilityState.disabled: true` 并移除有效 handler；loading 还上报 `busy: true`。调用方不能覆盖这两个字段。
 
 ```tsx

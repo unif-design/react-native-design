@@ -165,6 +165,95 @@ describe('normalizeTextFieldSlot — 未类型化 action 不能绕过 handler/na
       diagnostics: ['slot.action'],
     });
   });
+
+  test('undefined 是唯一不产生诊断的空 slot', () => {
+    expect(normalizeTextFieldSlot(undefined)).toEqual({
+      slot: undefined,
+      diagnostics: [],
+    });
+  });
+
+  test.each([
+    ['null', null, 'slot'],
+    ['布尔值', false, 'slot'],
+    ['字符串', 'search', 'slot'],
+    ['未知 discriminant', { kind: 'node', value: 'x' }, 'slot.kind'],
+    ['对象 text', { kind: 'text', value: { text: 'x' } }, 'slot.text'],
+    ['无效 icon', { kind: 'icon', icon: 'not-generated' }, 'slot.icon'],
+    [
+      'icon size 非有限数',
+      { kind: 'icon', icon: 'search', size: Number.POSITIVE_INFINITY },
+      'slot.icon',
+    ],
+    [
+      'icon color 非字符串',
+      { kind: 'icon', icon: 'search', color: 42 },
+      'slot.icon',
+    ],
+    [
+      'action icon 无效',
+      {
+        kind: 'action',
+        icon: 'not-generated',
+        onPress: () => {},
+        accessibilityLabel: '操作',
+      },
+      'slot.action',
+    ],
+    [
+      'action disabled 非布尔值',
+      {
+        kind: 'action',
+        icon: 'close',
+        onPress: () => {},
+        accessibilityLabel: '操作',
+        disabled: 'false',
+      },
+      'slot.action',
+    ],
+  ])('%s 失败关闭并诊断', (_name, slot, diagnostic) => {
+    expect(normalizeTextFieldSlot(slot)).toEqual({
+      slot: undefined,
+      diagnostics: [diagnostic],
+    });
+  });
+
+  test('保留并规范化有效 icon/text/action 分支', () => {
+    const onPress = () => {};
+    expect(
+      normalizeTextFieldSlot({
+        kind: 'icon',
+        icon: 'search',
+        size: 33,
+        color: 'tomato',
+      })
+    ).toEqual({
+      slot: { kind: 'icon', icon: 'search', size: 33, color: 'tomato' },
+      diagnostics: [],
+    });
+    expect(normalizeTextFieldSlot({ kind: 'text', value: 0 })).toEqual({
+      slot: { kind: 'text', value: 0 },
+      diagnostics: [],
+    });
+    expect(
+      normalizeTextFieldSlot({
+        kind: 'action',
+        icon: 'close',
+        onPress,
+        accessibilityLabel: '  清除  ',
+        disabled: false,
+      })
+    ).toEqual({
+      slot: {
+        kind: 'action',
+        icon: 'close',
+        onPress,
+        accessibilityLabel: '清除',
+        disabled: false,
+      },
+      diagnostics: [],
+    });
+  });
 });
 
 describe('normalizeSearchLayout — 44pt 交互层与 36pt 可视面分离', () => {

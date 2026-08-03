@@ -69,6 +69,7 @@ export function ButtonBase({
 
   const isText = variant === 'text';
   const unavailable = disabled === true || loading === true;
+  const hasAccessibleName = accessibilityLabel !== undefined;
 
   // [M-7] 触控目标补偿:hitSlop 向外扩展命中区域到 fixed.hitTarget(44pt)。
   // 公式:vertical slop = max(0, (hitTarget - h) / 2);square 时同补 horizontal。
@@ -90,12 +91,17 @@ export function ButtonBase({
 
   return (
     <Pressable
-      accessibilityRole={accessibilityRole}
-      accessibilityState={{
-        ...accessibilityState,
-        disabled: unavailable,
-        busy: loading === true,
-      }}
+      accessible={hasAccessibleName}
+      accessibilityRole={hasAccessibleName ? accessibilityRole : undefined}
+      accessibilityState={
+        hasAccessibleName
+          ? {
+              ...accessibilityState,
+              disabled: unavailable,
+              busy: loading === true,
+            }
+          : undefined
+      }
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
       disabled={unavailable}

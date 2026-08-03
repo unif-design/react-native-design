@@ -27,6 +27,10 @@ ref.current?.focus();
 
 - display slot 会由本地 View/Text 从 a11y tree 隐藏；语义放在输入框 label/hint 上。
 - action slot 始终拥有真实 44×44pt Pressable frame；字段 `disabled` 或 `editable={false}` 时移除 handler，并上报 disabled state。
+- 运行时逐分支验证 `kind`、生成 icon name、有限数 size、string color、
+  string/number text value，以及 action 的函数 handler、非空名称和 boolean
+  disabled。只有 `undefined` 表示无 slot；其余 malformed 值在 effect 诊断并移除。
+  合法配置中的越界数值 icon size 仍回退 18。
 - `A11Y_HIDDEN_PROPS` 是内部共享常量，只能应用到库内本地 RN 节点，不能透传给第三方组件。
 
 ## 布局、优先级与错误

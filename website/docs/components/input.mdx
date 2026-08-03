@@ -78,4 +78,10 @@ action slot 由库渲染 44×44pt frame。`disabled` 或 `editable={false}` 会�
 - `containerStyle`: `TextFieldContainerStyle?`
 - `ref`: `TextFieldHandle`，仅 `focus()` / `blur()`
 
+运行时会验证每个 slot 的精确 discriminant 和关键字段：icon 必须来自生成 registry，
+可选 size 必须是有限 number、color 必须是 string；text 只接受 string/number；
+action 还必须有函数 handler、非空名称和可选 boolean disabled。`undefined` 表示无
+slot，其他 malformed 未类型化值都会失败关闭，并在 effect 中诊断。合法但超出
+`[1, 32]` 的数值 icon size 仍按既有规则回退 18。
+
 无可见 label 时请传 `accessibilityLabel`。错误文字在 Android 是 polite live region；iOS 后续错误变化会播报。

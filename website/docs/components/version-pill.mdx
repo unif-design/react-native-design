@@ -63,7 +63,7 @@ import { VersionPill } from '@unif/react-native-design';
 |---|---|---|---|
 | `version` | `string` | — | 版本号字串（`'2.8.0'`，必填） |
 | `build` | `string?` | — | build 号；为空时省略分点与 build 字 |
-| `status` | `VersionStatus?` | `{ label: '正常', color: c.success }` | 可见状态文案与状态点颜色；caller 提供状态但省略 `color` 时使用 `c.foregroundMuted` |
+| `status` | `VersionStatus?` | `{ label: '正常', color: c.success }` | 可见状态文案与状态点颜色；空白 label 回退“状态未知”并在 effect 诊断，省略 `color` 时使用 `c.foregroundMuted` |
 | `style` | `StyleProp<ViewStyle>?` | — | 容器附加样式覆盖 |
 
 ## 视觉规范（Tokens）
@@ -83,7 +83,7 @@ import { VersionPill } from '@unif/react-native-design';
 
 来源：`src/components/business/VersionPill/VersionPill.tsx`、`types.ts`。
 
-VersionPill 是**纯展示**徽章，外层本地 `<View accessible>` 合并名称，例如“版本 2.0.0，build 12，测试中”；没有 build 时对应片段整体省略。分隔使用全角逗号“，”。状态点、可见状态文字、版本和 build 子节点均只在本地 RN `View` / `Text` 上使用共享隐藏属性，避免重复焦点。组件未设置操作 role，也没有受控状态。
+VersionPill 是**纯展示**徽章，外层本地 `<View accessible>` 合并名称，例如“版本 2.0.0，build 12，测试中”；没有 build 时对应片段整体省略。空白 status label 会显示并朗读“状态未知”，保留 caller 的合法颜色策略，同时在 effect 诊断。状态点、可见文字、版本和 build 子节点均隐藏为单一焦点。
 
 ## 不要
 

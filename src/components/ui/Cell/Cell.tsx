@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { type StyleProp, Text, type TextStyle, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
 import { pressedOpacity, r, useColors, useThemedStyles } from '../../../theme';
+import { createLogger } from '../../../utils/logger';
 import { Icon } from '../Icon';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
-import { buildCellAccessibilityLabel, stringifyCellText } from './content';
+import {
+  resolveCellActionAccessibilityLabel,
+  stringifyCellText,
+} from './content';
 import { useListVariant } from './context';
 import { Leading } from './Leading';
 import { makeStyles } from './styles';
 import type { CellExtra, CellProps } from './types';
+
+const log = createLogger('Cell');
 
 function CellExtraContent({
   extra,
@@ -44,6 +50,24 @@ export function Cell(props: CellProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
   const variant = useListVariant();
   const flush = variant === 'flush';
+  const requestedAction = typeof props.onPress === 'function';
+  const accessibilityLabel = requestedAction
+    ? resolveCellActionAccessibilityLabel({
+        accessibilityLabel: props.accessibilityLabel,
+        title: props.title,
+        desc: props.desc,
+        extra: props.extra,
+      })
+    : undefined;
+  const hasEffectiveAction =
+    requestedAction && accessibilityLabel !== undefined;
+  const hasMissingActionName = requestedAction && !hasEffectiveAction;
+
+  useEffect(() => {
+    if (hasMissingActionName) {
+      log.warn('Cell action 缺少非空业务名称，已按 display-only 渲染。');
+    }
+  }, [hasMissingActionName]);
 
   const cellStyle = [
     styles.cell,
@@ -63,7 +87,7 @@ export function Cell(props: CellProps): React.JSX.Element {
   const inner = (
     <View
       style={cellStyle}
-      testID={typeof props.onPress === 'function' ? undefined : props.testID}
+      testID={hasEffectiveAction ? undefined : props.testID}
     >
       {props.leading !== undefined ? (
         <Leading slot={props.leading} danger={props.danger} />
@@ -79,7 +103,7 @@ export function Cell(props: CellProps): React.JSX.Element {
         ) : null}
       </View>
       <CellExtraContent extra={props.extra} textStyle={extraStyle} />
-      {typeof props.onPress === 'function' && props.arrow && !props.danger ? (
+      {hasEffectiveAction && props.arrow && !props.danger ? (
         <View
           {...A11Y_HIDDEN_PROPS}
           style={flush ? styles.chevronFlush : undefined}
@@ -94,7 +118,7 @@ export function Cell(props: CellProps): React.JSX.Element {
     </View>
   );
 
-  if (typeof props.onPress === 'function') {
+  if (hasEffectiveAction) {
     const isDisabled = props.disabled === true;
 
     return (
@@ -102,14 +126,7 @@ export function Cell(props: CellProps): React.JSX.Element {
         onPress={isDisabled ? undefined : props.onPress}
         disabled={isDisabled}
         accessibilityRole="button"
-        accessibilityLabel={
-          props.accessibilityLabel ??
-          buildCellAccessibilityLabel({
-            title: props.title,
-            desc: props.desc,
-            extra: props.extra,
-          })
-        }
+        accessibilityLabel={accessibilityLabel}
         accessibilityHint={props.accessibilityHint}
         accessibilityState={{ disabled: isDisabled }}
         testID={props.testID}

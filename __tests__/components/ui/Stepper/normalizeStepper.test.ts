@@ -21,8 +21,11 @@ describe('normalizeStepper — 范围与值归一化', () => {
 
   test.each([
     ['NaN', Number.NaN, 0],
-    ['+Infinity', Number.POSITIVE_INFINITY, 2],
+    ['+Infinity', Number.POSITIVE_INFINITY, 0],
     ['-Infinity', Number.NEGATIVE_INFINITY, 0],
+    ['undefined', undefined, 0],
+    ['字符串', '1', 0],
+    ['对象', { value: 1 }, 0],
   ])('%s value 使用 min/max 安全范围', (_name, value, safeValue) => {
     expect(normalizeStepper({ value, min: 0, max: 2, step: 1 }).safeValue).toBe(
       safeValue
@@ -66,6 +69,22 @@ describe('normalizeStepper — 范围与值归一化', () => {
       }).safeMax
     ).toBe(1);
   });
+
+  test('字符串和对象 min/max 不参与数值计算', () => {
+    expect(
+      normalizeStepper({
+        value: 5,
+        min: '1',
+        max: { value: 10 },
+        step: 1,
+      })
+    ).toMatchObject({
+      safeMin: 0,
+      safeMax: 0,
+      safeValue: 0,
+      rangeDisabled: true,
+    });
+  });
 });
 
 describe('normalizeStepper — step 与外部 disabled', () => {
@@ -75,6 +94,9 @@ describe('normalizeStepper — step 与外部 disabled', () => {
     ['NaN', Number.NaN],
     ['+Infinity', Number.POSITIVE_INFINITY],
     ['-Infinity', Number.NEGATIVE_INFINITY],
+    ['undefined', undefined],
+    ['字符串', '2'],
+    ['对象', { value: 2 }],
   ])('%s step 回退 1', (_name, step) => {
     expect(normalizeStepper({ value: 1, min: 0, max: 2, step }).safeStep).toBe(
       1

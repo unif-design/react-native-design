@@ -331,28 +331,42 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 - **Icon** —— 24×24 描边 SVG 目录。
 
 ### 通用
-- **Button** —— variant:`primary` / `secondary` / `ghost` / `outline` / `danger` / `text`;size:`sm` / `md` / `lg`;可 `block`。
-- **IconButton** —— 纯图标按钮,`accessibilityLabel` 类型必填。
+- **Button** —— `onPress` 必填；variant:`primary` / `secondary` / `ghost` /
+  `neutral` / `outline` / `danger` / `text`;size:`sm` / `md` / `lg`;可
+  `block`。`disabled` / `loading` 都移除 handler 并上报 disabled，
+  `loading` 额外上报 busy；空白 `label` 在 effect 诊断并失败关闭 action。
+- **IconButton** —— 纯图标按钮，`onPress` 与 `accessibilityLabel` 类型必填；
+  空白名称在 effect 诊断并失败关闭，disabled/loading 语义与 Button 相同。
 - **Avatar** —— 单字符 monogram。variant:`brand` / `info` / `soft` / `neutral`;size:`xs`(18)/ `sm`(28)/ `md`(32)/ `lg`(40)/ `xl`(56)。
 - **Tag** —— 状态徽章,5 语义 × 2 尺寸(`md` / `lg`)。
 - **Chip** —— 胶囊形可选中 pill;`selected` 切主色边框 / 文本;可带 leading / trailing。Suggestion 底层。
-- **Confirm** —— 命令式 `confirm(): Promise<boolean>` + `<ConfirmHost />`,高风险二次确认(纯 single-owner Store 保证同一时间只 1 个 Host / active entry；裸 RN Modal,不依赖 @gorhom)。
+- **Confirm** —— 命令式 `confirm(): Promise<boolean>` + `<ConfirmHost />`,高风险二次确认(纯 single-owner Store 保证同一时间只 1 个 Host / active entry；裸 RN Modal,不依赖 @gorhom)。自定义确认/取消文案先 trim，空白值回退“确认”/“取消”。
 - **Thumbnail** —— 16:9.5 缩略图,`sm 64×40 / md 113×67 / lg 160×96`。
 - **Loading** —— `Spinner`(reanimated 4 旋转)+ 线性进度。
 - **Pulse** —— `usePulse` + `<Pulse>` + `<PulseDot>`,公共层统一归一化；native 用 Reanimated 4 driver，Web 用 CSS transition + timer driver。Skeleton / Shimmer / Reasoning 等建立其上。
 - **StatusDot** —— `done` / `active` / `pending` 圆点,`flat` / `soft` 双 tone。
 
 ### 表单
-- **Input** —— 单行;状态 `idle` / `focus` / `filled` / `error`。
-- **PasswordInput** —— Input + secureTextEntry + 明文切换。
-- **Textarea** —— 多行(复用 Input,顶对齐)。
-- **TextField** —— 带 label / 校验的字段封装。
-- **Search** —— 搜索条(Input 预设,`accessibilityRole='search'`)。
-- **Checkbox / Radio / Switch / Stepper** —— 选择 / 开关 / 步进。
+- **Input / Textarea / Search** —— 首次 render 锁定 strict
+  controlled/uncontrolled mode，`defaultValue` 只初始化一次；ref 仅公开
+  `focus()` / `blur()`。`leading` / `trailing` 只接受经过运行时完整校验的
+  icon/text/action `TextFieldSlot`，malformed 值在 effect 诊断并移除。
+- **PasswordInput** —— 顶层受控 Input + secureTextEntry + 明文切换，不再接受
+  嵌套 `inputProps`。
+- **TextField** —— 上述输入组件的 internal 内核，不作为公共组件导入。
+- **Checkbox / Radio / Switch** —— required string 仍会在运行时 trim；空白名称
+  移除有效 action 并在 effect 诊断。Checkbox/Radio 的显式空白覆盖会回退可见
+  label，Radio.Group 的组名也会 trim。
+- **Stepper** —— 三个真实至少 44pt frame；单一 normalizer 驱动显示、
+  native/Web handler 与 a11y state。非 number / 非有限值不会进入运算，
+  空白业务名称会移除全部有效 action。
 - **Form** —— Form / FormGroup / FormRow(行间 hairline)。
 
 ### 导航
-- **NavBar** —— 固定顶部头,44px。default(白 + hairline)/ `brand`(渐变)。
+- **NavBar** —— 固定顶部头，44px。`default` 白底 + hairline，
+  `brand` 是纯品牌橙实底白字（不是渐变），`transparent` 透明无边框 + 深字。
+  display slot 保持宽 React 19 `ReactNode`，Fragment/collection/thenable 的
+  primitive 叶子会安全归一化。
 - **TabBar** —— 固定底部 tab,50px,带 badge。
 - **Tabs / Segmented** —— 页级下划线 / 局部分段,共用 `TabItem` 形状。
 - **Drawer** —— `DrawerHeader` + `@react-navigation/drawer`。
@@ -363,11 +377,18 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 - **Skeleton** —— 骨架占位,`shape='line'/'rect'/'circle'`(走 `usePulse`)。
 
 ### 数据展示
-- **Cell · List** —— 列表行 + List 容器,两模式互斥:**grouped**(默认,白卡 + 8px gap,无 cell 间分隔线)/ **flush**(`<List flush />`,透明底 + cell 间 hairline)。
+- **Cell · List** —— actionable / control / static 三分支；action 默认从
+  title/desc/extra 组合名称，空白显式覆盖回退组合名称，最终仍空白时不渲染
+  外层 button、handler 或 arrow。两种布局:**grouped**(默认,白卡 + 8px gap)/
+  **flush**(`<List flush />`,透明底 + cell 间 hairline)。
 - **Card** —— 内容卡。variant `default`(白底 + card shadow + 边框)/ `plain`(仅白底,无阴影无边框);`flat` 已 deprecated 等价 `plain`。
-- **Grid** —— 九宫格图标网格；只有传 `onPress` 才是 action，默认 accessible
-  name 包含 `badge != null` 的角标（包括 `0`）。
-- **Carousel** —— 轮播(包装 reanimated-carousel v5)。
+- **Grid** —— 九宫格图标网格；只有函数 `onPress` 且 item 最终名称非空时该格
+  才是 button。空白显式名称回退 label + badge；display-only 空名称不创建
+  unnamed merged a11y node。
+- **Carousel** —— display/action 严格分支(包装 reanimated-carousel v5)；
+  只有两个 action props 都是函数且当前 item getter 返回非空 string 才渲染
+  button，否则该 slide 失败关闭为 View 并在 effect 诊断。reduced motion 停止
+  autoplay，单页不渲染 Pagination 或保留高度。
 
 ### 其他 ui
 - **BlurLayer** —— BlurView + tint 双层,intensity `soft`(10)/ `strong`(40)。
@@ -380,7 +401,7 @@ Mono(`fontMono` token):iOS `Menlo` / Android `monospace`。品牌刻意依赖 OS
 - **GlassStats** —— 玻璃数据条(BlurView + N 列)。
 - **Decorations** —— `GradientWash`(线性渐变)+ `RadialHalo`(径向柔光)+ `ScreenBackdrop`(整屏沉浸渐变,`preset="warmOrange"` + 暗色自适配),纯装饰层 `pointerEvents="none"`。
 - **VersionPill** —— 带可见 `VersionStatus { label, color? }` 的版本号药丸；
-  状态文案必需，不能只传颜色。
+  空白状态文案回退“状态未知”并在 effect 诊断，不能只靠颜色表达状态。
 
 ### 聊天(设计语言,代码在 portal)
 Message(非对称圆角气泡)· PromptInput(4 态)· Attachments · Suggestion · Sources · Citation · Reasoning(`思考中…` → `已思考 N.Ns`)· ChainOfThought · Task · Tool · Confirmation(**内联**,绝不模态)· Shimmer · DayDivider。Conversation = 完整线程,由 chat 与 ui 原子组合而成。

@@ -16,6 +16,8 @@ type IteratorFactoryResult =
   | { kind: 'factory'; factory: () => unknown }
   | { kind: 'invalid' };
 
+const mappedThenables = new WeakMap<object, ReactNode>();
+
 function isIconName(value: unknown): value is IconName {
   return (
     typeof value === 'string' &&
@@ -58,6 +60,75 @@ function isThenable(value: unknown): value is ReactNode {
   } catch {
     return false;
   }
+}
+
+function normalizeFragment(
+  value: React.ReactElement,
+  activeIterables: WeakSet<object>,
+  path: string
+): NormalizedNode {
+  try {
+    const props = value.props as { children?: unknown };
+    const normalized = normalizeReactNode(
+      props.children,
+      activeIterables,
+      `${path}.fragment`
+    );
+    if (normalized.kind === 'invalid') return normalized;
+    return {
+      kind: 'node',
+      node: React.cloneElement(value, undefined, normalized.node),
+    };
+  } catch {
+    return { kind: 'invalid' };
+  }
+}
+
+function normalizeThenable(value: object, path: string): NormalizedNode {
+  const cached = mappedThenables.get(value);
+  if (cached !== undefined) return { kind: 'node', node: cached };
+
+  let resolveMapped: (node: unknown) => void = () => {};
+  let rejectMapped: (reason?: unknown) => void = () => {};
+  const mappedPromise = new Promise<unknown>((resolve, reject) => {
+    resolveMapped = resolve;
+    rejectMapped = reject;
+  });
+  const mappedNode = mappedPromise as ReactNode;
+  // 先入 cache 再调用用户 then：同步 thenable 或循环引用也不会递归创建新映射。
+  mappedThenables.set(value, mappedNode);
+
+  try {
+    const then = (value as { then?: unknown }).then;
+    if (typeof then !== 'function') {
+      resolveMapped(null);
+      return { kind: 'node', node: mappedNode };
+    }
+    then.call(
+      value,
+      (resolved: unknown) => {
+        if (resolved === value || resolved === mappedPromise) {
+          resolveMapped(null);
+          return;
+        }
+        try {
+          const normalized = normalizeReactNode(
+            resolved,
+            new WeakSet<object>(),
+            `${path}.then`
+          );
+          resolveMapped(normalized.kind === 'invalid' ? null : normalized.node);
+        } catch {
+          resolveMapped(null);
+        }
+      },
+      (reason: unknown) => rejectMapped(reason)
+    );
+  } catch (error) {
+    rejectMapped(error);
+  }
+
+  return { kind: 'node', node: mappedNode };
 }
 
 function getIteratorFactory(value: object): IteratorFactoryResult {
@@ -198,9 +269,10 @@ function normalizeReactNode(
     return { kind: 'node', node: value };
   }
   if (React.isValidElement(value)) {
-    return hasElementShape(value)
-      ? { kind: 'node', node: value }
-      : { kind: 'invalid' };
+    if (!hasElementShape(value)) return { kind: 'invalid' };
+    return value.type === React.Fragment
+      ? normalizeFragment(value, activeIterables, path)
+      : { kind: 'node', node: value };
   }
   if (typeof value !== 'object' || value === null) {
     return { kind: 'invalid' };
@@ -214,7 +286,7 @@ function normalizeReactNode(
   if (iterator.kind === 'factory') {
     return normalizeIterable(value, iterator.factory, activeIterables, path);
   }
-  if (isThenable(value)) return { kind: 'node', node: value };
+  if (isThenable(value)) return normalizeThenable(value, path);
   if (typeof value !== 'object') return { kind: 'invalid' };
   return isReactPortal(value)
     ? { kind: 'node', node: value }
@@ -224,8 +296,9 @@ function normalizeReactNode(
 /**
  * 未类型化边界的单一分类器。React 的公开 API 无法证明 object 不可伪造；这里拒绝
  * 结构不成立的 marker-only element 与普通 plain object，同时保留 React 19 声明的
- * bigint、Iterable、portal、Promise/thenable 等合法 ReactNode。Iterable 会递归验证并
- * 归一化为新数组，避免把已消费的一次性 iterator 交给 React reconciliation。
+ * bigint、Iterable、portal、Promise/thenable 等合法 ReactNode。Fragment/Iterable
+ * 会递归验证 primitive 叶子；thenable 映射按源对象缓存，避免每次 render 制造新的
+ * suspend identity，并把非法 resolved value 失败关闭为 null。
  */
 export function classifyNavBarSlot(value: unknown): NavBarSlotClassification {
   if (value === undefined || value === null || typeof value === 'boolean') {

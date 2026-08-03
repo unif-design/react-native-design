@@ -150,8 +150,8 @@ const settledIndex = carouselRef.current?.getCurrentIndex();
 slide 的节点类型与 a11y 语义由严格联合决定：
 
 - display slide：不传 `onPressItem` / `getAccessibilityLabel`，每张 slide 是普通 `<View>`，不形成 button 焦点。
-- action slide：必须同时传入 `onPressItem` 与 `getAccessibilityLabel`，每张 slide 才是 RN core `<Pressable accessibilityRole="button">`。这是 Carousel 内与第三方 `GestureDetector` 兼容的窄例外。
-- action 名称固定拼为 `${getAccessibilityLabel(item, index)}，第 ${index + 1} 项，共 ${data.length} 项`，业务名称不能缺失。
+- action slide：运行时只有 `onPressItem` 与 `getAccessibilityLabel` **都是函数**才进入 action 配置；partial 或非函数未类型化值会让整组回退 display-only，并在 effect 诊断。
+- 每个 item 的 getter 结果还会单独验证：trim 后非空 string 才拼为 `${业务名称}，第 ${index + 1} 项，共 ${data.length} 项` 并渲染 RN core button；空白、非 string 或 getter 抛错只让对应 slide 失败关闭为 View，并在 effect 诊断，不生成“第 N 项”兜底按钮名。
 - Pagination 仅在多页时渲染，并由本地 `View` 从 a11y tree 隐藏；隐藏 props 不会透传给第三方 Pagination。
 
 ```tsx

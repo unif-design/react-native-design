@@ -111,7 +111,7 @@ import { Checkbox } from '@unif/react-native-design';
 来源：`src/components/ui/Checkbox/Checkbox.tsx`、`types.ts`。
 
 - 默认 `accessibilityRole`：`'checkbox'`（在 `<Pressable>` 上硬编码）。
-- accessible name：`accessibilityLabel ?? label`；类型保证二者至少存在一个。
+- accessible name：优先 trim 后非空的 `accessibilityLabel`，否则回退 trim 后非空的可见 `label`。两者最终都空白时移除 handler/action 语义，并在 effect 诊断。
 - 状态语义：`accessibilityState={{ checked, disabled: !!disabled }}` —— `checked` 直接映射受控的 `checked` prop，`disabled` 映射 `disabled` prop。
 - 禁用语义：同时传 `disabled={true}` 与 `onPress={undefined}`，不是在 handler 内静默 no-op。
 - 视觉方框、Icon 与可见文字是外层 checkbox 的 display descendants；它们只在本地 RN `View` / `Text` 上复用共享 `A11Y_HIDDEN_PROPS`，不会生成重复焦点，也不会把隐藏 props 透传给第三方 Icon。

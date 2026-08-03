@@ -10,10 +10,12 @@ describe('VersionPill content', () => {
     expect(resolveVersionStatus(undefined, lightColors)).toEqual({
       label: '正常',
       color: lightColors.success,
+      diagnostics: [],
     });
     expect(resolveVersionStatus({ label: '测试中' }, lightColors)).toEqual({
       label: '测试中',
       color: lightColors.foregroundMuted,
+      diagnostics: [],
     });
   });
 
@@ -26,8 +28,22 @@ describe('VersionPill content', () => {
     ).toEqual({
       label: '已废',
       color: lightColors.error,
+      diagnostics: [],
     });
   });
+
+  test.each(['', '   ', '\t'])(
+    '空白 status label 使用非颜色语义并记诊断',
+    (label) => {
+      expect(
+        resolveVersionStatus({ label, color: lightColors.error }, lightColors)
+      ).toEqual({
+        label: '状态未知',
+        color: lightColors.error,
+        diagnostics: ['status.label'],
+      });
+    }
+  );
 
   test('组合名称含 version、build 和 status', () => {
     expect(

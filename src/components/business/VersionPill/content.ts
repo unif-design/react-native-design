@@ -1,4 +1,5 @@
 import type { ColorTokens } from '../../../theme';
+import { normalizeNonBlankText } from '../../ui/shared/accessibilityName';
 import type { VersionStatus } from './types';
 
 type VersionStatusColors = Pick<ColorTokens, 'foregroundMuted' | 'success'>;
@@ -6,6 +7,7 @@ type VersionStatusColors = Pick<ColorTokens, 'foregroundMuted' | 'success'>;
 type ResolvedVersionStatus = {
   label: string;
   color: string;
+  diagnostics: readonly string[];
 };
 
 export function resolveVersionStatus(
@@ -13,11 +15,13 @@ export function resolveVersionStatus(
   colors: VersionStatusColors
 ): ResolvedVersionStatus {
   if (status == null) {
-    return { label: '正常', color: colors.success };
+    return { label: '正常', color: colors.success, diagnostics: [] };
   }
+  const label = normalizeNonBlankText(status.label);
   return {
-    label: status.label,
+    label: label ?? '状态未知',
     color: status.color ?? colors.foregroundMuted,
+    diagnostics: label === undefined ? ['status.label'] : [],
   };
 }
 

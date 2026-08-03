@@ -1,4 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
+import { resolveConfirmLabels } from '../../../../src/components/ui/Confirm/labels';
 import { createConfirmStore } from '../../../../src/components/ui/Confirm/store';
 import type {
   ConfirmEntry,
@@ -25,6 +26,26 @@ const firstEntry = (events: readonly ConfirmEvent[]): ConfirmEntry => {
   if (!shown) throw new Error('没有收到 show 事件');
   return shown.entry;
 };
+
+describe('Confirm labels', () => {
+  test('trim 自定义 label，空白值回退默认文案', () => {
+    expect(
+      resolveConfirmLabels({
+        confirmLabel: '  删除  ',
+        cancelLabel: '\t',
+      })
+    ).toEqual({
+      confirmLabel: '删除',
+      cancelLabel: '取消',
+    });
+    expect(
+      resolveConfirmLabels({ confirmLabel: '', cancelLabel: '  返回 ' })
+    ).toEqual({
+      confirmLabel: '确认',
+      cancelLabel: '返回',
+    });
+  });
+});
 
 describe('ConfirmStore — 无 Host', () => {
   test('无 Host 时立即 resolve(false),不悬挂', async () => {

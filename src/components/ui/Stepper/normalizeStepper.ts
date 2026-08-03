@@ -13,11 +13,11 @@ export type NormalizedStepper = {
 };
 
 type StepperNormalizationInput = {
-  value: number;
-  min?: number;
-  max?: number;
-  step?: number;
-  disabled?: boolean;
+  value: unknown;
+  min?: unknown;
+  max?: unknown;
+  step?: unknown;
+  disabled?: unknown;
 };
 
 export type StepperDirection = 'increment' | 'decrement';
@@ -35,13 +35,18 @@ export function normalizeStepper({
   step = 1,
   disabled = false,
 }: StepperNormalizationInput): NormalizedStepper {
-  const safeMin = Number.isFinite(min) ? min : 0;
-  const safeMax = Number.isFinite(max) && max >= safeMin ? max : safeMin;
-  const safeStep = Number.isFinite(step) && step > 0 ? step : 1;
-  const safeValue = Number.isNaN(value)
-    ? safeMin
-    : Math.min(safeMax, Math.max(safeMin, value));
-  const rangeDisabled = disabled || safeMin === safeMax;
+  const safeMin = typeof min === 'number' && Number.isFinite(min) ? min : 0;
+  const safeMax =
+    typeof max === 'number' && Number.isFinite(max) && max >= safeMin
+      ? max
+      : safeMin;
+  const safeStep =
+    typeof step === 'number' && Number.isFinite(step) && step > 0 ? step : 1;
+  const safeValue =
+    typeof value === 'number' && Number.isFinite(value)
+      ? Math.min(safeMax, Math.max(safeMin, value))
+      : safeMin;
+  const rangeDisabled = disabled === true || safeMin === safeMax;
   const canDecrement = !rangeDisabled && safeValue > safeMin;
   const canIncrement = !rangeDisabled && safeValue < safeMax;
   const accessibilityActions: NormalizedStepper['accessibilityActions'] = [];

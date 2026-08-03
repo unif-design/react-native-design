@@ -34,7 +34,9 @@ import {
   type InputProps,
   type NavBarAction,
   type NavBarSlot,
+  type TextFieldContainerStyle,
   type TextFieldHandle,
+  type TextFieldSlot,
   type VersionStatus,
 } from '../src';
 
@@ -43,6 +45,22 @@ const noop = () => {};
 const inputRef = createRef<TextFieldHandle>();
 const tooShortContainer = { height: 20 };
 const safeContainerStyle = { marginTop: 8 };
+const publicTextFieldContainerStyle: TextFieldContainerStyle = {
+  marginTop: 8,
+  paddingHorizontal: 12,
+};
+const publicTextFieldSlot: TextFieldSlot = {
+  kind: 'icon',
+  icon: 'search',
+  size: 18,
+};
+const invalidTextFieldSlot: TextFieldSlot = {
+  kind: 'text',
+  // @ts-expect-error TextFieldSlot text 分支只接受 string | number
+  value: { text: 'invalid' },
+};
+// @ts-expect-error TextFieldContainerStyle 不允许覆盖内部 height
+const invalidTextFieldContainerStyle: TextFieldContainerStyle = { height: 20 };
 const logoSource = { uri: 'https://example.test/logo.png' } as const;
 
 // --- Button / IconButton / NavBar:所有操作必须显式可达 --------------------
@@ -242,6 +260,16 @@ inputRef.current?.setNativeProps({ text: 'bypass' });
 // --- slot 判别联合 --------------------------------------------------------
 
 <Input defaultValue="" leading={{ kind: 'icon', icon: 'search' }} />;
+<Input
+  defaultValue=""
+  leading={publicTextFieldSlot}
+  containerStyle={publicTextFieldContainerStyle}
+/>;
+<Input
+  defaultValue=""
+  leading={invalidTextFieldSlot}
+  containerStyle={invalidTextFieldContainerStyle}
+/>;
 <Input defaultValue="" trailing={{ kind: 'text', value: 10 }} />;
 <Input
   defaultValue=""

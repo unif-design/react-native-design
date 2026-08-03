@@ -2,6 +2,7 @@ import { describe, expect, test } from '@jest/globals';
 import React from 'react';
 import {
   buildCellAccessibilityLabel,
+  resolveCellActionAccessibilityLabel,
   stringifyCellText,
 } from '../../../../src/components/ui/Cell/content';
 
@@ -44,5 +45,26 @@ describe('Cell content', () => {
         },
       })
     ).toBe('设备');
+  });
+
+  test('空白显式名称回退到生成名称并 trim 各片段', () => {
+    expect(
+      resolveCellActionAccessibilityLabel({
+        accessibilityLabel: '   ',
+        title: ' 订单 ',
+        desc: ' 待支付 ',
+        extra: { kind: 'text', value: 0 },
+      })
+    ).toBe('订单，待支付，0');
+  });
+
+  test('显式和生成名称都为空时失败关闭', () => {
+    expect(
+      resolveCellActionAccessibilityLabel({
+        accessibilityLabel: '\t',
+        title: '   ',
+        desc: '',
+      })
+    ).toBeUndefined();
   });
 });

@@ -44,7 +44,7 @@ export function TextFieldSlot({
   }, [iconDiagnosticKey]);
   useEffect(() => {
     if (slotDiagnosticKey.length > 0) {
-      log.warn('非法 action slot 已移除：需要函数 handler 和非空可访问名称。');
+      log.warn(`非法 TextField slot(${slotDiagnosticKey})已移除。`);
     }
   }, [slotDiagnosticKey]);
 

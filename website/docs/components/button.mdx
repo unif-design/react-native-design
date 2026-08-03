@@ -73,7 +73,7 @@ import { Button } from '@unif/react-native-design';
 
 | Prop | Type | 默认 | 说明 |
 |---|---|---|---|
-| `label` | `string` | — | 按钮文字(icon-only 场景请用 [IconButton](/docs/components/icon-button)) |
+| `label` | `string` | — | 按钮文字，同时作为业务名称；trim 后空白会失败关闭 action 并在 effect 诊断 |
 | `onPress` | `() => void` | — | **必填**点击回调；`disabled` / `loading` 时组件移除有效 handler |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | 高度 28 / 36 / 44 |
 | `variant` | `'primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'danger' \| 'text'` | `'primary'` | 视觉变体 |
@@ -91,7 +91,7 @@ import { Button } from '@unif/react-native-design';
 来源：`src/components/ui/Button/ButtonBase.tsx`、`Button.tsx`、`types.ts`。
 
 - 默认 `accessibilityRole`：`'button'`（在 `ButtonBase` 中硬编码，`accessibilityRole = 'button'`）。
-- a11y props：`accessibilityLabel` 自动取自必填的 `label`（`<ButtonBase accessibilityLabel={label}>`），无需另传；`accessibilityHint` 可选，仅在「行为不显然」时补充（如「切换主题」）。
+- a11y props：`accessibilityLabel` 自动取 trim 后非空的必填 `label`，无需另传；`accessibilityHint` 可选，仅在「行为不显然」时补充（如「切换主题」）。空白 `label` 不会留下 unnamed button：组件移除 handler/action 语义，并在 effect 中诊断。
 - 状态语义：`disabled` **或** `loading` 任一为真时都会上报 `accessibilityState.disabled: true` 并移除有效 handler；loading 还上报 `busy: true`（此时 label 被 `ActivityIndicator` 替换）。调用方传入的状态不能覆盖这两个字段。
 
 ```tsx

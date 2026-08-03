@@ -129,7 +129,7 @@ import { Switch, Cell, List } from '@unif/react-native-design';
 来源：`src/components/ui/Switch/Switch.tsx`、`Switch.web.tsx`、`types.ts`（native 与 web 两份实现 a11y 完全一致）。
 
 - 默认 `accessibilityRole`：包裹的 `<Pressable>` 上硬编码 `'switch'`。
-- accessible name：`accessibilityLabel` 是类型必填；即使视觉文字位于相邻 Cell / FormRow，也必须把该文字显式传给 Switch，不能依赖上下文猜测。
+- accessible name：`accessibilityLabel` 是类型必填且运行时会 trim；空白值移除 handler/action 语义并在 effect 诊断。即使视觉文字位于相邻 Cell / FormRow，也必须显式传入非空名称。
 - 放在 Cell 行尾时必须使用 `extra={{ kind: 'control', node: <Switch ... /> }}`；Cell 外层保持普通 `View`，Switch 是唯一交互与 a11y owner。
 - 状态语义：`accessibilityState={{ checked: value, disabled: !!disabled }}`——`checked` 直接映射必填的 `value`，`disabled` 映射 `disabled` prop。
 - 禁用语义：同时传 `disabled={true}` 与 `onPress={undefined}`。

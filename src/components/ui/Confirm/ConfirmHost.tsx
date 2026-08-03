@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { space, useThemedStyles } from '../../../theme';
 import { Button } from '../Button';
 import { registerConfirmHost, settleConfirm } from './confirm';
+import { resolveConfirmLabels } from './labels';
 import { makeStyles } from './styles';
 import type { ConfirmEntry, ConfirmEvent } from './store';
 
@@ -46,6 +47,10 @@ export function ConfirmHost(): React.JSX.Element | null {
   const lastEntryRef = useRef<ConfirmEntry | null>(null);
   if (entry) lastEntryRef.current = entry;
   const display = entry ?? lastEntryRef.current;
+  const labels = resolveConfirmLabels({
+    confirmLabel: display?.options.confirmLabel,
+    cancelLabel: display?.options.cancelLabel,
+  });
 
   useEffect(() => {
     const subscriber = (event: ConfirmEvent) => {
@@ -142,14 +147,14 @@ export function ConfirmHost(): React.JSX.Element | null {
               <View style={styles.actions}>
                 <Button
                   testID="confirm-cancel"
-                  label={display.options.cancelLabel ?? '取消'}
+                  label={labels.cancelLabel}
                   variant="secondary"
                   style={styles.action}
                   onPress={handleCancel}
                 />
                 <Button
                   testID="confirm-ok"
-                  label={display.options.confirmLabel ?? '确认'}
+                  label={labels.confirmLabel}
                   variant={display.options.destructive ? 'danger' : 'primary'}
                   style={styles.action}
                   onPress={handleConfirm}

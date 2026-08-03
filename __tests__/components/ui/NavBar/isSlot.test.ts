@@ -123,6 +123,39 @@ describe('NavBar slot classification', () => {
     }
   });
 
+  test('recursively wraps Fragment primitives while preserving Fragment semantics', () => {
+    const fragment = React.createElement(
+      React.Fragment,
+      { key: 'outer' },
+      'fragment',
+      React.createElement(React.Fragment, { key: 'inner' }, ['nested', 2n])
+    );
+
+    const result = classifyNavBarSlot(fragment);
+
+    expect(result.kind).toBe('node');
+    if (result.kind !== 'node' || !React.isValidElement(result.node)) return;
+    expect(result.node.type).toBe(React.Fragment);
+    expect(result.node.key).toBe('outer');
+    const children = (result.node.props as { children?: React.ReactNode })
+      .children;
+    expect(Array.isArray(children)).toBe(true);
+    if (!Array.isArray(children)) return;
+    expectTextNodeKey(children[0], 'fragment', 'slot.fragment.0');
+    const nestedFragment = children[1];
+    expect(React.isValidElement(nestedFragment)).toBe(true);
+    if (!React.isValidElement(nestedFragment)) return;
+    expect(nestedFragment.type).toBe(React.Fragment);
+    expect(nestedFragment.key).toBe('inner');
+    const nestedChildren = (
+      nestedFragment.props as { children?: React.ReactNode }
+    ).children;
+    expect(Array.isArray(nestedChildren)).toBe(true);
+    if (!Array.isArray(nestedChildren)) return;
+    expectTextNode(nestedChildren[0], 'nested');
+    expectTextNode(nestedChildren[1], '2');
+  });
+
   test('keeps primitive wrapper keys stable across repeated normalization', () => {
     const first = classifyNavBarSlot([0, ['nested', 1n]]);
     const second = classifyNavBarSlot([0, ['nested', 1n]]);
@@ -210,8 +243,54 @@ describe('NavBar slot classification', () => {
       expect([...generator]).toEqual([]);
     }
     if (promiseResult.kind === 'node') {
-      expect(promiseResult.node).toBe(promise);
+      expect(promiseResult.node).not.toBe(promise);
     }
+  });
+
+  test('normalizes a thenable primitive once and reuses the mapped thenable', async () => {
+    const promise = Promise.resolve('deferred primitive');
+
+    const first = classifyNavBarSlot(promise);
+    const second = classifyNavBarSlot(promise);
+
+    expect(first.kind).toBe('node');
+    expect(second.kind).toBe('node');
+    if (first.kind !== 'node' || second.kind !== 'node') return;
+    expect(second.node).toBe(first.node);
+    const resolved = await (first.node as Promise<React.ReactNode>);
+    expectTextNode(resolved, 'deferred primitive');
+  });
+
+  test('fails closed when a thenable resolves to an invalid node', async () => {
+    const invalid = Promise.resolve({ plain: 'object' });
+    const result = classifyNavBarSlot(invalid);
+
+    expect(result.kind).toBe('node');
+    if (result.kind !== 'node') return;
+    await expect(result.node as Promise<React.ReactNode>).resolves.toBeNull();
+  });
+
+  test('fails closed when a synchronous thenable resolves to itself', async () => {
+    const selfThenable = {
+      then(resolve: (value: unknown) => void) {
+        resolve(selfThenable);
+      },
+    };
+    const result = classifyNavBarSlot(selfThenable);
+
+    expect(result.kind).toBe('node');
+    if (result.kind !== 'node') return;
+    await expect(result.node as Promise<React.ReactNode>).resolves.toBeNull();
+  });
+
+  test('preserves a thenable rejection reason', async () => {
+    const reason = new Error('deferred failure');
+    const rejected = Promise.reject(reason);
+    const result = classifyNavBarSlot(rejected);
+
+    expect(result.kind).toBe('node');
+    if (result.kind !== 'node') return;
+    await expect(result.node as Promise<React.ReactNode>).rejects.toBe(reason);
   });
 
   test('normalizes nested legal ReactNode collections', () => {
@@ -232,8 +311,16 @@ describe('NavBar slot classification', () => {
       expect(Array.isArray(result.node)).toBe(true);
       if (Array.isArray(result.node)) {
         expectTextNode(result.node[0], '1');
-        expect(result.node[1]).toBe(promise);
-        expect(result.node[2]).toBe(element);
+        expect(result.node[1]).not.toBe(promise);
+        expect(result.node[2]).not.toBe(element);
+        expect(React.isValidElement(result.node[2])).toBe(true);
+        if (React.isValidElement(result.node[2])) {
+          expect(result.node[2].type).toBe(React.Fragment);
+          expectTextNode(
+            (result.node[2].props as { children?: React.ReactNode }).children,
+            'element node'
+          );
+        }
         expect(result.node[3]).toBe(portal);
         expect(result.node[4]).toBeNull();
         const nestedNodes = result.node[5];
@@ -273,14 +360,20 @@ describe('NavBar slot classification', () => {
     expect(classifyNavBarSlot(callableIterable).kind).toBe('invalid');
   });
 
-  test('accepts a Promise when a non-function iterator property is incidental', () => {
+  test('accepts a Promise when a non-function iterator property is incidental', async () => {
     const promise = Object.assign(Promise.resolve('deferred node'), {
       [Symbol.iterator]: 1,
     });
     const result = classifyNavBarSlot(promise);
 
     expect(result.kind).toBe('node');
-    if (result.kind === 'node') expect(result.node).toBe(promise);
+    if (result.kind === 'node') {
+      expect(result.node).not.toBe(promise);
+      expectTextNode(
+        await (result.node as Promise<React.ReactNode>),
+        'deferred node'
+      );
+    }
   });
 
   test.each([

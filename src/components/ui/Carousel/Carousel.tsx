@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 import {
   Carousel as ReanimatedCarousel,
@@ -10,13 +10,18 @@ import {
   usePrefersReducedMotion,
   useThemedStyles,
 } from '../../../theme';
+import { createLogger } from '../../../utils/logger';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import {
   effectiveCarouselAutoplay,
+  normalizeCarouselAction,
+  resolveCarouselItemAccessibility,
   shouldRenderCarouselPagination,
 } from './behavior';
 import { makeCarouselStyles } from './styles';
 import type { CarouselProps, CarouselRef } from './types';
+
+const log = createLogger('Carousel');
 
 /** Carousel —— 包装 `react-native-reanimated-carousel@5.0.0`。
  *
@@ -54,8 +59,42 @@ function CarouselInner<T>(
     showIndicator,
     data.length
   );
-  const isActionable =
-    onPressItem !== undefined && getAccessibilityLabel !== undefined;
+  const action = normalizeCarouselAction<T>(onPressItem, getAccessibilityLabel);
+  const itemAccessibility =
+    action.kind === 'action'
+      ? data.map((item, index) =>
+          resolveCarouselItemAccessibility(
+            action.getAccessibilityLabel,
+            item,
+            index,
+            data.length
+          )
+        )
+      : [];
+  const actionDiagnosticKey = action.diagnostics.join(',');
+  const itemDiagnosticKey = itemAccessibility
+    .map((result, index) =>
+      result.diagnostics.length > 0
+        ? `${index}:${result.diagnostics.join('+')}`
+        : ''
+    )
+    .filter(Boolean)
+    .join(',');
+
+  useEffect(() => {
+    if (actionDiagnosticKey.length > 0) {
+      log.warn(
+        'Carousel action 必须同时提供 onPressItem 与 getAccessibilityLabel 函数，已按 display-only 渲染。'
+      );
+    }
+  }, [actionDiagnosticKey]);
+  useEffect(() => {
+    if (itemDiagnosticKey.length > 0) {
+      log.warn(
+        `Carousel item 名称无效(${itemDiagnosticKey})，对应 slide 已按 display-only 渲染。`
+      );
+    }
+  }, [itemDiagnosticKey]);
   // Carousel 把逻辑页进度写进 shared value,Pagination 自动跟随。
   const progress = useSharedValue<number>(0);
 
@@ -84,18 +123,19 @@ function CarouselInner<T>(
         renderItem={({ item, index, relativeProgress }) => {
           const content = renderItem({ item, index, relativeProgress });
           const itemTestID = `${testID ?? 'carousel'}-item-${index}`;
+          const itemLabel = itemAccessibility[index]?.label;
 
-          if (isActionable) {
+          if (action.kind === 'action' && itemLabel !== undefined) {
             // RN Pressable 而非 RNGH Pressable:Carousel 的 GestureDetector 已挂在
             // ReanimatedCarousel 内部,外层再套 RNGH Pressable 会产生手势冲突;
             // 用 RN 原生 Pressable 让库自己的拖拽手势优先,tap 仍正常触发。
             return (
               <Pressable
-                onPress={() => onPressItem(item, index)}
+                onPress={() => action.onPressItem(item, index)}
                 style={{ width, height }}
                 testID={itemTestID}
                 accessibilityRole="button"
-                accessibilityLabel={`${getAccessibilityLabel(item, index)}，第 ${index + 1} 项，共 ${data.length} 项`}
+                accessibilityLabel={itemLabel}
               >
                 {content}
               </Pressable>

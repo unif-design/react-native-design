@@ -31,4 +31,13 @@ describe('gridItemAccessibilityLabel', () => {
       })
     ).toBe('消息，3');
   });
+
+  test('显式和可见名称都空白时不创建 unnamed merged node', () => {
+    expect(
+      gridItemAccessibilityLabel({
+        label: '   ',
+        accessibilityLabel: '\t',
+      })
+    ).toBeUndefined();
+  });
 });

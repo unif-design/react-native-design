@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { createLogger } from '../../../utils/logger';
 import { ButtonBase } from '../Button/ButtonBase';
 import { Icon } from '../Icon';
+import { normalizeNonBlankText } from '../shared/accessibilityName';
 import type { IconButtonProps } from './types';
+
+const log = createLogger('IconButton');
 
 /**
  * Icon-only 按钮 —— 与 Button 共享 ButtonBase chrome。
@@ -26,6 +30,17 @@ export function IconButton({
   style,
   testID,
 }: IconButtonProps): React.JSX.Element {
+  const accessibleName = normalizeNonBlankText(accessibilityLabel);
+  const hasBlankLabel = accessibleName === undefined;
+
+  useEffect(() => {
+    if (hasBlankLabel) {
+      log.warn(
+        'IconButton accessibilityLabel 不能为空白，当前 action 已禁用。'
+      );
+    }
+  }, [hasBlankLabel]);
+
   return (
     <ButtonBase
       square
@@ -33,8 +48,8 @@ export function IconButton({
       size={size}
       variant={variant}
       loading={loading}
-      disabled={disabled}
-      accessibilityLabel={accessibilityLabel}
+      disabled={disabled === true || hasBlankLabel}
+      accessibilityLabel={accessibleName}
       accessibilityHint={accessibilityHint}
       accessibilityState={accessibilityState}
       style={style}

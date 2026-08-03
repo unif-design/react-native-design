@@ -87,7 +87,7 @@ import { NavBar } from '@unif/react-native-design';
 | `variant` | `'default' \| 'brand' \| 'transparent'` | `'default'` | 视觉变体：`default` 白底 hairline + 深字 / `brand` 品牌橙底 + 白字 / `transparent` 透明无边框 + **深字 `c.foreground`**（浮在浅色 hero 上；若需白字深色浮层后续加 `transparentLight`） |
 | `testID` | `string?` | — | E2E 定位 |
 
-> `left` / `right` 传完整 `NavBarAction` 时渲染为内部 `IconButton`（`variant='ghost'`，icon 必须是生成的 `IconName`，色按 variant tint：brand 用 `c.onPrimary`、其余 `c.foreground`）；展示节点中的 `string` / `number` / `bigint`（包括 `0`）会递归包装为本地 `Text`，React element / Promise / portal 保持原有语义。缺字段、非法 icon 或伪造 React 标记的非类型安全 plain object 会在 effect 中诊断一次并渲染为空，不会伪造 handler 或英文 icon 名。标题用 `t.h3 + 0.5` / `fw.semi` / `letterSpacing: -0.2`，副标题 `t.micro`（11）。
+> `left` / `right` 传完整 `NavBarAction` 时渲染为内部 `IconButton`（`variant='ghost'`，icon 必须是生成的 `IconName`）。展示节点中的 `string` / `number` / `bigint`（包括 Fragment、nested collection 与 thenable resolved value 内的 primitive）会递归包装为本地 `Text`；非 Fragment element / portal 保持原有语义。thenable 映射按稳定源对象缓存，拒绝原因保持不变，非法 resolved value 失败关闭。缺字段、非法 icon 或 malformed node 会在 effect 中诊断并渲染为空。
 
 ## 安全区（Safe Area）
 

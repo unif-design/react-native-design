@@ -46,7 +46,7 @@ if (ok) doLogout();
 
 - 对话框容器走 RN 原生 `<Modal transparent animationType="slide">`。backdrop 虽可供触屏用户点击取消，但显式 `accessible={false}`，**不会**以“关闭”按钮进入 a11y tree，避免把标题、说明和两个 action 合并成一个节点。
 - 标题 / 说明用 `<Text>`（`entry.options.title` / `entry.options.message`）渲染，screen reader 可读到文字。
-- 取消 / 确认两个按钮用本库 [Button](./button) 渲染，自动带 `accessibilityRole='button'`，且 `accessibilityLabel` 取自各自的文案：取消← `cancelLabel ?? '取消'`、确认← `confirmLabel ?? '确认'`。
+- 取消 / 确认两个按钮用本库 [Button](./button) 渲染。自定义 `cancelLabel` / `confirmLabel` 会先 trim；空白值分别回退“取消”/“确认”，因此不会把空名称传给 Button。
 - screen reader 的取消路径是可见的取消按钮；Android 系统返回走 Modal 的 `onRequestClose`，同样结算为 `false`。
 
 要让 SR 读到清晰语义，给 `title`（必填）/ `confirmLabel` / `cancelLabel` 传明确文案即可；组件层无额外 a11y 旋钮。
