@@ -25,6 +25,7 @@ import {
   Stepper,
   Switch,
   Textarea,
+  Thumbnail,
   VersionPill,
   type CellExtra,
   type CellLeading,
@@ -37,6 +38,7 @@ import {
   type TextFieldContainerStyle,
   type TextFieldHandle,
   type TextFieldSlot,
+  type ThumbnailImageStyle,
   type VersionStatus,
 } from '../src';
 
@@ -62,6 +64,12 @@ const invalidTextFieldSlot: TextFieldSlot = {
 // @ts-expect-error TextFieldContainerStyle 不允许覆盖内部 height
 const invalidTextFieldContainerStyle: TextFieldContainerStyle = { height: 20 };
 const logoSource = { uri: 'https://example.test/logo.png' } as const;
+const thumbnailContainerStyle = {
+  marginLeft: 8,
+  transform: [{ scale: 1.1 }],
+} as const;
+const legacyThumbnailStyle = { opacity: 0.5 };
+const invalidThumbnailImageStyle = { width: 999 };
 
 // --- Button / IconButton / NavBar:所有操作必须显式可达 --------------------
 
@@ -142,6 +150,27 @@ const navBarDisplaySlot: NavBarSlot = <Text>只读</Text>;
 <Logo source={logoSource} />;
 // @ts-expect-error label alias removed
 <Logo source={logoSource} label="Unif" />;
+
+// --- Thumbnail:source exactly-one + layout / visual style 分层 -------------
+
+const publicThumbnailImageStyle: ThumbnailImageStyle = {
+  opacity: 0.5,
+  tintColor: 'red',
+};
+<Thumbnail
+  uri="https://example.test/thumbnail.png"
+  containerStyle={thumbnailContainerStyle}
+  imageStyle={publicThumbnailImageStyle}
+/>;
+<Thumbnail source={logoSource} />;
+// @ts-expect-error exactly one source
+<Thumbnail />;
+// @ts-expect-error uri/source mutually exclusive
+<Thumbnail uri="a" source={logoSource} />;
+// @ts-expect-error old style alias removed
+<Thumbnail uri="a" style={legacyThumbnailStyle} />;
+// @ts-expect-error imageStyle cannot change geometry
+<Thumbnail uri="a" imageStyle={invalidThumbnailImageStyle} />;
 
 const publicVersionStatus: VersionStatus = { label: '测试中' };
 <VersionPill version="1.0.0" status={publicVersionStatus} />;

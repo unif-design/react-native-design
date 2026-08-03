@@ -82,7 +82,11 @@ export type { TagProps, TagSize, TagVariant } from './Tag';
 export { Textarea } from './Textarea';
 export type { TextareaProps } from './Textarea';
 export { Thumbnail } from './Thumbnail';
-export type { ThumbnailProps, ThumbnailSize } from './Thumbnail';
+export type {
+  ThumbnailImageStyle,
+  ThumbnailProps,
+  ThumbnailSize,
+} from './Thumbnail';
 export { toast, ToastHost } from './Toast';
 export type {
   ToastEntry,

@@ -30,9 +30,11 @@ import {
   Tag,
   Textarea,
   ThemeProvider,
+  Thumbnail,
   ToastHost,
   VersionPill,
   confirm,
+  r,
   toast,
   useColors,
   usePrefersReducedMotion,
@@ -259,6 +261,8 @@ export function RuntimeApiScreen(): React.JSX.Element {
               <FontScaleSection />
 
               <ImageSourceAttemptSection />
+
+              <ThumbnailSection />
 
               <Section title="Toast">
                 <Button
@@ -720,6 +724,54 @@ function ImageSourceAttemptSection(): React.JSX.Element {
         source={invalidNestedSource}
         testID="invalid-nested-drawer"
       />
+    </Section>
+  );
+}
+
+/**
+ * Thumbnail 的 outer layout / inner visual / ring 始终分层。
+ *
+ * 通过 Inspector 测量 outer testID 与 inner child；本区未在真实 native/Web
+ * 运行前只能记 BLOCKED。
+ */
+function ThumbnailSection(): React.JSX.Element {
+  const [selected, setSelected] = useState(false);
+  const mdFrameSize = `${r(113)}×${r(67)}`;
+  const smFrameSize = `${r(64)}×${r(40)}`;
+
+  return (
+    <Section title="Thumbnail stable layout / visual frame / ring">
+      <Text style={styles.result}>
+        thumbnail-layout-probe 的 outer 固定为 196×112，并带 translate + scale；
+        inner visual frame 的 402pt 设计基准为 md 113×67，当前平台必须实测为{' '}
+        {mdFrameSize}。图片 opacity=0.45，但宽高/top runtime override
+        必须被剔除。切换 selected 前后，公开两层 View、Image attempt/ring
+        overlay、outer/inner measured size 和 caller transform
+        都不得变化；只允许 ring 由透明切 primary。真实 native/Web Inspector
+        未核验前不得记 PASS。
+      </Text>
+      <View style={styles.row}>
+        <Thumbnail
+          source={DISPLAY_IMAGE_SOURCE}
+          selected={selected}
+          containerStyle={styles.thumbnailOuterProbe}
+          imageStyle={styles.thumbnailRuntimeImageProbe as never}
+          accessibilityLabel="Thumbnail 稳定结构图片"
+          testID="thumbnail-layout-probe"
+        />
+        <Button
+          label={selected ? '切换为未选中' : '切换为已选中'}
+          variant="secondary"
+          onPress={() => setSelected((current) => !current)}
+        />
+      </View>
+      <Result label="thumbnail selected" value={String(selected)} />
+      <Text style={styles.result}>
+        thumbnail-invalid-placeholder 的空白 URI 必须保留 sm 64×40
+        设计基准、当前平台 {smFrameSize} 的 outer + visual frame 和透明
+        ring，不挂 Image、不返回 null；dev 诊断必须来自 effect。
+      </Text>
+      <Thumbnail uri="   " size="sm" testID="thumbnail-invalid-placeholder" />
     </Section>
   );
 }
@@ -1391,6 +1443,18 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     alignItems: 'center',
     gap: 12,
+  },
+  thumbnailOuterProbe: {
+    width: 196,
+    height: 112,
+    transform: [{ translateX: 4 }, { scale: 0.95 }],
+  },
+  thumbnailRuntimeImageProbe: {
+    opacity: 0.45,
+    position: 'absolute',
+    top: 12,
+    width: 999,
+    height: 999,
   },
   selectionRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   navBarFrame: { borderWidth: 1 },
