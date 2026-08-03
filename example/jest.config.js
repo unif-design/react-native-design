@@ -1,5 +1,6 @@
 module.exports = {
   preset: '@react-native/jest-preset',
+  testMatch: ['**/*.test.[jt]s?(x)'],
   moduleNameMapper: {
     '^@unif/react-native-design$': '<rootDir>/../src/index.tsx',
     '^react$': '<rootDir>/node_modules/react',
