@@ -509,11 +509,12 @@ function SelectionControlsSection(): React.JSX.Element {
 }
 
 /**
- * Stepper:三个真实 44pt outer frame、归一化零范围与边界 action。
+ * Stepper:三个真实至少 44pt outer frame、归一化零范围与边界 action。
  *
- * Inspector 在所有平台测 `stepper-middle-decrement/value/increment` 都至少 44×44
- * （左右两侧精确 44×44）。对应 visual 实现为 r(32)/r(48)，只有 Web 与 402pt
- * RN harness 才写死为 32/48；`stepper-zero-range` 的 sm visual 为 28/r(40)。
+ * Inspector 应验证 side outer = max(44, visual button width) × max(44, visual height)，
+ * value outer = max(44, visual value width) × max(44, visual height)。sm visual 是
+ * r(28)×r(28) / r(40)×r(28) / r(28)×r(28)；只有 Web / 402pt RN harness 得到
+ * 28/32/40/48 基准值。
  */
 function StepperSection(): React.JSX.Element {
   const [middleValue, setMiddleValue] = useState(1);
@@ -525,10 +526,11 @@ function StepperSection(): React.JSX.Element {
     <Section title="Stepper 44pt / boundary actions">
       <Text style={styles.result}>
         用 Inspector 测量：stepper-middle-decrement/value/increment 的三个 outer
-        在所有平台均至少 44×44，左右两侧精确 44×44；md visual 是 r(32)×r(32) /
-        r(48)×r(32) / r(32)×r(32)，仅 Web 与 402pt RN harness 对应 32×32 / 48×32
-        / 32×32。stepper-zero-range 使用 sm；visual 是 28×28 / r(40)×28 /
-        28×28，但 outer 仍是固定 44pt。
+        均至少 44pt：side outer = max(44, visual button width) × max(44, visual
+        height)，value outer = max(44, visual value width) × max(44, visual
+        height)。 md visual 是 r(32)×r(32) / r(48)×r(32) / r(32)×r(32)，仅 Web
+        与 402pt RN harness 对应 32×32 / 48×32 / 32×32。stepper-zero-range 使用
+        sm；visual 是 r(28)×r(28) / r(40)×r(28) / r(28)×r(28)。
       </Text>
       <Text style={styles.result}>
         用 screen reader 检查：中间值同时有增加/减少；min 只提供增加，max

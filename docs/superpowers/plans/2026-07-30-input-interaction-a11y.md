@@ -1077,7 +1077,7 @@ git commit -m "feat: model cell content and actions explicitly"
 
 ---
 
-### Task 7: Normalize Stepper actions and give every node a real 44pt frame
+### Task 7: Normalize Stepper actions and give every node a real at-least-44pt frame
 
 **Files:**
 
@@ -1166,7 +1166,7 @@ Safe min defaults 0; safe max defaults/collapses to safe min when invalid or low
 
 - [ ] **Step 5: Rebuild the three frames**
 
-Each left/right Pressable is exactly `fixed.hitTarget × fixed.hitTarget`, with the existing `dims.btn × dims.h` visual cell nested and edge-aligned toward the center. The central adjustable View has `minWidth/minHeight: fixed.hitTarget`; its nested visual value cell retains the current `dims.w × dims.h`.
+Each outer is at least `fixed.hitTarget` and grows with its unbounded visual: `side outer = max(44, visual button width) × max(44, visual height)` and `value outer = max(44, visual value width) × max(44, visual height)`. The existing `dims.btn × dims.h` side visual remains edge-aligned toward the center; the `dims.w × dims.h` central visual remains centered. sm visual is `r(28)×r(28) / r(40)×r(28) / r(28)×r(28)`, not physical 28 constants. Only Web / 402pt RN harness yields base 28/32/40/48 values; do not add padding, `hitSlop`, overflow or visual caps.
 
 Labels are:
 

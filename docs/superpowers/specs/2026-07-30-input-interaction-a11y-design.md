@@ -326,8 +326,8 @@ actionable Cell 默认 accessible name 由 `title`、非空 `desc`、`extra.kind
 
 ## 9. Stepper
 
-- 左右 Pressable 使用 44×44 外层交互框，内部视觉 cell 保持现有 28/32pt。
-- 中央 adjustable 节点也拥有至少 44pt 的实际边界。
+- 三个 outer 都至少为 `fixed.hitTarget`，不经过 `r()` 或 fontScale；side/value outer 随未设上限的 visual 增长：`side outer = max(44, visual button width) × max(44, visual height)`，`value outer = max(44, visual value width) × max(44, visual height)`。
+- 左右 Pressable 的内部视觉 cell 仍朝中央贴边；中央 adjustable 的 visual cell 仍居中。sm visual 是 `r(28)×r(28) / r(40)×r(28) / r(28)×r(28)`，不是物理 28 常量；只有 Web / 402pt RN harness 才得到 28/32/40/48 的基准值。
 - `StepperProps.accessibilityLabel: string` 改为必填，作为中央 adjustable 的名称；左右按钮分别组合为“`${label}，减少` / `${label}，增加`”，避免页面上多个 Stepper 都只读“增加/减少”。
 - 整体 disabled 或归一化后的 `safeMin === safeMax` 时，上报 disabled，删除 `accessibilityActions` 和 `onAccessibilityAction`；这同时覆盖原始 `min > max`、非有限边界等最终折叠为零范围的情况。
 - 到达 `min` 时只暴露仍有效的 increment action；到达 `max` 时只暴露 decrement action。

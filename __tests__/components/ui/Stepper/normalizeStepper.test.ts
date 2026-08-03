@@ -1,5 +1,8 @@
 import { describe, expect, test } from '@jest/globals';
-import { normalizeStepper } from '../../../../src/components/ui/Stepper/normalizeStepper';
+import {
+  nextStepperValue,
+  normalizeStepper,
+} from '../../../../src/components/ui/Stepper/normalizeStepper';
 
 describe('normalizeStepper — 范围与值归一化', () => {
   test('min > max 折叠为零范围且不暴露 action', () => {
@@ -112,8 +115,8 @@ describe('normalizeStepper — 边界 accessibilityActions', () => {
     ).toEqual([{ name: 'decrement', label: '减少' }]);
   });
 
-  test('范围中间同时允许 decrease/increase，默认值区间保持 0–99', () => {
-    expect(normalizeStepper({ value: 42, min: 0, max: 99, step: 1 })).toEqual({
+  test('缺省入口只由 normalizer 定义 0–99 / step 1', () => {
+    expect(normalizeStepper({ value: 42 })).toEqual({
       safeMin: 0,
       safeMax: 99,
       safeStep: 1,
@@ -126,5 +129,14 @@ describe('normalizeStepper — 边界 accessibilityActions', () => {
         { name: 'decrement', label: '减少' },
       ],
     });
+  });
+
+  test('nextStepperValue 只返回 capability 允许的新值', () => {
+    const atMin = normalizeStepper({ value: 0, min: 0, max: 2, step: 1 });
+    expect(nextStepperValue(atMin, 'decrement')).toBeUndefined();
+    expect(nextStepperValue(atMin, 'increment')).toBe(1);
+
+    const wideStep = normalizeStepper({ value: 1, min: 0, max: 2, step: 8 });
+    expect(nextStepperValue(wideStep, 'increment')).toBe(2);
   });
 });

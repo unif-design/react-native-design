@@ -1,10 +1,10 @@
 import { StyleSheet } from 'react-native';
-import { control, fixed, fw, r, radius, type as t } from '../../../theme';
+import { control, fw, r, radius, type as t } from '../../../theme';
 import type { ColorTokens } from '../../../theme';
 import type { StepperSize } from './types';
 
 /** Stepper 静态 + themed base —— btn / value 容器共用 cell 基底,radius / border 走 token。
- *  尺寸(高 / 宽 / 字号)由 sizingFor 派生,sm 走 control.sm,md 走 r(32)(介于
+ *  尺寸(高 / 宽 / 字号)由 sizingFor 派生,sm 走 control.sm (`r(28)`),md 走 r(32)(介于
  *  control.sm 与 control.md 之间,与 avatar.md / dim.sendBtn 同值但语义独立)。 */
 export const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({
@@ -13,21 +13,10 @@ export const makeStyles = (c: ColorTokens) =>
       alignItems: 'center',
       alignSelf: 'flex-start',
     },
-    // 固定命中框不走 r()/fontScale；视觉 cell 仍保持原来的 sm/md 尺寸。
     actionFrame: {
-      width: fixed.hitTarget,
-      height: fixed.hitTarget,
       justifyContent: 'center',
     },
-    decrementFrame: {
-      alignItems: 'flex-end',
-    },
-    incrementFrame: {
-      alignItems: 'flex-start',
-    },
     valueFrame: {
-      minWidth: fixed.hitTarget,
-      minHeight: fixed.hitTarget,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -63,7 +52,7 @@ export const makeStyles = (c: ColorTokens) =>
     },
   });
 
-/** Stepper 尺寸推导:sm(control.sm=28 高 / 28 按钮 / 40 值宽 / xs 字)/
+/** Stepper 尺寸推导:sm(control.sm=`r(28)` 高 / `r(28)` 按钮 / r(40) 值宽 / xs 字)/
  *  md(r(32) 高 / r(32) 按钮 / r(48) 值宽 / sm 字)。
  *  新增 size 在 types.ts 加 union + 这里加 case。 */
 export function sizingFor(size: StepperSize): {

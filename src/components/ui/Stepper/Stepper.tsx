@@ -5,7 +5,8 @@ import { pressedOpacity, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
-import { normalizeStepper } from './normalizeStepper';
+import { resolveStepperLayout } from './layout';
+import { nextStepperValue, normalizeStepper } from './normalizeStepper';
 import { makeStyles, sizingFor } from './styles';
 import type { StepperProps } from './types';
 
@@ -25,15 +26,16 @@ export function Stepper({
   value,
   onChange,
   accessibilityLabel,
-  min = 0,
-  max = 99,
-  step = 1,
+  min,
+  max,
+  step,
   size = 'md',
   disabled = false,
   testID,
 }: StepperProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
   const dims = sizingFor(size);
+  const layout = resolveStepperLayout(dims);
   const normalized = normalizeStepper({
     value,
     min,
@@ -51,10 +53,12 @@ export function Stepper({
     canIncrement,
     accessibilityActions,
   } = normalized;
+  const decrementValue = nextStepperValue(normalized, 'decrement');
+  const incrementValue = nextStepperValue(normalized, 'increment');
 
   // [L-30] step 口径对齐:非有限数(NaN/Infinity)也告警,与 min>max 告警保持一致
   // 告警也读取归一化结果,避免提示 fallback 与实际 render/action 使用不同数值。
-  if (safeStep !== step) {
+  if (step !== undefined && safeStep !== step) {
     const k = `step:${step}`;
     if (!_warned.has(k)) {
       _warned.add(k);
@@ -62,10 +66,11 @@ export function Stepper({
     }
   }
   if (
+    min !== undefined &&
+    max !== undefined &&
     Number.isFinite(min) &&
     Number.isFinite(max) &&
-    min > max &&
-    safeMax === safeMin
+    min > max
   ) {
     const k = `minmax:${min}:${max}`;
     if (!_warned.has(k)) {
@@ -83,9 +88,9 @@ export function Stepper({
     <View style={styles.wrap} testID={testID}>
       <Pressable
         onPress={
-          canDecrement
-            ? () => onChange(Math.max(safeMin, safeValue - safeStep))
-            : undefined
+          decrementValue === undefined
+            ? undefined
+            : () => onChange(decrementValue)
         }
         disabled={!canDecrement}
         accessibilityRole="button"
@@ -95,7 +100,7 @@ export function Stepper({
         testID={decrementTestID}
         style={({ pressed }) => [
           styles.actionFrame,
-          styles.decrementFrame,
+          layout.decrementFrame,
           {
             opacity: !canDecrement ? 0.4 : pressed ? pressedOpacity : 1,
           },
@@ -126,18 +131,18 @@ export function Stepper({
             : (event) => {
                 if (
                   event.nativeEvent.actionName === 'increment' &&
-                  canIncrement
+                  incrementValue !== undefined
                 ) {
-                  onChange(Math.min(safeMax, safeValue + safeStep));
+                  onChange(incrementValue);
                 } else if (
                   event.nativeEvent.actionName === 'decrement' &&
-                  canDecrement
+                  decrementValue !== undefined
                 ) {
-                  onChange(Math.max(safeMin, safeValue - safeStep));
+                  onChange(decrementValue);
                 }
               }
         }
-        style={styles.valueFrame}
+        style={[styles.valueFrame, layout.valueFrame]}
         testID={valueTestID}
       >
         <View
@@ -152,9 +157,9 @@ export function Stepper({
       </View>
       <Pressable
         onPress={
-          canIncrement
-            ? () => onChange(Math.min(safeMax, safeValue + safeStep))
-            : undefined
+          incrementValue === undefined
+            ? undefined
+            : () => onChange(incrementValue)
         }
         disabled={!canIncrement}
         accessibilityRole="button"
@@ -164,7 +169,7 @@ export function Stepper({
         testID={incrementTestID}
         style={({ pressed }) => [
           styles.actionFrame,
-          styles.incrementFrame,
+          layout.incrementFrame,
           {
             opacity: !canIncrement ? 0.4 : pressed ? pressedOpacity : 1,
           },

@@ -73,11 +73,11 @@ export const StepperDemo = () => {
 
 | 元素 | 规则 |
 |---|---|
-| 实际交互 frame | `−` / `+` outer 固定 44×44；中央 adjustable outer 至少 44×44，均直接读取 `fixed.hitTarget`，不经过 `r()` 或 fontScale |
-| visual 高度 | md 为 `r(32)`（Web / 402pt RN harness 是 32px）；sm 为 28px（`control.sm`） |
+| 实际交互 frame | 三个 outer 均至少 `fixed.hitTarget`，不经过 `r()` 或 fontScale：side outer = max(44, visual button width) × max(44, visual height)；value outer = max(44, visual value width) × max(44, visual height)。不加 padding、`hitSlop`、overflow 或 visual cap |
+| visual 高度 | md 为 `r(32)`；sm 为 `r(28)`。只有 Web / 402pt RN harness 得到 28/32/40/48 的基准值，其他 native window 按实际 `r()` 结果 |
 | 圆角 | 8px（`radius.md`，外层左右两角），中间数字框无独立圆角 |
-| 按钮 visual | md `r(32) × r(32)` / sm 28×28，嵌在 44×44 outer 内并朝中央贴边；`±` 字号 18px（`type.h1`） |
-| 数字 visual | md `r(48) × r(32)` / sm `r(40) × 28`，在中央 outer 内居中；1px 上下边线、无左右边线，字号 md 14 / sm 13 |
+| 按钮 visual | md `r(32) × r(32)` / sm `r(28) × r(28)`，嵌在 side outer 内并朝中央贴边；`±` 字号 18px（`type.h1`） |
+| 数字 visual | md `r(48) × r(32)` / sm `r(40) × r(28)`，在中央 outer 内居中；1px 上下边线、无左右边线，字号 md 14 / sm 13 |
 | 背景 / 描边 | `c.surface` 底 + 1px `c.outline`（亮色 `#EDEDED`）边 |
 | 禁用 | 按钮 `opacity: 0.4`（达到 min/max 或整体 `disabled` 时；按下 0.7） |
 
@@ -138,7 +138,7 @@ const [qty, setQty] = useState(12);
 | `min` | `number?` | `0` | 下限（达到时 `−` 禁用） |
 | `max` | `number?` | `99` | 上限（达到时 `+` 禁用） |
 | `step` | `number?` | `1` | 步长（非正数 / 非有限数回退为 1） |
-| `size` | `'sm' \| 'md'` | `'md'` | visual 高度 28 / `r(32)`；三个 outer 的 44pt 约束不变 |
+| `size` | `'sm' \| 'md'` | `'md'` | visual 高度 `r(28)` / `r(32)`；三个 outer 都至少 44pt，并随 visual 增长 |
 | `disabled` | `boolean?` | `false` | 整体禁用（三个操作节点都不暴露 action） |
 | `testID` | `string?` | — | 根定位；派生三个 outer `-decrement` / `-value` / `-increment` 与对应 `-*-visual` |
 
@@ -169,10 +169,10 @@ const [qty, setQty] = useState(12);
 
 | 节点 | testID | 预期布局 |
 |---|---|---|
-| 左右 outer RNGH Pressable | `stepper-middle-decrement` / `stepper-middle-increment` | 所有平台固定 44×44，透明、无 `hitSlop`；visual 朝中央贴边 |
-| 中央 adjustable outer | `stepper-middle-value` | 所有平台至少 44×44 |
+| 左右 outer RNGH Pressable | `stepper-middle-decrement` / `stepper-middle-increment` | side outer = max(44, visual button width) × max(44, visual height)，透明、无 `hitSlop`；visual 朝中央贴边 |
+| 中央 adjustable outer | `stepper-middle-value` | value outer = max(44, visual value width) × max(44, visual height) |
 | md visual wrappers | 对应 `-decrement-visual` / `-value-visual` / `-increment-visual` | 实现为 `r(32)×r(32)` / `r(48)×r(32)` / `r(32)×r(32)`；Web 与 402pt RN harness 是 32×32 / 48×32 / 32×32，其他 native window 按实际 `r()` 结果 |
-| sm visual wrappers | `stepper-zero-range-*-visual` | 28×28 / `r(40)×28` / 28×28；outer 仍为固定 44×44 |
+| sm visual wrappers | `stepper-zero-range-*-visual` | `r(28)×r(28) / r(40)×r(28) / r(28)×r(28)`；outer 按上述公式至少 44pt |
 
 用 screen reader 检查 `stepper-min-value` 只提供增加、`stepper-max-value` 只提供减少；`stepper-zero-range-value` 必须上报 disabled 且没有 adjustable action。点击无效侧按钮或零范围任意节点，harness 的 unexpected 计数必须保持 0。
 

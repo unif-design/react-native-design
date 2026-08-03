@@ -14,11 +14,13 @@ export type NormalizedStepper = {
 
 type StepperNormalizationInput = {
   value: number;
-  min: number;
-  max: number;
-  step: number;
+  min?: number;
+  max?: number;
+  step?: number;
   disabled?: boolean;
 };
+
+export type StepperDirection = 'increment' | 'decrement';
 
 /**
  * Stepper 唯一的范围与 action 归一化入口。
@@ -28,9 +30,9 @@ type StepperNormalizationInput = {
  */
 export function normalizeStepper({
   value,
-  min,
-  max,
-  step,
+  min = 0,
+  max = 99,
+  step = 1,
   disabled = false,
 }: StepperNormalizationInput): NormalizedStepper {
   const safeMin = Number.isFinite(min) ? min : 0;
@@ -61,4 +63,18 @@ export function normalizeStepper({
     canIncrement,
     accessibilityActions,
   };
+}
+
+export function nextStepperValue(
+  normalized: NormalizedStepper,
+  direction: StepperDirection
+): number | undefined {
+  if (direction === 'increment') {
+    return normalized.canIncrement
+      ? Math.min(normalized.safeMax, normalized.safeValue + normalized.safeStep)
+      : undefined;
+  }
+  return normalized.canDecrement
+    ? Math.max(normalized.safeMin, normalized.safeValue - normalized.safeStep)
+    : undefined;
 }
