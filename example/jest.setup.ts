@@ -7,12 +7,22 @@ jest.mock(
 
 jest.mock('react-native-gesture-handler', () => {
   const actual = jest.requireActual('react-native-gesture-handler');
+  const React = require('react');
   const { Pressable, View } = require('react-native');
 
   return {
     ...actual,
     Pressable,
-    GestureHandlerRootView: View,
+    GestureHandlerRootView: function MockGestureHandlerRootView({
+      children,
+      ...props
+    }: import('react').ComponentProps<typeof import('react-native').View>) {
+      return React.createElement(
+        View,
+        { ...props, testID: 'capture-gesture-root' },
+        children
+      );
+    },
   };
 });
 

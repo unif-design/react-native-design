@@ -4,7 +4,12 @@ import {
   ICON_NAMES,
   consoleTransport,
   darkColors,
+  fixed,
   lightColors,
+  lightShadow,
+  scaleFontMetric,
+  type,
+  warmOrangePalette,
 } from '@unif/react-native-design';
 import * as DesignRuntime from '@unif/react-native-design';
 import App from '../App';
@@ -40,6 +45,10 @@ function enterFoundation(): void {
   fireEvent.press(screen.getByRole('button', { name: /基础能力与图标/ }));
 }
 
+function escapeRegExp(value: string | number): string {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 afterEach(() => {
   restoreNativeMocks();
   jest.restoreAllMocks();
@@ -72,10 +81,22 @@ test('Foundation 展示真实 theme、token、palette、scale、blur 与 Icon �
   ).toHaveStyle({
     backgroundColor: darkColors.background,
   });
-  expect(screen.getByTestId('foundation-token-metrics')).toBeOnTheScreen();
-  expect(screen.getByTestId('foundation-shadow-metrics')).toBeOnTheScreen();
-  expect(screen.getByTestId('foundation-palette-metrics')).toBeOnTheScreen();
-  expect(screen.getByTestId('foundation-scale-metrics')).toBeOnTheScreen();
+  expect(screen.getByTestId('foundation-token-metrics')).toHaveTextContent(
+    new RegExp(`fixed ${escapeRegExp(fixed.hitTarget)}`)
+  );
+  expect(screen.getByTestId('foundation-shadow-metrics')).toHaveTextContent(
+    new RegExp(`浅色 card ${escapeRegExp(lightShadow.card.shadowOpacity)}`)
+  );
+  expect(screen.getByTestId('foundation-palette-metrics')).toHaveTextContent(
+    new RegExp(
+      `暖橙 ${escapeRegExp(
+        warmOrangePalette.light.length
+      )}/${escapeRegExp(warmOrangePalette.dark.length)}`
+    )
+  );
+  expect(screen.getByTestId('foundation-scale-metrics')).toHaveTextContent(
+    new RegExp(`dynamic body=${escapeRegExp(scaleFontMetric(type.body, 1))}`)
+  );
   expect(
     screen.getByText(`控制台传输器：${consoleTransport.id}`)
   ).toBeOnTheScreen();

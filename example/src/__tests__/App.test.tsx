@@ -1,16 +1,12 @@
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import {
-  ConfirmHost,
-  ThemeProvider,
-  ToastHost,
-} from '@unif/react-native-design';
+import type {
+  ReactTestRendererJSON,
+  ReactTestRendererNode,
+} from 'react-test-renderer';
+import { ThemeProvider } from '@unif/react-native-design';
 import App from '../App';
 import { AppProviders } from '../app/AppProviders';
-import { ExampleRouter } from '../app/ExampleRouter';
-import { ShowcaseProvider } from '../state/ShowcaseProvider';
 import {
   installAndroidBackHandlerMock,
   installNonAndroidBackHandlerMock,
@@ -18,18 +14,138 @@ import {
   restoreNativeMocks,
 } from './helpers/nativeMocks';
 
-jest.mock('@unif/react-native-design', () => {
-  const actual = jest.requireActual('@unif/react-native-design');
+jest.mock('react-native-safe-area-context', () => {
+  const safeAreaMock = jest.requireActual(
+    'react-native-safe-area-context/jest/mock'
+  ).default;
+  const ReactModule = jest.requireActual<typeof import('react')>('react');
+  const { View } =
+    jest.requireActual<typeof import('react-native')>('react-native');
+
   return {
-    ...actual,
-    ConfirmHost: function MockConfirmHost() {
-      return null;
-    },
-    ToastHost: function MockToastHost() {
-      return null;
+    ...safeAreaMock,
+    SafeAreaProvider: function MockSafeAreaProvider({
+      children,
+      ...props
+    }: React.ComponentProps<typeof safeAreaMock.SafeAreaProvider>) {
+      return ReactModule.createElement(
+        View,
+        { testID: 'capture-safe-area-provider' },
+        ReactModule.createElement(
+          safeAreaMock.SafeAreaProvider,
+          props,
+          children
+        )
+      );
     },
   };
 });
+
+jest.mock('@unif/react-native-design', () => {
+  const actual = jest.requireActual('@unif/react-native-design');
+  const ReactModule = jest.requireActual<typeof import('react')>('react');
+  const { View } =
+    jest.requireActual<typeof import('react-native')>('react-native');
+
+  return {
+    ...actual,
+    ThemeProvider: function MockThemeProvider(
+      props: React.ComponentProps<typeof actual.ThemeProvider>
+    ) {
+      return ReactModule.createElement(
+        View,
+        { testID: 'capture-theme-provider' },
+        ReactModule.createElement(actual.ThemeProvider, props)
+      );
+    },
+    ConfirmHost: function MockConfirmHost({
+      children,
+    }: {
+      children?: React.ReactNode;
+    }) {
+      return ReactModule.createElement(
+        View,
+        { testID: 'capture-confirm-host' },
+        children
+      );
+    },
+    ToastHost: function MockToastHost({
+      children,
+    }: {
+      children?: React.ReactNode;
+    }) {
+      return ReactModule.createElement(
+        View,
+        { testID: 'capture-toast-host' },
+        children
+      );
+    },
+  };
+});
+
+jest.mock('../state/ShowcaseProvider', () => {
+  const actual = jest.requireActual('../state/ShowcaseProvider');
+  const ReactModule = jest.requireActual<typeof import('react')>('react');
+  const { View } =
+    jest.requireActual<typeof import('react-native')>('react-native');
+
+  return {
+    ...actual,
+    ShowcaseProvider: function MockShowcaseProvider({
+      children,
+    }: React.ComponentProps<typeof actual.ShowcaseProvider>) {
+      return ReactModule.createElement(
+        View,
+        { testID: 'capture-showcase-provider' },
+        ReactModule.createElement(actual.ShowcaseProvider, null, children)
+      );
+    },
+  };
+});
+
+jest.mock('../app/ExampleRouter', () => {
+  const actual = jest.requireActual('../app/ExampleRouter');
+  const ReactModule = jest.requireActual<typeof import('react')>('react');
+  const { View } =
+    jest.requireActual<typeof import('react-native')>('react-native');
+
+  return {
+    ...actual,
+    ExampleRouter: function MockExampleRouter() {
+      return ReactModule.createElement(
+        View,
+        { testID: 'capture-example-router' },
+        ReactModule.createElement(actual.ExampleRouter)
+      );
+    },
+  };
+});
+
+function requireHostNode(
+  node: ReactTestRendererNode | null | ReactTestRendererJSON[],
+  label: string
+): ReactTestRendererJSON {
+  if (node === null || typeof node === 'string' || Array.isArray(node)) {
+    throw new Error(`${label} 必须是唯一 host 节点`);
+  }
+  return node;
+}
+
+function directHostChildren(
+  node: ReactTestRendererJSON
+): ReactTestRendererJSON[] {
+  return (node.children ?? []).map((child, index) =>
+    requireHostNode(child, `${node.props.testID ?? node.type}[${index}]`)
+  );
+}
+
+function onlyDirectHostChild(
+  node: ReactTestRendererJSON
+): ReactTestRendererJSON {
+  const children = directHostChildren(node);
+  expect(children).toHaveLength(1);
+  return children[0];
+}
 
 afterEach(() => {
   restoreNativeMocks();
@@ -38,16 +154,29 @@ afterEach(() => {
 
 test('根装配保持指定 Provider 顺序且两个 Host 各唯一一份', () => {
   installReducedMotionMock(false);
-  render(<App />);
+  const mounted = render(<App />);
 
-  const gestureRoot = screen.UNSAFE_getByType(GestureHandlerRootView);
-  const safeArea = gestureRoot.findByType(SafeAreaProvider);
-  const showcase = safeArea.findByType(ShowcaseProvider);
-  const theme = showcase.findByType(ThemeProvider);
+  const gestureRoot = requireHostNode(mounted.toJSON(), 'App root');
+  expect(gestureRoot.props.testID).toBe('capture-gesture-root');
 
-  expect(theme.findAllByType(ExampleRouter)).toHaveLength(1);
-  expect(theme.findAllByType(ConfirmHost)).toHaveLength(1);
-  expect(theme.findAllByType(ToastHost)).toHaveLength(1);
+  const safeArea = onlyDirectHostChild(gestureRoot);
+  expect(safeArea.props.testID).toBe('capture-safe-area-provider');
+  const showcase = onlyDirectHostChild(safeArea);
+  expect(showcase.props.testID).toBe('capture-showcase-provider');
+  const theme = onlyDirectHostChild(showcase);
+  expect(theme.props.testID).toBe('capture-theme-provider');
+  expect(directHostChildren(theme).map((child) => child.props.testID)).toEqual([
+    'capture-example-router',
+    'capture-confirm-host',
+    'capture-toast-host',
+  ]);
+  expect(screen.getAllByTestId('capture-gesture-root')).toHaveLength(1);
+  expect(screen.getAllByTestId('capture-safe-area-provider')).toHaveLength(1);
+  expect(screen.getAllByTestId('capture-showcase-provider')).toHaveLength(1);
+  expect(screen.getAllByTestId('capture-theme-provider')).toHaveLength(1);
+  expect(screen.getAllByTestId('capture-example-router')).toHaveLength(1);
+  expect(screen.getAllByTestId('capture-confirm-host')).toHaveLength(1);
+  expect(screen.getAllByTestId('capture-toast-host')).toHaveLength(1);
   expect(screen.UNSAFE_getAllByType(AppProviders)).toHaveLength(1);
 });
 
@@ -163,4 +292,14 @@ test('非 Android 根不建立 BackHandler subscription', () => {
   render(<App />);
 
   expect(addEventListener).not.toHaveBeenCalled();
+});
+
+test('系统减少动态效果开启时 Home 与 Foundation 均展示真实事实', () => {
+  installReducedMotionMock(true);
+  render(<App />);
+
+  expect(screen.getByText('减少动态效果：是')).toBeOnTheScreen();
+  fireEvent.press(screen.getByRole('button', { name: /基础能力与图标/ }));
+  expect(screen.getByTestId('foundation-screen')).toBeOnTheScreen();
+  expect(screen.getByText('减少动态效果：是')).toBeOnTheScreen();
 });
