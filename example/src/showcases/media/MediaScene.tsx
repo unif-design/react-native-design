@@ -96,7 +96,7 @@ export function MediaScene(): React.JSX.Element {
 
   return (
     <ShowcaseScaffold
-      title="媒体与身份"
+      title="媒体展示"
       scene="media"
       onBack={() => {
         back();

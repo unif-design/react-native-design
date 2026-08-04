@@ -47,7 +47,7 @@
     "check:config": "node scripts/check-config.js",
     "check:icons": "node scripts/check-icons-generated.js",
     "check:runtime-peers": "node scripts/check-runtime-peers.js",
-    "verify:example-showcase": "node scripts/verify-example-showcase.mjs",
+    "verify:example-showcase": "node --test scripts/__tests__/verify-example-showcase.test.mjs && node scripts/verify-example-showcase.mjs",
     "create:runtime-harness": "node scripts/create-runtime-api-harness.js",
     "runtime:image-fixture": "node scripts/runtime-image-fixture.js",
     "release": "release-it --only-version"
@@ -164,7 +164,8 @@
     "testPathIgnorePatterns": [
       "/node_modules/",
       "<rootDir>/website/",
-      "<rootDir>/example/"
+      "<rootDir>/example/",
+      "<rootDir>/scripts/__tests__/"
     ]
   },
   "commitlint": {

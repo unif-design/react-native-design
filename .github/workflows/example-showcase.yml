@@ -1,0 +1,65 @@
+name: Design Example Showcase
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  merge_group:
+    types:
+      - checks_requested
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify-example-showcase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      # setup action 命中 node_modules cache 时会跳过安装；这里仍要验证当前 yarn config 与 lock。
+      - name: Verify immutable install
+        run: yarn install --immutable
+
+      - name: Check repository configuration
+        run: yarn check:config
+
+      - name: Check runtime peers
+        run: yarn check:runtime-peers
+
+      - name: Check generated icons
+        run: yarn check:icons
+
+      - name: Verify example showcase contract
+        run: yarn verify:example-showcase
+
+      - name: Typecheck example
+        run: yarn example typecheck
+
+      - name: Lint example
+        run: yarn example lint
+
+      - name: Test example
+        run: yarn example test --maxWorkers=2
+
+      - name: Lint library
+        run: yarn lint
+
+      - name: Typecheck library
+        run: yarn typecheck
+
+      - name: Test library
+        run: yarn test --maxWorkers=2
+
+      - name: Build library
+        run: yarn prepare

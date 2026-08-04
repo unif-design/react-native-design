@@ -1,97 +1,147 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Design 组件展厅
 
-# Getting Started
+这是 `@unif/react-native-design-example` 的持久 RN `0.86.2` 新架构宿主。它从
+`@unif/react-native-design` public package root 消费当前工作区源码，用 8 个按路由挂载的
+scene 展示全部公开组件及主要状态。
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 1. 安装
 
-## Step 1: Start Metro
-
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
-
-To start the Metro dev server, run the following command from the root of your React Native project:
+Node 版本以仓库根 `.nvmrc` 为准，只使用 Yarn 4。从 repo root 执行：
 
 ```sh
-# Using npm
-npm start
-
-# OR using Yarn
-yarn start
+yarn install --immutable
 ```
 
-## Step 2: Build and run your app
+不要在根目录或 `example/` 使用 npm、`--force`、`--legacy-peer-deps`。安装日志中的
+Carousel 5 / RNGH 3 workspace warning 由 `yarn check:runtime-peers` 的窄 allowlist 审核；
+普通 `yarn install` 的其他既存 peer warning 不能被描述成同一条 contract。
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+## 2. 安装 iOS Pods
 
-### Android
+首次运行 iOS 或 native 依赖、Podfile、lockfile 变化后，从 repo root 执行：
 
 ```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+cd example && bundle install
+cd example && bundle exec pod install --project-directory=ios
 ```
 
-### iOS
+必须通过 Bundler 使用 `example/Gemfile.lock`；不要直接运行系统 `pod install`。
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+## 3. 启动 Metro
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+在一个终端中，从 repo root 执行：
 
 ```sh
-bundle install
+yarn example start
 ```
 
-Then, and every time you update your native dependencies, run:
+Metro 通过 `react-native-monorepo-config` 监听仓库根目录，并把
+`@unif/react-native-design` 解析到本地 public source。
+
+## 4. Simulator 与真机
+
+保持 Metro 运行，再从 repo root 的新终端启动目标平台：
 
 ```sh
-bundle exec pod install
+# Android emulator 或已连接 Android 真机
+yarn example android
+
+# iOS Simulator
+yarn example ios
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+iOS 真机请用 Xcode 打开
+`example/ios/ReactNativeDesignExample.xcworkspace`，选择已配置签名的设备运行。只构建、不启动
+app 时，从 repo root 执行：
 
 ```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+yarn example build:android
+yarn example build:ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+原生命令成功只能证明对应 binary 构建完成；Simulator 结果不能冒充真机手势、系统设置或
+a11y 验收。
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## 5. 八个场景
 
-## Step 3: Modify your app
+Home 显示每个 scene 的主归属组件数量、主要状态与最近一次安全交互摘要。返回 Home 时当前
+scene 会卸载，可复现 draft 保存在根 Provider 中。
 
-Now that you have successfully run the app, let's make changes!
+| Scene ID      | 标题           | 主覆盖                                                                            |
+| ------------- | -------------- | --------------------------------------------------------------------------------- |
+| `foundation`  | 基础能力与图标 | Theme、token、Icon 全集、logger、testID                                           |
+| `actions`     | 操作与状态     | Button、IconButton、Chip、Tag、StatusDot                                          |
+| `feedback`    | 反馈与浮层     | Empty、Skeleton、Spinner、Pulse、Reveal、Blur、Toast、Confirm                     |
+| `forms`       | 表单与输入     | Input、PasswordInput、Textarea、Search、选择控件、Stepper、Form                   |
+| `navigation`  | 导航组件       | NavBar、DrawerHeader、Tabs、Segmented、TabBar                                     |
+| `collections` | 容器与集合     | Card、Cell、List、Grid、EntryCard、Carousel                                       |
+| `media`       | 媒体展示       | Avatar、Thumbnail、Logo、remote image success/failure                             |
+| `business`    | 业务复合组件   | GradientWash、RadialHalo、ScreenBackdrop、GlassStats、AvatarWithRing、VersionPill |
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+Collections 中 Carousel 默认不挂载；开启后可切换 empty/one/multiple、display/action、
+indicator、autoplay、loop 和 ref 控制。Media 可编辑 HTTPS URI，并能显式触发 remote image
+failure；结果日志不会保存原始 URI。
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## 6. 主题、字号与减少动态效果
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+在「基础能力与图标」scene 中操作：
 
-## Congratulations! :tada:
+- 主题模式：`system`、`light`、`dark`；`system` 读取设备当前 scheme。
+- fontScale：`1 / 1.25 / 1.5 / 2`，通过公开 `normalizeFontScale()` 进入根
+  `ThemeProvider`。
+- reduced motion：只展示 `usePrefersReducedMotion()` 读取到的系统事实，没有本地伪造
+  override。请在系统设置中切换后重新验证 Pulse、Reveal 与 Carousel autoplay。
 
-You've successfully run and modified your React Native App. :partying_face:
+## 7. 自动化
 
-### Now what?
+以下命令全部从 repo root 执行：
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+```sh
+yarn check:config
+yarn check:runtime-peers
+yarn check:icons
+yarn verify:example-showcase
+yarn example typecheck
+yarn example lint
+yarn example test --maxWorkers=2
 
-# Troubleshooting
+yarn typecheck
+yarn lint
+yarn test --maxWorkers=2
+yarn prepare
+node website/scripts/build-llms.test.js
+yarn workspace @unif/react-native-design-website typecheck
+yarn workspace @unif/react-native-design-website build
+```
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+自动化覆盖 public catalog、route、Host 唯一性、主要交互与配置 contract，但不能替代屏幕
+阅读器、系统主题、真机、旋转、原生 Blur 或真实网络验收。
 
-# Learn More
+## 8. 人工验收矩阵
 
-To learn more about React Native, take a look at the following resources:
+下面不预填 PASS。完成某一环境的真实操作并保留证据后，才可在对应交付记录中更新状态。
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+| 项目                         | 核对内容                                                  | 状态       |
+| ---------------------------- | --------------------------------------------------------- | ---------- |
+| Android emulator             | 启动、8 scenes、portrait/landscape、Android hardware back | 待人工执行 |
+| Android 真机                 | 手势、性能、system theme、remote image success/failure    | 待人工执行 |
+| iOS Simulator                | 启动、8 scenes、portrait/landscape                        | 待人工执行 |
+| iOS 真机                     | 签名、手势、system theme、remote image success/failure    | 待人工执行 |
+| system/light/dark            | 系统、强制浅色、强制深色下 token 与可读性                 | 待人工执行 |
+| fontScale                    | 1 / 1.25 / 1.5 / 2 下布局、截断与动态文字                 | 待人工执行 |
+| reduced motion               | 系统开/关；Pulse、Reveal、Carousel autoplay               | 待人工执行 |
+| portrait/landscape           | Android 与 iOS 旋转、滚动和安全区                         | 待人工执行 |
+| VoiceOver                    | 角色、名称、state、顺序、live region、装饰隐藏            | 待人工执行 |
+| TalkBack                     | 角色、名称、state、顺序、live region、装饰隐藏            | 待人工执行 |
+| remote image success/failure | Avatar/Thumbnail 成功、错误、fallback、URI 隐私           | 待人工执行 |
+| Toast/Confirm                | 位置、类型、确认/取消、连续触发后的 settled 结果          | 待人工执行 |
+| Carousel action/autoplay     | display/action、ref、loop、指示器与 reduced motion 停播   | 待人工执行 |
+| Android hardware back        | scene 回 Home；Home 将事件交还系统                        | 待人工执行 |
+| Blur soft/strong/fallback    | 真机 soft/strong 与不支持原生 Blur 时的边界表现           | 待人工执行 |
+
+## 9. 复制边界
+
+业务 app 可以复制 scene 中的组合思路和 public props，但所有组件、hook、type、token、
+imperative API 都必须从 `@unif/react-native-design` package root 导入。不要复制或导入本仓
+`src/`、`lib/`、`dist/`、Store、ButtonBase、TextFieldBase、Pulse driver 等内部路径；也不要
+把 example 的 reducer、测试 mock 或本地 fixture 当成 library public API。
