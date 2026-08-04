@@ -224,6 +224,32 @@ test('Collections 覆盖 Card、Cell/List、Grid 与 EntryCard 的公开分支',
   ).toBeOnTheScreen();
 });
 
+test('Cell control 跨路由保留并随本场景重置回默认值', () => {
+  render(<App />);
+  enterCollections();
+
+  const control = screen.getByRole('switch', { name: '列表内控制项' });
+  expect(control.props.accessibilityState).toMatchObject({ checked: false });
+  fireEvent.press(control);
+  expect(
+    screen.getByRole('switch', { name: '列表内控制项' }).props
+      .accessibilityState
+  ).toMatchObject({ checked: true });
+
+  fireEvent.press(screen.getByRole('button', { name: '返回首页' }));
+  enterCollections();
+  expect(
+    screen.getByRole('switch', { name: '列表内控制项' }).props
+      .accessibilityState
+  ).toMatchObject({ checked: true });
+
+  fireEvent.press(screen.getByRole('button', { name: '重置本场景' }));
+  expect(
+    screen.getByRole('switch', { name: '列表内控制项' }).props
+      .accessibilityState
+  ).toMatchObject({ checked: false });
+});
+
 test('Carousel 默认不挂载，开启后覆盖 empty/one/multiple 与 display/action union', () => {
   render(<App />);
   enterCollections();

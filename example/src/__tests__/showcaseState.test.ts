@@ -112,8 +112,30 @@ test('scene draft 提供跨路由复现与按需挂载所需的最小字段', ()
     cardVariant: 'default',
     cardBare: false,
     cardFill: false,
+    cellControlEnabled: false,
     carouselEnabled: false,
   });
+});
+
+test('Collections Cell control 可更新，reset 只重建目标 draft', () => {
+  const initial = createInitialShowcaseState();
+  const initialCollections = initial.scenes.collections;
+  const initialMedia = initial.scenes.media;
+
+  expect(initialCollections.cellControlEnabled).toBe(false);
+
+  const enabled = updateShowcaseScene(initial, 'collections', (current) => ({
+    ...current,
+    cellControlEnabled: true,
+  }));
+  expect(enabled.scenes.collections.cellControlEnabled).toBe(true);
+  expect(enabled.scenes.collections).not.toBe(initialCollections);
+  expect(enabled.scenes.media).toBe(initialMedia);
+
+  const reset = resetShowcaseScene(enabled, 'collections');
+  expect(reset.scenes.collections.cellControlEnabled).toBe(false);
+  expect(reset.scenes.collections).not.toBe(enabled.scenes.collections);
+  expect(reset.scenes.media).toBe(initialMedia);
 });
 
 test('Feedback blurIntensity 初始化与 reset 都回到 soft', () => {

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import {
   Button,
@@ -94,7 +94,6 @@ const makeStyles = (colors: ColorTokens) =>
 
 export function CollectionsScene(): React.JSX.Element {
   const { appendResult, back, state, updateScene } = useShowcase();
-  const [controlValue, setControlValue] = useState(false);
   const styles = useThemedStyles(makeStyles);
   const reducedMotion = usePrefersReducedMotion();
   const draft = state.scenes.collections;
@@ -210,8 +209,13 @@ export function CollectionsScene(): React.JSX.Element {
                 kind: 'control',
                 node: (
                   <Switch
-                    value={controlValue}
-                    onChange={setControlValue}
+                    value={draft.cellControlEnabled}
+                    onChange={(cellControlEnabled) =>
+                      updateScene('collections', (current) => ({
+                        ...current,
+                        cellControlEnabled,
+                      }))
+                    }
                     accessibilityLabel="列表内控制项"
                   />
                 ),

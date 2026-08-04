@@ -56,6 +56,7 @@ export type CollectionsSceneState = Readonly<{
   cardVariant: 'default' | 'plain';
   cardBare: boolean;
   cardFill: boolean;
+  cellControlEnabled: boolean;
   carouselEnabled: boolean;
   carouselIndex: number;
   carouselAutoplay: boolean;
@@ -144,6 +145,7 @@ const sceneStateFactories: {
     cardVariant: 'default',
     cardBare: false,
     cardFill: false,
+    cellControlEnabled: false,
     carouselEnabled: false,
     carouselIndex: 0,
     carouselAutoplay: false,
