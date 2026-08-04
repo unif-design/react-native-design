@@ -15,6 +15,8 @@ import { ShowcaseScaffold } from '../../shared/ShowcaseScaffold';
 import { SectionCard } from '../../shared/SectionCard';
 import { useShowcase } from '../../state/useShowcase';
 
+const LOCAL_DRAWER_SOURCE = require('../../../android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png');
+
 const tabItems = [
   { id: 'overview', label: '概览' },
   { id: 'details', label: '详情' },
@@ -128,11 +130,19 @@ export function NavigationScene(): React.JSX.Element {
           title="抽屉头"
           description="纯展示面板，不把姓名或头像区域变成按钮。"
         >
-          <DrawerHeader
-            name="王小明"
-            subtitle="华东区 · 管理员"
-            testID="navigation-drawer-header"
-          />
+          <View style={styles.specimens}>
+            <DrawerHeader
+              name="王小明"
+              subtitle="华东区 · 管理员"
+              testID="navigation-drawer-header"
+            />
+            <DrawerHeader
+              name="李晓雨"
+              subtitle="头像来源示例"
+              source={LOCAL_DRAWER_SOURCE}
+              testID="navigation-drawer-header-source"
+            />
+          </View>
         </SectionCard>
 
         <SectionCard title="页面页签">

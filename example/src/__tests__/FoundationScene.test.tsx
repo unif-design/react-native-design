@@ -2,6 +2,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import {
   ICON_NAMES,
+  Icon,
   consoleTransport,
   darkColors,
   fixed,
@@ -17,6 +18,7 @@ import {
   installReducedMotionMock,
   restoreNativeMocks,
 } from './helpers/nativeMocks';
+import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
 
 jest.mock('@unif/react-native-design', () => {
   const actual = jest.requireActual<typeof DesignRuntime>(
@@ -109,12 +111,35 @@ test('Icon catalog 初始 24 个、每次多 24 个，并由大小写不敏感�
   installReducedMotionMock(false);
   render(<App />);
   enterFoundation();
+  const stateCoverage = createShowcaseStateCoverage('Icon');
 
   expect(screen.getAllByTestId(/^foundation-icons-/)).toHaveLength(24);
-  fireEvent.press(screen.getByRole('button', { name: '加载更多图标' }));
+  for (let loaded = 24; loaded < ICON_NAMES.length; loaded += 24) {
+    fireEvent.press(screen.getByRole('button', { name: '加载更多图标' }));
+  }
   expect(screen.getAllByTestId(/^foundation-icons-/)).toHaveLength(
-    Math.min(48, ICON_NAMES.length)
+    ICON_NAMES.length
   );
+  expect(
+    screen.queryByRole('button', { name: '加载更多图标' })
+  ).not.toBeOnTheScreen();
+  stateCoverage.consume('icon.all-icons');
+
+  fireEvent.press(screen.getByRole('tab', { name: '32 点图标' }));
+  const iconWrappers = screen.getAllByTestId(/^foundation-icons-/);
+  expect(
+    iconWrappers.map((wrapper) => wrapper.findByType(Icon).props.size)
+  ).toEqual(Array.from({ length: ICON_NAMES.length }, () => 32));
+  stateCoverage.consume('icon.sizes');
+  const firstIcon = iconWrappers[0]?.findByType(Icon);
+  expect(firstIcon?.props.color).toBe(lightColors.primary);
+  stateCoverage.consume('icon.color');
+  expect(
+    firstIcon?.findByProps({
+      importantForAccessibility: 'no-hide-descendants',
+    }).props
+  ).toMatchObject({ accessibilityElementsHidden: true });
+  stateCoverage.consume('icon.a11y-hidden');
 
   fireEvent.changeText(screen.getByPlaceholderText('搜索图标名称'), 'ARROW');
   const arrowCount = ICON_NAMES.filter((name) =>
@@ -122,6 +147,7 @@ test('Icon catalog 初始 24 个、每次多 24 个，并由大小写不敏感�
   ).length;
   expect(screen.getAllByTestId(/^foundation-icons-/)).toHaveLength(arrowCount);
   expect(screen.getByText('arrow-left')).toBeOnTheScreen();
+  stateCoverage.consume('icon.name-search');
 
   fireEvent.changeText(
     screen.getByPlaceholderText('搜索图标名称'),
@@ -131,6 +157,7 @@ test('Icon catalog 初始 24 个、每次多 24 个，并由大小写不敏感�
   expect(
     screen.queryByRole('button', { name: '加载更多图标' })
   ).not.toBeOnTheScreen();
+  stateCoverage.expectComplete();
 });
 
 test('Icon query 与 loadedCount 跨路由保留，scene reset 只重置 Foundation draft', () => {

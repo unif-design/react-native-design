@@ -13,6 +13,7 @@ import {
   installReducedMotionMock,
   restoreNativeMocks,
 } from './helpers/nativeMocks';
+import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
 
 jest.mock('react-native-safe-area-context', () => {
   const safeAreaMock = jest.requireActual(
@@ -110,29 +111,59 @@ test('scene 直接生成并使用两个唯一合法 SVG id，装饰 wrapper 隐�
 test('GradientWash、RadialHalo 与 ScreenBackdrop 覆盖互斥 simple/custom 与暖橙/custom', () => {
   render(<App />);
   enterBusiness();
+  const gradientCoverage = createShowcaseStateCoverage('GradientWash');
+  const haloCoverage = createShowcaseStateCoverage('RadialHalo');
+  const backdropCoverage = createShowcaseStateCoverage('ScreenBackdrop');
 
   const washes = screen.UNSAFE_getAllByType(GradientWash);
-  expect(washes.some((node) => node.props.color !== undefined)).toBe(true);
-  expect(washes.some((node) => node.props.stops !== undefined)).toBe(true);
+  const simpleWash = washes.find((node) => node.props.color !== undefined);
+  const customWash = washes.find((node) => node.props.stops !== undefined);
+  expect(simpleWash?.props).toMatchObject({
+    height: 120,
+    fromOpacity: 0.2,
+    toOpacity: 0,
+    color: expect.any(String),
+    gradientId: expect.stringMatching(/^[A-Za-z_][A-Za-z0-9_.-]*$/),
+  });
+  gradientCoverage.consume(
+    'gradient-wash.color-opacity',
+    'gradient-wash.height',
+    'gradient-wash.gradient-id'
+  );
+  expect(customWash?.props.stops).toHaveLength(3);
+  gradientCoverage.consume('gradient-wash.custom-stops');
+  gradientCoverage.expectComplete();
   const halos = screen.UNSAFE_getAllByType(RadialHalo);
-  expect(
-    halos.some(
-      (node) =>
-        node.props.height === undefined && node.props.stops === undefined
-    )
-  ).toBe(true);
-  expect(
-    halos.some(
-      (node) =>
-        node.props.height !== undefined && node.props.stops !== undefined
-    )
-  ).toBe(true);
+  const circleHalo = halos.find(
+    (node) => node.props.height === undefined && node.props.stops === undefined
+  );
+  const ellipseHalo = halos.find(
+    (node) => node.props.height !== undefined && node.props.stops !== undefined
+  );
+  expect(circleHalo?.props).toMatchObject({
+    size: 120,
+    maxOpacity: 0.22,
+    gradientId: expect.stringMatching(/^[A-Za-z_][A-Za-z0-9_.-]*$/),
+  });
+  haloCoverage.consume(
+    'radial-halo.circle',
+    'radial-halo.max-opacity',
+    'radial-halo.gradient-id'
+  );
+  expect(ellipseHalo?.props).toMatchObject({
+    size: 180,
+    height: 96,
+    stops: expect.any(Array),
+  });
+  haloCoverage.consume('radial-halo.ellipse', 'radial-halo.custom-stops');
+  haloCoverage.expectComplete();
 
   expect(screen.UNSAFE_getAllByType(ScreenBackdrop)).toHaveLength(1);
   expect(screen.UNSAFE_getByType(ScreenBackdrop).props.preset).toBe(
     'warmOrange'
   );
   expect(screen.UNSAFE_getByType(ScreenBackdrop).props.stops).toBeUndefined();
+  backdropCoverage.consume('screen-backdrop.preset');
   fireEvent.press(screen.getByRole('tab', { name: '自定义背景' }));
   expect(screen.UNSAFE_getAllByType(ScreenBackdrop)).toHaveLength(1);
   expect(screen.UNSAFE_getByType(ScreenBackdrop).props).toMatchObject({
@@ -140,7 +171,12 @@ test('GradientWash、RadialHalo 与 ScreenBackdrop 覆盖互斥 simple/custom �
       light: expect.any(Array),
       dark: expect.any(Array),
     },
+    halos: [expect.objectContaining({ maxOpacity: 0.18, centerX: true })],
   });
+  backdropCoverage.consume(
+    'screen-backdrop.custom-halo',
+    'screen-backdrop.theme'
+  );
   expect(screen.UNSAFE_getByType(ScreenBackdrop).props.preset).toBeUndefined();
   const backdropWrapper = screen.getByTestId('business-backdrop-wrapper', {
     includeHiddenElements: true,
@@ -159,22 +195,41 @@ test('GradientWash、RadialHalo 与 ScreenBackdrop 覆盖互斥 simple/custom �
   expect(
     screen.getByRole('tab', { name: '自定义背景' }).props.accessibilityState
   ).toMatchObject({ selected: true });
+  backdropCoverage.expectComplete();
 });
 
 test('GlassStats 覆盖 2/3/4 列，AvatarWithRing 使用受控尺寸与 token ringColor', () => {
   render(<App />);
   enterBusiness();
+  const statsCoverage = createShowcaseStateCoverage('GlassStats');
+  const avatarCoverage = createShowcaseStateCoverage('AvatarWithRing');
 
   expect(
     ['business-stats-2', 'business-stats-3', 'business-stats-4'].map(
       (testID) => componentByTestID(GlassStats, testID).props.items.length
     )
   ).toEqual([2, 3, 4]);
+  statsCoverage.consume(
+    'glass-stats.columns-2',
+    'glass-stats.columns-3',
+    'glass-stats.columns-4'
+  );
+  expect(screen.getByText('¥2,016')).toBeOnTheScreen();
+  expect(screen.getByText('98%')).toBeOnTheScreen();
+  statsCoverage.consume('glass-stats.formatted-value');
+  statsCoverage.expectComplete();
   expect(
     ['business-avatar-48', 'business-avatar-64', 'business-avatar-88'].map(
       (testID) => componentByTestID(AvatarWithRing, testID).props.size
     )
   ).toEqual([48, 64, 88]);
+  avatarCoverage.consume('avatar-with-ring.sizes');
+  expect(
+    ['business-avatar-48', 'business-avatar-64', 'business-avatar-88'].map(
+      (testID) => componentByTestID(AvatarWithRing, testID).props.label
+    )
+  ).toEqual(['小', '中', '大']);
+  avatarCoverage.consume('avatar-with-ring.characters');
   for (const testID of [
     'business-avatar-48',
     'business-avatar-64',
@@ -184,16 +239,20 @@ test('GlassStats 覆盖 2/3/4 列，AvatarWithRing 使用受控尺寸与 token r
       expect.any(String)
     );
   }
+  avatarCoverage.consume('avatar-with-ring.ring-color');
+  avatarCoverage.expectComplete();
 });
 
 test('VersionPill 覆盖 build、默认/自定义/空白 fallback，并使用中文构建前缀', () => {
   render(<App />);
   enterBusiness();
+  const stateCoverage = createShowcaseStateCoverage('VersionPill');
 
   expect(screen.getByLabelText('版本 0.20.0，正常')).toBeOnTheScreen();
   expect(
     screen.getByLabelText('版本 0.20.0，构建 20260803，正常')
   ).toBeOnTheScreen();
+  stateCoverage.consume('version-pill.version-text');
   fireEvent.changeText(screen.getByLabelText('版本状态文案'), '内测');
   expect(
     screen.getByLabelText('版本 0.20.0，构建 20260803，内测')
@@ -211,4 +270,6 @@ test('VersionPill 覆盖 build、默认/自定义/空白 fallback，并使用中
     componentByTestID(VersionPill, 'business-version-configured').props
       .buildPrefix
   ).toBe('构建 ');
+  stateCoverage.consume('version-pill.status');
+  stateCoverage.expectComplete();
 });

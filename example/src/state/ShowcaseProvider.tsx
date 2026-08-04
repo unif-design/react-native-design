@@ -43,6 +43,7 @@ export type ShowcaseContextValue = {
   back: () => boolean;
   setThemeMode: (mode: ThemeMode) => void;
   setFontScale: (scale: FontScalePreset) => void;
+  setRuntimeHostsMounted: (mounted: boolean) => void;
   updateScene: <K extends SceneId>(
     scene: K,
     updater: (current: SceneStateMap[K]) => SceneStateMap[K]
@@ -153,6 +154,7 @@ export function ShowcaseProvider({
       commit((current) => ({
         ...current,
         navigation: navigateToScene(current.navigation, scene),
+        runtimeHostsMounted: true,
       }));
     },
     [commit]
@@ -166,6 +168,7 @@ export function ShowcaseProvider({
     commit((current) => ({
       ...current,
       navigation: backNavigation(current.navigation),
+      runtimeHostsMounted: true,
     }));
     return true;
   }, [commit]);
@@ -184,6 +187,17 @@ export function ShowcaseProvider({
     [commit]
   );
 
+  const setRuntimeHostsMounted = useCallback(
+    (mounted: boolean) => {
+      commit((current) =>
+        current.runtimeHostsMounted === mounted
+          ? current
+          : { ...current, runtimeHostsMounted: mounted }
+      );
+    },
+    [commit]
+  );
+
   const updateScene = useCallback(
     <K extends SceneId>(
       scene: K,
@@ -196,7 +210,12 @@ export function ShowcaseProvider({
 
   const resetScene = useCallback(
     (scene: SceneId) => {
-      commit((current) => resetShowcaseScene(current, scene));
+      commit((current) => {
+        const reset = resetShowcaseScene(current, scene);
+        return scene === 'feedback'
+          ? { ...reset, runtimeHostsMounted: true }
+          : reset;
+      });
     },
     [commit]
   );
@@ -221,6 +240,7 @@ export function ShowcaseProvider({
       back,
       setThemeMode,
       setFontScale,
+      setRuntimeHostsMounted,
       updateScene,
       resetScene,
       appendResult,
@@ -233,6 +253,7 @@ export function ShowcaseProvider({
       navigate,
       resetScene,
       setFontScale,
+      setRuntimeHostsMounted,
       setThemeMode,
       state,
       updateScene,

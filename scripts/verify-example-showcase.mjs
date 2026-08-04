@@ -118,6 +118,258 @@ const expectedComponentsByScene = {
   business: expectedBusinessComponents,
 };
 
+const expectedSceneTestFiles = {
+  foundation: 'FoundationScene.test.tsx',
+  actions: 'ActionsScene.test.tsx',
+  feedback: 'FeedbackScene.test.tsx',
+  forms: 'FormsScene.test.tsx',
+  navigation: 'NavigationScene.test.tsx',
+  collections: 'CollectionsScene.test.tsx',
+  media: 'MediaScene.test.tsx',
+  business: 'BusinessScene.test.tsx',
+};
+
+const expectedStateIdsByComponent = {
+  Icon: [
+    'icon.all-icons',
+    'icon.name-search',
+    'icon.sizes',
+    'icon.color',
+    'icon.a11y-hidden',
+  ],
+  Button: [
+    'button.variants',
+    'button.sizes',
+    'button.block',
+    'button.leading-trailing-icons',
+    'button.disabled',
+    'button.loading',
+  ],
+  IconButton: [
+    'icon-button.variants',
+    'icon-button.sizes',
+    'icon-button.a11y-name',
+    'icon-button.disabled',
+    'icon-button.loading',
+  ],
+  Chip: [
+    'chip.unselected',
+    'chip.selected',
+    'chip.icon-slots',
+    'chip.disabled',
+  ],
+  Tag: ['tag.variants', 'tag.sizes'],
+  StatusDot: [
+    'status-dot.statuses',
+    'status-dot.tones',
+    'status-dot.sizes',
+    'status-dot.a11y-name',
+  ],
+  Empty: ['empty.title', 'empty.description', 'empty.custom-icon'],
+  Skeleton: ['skeleton.line', 'skeleton.rect', 'skeleton.circle'],
+  Spinner: ['spinner.sizes', 'spinner.color', 'spinner.stroke-width'],
+  Pulse: [
+    'pulse.default',
+    'pulse.opacity-range',
+    'pulse.duration',
+    'pulse.delay',
+    'pulse.reduced-motion',
+  ],
+  PulseDot: [
+    'pulse-dot.default',
+    'pulse-dot.sizes',
+    'pulse-dot.color',
+    'pulse-dot.custom-timing',
+    'pulse-dot.reduced-motion',
+  ],
+  Reveal: [
+    'reveal.enter',
+    'reveal.duration',
+    'reveal.container-style',
+    'reveal.reduced-motion',
+  ],
+  BlurLayer: [
+    'blur-layer.soft',
+    'blur-layer.strong',
+    'blur-layer.custom-tint',
+    'blur-layer.theme',
+  ],
+  ConfirmHost: [
+    'confirm-host.confirm',
+    'confirm-host.cancel',
+    'confirm-host.destructive',
+    'confirm-host.no-host',
+    'confirm-host.reentrant',
+  ],
+  ToastHost: [
+    'toast-host.kinds',
+    'toast-host.positions',
+    'toast-host.duration',
+    'toast-host.pre-host',
+    'toast-host.latest-wins',
+  ],
+  Input: [
+    'input.controlled',
+    'input.uncontrolled',
+    'input.error',
+    'input.disabled',
+    'input.display-slots',
+    'input.action-slot',
+  ],
+  PasswordInput: [
+    'password-input.controlled',
+    'password-input.hidden',
+    'password-input.visible',
+    'password-input.error',
+    'password-input.disabled',
+    'password-input.safe-result',
+  ],
+  Textarea: [
+    'textarea.controlled',
+    'textarea.uncontrolled',
+    'textarea.error',
+    'textarea.disabled',
+    'textarea.max-length',
+  ],
+  Search: [
+    'search.controlled',
+    'search.uncontrolled',
+    'search.clear',
+    'search.disabled',
+    'search.submit',
+  ],
+  Checkbox: [
+    'checkbox.unchecked',
+    'checkbox.checked',
+    'checkbox.disabled',
+    'checkbox.a11y-state',
+  ],
+  Radio: ['radio.unchecked', 'radio.checked', 'radio.group', 'radio.disabled'],
+  Switch: ['switch.off', 'switch.on', 'switch.disabled'],
+  Stepper: [
+    'stepper.min',
+    'stepper.mid',
+    'stepper.max',
+    'stepper.disabled',
+    'stepper.sizes',
+  ],
+  Form: ['form.single-group', 'form.multi-group'],
+  FormGroup: ['form-group.labelled', 'form-group.unlabelled'],
+  FormRow: [
+    'form-row.default',
+    'form-row.required',
+    'form-row.error',
+    'form-row.a11y-control',
+  ],
+  NavBar: [
+    'nav-bar.title',
+    'nav-bar.back',
+    'nav-bar.actions',
+    'nav-bar.safe-area',
+  ],
+  DrawerHeader: [
+    'drawer-header.name',
+    'drawer-header.subtitle',
+    'drawer-header.avatar-source',
+    'drawer-header.initial-fallback',
+  ],
+  Tabs: [
+    'tabs.selected',
+    'tabs.change',
+    'tabs.item-disabled',
+    'tabs.all-disabled',
+  ],
+  Segmented: ['segmented.selected', 'segmented.sizes', 'segmented.disabled'],
+  TabBar: [
+    'tab-bar.selected',
+    'tab-bar.numeric-badge',
+    'tab-bar.overflow-badge',
+    'tab-bar.a11y',
+  ],
+  Card: ['card.default', 'card.plain', 'card.bare', 'card.fill'],
+  Cell: [
+    'cell.static',
+    'cell.action',
+    'cell.control',
+    'cell.arrow',
+    'cell.danger',
+    'cell.disabled',
+  ],
+  List: [
+    'list.grouped',
+    'list.flush',
+    'list.divider-full',
+    'list.divider-none',
+  ],
+  Grid: [
+    'grid.static',
+    'grid.action',
+    'grid.columns',
+    'grid.card',
+    'grid.badge',
+  ],
+  EntryCard: [
+    'entry-card.static',
+    'entry-card.action',
+    'entry-card.with-subtitle',
+    'entry-card.without-subtitle',
+  ],
+  Carousel: [
+    'carousel.empty',
+    'carousel.single',
+    'carousel.multiple',
+    'carousel.action',
+    'carousel.indicator',
+    'carousel.autoplay',
+    'carousel.loop',
+    'carousel.ref',
+  ],
+  Avatar: [
+    'avatar.variants',
+    'avatar.sizes',
+    'avatar.image',
+    'avatar.initial-fallback',
+  ],
+  Thumbnail: [
+    'thumbnail.sizes',
+    'thumbnail.sources',
+    'thumbnail.selected',
+    'thumbnail.a11y-name',
+    'thumbnail.load-error',
+  ],
+  Logo: ['logo.source', 'logo.sizes', 'logo.border-radius', 'logo.a11y-mode'],
+  GradientWash: [
+    'gradient-wash.color-opacity',
+    'gradient-wash.custom-stops',
+    'gradient-wash.height',
+    'gradient-wash.gradient-id',
+  ],
+  RadialHalo: [
+    'radial-halo.circle',
+    'radial-halo.ellipse',
+    'radial-halo.max-opacity',
+    'radial-halo.custom-stops',
+    'radial-halo.gradient-id',
+  ],
+  ScreenBackdrop: [
+    'screen-backdrop.preset',
+    'screen-backdrop.custom-halo',
+    'screen-backdrop.theme',
+  ],
+  GlassStats: [
+    'glass-stats.columns-2',
+    'glass-stats.columns-3',
+    'glass-stats.columns-4',
+    'glass-stats.formatted-value',
+  ],
+  AvatarWithRing: [
+    'avatar-with-ring.characters',
+    'avatar-with-ring.sizes',
+    'avatar-with-ring.ring-color',
+  ],
+  VersionPill: ['version-pill.status', 'version-pill.version-text'],
+};
+
 const expectedRuntimeApis = [
   'ThemeProvider',
   'useTheme',
@@ -374,6 +626,275 @@ function readCatalogEntries(catalogPath) {
   });
 }
 
+function stateContractProperty(object, propertyName, label) {
+  for (const property of object.properties) {
+    if (
+      ts.isPropertyAssignment(property) &&
+      ((ts.isIdentifier(property.name) &&
+        property.name.text === propertyName) ||
+        (ts.isStringLiteral(property.name) &&
+          property.name.text === propertyName))
+    ) {
+      return property.initializer;
+    }
+  }
+  failVerification(
+    'COMPONENT_STATE_CONTRACT_SHAPE',
+    `${label} 缺少 ${propertyName}`
+  );
+}
+
+function stateContractString(object, propertyName, label) {
+  const initializer = stateContractProperty(object, propertyName, label);
+  if (!ts.isStringLiteral(initializer)) {
+    failVerification(
+      'COMPONENT_STATE_CONTRACT_SHAPE',
+      `${label}.${propertyName} 必须是 string literal`
+    );
+  }
+  return initializer.text;
+}
+
+function optionalStateContractString(object, propertyName, label) {
+  const property = object.properties.find(
+    (candidate) =>
+      ts.isPropertyAssignment(candidate) &&
+      ((ts.isIdentifier(candidate.name) &&
+        candidate.name.text === propertyName) ||
+        (ts.isStringLiteral(candidate.name) &&
+          candidate.name.text === propertyName))
+  );
+  if (!property || !ts.isPropertyAssignment(property)) return undefined;
+  if (!ts.isStringLiteral(property.initializer)) {
+    failVerification(
+      'COMPONENT_STATE_CONTRACT_SHAPE',
+      `${label}.${propertyName} 必须是 string literal`
+    );
+  }
+  return property.initializer.text;
+}
+
+function stateContractStringArray(object, propertyName, label) {
+  const initializer = unwrapExpression(
+    stateContractProperty(object, propertyName, label)
+  );
+  if (!ts.isArrayLiteralExpression(initializer)) {
+    failVerification(
+      'COMPONENT_STATE_CONTRACT_SHAPE',
+      `${label}.${propertyName} 必须是 static string array`
+    );
+  }
+  return initializer.elements.map((element, index) => {
+    if (!ts.isStringLiteral(element)) {
+      failVerification(
+        'COMPONENT_STATE_CONTRACT_SHAPE',
+        `${label}.${propertyName}[${index}] 必须是 string literal`
+      );
+    }
+    return element.text;
+  });
+}
+
+function optionalStateContractStringArray(object, propertyName, label) {
+  const property = object.properties.find(
+    (candidate) =>
+      ts.isPropertyAssignment(candidate) &&
+      ((ts.isIdentifier(candidate.name) &&
+        candidate.name.text === propertyName) ||
+        (ts.isStringLiteral(candidate.name) &&
+          candidate.name.text === propertyName))
+  );
+  if (!property || !ts.isPropertyAssignment(property)) return [];
+  const initializer = unwrapExpression(property.initializer);
+  if (!ts.isArrayLiteralExpression(initializer)) {
+    failVerification(
+      'COMPONENT_STATE_CONTRACT_SHAPE',
+      `${label}.${propertyName} 必须是 static string array`
+    );
+  }
+  return initializer.elements.map((element, index) => {
+    if (!ts.isStringLiteral(element)) {
+      failVerification(
+        'COMPONENT_STATE_CONTRACT_SHAPE',
+        `${label}.${propertyName}[${index}] 必须是 string literal`
+      );
+    }
+    return element.text;
+  });
+}
+
+function stateWitnessScalar(node, label) {
+  const value = unwrapExpression(node);
+  if (ts.isStringLiteral(value) || ts.isNumericLiteral(value)) {
+    return ts.isNumericLiteral(value) ? Number(value.text) : value.text;
+  }
+  if (value.kind === ts.SyntaxKind.TrueKeyword) return true;
+  if (value.kind === ts.SyntaxKind.FalseKeyword) return false;
+  failVerification(
+    'COMPONENT_STATE_CONTRACT_SHAPE',
+    `${label} 必须是 string/number/boolean literal`
+  );
+}
+
+function readStateWitnessProps(node, label) {
+  const object = unwrapExpression(node);
+  if (!ts.isObjectLiteralExpression(object)) {
+    failVerification(
+      'COMPONENT_STATE_CONTRACT_SHAPE',
+      `${label} 必须是 props object literal`
+    );
+  }
+  const props = {};
+  for (const property of object.properties) {
+    if (
+      !ts.isPropertyAssignment(property) ||
+      (!ts.isIdentifier(property.name) && !ts.isStringLiteral(property.name))
+    ) {
+      failVerification(
+        'COMPONENT_STATE_CONTRACT_SHAPE',
+        `${label} 只允许静态 props property`
+      );
+    }
+    props[property.name.text] = stateWitnessScalar(
+      property.initializer,
+      `${label}.${property.name.text}`
+    );
+  }
+  return props;
+}
+
+function readShowcaseStateContract(filePath) {
+  const array = findStaticArray(parseSource(filePath), 'showcaseStateContract');
+  return array.elements.map((element, index) => {
+    if (!ts.isObjectLiteralExpression(element)) {
+      failVerification(
+        'COMPONENT_STATE_CONTRACT_SHAPE',
+        `showcaseStateContract[${index}] 必须是 object literal`
+      );
+    }
+    const label = `showcaseStateContract[${index}]`;
+    const witnessNode = unwrapExpression(
+      stateContractProperty(element, 'witness', label)
+    );
+    if (!ts.isObjectLiteralExpression(witnessNode)) {
+      failVerification(
+        'COMPONENT_STATE_CONTRACT_SHAPE',
+        `${label}.witness 必须是 object literal`
+      );
+    }
+    const kind = stateContractString(witnessNode, 'kind', `${label}.witness`);
+    let witness;
+    if (kind === 'jsx-props') {
+      const specimensNode = unwrapExpression(
+        stateContractProperty(witnessNode, 'specimens', `${label}.witness`)
+      );
+      if (
+        !ts.isArrayLiteralExpression(specimensNode) ||
+        specimensNode.elements.length === 0
+      ) {
+        failVerification(
+          'COMPONENT_STATE_CONTRACT_SHAPE',
+          `${label}.witness.specimens 必须是非空静态数组`
+        );
+      }
+      const specimens = specimensNode.elements.map(
+        (specimen, specimenIndex) => {
+          if (!ts.isObjectLiteralExpression(specimen)) {
+            failVerification(
+              'COMPONENT_STATE_CONTRACT_SHAPE',
+              `${label}.witness.specimens[${specimenIndex}] 必须是 object literal`
+            );
+          }
+          const specimenLabel = `${label}.witness.specimens[${specimenIndex}]`;
+          return {
+            testID: optionalStateContractString(
+              specimen,
+              'testID',
+              specimenLabel
+            ),
+            props: readStateWitnessProps(
+              stateContractProperty(specimen, 'props', specimenLabel),
+              `${specimenLabel}.props`
+            ),
+            presentProps: optionalStateContractStringArray(
+              specimen,
+              'presentProps',
+              specimenLabel
+            ),
+          };
+        }
+      );
+      witness = {
+        kind,
+        targetComponent: optionalStateContractString(
+          witnessNode,
+          'targetComponent',
+          `${label}.witness`
+        ),
+        specimens,
+      };
+    } else if (kind === 'interaction') {
+      witness = {
+        kind,
+        targetComponent: stateContractString(
+          witnessNode,
+          'targetComponent',
+          `${label}.witness`
+        ),
+        testID: stateContractString(witnessNode, 'testID', `${label}.witness`),
+        handler: stateContractString(
+          witnessNode,
+          'handler',
+          `${label}.witness`
+        ),
+        calls: stateContractStringArray(
+          witnessNode,
+          'calls',
+          `${label}.witness`
+        ),
+        rootHost: optionalStateContractString(
+          witnessNode,
+          'rootHost',
+          `${label}.witness`
+        ),
+      };
+    } else if (kind === 'runtime-api') {
+      const calls = stateContractStringArray(
+        witnessNode,
+        'calls',
+        `${label}.witness`
+      );
+      if (calls.length === 0) {
+        failVerification(
+          'COMPONENT_STATE_CONTRACT_SHAPE',
+          `${label}.witness.calls 不得为空`
+        );
+      }
+      witness = {
+        kind,
+        calls,
+        rootHost: optionalStateContractString(
+          witnessNode,
+          'rootHost',
+          `${label}.witness`
+        ),
+      };
+    } else {
+      failVerification(
+        'COMPONENT_STATE_CONTRACT_SHAPE',
+        `${label}.witness.kind 尚未支持: ${kind}`
+      );
+    }
+    return {
+      id: stateContractString(element, 'id', label),
+      component: stateContractString(element, 'component', label),
+      scene: stateContractString(element, 'scene', label),
+      label: stateContractString(element, 'label', label),
+      witness,
+    };
+  });
+}
+
 function readStaticStrings(sourceFile, variableName) {
   const array = findStaticArray(sourceFile, variableName);
   return array.elements.map((element, index) =>
@@ -572,11 +1093,251 @@ function importModuleName(statement) {
   return undefined;
 }
 
-function collectRuntimeImportBindings(filePaths, moduleName) {
+function createRuntimeBindingAnalysis(filePaths) {
+  const absolutePaths = [
+    ...new Set(filePaths.map((filePath) => path.resolve(filePath))),
+  ];
+  const program = ts.createProgram({
+    rootNames: absolutePaths,
+    options: {
+      jsx: ts.JsxEmit.Preserve,
+      module: ts.ModuleKind.ESNext,
+      noEmit: true,
+      noLib: true,
+      noResolve: true,
+      skipLibCheck: true,
+      target: ts.ScriptTarget.Latest,
+    },
+  });
+  const sourceFiles = new Map();
+  for (const filePath of absolutePaths) {
+    const sourceFile = program.getSourceFile(filePath);
+    if (!sourceFile) {
+      failVerification(
+        'SOURCE_READ',
+        `TypeScript binding analysis 无法读取 source: ${filePath}`
+      );
+    }
+    sourceFiles.set(filePath, sourceFile);
+  }
+  return {
+    checker: program.getTypeChecker(),
+    sourceFiles,
+  };
+}
+
+function isTypeOnlyIdentifierUse(node) {
+  let current = node.parent;
+  while (current && !ts.isSourceFile(current)) {
+    if (ts.isTypeNode(current)) return true;
+    if (
+      ts.isExpression(current) ||
+      ts.isStatement(current) ||
+      ts.isJsxAttribute(current)
+    ) {
+      return false;
+    }
+    current = current.parent;
+  }
+  return false;
+}
+
+function jsxUseNode(identifier) {
+  if (
+    ts.isJsxOpeningElement(identifier.parent) &&
+    identifier.parent.tagName === identifier
+  ) {
+    return identifier.parent.parent;
+  }
+  if (
+    ts.isJsxSelfClosingElement(identifier.parent) &&
+    identifier.parent.tagName === identifier
+  ) {
+    return identifier.parent;
+  }
+  return undefined;
+}
+
+function readStaticStringArrays(sourceFile) {
+  const arrays = new Map();
+  for (const statement of sourceFile.statements) {
+    if (!ts.isVariableStatement(statement)) continue;
+    for (const declaration of statement.declarationList.declarations) {
+      if (!ts.isIdentifier(declaration.name) || !declaration.initializer) {
+        continue;
+      }
+      const initializer = unwrapExpression(declaration.initializer);
+      if (!ts.isArrayLiteralExpression(initializer)) continue;
+      const values = [];
+      let isStaticStringArray = true;
+      for (const element of initializer.elements) {
+        if (!ts.isStringLiteral(element)) {
+          isStaticStringArray = false;
+          break;
+        }
+        values.push(element.text);
+      }
+      if (isStaticStringArray) arrays.set(declaration.name.text, values);
+    }
+  }
+  return arrays;
+}
+
+function iteratorEnvironments(node, staticArrays) {
+  const dimensions = [];
+  let current = node.parent;
+  while (current && !ts.isSourceFile(current)) {
+    if (
+      ts.isArrowFunction(current) &&
+      current.parameters.length > 0 &&
+      ts.isIdentifier(current.parameters[0].name) &&
+      ts.isCallExpression(current.parent) &&
+      current.parent.arguments.includes(current) &&
+      ts.isPropertyAccessExpression(current.parent.expression) &&
+      ['map', 'flatMap'].includes(current.parent.expression.name.text) &&
+      ts.isIdentifier(current.parent.expression.expression)
+    ) {
+      const values = staticArrays.get(
+        current.parent.expression.expression.text
+      );
+      if (values) {
+        dimensions.unshift({
+          name: current.parameters[0].name.text,
+          values,
+        });
+      }
+    }
+    current = current.parent;
+  }
+
+  let environments = [{}];
+  for (const dimension of dimensions) {
+    environments = environments.flatMap((environment) =>
+      dimension.values.map((value) => ({
+        ...environment,
+        [dimension.name]: value,
+      }))
+    );
+  }
+  return environments;
+}
+
+function evaluateStateWitnessExpression(node, environment) {
+  const value = unwrapExpression(node);
+  if (ts.isStringLiteral(value) || ts.isNoSubstitutionTemplateLiteral(value)) {
+    return value.text;
+  }
+  if (ts.isNumericLiteral(value)) return Number(value.text);
+  if (value.kind === ts.SyntaxKind.TrueKeyword) return true;
+  if (value.kind === ts.SyntaxKind.FalseKeyword) return false;
+  if (ts.isIdentifier(value)) return environment[value.text];
+  if (ts.isTemplateExpression(value)) {
+    let result = value.head.text;
+    for (const span of value.templateSpans) {
+      const expressionValue = evaluateStateWitnessExpression(
+        span.expression,
+        environment
+      );
+      if (
+        typeof expressionValue !== 'string' &&
+        typeof expressionValue !== 'number' &&
+        typeof expressionValue !== 'boolean'
+      ) {
+        return undefined;
+      }
+      result += `${expressionValue}${span.literal.text}`;
+    }
+    return result;
+  }
+  return undefined;
+}
+
+function readJsxWitnessValue(element, propertyName, environment) {
+  const attributes = ts.isJsxElement(element)
+    ? element.openingElement.attributes.properties
+    : element.attributes.properties;
+  const attribute = attributes.find(
+    (candidate) =>
+      ts.isJsxAttribute(candidate) &&
+      ts.isIdentifier(candidate.name) &&
+      candidate.name.text === propertyName
+  );
+  if (!attribute || !ts.isJsxAttribute(attribute)) return undefined;
+  if (!attribute.initializer) return true;
+  if (ts.isStringLiteral(attribute.initializer)) {
+    return attribute.initializer.text;
+  }
+  if (
+    ts.isJsxExpression(attribute.initializer) &&
+    attribute.initializer.expression
+  ) {
+    return evaluateStateWitnessExpression(
+      attribute.initializer.expression,
+      environment
+    );
+  }
+  return undefined;
+}
+
+function expandBindingJsxSpecimens(binding) {
+  const specimens = [];
+  const staticArraysBySource = new Map();
+  for (const node of binding?.jsxNodes ?? []) {
+    const sourceFile = node.getSourceFile();
+    const staticArrays =
+      staticArraysBySource.get(sourceFile) ??
+      readStaticStringArrays(sourceFile);
+    staticArraysBySource.set(sourceFile, staticArrays);
+    for (const environment of iteratorEnvironments(node, staticArrays)) {
+      const testID = readJsxWitnessValue(node, 'testID', environment);
+      specimens.push({
+        node,
+        testID: typeof testID === 'string' ? testID : undefined,
+        readProp(propertyName) {
+          return readJsxWitnessValue(node, propertyName, environment);
+        },
+      });
+    }
+  }
+  return specimens;
+}
+
+function jsxHasAttribute(element, propertyName) {
+  const attributes = ts.isJsxElement(element)
+    ? element.openingElement.attributes.properties
+    : element.attributes.properties;
+  return attributes.some(
+    (attribute) =>
+      ts.isJsxAttribute(attribute) &&
+      ts.isIdentifier(attribute.name) &&
+      attribute.name.text === propertyName
+  );
+}
+
+function sceneRuntimeCallPaths(sceneContext) {
+  return new Set(
+    [...sceneContext.bindings.values()].flatMap((binding) =>
+      binding.callPaths.map((call) => call.path)
+    )
+  );
+}
+
+function collectRuntimeImportBindings(
+  filePaths,
+  moduleName,
+  bindingAnalysis = createRuntimeBindingAnalysis(filePaths)
+) {
   const bindings = new Map();
+  const bindingsBySymbol = new Map();
   for (const filePath of filePaths) {
-    const sourceFile = parseSource(filePath);
-    const localBindings = new Map();
+    const absolutePath = path.resolve(filePath);
+    const sourceFile = bindingAnalysis.sourceFiles.get(absolutePath);
+    if (!sourceFile) {
+      failVerification(
+        'SOURCE_READ',
+        `binding analysis 缺少 source: ${absolutePath}`
+      );
+    }
     for (const statement of sourceFile.statements) {
       if (importModuleName(statement) !== moduleName) continue;
       const clause = statement.importClause;
@@ -585,34 +1346,41 @@ function collectRuntimeImportBindings(filePaths, moduleName) {
       for (const specifier of clause.namedBindings.elements) {
         if (specifier.isTypeOnly) continue;
         const imported = specifier.propertyName?.text ?? specifier.name.text;
-        const local = specifier.name.text;
-        localBindings.set(local, imported);
         const binding = bindings.get(imported) ?? {
           imported,
           uses: 0,
           jsxUses: 0,
           callUses: 0,
+          callPaths: [],
           files: new Set(),
+          jsxNodes: [],
         };
-        binding.files.add(filePath);
+        const symbol = bindingAnalysis.checker.getSymbolAtLocation(
+          specifier.name
+        );
+        if (!symbol) {
+          failVerification(
+            'SOURCE_BINDING',
+            `无法解析 public-root import binding: ${specifier.name.text} in ${absolutePath}`
+          );
+        }
+        binding.files.add(absolutePath);
         bindings.set(imported, binding);
+        bindingsBySymbol.set(symbol, binding);
       }
     }
 
     const visit = (node) => {
       if (ts.isImportDeclaration(node)) return;
-      if (ts.isIdentifier(node)) {
-        const imported = localBindings.get(node.text);
-        const binding = imported ? bindings.get(imported) : undefined;
+      if (ts.isIdentifier(node) && !isTypeOnlyIdentifierUse(node)) {
+        const symbol = bindingAnalysis.checker.getSymbolAtLocation(node);
+        const binding = symbol ? bindingsBySymbol.get(symbol) : undefined;
         if (binding) {
           binding.uses += 1;
-          if (
-            (ts.isJsxOpeningElement(node.parent) &&
-              node.parent.tagName === node) ||
-            (ts.isJsxSelfClosingElement(node.parent) &&
-              node.parent.tagName === node)
-          ) {
+          const jsxNode = jsxUseNode(node);
+          if (jsxNode) {
             binding.jsxUses += 1;
+            binding.jsxNodes.push(jsxNode);
           }
           if (
             (ts.isCallExpression(node.parent) &&
@@ -623,6 +1391,19 @@ function collectRuntimeImportBindings(filePaths, moduleName) {
               node.parent.parent.expression === node.parent)
           ) {
             binding.callUses += 1;
+            const callPath =
+              ts.isPropertyAccessExpression(node.parent) &&
+              ts.isIdentifier(node.parent.name)
+                ? `${binding.imported}.${node.parent.name.text}`
+                : binding.imported;
+            binding.callPaths.push({
+              path: callPath,
+              node:
+                ts.isCallExpression(node.parent) &&
+                node.parent.expression === node
+                  ? node.parent
+                  : node.parent.parent,
+            });
           }
         }
       }
@@ -631,6 +1412,89 @@ function collectRuntimeImportBindings(filePaths, moduleName) {
     visit(sourceFile);
   }
   return bindings;
+}
+
+function importDeclarationHasRuntimeValue(statement) {
+  const clause = statement.importClause;
+  if (!clause) return true;
+  if (clause.isTypeOnly) return false;
+  if (clause.name) return true;
+  if (!clause.namedBindings) return false;
+  if (ts.isNamespaceImport(clause.namedBindings)) return true;
+  return clause.namedBindings.elements.some(
+    (specifier) => !specifier.isTypeOnly
+  );
+}
+
+function exportDeclarationHasRuntimeValue(statement) {
+  if (statement.isTypeOnly) return false;
+  if (!statement.exportClause) return true;
+  if (!ts.isNamedExports(statement.exportClause)) return true;
+  return statement.exportClause.elements.some(
+    (specifier) => !specifier.isTypeOnly
+  );
+}
+
+function relativeRuntimeModuleNames(sourceFile) {
+  const moduleNames = new Set();
+  for (const statement of sourceFile.statements) {
+    if (
+      ts.isImportDeclaration(statement) &&
+      importDeclarationHasRuntimeValue(statement)
+    ) {
+      const moduleName = importModuleName(statement);
+      if (moduleName?.startsWith('.')) moduleNames.add(moduleName);
+      continue;
+    }
+    if (
+      ts.isExportDeclaration(statement) &&
+      exportDeclarationHasRuntimeValue(statement) &&
+      statement.moduleSpecifier &&
+      ts.isStringLiteral(statement.moduleSpecifier) &&
+      statement.moduleSpecifier.text.startsWith('.')
+    ) {
+      moduleNames.add(statement.moduleSpecifier.text);
+    }
+  }
+
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      node.expression.kind === ts.SyntaxKind.ImportKeyword &&
+      node.arguments.length === 1 &&
+      ts.isStringLiteral(node.arguments[0]) &&
+      node.arguments[0].text.startsWith('.')
+    ) {
+      moduleNames.add(node.arguments[0].text);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return moduleNames;
+}
+
+function collectReachableRuntimeFiles(entryFile) {
+  const reachable = new Set();
+  const pending = [path.resolve(entryFile)];
+  while (pending.length > 0) {
+    const filePath = pending.pop();
+    if (!filePath || reachable.has(filePath)) continue;
+    reachable.add(filePath);
+    const sourceFile = parseSource(filePath);
+    for (const moduleName of relativeRuntimeModuleNames(sourceFile)) {
+      const dependency = resolveModuleFile(filePath, moduleName);
+      if (!reachable.has(dependency)) pending.push(dependency);
+    }
+  }
+  return [...reachable];
+}
+
+function isWithinDirectory(filePath, directory) {
+  const relativePath = path.relative(directory, filePath);
+  return (
+    relativePath === '' ||
+    (!relativePath.startsWith('..') && !path.isAbsolute(relativePath))
+  );
 }
 
 function readStaticObjectArray(sourceFile, variableName, properties) {
@@ -681,6 +1545,24 @@ function directJsxChildren(element) {
   );
 }
 
+function directRuntimeJsxChildren(element) {
+  if (!ts.isJsxElement(element)) return [];
+  return element.children.flatMap((child) => {
+    if (ts.isJsxElement(child) || ts.isJsxSelfClosingElement(child)) {
+      return [child];
+    }
+    if (!ts.isJsxExpression(child) || !child.expression) return [];
+    const expression = unwrapExpression(child.expression);
+    if (!ts.isConditionalExpression(expression)) return [];
+    return [expression.whenTrue, expression.whenFalse]
+      .map(unwrapExpression)
+      .filter(
+        (branch) =>
+          ts.isJsxElement(branch) || ts.isJsxSelfClosingElement(branch)
+      );
+  });
+}
+
 function assertDirectChild(parent, expectedName, code) {
   const matches = directJsxChildren(parent).filter((child) => {
     if (ts.isJsxElement(child))
@@ -691,6 +1573,20 @@ function assertDirectChild(parent, expectedName, code) {
     failVerification(
       code,
       `${jsxTagName(parent.openingElement)} 必须恰有一个直接子节点 ${expectedName}`
+    );
+  }
+  return matches[0];
+}
+
+function assertDirectRuntimeChild(parent, binding, expectedName) {
+  const expectedNodes = new Set(binding?.jsxNodes ?? []);
+  const matches = directRuntimeJsxChildren(parent).filter((child) =>
+    expectedNodes.has(child)
+  );
+  if (matches.length !== 1) {
+    failVerification(
+      'ROOT_PROVIDER_HIERARCHY',
+      `root runtime 必须恰有一个直接子节点 ${expectedName}`
     );
   }
   return matches[0];
@@ -1021,7 +1917,463 @@ function verifyRuntimeAndNativeContract(root) {
   );
 }
 
-function verifySceneContract(root, entries) {
+function isFunctionLikeNode(node) {
+  return (
+    ts.isArrowFunction(node) ||
+    ts.isFunctionExpression(node) ||
+    ts.isFunctionDeclaration(node) ||
+    ts.isMethodDeclaration(node)
+  );
+}
+
+function nearestFunctionLike(node) {
+  let current = node.parent;
+  while (current && !ts.isSourceFile(current)) {
+    if (isFunctionLikeNode(current)) return current;
+    current = current.parent;
+  }
+  return undefined;
+}
+
+function enclosingImportModuleName(node) {
+  let current = node.parent;
+  while (current && !ts.isSourceFile(current)) {
+    if (ts.isImportDeclaration(current)) return importModuleName(current);
+    current = current.parent;
+  }
+  return undefined;
+}
+
+function isUnshadowedJestIdentifier(identifier, names, checker) {
+  if (!names.includes(identifier.text)) return false;
+  const symbol = checker.getSymbolAtLocation(identifier);
+  if (!symbol) return true;
+  return (symbol.declarations ?? []).every(
+    (declaration) =>
+      declaration.getSourceFile() !== identifier.getSourceFile() ||
+      enclosingImportModuleName(declaration) === '@jest/globals'
+  );
+}
+
+function isJestTestRootExpression(expression, checker) {
+  const value = unwrapExpression(expression);
+  if (ts.isIdentifier(value)) {
+    return isUnshadowedJestIdentifier(value, ['test', 'it'], checker);
+  }
+  return (
+    ts.isPropertyAccessExpression(value) &&
+    value.name.text === 'only' &&
+    ts.isIdentifier(value.expression) &&
+    isUnshadowedJestIdentifier(value.expression, ['test', 'it'], checker)
+  );
+}
+
+function isJestEachFactoryCall(node, checker) {
+  if (!ts.isCallExpression(node)) return false;
+  const expression = unwrapExpression(node.expression);
+  return (
+    ts.isPropertyAccessExpression(expression) &&
+    expression.name.text === 'each' &&
+    isJestTestRootExpression(expression.expression, checker)
+  );
+}
+
+function executableJestCallback(node, checker) {
+  const callback = nearestFunctionLike(node);
+  if (
+    !callback ||
+    !ts.isCallExpression(callback.parent) ||
+    callback.parent.arguments[1] !== callback
+  ) {
+    return undefined;
+  }
+  const registration = callback.parent;
+  const callee = unwrapExpression(registration.expression);
+  if (
+    !isJestTestRootExpression(callee, checker) &&
+    !(ts.isCallExpression(callee) && isJestEachFactoryCall(callee, checker))
+  ) {
+    return undefined;
+  }
+  let current = registration.parent;
+  while (current && !ts.isSourceFile(current)) {
+    if (isFunctionLikeNode(current)) return undefined;
+    current = current.parent;
+  }
+  return callback;
+}
+
+function callbackHasDirectExpectation(callback, checker) {
+  let found = false;
+  const visit = (node) => {
+    if (found) return;
+    if (node !== callback && isFunctionLikeNode(node)) return;
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      isUnshadowedJestIdentifier(node.expression, ['expect'], checker)
+    ) {
+      found = true;
+      return;
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(callback);
+  return found;
+}
+
+function verifySceneStateTestConsumption(root) {
+  const testFiles = Object.values(expectedSceneTestFiles).map((fileName) =>
+    path.join(root, 'example/src/__tests__', fileName)
+  );
+  const bindingAnalysis = createRuntimeBindingAnalysis(testFiles);
+
+  for (const scene of expectedScenes) {
+    const testFile = path.join(
+      root,
+      'example/src/__tests__',
+      expectedSceneTestFiles[scene]
+    );
+    const sourceFile = bindingAnalysis.sourceFiles.get(path.resolve(testFile));
+    if (!sourceFile) {
+      failVerification(
+        'SCENE_STATE_TEST_CONSUMPTION',
+        `${scene} 缺少对应 scene Jest 文件`
+      );
+    }
+
+    const factorySymbols = new Set();
+    for (const statement of sourceFile.statements) {
+      if (
+        importModuleName(statement) !== './helpers/showcaseStateCoverage' ||
+        !ts.isImportDeclaration(statement)
+      ) {
+        continue;
+      }
+      const clause = statement.importClause;
+      if (
+        !clause ||
+        clause.isTypeOnly ||
+        !clause.namedBindings ||
+        !ts.isNamedImports(clause.namedBindings)
+      ) {
+        continue;
+      }
+      for (const specifier of clause.namedBindings.elements) {
+        if (
+          specifier.isTypeOnly ||
+          (specifier.propertyName?.text ?? specifier.name.text) !==
+            'createShowcaseStateCoverage'
+        ) {
+          continue;
+        }
+        const symbol = bindingAnalysis.checker.getSymbolAtLocation(
+          specifier.name
+        );
+        if (symbol) factorySymbols.add(symbol);
+      }
+    }
+
+    const coverageRecords = [];
+    const coverageBySymbol = new Map();
+    const collectFactories = (node) => {
+      if (
+        ts.isCallExpression(node) &&
+        ts.isIdentifier(node.expression) &&
+        factorySymbols.has(
+          bindingAnalysis.checker.getSymbolAtLocation(node.expression)
+        )
+      ) {
+        const [componentNode] = node.arguments;
+        if (
+          node.arguments.length !== 1 ||
+          !componentNode ||
+          !ts.isStringLiteral(componentNode) ||
+          !ts.isVariableDeclaration(node.parent) ||
+          node.parent.initializer !== node ||
+          !ts.isIdentifier(node.parent.name)
+        ) {
+          failVerification(
+            'SCENE_STATE_TEST_CONSUMPTION',
+            `${scene} 的 createShowcaseStateCoverage 必须直接赋给局部 const，且 component 使用 string literal`
+          );
+        }
+        const coverageSymbol = bindingAnalysis.checker.getSymbolAtLocation(
+          node.parent.name
+        );
+        if (!coverageSymbol) {
+          failVerification(
+            'SCENE_STATE_TEST_CONSUMPTION',
+            `${scene} 无法解析 ${componentNode.text} coverage binding`
+          );
+        }
+        const testCallback = executableJestCallback(
+          node,
+          bindingAnalysis.checker
+        );
+        if (!testCallback) {
+          failVerification(
+            'SCENE_STATE_TEST_CONSUMPTION',
+            `${scene}/${componentNode.text} coverage factory 必须位于顶层、未 skip 的 test/it callback`
+          );
+        }
+        const record = {
+          callback: testCallback,
+          component: componentNode.text,
+          consumed: [],
+          expectCompleteCalls: 0,
+        };
+        coverageRecords.push(record);
+        coverageBySymbol.set(coverageSymbol, record);
+      }
+      ts.forEachChild(node, collectFactories);
+    };
+    collectFactories(sourceFile);
+
+    const collectConsumption = (node) => {
+      if (
+        ts.isCallExpression(node) &&
+        ts.isPropertyAccessExpression(node.expression) &&
+        ts.isIdentifier(node.expression.expression)
+      ) {
+        const coverageSymbol = bindingAnalysis.checker.getSymbolAtLocation(
+          node.expression.expression
+        );
+        const record = coverageSymbol
+          ? coverageBySymbol.get(coverageSymbol)
+          : undefined;
+        if (record && node.expression.name.text === 'consume') {
+          if (nearestFunctionLike(node) !== record.callback) {
+            failVerification(
+              'SCENE_STATE_TEST_CONSUMPTION',
+              `${scene}/${record.component} consume 必须直接属于 coverage factory 所在 test/it callback`
+            );
+          }
+          for (const [index, argument] of node.arguments.entries()) {
+            if (!ts.isStringLiteral(argument)) {
+              failVerification(
+                'SCENE_STATE_TEST_CONSUMPTION',
+                `${scene}/${record.component} consume[${index}] 必须是 string literal`
+              );
+            }
+            record.consumed.push(argument.text);
+          }
+        } else if (record && node.expression.name.text === 'expectComplete') {
+          if (nearestFunctionLike(node) !== record.callback) {
+            failVerification(
+              'SCENE_STATE_TEST_CONSUMPTION',
+              `${scene}/${record.component} expectComplete 必须直接属于 coverage factory 所在 test/it callback`
+            );
+          }
+          if (node.arguments.length !== 0) {
+            failVerification(
+              'SCENE_STATE_TEST_CONSUMPTION',
+              `${scene}/${record.component} expectComplete 不接受参数`
+            );
+          }
+          record.expectCompleteCalls += 1;
+        }
+      }
+      ts.forEachChild(node, collectConsumption);
+    };
+    collectConsumption(sourceFile);
+
+    const expectedComponents = expectedComponentsByScene[scene];
+    assertExactSet(
+      `${scene} scene Jest coverage components`,
+      coverageRecords.map((record) => record.component),
+      expectedComponents,
+      {
+        duplicateCode: 'SCENE_STATE_TEST_CONSUMPTION',
+        mismatchCode: 'SCENE_STATE_TEST_CONSUMPTION',
+      }
+    );
+    for (const record of coverageRecords) {
+      const expectedStateIds = expectedStateIdsByComponent[record.component];
+      if (!expectedStateIds) {
+        failVerification(
+          'SCENE_STATE_TEST_CONSUMPTION',
+          `${scene} Jest coverage 包含未独立锚定组件 ${record.component}`
+        );
+      }
+      assertExactSet(
+        `${scene}/${record.component} consumed state ids`,
+        record.consumed,
+        expectedStateIds,
+        {
+          duplicateCode: 'SCENE_STATE_TEST_CONSUMPTION',
+          mismatchCode: 'SCENE_STATE_TEST_CONSUMPTION',
+        }
+      );
+      if (record.expectCompleteCalls !== 1) {
+        failVerification(
+          'SCENE_STATE_TEST_CONSUMPTION',
+          `${scene}/${record.component} 必须恰好调用一次 expectComplete，实际=${record.expectCompleteCalls}`
+        );
+      }
+      if (
+        !callbackHasDirectExpectation(record.callback, bindingAnalysis.checker)
+      ) {
+        failVerification(
+          'SCENE_STATE_TEST_CONSUMPTION',
+          `${scene}/${record.component} coverage callback 缺少直接执行的 Jest expect`
+        );
+      }
+    }
+  }
+}
+
+function verifyShowcaseStateContract(root, catalogEntries, sceneContexts) {
+  const stateEntries = readShowcaseStateContract(
+    path.join(root, 'example/src/catalog/showcaseStateContract.ts')
+  );
+  const anchoredComponents = Object.keys(expectedStateIdsByComponent);
+  const expectedStateIds = Object.values(expectedStateIdsByComponent).flat();
+  assertExactSet(
+    'global required state ids',
+    stateEntries.map((entry) => entry.id),
+    expectedStateIds,
+    {
+      duplicateCode: 'COMPONENT_STATE_REQUIRED_SET',
+      mismatchCode: 'COMPONENT_STATE_REQUIRED_SET',
+    }
+  );
+  const unanchoredEntries = stateEntries.filter(
+    (entry) => !anchoredComponents.includes(entry.component)
+  );
+  if (unanchoredEntries.length > 0) {
+    failVerification(
+      'COMPONENT_STATE_REQUIRED_SET',
+      `state contract 包含未独立锚定的 component: ${unanchoredEntries
+        .map((entry) => entry.component)
+        .join(', ')}`
+    );
+  }
+
+  for (const [component, requiredIds] of Object.entries(
+    expectedStateIdsByComponent
+  )) {
+    const componentStates = stateEntries.filter(
+      (entry) => entry.component === component
+    );
+    assertExactSet(
+      `${component} required state ids`,
+      componentStates.map((entry) => entry.id),
+      requiredIds,
+      {
+        duplicateCode: 'COMPONENT_STATE_REQUIRED_SET',
+        mismatchCode: 'COMPONENT_STATE_REQUIRED_SET',
+      }
+    );
+
+    const catalogEntry = catalogEntries.find((entry) => entry.id === component);
+    if (!catalogEntry) {
+      failVerification(
+        'COMPONENT_STATE_CATALOG_SET',
+        `${component} 缺少 component catalog entry`
+      );
+    }
+    assertExactSet(
+      `${component} catalog state labels`,
+      catalogEntry.states,
+      componentStates.map((entry) => entry.label),
+      {
+        duplicateCode: 'COMPONENT_STATE_CATALOG_SET',
+        mismatchCode: 'COMPONENT_STATE_CATALOG_SET',
+      }
+    );
+
+    const jsxSpecimensByTarget = new Map();
+    for (const state of componentStates) {
+      if (!/^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$/u.test(state.id)) {
+        failVerification(
+          'COMPONENT_STATE_REQUIRED_SET',
+          `${state.id} 不是稳定的 component-slug.state-slug ID`
+        );
+      }
+      if (state.scene !== catalogEntry.scene) {
+        failVerification(
+          'COMPONENT_STATE_CATALOG_SET',
+          `${state.id} scene=${state.scene} 与 catalog scene=${catalogEntry.scene} 不一致`
+        );
+      }
+      const sceneContext = sceneContexts.get(state.scene);
+      if (!sceneContext) {
+        failVerification(
+          'COMPONENT_STATE_WITNESS',
+          `${state.id} 缺少 route-reachable scene context`
+        );
+      }
+      const callPaths = sceneRuntimeCallPaths(sceneContext);
+      if (state.witness.rootHost && state.witness.rootHost !== component) {
+        failVerification(
+          'COMPONENT_STATE_WITNESS',
+          `${state.id} rootHost=${state.witness.rootHost} 与 component=${component} 不一致`
+        );
+      }
+      if (state.witness.kind === 'jsx-props') {
+        const targetComponent = state.witness.targetComponent ?? component;
+        const targetKey = `${state.scene}:${targetComponent}`;
+        let actualSpecimens = jsxSpecimensByTarget.get(targetKey);
+        if (!actualSpecimens) {
+          actualSpecimens = expandBindingJsxSpecimens(
+            sceneContext.bindings.get(targetComponent)
+          );
+          jsxSpecimensByTarget.set(targetKey, actualSpecimens);
+        }
+        for (const requiredSpecimen of state.witness.specimens) {
+          const matches = actualSpecimens.filter(
+            (actual) =>
+              actual.testID === requiredSpecimen.testID &&
+              Object.entries(requiredSpecimen.props).every(
+                ([propertyName, expectedValue]) =>
+                  actual.readProp(propertyName) === expectedValue
+              ) &&
+              requiredSpecimen.presentProps.every((propertyName) =>
+                jsxHasAttribute(actual.node, propertyName)
+              )
+          );
+          if (matches.length !== 1) {
+            failVerification(
+              'COMPONENT_STATE_WITNESS',
+              `${state.id} 需要恰好一个 route-reachable ${targetComponent} witness: testID=${requiredSpecimen.testID} props=${JSON.stringify(requiredSpecimen.props)} presentProps=${requiredSpecimen.presentProps.join(',') || '无'}; actual=${matches.length}`
+            );
+          }
+        }
+      } else if (state.witness.kind === 'interaction') {
+        const targets = expandBindingJsxSpecimens(
+          sceneContext.bindings.get(state.witness.targetComponent)
+        ).filter(
+          (specimen) =>
+            specimen.testID === state.witness.testID &&
+            jsxHasAttribute(specimen.node, state.witness.handler)
+        );
+        const missingCalls = state.witness.calls.filter(
+          (callPath) => !callPaths.has(callPath)
+        );
+        if (targets.length !== 1 || missingCalls.length > 0) {
+          failVerification(
+            'COMPONENT_STATE_WITNESS',
+            `${state.id} interaction witness 失配: target=${state.witness.targetComponent}#${state.witness.testID} handler=${state.witness.handler} actual=${targets.length} missingCalls=${missingCalls.join(', ') || '无'}`
+          );
+        }
+      } else if (state.witness.kind === 'runtime-api') {
+        const missingCalls = state.witness.calls.filter(
+          (callPath) => !callPaths.has(callPath)
+        );
+        if (missingCalls.length > 0) {
+          failVerification(
+            'COMPONENT_STATE_WITNESS',
+            `${state.id} 缺少 binding-aware runtime API call: ${missingCalls.join(', ')}`
+          );
+        }
+      }
+    }
+  }
+  verifySceneStateTestConsumption(root);
+}
+
+function verifySceneContract(root, entries, bindingAnalysis) {
   const catalogPath = path.join(
     root,
     'example/src/catalog/componentCatalog.ts'
@@ -1035,21 +2387,27 @@ function verifySceneContract(root, entries) {
   const routerPath = path.join(root, 'example/src/app/ExampleRouter.tsx');
   const routerSource = readText(root, 'example/src/app/ExampleRouter.tsx');
   const routerAst = parseSource(routerPath);
-  const routeImports = new Map();
+  const routeTargets = new Map();
   for (const statement of routerAst.statements) {
     const moduleName = importModuleName(statement);
     const match = moduleName?.match(/^\.\.\/showcases\/([^/]+)\//u);
     if (!match) continue;
     const namedBindings = statement.importClause?.namedBindings;
     if (!namedBindings || !ts.isNamedImports(namedBindings)) continue;
-    const names = namedBindings.elements.map(
-      (specifier) => specifier.name.text
+    const valueSpecifiers = namedBindings.elements.filter(
+      (specifier) => !specifier.isTypeOnly
     );
-    if (names.length === 1) routeImports.set(match[1], names[0]);
+    if (valueSpecifiers.length !== 1 || !moduleName) continue;
+    const specifier = valueSpecifiers[0];
+    routeTargets.set(match[1], {
+      importedName: specifier.propertyName?.text ?? specifier.name.text,
+      localName: specifier.name.text,
+      filePath: resolveModuleFile(routerPath, moduleName),
+    });
   }
   const routeEntries = [];
   for (const scene of expectedScenes.slice(0, -1)) {
-    const componentName = routeImports.get(scene);
+    const componentName = routeTargets.get(scene)?.localName;
     if (
       !componentName ||
       !new RegExp(
@@ -1064,7 +2422,7 @@ function verifySceneContract(root, entries) {
     }
     routeEntries.push(scene);
   }
-  const businessComponent = routeImports.get('business');
+  const businessComponent = routeTargets.get('business')?.localName;
   if (
     !businessComponent ||
     !new RegExp(`return\\s*<${businessComponent}\\s*\\/>;`, 'u').test(
@@ -1085,24 +2443,27 @@ function verifySceneContract(root, entries) {
     failVerification('ROUTE_REGISTRY', 'Router 仍包含 PendingScene');
   }
 
+  const sceneContexts = new Map();
   for (const scene of expectedScenes) {
-    const componentName = routeImports.get(scene);
-    const sceneFiles = listSourceFiles(
-      path.join(root, `example/src/showcases/${scene}`)
-    );
-    const routeTargetFile = componentName
-      ? sceneFiles.find((filePath) =>
-          new RegExp(`export\\s+function\\s+${componentName}\\b`, 'u').test(
-            readFileSync(filePath, 'utf8')
-          )
-        )
-      : undefined;
-    if (!routeTargetFile) {
+    const routeTarget = routeTargets.get(scene);
+    if (
+      !routeTarget ||
+      !new RegExp(
+        `export\\s+function\\s+${routeTarget.importedName}\\b`,
+        'u'
+      ).test(readFileSync(routeTarget.filePath, 'utf8'))
+    ) {
       failVerification(
         'ROUTE_REGISTRY',
         `${scene} route target 不是实际导出的 scene`
       );
     }
+    const routeTargetFile = routeTarget.filePath;
+    const reachableFiles = collectReachableRuntimeFiles(routeTargetFile);
+    const sceneDirectory = path.join(root, `example/src/showcases/${scene}`);
+    const reachableSceneFiles = reachableFiles.filter((filePath) =>
+      isWithinDirectory(filePath, sceneDirectory)
+    );
     const scaffolds = findJsxElements(
       parseSource(routeTargetFile),
       'ShowcaseScaffold'
@@ -1134,9 +2495,11 @@ function verifySceneContract(root, entries) {
     }
 
     const bindings = collectRuntimeImportBindings(
-      sceneFiles,
-      '@unif/react-native-design'
+      reachableSceneFiles,
+      '@unif/react-native-design',
+      bindingAnalysis
     );
+    sceneContexts.set(scene, { bindings, reachableSceneFiles });
     const requiredComponents = entries
       .filter(
         (entry) =>
@@ -1188,6 +2551,8 @@ function verifySceneContract(root, entries) {
       );
     }
   }
+
+  verifyShowcaseStateContract(root, entries, sceneContexts);
 
   const homePath = path.join(root, 'example/src/screens/HomeScreen.tsx');
   const homeAst = parseSource(homePath);
@@ -1246,11 +2611,12 @@ function verifySceneContract(root, entries) {
     'ICONS',
     'ICON_NAMES',
     'IconCatalog',
-    ...[...routeImports.values()],
+    ...[...routeTargets.values()].map((target) => target.localName),
   ]);
   const homeImports = collectRuntimeImportBindings(
     [homePath],
-    '@unif/react-native-design'
+    '@unif/react-native-design',
+    bindingAnalysis
   );
   const eagerHeavy = [...heavyNames].filter(
     (name) => (homeImports.get(name)?.uses ?? 0) > 0
@@ -1263,19 +2629,26 @@ function verifySceneContract(root, entries) {
   }
 }
 
-function verifyRootRuntime(root) {
+function verifyRootRuntime(root, bindingAnalysis) {
   const runtimeFiles = listSourceFiles(path.join(root, 'example/src'));
+  const designBindings = collectRuntimeImportBindings(
+    runtimeFiles,
+    '@unif/react-native-design',
+    bindingAnalysis
+  );
+  const gestureBindings = collectRuntimeImportBindings(
+    runtimeFiles,
+    'react-native-gesture-handler',
+    bindingAnalysis
+  );
+  const runtimeBindings = new Map([
+    ['GestureHandlerRootView', gestureBindings.get('GestureHandlerRootView')],
+    ['ThemeProvider', designBindings.get('ThemeProvider')],
+    ['ConfirmHost', designBindings.get('ConfirmHost')],
+    ['ToastHost', designBindings.get('ToastHost')],
+  ]);
   const counts = Object.fromEntries(
-    ['GestureHandlerRootView', 'ThemeProvider', 'ConfirmHost', 'ToastHost'].map(
-      (name) => [
-        name,
-        runtimeFiles.reduce(
-          (count, filePath) =>
-            count + findJsxElements(parseSource(filePath), name).length,
-          0
-        ),
-      ]
-    )
+    [...runtimeBindings].map(([name, binding]) => [name, binding?.jsxUses ?? 0])
   );
   const invalid = Object.entries(counts).filter(([, count]) => count !== 1);
   if (invalid.length) {
@@ -1288,8 +2661,24 @@ function verifyRootRuntime(root) {
   }
 
   const providersPath = path.join(root, 'example/src/app/AppProviders.tsx');
-  const providersAst = parseSource(providersPath);
-  const gesture = findJsxElements(providersAst, 'GestureHandlerRootView')[0];
+  const providerDesignBindings = collectRuntimeImportBindings(
+    [providersPath],
+    '@unif/react-native-design',
+    bindingAnalysis
+  );
+  const providerGestureBindings = collectRuntimeImportBindings(
+    [providersPath],
+    'react-native-gesture-handler',
+    bindingAnalysis
+  );
+  const gesture = providerGestureBindings.get('GestureHandlerRootView')
+    ?.jsxNodes[0];
+  if (!gesture || !ts.isJsxElement(gesture)) {
+    failVerification(
+      'ROOT_PROVIDER_HIERARCHY',
+      '缺少 public react-native-gesture-handler GestureHandlerRootView 根节点'
+    );
+  }
   const safeArea = gesture
     ? assertDirectChild(gesture, 'SafeAreaProvider', 'ROOT_PROVIDER_HIERARCHY')
     : undefined;
@@ -1299,23 +2688,23 @@ function verifyRootRuntime(root) {
   if (showcase) {
     assertDirectChild(showcase, 'DesignRuntime', 'ROOT_PROVIDER_HIERARCHY');
   }
-  const theme = findJsxElements(providersAst, 'ThemeProvider')[0];
-  if (!theme) {
-    failVerification('ROOT_PROVIDER_HIERARCHY', '缺少 ThemeProvider');
-  }
-  assertDirectChild(theme, 'ConfirmHost', 'ROOT_PROVIDER_HIERARCHY');
-  assertDirectChild(theme, 'ToastHost', 'ROOT_PROVIDER_HIERARCHY');
-
-  const bindings = collectRuntimeImportBindings(
-    [providersPath],
-    '@unif/react-native-design'
-  );
-  if ((bindings.get('ThemeProvider')?.jsxUses ?? 0) === 0) {
+  const theme = providerDesignBindings.get('ThemeProvider')?.jsxNodes[0];
+  if (!theme || !ts.isJsxElement(theme)) {
     failVerification(
-      'SCENE_RUNTIME_API_CONSUMPTION',
-      '根装配未从 public root 真实消费 ThemeProvider'
+      'ROOT_PROVIDER_HIERARCHY',
+      '缺少 public-root ThemeProvider'
     );
   }
+  assertDirectRuntimeChild(
+    theme,
+    providerDesignBindings.get('ConfirmHost'),
+    'ConfirmHost'
+  );
+  assertDirectRuntimeChild(
+    theme,
+    providerDesignBindings.get('ToastHost'),
+    'ToastHost'
+  );
 }
 
 function documentSection(source, heading, code) {
@@ -1760,8 +3149,10 @@ export function verifyExampleShowcase(root) {
     );
   }
 
-  verifySceneContract(root, entries);
-  verifyRootRuntime(root);
+  const exampleSourceFiles = listSourceFiles(path.join(root, 'example/src'));
+  const bindingAnalysis = createRuntimeBindingAnalysis(exampleSourceFiles);
+  verifySceneContract(root, entries, bindingAnalysis);
+  verifyRootRuntime(root, bindingAnalysis);
   verifyDocumentation(root);
   verifyWorkflowContract(root);
   verifyTurboContract(root);

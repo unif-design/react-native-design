@@ -15,6 +15,7 @@ import {
   installReducedMotionMock,
   restoreNativeMocks,
 } from './helpers/nativeMocks';
+import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
 
 jest.mock('react-native-safe-area-context', () => {
   const safeAreaMock = jest.requireActual(
@@ -136,43 +137,58 @@ afterEach(() => {
 test('Collections 覆盖 Card、Cell/List、Grid 与 EntryCard 的公开分支', () => {
   render(<App />);
   enterCollections();
+  const cardCoverage = createShowcaseStateCoverage('Card');
+  const cellCoverage = createShowcaseStateCoverage('Cell');
+  const listCoverage = createShowcaseStateCoverage('List');
+  const gridCoverage = createShowcaseStateCoverage('Grid');
+  const entryCardCoverage = createShowcaseStateCoverage('EntryCard');
 
   expect(screen.getByTestId('collections-screen')).toBeOnTheScreen();
   expect(
     componentByTestID(Card, 'collections-card-default').props
   ).toMatchObject({ variant: 'default' });
+  cardCoverage.consume('card.default');
   expect(componentByTestID(Card, 'collections-card-plain').props).toMatchObject(
     {
       variant: 'plain',
     }
   );
+  cardCoverage.consume('card.plain');
   expect(componentByTestID(Card, 'collections-card-bare').props).toMatchObject({
     variant: 'default',
     bare: true,
   });
+  cardCoverage.consume('card.bare');
   expect(componentByTestID(Card, 'collections-card-fill').props.fill).toBe(
     true
   );
+  cardCoverage.consume('card.fill');
+  cardCoverage.expectComplete();
 
   expect(
     screen.queryByRole('button', { name: '静态信息' })
   ).not.toBeOnTheScreen();
+  cellCoverage.consume('cell.static');
   expect(screen.getByRole('button', { name: /可操作行/ })).toBeOnTheScreen();
+  cellCoverage.consume('cell.action');
   expect(
     screen.getByRole('switch', { name: '列表内控制项' })
   ).toBeOnTheScreen();
+  cellCoverage.consume('cell.control');
   const disabledCell = screen.getByRole('button', { name: /禁用行/ });
   expect(disabledCell.props.accessibilityState).toMatchObject({
     disabled: true,
   });
   fireEvent.press(disabledCell);
   expect(screen.queryByTestId('result-latest')).not.toBeOnTheScreen();
+  cellCoverage.consume('cell.disabled');
   expect(
     componentByTestID(Cell, 'collections-cell-danger').props
   ).toMatchObject({
     danger: true,
     arrow: true,
   });
+  cellCoverage.consume('cell.arrow', 'cell.danger');
   expect(
     componentByTestID(Cell, 'collections-cell-danger')
       .findAllByType(Icon)
@@ -181,14 +197,19 @@ test('Collections 覆盖 Card、Cell/List、Grid 与 EntryCard 的公开分支',
   expect(componentByTestID(List, 'collections-list-grouped').props.flush).toBe(
     undefined
   );
+  listCoverage.consume('list.grouped');
   expect(componentByTestID(List, 'collections-list-full').props).toMatchObject({
     flush: true,
     divider: 'full',
   });
+  listCoverage.consume('list.flush', 'list.divider-full');
   expect(componentByTestID(List, 'collections-list-none').props).toMatchObject({
     flush: true,
     divider: 'none',
   });
+  listCoverage.consume('list.divider-none');
+  listCoverage.expectComplete();
+  cellCoverage.expectComplete();
 
   expect(componentByTestID(Grid, 'collections-grid-2').props).toMatchObject({
     columns: 2,
@@ -197,6 +218,7 @@ test('Collections 覆盖 Card、Cell/List、Grid 与 EntryCard 的公开分支',
   expect(
     componentByTestID(Grid, 'collections-grid-2').props.onPress
   ).toBeUndefined();
+  gridCoverage.consume('grid.static');
   expect(componentByTestID(Grid, 'collections-grid-4').props).toMatchObject({
     columns: 4,
     card: true,
@@ -205,23 +227,34 @@ test('Collections 覆盖 Card、Cell/List、Grid 与 EntryCard 的公开分支',
     columns: 6,
     card: false,
   });
+  gridCoverage.consume('grid.columns', 'grid.card');
   expect(screen.getByRole('button', { name: '消息，0' })).toBeOnTheScreen();
   expect(screen.getByRole('button', { name: '任务，99+' })).toBeOnTheScreen();
+  gridCoverage.consume('grid.badge');
   fireEvent.press(screen.getByRole('button', { name: '消息，0' }));
   expect(
     screen.getByText('最新结果：Grid · 选择 · 已选择消息入口')
   ).toBeOnTheScreen();
+  gridCoverage.consume('grid.action');
+  gridCoverage.expectComplete();
 
   expect(
     componentByTestID(EntryCard, 'collections-entry-static').props.onPress
   ).toBeUndefined();
   expect(
+    componentByTestID(EntryCard, 'collections-entry-static').props.sub
+  ).toBe('带副标题');
+  entryCardCoverage.consume('entry-card.static', 'entry-card.with-subtitle');
+  expect(
     componentByTestID(EntryCard, 'collections-entry-action').props.sub
   ).toBeUndefined();
+  entryCardCoverage.consume('entry-card.without-subtitle');
   fireEvent.press(screen.getByRole('button', { name: '打开入口' }));
   expect(
     screen.getByText('最新结果：EntryCard · 点击 · 入口卡片已触发')
   ).toBeOnTheScreen();
+  entryCardCoverage.consume('entry-card.action');
+  entryCardCoverage.expectComplete();
 });
 
 test('Cell control 跨路由保留并随本场景重置回默认值', () => {
@@ -303,16 +336,37 @@ test('Carousel 默认不挂载，开启后覆盖 empty/one/multiple 与 display/
 test('Carousel ref 四个公开方法可执行，reduced motion 停止 upstream autoplay', () => {
   const mounted = render(<App />);
   enterCollections();
+  const stateCoverage = createShowcaseStateCoverage('Carousel');
   fireEvent.press(screen.getByRole('button', { name: '挂载轮播演示' }));
+  expect(screen.getByText('空数据由消费方显示空态')).toBeOnTheScreen();
+  stateCoverage.consume('carousel.empty');
+  expect(
+    componentByTestID(Carousel, 'collections-carousel-one').props.data
+  ).toHaveLength(1);
+  stateCoverage.consume('carousel.single');
+  expect(
+    componentByTestID(Carousel, 'collections-carousel-display').props.data
+  ).toHaveLength(3);
+  stateCoverage.consume('carousel.multiple');
+  expect(
+    componentByTestID(Carousel, 'collections-carousel-action').props
+  ).toMatchObject({
+    indicatorPosition: 'overlay-bottom-right',
+    onPressItem: expect.any(Function),
+    getAccessibilityLabel: expect.any(Function),
+  });
+  stateCoverage.consume('carousel.action', 'carousel.indicator');
   fireEvent.press(screen.getByRole('switch', { name: '轮播自动播放' }));
   fireEvent.press(screen.getByRole('switch', { name: '轮播循环' }));
 
   expect(
     mockUpstreamCarouselProps.some((props) => props.autoplay === true)
   ).toBe(true);
+  stateCoverage.consume('carousel.autoplay');
   expect(
     componentByTestID(Carousel, 'collections-carousel-action').props.loop
   ).toBe(false);
+  stateCoverage.consume('carousel.loop');
   fireEvent.press(screen.getByRole('button', { name: '下一项' }));
   fireEvent.press(screen.getByRole('button', { name: '上一项' }));
   fireEvent.press(screen.getByRole('button', { name: '跳到第一项' }));
@@ -324,9 +378,11 @@ test('Carousel ref 四个公开方法可执行，reduced motion 停止 upstream 
     animated: false,
   });
   expect(mockCarouselRef.getCurrentIndex).toHaveBeenCalledTimes(1);
+  stateCoverage.consume('carousel.ref');
   expect(
     screen.getByText('最新结果：Carousel · 读取 · 当前为第 2 项')
   ).toBeOnTheScreen();
+  stateCoverage.expectComplete();
 
   fireEvent.press(screen.getByRole('button', { name: '返回首页' }));
   expect(mockCarouselUnmount).toHaveBeenCalledTimes(3);

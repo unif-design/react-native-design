@@ -72,6 +72,42 @@ test('Provider 暴露 typed navigation、持久 scene draft 与 target reset', (
   expect(showcase?.state.scenes.forms.inputValue).toBe('');
 });
 
+test('离开或重置 Feedback 时原子恢复 runtime Hosts', () => {
+  render(
+    <ShowcaseProvider>
+      <Probe />
+    </ShowcaseProvider>
+  );
+
+  expect(showcase?.state.runtimeHostsMounted).toBe(true);
+  act(() => {
+    showcase?.navigate('feedback');
+    showcase?.setRuntimeHostsMounted(false);
+  });
+  expect(showcase?.state.runtimeHostsMounted).toBe(false);
+
+  act(() => {
+    showcase?.back();
+  });
+  expect(showcase?.state.navigation).toEqual(['home']);
+  expect(showcase?.state.runtimeHostsMounted).toBe(true);
+
+  act(() => {
+    showcase?.navigate('feedback');
+    showcase?.setRuntimeHostsMounted(false);
+    showcase?.resetScene('feedback');
+  });
+  expect(showcase?.state.navigation).toEqual(['home', 'feedback']);
+  expect(showcase?.state.runtimeHostsMounted).toBe(true);
+
+  act(() => {
+    showcase?.setRuntimeHostsMounted(false);
+    showcase?.navigate('forms');
+  });
+  expect(showcase?.state.navigation).toEqual(['home', 'forms']);
+  expect(showcase?.state.runtimeHostsMounted).toBe(true);
+});
+
 test('custom logger transport 只映射白名单安全摘要并在 unmount 恢复', () => {
   const originalLevel = getLogLevel();
   setLogLevel('error');

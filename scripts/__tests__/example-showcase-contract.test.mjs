@@ -169,6 +169,49 @@ function mutateFixtureFile(fixture, relativePath, mutate, label) {
   writeFileSync(target, mutated);
 }
 
+function removeButtonLoadingCatalogState(source) {
+  return source.replace(
+    "states: ['变体', '尺寸', '通栏', '前后图标', '禁用', '加载']",
+    "states: ['变体', '尺寸', '通栏', '前后图标', '禁用']"
+  );
+}
+
+function removeButtonLoadingSpecimen(source) {
+  const startMarker = '            <Button\n              label="加载按钮"';
+  const start = source.indexOf(startMarker);
+  if (start < 0) return source;
+  const endMarker = '            />';
+  const end = source.indexOf(endMarker, start);
+  if (end < 0) return source;
+  return `${source.slice(0, start)}${source.slice(end + endMarker.length + 1)}`;
+}
+
+function removeRoutedStatusDotSpecimens(source) {
+  return source.replaceAll('<StatusDot\n', '<Tag\n');
+}
+
+function removeSelectableChipSpecimen(source) {
+  const startMarker = '            <Chip\n              label="可选择标签"';
+  const start = source.indexOf(startMarker);
+  if (start < 0) return source;
+  const endMarker = '            />';
+  const end = source.indexOf(endMarker, start);
+  if (end < 0) return source;
+  return `${source.slice(0, start)}${source.slice(end + endMarker.length + 1)}`;
+}
+
+function removeStateContractEntry(source, stateId) {
+  const idMarker = `    id: '${stateId}',`;
+  const idIndex = source.indexOf(idMarker);
+  if (idIndex < 0) return source;
+  const start = source.lastIndexOf('  {\n', idIndex);
+  const nextEntry = source.indexOf("\n  {\n    id: '", idIndex);
+  const contractEnd = source.indexOf('\n] as const', idIndex);
+  const end = nextEntry >= 0 ? nextEntry + 1 : contractEnd;
+  if (start < 0 || end < 0) return source;
+  return `${source.slice(0, start)}${source.slice(end)}`;
+}
+
 function assertVerifierCode(fixture, expectedCode, label) {
   assert.throws(
     () => showcaseVerifier.verifyExampleShowcase(fixture),
@@ -179,7 +222,8 @@ function assertVerifierCode(fixture, expectedCode, label) {
       );
       assert.equal(error.code, expectedCode, label);
       return true;
-    }
+    },
+    label
   );
 }
 
@@ -668,17 +712,13 @@ test('exhaustive verifier 将 sceneIds、Router、Home 与真实 scene consumpti
       label: 'Actions 保留 import 但不再渲染 StatusDot',
       file: 'example/src/showcases/actions/ActionsScene.tsx',
       code: 'SCENE_COMPONENT_CONSUMPTION',
-      mutate: (source) => source.replace('<StatusDot\n', '<Tag\n'),
+      mutate: removeRoutedStatusDotSpecimens,
     },
     {
       label: 'Feedback 保留 import 但不再调用 confirm',
       file: 'example/src/showcases/feedback/FeedbackScene.tsx',
       code: 'SCENE_RUNTIME_API_CONSUMPTION',
-      mutate: (source) =>
-        source.replace(
-          'const accepted = await confirm(',
-          'const accepted = await Promise.resolve('
-        ),
+      mutate: (source) => source.replaceAll('confirm(', 'Promise.resolve('),
     },
     {
       label: 'Foundation 保留 import 但不再调用 childTestID',
@@ -731,6 +771,239 @@ test('exhaustive verifier 将 sceneIds、Router、Home 与真实 scene consumpti
   }
 });
 
+test('scene consumption 仅接受 Router 可达文件，拒绝 dead-file 冒充 StatusDot', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'dead-file mutation 的 clean fixture 必须先完整通过'
+    );
+
+    mutateFixtureFile(
+      fixture,
+      'example/src/showcases/actions/ActionsScene.tsx',
+      removeRoutedStatusDotSpecimens,
+      '从 Router 可达 ActionsScene 移除 StatusDot'
+    );
+
+    const deadCoveragePath = path.join(
+      fixture,
+      'example/src/showcases/actions/DeadCoverage.tsx'
+    );
+    writeFileSync(
+      deadCoveragePath,
+      [
+        "import { StatusDot } from '@unif/react-native-design';",
+        '',
+        'export function DeadCoverage() {',
+        '  return <StatusDot status="done" accessibilityLabel="dead coverage" />;',
+        '}',
+        '',
+      ].join('\n')
+    );
+
+    assertVerifierCode(
+      fixture,
+      'SCENE_COMPONENT_CONSUMPTION',
+      'Router 不可达 dead file 不得补齐 StatusDot consumption'
+    );
+  });
+});
+
+test('root runtime 只计数真实 public-root binding，拒绝本地 ConfirmHost 冒充', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'root binding mutation 的 clean fixture 必须先完整通过'
+    );
+
+    mutateFixtureFile(
+      fixture,
+      'example/src/app/AppProviders.tsx',
+      (source) =>
+        source
+          .replace(
+            '  ConfirmHost,',
+            '  ConfirmHost as UnusedPublicConfirmHost,'
+          )
+          .replace(
+            'function DesignRuntime({ children }: { children: ReactNode }) {',
+            [
+              'function ConfirmHost(): null {',
+              '  return null;',
+              '}',
+              '',
+              'function DesignRuntime({ children }: { children: ReactNode }) {',
+            ].join('\n')
+          ),
+      '用本地 ConfirmHost 取代 public-root binding'
+    );
+
+    assertVerifierCode(
+      fixture,
+      'ROOT_RUNTIME_UNIQUENESS',
+      '本地 ConfirmHost lookalike 不得满足 root runtime contract'
+    );
+  });
+});
+
+test('Button catalog 删除 required loading state 时 typed gate 失败', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'Button catalog state mutation 的 clean fixture 必须先完整通过'
+    );
+    mutateFixtureFile(
+      fixture,
+      'example/src/catalog/componentCatalog.ts',
+      removeButtonLoadingCatalogState,
+      '从 Button catalog 删除 loading state'
+    );
+    assertVerifierCode(
+      fixture,
+      'COMPONENT_STATE_CATALOG_SET',
+      'Button catalog 必须精确保留 required loading state'
+    );
+  });
+});
+
+test('Button loading 真实 routed specimen 删除时 typed witness gate 失败', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'Button loading witness mutation 的 clean fixture 必须先完整通过'
+    );
+    mutateFixtureFile(
+      fixture,
+      'example/src/showcases/actions/ActionsScene.tsx',
+      removeButtonLoadingSpecimen,
+      '从 routed ActionsScene 删除 loading Button specimen'
+    );
+    assertVerifierCode(
+      fixture,
+      'COMPONENT_STATE_WITNESS',
+      'button.loading 必须由 routed scene 的真实 specimen 见证'
+    );
+  });
+});
+
+test('Button loading 同时从 catalog 与 mutable state contract 删除仍失败', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'independent required state mutation 的 clean fixture 必须先完整通过'
+    );
+    mutateFixtureFile(
+      fixture,
+      'example/src/catalog/componentCatalog.ts',
+      removeButtonLoadingCatalogState,
+      '从 Button catalog 删除 loading state'
+    );
+    mutateFixtureFile(
+      fixture,
+      'example/src/catalog/showcaseStateContract.ts',
+      (source) => removeStateContractEntry(source, 'button.loading'),
+      '从 mutable showcase state contract 删除 button.loading'
+    );
+    assertVerifierCode(
+      fixture,
+      'COMPONENT_STATE_REQUIRED_SET',
+      '独立 verifier anchor 必须拒绝 catalog/contract 同步删除 button.loading'
+    );
+  });
+});
+
+test('Button loading 的 Jest consume 调用删除时 typed gate 失败', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'Jest state consume mutation 的 clean fixture 必须先完整通过'
+    );
+    mutateFixtureFile(
+      fixture,
+      'example/src/__tests__/ActionsScene.test.tsx',
+      (source) =>
+        source.replace("  stateCoverage.consume('button.loading');\n", ''),
+      '删除 button.loading Jest consume 调用'
+    );
+    assertVerifierCode(
+      fixture,
+      'SCENE_STATE_TEST_CONSUMPTION',
+      'production verifier 必须独立拒绝漏掉 button.loading Jest consume'
+    );
+  });
+});
+
+test('Button loading 的 Jest consume 移入 dead helper 时 typed gate 失败', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'Jest dead helper mutation 的 clean fixture 必须先完整通过'
+    );
+
+    mutateFixtureFile(
+      fixture,
+      'example/src/__tests__/ActionsScene.test.tsx',
+      (source) =>
+        source.replace(
+          "  stateCoverage.consume('button.loading');",
+          [
+            '  function deadCoverage(): void {',
+            "    stateCoverage.consume('button.loading');",
+            '  }',
+          ].join('\n')
+        ),
+      '把 button.loading consume 移入未调用的 nested helper'
+    );
+
+    assertVerifierCode(
+      fixture,
+      'SCENE_STATE_TEST_CONSUMPTION',
+      'production verifier 不得把 dead helper 当作已执行 Jest consume'
+    );
+  });
+});
+
+test('Chip selected 删除真实 routed interaction specimen 时 typed gate 失败', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'Chip interaction mutation 的 clean fixture 必须先完整通过'
+    );
+    mutateFixtureFile(
+      fixture,
+      'example/src/showcases/actions/ActionsScene.tsx',
+      removeSelectableChipSpecimen,
+      '从 routed ActionsScene 删除 selectable Chip'
+    );
+    assertVerifierCode(
+      fixture,
+      'COMPONENT_STATE_WITNESS',
+      'chip.selected 必须由真实可执行 interaction 见证'
+    );
+  });
+});
+
+test('Toast kinds 的 error runtime-api 分支被偷换时 typed gate 失败', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'Toast runtime-api mutation 的 clean fixture 必须先完整通过'
+    );
+    mutateFixtureFile(
+      fixture,
+      'example/src/showcases/feedback/FeedbackScene.tsx',
+      (source) =>
+        source.replace('toast.error(input);', 'toast.success(input);'),
+      '将 toast.error runtime call 偷换为 toast.success'
+    );
+    assertVerifierCode(
+      fixture,
+      'COMPONENT_STATE_WITNESS',
+      'ToastHost.kinds 必须保留 error public runtime-api call'
+    );
+  });
+});
+
 test('exhaustive verifier 拒绝重复根 runtime 与 Home heavy eager import', () => {
   const mutations = [
     {
@@ -747,8 +1020,8 @@ test('exhaustive verifier 拒绝重复根 runtime 与 Home heavy eager import', 
       code: 'ROOT_RUNTIME_UNIQUENESS',
       mutate: (source) =>
         source.replace(
-          '      <ToastHost />',
-          '      <ToastHost />\n      <ThemeProvider />'
+          '      {runtimeHostsMounted ? <ToastHost /> : null}',
+          '      {runtimeHostsMounted ? <ToastHost /> : null}\n      <ThemeProvider />'
         ),
     },
     {
@@ -756,8 +1029,8 @@ test('exhaustive verifier 拒绝重复根 runtime 与 Home heavy eager import', 
       code: 'ROOT_RUNTIME_UNIQUENESS',
       mutate: (source) =>
         source.replace(
-          '      <ConfirmHost />',
-          '      <ConfirmHost />\n      <ConfirmHost />'
+          '      {runtimeHostsMounted ? <ConfirmHost /> : null}',
+          '      {runtimeHostsMounted ? <ConfirmHost /> : null}\n      <ConfirmHost />'
         ),
     },
     {
@@ -765,8 +1038,8 @@ test('exhaustive verifier 拒绝重复根 runtime 与 Home heavy eager import', 
       code: 'ROOT_RUNTIME_UNIQUENESS',
       mutate: (source) =>
         source.replace(
-          '      <ToastHost />',
-          '      <ToastHost />\n      <ToastHost />'
+          '      {runtimeHostsMounted ? <ToastHost /> : null}',
+          '      {runtimeHostsMounted ? <ToastHost /> : null}\n      <ToastHost />'
         ),
     },
   ];

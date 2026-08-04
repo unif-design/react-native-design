@@ -296,6 +296,24 @@ test('Android BackHandler 只订阅一次，child consume、Home 不 consume，�
   expect(nativeBack.remove).toHaveBeenCalledTimes(1);
 });
 
+test('Android back 离开 Feedback 时恢复默认唯一 Hosts', () => {
+  installReducedMotionMock(false);
+  const nativeBack = installAndroidBackHandlerMock();
+  render(<App />);
+
+  fireEvent.press(screen.getByRole('button', { name: /反馈与浮层/ }));
+  fireEvent.press(screen.getByTestId('feedback-hosts-unmount'));
+  expect(screen.queryByTestId('capture-confirm-host')).not.toBeOnTheScreen();
+  expect(screen.queryByTestId('capture-toast-host')).not.toBeOnTheScreen();
+
+  act(() => {
+    expect(nativeBack.getHandler()()).toBe(true);
+  });
+  expect(screen.getByText('设计系统示例')).toBeOnTheScreen();
+  expect(screen.getAllByTestId('capture-confirm-host')).toHaveLength(1);
+  expect(screen.getAllByTestId('capture-toast-host')).toHaveLength(1);
+});
+
 test('非 Android 根不建立 BackHandler subscription', () => {
   installReducedMotionMock(false);
   const addEventListener = installNonAndroidBackHandlerMock();

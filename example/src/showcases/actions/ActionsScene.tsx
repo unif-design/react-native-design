@@ -231,11 +231,13 @@ export function ActionsScene(): React.JSX.Element {
             <Button
               label="禁用按钮"
               disabled
+              testID="actions-button-disabled"
               onPress={() => record('Button', '点击', '禁用按钮已触发')}
             />
             <Button
               label="加载按钮"
               loading
+              testID="actions-button-loading"
               onPress={() => record('Button', '点击', '加载按钮已触发')}
             />
           </View>
@@ -305,6 +307,7 @@ export function ActionsScene(): React.JSX.Element {
             <Chip
               label="可选择标签"
               selected={draft.chipSelected}
+              testID="actions-chip-selectable"
               onPress={() => {
                 const selected = !draft.chipSelected;
                 updateScene('actions', (current) => ({
@@ -317,6 +320,7 @@ export function ActionsScene(): React.JSX.Element {
             <Chip
               label="禁用标签"
               disabled
+              testID="actions-chip-disabled"
               onPress={() => record('Chip', '点击', '禁用标签已触发')}
             />
             <Chip
@@ -373,6 +377,26 @@ export function ActionsScene(): React.JSX.Element {
                 />
               ))
             )}
+          </View>
+          <View style={styles.row}>
+            <StatusDot
+              status="active"
+              size={12}
+              accessibilityLabel="小尺寸进行状态"
+              testID="actions-dot-size-12"
+            />
+            <StatusDot
+              status="active"
+              size={18}
+              accessibilityLabel="中尺寸进行状态"
+              testID="actions-dot-size-18"
+            />
+            <StatusDot
+              status="active"
+              size={24}
+              accessibilityLabel="大尺寸进行状态"
+              testID="actions-dot-size-24"
+            />
           </View>
         </SectionCard>
       </View>

@@ -1,5 +1,7 @@
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   DrawerHeader,
   Input,
@@ -13,6 +15,14 @@ import {
   installReducedMotionMock,
   restoreNativeMocks,
 } from './helpers/nativeMocks';
+import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
+
+const LOCAL_DRAWER_SOURCE = require('../../android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png');
+
+jest.mock(
+  '../../android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png',
+  () => 1
+);
 
 jest.mock('react-native-safe-area-context', () => {
   const safeAreaMock = jest.requireActual(
@@ -57,6 +67,8 @@ afterEach(() => {
 test('NavBar 展示三种 variant、action/display slot，DrawerHeader 保持纯展示 fallback', () => {
   render(<App />);
   enterNavigation();
+  const navBarCoverage = createShowcaseStateCoverage('NavBar');
+  const drawerCoverage = createShowcaseStateCoverage('DrawerHeader');
 
   expect(screen.getByTestId('navigation-screen')).toBeOnTheScreen();
   expect(
@@ -72,6 +84,7 @@ test('NavBar 展示三种 variant、action/display slot，DrawerHeader 保持纯
       accessibilityLabel: '演示更多动作',
     },
   });
+  navBarCoverage.consume('nav-bar.title', 'nav-bar.back');
   expect(
     componentByTestID(NavBar, 'navigation-navbar-brand').props.variant
   ).toBe('brand');
@@ -83,10 +96,20 @@ test('NavBar 展示三种 variant、action/display slot，DrawerHeader 保持纯
   expect(
     screen.getByText('最新结果：NavBar · 操作 · 更多动作已触发')
   ).toBeOnTheScreen();
+  navBarCoverage.consume('nav-bar.actions');
   expect(screen.getByText('展示槽')).toBeOnTheScreen();
   expect(
     screen.queryByRole('button', { name: '展示槽' })
   ).not.toBeOnTheScreen();
+  const sceneSafeArea = screen
+    .UNSAFE_getAllByType(SafeAreaView)
+    .find(
+      (candidate) =>
+        candidate.findAllByProps({ testID: 'navigation-screen' }).length > 0
+    );
+  expect(sceneSafeArea?.props.edges).toEqual(['top', 'left', 'right']);
+  navBarCoverage.consume('nav-bar.safe-area');
+  navBarCoverage.expectComplete();
 
   expect(
     componentByTestID(DrawerHeader, 'navigation-drawer-header').props
@@ -94,20 +117,78 @@ test('NavBar 展示三种 variant、action/display slot，DrawerHeader 保持纯
     name: '王小明',
     subtitle: '华东区 · 管理员',
   });
+  drawerCoverage.consume('drawer-header.name', 'drawer-header.subtitle');
   expect(
     componentByTestID(DrawerHeader, 'navigation-drawer-header').props
   ).not.toHaveProperty('source');
   expect(
     screen.getByText('王', { includeHiddenElements: true })
   ).toBeOnTheScreen();
+  drawerCoverage.consume('drawer-header.initial-fallback');
+  expect(
+    componentByTestID(DrawerHeader, 'navigation-drawer-header-source').props
+      .source
+  ).toBe(LOCAL_DRAWER_SOURCE);
+  drawerCoverage.consume('drawer-header.avatar-source');
   expect(
     screen.queryByRole('button', { name: /王小明/ })
+  ).not.toBeOnTheScreen();
+  drawerCoverage.expectComplete();
+});
+
+test('NavBar 输出真实标题，且所在 scene 由 top/left/right SafeAreaView 包裹', () => {
+  render(<App />);
+  enterNavigation();
+
+  expect(screen.getByText('默认导航')).toBeOnTheScreen();
+  expect(
+    componentByTestID(NavBar, 'navigation-navbar-default').props.title
+  ).toBe('默认导航');
+
+  const sceneSafeArea = screen
+    .UNSAFE_getAllByType(SafeAreaView)
+    .find(
+      (candidate) =>
+        candidate.findAllByProps({ testID: 'navigation-screen' }).length > 0
+    );
+  expect(sceneSafeArea).toBeDefined();
+  expect(sceneSafeArea?.props.edges).toEqual(['top', 'left', 'right']);
+  expect(
+    sceneSafeArea
+      ?.findAllByType(NavBar)
+      .some((navBar) => navBar.props.testID === 'navigation-navbar-default')
+  ).toBe(true);
+});
+
+test('DrawerHeader source specimen 渲染真实 Image，加载失败后回退姓名首字', () => {
+  render(<App />);
+  enterNavigation();
+
+  const sourceHeader = componentByTestID(
+    DrawerHeader,
+    'navigation-drawer-header-source'
+  );
+  expect(sourceHeader.props.source).toBe(LOCAL_DRAWER_SOURCE);
+  const avatarImage = screen.UNSAFE_getByType(Image);
+  expect(avatarImage.props.source).toBe(LOCAL_DRAWER_SOURCE);
+  expect(
+    screen.queryByText('李', { includeHiddenElements: true })
+  ).not.toBeOnTheScreen();
+
+  fireEvent(avatarImage, 'error');
+  expect(
+    screen.getByText('李', { includeHiddenElements: true })
+  ).toBeOnTheScreen();
+  expect(
+    screen.queryByRole('button', { name: /李晓雨/ })
   ).not.toBeOnTheScreen();
 });
 
 test('Tabs 与 Segmented 使用 tablist/tab 的 selected、item disabled、global disabled 语义', () => {
   render(<App />);
   enterNavigation();
+  const tabsCoverage = createShowcaseStateCoverage('Tabs');
+  const segmentedCoverage = createShowcaseStateCoverage('Segmented');
 
   for (const testID of [
     'navigation-tabs',
@@ -124,6 +205,7 @@ test('Tabs 与 Segmented 使用 tablist/tab 的 selected、item disabled、globa
     selected: true,
     disabled: false,
   });
+  tabsCoverage.consume('tabs.selected');
   fireEvent.press(screen.getByRole('tab', { name: '详情' }));
   expect(
     screen.getByRole('tab', { name: '详情' }).props.accessibilityState
@@ -131,11 +213,13 @@ test('Tabs 与 Segmented 使用 tablist/tab 的 selected、item disabled、globa
   expect(
     screen.getByText('最新结果：Tabs · 选择 · 已选择详情')
   ).toBeOnTheScreen();
+  tabsCoverage.consume('tabs.change');
 
   const disabledTab = screen.getByRole('tab', { name: '禁用页签' });
   expect(disabledTab.props.accessibilityState).toMatchObject({
     disabled: true,
   });
+  tabsCoverage.consume('tabs.item-disabled');
   fireEvent.press(disabledTab);
   expect(
     screen.getByRole('tab', { name: '详情' }).props.accessibilityState
@@ -149,6 +233,8 @@ test('Tabs 与 Segmented 使用 tablist/tab 的 selected、item disabled、globa
       screen.getByRole('tab', { name: label }).props.accessibilityState
     ).toMatchObject({ disabled: true });
   }
+  tabsCoverage.consume('tabs.all-disabled');
+  tabsCoverage.expectComplete();
 
   expect(
     componentByTestID(Segmented, 'navigation-segmented-md').props.size
@@ -156,10 +242,12 @@ test('Tabs 与 Segmented 使用 tablist/tab 的 selected、item disabled、globa
   expect(
     componentByTestID(Segmented, 'navigation-segmented-sm').props.size
   ).toBe('sm');
+  segmentedCoverage.consume('segmented.sizes');
   fireEvent.press(screen.getByRole('tab', { name: '第二段' }));
   expect(
     screen.getByRole('tab', { name: '第二段' }).props.accessibilityState
   ).toMatchObject({ selected: true, disabled: false });
+  segmentedCoverage.consume('segmented.selected');
   expect(
     screen.getByRole('tab', { name: '禁用分段' }).props.accessibilityState
   ).toMatchObject({ disabled: true });
@@ -179,11 +267,14 @@ test('Tabs 与 Segmented 使用 tablist/tab 的 selected、item disabled、globa
       screen.getByRole('tab', { name: label }).props.accessibilityState
     ).toMatchObject({ disabled: true });
   }
+  segmentedCoverage.consume('segmented.disabled');
+  segmentedCoverage.expectComplete();
 });
 
 test('TabBar selected 与数字/99+ badge 进入可访问名称，选择仅更新 specimen', () => {
   render(<App />);
   enterNavigation();
+  const stateCoverage = createShowcaseStateCoverage('TabBar');
 
   expect(componentByTestID(TabBar, 'navigation-tabbar').props.active).toBe(
     'home'
@@ -191,8 +282,11 @@ test('TabBar selected 与数字/99+ badge 进入可访问名称，选择仅更�
   expect(
     screen.getByRole('tab', { name: '首页' }).props.accessibilityState
   ).toMatchObject({ selected: true });
+  stateCoverage.consume('tab-bar.selected');
   expect(screen.getByRole('tab', { name: '消息,3条未读' })).toBeOnTheScreen();
+  stateCoverage.consume('tab-bar.numeric-badge');
   expect(screen.getByRole('tab', { name: '任务,99+条未读' })).toBeOnTheScreen();
+  stateCoverage.consume('tab-bar.overflow-badge', 'tab-bar.a11y');
 
   fireEvent.press(screen.getByRole('tab', { name: '消息,3条未读' }));
   expect(
@@ -203,6 +297,7 @@ test('TabBar selected 与数字/99+ badge 进入可访问名称，选择仅更�
   expect(
     screen.getByText('最新结果：TabBar · 选择 · 已选择消息')
   ).toBeOnTheScreen();
+  stateCoverage.expectComplete();
 });
 
 test('specimen 选择跨路由保留，重置 Navigation 不改变 Forms draft 或当前 route', () => {

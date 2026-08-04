@@ -23,6 +23,8 @@ import { ShowcaseScaffold } from '../../shared/ShowcaseScaffold';
 import { SectionCard } from '../../shared/SectionCard';
 import { useShowcase } from '../../state/useShowcase';
 
+const TEXTAREA_MAX_LENGTH = 40;
+
 const makeStyles = (colors: ColorTokens) =>
   StyleSheet.create({
     stack: {
@@ -110,6 +112,7 @@ export function FormsScene(): React.JSX.Element {
               accessibilityLabel="拜访备注"
               minHeight={96}
               maxHeight={180}
+              maxLength={TEXTAREA_MAX_LENGTH}
               testID="forms-textarea-uncontrolled"
             />
           </View>
@@ -120,6 +123,7 @@ export function FormsScene(): React.JSX.Element {
             <Input
               defaultValue=""
               placeholder="空闲状态"
+              trailing={{ kind: 'text', value: '选填' }}
               accessibilityLabel="空闲输入"
               testID="forms-input-idle"
             />
@@ -178,6 +182,21 @@ export function FormsScene(): React.JSX.Element {
               accessibilityLabel="只读备注"
               testID="forms-textarea-readonly"
             />
+            <Textarea
+              value={draft.textareaValue}
+              onChangeText={(textareaValue) => {
+                updateScene('forms', (current) => ({
+                  ...current,
+                  textareaValue,
+                }));
+              }}
+              maxLength={TEXTAREA_MAX_LENGTH}
+              accessibilityLabel="字数限制备注"
+              testID="forms-textarea-max-length"
+            />
+            <Text style={styles.status} testID="forms-textarea-counter">
+              字数：{draft.textareaValue.length}/{TEXTAREA_MAX_LENGTH}
+            </Text>
           </View>
         </SectionCard>
 
@@ -246,6 +265,12 @@ export function FormsScene(): React.JSX.Element {
               placeholder="搜索组件"
               accessibilityLabel="组件搜索"
               testID="forms-search"
+            />
+            <Search
+              defaultValue=""
+              placeholder="非受控搜索"
+              accessibilityLabel="非受控组件搜索"
+              testID="forms-search-uncontrolled"
             />
             <Search
               value=""
@@ -422,6 +447,13 @@ export function FormsScene(): React.JSX.Element {
                   }}
                   label="资料已核对"
                 />
+              </FormRow>
+            </FormGroup>
+          </Form>
+          <Form testID="forms-form-single">
+            <FormGroup label="单组示例" testID="forms-form-single-group">
+              <FormRow label="备注" testID="forms-form-single-row">
+                <Input defaultValue="" accessibilityLabel="单组备注" />
               </FormRow>
             </FormGroup>
           </Form>

@@ -7,6 +7,7 @@ import {
   installReducedMotionMock,
   restoreNativeMocks,
 } from './helpers/nativeMocks';
+import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
 
 jest.mock('react-native-safe-area-context', () => {
   const safeAreaMock = jest.requireActual(
@@ -56,6 +57,7 @@ afterEach(() => {
 test('Avatar 覆盖五档尺寸、四种 variant、monogram、本地/HTTPS 与真实 error fallback', () => {
   render(<App />);
   enterMedia();
+  const stateCoverage = createShowcaseStateCoverage('Avatar');
 
   expect(screen.getByTestId('media-screen')).toBeOnTheScreen();
   const avatars = screen
@@ -68,6 +70,7 @@ test('Avatar 覆盖五档尺寸、四种 variant、monogram、本地/HTTPS 与�
       )
       .map((node) => node.props.size)
   ).toEqual(['xs', 'sm', 'md', 'lg', 'xl']);
+  stateCoverage.consume('avatar.sizes');
   expect(
     avatars
       .filter((node) =>
@@ -75,6 +78,7 @@ test('Avatar 覆盖五档尺寸、四种 variant、monogram、本地/HTTPS 与�
       )
       .map((node) => node.props.variant)
   ).toEqual(['brand', 'info', 'soft', 'neutral']);
+  stateCoverage.consume('avatar.variants');
   expect(componentByTestID(Avatar, 'media-avatar-local').props.source).toEqual(
     expect.anything()
   );
@@ -83,6 +87,7 @@ test('Avatar 覆盖五档尺寸、四种 variant、monogram、本地/HTTPS 与�
       uri: 'https://images.example.com/unif-avatar.png',
     }
   );
+  stateCoverage.consume('avatar.image');
   expect(
     componentByTestID(Avatar, 'media-avatar-invalid').findAllByType(Image)
   ).toHaveLength(0);
@@ -91,11 +96,14 @@ test('Avatar 覆盖五档尺寸、四种 variant、monogram、本地/HTTPS 与�
   fireEvent(remoteAvatar.findByType(Image), 'error');
   expect(screen.getByText('远程头像')).toBeOnTheScreen();
   expect(screen.getByLabelText('远程头像')).toBeOnTheScreen();
+  stateCoverage.consume('avatar.initial-fallback');
+  stateCoverage.expectComplete();
 });
 
 test('Thumbnail 覆盖 uri/source、三档尺寸、selected、具名/装饰与失败后固定 frame', () => {
   render(<App />);
   enterMedia();
+  const stateCoverage = createShowcaseStateCoverage('Thumbnail');
 
   expect(
     componentByTestID(Thumbnail, 'media-thumbnail-uri-sm').props
@@ -104,6 +112,7 @@ test('Thumbnail 覆盖 uri/source、三档尺寸、selected、具名/装饰与�
     size: 'sm',
     accessibilityLabel: '远程缩略图',
   });
+  stateCoverage.consume('thumbnail.sources');
   expect(
     componentByTestID(Thumbnail, 'media-thumbnail-source-md').props
   ).toMatchObject({
@@ -112,11 +121,13 @@ test('Thumbnail 覆盖 uri/source、三档尺寸、selected、具名/装饰与�
     selected: true,
     accessibilityLabel: '本地缩略图',
   });
+  stateCoverage.consume('thumbnail.selected');
   expect(
     componentByTestID(Thumbnail, 'media-thumbnail-source-lg').props
   ).toMatchObject({
     size: 'lg',
   });
+  stateCoverage.consume('thumbnail.sizes');
   expect(
     componentByTestID(Thumbnail, 'media-thumbnail-source-lg').props
       .accessibilityLabel
@@ -134,6 +145,7 @@ test('Thumbnail 覆盖 uri/source、三档尺寸、selected、具名/装饰与�
     accessibilityElementsHidden: true,
     importantForAccessibility: 'no-hide-descendants',
   });
+  stateCoverage.consume('thumbnail.a11y-name');
 
   const remoteThumbnail = componentByTestID(
     Thumbnail,
@@ -145,11 +157,14 @@ test('Thumbnail 覆盖 uri/source、三档尺寸、selected、具名/装饰与�
     screen.queryByRole('image', { name: '远程缩略图' })
   ).not.toBeOnTheScreen();
   expect(screen.getByText('失败后保留固定缩略图框')).toBeOnTheScreen();
+  stateCoverage.consume('thumbnail.load-error');
+  stateCoverage.expectComplete();
 });
 
 test('Logo 只用本地 fixture，并区分具名与装饰图片的尺寸圆角', () => {
   render(<App />);
   enterMedia();
+  const stateCoverage = createShowcaseStateCoverage('Logo');
 
   expect(componentByTestID(Logo, 'media-logo-named').props).toMatchObject({
     source: expect.anything(),
@@ -157,6 +172,7 @@ test('Logo 只用本地 fixture，并区分具名与装饰图片的尺寸圆角'
     borderRadius: 18,
     accessibilityLabel: 'Unif 示例标志',
   });
+  stateCoverage.consume('logo.source', 'logo.sizes', 'logo.border-radius');
   expect(componentByTestID(Logo, 'media-logo-decorative').props).toMatchObject({
     source: expect.anything(),
     size: 48,
@@ -176,6 +192,8 @@ test('Logo 只用本地 fixture，并区分具名与装饰图片的尺寸圆角'
     accessibilityElementsHidden: true,
     importantForAccessibility: 'no-hide-descendants',
   });
+  stateCoverage.consume('logo.a11y-mode');
+  stateCoverage.expectComplete();
 });
 
 test('远程 URI 只接受 HTTPS，跨路由保留合法值且结果/a11y/testID 不泄露原文', () => {

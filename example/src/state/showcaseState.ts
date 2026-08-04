@@ -102,6 +102,7 @@ export type ShowcaseState = Readonly<{
   navigation: NavigationState;
   themeMode: ThemeMode;
   fontScale: FontScalePreset;
+  runtimeHostsMounted: boolean;
   scenes: SceneStateMap;
   results: readonly ResultRecord[];
   nextResultId: number;
@@ -198,6 +199,7 @@ export function createInitialShowcaseState(): ShowcaseState {
     navigation: ['home'],
     themeMode: 'system',
     fontScale: 1,
+    runtimeHostsMounted: true,
     scenes: createInitialSceneStateMap(),
     results: [],
     nextResultId: 1,
