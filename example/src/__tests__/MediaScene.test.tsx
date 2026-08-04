@@ -70,7 +70,15 @@ test('Avatar 覆盖五档尺寸、四种 variant、monogram、本地/HTTPS 与�
       )
       .map((node) => node.props.size)
   ).toEqual(['xs', 'sm', 'md', 'lg', 'xl']);
-  stateCoverage.consume('avatar.sizes');
+  stateCoverage.prove('avatar.sizes', () => {
+    expect(
+      avatars
+        .filter((node) =>
+          String(node.props.testID).startsWith('media-avatar-size')
+        )
+        .map((node) => node.props.size)
+    ).toEqual(['xs', 'sm', 'md', 'lg', 'xl']);
+  });
   expect(
     avatars
       .filter((node) =>
@@ -78,7 +86,15 @@ test('Avatar 覆盖五档尺寸、四种 variant、monogram、本地/HTTPS 与�
       )
       .map((node) => node.props.variant)
   ).toEqual(['brand', 'info', 'soft', 'neutral']);
-  stateCoverage.consume('avatar.variants');
+  stateCoverage.prove('avatar.variants', () => {
+    expect(
+      avatars
+        .filter((node) =>
+          String(node.props.testID).startsWith('media-avatar-variant')
+        )
+        .map((node) => node.props.variant)
+    ).toEqual(['brand', 'info', 'soft', 'neutral']);
+  });
   expect(componentByTestID(Avatar, 'media-avatar-local').props.source).toEqual(
     expect.anything()
   );
@@ -87,7 +103,11 @@ test('Avatar 覆盖五档尺寸、四种 variant、monogram、本地/HTTPS 与�
       uri: 'https://images.example.com/unif-avatar.png',
     }
   );
-  stateCoverage.consume('avatar.image');
+  stateCoverage.prove('avatar.image', () => {
+    expect(
+      componentByTestID(Avatar, 'media-avatar-remote').props.source
+    ).toEqual({ uri: 'https://images.example.com/unif-avatar.png' });
+  });
   expect(
     componentByTestID(Avatar, 'media-avatar-invalid').findAllByType(Image)
   ).toHaveLength(0);
@@ -96,7 +116,9 @@ test('Avatar 覆盖五档尺寸、四种 variant、monogram、本地/HTTPS 与�
   fireEvent(remoteAvatar.findByType(Image), 'error');
   expect(screen.getByText('远程头像')).toBeOnTheScreen();
   expect(screen.getByLabelText('远程头像')).toBeOnTheScreen();
-  stateCoverage.consume('avatar.initial-fallback');
+  stateCoverage.prove('avatar.initial-fallback', () => {
+    expect(screen.getByLabelText('远程头像')).toBeOnTheScreen();
+  });
   stateCoverage.expectComplete();
 });
 
@@ -112,7 +134,14 @@ test('Thumbnail 覆盖 uri/source、三档尺寸、selected、具名/装饰与�
     size: 'sm',
     accessibilityLabel: '远程缩略图',
   });
-  stateCoverage.consume('thumbnail.sources');
+  stateCoverage.prove('thumbnail.sources', () => {
+    expect(
+      componentByTestID(Thumbnail, 'media-thumbnail-uri-sm').props
+    ).toMatchObject({
+      uri: 'https://images.example.com/unif-avatar.png',
+      size: 'sm',
+    });
+  });
   expect(
     componentByTestID(Thumbnail, 'media-thumbnail-source-md').props
   ).toMatchObject({
@@ -121,13 +150,21 @@ test('Thumbnail 覆盖 uri/source、三档尺寸、selected、具名/装饰与�
     selected: true,
     accessibilityLabel: '本地缩略图',
   });
-  stateCoverage.consume('thumbnail.selected');
+  stateCoverage.prove('thumbnail.selected', () => {
+    expect(
+      componentByTestID(Thumbnail, 'media-thumbnail-source-md').props.selected
+    ).toBe(true);
+  });
   expect(
     componentByTestID(Thumbnail, 'media-thumbnail-source-lg').props
   ).toMatchObject({
     size: 'lg',
   });
-  stateCoverage.consume('thumbnail.sizes');
+  stateCoverage.prove('thumbnail.sizes', () => {
+    expect(
+      componentByTestID(Thumbnail, 'media-thumbnail-source-lg').props.size
+    ).toBe('lg');
+  });
   expect(
     componentByTestID(Thumbnail, 'media-thumbnail-source-lg').props
       .accessibilityLabel
@@ -145,7 +182,9 @@ test('Thumbnail 覆盖 uri/source、三档尺寸、selected、具名/装饰与�
     accessibilityElementsHidden: true,
     importantForAccessibility: 'no-hide-descendants',
   });
-  stateCoverage.consume('thumbnail.a11y-name');
+  stateCoverage.prove('thumbnail.a11y-name', () => {
+    expect(screen.getByRole('image', { name: '远程缩略图' })).toBeOnTheScreen();
+  });
 
   const remoteThumbnail = componentByTestID(
     Thumbnail,
@@ -157,7 +196,9 @@ test('Thumbnail 覆盖 uri/source、三档尺寸、selected、具名/装饰与�
     screen.queryByRole('image', { name: '远程缩略图' })
   ).not.toBeOnTheScreen();
   expect(screen.getByText('失败后保留固定缩略图框')).toBeOnTheScreen();
-  stateCoverage.consume('thumbnail.load-error');
+  stateCoverage.prove('thumbnail.load-error', () => {
+    expect(screen.getByText('失败后保留固定缩略图框')).toBeOnTheScreen();
+  });
   stateCoverage.expectComplete();
 });
 
@@ -172,7 +213,13 @@ test('Logo 只用本地 fixture，并区分具名与装饰图片的尺寸圆角'
     borderRadius: 18,
     accessibilityLabel: 'Unif 示例标志',
   });
-  stateCoverage.consume('logo.source', 'logo.sizes', 'logo.border-radius');
+  stateCoverage.prove('logo.source', 'logo.sizes', 'logo.border-radius', () => {
+    expect(componentByTestID(Logo, 'media-logo-named').props).toMatchObject({
+      source: expect.anything(),
+      size: 72,
+      borderRadius: 18,
+    });
+  });
   expect(componentByTestID(Logo, 'media-logo-decorative').props).toMatchObject({
     source: expect.anything(),
     size: 48,
@@ -192,7 +239,11 @@ test('Logo 只用本地 fixture，并区分具名与装饰图片的尺寸圆角'
     accessibilityElementsHidden: true,
     importantForAccessibility: 'no-hide-descendants',
   });
-  stateCoverage.consume('logo.a11y-mode');
+  stateCoverage.prove('logo.a11y-mode', () => {
+    expect(
+      screen.getByRole('image', { name: 'Unif 示例标志' })
+    ).toBeOnTheScreen();
+  });
   stateCoverage.expectComplete();
 });
 

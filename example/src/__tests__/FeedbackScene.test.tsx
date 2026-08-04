@@ -16,15 +16,18 @@ import {
   Reveal,
   Skeleton,
   Spinner,
+  confirm,
   r,
   space,
   toast,
+  usePulse,
 } from '@unif/react-native-design';
 import App from '../App';
 import {
   installReducedMotionMock,
   restoreNativeMocks,
 } from './helpers/nativeMocks';
+import { createShowcaseRuntimeCoverage } from './helpers/showcaseRuntimeCoverage';
 import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
 
 jest.mock('react-native-safe-area-context', () => {
@@ -53,6 +56,17 @@ jest.mock('@sbaiahmed1/react-native-blur', () => {
     ) {
       return ReactModule.createElement(NativeView, props);
     },
+  };
+});
+
+jest.mock('@unif/react-native-design', () => {
+  const actual = jest.requireActual<typeof import('@unif/react-native-design')>(
+    '@unif/react-native-design'
+  );
+  return {
+    ...actual,
+    confirm: jest.fn(actual.confirm),
+    usePulse: jest.fn(actual.usePulse),
   };
 });
 
@@ -112,6 +126,7 @@ function componentByTestID<T extends React.ComponentType<never>>(
 }
 
 beforeEach(() => {
+  jest.clearAllMocks();
   installReducedMotionMock(false);
 });
 
@@ -134,10 +149,17 @@ test('Feedback 展示 Empty、三种 Skeleton 与具备外层加载语义的 Spi
     desc: '触发下方动作后可在结果面板查看安全摘要。',
     icon: 'clipboard',
   });
-  emptyCoverage.consume(
+  emptyCoverage.prove(
     'empty.title',
     'empty.description',
-    'empty.custom-icon'
+    'empty.custom-icon',
+    () => {
+      expect(screen.UNSAFE_getByType(Empty).props).toMatchObject({
+        title: '暂无反馈记录',
+        desc: '触发下方动作后可在结果面板查看安全摘要。',
+        icon: 'clipboard',
+      });
+    }
   );
   emptyCoverage.expectComplete();
   expect(
@@ -148,7 +170,21 @@ test('Feedback 展示 Empty、三种 Skeleton 与具备外层加载语义的 Spi
       )
       .map((node) => node.props.shape)
   ).toEqual(['line', 'rect', 'circle']);
-  skeletonCoverage.consume('skeleton.line', 'skeleton.rect', 'skeleton.circle');
+  skeletonCoverage.prove(
+    'skeleton.line',
+    'skeleton.rect',
+    'skeleton.circle',
+    () => {
+      expect(
+        screen
+          .UNSAFE_getAllByType(Skeleton)
+          .filter((node) =>
+            String(node.props.testID).startsWith('feedback-skeleton-')
+          )
+          .map((node) => node.props.shape)
+      ).toEqual(['line', 'rect', 'circle']);
+    }
+  );
   for (const id of ['line', 'rect', 'circle']) {
     expect(
       screen.getByTestId(`feedback-skeleton-${id}`, {
@@ -165,10 +201,15 @@ test('Feedback 展示 Empty、三种 Skeleton 与具备外层加载语义的 Spi
     color: expect.any(String),
     thickness: 3,
   });
-  spinnerCoverage.consume(
+  spinnerCoverage.prove(
     'spinner.sizes',
     'spinner.color',
-    'spinner.stroke-width'
+    'spinner.stroke-width',
+    () => {
+      expect(
+        componentByTestID(Spinner, 'feedback-spinner').props
+      ).toMatchObject({ size: 24, color: expect.any(String), thickness: 3 });
+    }
   );
   expect(
     screen.getByRole('progressbar', { name: '正在加载示例' }).props
@@ -195,14 +236,30 @@ test('Pulse、PulseDot、usePulse 与 Reveal 使用合法 options，并保留子
   expect(screen.getByTestId('feedback-pulse-default')).toHaveStyle({
     opacity: 0.6,
   });
-  pulseCoverage.consume('pulse.default');
+  pulseCoverage.prove('pulse.default', () => {
+    expect(screen.getByTestId('feedback-pulse-default')).toHaveStyle({
+      opacity: 0.6,
+    });
+  });
   expect(componentByTestID(Pulse, 'feedback-pulse').props).toMatchObject({
     from: 0.45,
     to: 1,
     duration: 700,
     delay: 0,
   });
-  pulseCoverage.consume('pulse.opacity-range', 'pulse.duration', 'pulse.delay');
+  pulseCoverage.prove(
+    'pulse.opacity-range',
+    'pulse.duration',
+    'pulse.delay',
+    () => {
+      expect(componentByTestID(Pulse, 'feedback-pulse').props).toMatchObject({
+        from: 0.45,
+        to: 1,
+        duration: 700,
+        delay: 0,
+      });
+    }
+  );
   expect(componentByTestID(PulseDot, 'feedback-pulse-dot').props).toMatchObject(
     {
       from: 0.5,
@@ -210,7 +267,11 @@ test('Pulse、PulseDot、usePulse 与 Reveal 使用合法 options，并保留子
       duration: 500,
     }
   );
-  pulseDotCoverage.consume('pulse-dot.custom-timing');
+  pulseDotCoverage.prove('pulse-dot.custom-timing', () => {
+    expect(
+      componentByTestID(PulseDot, 'feedback-pulse-dot').props
+    ).toMatchObject({ from: 0.5, to: 1, duration: 500 });
+  });
   const defaultPulseDot = componentByTestID(
     PulseDot,
     'feedback-pulse-dot-default'
@@ -226,7 +287,13 @@ test('Pulse、PulseDot、usePulse 与 Reveal 使用合法 options，并保留子
       includeHiddenElements: true,
     })
   ).toHaveStyle({ width: r(6), height: r(6), opacity: 0.5 });
-  pulseDotCoverage.consume('pulse-dot.default');
+  pulseDotCoverage.prove('pulse-dot.default', () => {
+    expect(
+      screen.getByTestId('feedback-pulse-dot-default', {
+        includeHiddenElements: true,
+      })
+    ).toHaveStyle({ width: r(6), height: r(6), opacity: 0.5 });
+  });
   const sizeColorDot = componentByTestID(
     PulseDot,
     'feedback-pulse-dot-size-color'
@@ -244,7 +311,12 @@ test('Pulse、PulseDot、usePulse 与 Reveal 使用合法 options，并保留子
     height: 12,
     backgroundColor: sizeColorDot.props.color,
   });
-  pulseDotCoverage.consume('pulse-dot.sizes', 'pulse-dot.color');
+  pulseDotCoverage.prove('pulse-dot.sizes', 'pulse-dot.color', () => {
+    expect(sizeColorDot.props).toMatchObject({
+      size: 12,
+      color: expect.any(String),
+    });
+  });
   expect(screen.getByText('脉冲内容保持可读')).toBeOnTheScreen();
   expect(screen.getByTestId('feedback-use-pulse')).toHaveStyle({
     opacity: 0.32,
@@ -252,11 +324,19 @@ test('Pulse、PulseDot、usePulse 与 Reveal 使用合法 options，并保留子
   expect(screen.getByText('减少动态效果：否')).toBeOnTheScreen();
   expect(componentByTestID(Reveal, 'feedback-reveal').props.duration).toBe(200);
   expect(screen.getByTestId('feedback-reveal').props.entering).toBeDefined();
-  revealCoverage.consume('reveal.enter', 'reveal.duration');
+  revealCoverage.prove('reveal.enter', 'reveal.duration', () => {
+    expect(componentByTestID(Reveal, 'feedback-reveal').props.duration).toBe(
+      200
+    );
+  });
   expect(screen.getByTestId('feedback-reveal')).toHaveStyle({
     padding: space['4'],
   });
-  revealCoverage.consume('reveal.container-style');
+  revealCoverage.prove('reveal.container-style', () => {
+    expect(screen.getByTestId('feedback-reveal')).toHaveStyle({
+      padding: space['4'],
+    });
+  });
   expect(screen.getByText('淡入内容已显示')).toBeOnTheScreen();
 
   fireEvent.press(screen.getByRole('button', { name: '隐藏淡入内容' }));
@@ -279,7 +359,11 @@ test('Pulse、PulseDot、usePulse 与 Reveal 使用合法 options，并保留子
       screen.getByTestId(testID, { includeHiddenElements: true })
     ).toHaveStyle({ opacity: 1 });
   }
-  pulseCoverage.consume('pulse.reduced-motion');
+  pulseCoverage.prove('pulse.reduced-motion', () => {
+    expect(
+      screen.getByTestId('feedback-pulse', { includeHiddenElements: true })
+    ).toHaveStyle({ opacity: 1 });
+  });
   for (const testID of [
     'feedback-pulse-dot-default',
     'feedback-pulse-dot-size-color',
@@ -289,11 +373,17 @@ test('Pulse、PulseDot、usePulse 与 Reveal 使用合法 options，并保留子
       screen.getByTestId(testID, { includeHiddenElements: true })
     ).toHaveStyle({ opacity: 1 });
   }
-  pulseDotCoverage.consume('pulse-dot.reduced-motion');
+  pulseDotCoverage.prove('pulse-dot.reduced-motion', () => {
+    expect(
+      screen.getByTestId('feedback-pulse-dot', { includeHiddenElements: true })
+    ).toHaveStyle({ opacity: 1 });
+  });
   const reducedReveal = screen.getByTestId('feedback-reveal');
   expect(reducedReveal.props.entering).toBeUndefined();
   expect(reducedReveal.props.exiting).toBeUndefined();
-  revealCoverage.consume('reveal.reduced-motion');
+  revealCoverage.prove('reveal.reduced-motion', () => {
+    expect(reducedReveal.props.entering).toBeUndefined();
+  });
   pulseCoverage.expectComplete();
   pulseDotCoverage.expectComplete();
   revealCoverage.expectComplete();
@@ -376,7 +466,12 @@ test('BlurLayer 随 ThemeProvider 在 light/dark 间切换原生 blurType', () =
     intensity: 'soft',
     tint: expect.any(String),
   });
-  stateCoverage.consume('blur-layer.soft', 'blur-layer.custom-tint');
+  stateCoverage.prove('blur-layer.soft', 'blur-layer.custom-tint', () => {
+    expect(darkBlurLayer.props).toMatchObject({
+      intensity: 'soft',
+      tint: expect.any(String),
+    });
+  });
   expect(
     hostChild(screen.getByTestId('feedback-blur-layer'), 0).props.blurType
   ).toBe('dark');
@@ -384,7 +479,11 @@ test('BlurLayer 随 ThemeProvider 在 light/dark 间切换原生 blurType', () =
   expect(
     componentByTestID(BlurLayer, 'feedback-blur-layer').props.intensity
   ).toBe('strong');
-  stateCoverage.consume('blur-layer.strong');
+  stateCoverage.prove('blur-layer.strong', () => {
+    expect(
+      componentByTestID(BlurLayer, 'feedback-blur-layer').props.intensity
+    ).toBe('strong');
+  });
 
   fireEvent.press(screen.getByRole('button', { name: '返回首页' }));
   enterFoundation();
@@ -395,7 +494,11 @@ test('BlurLayer 随 ThemeProvider 在 light/dark 间切换原生 blurType', () =
   expect(
     hostChild(screen.getByTestId('feedback-blur-layer'), 0).props.blurType
   ).toBe('light');
-  stateCoverage.consume('blur-layer.theme');
+  stateCoverage.prove('blur-layer.theme', () => {
+    expect(
+      hostChild(screen.getByTestId('feedback-blur-layer'), 0).props.blurType
+    ).toBe('light');
+  });
   stateCoverage.expectComplete();
 });
 
@@ -559,6 +662,19 @@ test('ConfirmHost 与 ToastHost 的全部公开状态都由真实命令结果证
   enterFeedback();
   const confirmCoverage = createShowcaseStateCoverage('ConfirmHost');
   const toastCoverage = createShowcaseStateCoverage('ToastHost');
+  const runtimeCoverage = createShowcaseRuntimeCoverage('feedback');
+
+  runtimeCoverage.prove('usePulse', () => {
+    expect(jest.mocked(usePulse)).toHaveBeenCalledWith({
+      from: 0.32,
+      to: 0.92,
+      duration: 700,
+      delay: 0,
+    });
+    expect(screen.getByTestId('feedback-use-pulse')).toHaveStyle({
+      opacity: 0.32,
+    });
+  });
 
   for (const [kind, position] of [
     ['信息', '顶部'],
@@ -576,17 +692,33 @@ test('ConfirmHost 与 ToastHost 的全部公开状态都由真实命令结果证
       duration: 10_000,
     });
   }
-  toastCoverage.consume(
+  toastCoverage.prove(
     'toast-host.kinds',
     'toast-host.positions',
-    'toast-host.duration'
+    'toast-host.duration',
+    () => {
+      expect(errorSpy).toHaveBeenLastCalledWith({
+        message: '错误提示 · 底部',
+        position: 'bottom',
+        duration: 10_000,
+      });
+    }
   );
+  runtimeCoverage.prove('toast', () => {
+    expect(errorSpy).toHaveBeenLastCalledWith({
+      message: '错误提示 · 底部',
+      position: 'bottom',
+      duration: 10_000,
+    });
+  });
 
   fireEvent.press(screen.getByRole('button', { name: '展示信息顶部提示' }));
   fireEvent.press(screen.getByRole('button', { name: '展示错误底部提示' }));
   expect(screen.getByText('错误提示 · 底部')).toBeOnTheScreen();
   expect(screen.queryByText('信息提示 · 顶部')).not.toBeOnTheScreen();
-  toastCoverage.consume('toast-host.latest-wins');
+  toastCoverage.prove('toast-host.latest-wins', () => {
+    expect(screen.queryByText('信息提示 · 顶部')).not.toBeOnTheScreen();
+  });
 
   fireEvent.press(screen.getByTestId('feedback-hosts-unmount'));
   fireEvent.press(screen.getByTestId('feedback-confirm-no-host'));
@@ -598,13 +730,17 @@ test('ConfirmHost 与 ToastHost 的全部公开状态都由真实命令结果证
     ).toBeOnTheScreen();
   });
   expect(screen.queryByText('无 Host 确认不会显示')).not.toBeOnTheScreen();
-  confirmCoverage.consume('confirm-host.no-host');
+  confirmCoverage.prove('confirm-host.no-host', () => {
+    expect(screen.queryByText('无 Host 确认不会显示')).not.toBeOnTheScreen();
+  });
 
   fireEvent.press(screen.getByTestId('feedback-toast-pre-host'));
   expect(screen.queryByText('Host 重挂后补投的提示')).not.toBeOnTheScreen();
   fireEvent.press(screen.getByTestId('feedback-hosts-remount'));
   expect(screen.getByText('Host 重挂后补投的提示')).toBeOnTheScreen();
-  toastCoverage.consume('toast-host.pre-host');
+  toastCoverage.prove('toast-host.pre-host', () => {
+    expect(screen.getByText('Host 重挂后补投的提示')).toBeOnTheScreen();
+  });
   toastCoverage.expectComplete();
 
   fireEvent.press(screen.getByRole('button', { name: '打开普通确认' }));
@@ -615,7 +751,11 @@ test('ConfirmHost 与 ToastHost 的全部公开状态都由真实命令结果证
       screen.getByText('最新结果：Confirm · 普通确认 · 已确认')
     ).toBeOnTheScreen();
   });
-  confirmCoverage.consume('confirm-host.confirm');
+  confirmCoverage.prove('confirm-host.confirm', () => {
+    expect(
+      screen.getByText('最新结果：Confirm · 普通确认 · 已确认')
+    ).toBeOnTheScreen();
+  });
 
   fireEvent.press(screen.getByRole('button', { name: '打开普通确认' }));
   fireEvent.press(screen.getByRole('button', { name: '取消操作' }));
@@ -624,7 +764,11 @@ test('ConfirmHost 与 ToastHost 的全部公开状态都由真实命令结果证
       screen.getByText('最新结果：Confirm · 普通确认 · 已取消')
     ).toBeOnTheScreen();
   });
-  confirmCoverage.consume('confirm-host.cancel');
+  confirmCoverage.prove('confirm-host.cancel', () => {
+    expect(
+      screen.getByText('最新结果：Confirm · 普通确认 · 已取消')
+    ).toBeOnTheScreen();
+  });
 
   fireEvent.press(screen.getByRole('button', { name: '打开破坏性确认' }));
   expect(screen.getByText('删除示例记录？')).toBeOnTheScreen();
@@ -635,7 +779,11 @@ test('ConfirmHost 与 ToastHost 的全部公开状态都由真实命令结果证
       screen.getByText('最新结果：Confirm · 破坏性确认 · 已取消')
     ).toBeOnTheScreen();
   });
-  confirmCoverage.consume('confirm-host.destructive');
+  confirmCoverage.prove('confirm-host.destructive', () => {
+    expect(
+      screen.getByText('最新结果：Confirm · 破坏性确认 · 已取消')
+    ).toBeOnTheScreen();
+  });
 
   fireEvent.press(screen.getByTestId('feedback-confirm-reentrant'));
   expect(screen.getByText('第一个连续确认')).toBeOnTheScreen();
@@ -653,8 +801,21 @@ test('ConfirmHost 与 ToastHost 的全部公开状态都由真实命令结果证
       screen.getByText('最新结果：ConfirmHost · 重入结算 · 第一个请求已确认')
     ).toBeOnTheScreen();
   });
-  confirmCoverage.consume('confirm-host.reentrant');
+  confirmCoverage.prove('confirm-host.reentrant', () => {
+    expect(
+      screen.getByText('最新结果：ConfirmHost · 重入结算 · 第一个请求已确认')
+    ).toBeOnTheScreen();
+  });
   confirmCoverage.expectComplete();
+  runtimeCoverage.prove('confirm', () => {
+    expect(jest.mocked(confirm)).toHaveBeenCalledWith(
+      expect.objectContaining({ title: '继续当前操作？' })
+    );
+    expect(
+      screen.getByText('最新结果：ConfirmHost · 重入结算 · 第一个请求已确认')
+    ).toBeOnTheScreen();
+  });
+  runtimeCoverage.expectComplete();
 
   act(() => {
     jest.advanceTimersByTime(10_000);

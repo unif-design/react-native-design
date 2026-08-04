@@ -8,9 +8,11 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   readdirSync,
   rmSync,
   statSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import os from 'node:os';
@@ -68,6 +70,74 @@ function runContractMutation(fixture, testNamePattern) {
       cwd: repositoryRoot,
       encoding: 'utf8',
       env,
+    }
+  );
+}
+
+function runExampleAcceptanceTest(fixture, testFile) {
+  const fixtureRoot = realpathSync(fixture);
+  const fixtureExampleRoot = path.join(fixtureRoot, 'example');
+  const rootModules = path.join(fixtureRoot, 'node_modules');
+  const exampleModules = path.join(fixtureExampleRoot, 'node_modules');
+  if (!existsSync(rootModules)) {
+    symlinkSync(path.join(repositoryRoot, 'node_modules'), rootModules, 'dir');
+  }
+  if (!existsSync(exampleModules)) {
+    symlinkSync(
+      path.join(repositoryRoot, 'example/node_modules'),
+      exampleModules,
+      'dir'
+    );
+  }
+  const baseConfig = require(
+    path.join(repositoryRoot, 'example/jest.config.js')
+  );
+  const config = {
+    ...baseConfig,
+    rootDir: fixtureExampleRoot,
+    cacheDirectory: path.join(fixture, '.jest-cache'),
+    preset: path.join(
+      repositoryRoot,
+      'example/node_modules/@react-native/jest-preset'
+    ),
+    setupFilesAfterEnv: [path.join(repositoryRoot, 'example/jest.setup.ts')],
+    moduleNameMapper: {
+      ...baseConfig.moduleNameMapper,
+      '^@unif/react-native-design$': path.join(repositoryRoot, 'src/index.tsx'),
+      '^react$': path.join(repositoryRoot, 'example/node_modules/react'),
+      '^react/(.*)$': path.join(
+        repositoryRoot,
+        'example/node_modules/react/$1'
+      ),
+      '^react-native-gesture-handler$': path.join(
+        repositoryRoot,
+        'example/node_modules/react-native-gesture-handler/src/index.ts'
+      ),
+      '^react-native-reanimated$': path.join(
+        repositoryRoot,
+        'example/node_modules/react-native-reanimated/mock.js'
+      ),
+      '^react-native-worklets$': path.join(
+        repositoryRoot,
+        'example/node_modules/react-native-worklets/src/mock.ts'
+      ),
+    },
+  };
+
+  return spawnSync(
+    process.execPath,
+    [
+      path.join(repositoryRoot, 'example/node_modules/jest/bin/jest.js'),
+      '--config',
+      JSON.stringify(config),
+      '--runInBand',
+      '--runTestsByPath',
+      path.join(fixtureExampleRoot, 'src/__tests__', testFile),
+    ],
+    {
+      cwd: repositoryRoot,
+      encoding: 'utf8',
+      env: process.env,
     }
   );
 }
@@ -161,6 +231,12 @@ const sourceContractFiles = [
   'example/ios/ReactNativeDesignExample.xcodeproj/xcshareddata/xcschemes/ReactNativeDesignExample.xcscheme',
 ];
 
+const runtimeAcceptanceFiles = [
+  ...sourceContractFiles,
+  'example/jest.setup.ts',
+  'example/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png',
+];
+
 function mutateFixtureFile(fixture, relativePath, mutate, label) {
   const target = path.join(fixture, relativePath);
   const source = readFileSync(target, 'utf8');
@@ -184,6 +260,21 @@ function removeButtonLoadingSpecimen(source) {
   const end = source.indexOf(endMarker, start);
   if (end < 0) return source;
   return `${source.slice(0, start)}${source.slice(end + endMarker.length + 1)}`;
+}
+
+function proofCallBlock(source, coverageName, proofId) {
+  const marker = `  ${coverageName}.prove('${proofId}', () => {`;
+  const start = source.indexOf(marker);
+  if (start < 0) return undefined;
+  const endMarker = '\n  });';
+  const end = source.indexOf(endMarker, start);
+  if (end < 0) return undefined;
+  return source.slice(start, end + endMarker.length);
+}
+
+function replaceProofCall(source, coverageName, proofId, replacement) {
+  const block = proofCallBlock(source, coverageName, proofId);
+  return block ? source.replace(block, replacement) : source;
 }
 
 function removeRoutedStatusDotSpecimens(source) {
@@ -771,7 +862,7 @@ test('exhaustive verifier 将 sceneIds、Router、Home 与真实 scene consumpti
   }
 });
 
-test('scene runtime API 不能由未调用的 dead helper 冒充 consumption', () => {
+test('静态 public-binding gate 明确不把 dead helper 当作运行时真值', () => {
   withFixture([...new Set(sourceContractFiles)], (fixture) => {
     assert.doesNotThrow(
       () => showcaseVerifier.verifyExampleShowcase(fixture),
@@ -792,10 +883,132 @@ test('scene runtime API 不能由未调用的 dead helper 冒充 consumption', (
           )}\nfunction deadUseSvgIdWitness(): void {\n  useSvgId('dead-wash');\n  useSvgId('dead-halo');\n}\n`,
       '删除真实 useSvgId calls 并追加未调用的 dead helper'
     );
-    assertVerifierCode(
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'dead helper 仍满足静态 binding shape；运行时真值由 Jest proof gate 负责'
+    );
+  });
+});
+
+test('完整验收链拒绝只创建但未挂载的 Button loading JSX', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const clean = runExampleAcceptanceTest(fixture, 'ActionsScene.test.tsx');
+    assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
+
+    mutateFixtureFile(
       fixture,
-      'SCENE_RUNTIME_API_CONSUMPTION',
-      'useSvgId consumption 不得由未调用的 dead helper 冒充'
+      'example/src/showcases/actions/ActionsScene.tsx',
+      (source) =>
+        removeButtonLoadingSpecimen(source).replace(
+          '  return (\n    <ShowcaseScaffold',
+          [
+            '  const unusedLoadingSpecimen = (',
+            '    <Button',
+            '      label="加载按钮"',
+            '      loading',
+            '      testID="actions-button-loading"',
+            '      onPress={() => {}}',
+            '    />',
+            '  );',
+            '  void unusedLoadingSpecimen;',
+            '',
+            '  return (',
+            '    <ShowcaseScaffold',
+          ].join('\n')
+        ),
+      '删除真实 loading Button 并仅创建 unused JSX'
+    );
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      '静态 route/public-binding gate 可以保留，但不得声称 unused JSX 已被挂载'
+    );
+
+    const mutated = runExampleAcceptanceTest(fixture, 'ActionsScene.test.tsx');
+    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /actions-button-loading|加载按钮/u
+    );
+  });
+});
+
+test('完整验收链拒绝 Scene if(false) 中的两次 useSvgId', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const clean = runExampleAcceptanceTest(fixture, 'BusinessScene.test.tsx');
+    assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
+
+    mutateFixtureFile(
+      fixture,
+      'example/src/showcases/business/BusinessScene.tsx',
+      (source) =>
+        source
+          .replace(
+            "  const washGradientId = useSvgId('business-wash');",
+            "  const washGradientId = 'business-wash';"
+          )
+          .replace(
+            "  const haloGradientId = useSvgId('business-halo');",
+            "  const haloGradientId = 'business-halo';"
+          )
+          .replace(
+            '  const draft = state.scenes.business;',
+            [
+              '  const draft = state.scenes.business;',
+              '  if (false) {',
+              "    useSvgId('dead-wash');",
+              "    useSvgId('dead-halo');",
+              '  }',
+            ].join('\n')
+          ),
+      '删除真实 useSvgId calls 并放入 Scene if(false)'
+    );
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      '静态 binding gate 不负责解释 JavaScript control flow'
+    );
+
+    const mutated = runExampleAcceptanceTest(fixture, 'BusinessScene.test.tsx');
+    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /useSvgId|runtime proof/u
+    );
+  });
+});
+
+test('完整验收链拒绝 module if(false) 中的 createLogger', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const clean = runExampleAcceptanceTest(fixture, 'FoundationScene.test.tsx');
+    assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
+
+    mutateFixtureFile(
+      fixture,
+      'example/src/showcases/foundation/FoundationScene.tsx',
+      (source) =>
+        source.replace(
+          "const log = createLogger('FoundationScene');",
+          [
+            'const log = { info(_message: string): void {} };',
+            'if (false) {',
+            "  createLogger('FoundationScene');",
+            '}',
+          ].join('\n')
+        ),
+      '删除真实 module-init createLogger 并放入 module if(false)'
+    );
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      '静态 binding gate 不负责解释 module control flow'
+    );
+
+    const mutated = runExampleAcceptanceTest(
+      fixture,
+      'FoundationScene.test.tsx'
+    );
+    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /createLogger|runtime proof/u
     );
   });
 });
@@ -895,7 +1108,7 @@ test('Button catalog 删除 required loading state 时 typed gate 失败', () =>
   });
 });
 
-test('Button loading 真实 routed specimen 删除时 typed witness gate 失败', () => {
+test('Button loading 是否真实挂载不由静态 witness gate 冒充判断', () => {
   withFixture([...new Set(sourceContractFiles)], (fixture) => {
     assert.doesNotThrow(
       () => showcaseVerifier.verifyExampleShowcase(fixture),
@@ -907,15 +1120,14 @@ test('Button loading 真实 routed specimen 删除时 typed witness gate 失败'
       removeButtonLoadingSpecimen,
       '从 routed ActionsScene 删除 loading Button specimen'
     );
-    assertVerifierCode(
-      fixture,
-      'COMPONENT_STATE_WITNESS',
-      'button.loading 必须由 routed scene 的真实 specimen 见证'
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      '静态 verifier 只锚定 catalog/state/proof shape，挂载事实由 Jest 运行时证明'
     );
   });
 });
 
-test('Button loading 不能由未渲染的 dead component 冒充 witness', () => {
+test('Button loading dead component 只属于静态 binding shape', () => {
   withFixture([...new Set(sourceContractFiles)], (fixture) => {
     assert.doesNotThrow(
       () => showcaseVerifier.verifyExampleShowcase(fixture),
@@ -928,10 +1140,9 @@ test('Button loading 不能由未渲染的 dead component 冒充 witness', () =>
         `${removeButtonLoadingSpecimen(source)}\nfunction DeadButtonLoadingWitness() {\n  return (\n    <Button\n      label="加载按钮"\n      loading\n      testID="actions-button-loading"\n      onPress={() => {}}\n    />\n  );\n}\n`,
       '删除真实 loading Button 并追加未渲染的 dead component'
     );
-    assertVerifierCode(
-      fixture,
-      'COMPONENT_STATE_WITNESS',
-      'button.loading 不得由未渲染的 dead component 冒充'
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      '静态 binding gate 可以接受 dead JSX，但 Jest proof 必须查询真实挂载节点'
     );
   });
 });
@@ -962,28 +1173,28 @@ test('Button loading 同时从 catalog 与 mutable state contract 删除仍失�
   });
 });
 
-test('Button loading 的 Jest consume 调用删除时 typed gate 失败', () => {
+test('Button loading 的 Jest prove 调用删除时 typed gate 失败', () => {
   withFixture([...new Set(sourceContractFiles)], (fixture) => {
     assert.doesNotThrow(
       () => showcaseVerifier.verifyExampleShowcase(fixture),
-      'Jest state consume mutation 的 clean fixture 必须先完整通过'
+      'Jest state proof mutation 的 clean fixture 必须先完整通过'
     );
     mutateFixtureFile(
       fixture,
       'example/src/__tests__/ActionsScene.test.tsx',
       (source) =>
-        source.replace("  stateCoverage.consume('button.loading');\n", ''),
-      '删除 button.loading Jest consume 调用'
+        replaceProofCall(source, 'stateCoverage', 'button.loading', ''),
+      '删除 button.loading Jest prove 调用'
     );
     assertVerifierCode(
       fixture,
       'SCENE_STATE_TEST_CONSUMPTION',
-      'production verifier 必须独立拒绝漏掉 button.loading Jest consume'
+      'production verifier 必须独立拒绝漏掉 button.loading Jest proof'
     );
   });
 });
 
-test('Button loading 的 Jest consume 移入 dead helper 时 typed gate 失败', () => {
+test('Button loading 的 Jest prove 移入 dead helper 时 typed gate 失败', () => {
   withFixture([...new Set(sourceContractFiles)], (fixture) => {
     assert.doesNotThrow(
       () => showcaseVerifier.verifyExampleShowcase(fixture),
@@ -994,26 +1205,125 @@ test('Button loading 的 Jest consume 移入 dead helper 时 typed gate 失败',
       fixture,
       'example/src/__tests__/ActionsScene.test.tsx',
       (source) =>
-        source.replace(
-          "  stateCoverage.consume('button.loading');",
+        replaceProofCall(
+          source,
+          'stateCoverage',
+          'button.loading',
           [
             '  function deadCoverage(): void {',
-            "    stateCoverage.consume('button.loading');",
+            "    stateCoverage.prove('button.loading', () => {",
+            '      expect(loadingSpecimen.props.loading).toBe(true);',
+            '    });',
             '  }',
           ].join('\n')
         ),
-      '把 button.loading consume 移入未调用的 nested helper'
+      '把 button.loading prove 移入未调用的 nested helper'
     );
 
     assertVerifierCode(
       fixture,
       'SCENE_STATE_TEST_CONSUMPTION',
-      'production verifier 不得把 dead helper 当作已执行 Jest consume'
+      'production verifier 不得把 dead helper 当作直接 Jest proof'
     );
   });
 });
 
-test('Chip selected 删除真实 routed interaction specimen 时 typed gate 失败', () => {
+test('Button loading 的空 proof callback 被 typed gate 拒绝', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(() => showcaseVerifier.verifyExampleShowcase(fixture));
+    mutateFixtureFile(
+      fixture,
+      'example/src/__tests__/ActionsScene.test.tsx',
+      (source) =>
+        replaceProofCall(
+          source,
+          'stateCoverage',
+          'button.loading',
+          "  stateCoverage.prove('button.loading', () => {});"
+        ),
+      '清空 button.loading inline proof callback'
+    );
+    assertVerifierCode(
+      fixture,
+      'SCENE_STATE_TEST_CONSUMPTION',
+      'proof callback 必须含直接 Jest assertion'
+    );
+  });
+});
+
+test('Button loading 退回 legacy consume 时 typed gate 失败', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(() => showcaseVerifier.verifyExampleShowcase(fixture));
+    mutateFixtureFile(
+      fixture,
+      'example/src/__tests__/ActionsScene.test.tsx',
+      (source) =>
+        replaceProofCall(
+          source,
+          'stateCoverage',
+          'button.loading',
+          "  stateCoverage.consume('button.loading');"
+        ),
+      '把 button.loading proof 退回 consume'
+    );
+    assertVerifierCode(
+      fixture,
+      'SCENE_STATE_TEST_CONSUMPTION',
+      'production verifier 必须显式拒绝 legacy consume'
+    );
+  });
+});
+
+test('runtime API proof gate 拒绝 missing、空 callback 与 legacy consume', () => {
+  const mutations = [
+    {
+      label: '删除 useSvgId runtime proof',
+      file: 'example/src/__tests__/BusinessScene.test.tsx',
+      mutate: (source) =>
+        replaceProofCall(source, 'runtimeCoverage', 'useSvgId', ''),
+    },
+    {
+      label: 'toast runtime proof 使用空 callback',
+      file: 'example/src/__tests__/FeedbackScene.test.tsx',
+      mutate: (source) =>
+        replaceProofCall(
+          source,
+          'runtimeCoverage',
+          'toast',
+          "  runtimeCoverage.prove('toast', () => {});"
+        ),
+    },
+    {
+      label: 'createLogger runtime proof 退回 consume',
+      file: 'example/src/__tests__/FoundationScene.test.tsx',
+      mutate: (source) =>
+        replaceProofCall(
+          source,
+          'runtimeCoverage',
+          'createLogger',
+          "  runtimeCoverage.consume('createLogger');"
+        ),
+    },
+  ];
+
+  for (const mutation of mutations) {
+    withFixture([...new Set(sourceContractFiles)], (fixture) => {
+      assert.doesNotThrow(
+        () => showcaseVerifier.verifyExampleShowcase(fixture),
+        `${mutation.label} clean fixture 必须先完整通过`
+      );
+      mutateFixtureFile(
+        fixture,
+        mutation.file,
+        mutation.mutate,
+        mutation.label
+      );
+      assertVerifierCode(fixture, 'RUNTIME_API_TEST_PROOF', mutation.label);
+    });
+  }
+});
+
+test('Chip selected 交互真值不由静态 AST gate 判断', () => {
   withFixture([...new Set(sourceContractFiles)], (fixture) => {
     assert.doesNotThrow(
       () => showcaseVerifier.verifyExampleShowcase(fixture),
@@ -1025,15 +1335,14 @@ test('Chip selected 删除真实 routed interaction specimen 时 typed gate 失�
       removeSelectableChipSpecimen,
       '从 routed ActionsScene 删除 selectable Chip'
     );
-    assertVerifierCode(
-      fixture,
-      'COMPONENT_STATE_WITNESS',
-      'chip.selected 必须由真实可执行 interaction 见证'
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      '交互后态由 scene Jest proof 负责'
     );
   });
 });
 
-test('Chip selected 不能由未渲染的 dead component 冒充 interaction witness', () => {
+test('Chip selected dead component 不改变静态 gate 与 runtime proof 的职责边界', () => {
   withFixture([...new Set(sourceContractFiles)], (fixture) => {
     assert.doesNotThrow(
       () => showcaseVerifier.verifyExampleShowcase(fixture),
@@ -1046,15 +1355,14 @@ test('Chip selected 不能由未渲染的 dead component 冒充 interaction witn
         `${removeSelectableChipSpecimen(source)}\nfunction DeadChipWitness() {\n  return (\n    <Chip\n      label="可选择标签"\n      selected={false}\n      testID="actions-chip-selectable"\n      onPress={() => {}}\n    />\n  );\n}\n`,
       '删除真实 selectable Chip 并追加未渲染的 dead component'
     );
-    assertVerifierCode(
-      fixture,
-      'COMPONENT_STATE_WITNESS',
-      'chip.selected 不得由未渲染的 dead component 冒充'
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      '静态 verifier 不手写 React render/JavaScript CFG'
     );
   });
 });
 
-test('Toast kinds 的 error runtime-api 分支被偷换时 typed gate 失败', () => {
+test('Toast error 分支执行事实交给 runtime proof', () => {
   withFixture([...new Set(sourceContractFiles)], (fixture) => {
     assert.doesNotThrow(
       () => showcaseVerifier.verifyExampleShowcase(fixture),
@@ -1067,15 +1375,14 @@ test('Toast kinds 的 error runtime-api 分支被偷换时 typed gate 失败', (
         source.replace('toast.error(input);', 'toast.success(input);'),
       '将 toast.error runtime call 偷换为 toast.success'
     );
-    assertVerifierCode(
-      fixture,
-      'COMPONENT_STATE_WITNESS',
-      'ToastHost.kinds 必须保留 error public runtime-api call'
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      '静态 binding gate 不解释 switch 分支；toast.error spy proof 会拒绝 mutation'
     );
   });
 });
 
-test('Toast error 不能由未调用的 dead helper 冒充 runtime witness', () => {
+test('Toast dead helper 不由静态 verifier 猜测是否执行', () => {
   withFixture([...new Set(sourceContractFiles)], (fixture) => {
     assert.doesNotThrow(
       () => showcaseVerifier.verifyExampleShowcase(fixture),
@@ -1091,10 +1398,9 @@ test('Toast error 不能由未调用的 dead helper 冒充 runtime witness', () 
         )}\nfunction deadToastWitness(): void {\n  toast.error({\n    message: 'dead witness',\n    position: 'bottom',\n    duration: 1,\n  });\n}\n`,
       '偷换真实 toast.error 并追加未调用的 dead helper'
     );
-    assertVerifierCode(
-      fixture,
-      'COMPONENT_STATE_WITNESS',
-      'toast-host.kinds 不得由未调用的 dead helper 冒充'
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'runtime Jest 的 toast.error spy 是执行真值'
     );
   });
 });

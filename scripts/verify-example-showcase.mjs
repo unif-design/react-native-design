@@ -417,6 +417,61 @@ const expectedRuntimeApis = [
   'useSvgId',
 ];
 
+// Runtime proof 的 owner/ID 映射必须由 production verifier 独立锚定，不能从
+// example catalog 或测试 helper 读取，否则两边同步删项时会一起假绿。
+const expectedRuntimeProofIdsByOwner = {
+  app: ['ThemeProvider', 'normalizeFontScale'],
+  foundation: [
+    'useTheme',
+    'useColors',
+    'useShadow',
+    'useFontScale',
+    'useThemedStyles',
+    'usePrefersReducedMotion',
+    'scaleFontMetric',
+    'r',
+    'rf',
+    'lightColors',
+    'darkColors',
+    'avatarGradient',
+    'BRAND_ORANGE',
+    'warmOrangePalette',
+    'lightShadow',
+    'darkShadow',
+    'fontMono',
+    'type',
+    'fw',
+    'space',
+    'radius',
+    'avatar',
+    'icon',
+    'control',
+    'dim',
+    'fixed',
+    'motion',
+    'pressedOpacity',
+    'blur',
+    'ICONS',
+    'ICON_NAMES',
+    'childTestID',
+    'createLogger',
+    'setLogLevel',
+    'getLogLevel',
+    'addTransport',
+    'removeTransport',
+    'consoleTransport',
+  ],
+  feedback: ['confirm', 'toast', 'usePulse'],
+  business: ['useSvgId'],
+};
+
+const expectedRuntimeProofTestFiles = {
+  app: 'App.test.tsx',
+  foundation: 'FoundationScene.test.tsx',
+  feedback: 'FeedbackScene.test.tsx',
+  business: 'BusinessScene.test.tsx',
+};
+
 const expectedSceneTitles = {
   foundation: '基础能力与图标',
   actions: '操作与状态',
@@ -1158,170 +1213,6 @@ function jsxUseNode(identifier) {
   return undefined;
 }
 
-function readStaticStringArrays(sourceFile) {
-  const arrays = new Map();
-  for (const statement of sourceFile.statements) {
-    if (!ts.isVariableStatement(statement)) continue;
-    for (const declaration of statement.declarationList.declarations) {
-      if (!ts.isIdentifier(declaration.name) || !declaration.initializer) {
-        continue;
-      }
-      const initializer = unwrapExpression(declaration.initializer);
-      if (!ts.isArrayLiteralExpression(initializer)) continue;
-      const values = [];
-      let isStaticStringArray = true;
-      for (const element of initializer.elements) {
-        if (!ts.isStringLiteral(element)) {
-          isStaticStringArray = false;
-          break;
-        }
-        values.push(element.text);
-      }
-      if (isStaticStringArray) arrays.set(declaration.name.text, values);
-    }
-  }
-  return arrays;
-}
-
-function iteratorEnvironments(node, staticArrays) {
-  const dimensions = [];
-  let current = node.parent;
-  while (current && !ts.isSourceFile(current)) {
-    if (
-      ts.isArrowFunction(current) &&
-      current.parameters.length > 0 &&
-      ts.isIdentifier(current.parameters[0].name) &&
-      ts.isCallExpression(current.parent) &&
-      current.parent.arguments.includes(current) &&
-      ts.isPropertyAccessExpression(current.parent.expression) &&
-      ['map', 'flatMap'].includes(current.parent.expression.name.text) &&
-      ts.isIdentifier(current.parent.expression.expression)
-    ) {
-      const values = staticArrays.get(
-        current.parent.expression.expression.text
-      );
-      if (values) {
-        dimensions.unshift({
-          name: current.parameters[0].name.text,
-          values,
-        });
-      }
-    }
-    current = current.parent;
-  }
-
-  let environments = [{}];
-  for (const dimension of dimensions) {
-    environments = environments.flatMap((environment) =>
-      dimension.values.map((value) => ({
-        ...environment,
-        [dimension.name]: value,
-      }))
-    );
-  }
-  return environments;
-}
-
-function evaluateStateWitnessExpression(node, environment) {
-  const value = unwrapExpression(node);
-  if (ts.isStringLiteral(value) || ts.isNoSubstitutionTemplateLiteral(value)) {
-    return value.text;
-  }
-  if (ts.isNumericLiteral(value)) return Number(value.text);
-  if (value.kind === ts.SyntaxKind.TrueKeyword) return true;
-  if (value.kind === ts.SyntaxKind.FalseKeyword) return false;
-  if (ts.isIdentifier(value)) return environment[value.text];
-  if (ts.isTemplateExpression(value)) {
-    let result = value.head.text;
-    for (const span of value.templateSpans) {
-      const expressionValue = evaluateStateWitnessExpression(
-        span.expression,
-        environment
-      );
-      if (
-        typeof expressionValue !== 'string' &&
-        typeof expressionValue !== 'number' &&
-        typeof expressionValue !== 'boolean'
-      ) {
-        return undefined;
-      }
-      result += `${expressionValue}${span.literal.text}`;
-    }
-    return result;
-  }
-  return undefined;
-}
-
-function readJsxWitnessValue(element, propertyName, environment) {
-  const attributes = ts.isJsxElement(element)
-    ? element.openingElement.attributes.properties
-    : element.attributes.properties;
-  const attribute = attributes.find(
-    (candidate) =>
-      ts.isJsxAttribute(candidate) &&
-      ts.isIdentifier(candidate.name) &&
-      candidate.name.text === propertyName
-  );
-  if (!attribute || !ts.isJsxAttribute(attribute)) return undefined;
-  if (!attribute.initializer) return true;
-  if (ts.isStringLiteral(attribute.initializer)) {
-    return attribute.initializer.text;
-  }
-  if (
-    ts.isJsxExpression(attribute.initializer) &&
-    attribute.initializer.expression
-  ) {
-    return evaluateStateWitnessExpression(
-      attribute.initializer.expression,
-      environment
-    );
-  }
-  return undefined;
-}
-
-function expandBindingJsxSpecimens(binding) {
-  const specimens = [];
-  const staticArraysBySource = new Map();
-  for (const node of binding?.jsxNodes ?? []) {
-    const sourceFile = node.getSourceFile();
-    const staticArrays =
-      staticArraysBySource.get(sourceFile) ??
-      readStaticStringArrays(sourceFile);
-    staticArraysBySource.set(sourceFile, staticArrays);
-    for (const environment of iteratorEnvironments(node, staticArrays)) {
-      const testID = readJsxWitnessValue(node, 'testID', environment);
-      specimens.push({
-        node,
-        testID: typeof testID === 'string' ? testID : undefined,
-        readProp(propertyName) {
-          return readJsxWitnessValue(node, propertyName, environment);
-        },
-      });
-    }
-  }
-  return specimens;
-}
-
-function jsxHasAttribute(element, propertyName) {
-  const attributes = ts.isJsxElement(element)
-    ? element.openingElement.attributes.properties
-    : element.attributes.properties;
-  return attributes.some(
-    (attribute) =>
-      ts.isJsxAttribute(attribute) &&
-      ts.isIdentifier(attribute.name) &&
-      attribute.name.text === propertyName
-  );
-}
-
-function sceneRuntimeCallPaths(sceneContext) {
-  return new Set(
-    [...sceneContext.bindings.values()].flatMap((binding) =>
-      binding.callPaths.map((call) => call.path)
-    )
-  );
-}
-
 function collectRuntimeImportBindings(
   filePaths,
   moduleName,
@@ -1351,9 +1242,7 @@ function collectRuntimeImportBindings(
           uses: 0,
           jsxUses: 0,
           callUses: 0,
-          callPaths: [],
           files: new Set(),
-          useNodes: [],
           jsxNodes: [],
         };
         const symbol = bindingAnalysis.checker.getSymbolAtLocation(
@@ -1378,7 +1267,6 @@ function collectRuntimeImportBindings(
         const binding = symbol ? bindingsBySymbol.get(symbol) : undefined;
         if (binding) {
           binding.uses += 1;
-          binding.useNodes.push(node);
           const jsxNode = jsxUseNode(node);
           if (jsxNode) {
             binding.jsxUses += 1;
@@ -1393,19 +1281,6 @@ function collectRuntimeImportBindings(
               node.parent.parent.expression === node.parent)
           ) {
             binding.callUses += 1;
-            const callPath =
-              ts.isPropertyAccessExpression(node.parent) &&
-              ts.isIdentifier(node.parent.name)
-                ? `${binding.imported}.${node.parent.name.text}`
-                : binding.imported;
-            binding.callPaths.push({
-              path: callPath,
-              node:
-                ts.isCallExpression(node.parent) &&
-                node.parent.expression === node
-                  ? node.parent
-                  : node.parent.parent,
-            });
           }
         }
       }
@@ -1414,231 +1289,6 @@ function collectRuntimeImportBindings(
     visit(sourceFile);
   }
   return bindings;
-}
-
-function findRuntimeDeclaration(sourceFile, name) {
-  for (const statement of sourceFile.statements) {
-    if (ts.isFunctionDeclaration(statement) && statement.name?.text === name) {
-      return statement;
-    }
-    if (!ts.isVariableStatement(statement)) continue;
-    for (const declaration of statement.declarationList.declarations) {
-      if (ts.isIdentifier(declaration.name) && declaration.name.text === name) {
-        return declaration;
-      }
-    }
-  }
-  return undefined;
-}
-
-function enclosingImportDeclaration(node) {
-  let current = node.parent;
-  while (current && !ts.isSourceFile(current)) {
-    if (ts.isImportDeclaration(current)) return current;
-    current = current.parent;
-  }
-  return undefined;
-}
-
-function callableNodeFromDeclaration(
-  declaration,
-  bindingAnalysis,
-  seenDeclarations = new Set()
-) {
-  if (!declaration || seenDeclarations.has(declaration)) return undefined;
-  seenDeclarations.add(declaration);
-
-  if (isFunctionLikeNode(declaration)) return declaration;
-  if (ts.isVariableDeclaration(declaration) && declaration.initializer) {
-    return callableNodeFromExpression(
-      declaration.initializer,
-      bindingAnalysis,
-      seenDeclarations
-    );
-  }
-  if (ts.isImportSpecifier(declaration)) {
-    const importDeclaration = enclosingImportDeclaration(declaration);
-    const moduleName = importDeclaration
-      ? importModuleName(importDeclaration)
-      : undefined;
-    if (!importDeclaration || !moduleName?.startsWith('.')) return undefined;
-    const importedName =
-      declaration.propertyName?.text ?? declaration.name.text;
-    const targetFile = resolveModuleFile(
-      importDeclaration.getSourceFile().fileName,
-      moduleName
-    );
-    const targetSource = bindingAnalysis.sourceFiles.get(
-      path.resolve(targetFile)
-    );
-    if (!targetSource) return undefined;
-    return callableNodeFromDeclaration(
-      findRuntimeDeclaration(targetSource, importedName),
-      bindingAnalysis,
-      seenDeclarations
-    );
-  }
-  return undefined;
-}
-
-function callableNodeFromExpression(
-  expression,
-  bindingAnalysis,
-  seenDeclarations = new Set()
-) {
-  const value = unwrapExpression(expression);
-  if (isFunctionLikeNode(value)) return value;
-  if (!ts.isIdentifier(value)) return undefined;
-  const symbol = bindingAnalysis.checker.getSymbolAtLocation(value);
-  for (const declaration of symbol?.declarations ?? []) {
-    const callable = callableNodeFromDeclaration(
-      declaration,
-      bindingAnalysis,
-      seenDeclarations
-    );
-    if (callable) return callable;
-  }
-  return undefined;
-}
-
-function collectSceneExecutableNodes(
-  routeTargetFile,
-  routeTargetName,
-  reachableSceneFiles,
-  bindingAnalysis
-) {
-  const allowedFiles = new Set(
-    reachableSceneFiles.map((filePath) => path.resolve(filePath))
-  );
-  const sourceFile = bindingAnalysis.sourceFiles.get(
-    path.resolve(routeTargetFile)
-  );
-  const routeDeclaration = sourceFile
-    ? findRuntimeDeclaration(sourceFile, routeTargetName)
-    : undefined;
-  const routeFunction = routeDeclaration
-    ? callableNodeFromDeclaration(routeDeclaration, bindingAnalysis)
-    : undefined;
-  if (!routeFunction || !isFunctionLikeNode(routeFunction)) {
-    failVerification(
-      'ROUTE_REGISTRY',
-      `${routeTargetName} 缺少可执行 routed scene function`
-    );
-  }
-
-  const activeNodes = new Set();
-  const activeFunctions = new Set();
-
-  const isAllowedFunction = (node) =>
-    allowedFiles.has(path.resolve(node.getSourceFile().fileName));
-
-  const activateExpression = (expression) => {
-    const value = unwrapExpression(expression);
-    if (ts.isConditionalExpression(value)) {
-      activateExpression(value.whenTrue);
-      activateExpression(value.whenFalse);
-      return;
-    }
-    const callable = callableNodeFromExpression(value, bindingAnalysis);
-    if (callable) activateFunction(callable);
-  };
-
-  const visitActive = (node) => {
-    if (isFunctionLikeNode(node)) return;
-    activeNodes.add(node);
-
-    if (ts.isCallExpression(node)) {
-      activateExpression(node.expression);
-      for (const argument of node.arguments) activateExpression(argument);
-    }
-
-    if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
-      const opening = ts.isJsxElement(node) ? node.openingElement : node;
-      if (ts.isIdentifier(opening.tagName)) {
-        activateExpression(opening.tagName);
-      }
-    }
-
-    if (
-      ts.isJsxAttribute(node) &&
-      node.initializer &&
-      ts.isJsxExpression(node.initializer) &&
-      node.initializer.expression
-    ) {
-      activateExpression(node.initializer.expression);
-    }
-
-    ts.forEachChild(node, visitActive);
-  };
-
-  function activateFunction(node) {
-    if (activeFunctions.has(node) || !isAllowedFunction(node)) return;
-    activeFunctions.add(node);
-    activeNodes.add(node);
-    for (const parameter of node.parameters) {
-      if (parameter.initializer) visitActive(parameter.initializer);
-    }
-    if (node.body) visitActive(node.body);
-  }
-
-  activateFunction(routeFunction);
-  return activeNodes;
-}
-
-function collectModuleExecutableNodes(filePaths, bindingAnalysis) {
-  const activeNodes = new Set();
-  const visitModuleExecution = (node) => {
-    if (
-      isFunctionLikeNode(node) ||
-      ts.isClassDeclaration(node) ||
-      ts.isClassExpression(node)
-    ) {
-      return;
-    }
-    activeNodes.add(node);
-    ts.forEachChild(node, visitModuleExecution);
-  };
-
-  for (const filePath of filePaths) {
-    const sourceFile = bindingAnalysis.sourceFiles.get(path.resolve(filePath));
-    if (!sourceFile) {
-      failVerification(
-        'SOURCE_READ',
-        `binding analysis 缺少 module execution source: ${filePath}`
-      );
-    }
-    for (const statement of sourceFile.statements) {
-      if (
-        ts.isImportDeclaration(statement) ||
-        ts.isExportDeclaration(statement)
-      ) {
-        continue;
-      }
-      visitModuleExecution(statement);
-    }
-  }
-  return activeNodes;
-}
-
-function filterRuntimeBindingsByActiveNodes(bindings, activeNodes) {
-  const filtered = new Map();
-  for (const [name, binding] of bindings) {
-    const useNodes = binding.useNodes.filter((node) => activeNodes.has(node));
-    const jsxNodes = binding.jsxNodes.filter((node) => activeNodes.has(node));
-    const callPaths = binding.callPaths.filter((call) =>
-      activeNodes.has(call.node)
-    );
-    filtered.set(name, {
-      ...binding,
-      uses: useNodes.length,
-      jsxUses: jsxNodes.length,
-      callUses: callPaths.length,
-      useNodes,
-      jsxNodes,
-      callPaths,
-    });
-  }
-  return filtered;
 }
 
 function importDeclarationHasRuntimeValue(statement) {
@@ -2249,208 +1899,285 @@ function callbackHasDirectExpectation(callback, checker) {
   return found;
 }
 
-function verifySceneStateTestConsumption(root) {
-  const testFiles = Object.values(expectedSceneTestFiles).map((fileName) =>
-    path.join(root, 'example/src/__tests__', fileName)
+function importedFactorySymbols(sourceFile, checker, moduleName, factoryName) {
+  const symbols = new Set();
+  for (const statement of sourceFile.statements) {
+    if (
+      !ts.isImportDeclaration(statement) ||
+      importModuleName(statement) !== moduleName
+    ) {
+      continue;
+    }
+    const clause = statement.importClause;
+    if (
+      !clause ||
+      clause.isTypeOnly ||
+      !clause.namedBindings ||
+      !ts.isNamedImports(clause.namedBindings)
+    ) {
+      continue;
+    }
+    for (const specifier of clause.namedBindings.elements) {
+      if (
+        specifier.isTypeOnly ||
+        (specifier.propertyName?.text ?? specifier.name.text) !== factoryName
+      ) {
+        continue;
+      }
+      const symbol = checker.getSymbolAtLocation(specifier.name);
+      if (symbol) symbols.add(symbol);
+    }
+  }
+  return symbols;
+}
+
+function isConstVariableDeclaration(node) {
+  return (
+    ts.isVariableDeclaration(node) &&
+    ts.isVariableDeclarationList(node.parent) &&
+    (node.parent.flags & ts.NodeFlags.Const) !== 0
   );
-  const bindingAnalysis = createRuntimeBindingAnalysis(testFiles);
+}
 
-  for (const scene of expectedScenes) {
-    const testFile = path.join(
-      root,
-      'example/src/__tests__',
-      expectedSceneTestFiles[scene]
+function isAsyncFunctionLike(node) {
+  return Boolean(
+    node.modifiers?.some(
+      (modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword
+    )
+  );
+}
+
+function verifyTypedProofCoverage({
+  root,
+  relativeTestFile,
+  moduleName,
+  factoryName,
+  expectedIdsByOwner,
+  code,
+  proofLabel,
+}) {
+  const testFile = path.join(root, 'example/src/__tests__', relativeTestFile);
+  const bindingAnalysis = createRuntimeBindingAnalysis([testFile]);
+  const sourceFile = bindingAnalysis.sourceFiles.get(path.resolve(testFile));
+  if (!sourceFile) {
+    failVerification(code, `${proofLabel} 缺少 Jest 文件 ${relativeTestFile}`);
+  }
+  const checker = bindingAnalysis.checker;
+  const factorySymbols = importedFactorySymbols(
+    sourceFile,
+    checker,
+    moduleName,
+    factoryName
+  );
+  if (factorySymbols.size !== 1) {
+    failVerification(
+      code,
+      `${relativeTestFile} 必须从 ${moduleName} 唯一导入真实 ${factoryName} symbol`
     );
-    const sourceFile = bindingAnalysis.sourceFiles.get(path.resolve(testFile));
-    if (!sourceFile) {
+  }
+
+  const coverageRecords = [];
+  const coverageBySymbol = new Map();
+  const collectFactories = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      factorySymbols.has(checker.getSymbolAtLocation(node.expression))
+    ) {
+      const [ownerNode] = node.arguments;
+      if (
+        node.arguments.length !== 1 ||
+        !ownerNode ||
+        !ts.isStringLiteral(ownerNode) ||
+        !isConstVariableDeclaration(node.parent) ||
+        node.parent.initializer !== node ||
+        !ts.isIdentifier(node.parent.name)
+      ) {
+        failVerification(
+          code,
+          `${relativeTestFile} 的 ${factoryName} 必须直接赋给局部 const，且 owner 使用 string literal`
+        );
+      }
+      const coverageSymbol = checker.getSymbolAtLocation(node.parent.name);
+      if (!coverageSymbol) {
+        failVerification(
+          code,
+          `${relativeTestFile} 无法解析 ${ownerNode.text} proof coverage binding`
+        );
+      }
+      const testCallback = executableJestCallback(node, checker);
+      if (!testCallback) {
+        failVerification(
+          code,
+          `${relativeTestFile}/${ownerNode.text} factory 必须位于顶层、未 skip 的 test/it callback`
+        );
+      }
+      const record = {
+        callback: testCallback,
+        owner: ownerNode.text,
+        proved: [],
+        expectCompleteCalls: 0,
+      };
+      coverageRecords.push(record);
+      coverageBySymbol.set(coverageSymbol, record);
+    }
+    ts.forEachChild(node, collectFactories);
+  };
+  collectFactories(sourceFile);
+
+  const collectProofCalls = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isPropertyAccessExpression(node.expression) &&
+      ts.isIdentifier(node.expression.expression)
+    ) {
+      const coverageSymbol = checker.getSymbolAtLocation(
+        node.expression.expression
+      );
+      const record = coverageSymbol
+        ? coverageBySymbol.get(coverageSymbol)
+        : undefined;
+      const method = node.expression.name.text;
+      if (record && method === 'consume') {
+        failVerification(
+          code,
+          `${relativeTestFile}/${record.owner} 禁止 legacy consume；必须使用带 inline assertion callback 的 prove`
+        );
+      }
+      if (record && method === 'prove') {
+        if (nearestFunctionLike(node) !== record.callback) {
+          failVerification(
+            code,
+            `${relativeTestFile}/${record.owner} prove 必须直接属于 factory 所在 test/it callback`
+          );
+        }
+        if (node.arguments.length < 2) {
+          failVerification(
+            code,
+            `${relativeTestFile}/${record.owner} prove 需要至少一个 literal ID 与 inline callback`
+          );
+        }
+        const proofNode = unwrapExpression(node.arguments.at(-1));
+        if (
+          (!ts.isArrowFunction(proofNode) &&
+            !ts.isFunctionExpression(proofNode)) ||
+          isAsyncFunctionLike(proofNode)
+        ) {
+          failVerification(
+            code,
+            `${relativeTestFile}/${record.owner} prove 最后一个参数必须是同步 inline callback`
+          );
+        }
+        if (!callbackHasDirectExpectation(proofNode, checker)) {
+          failVerification(
+            code,
+            `${relativeTestFile}/${record.owner} prove callback 必须包含直接 Jest expect`
+          );
+        }
+        for (const [index, argument] of node.arguments.slice(0, -1).entries()) {
+          if (!ts.isStringLiteral(argument)) {
+            failVerification(
+              code,
+              `${relativeTestFile}/${record.owner} prove[${index}] 必须是 string literal ID`
+            );
+          }
+          record.proved.push(argument.text);
+        }
+      } else if (record && method === 'expectComplete') {
+        if (nearestFunctionLike(node) !== record.callback) {
+          failVerification(
+            code,
+            `${relativeTestFile}/${record.owner} expectComplete 必须直接属于 factory 所在 test/it callback`
+          );
+        }
+        if (node.arguments.length !== 0) {
+          failVerification(
+            code,
+            `${relativeTestFile}/${record.owner} expectComplete 不接受参数`
+          );
+        }
+        record.expectCompleteCalls += 1;
+      }
+    }
+    ts.forEachChild(node, collectProofCalls);
+  };
+  collectProofCalls(sourceFile);
+
+  assertExactSet(
+    `${relativeTestFile} ${proofLabel} owners`,
+    coverageRecords.map((record) => record.owner),
+    Object.keys(expectedIdsByOwner),
+    { duplicateCode: code, mismatchCode: code }
+  );
+  for (const record of coverageRecords) {
+    const expectedIds = expectedIdsByOwner[record.owner];
+    if (!expectedIds) {
       failVerification(
-        'SCENE_STATE_TEST_CONSUMPTION',
-        `${scene} 缺少对应 scene Jest 文件`
+        code,
+        `${relativeTestFile} 包含未独立锚定的 ${proofLabel} owner ${record.owner}`
       );
     }
-
-    const factorySymbols = new Set();
-    for (const statement of sourceFile.statements) {
-      if (
-        importModuleName(statement) !== './helpers/showcaseStateCoverage' ||
-        !ts.isImportDeclaration(statement)
-      ) {
-        continue;
-      }
-      const clause = statement.importClause;
-      if (
-        !clause ||
-        clause.isTypeOnly ||
-        !clause.namedBindings ||
-        !ts.isNamedImports(clause.namedBindings)
-      ) {
-        continue;
-      }
-      for (const specifier of clause.namedBindings.elements) {
-        if (
-          specifier.isTypeOnly ||
-          (specifier.propertyName?.text ?? specifier.name.text) !==
-            'createShowcaseStateCoverage'
-        ) {
-          continue;
-        }
-        const symbol = bindingAnalysis.checker.getSymbolAtLocation(
-          specifier.name
-        );
-        if (symbol) factorySymbols.add(symbol);
-      }
-    }
-
-    const coverageRecords = [];
-    const coverageBySymbol = new Map();
-    const collectFactories = (node) => {
-      if (
-        ts.isCallExpression(node) &&
-        ts.isIdentifier(node.expression) &&
-        factorySymbols.has(
-          bindingAnalysis.checker.getSymbolAtLocation(node.expression)
-        )
-      ) {
-        const [componentNode] = node.arguments;
-        if (
-          node.arguments.length !== 1 ||
-          !componentNode ||
-          !ts.isStringLiteral(componentNode) ||
-          !ts.isVariableDeclaration(node.parent) ||
-          node.parent.initializer !== node ||
-          !ts.isIdentifier(node.parent.name)
-        ) {
-          failVerification(
-            'SCENE_STATE_TEST_CONSUMPTION',
-            `${scene} 的 createShowcaseStateCoverage 必须直接赋给局部 const，且 component 使用 string literal`
-          );
-        }
-        const coverageSymbol = bindingAnalysis.checker.getSymbolAtLocation(
-          node.parent.name
-        );
-        if (!coverageSymbol) {
-          failVerification(
-            'SCENE_STATE_TEST_CONSUMPTION',
-            `${scene} 无法解析 ${componentNode.text} coverage binding`
-          );
-        }
-        const testCallback = executableJestCallback(
-          node,
-          bindingAnalysis.checker
-        );
-        if (!testCallback) {
-          failVerification(
-            'SCENE_STATE_TEST_CONSUMPTION',
-            `${scene}/${componentNode.text} coverage factory 必须位于顶层、未 skip 的 test/it callback`
-          );
-        }
-        const record = {
-          callback: testCallback,
-          component: componentNode.text,
-          consumed: [],
-          expectCompleteCalls: 0,
-        };
-        coverageRecords.push(record);
-        coverageBySymbol.set(coverageSymbol, record);
-      }
-      ts.forEachChild(node, collectFactories);
-    };
-    collectFactories(sourceFile);
-
-    const collectConsumption = (node) => {
-      if (
-        ts.isCallExpression(node) &&
-        ts.isPropertyAccessExpression(node.expression) &&
-        ts.isIdentifier(node.expression.expression)
-      ) {
-        const coverageSymbol = bindingAnalysis.checker.getSymbolAtLocation(
-          node.expression.expression
-        );
-        const record = coverageSymbol
-          ? coverageBySymbol.get(coverageSymbol)
-          : undefined;
-        if (record && node.expression.name.text === 'consume') {
-          if (nearestFunctionLike(node) !== record.callback) {
-            failVerification(
-              'SCENE_STATE_TEST_CONSUMPTION',
-              `${scene}/${record.component} consume 必须直接属于 coverage factory 所在 test/it callback`
-            );
-          }
-          for (const [index, argument] of node.arguments.entries()) {
-            if (!ts.isStringLiteral(argument)) {
-              failVerification(
-                'SCENE_STATE_TEST_CONSUMPTION',
-                `${scene}/${record.component} consume[${index}] 必须是 string literal`
-              );
-            }
-            record.consumed.push(argument.text);
-          }
-        } else if (record && node.expression.name.text === 'expectComplete') {
-          if (nearestFunctionLike(node) !== record.callback) {
-            failVerification(
-              'SCENE_STATE_TEST_CONSUMPTION',
-              `${scene}/${record.component} expectComplete 必须直接属于 coverage factory 所在 test/it callback`
-            );
-          }
-          if (node.arguments.length !== 0) {
-            failVerification(
-              'SCENE_STATE_TEST_CONSUMPTION',
-              `${scene}/${record.component} expectComplete 不接受参数`
-            );
-          }
-          record.expectCompleteCalls += 1;
-        }
-      }
-      ts.forEachChild(node, collectConsumption);
-    };
-    collectConsumption(sourceFile);
-
-    const expectedComponents = expectedComponentsByScene[scene];
     assertExactSet(
-      `${scene} scene Jest coverage components`,
-      coverageRecords.map((record) => record.component),
-      expectedComponents,
-      {
-        duplicateCode: 'SCENE_STATE_TEST_CONSUMPTION',
-        mismatchCode: 'SCENE_STATE_TEST_CONSUMPTION',
-      }
+      `${relativeTestFile}/${record.owner} proved IDs`,
+      record.proved,
+      expectedIds,
+      { duplicateCode: code, mismatchCode: code }
     );
-    for (const record of coverageRecords) {
-      const expectedStateIds = expectedStateIdsByComponent[record.component];
-      if (!expectedStateIds) {
-        failVerification(
-          'SCENE_STATE_TEST_CONSUMPTION',
-          `${scene} Jest coverage 包含未独立锚定组件 ${record.component}`
-        );
-      }
-      assertExactSet(
-        `${scene}/${record.component} consumed state ids`,
-        record.consumed,
-        expectedStateIds,
-        {
-          duplicateCode: 'SCENE_STATE_TEST_CONSUMPTION',
-          mismatchCode: 'SCENE_STATE_TEST_CONSUMPTION',
-        }
+    if (record.expectCompleteCalls !== 1) {
+      failVerification(
+        code,
+        `${relativeTestFile}/${record.owner} 必须恰好调用一次 expectComplete，实际=${record.expectCompleteCalls}`
       );
-      if (record.expectCompleteCalls !== 1) {
-        failVerification(
-          'SCENE_STATE_TEST_CONSUMPTION',
-          `${scene}/${record.component} 必须恰好调用一次 expectComplete，实际=${record.expectCompleteCalls}`
-        );
-      }
-      if (
-        !callbackHasDirectExpectation(record.callback, bindingAnalysis.checker)
-      ) {
-        failVerification(
-          'SCENE_STATE_TEST_CONSUMPTION',
-          `${scene}/${record.component} coverage callback 缺少直接执行的 Jest expect`
-        );
-      }
     }
   }
 }
 
-function verifyShowcaseStateContract(root, catalogEntries, sceneContexts) {
+function verifySceneStateTestProofs(root) {
+  for (const scene of expectedScenes) {
+    const expectedIdsByComponent = Object.fromEntries(
+      expectedComponentsByScene[scene].map((component) => [
+        component,
+        expectedStateIdsByComponent[component],
+      ])
+    );
+    verifyTypedProofCoverage({
+      root,
+      relativeTestFile: expectedSceneTestFiles[scene],
+      moduleName: './helpers/showcaseStateCoverage',
+      factoryName: 'createShowcaseStateCoverage',
+      expectedIdsByOwner: expectedIdsByComponent,
+      code: 'SCENE_STATE_TEST_CONSUMPTION',
+      proofLabel: `${scene} state proof`,
+    });
+  }
+}
+
+function verifyRuntimeApiTestProofs(root) {
+  assertExactSet(
+    'independent runtime proof IDs',
+    Object.values(expectedRuntimeProofIdsByOwner).flat(),
+    expectedRuntimeApis,
+    {
+      duplicateCode: 'RUNTIME_API_TEST_PROOF',
+      mismatchCode: 'RUNTIME_API_TEST_PROOF',
+    }
+  );
+  for (const [owner, runtimeIds] of Object.entries(
+    expectedRuntimeProofIdsByOwner
+  )) {
+    verifyTypedProofCoverage({
+      root,
+      relativeTestFile: expectedRuntimeProofTestFiles[owner],
+      moduleName: './helpers/showcaseRuntimeCoverage',
+      factoryName: 'createShowcaseRuntimeCoverage',
+      expectedIdsByOwner: { [owner]: runtimeIds },
+      code: 'RUNTIME_API_TEST_PROOF',
+      proofLabel: 'runtime API proof',
+    });
+  }
+}
+
+function verifyShowcaseStateContract(root, catalogEntries) {
   const stateEntries = readShowcaseStateContract(
     path.join(root, 'example/src/catalog/showcaseStateContract.ts')
   );
@@ -2510,7 +2237,6 @@ function verifyShowcaseStateContract(root, catalogEntries, sceneContexts) {
       }
     );
 
-    const jsxSpecimensByTarget = new Map();
     for (const state of componentStates) {
       if (!/^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$/u.test(state.id)) {
         failVerification(
@@ -2524,80 +2250,16 @@ function verifyShowcaseStateContract(root, catalogEntries, sceneContexts) {
           `${state.id} scene=${state.scene} 与 catalog scene=${catalogEntry.scene} 不一致`
         );
       }
-      const sceneContext = sceneContexts.get(state.scene);
-      if (!sceneContext) {
-        failVerification(
-          'COMPONENT_STATE_WITNESS',
-          `${state.id} 缺少 route-reachable scene context`
-        );
-      }
-      const callPaths = sceneRuntimeCallPaths(sceneContext);
       if (state.witness.rootHost && state.witness.rootHost !== component) {
         failVerification(
           'COMPONENT_STATE_WITNESS',
           `${state.id} rootHost=${state.witness.rootHost} 与 component=${component} 不一致`
         );
       }
-      if (state.witness.kind === 'jsx-props') {
-        const targetComponent = state.witness.targetComponent ?? component;
-        const targetKey = `${state.scene}:${targetComponent}`;
-        let actualSpecimens = jsxSpecimensByTarget.get(targetKey);
-        if (!actualSpecimens) {
-          actualSpecimens = expandBindingJsxSpecimens(
-            sceneContext.bindings.get(targetComponent)
-          );
-          jsxSpecimensByTarget.set(targetKey, actualSpecimens);
-        }
-        for (const requiredSpecimen of state.witness.specimens) {
-          const matches = actualSpecimens.filter(
-            (actual) =>
-              actual.testID === requiredSpecimen.testID &&
-              Object.entries(requiredSpecimen.props).every(
-                ([propertyName, expectedValue]) =>
-                  actual.readProp(propertyName) === expectedValue
-              ) &&
-              requiredSpecimen.presentProps.every((propertyName) =>
-                jsxHasAttribute(actual.node, propertyName)
-              )
-          );
-          if (matches.length !== 1) {
-            failVerification(
-              'COMPONENT_STATE_WITNESS',
-              `${state.id} 需要恰好一个 route-reachable ${targetComponent} witness: testID=${requiredSpecimen.testID} props=${JSON.stringify(requiredSpecimen.props)} presentProps=${requiredSpecimen.presentProps.join(',') || '无'}; actual=${matches.length}`
-            );
-          }
-        }
-      } else if (state.witness.kind === 'interaction') {
-        const targets = expandBindingJsxSpecimens(
-          sceneContext.bindings.get(state.witness.targetComponent)
-        ).filter(
-          (specimen) =>
-            specimen.testID === state.witness.testID &&
-            jsxHasAttribute(specimen.node, state.witness.handler)
-        );
-        const missingCalls = state.witness.calls.filter(
-          (callPath) => !callPaths.has(callPath)
-        );
-        if (targets.length !== 1 || missingCalls.length > 0) {
-          failVerification(
-            'COMPONENT_STATE_WITNESS',
-            `${state.id} interaction witness 失配: target=${state.witness.targetComponent}#${state.witness.testID} handler=${state.witness.handler} actual=${targets.length} missingCalls=${missingCalls.join(', ') || '无'}`
-          );
-        }
-      } else if (state.witness.kind === 'runtime-api') {
-        const missingCalls = state.witness.calls.filter(
-          (callPath) => !callPaths.has(callPath)
-        );
-        if (missingCalls.length > 0) {
-          failVerification(
-            'COMPONENT_STATE_WITNESS',
-            `${state.id} 缺少 binding-aware runtime API call: ${missingCalls.join(', ')}`
-          );
-        }
-      }
     }
   }
-  verifySceneStateTestConsumption(root);
+  verifySceneStateTestProofs(root);
+  verifyRuntimeApiTestProofs(root);
 }
 
 function verifySceneContract(root, entries, bindingAnalysis) {
@@ -2670,7 +2332,6 @@ function verifySceneContract(root, entries, bindingAnalysis) {
     failVerification('ROUTE_REGISTRY', 'Router 仍包含 PendingScene');
   }
 
-  const sceneContexts = new Map();
   for (const scene of expectedScenes) {
     const routeTarget = routeTargets.get(scene);
     if (
@@ -2726,25 +2387,6 @@ function verifySceneContract(root, entries, bindingAnalysis) {
       '@unif/react-native-design',
       bindingAnalysis
     );
-    const sceneActiveNodes = collectSceneExecutableNodes(
-      routeTargetFile,
-      routeTarget.importedName,
-      reachableSceneFiles,
-      bindingAnalysis
-    );
-    const bindings = filterRuntimeBindingsByActiveNodes(
-      allBindings,
-      sceneActiveNodes
-    );
-    const runtimeActiveNodes = new Set([
-      ...sceneActiveNodes,
-      ...collectModuleExecutableNodes(reachableSceneFiles, bindingAnalysis),
-    ]);
-    const runtimeBindings = filterRuntimeBindingsByActiveNodes(
-      allBindings,
-      runtimeActiveNodes
-    );
-    sceneContexts.set(scene, { bindings, reachableSceneFiles });
     const requiredComponents = entries
       .filter(
         (entry) =>
@@ -2754,12 +2396,12 @@ function verifySceneContract(root, entries, bindingAnalysis) {
       )
       .map((entry) => entry.id);
     const missingComponents = requiredComponents.filter(
-      (name) => (bindings.get(name)?.jsxUses ?? 0) === 0
+      (name) => (allBindings.get(name)?.jsxUses ?? 0) === 0
     );
     if (missingComponents.length) {
       failVerification(
         'SCENE_COMPONENT_CONSUMPTION',
-        `${scene} 未从 public root 真实消费主归属组件: ${missingComponents.join(', ')}`
+        `${scene} 缺少 route-reachable public-root 组件绑定: ${missingComponents.join(', ')}`
       );
     }
 
@@ -2780,27 +2422,27 @@ function verifySceneContract(root, entries, bindingAnalysis) {
             : [];
     const missingApis = requiredByScene.filter((name) =>
       requiredCallableApis.has(name)
-        ? (runtimeBindings.get(name)?.callUses ?? 0) === 0
-        : (runtimeBindings.get(name)?.uses ?? 0) === 0
+        ? (allBindings.get(name)?.callUses ?? 0) === 0
+        : (allBindings.get(name)?.uses ?? 0) === 0
     );
     if (missingApis.length) {
       failVerification(
         'SCENE_RUNTIME_API_CONSUMPTION',
-        `${scene} 未真实消费 required runtime API: ${missingApis.join(', ')}`
+        `${scene} 缺少 route-reachable required runtime API public binding: ${missingApis.join(', ')}`
       );
     }
     if (
       scene === 'business' &&
-      (runtimeBindings.get('useSvgId')?.callUses ?? 0) < 2
+      (allBindings.get('useSvgId')?.callUses ?? 0) < 2
     ) {
       failVerification(
         'SCENE_RUNTIME_API_CONSUMPTION',
-        'Business 必须至少两次调用 useSvgId 证明同屏唯一性'
+        'Business 必须保留至少两个 useSvgId public binding call site'
       );
     }
   }
 
-  verifyShowcaseStateContract(root, entries, sceneContexts);
+  verifyShowcaseStateContract(root, entries);
 
   const homePath = path.join(root, 'example/src/screens/HomeScreen.tsx');
   const homeAst = parseSource(homePath);

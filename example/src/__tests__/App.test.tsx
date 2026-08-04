@@ -4,7 +4,7 @@ import type {
   ReactTestRendererJSON,
   ReactTestRendererNode,
 } from 'react-test-renderer';
-import { ThemeProvider } from '@unif/react-native-design';
+import { ThemeProvider, normalizeFontScale } from '@unif/react-native-design';
 import App from '../App';
 import { AppProviders } from '../app/AppProviders';
 import {
@@ -13,6 +13,7 @@ import {
   installReducedMotionMock,
   restoreNativeMocks,
 } from './helpers/nativeMocks';
+import { createShowcaseRuntimeCoverage } from './helpers/showcaseRuntimeCoverage';
 
 jest.mock('react-native-safe-area-context', () => {
   const safeAreaMock = jest.requireActual(
@@ -183,10 +184,13 @@ test('根装配保持指定 Provider 顺序且两个 Host 各唯一一份', () =
 test('ThemeProvider 将 system 映射为 undefined，并窄化三档主题与四档字号', () => {
   installReducedMotionMock(false);
   render(<App />);
+  const runtimeCoverage = createShowcaseRuntimeCoverage('app');
 
-  expect(screen.UNSAFE_getByType(ThemeProvider).props).toMatchObject({
-    forceScheme: undefined,
-    fontScale: 1,
+  runtimeCoverage.prove('ThemeProvider', () => {
+    expect(screen.UNSAFE_getByType(ThemeProvider).props).toMatchObject({
+      forceScheme: undefined,
+      fontScale: 1,
+    });
   });
 
   fireEvent.press(screen.getByRole('button', { name: /基础能力与图标/ }));
@@ -225,6 +229,12 @@ test('ThemeProvider 将 system 映射为 undefined，并窄化三档主题与四
       screen.getByRole('tab', { name: label }).props.accessibilityState
     ).toMatchObject({ selected: true });
   }
+  runtimeCoverage.prove('normalizeFontScale', () => {
+    expect(
+      [undefined, Number.NaN, -1, 1, 1.25, 1.5, 2].map(normalizeFontScale)
+    ).toEqual([1, 1, 1, 1, 1.25, 1.5, 2]);
+  });
+  runtimeCoverage.expectComplete();
 });
 
 test('Home 只挂八个中文 scene 入口，并在前进与返回时互斥挂载 screen', () => {

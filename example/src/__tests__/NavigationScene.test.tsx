@@ -84,7 +84,14 @@ test('NavBar 展示三种 variant、action/display slot，DrawerHeader 保持纯
       accessibilityLabel: '演示更多动作',
     },
   });
-  navBarCoverage.consume('nav-bar.title', 'nav-bar.back');
+  navBarCoverage.prove('nav-bar.title', 'nav-bar.back', () => {
+    expect(
+      componentByTestID(NavBar, 'navigation-navbar-default').props
+    ).toMatchObject({
+      variant: 'default',
+      left: { icon: 'arrow-left', accessibilityLabel: '演示返回动作' },
+    });
+  });
   expect(
     componentByTestID(NavBar, 'navigation-navbar-brand').props.variant
   ).toBe('brand');
@@ -96,7 +103,11 @@ test('NavBar 展示三种 variant、action/display slot，DrawerHeader 保持纯
   expect(
     screen.getByText('最新结果：NavBar · 操作 · 更多动作已触发')
   ).toBeOnTheScreen();
-  navBarCoverage.consume('nav-bar.actions');
+  navBarCoverage.prove('nav-bar.actions', () => {
+    expect(
+      screen.getByText('最新结果：NavBar · 操作 · 更多动作已触发')
+    ).toBeOnTheScreen();
+  });
   expect(screen.getByText('展示槽')).toBeOnTheScreen();
   expect(
     screen.queryByRole('button', { name: '展示槽' })
@@ -108,7 +119,9 @@ test('NavBar 展示三种 variant、action/display slot，DrawerHeader 保持纯
         candidate.findAllByProps({ testID: 'navigation-screen' }).length > 0
     );
   expect(sceneSafeArea?.props.edges).toEqual(['top', 'left', 'right']);
-  navBarCoverage.consume('nav-bar.safe-area');
+  navBarCoverage.prove('nav-bar.safe-area', () => {
+    expect(sceneSafeArea?.props.edges).toEqual(['top', 'left', 'right']);
+  });
   navBarCoverage.expectComplete();
 
   expect(
@@ -117,19 +130,32 @@ test('NavBar 展示三种 variant、action/display slot，DrawerHeader 保持纯
     name: '王小明',
     subtitle: '华东区 · 管理员',
   });
-  drawerCoverage.consume('drawer-header.name', 'drawer-header.subtitle');
+  drawerCoverage.prove('drawer-header.name', 'drawer-header.subtitle', () => {
+    expect(
+      componentByTestID(DrawerHeader, 'navigation-drawer-header').props
+    ).toMatchObject({ name: '王小明', subtitle: '华东区 · 管理员' });
+  });
   expect(
     componentByTestID(DrawerHeader, 'navigation-drawer-header').props
   ).not.toHaveProperty('source');
   expect(
     screen.getByText('王', { includeHiddenElements: true })
   ).toBeOnTheScreen();
-  drawerCoverage.consume('drawer-header.initial-fallback');
+  drawerCoverage.prove('drawer-header.initial-fallback', () => {
+    expect(
+      screen.getByText('王', { includeHiddenElements: true })
+    ).toBeOnTheScreen();
+  });
   expect(
     componentByTestID(DrawerHeader, 'navigation-drawer-header-source').props
       .source
   ).toBe(LOCAL_DRAWER_SOURCE);
-  drawerCoverage.consume('drawer-header.avatar-source');
+  drawerCoverage.prove('drawer-header.avatar-source', () => {
+    expect(
+      componentByTestID(DrawerHeader, 'navigation-drawer-header-source').props
+        .source
+    ).toBe(LOCAL_DRAWER_SOURCE);
+  });
   expect(
     screen.queryByRole('button', { name: /王小明/ })
   ).not.toBeOnTheScreen();
@@ -205,7 +231,12 @@ test('Tabs 与 Segmented 使用 tablist/tab 的 selected、item disabled、globa
     selected: true,
     disabled: false,
   });
-  tabsCoverage.consume('tabs.selected');
+  tabsCoverage.prove('tabs.selected', () => {
+    expect(overview.props.accessibilityState).toMatchObject({
+      selected: true,
+      disabled: false,
+    });
+  });
   fireEvent.press(screen.getByRole('tab', { name: '详情' }));
   expect(
     screen.getByRole('tab', { name: '详情' }).props.accessibilityState
@@ -213,13 +244,21 @@ test('Tabs 与 Segmented 使用 tablist/tab 的 selected、item disabled、globa
   expect(
     screen.getByText('最新结果：Tabs · 选择 · 已选择详情')
   ).toBeOnTheScreen();
-  tabsCoverage.consume('tabs.change');
+  tabsCoverage.prove('tabs.change', () => {
+    expect(
+      screen.getByRole('tab', { name: '详情' }).props.accessibilityState
+    ).toMatchObject({ selected: true });
+  });
 
   const disabledTab = screen.getByRole('tab', { name: '禁用页签' });
   expect(disabledTab.props.accessibilityState).toMatchObject({
     disabled: true,
   });
-  tabsCoverage.consume('tabs.item-disabled');
+  tabsCoverage.prove('tabs.item-disabled', () => {
+    expect(disabledTab.props.accessibilityState).toMatchObject({
+      disabled: true,
+    });
+  });
   fireEvent.press(disabledTab);
   expect(
     screen.getByRole('tab', { name: '详情' }).props.accessibilityState
@@ -233,7 +272,11 @@ test('Tabs 与 Segmented 使用 tablist/tab 的 selected、item disabled、globa
       screen.getByRole('tab', { name: label }).props.accessibilityState
     ).toMatchObject({ disabled: true });
   }
-  tabsCoverage.consume('tabs.all-disabled');
+  tabsCoverage.prove('tabs.all-disabled', () => {
+    expect(
+      screen.getByRole('tab', { name: '全局乙' }).props.accessibilityState
+    ).toMatchObject({ disabled: true });
+  });
   tabsCoverage.expectComplete();
 
   expect(
@@ -242,12 +285,20 @@ test('Tabs 与 Segmented 使用 tablist/tab 的 selected、item disabled、globa
   expect(
     componentByTestID(Segmented, 'navigation-segmented-sm').props.size
   ).toBe('sm');
-  segmentedCoverage.consume('segmented.sizes');
+  segmentedCoverage.prove('segmented.sizes', () => {
+    expect(
+      componentByTestID(Segmented, 'navigation-segmented-sm').props.size
+    ).toBe('sm');
+  });
   fireEvent.press(screen.getByRole('tab', { name: '第二段' }));
   expect(
     screen.getByRole('tab', { name: '第二段' }).props.accessibilityState
   ).toMatchObject({ selected: true, disabled: false });
-  segmentedCoverage.consume('segmented.selected');
+  segmentedCoverage.prove('segmented.selected', () => {
+    expect(
+      screen.getByRole('tab', { name: '第二段' }).props.accessibilityState
+    ).toMatchObject({ selected: true, disabled: false });
+  });
   expect(
     screen.getByRole('tab', { name: '禁用分段' }).props.accessibilityState
   ).toMatchObject({ disabled: true });
@@ -267,7 +318,11 @@ test('Tabs 与 Segmented 使用 tablist/tab 的 selected、item disabled、globa
       screen.getByRole('tab', { name: label }).props.accessibilityState
     ).toMatchObject({ disabled: true });
   }
-  segmentedCoverage.consume('segmented.disabled');
+  segmentedCoverage.prove('segmented.disabled', () => {
+    expect(
+      screen.getByRole('tab', { name: '禁用分段' }).props.accessibilityState
+    ).toMatchObject({ disabled: true });
+  });
   segmentedCoverage.expectComplete();
 });
 
@@ -282,11 +337,21 @@ test('TabBar selected 与数字/99+ badge 进入可访问名称，选择仅更�
   expect(
     screen.getByRole('tab', { name: '首页' }).props.accessibilityState
   ).toMatchObject({ selected: true });
-  stateCoverage.consume('tab-bar.selected');
+  stateCoverage.prove('tab-bar.selected', () => {
+    expect(
+      screen.getByRole('tab', { name: '首页' }).props.accessibilityState
+    ).toMatchObject({ selected: true });
+  });
   expect(screen.getByRole('tab', { name: '消息,3条未读' })).toBeOnTheScreen();
-  stateCoverage.consume('tab-bar.numeric-badge');
+  stateCoverage.prove('tab-bar.numeric-badge', () => {
+    expect(screen.getByRole('tab', { name: '消息,3条未读' })).toBeOnTheScreen();
+  });
   expect(screen.getByRole('tab', { name: '任务,99+条未读' })).toBeOnTheScreen();
-  stateCoverage.consume('tab-bar.overflow-badge', 'tab-bar.a11y');
+  stateCoverage.prove('tab-bar.overflow-badge', 'tab-bar.a11y', () => {
+    expect(
+      screen.getByRole('tab', { name: '任务,99+条未读' })
+    ).toBeOnTheScreen();
+  });
 
   fireEvent.press(screen.getByRole('tab', { name: '消息,3条未读' }));
   expect(

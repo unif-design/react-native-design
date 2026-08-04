@@ -86,44 +86,49 @@ test('Actions 展示 Button 全部 variant、size、block、左右图标与真�
   const stateCoverage = createShowcaseStateCoverage('Button');
 
   expect(screen.getByTestId('actions-screen')).toBeOnTheScreen();
-  for (const variant of buttonVariants) {
+  stateCoverage.prove('button.variants', () => {
+    for (const variant of buttonVariants) {
+      expect(
+        componentByTestID(Button, `actions-button-variant-${variant}`).props
+          .variant
+      ).toBe(variant);
+    }
+  });
+  stateCoverage.prove('button.sizes', () => {
+    for (const size of buttonSizes) {
+      expect(
+        componentByTestID(Button, `actions-button-size-${size}`).props.size
+      ).toBe(size);
+    }
+  });
+  stateCoverage.prove('button.block', 'button.leading-trailing-icons', () => {
     expect(
-      componentByTestID(Button, `actions-button-variant-${variant}`).props
-        .variant
-    ).toBe(variant);
-  }
-  stateCoverage.consume('button.variants');
-  for (const size of buttonSizes) {
-    expect(
-      componentByTestID(Button, `actions-button-size-${size}`).props.size
-    ).toBe(size);
-  }
-  stateCoverage.consume('button.sizes');
-  expect(componentByTestID(Button, 'actions-button-icons').props).toMatchObject(
-    {
+      componentByTestID(Button, 'actions-button-icons').props
+    ).toMatchObject({
       block: true,
       leftIcon: 'check',
       rightIcon: 'arrow-right',
-    }
-  );
-  stateCoverage.consume('button.block', 'button.leading-trailing-icons');
+    });
+  });
 
   const disabledSpecimen = componentByTestID(Button, 'actions-button-disabled');
   const loadingSpecimen = componentByTestID(Button, 'actions-button-loading');
   const disabled = screen.getByRole('button', { name: '禁用按钮' });
   const loading = screen.getByRole('button', { name: '加载按钮' });
-  expect(disabledSpecimen.props.disabled).toBe(true);
-  expect(disabled.props.accessibilityState).toMatchObject({
-    disabled: true,
-    busy: false,
+  stateCoverage.prove('button.disabled', () => {
+    expect(disabledSpecimen.props.disabled).toBe(true);
+    expect(disabled.props.accessibilityState).toMatchObject({
+      disabled: true,
+      busy: false,
+    });
   });
-  stateCoverage.consume('button.disabled');
-  expect(loadingSpecimen.props.loading).toBe(true);
-  expect(loading.props.accessibilityState).toMatchObject({
-    disabled: true,
-    busy: true,
+  stateCoverage.prove('button.loading', () => {
+    expect(loadingSpecimen.props.loading).toBe(true);
+    expect(loading.props.accessibilityState).toMatchObject({
+      disabled: true,
+      busy: true,
+    });
   });
-  stateCoverage.consume('button.loading');
   fireEvent.press(disabled);
   fireEvent.press(loading);
   expect(screen.queryByTestId('result-latest')).not.toBeOnTheScreen();
@@ -174,40 +179,45 @@ test('IconButton 覆盖公开 variant/size/color 且每个实例都有中文可�
     .filter((node) =>
       String(node.props.testID).startsWith('actions-icon-button-')
     );
-  expect(
-    specimens
-      .filter((node) => String(node.props.testID).includes('variant'))
-      .map((node) => node.props.variant)
-  ).toEqual(iconButtonVariants);
-  stateCoverage.consume('icon-button.variants');
-  expect(
-    specimens
-      .filter((node) => String(node.props.testID).includes('size'))
-      .map((node) => node.props.size)
-  ).toEqual(buttonSizes);
-  stateCoverage.consume('icon-button.sizes');
-  for (const specimen of specimens) {
-    expect(specimen.props.accessibilityLabel).toEqual(expect.any(String));
-    expect(specimen.props.accessibilityLabel.trim()).not.toBe('');
-    expect(specimen.props.accessibilityLabel).toMatch(
-      /^[\u3400-\u9fff，。：、]+$/
-    );
-  }
-  stateCoverage.consume('icon-button.a11y-name');
+  stateCoverage.prove('icon-button.variants', () => {
+    expect(
+      specimens
+        .filter((node) => String(node.props.testID).includes('variant'))
+        .map((node) => node.props.variant)
+    ).toEqual(iconButtonVariants);
+  });
+  stateCoverage.prove('icon-button.sizes', () => {
+    expect(
+      specimens
+        .filter((node) => String(node.props.testID).includes('size'))
+        .map((node) => node.props.size)
+    ).toEqual(buttonSizes);
+  });
+  stateCoverage.prove('icon-button.a11y-name', () => {
+    for (const specimen of specimens) {
+      expect(specimen.props.accessibilityLabel).toEqual(expect.any(String));
+      expect(specimen.props.accessibilityLabel.trim()).not.toBe('');
+      expect(specimen.props.accessibilityLabel).toMatch(
+        /^[\u3400-\u9fff，。：、]+$/
+      );
+    }
+  });
   expect(
     componentByTestID(IconButton, 'actions-icon-button-color').props.color
   ).toEqual(expect.any(String));
 
-  expect(
-    screen.getByRole('button', { name: '禁用图标按钮' }).props
-      .accessibilityState
-  ).toMatchObject({ disabled: true, busy: false });
-  stateCoverage.consume('icon-button.disabled');
-  expect(
-    screen.getByRole('button', { name: '加载图标按钮' }).props
-      .accessibilityState
-  ).toMatchObject({ disabled: true, busy: true });
-  stateCoverage.consume('icon-button.loading');
+  stateCoverage.prove('icon-button.disabled', () => {
+    expect(
+      screen.getByRole('button', { name: '禁用图标按钮' }).props
+        .accessibilityState
+    ).toMatchObject({ disabled: true, busy: false });
+  });
+  stateCoverage.prove('icon-button.loading', () => {
+    expect(
+      screen.getByRole('button', { name: '加载图标按钮' }).props
+        .accessibilityState
+    ).toMatchObject({ disabled: true, busy: true });
+  });
   fireEvent.press(screen.getByRole('button', { name: '禁用图标按钮' }));
   fireEvent.press(screen.getByRole('button', { name: '加载图标按钮' }));
   expect(screen.queryByTestId('result-latest')).not.toBeOnTheScreen();
@@ -223,16 +233,20 @@ test('Chip 覆盖静态、selected、disabled、busy 与前后插槽，只有真
   expect(
     screen.queryByRole('button', { name: '静态标签' })
   ).not.toBeOnTheScreen();
-  expect(
-    screen.getByRole('button', { name: '可选择标签' }).props.accessibilityState
-  ).toMatchObject({ selected: false, disabled: false, busy: false });
-  stateCoverage.consume('chip.unselected');
+  stateCoverage.prove('chip.unselected', () => {
+    expect(
+      screen.getByRole('button', { name: '可选择标签' }).props
+        .accessibilityState
+    ).toMatchObject({ selected: false, disabled: false, busy: false });
+  });
 
   fireEvent.press(screen.getByRole('button', { name: '可选择标签' }));
-  expect(
-    screen.getByRole('button', { name: '可选择标签' }).props.accessibilityState
-  ).toMatchObject({ selected: true });
-  stateCoverage.consume('chip.selected');
+  stateCoverage.prove('chip.selected', () => {
+    expect(
+      screen.getByRole('button', { name: '可选择标签' }).props
+        .accessibilityState
+    ).toMatchObject({ selected: true });
+  });
   expect(
     screen.getByText('最新结果：Chip · 选择 · 标签已选中')
   ).toBeOnTheScreen();
@@ -242,11 +256,12 @@ test('Chip 覆盖静态、selected、disabled、busy 与前后插槽，只有真
   const busyDisabled = screen.getByRole('button', {
     name: '禁用处理中标签',
   });
-  expect(disabled.props.accessibilityState).toMatchObject({
-    disabled: true,
-    busy: false,
+  stateCoverage.prove('chip.disabled', () => {
+    expect(disabled.props.accessibilityState).toMatchObject({
+      disabled: true,
+      busy: false,
+    });
   });
-  stateCoverage.consume('chip.disabled');
   expect(busy.props.accessibilityState).toMatchObject({
     disabled: true,
     busy: true,
@@ -266,11 +281,12 @@ test('Chip 覆盖静态、selected、disabled、busy 与前后插槽，只有真
     .find((node) => node.props.label === '禁用处理中标签');
   expect(busyDisabledSpecimen).toBeDefined();
   expect(busyDisabledSpecimen?.findAllByType(Spinner)).toHaveLength(1);
-  expect(componentByTestID(Chip, 'actions-chip-slots').props).toMatchObject({
-    leading: expect.anything(),
-    trailing: expect.anything(),
+  stateCoverage.prove('chip.icon-slots', () => {
+    expect(componentByTestID(Chip, 'actions-chip-slots').props).toMatchObject({
+      leading: expect.anything(),
+      trailing: expect.anything(),
+    });
   });
-  stateCoverage.consume('chip.icon-slots');
   stateCoverage.expectComplete();
 });
 
@@ -283,40 +299,45 @@ test('Tag 展示 6×2 纯展示矩阵，StatusDot 展示 4×2 且只使用中文
   const tagSpecimens = screen
     .UNSAFE_getAllByType(Tag)
     .filter((node) => String(node.props.testID).startsWith('actions-tag-'));
-  expect(tagSpecimens).toHaveLength(tagVariants.length * tagSizes.length);
-  expect(
-    tagSpecimens.map((node) => [node.props.variant, node.props.size])
-  ).toEqual(
-    tagVariants.flatMap((variant) => tagSizes.map((size) => [variant, size]))
-  );
-  tagStateCoverage.consume('tag.variants', 'tag.sizes');
+  tagStateCoverage.prove('tag.variants', 'tag.sizes', () => {
+    expect(tagSpecimens).toHaveLength(tagVariants.length * tagSizes.length);
+    expect(
+      tagSpecimens.map((node) => [node.props.variant, node.props.size])
+    ).toEqual(
+      tagVariants.flatMap((variant) => tagSizes.map((size) => [variant, size]))
+    );
+  });
   tagStateCoverage.expectComplete();
 
   const statusSpecimens = screen
     .UNSAFE_getAllByType(StatusDot)
     .filter((node) => String(node.props.testID).startsWith('actions-status-'));
-  expect(statusSpecimens).toHaveLength(statuses.length * statusTones.length);
-  expect(
-    statusSpecimens.map((node) => [node.props.status, node.props.tone])
-  ).toEqual(
-    statuses.flatMap((status) => statusTones.map((tone) => [status, tone]))
-  );
-  statusStateCoverage.consume('status-dot.statuses', 'status-dot.tones');
-  for (const specimen of statusSpecimens) {
-    expect(specimen.props.accessibilityLabel).toMatch(
-      /^[\u3400-\u9fff，。：、]+$/
+  statusStateCoverage.prove('status-dot.statuses', 'status-dot.tones', () => {
+    expect(statusSpecimens).toHaveLength(statuses.length * statusTones.length);
+    expect(
+      statusSpecimens.map((node) => [node.props.status, node.props.tone])
+    ).toEqual(
+      statuses.flatMap((status) => statusTones.map((tone) => [status, tone]))
     );
-  }
-  expect(
-    componentByTestID(StatusDot, 'actions-dot-size-18').props.accessibilityLabel
-  ).toBe('中尺寸进行状态');
-  statusStateCoverage.consume('status-dot.a11y-name');
-  expect(
-    [12, 18, 24].map(
-      (size) =>
-        componentByTestID(StatusDot, `actions-dot-size-${size}`).props.size
-    )
-  ).toEqual([12, 18, 24]);
-  statusStateCoverage.consume('status-dot.sizes');
+  });
+  statusStateCoverage.prove('status-dot.a11y-name', () => {
+    for (const specimen of statusSpecimens) {
+      expect(specimen.props.accessibilityLabel).toMatch(
+        /^[\u3400-\u9fff，。：、]+$/
+      );
+    }
+    expect(
+      componentByTestID(StatusDot, 'actions-dot-size-18').props
+        .accessibilityLabel
+    ).toBe('中尺寸进行状态');
+  });
+  statusStateCoverage.prove('status-dot.sizes', () => {
+    expect(
+      [12, 18, 24].map(
+        (size) =>
+          componentByTestID(StatusDot, `actions-dot-size-${size}`).props.size
+      )
+    ).toEqual([12, 18, 24]);
+  });
   statusStateCoverage.expectComplete();
 });

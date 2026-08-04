@@ -112,7 +112,12 @@ test('Input 与 Textarea 分别保持 controlled/uncontrolled mode，并覆盖�
     },
   });
   expect(controlledInput).not.toHaveProperty('defaultValue');
-  inputCoverage.consume('input.controlled', 'input.action-slot');
+  inputCoverage.prove('input.controlled', 'input.action-slot', () => {
+    expect(controlledInput).toMatchObject({
+      value: '',
+      trailing: { kind: 'action', accessibilityLabel: '清除姓名' },
+    });
+  });
   expect(componentByTestID(Input, 'forms-input-idle').props).toMatchObject({
     defaultValue: '',
     trailing: { kind: 'text', value: '选填' },
@@ -120,7 +125,12 @@ test('Input 与 Textarea 分别保持 controlled/uncontrolled mode，并覆盖�
   expect(componentByTestID(Input, 'forms-input-idle').props).not.toHaveProperty(
     'value'
   );
-  inputCoverage.consume('input.uncontrolled', 'input.display-slots');
+  inputCoverage.prove('input.uncontrolled', 'input.display-slots', () => {
+    expect(componentByTestID(Input, 'forms-input-idle').props).toMatchObject({
+      defaultValue: '',
+      trailing: { kind: 'text', value: '选填' },
+    });
+  });
   const uncontrolledTextarea = componentByTestID(
     Textarea,
     'forms-textarea-uncontrolled'
@@ -130,11 +140,20 @@ test('Input 与 Textarea 分别保持 controlled/uncontrolled mode，并覆盖�
     leading: { kind: 'text', value: '备注' },
   });
   expect(uncontrolledTextarea).not.toHaveProperty('value');
-  textareaCoverage.consume('textarea.uncontrolled');
+  textareaCoverage.prove('textarea.uncontrolled', () => {
+    expect(uncontrolledTextarea).toMatchObject({
+      defaultValue: '',
+      leading: { kind: 'text', value: '备注' },
+    });
+  });
   expect(
     componentByTestID(Textarea, 'forms-textarea-max-length').props
   ).toMatchObject({ value: '', maxLength: 40 });
-  textareaCoverage.consume('textarea.controlled', 'textarea.max-length');
+  textareaCoverage.prove('textarea.controlled', 'textarea.max-length', () => {
+    expect(
+      componentByTestID(Textarea, 'forms-textarea-max-length').props
+    ).toMatchObject({ value: '', maxLength: 40 });
+  });
 
   const textareaInstance = componentByTestID(
     Textarea,
@@ -172,12 +191,20 @@ test('Input 与 Textarea 分别保持 controlled/uncontrolled mode，并覆盖�
   expect(componentByTestID(Input, 'forms-input-error').props.error).toBe(
     '字段格式不正确'
   );
-  inputCoverage.consume('input.error');
+  inputCoverage.prove('input.error', () => {
+    expect(componentByTestID(Input, 'forms-input-error').props.error).toBe(
+      '字段格式不正确'
+    );
+  });
   expect(screen.getByText('字段格式不正确')).toBeOnTheScreen();
   expect(
     screen.getByTestId('forms-input-disabled-input').props.accessibilityState
   ).toMatchObject({ disabled: true });
-  inputCoverage.consume('input.disabled');
+  inputCoverage.prove('input.disabled', () => {
+    expect(
+      screen.getByTestId('forms-input-disabled-input').props.accessibilityState
+    ).toMatchObject({ disabled: true });
+  });
   expect(
     screen.getByTestId('forms-input-readonly-input').props.accessibilityState
   ).toMatchObject({ disabled: true });
@@ -187,11 +214,20 @@ test('Input 与 Textarea 分别保持 controlled/uncontrolled mode，并覆盖�
   expect(componentByTestID(Textarea, 'forms-textarea-error').props.error).toBe(
     '备注需要补充'
   );
-  textareaCoverage.consume('textarea.error');
+  textareaCoverage.prove('textarea.error', () => {
+    expect(
+      componentByTestID(Textarea, 'forms-textarea-error').props.error
+    ).toBe('备注需要补充');
+  });
   expect(
     screen.getByTestId('forms-textarea-disabled-input').props.accessibilityState
   ).toMatchObject({ disabled: true });
-  textareaCoverage.consume('textarea.disabled');
+  textareaCoverage.prove('textarea.disabled', () => {
+    expect(
+      screen.getByTestId('forms-textarea-disabled-input').props
+        .accessibilityState
+    ).toMatchObject({ disabled: true });
+  });
   expect(
     componentByTestID(Textarea, 'forms-textarea-readonly').props.editable
   ).toBe(false);
@@ -309,23 +345,41 @@ test('PasswordInput 显隐和 Search 清除/提交只记录长度，不泄露用
   expect(componentByTestID(PasswordInput, 'forms-password').props.value).toBe(
     password
   );
-  passwordCoverage.consume('password-input.controlled');
+  passwordCoverage.prove('password-input.controlled', () => {
+    expect(componentByTestID(PasswordInput, 'forms-password').props.value).toBe(
+      password
+    );
+  });
   expect(screen.getByTestId('forms-password-input').props.secureTextEntry).toBe(
     true
   );
-  passwordCoverage.consume('password-input.hidden');
+  passwordCoverage.prove('password-input.hidden', () => {
+    expect(
+      screen.getByTestId('forms-password-input').props.secureTextEntry
+    ).toBe(true);
+  });
   fireEvent.press(screen.getByTestId('forms-password-trailing'));
   expect(screen.getByTestId('forms-password-input').props.secureTextEntry).toBe(
     false
   );
-  passwordCoverage.consume('password-input.visible');
+  passwordCoverage.prove('password-input.visible', () => {
+    expect(
+      screen.getByTestId('forms-password-input').props.secureTextEntry
+    ).toBe(false);
+  });
   fireEvent.press(screen.getByRole('button', { name: '记录密码状态' }));
   expect(
     screen.getByText(
       `最新结果：PasswordInput · 检查 · 已输入 ${password.length} 个字符`
     )
   ).toBeOnTheScreen();
-  passwordCoverage.consume('password-input.safe-result');
+  passwordCoverage.prove('password-input.safe-result', () => {
+    expect(
+      screen.getByText(
+        `最新结果：PasswordInput · 检查 · 已输入 ${password.length} 个字符`
+      )
+    ).toBeOnTheScreen();
+  });
   for (const testID of [
     'forms-password-disabled-trailing',
     'forms-password-readonly-trailing',
@@ -341,7 +395,12 @@ test('PasswordInput 显隐和 Search 清除/提交只记录长度，不泄露用
   expect(
     screen.getByTestId('forms-password-disabled-input').props.accessibilityState
   ).toMatchObject({ disabled: true });
-  passwordCoverage.consume('password-input.disabled');
+  passwordCoverage.prove('password-input.disabled', () => {
+    expect(
+      screen.getByTestId('forms-password-disabled-input').props
+        .accessibilityState
+    ).toMatchObject({ disabled: true });
+  });
   expect(
     screen.getByTestId('forms-password-readonly-input').props.secureTextEntry
   ).toBe(true);
@@ -351,21 +410,34 @@ test('PasswordInput 显隐和 Search 清除/提交只记录长度，不泄露用
   expect(
     componentByTestID(PasswordInput, 'forms-password-error').props.error
   ).toBe('密码格式不正确');
-  passwordCoverage.consume('password-input.error');
+  passwordCoverage.prove('password-input.error', () => {
+    expect(
+      componentByTestID(PasswordInput, 'forms-password-error').props.error
+    ).toBe('密码格式不正确');
+  });
   passwordCoverage.expectComplete();
 
   expect(componentByTestID(Search, 'forms-search').props).toMatchObject({
     value: '',
     onChangeText: expect.any(Function),
   });
-  searchCoverage.consume('search.controlled');
+  searchCoverage.prove('search.controlled', () => {
+    expect(componentByTestID(Search, 'forms-search').props).toMatchObject({
+      value: '',
+      onChangeText: expect.any(Function),
+    });
+  });
   expect(
     componentByTestID(Search, 'forms-search-uncontrolled').props
   ).toMatchObject({ defaultValue: '' });
   expect(
     componentByTestID(Search, 'forms-search-uncontrolled').props
   ).not.toHaveProperty('value');
-  searchCoverage.consume('search.uncontrolled');
+  searchCoverage.prove('search.uncontrolled', () => {
+    expect(
+      componentByTestID(Search, 'forms-search-uncontrolled').props
+    ).toMatchObject({ defaultValue: '' });
+  });
 
   fireEvent.changeText(screen.getByTestId('forms-search-input'), searchTerm);
   fireEvent(screen.getByTestId('forms-search-input'), 'submitEditing', {
@@ -376,17 +448,29 @@ test('PasswordInput 显隐和 Search 清除/提交只记录长度，不泄露用
       `最新结果：Search · 提交 · 已提交 ${searchTerm.length} 个字符`
     )
   ).toBeOnTheScreen();
-  searchCoverage.consume('search.submit');
+  searchCoverage.prove('search.submit', () => {
+    expect(
+      screen.getByText(
+        `最新结果：Search · 提交 · 已提交 ${searchTerm.length} 个字符`
+      )
+    ).toBeOnTheScreen();
+  });
   fireEvent.press(screen.getByRole('button', { name: '清除搜索内容' }));
   expect(componentByTestID(Search, 'forms-search').props.value).toBe('');
-  searchCoverage.consume('search.clear');
+  searchCoverage.prove('search.clear', () => {
+    expect(componentByTestID(Search, 'forms-search').props.value).toBe('');
+  });
   expect(
     componentByTestID(Search, 'forms-search-disabled').props.disabled
   ).toBe(true);
   expect(
     screen.getByTestId('forms-search-disabled-input').props.accessibilityState
   ).toMatchObject({ disabled: true });
-  searchCoverage.consume('search.disabled');
+  searchCoverage.prove('search.disabled', () => {
+    expect(
+      screen.getByTestId('forms-search-disabled-input').props.accessibilityState
+    ).toMatchObject({ disabled: true });
+  });
   expect(
     screen.queryByRole('button', { name: '清除搜索内容' })
   ).not.toBeOnTheScreen();
@@ -421,12 +505,22 @@ test('Checkbox、Radio 与 Switch 公开 checked/disabled 语义真实更新，�
     checked: false,
     disabled: false,
   });
-  checkboxCoverage.consume('checkbox.unchecked', 'checkbox.a11y-state');
+  checkboxCoverage.prove('checkbox.unchecked', 'checkbox.a11y-state', () => {
+    expect(checkbox.props.accessibilityState).toMatchObject({
+      checked: false,
+      disabled: false,
+    });
+  });
   fireEvent.press(checkbox);
   expect(
     screen.getByRole('checkbox', { name: '接收提醒' }).props.accessibilityState
   ).toMatchObject({ checked: true });
-  checkboxCoverage.consume('checkbox.checked');
+  checkboxCoverage.prove('checkbox.checked', () => {
+    expect(
+      screen.getByRole('checkbox', { name: '接收提醒' }).props
+        .accessibilityState
+    ).toMatchObject({ checked: true });
+  });
   expect(
     screen.getByText('最新结果：Checkbox · 切换 · 提醒已开启')
   ).toBeOnTheScreen();
@@ -437,7 +531,11 @@ test('Checkbox、Radio 与 Switch 公开 checked/disabled 语义真实更新，�
   expect(disabledCheckbox.props.accessibilityState).toMatchObject({
     disabled: true,
   });
-  checkboxCoverage.consume('checkbox.disabled');
+  checkboxCoverage.prove('checkbox.disabled', () => {
+    expect(disabledCheckbox.props.accessibilityState).toMatchObject({
+      disabled: true,
+    });
+  });
   fireEvent.press(disabledCheckbox);
   expect(
     screen.getByText('最新结果：Checkbox · 切换 · 提醒已开启')
@@ -448,15 +546,28 @@ test('Checkbox、Radio 与 Switch 公开 checked/disabled 语义真实更新，�
     accessibilityRole: 'radiogroup',
     accessibilityLabel: '联系偏好',
   });
-  radioCoverage.consume('radio.group');
+  radioCoverage.prove('radio.group', () => {
+    expect(screen.getByTestId('forms-radio-group').props).toMatchObject({
+      accessibilityRole: 'radiogroup',
+      accessibilityLabel: '联系偏好',
+    });
+  });
   expect(
     screen.getByRole('radio', { name: '电话' }).props.accessibilityState
   ).toMatchObject({ checked: true, disabled: false });
-  radioCoverage.consume('radio.checked');
+  radioCoverage.prove('radio.checked', () => {
+    expect(
+      screen.getByRole('radio', { name: '电话' }).props.accessibilityState
+    ).toMatchObject({ checked: true, disabled: false });
+  });
   expect(
     screen.getByRole('radio', { name: '短信' }).props.accessibilityState
   ).toMatchObject({ checked: false });
-  radioCoverage.consume('radio.unchecked');
+  radioCoverage.prove('radio.unchecked', () => {
+    expect(
+      screen.getByRole('radio', { name: '短信' }).props.accessibilityState
+    ).toMatchObject({ checked: false });
+  });
   fireEvent.press(screen.getByRole('radio', { name: '短信' }));
   expect(
     screen.getByRole('radio', { name: '短信' }).props.accessibilityState
@@ -465,7 +576,11 @@ test('Checkbox、Radio 与 Switch 公开 checked/disabled 语义真实更新，�
   expect(disabledRadio.props.accessibilityState).toMatchObject({
     disabled: true,
   });
-  radioCoverage.consume('radio.disabled');
+  radioCoverage.prove('radio.disabled', () => {
+    expect(disabledRadio.props.accessibilityState).toMatchObject({
+      disabled: true,
+    });
+  });
   fireEvent.press(disabledRadio);
   expect(
     screen.getByRole('radio', { name: '短信' }).props.accessibilityState
@@ -480,16 +595,29 @@ test('Checkbox、Radio 与 Switch 公开 checked/disabled 语义真实更新，�
     checked: false,
     disabled: false,
   });
-  switchCoverage.consume('switch.off');
+  switchCoverage.prove('switch.off', () => {
+    expect(switchControl.props.accessibilityState).toMatchObject({
+      checked: false,
+      disabled: false,
+    });
+  });
   fireEvent.press(switchControl);
   expect(
     screen.getByRole('switch', { name: '同步草稿' }).props.accessibilityState
   ).toMatchObject({ checked: true, disabled: false });
-  switchCoverage.consume('switch.on');
+  switchCoverage.prove('switch.on', () => {
+    expect(
+      screen.getByRole('switch', { name: '同步草稿' }).props.accessibilityState
+    ).toMatchObject({ checked: true, disabled: false });
+  });
   expect(
     screen.getByRole('switch', { name: '禁用开关' }).props.accessibilityState
   ).toMatchObject({ checked: true, disabled: true });
-  switchCoverage.consume('switch.disabled');
+  switchCoverage.prove('switch.disabled', () => {
+    expect(
+      screen.getByRole('switch', { name: '禁用开关' }).props.accessibilityState
+    ).toMatchObject({ checked: true, disabled: true });
+  });
   fireEvent.press(screen.getByRole('switch', { name: '禁用开关' }));
   expect(
     screen.getByText('最新结果：Switch · 切换 · 草稿同步已开启')
@@ -509,7 +637,11 @@ test('Stepper 覆盖尺寸、步长、边界、零范围与禁用语义，只保
     step: 2,
     size: 'md',
   });
-  stateCoverage.consume('stepper.min');
+  stateCoverage.prove('stepper.min', () => {
+    expect(
+      componentByTestID(Stepper, 'forms-stepper-main').props
+    ).toMatchObject({ value: 0, min: 0, max: 10, step: 2 });
+  });
   expect(
     screen.getByRole('button', { name: '数量，减少' }).props.accessibilityState
   ).toMatchObject({ disabled: true });
@@ -517,7 +649,11 @@ test('Stepper 覆盖尺寸、步长、边界、零范围与禁用语义，只保
   expect(
     screen.getByRole('adjustable', { name: '数量' }).props.accessibilityValue
   ).toMatchObject({ min: 0, max: 10, now: 2 });
-  stateCoverage.consume('stepper.mid');
+  stateCoverage.prove('stepper.mid', () => {
+    expect(
+      screen.getByRole('adjustable', { name: '数量' }).props.accessibilityValue
+    ).toMatchObject({ min: 0, max: 10, now: 2 });
+  });
   const stepperResult = screen
     .getByTestId('result-latest')
     .findAllByType(Text)
@@ -527,12 +663,21 @@ test('Stepper 覆盖尺寸、步长、边界、零范围与禁用语义，只保
   expect(componentByTestID(Stepper, 'forms-stepper-small').props.size).toBe(
     'sm'
   );
-  stateCoverage.consume('stepper.sizes');
+  stateCoverage.prove('stepper.sizes', () => {
+    expect(componentByTestID(Stepper, 'forms-stepper-small').props.size).toBe(
+      'sm'
+    );
+  });
   expect(
     screen.getByRole('button', { name: '最大值，增加' }).props
       .accessibilityState
   ).toMatchObject({ disabled: true });
-  stateCoverage.consume('stepper.max');
+  stateCoverage.prove('stepper.max', () => {
+    expect(
+      screen.getByRole('button', { name: '最大值，增加' }).props
+        .accessibilityState
+    ).toMatchObject({ disabled: true });
+  });
   expect(
     screen.getByRole('adjustable', { name: '零范围' }).props.accessibilityState
   ).toMatchObject({ disabled: true });
@@ -540,7 +685,12 @@ test('Stepper 覆盖尺寸、步长、边界、零范围与禁用语义，只保
     screen.getByRole('adjustable', { name: '禁用数量' }).props
       .accessibilityState
   ).toMatchObject({ disabled: true });
-  stateCoverage.consume('stepper.disabled');
+  stateCoverage.prove('stepper.disabled', () => {
+    expect(
+      screen.getByRole('adjustable', { name: '禁用数量' }).props
+        .accessibilityState
+    ).toMatchObject({ disabled: true });
+  });
   fireEvent.press(screen.getByRole('button', { name: '禁用数量，增加' }));
   expect(
     screen.getByRole('adjustable', { name: '禁用数量' }).props
@@ -566,39 +716,61 @@ test('Form/FormGroup/FormRow 真实组合 required 与单一 live error，child 
   const multiGroupForm = componentByTestID(Form, 'forms-form');
   expect(multiGroupForm.findAllByType(FormGroup)).toHaveLength(2);
   expect(multiGroupForm.findAllByType(FormRow)).toHaveLength(3);
-  formCoverage.consume('form.multi-group');
+  formCoverage.prove('form.multi-group', () => {
+    expect(multiGroupForm.findAllByType(FormGroup)).toHaveLength(2);
+  });
   const singleGroupForm = componentByTestID(Form, 'forms-form-single');
   expect(singleGroupForm.findAllByType(FormGroup)).toHaveLength(1);
   expect(singleGroupForm.findAllByType(FormRow)).toHaveLength(1);
-  formCoverage.consume('form.single-group');
+  formCoverage.prove('form.single-group', () => {
+    expect(singleGroupForm.findAllByType(FormGroup)).toHaveLength(1);
+  });
   formCoverage.expectComplete();
 
   expect(componentByTestID(FormGroup, 'forms-form-group').props.label).toBe(
     '客户资料'
   );
-  groupCoverage.consume('form-group.labelled');
+  groupCoverage.prove('form-group.labelled', () => {
+    expect(componentByTestID(FormGroup, 'forms-form-group').props.label).toBe(
+      '客户资料'
+    );
+  });
   expect(
     componentByTestID(FormGroup, 'forms-form-group-secondary').props.label
   ).toBeUndefined();
-  groupCoverage.consume('form-group.unlabelled');
+  groupCoverage.prove('form-group.unlabelled', () => {
+    expect(
+      componentByTestID(FormGroup, 'forms-form-group-secondary').props.label
+    ).toBeUndefined();
+  });
   groupCoverage.expectComplete();
 
   expect(componentByTestID(FormRow, 'forms-form-row-switch').props.label).toBe(
     '同步'
   );
-  rowCoverage.consume('form-row.default');
+  rowCoverage.prove('form-row.default', () => {
+    expect(
+      componentByTestID(FormRow, 'forms-form-row-switch').props.label
+    ).toBe('同步');
+  });
   expect(screen.getByText('客户名称 *')).toBeOnTheScreen();
-  rowCoverage.consume('form-row.required');
+  rowCoverage.prove('form-row.required', () => {
+    expect(screen.getByText('客户名称 *')).toBeOnTheScreen();
+  });
   expect(screen.getByLabelText('表单客户名称')).toBeOnTheScreen();
   const formError = screen.getByText('请输入客户名称');
   expect(formError.props.accessibilityLiveRegion).toBe('polite');
-  rowCoverage.consume('form-row.error');
+  rowCoverage.prove('form-row.error', () => {
+    expect(formError.props.accessibilityLiveRegion).toBe('polite');
+  });
   expect(screen.queryAllByText('请输入客户名称')).toHaveLength(1);
   expect(screen.getByLabelText('表单同步开关')).toBeOnTheScreen();
   expect(
     screen.getByRole('checkbox', { name: '资料已核对' })
   ).toBeOnTheScreen();
-  rowCoverage.consume('form-row.a11y-control');
+  rowCoverage.prove('form-row.a11y-control', () => {
+    expect(screen.getByLabelText('表单同步开关')).toBeOnTheScreen();
+  });
   rowCoverage.expectComplete();
 });
 
