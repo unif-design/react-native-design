@@ -35,14 +35,32 @@ import {
 import { createShowcaseRuntimeCoverage } from './helpers/showcaseRuntimeCoverage';
 import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
 
+const mockIconAccessLogKey = Symbol('foundation-icon-access-log');
+const mockIconAccessLog: string[] = [];
+
 jest.mock('@unif/react-native-design', () => {
   const actual = jest.requireActual<typeof DesignRuntime>(
     '@unif/react-native-design'
   );
+  const iconSentinel = new Proxy(
+    { ...actual.ICONS, warning: undefined },
+    {
+      get(target, property, receiver) {
+        if (property === mockIconAccessLogKey) return mockIconAccessLog;
+        if (
+          typeof property === 'string' &&
+          Object.prototype.hasOwnProperty.call(target, property)
+        ) {
+          mockIconAccessLog.push(property);
+        }
+        return Reflect.get(target, property, receiver);
+      },
+    }
+  );
   return {
     ...actual,
     BRAND_ORANGE: 'magenta',
-    ICONS: { ...actual.ICONS, warning: undefined },
+    ICONS: iconSentinel,
     ICON_NAMES: [...actual.ICON_NAMES].reverse(),
     addTransport: jest.fn(actual.addTransport),
     avatar: { ...actual.avatar, md: 37 },
@@ -128,6 +146,10 @@ afterEach(() => {
 test('Foundation 展示真实 theme、token、palette、scale、blur 与 Icon 事实', () => {
   installReducedMotionMock(false);
   render(<App />);
+  const iconAccessLog = (
+    ICONS as typeof ICONS & { [mockIconAccessLogKey]: string[] }
+  )[mockIconAccessLogKey];
+  iconAccessLog.length = 0;
   const callableMocks = [
     DesignRuntime.childTestID,
     DesignRuntime.r,
@@ -319,8 +341,13 @@ test('Foundation 展示真实 theme、token、palette、scale、blur 与 Icon �
     );
   });
   runtimeCoverage.prove('ICONS', 'ICON_NAMES', () => {
-    expect(ICONS.warning).toBeUndefined();
-    expect(ICON_NAMES.every((name) => ICONS[name] !== undefined)).toBe(false);
+    const warningIndex = ICON_NAMES.indexOf('warning');
+    const firstWarningAccess = iconAccessLog.indexOf('warning');
+    expect(warningIndex).toBeGreaterThanOrEqual(0);
+    expect(firstWarningAccess).toBe(warningIndex);
+    expect(iconAccessLog.slice(0, firstWarningAccess + 1)).toEqual(
+      ICON_NAMES.slice(0, warningIndex + 1)
+    );
     expect(
       screen.getByText(`图标诊断：${ICON_NAMES.length} / 数据缺失`)
     ).toBeOnTheScreen();

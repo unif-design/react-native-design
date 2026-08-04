@@ -1862,7 +1862,7 @@ function jestRegistrationRoot(expression, checker) {
   if (ts.isIdentifier(value)) {
     return isUnshadowedJestIdentifier(
       value,
-      ['test', 'it', 'describe'],
+      ['test', 'it', 'describe', 'fit', 'fdescribe', 'xit', 'xtest'],
       checker
     )
       ? value.text
@@ -1901,19 +1901,20 @@ function verifyGovernedJestRegistrations(root) {
     if (!sourceFile) continue;
     const checker = analysis.checker;
     const visit = (node) => {
-      if (
-        ts.isCallExpression(node) &&
-        ts.isIdentifier(unwrapExpression(node.expression)) &&
-        isUnshadowedJestIdentifier(
-          unwrapExpression(node.expression),
-          ['fit', 'fdescribe', 'xit', 'xtest'],
+      if (ts.isCallExpression(node)) {
+        const registrationRoot = jestRegistrationRoot(
+          node.expression,
           checker
-        )
-      ) {
-        failVerification(
-          'RUNTIME_API_TEST_PROOF',
-          `${path.relative(root, testFile)} 禁止 focused/skipped Jest registration: ${unwrapExpression(node.expression).text}`
         );
+        if (
+          registrationRoot &&
+          ['fit', 'fdescribe', 'xit', 'xtest'].includes(registrationRoot)
+        ) {
+          failVerification(
+            'RUNTIME_API_TEST_PROOF',
+            `${path.relative(root, testFile)} 禁止 focused/skipped Jest registration: ${registrationRoot}`
+          );
+        }
       }
       if (
         (ts.isPropertyAccessExpression(node) ||
@@ -1935,17 +1936,10 @@ function verifyGovernedJestRegistrations(root) {
 }
 
 export function verifyExampleTestRegistrations(root) {
-  verifyGovernedJestRegistrations(path.resolve(root));
-}
-
-function isJestEachFactoryCall(node, checker) {
-  if (!ts.isCallExpression(node)) return false;
-  const expression = unwrapExpression(node.expression);
-  return (
-    ts.isPropertyAccessExpression(expression) &&
-    expression.name.text === 'each' &&
-    isJestTestRootExpression(expression.expression, checker)
-  );
+  const resolvedRoot = path.resolve(root);
+  verifyGovernedJestRegistrations(resolvedRoot);
+  verifySceneStateTestProofs(resolvedRoot);
+  verifyRuntimeApiTestProofs(resolvedRoot);
 }
 
 function executableJestCallback(node, checker) {
@@ -1959,16 +1953,14 @@ function executableJestCallback(node, checker) {
   }
   const registration = callback.parent;
   const callee = unwrapExpression(registration.expression);
-  if (
-    !isJestTestRootExpression(callee, checker) &&
-    !(ts.isCallExpression(callee) && isJestEachFactoryCall(callee, checker))
-  ) {
+  if (!isJestTestRootExpression(callee, checker)) {
     return undefined;
   }
-  let current = registration.parent;
-  while (current && !ts.isSourceFile(current)) {
-    if (isFunctionLikeNode(current)) return undefined;
-    current = current.parent;
+  if (
+    !ts.isExpressionStatement(registration.parent) ||
+    !ts.isSourceFile(registration.parent.parent)
+  ) {
+    return undefined;
   }
   return callback;
 }

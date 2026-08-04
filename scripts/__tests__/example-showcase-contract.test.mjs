@@ -74,7 +74,7 @@ function runContractMutation(fixture, testNamePattern) {
   );
 }
 
-function runExampleAcceptanceTest(fixture, testFile) {
+function prepareFixtureExampleRuntime(fixture) {
   const fixtureRoot = realpathSync(fixture);
   const fixtureExampleRoot = path.join(fixtureRoot, 'example');
   const rootModules = path.join(fixtureRoot, 'node_modules');
@@ -89,10 +89,15 @@ function runExampleAcceptanceTest(fixture, testFile) {
       'dir'
     );
   }
+  return { fixtureExampleRoot, fixtureRoot };
+}
+
+function createFixtureJestConfig(fixture, overrides = {}) {
+  const { fixtureExampleRoot } = prepareFixtureExampleRuntime(fixture);
   const baseConfig = require(
     path.join(repositoryRoot, 'example/jest.config.js')
   );
-  const config = {
+  return {
     ...baseConfig,
     rootDir: fixtureExampleRoot,
     cacheDirectory: path.join(fixture, '.jest-cache'),
@@ -122,27 +127,54 @@ function runExampleAcceptanceTest(fixture, testFile) {
         'example/node_modules/react-native-worklets/src/mock.ts'
       ),
     },
+    ...overrides,
   };
+}
+
+function runExampleJestWrapper(
+  fixture,
+  args,
+  { cwd = repositoryRoot, showcaseRoot = fixture } = {}
+) {
+  prepareFixtureExampleRuntime(fixture);
+  const env = { ...process.env };
+  if (showcaseRoot === undefined) {
+    delete env.EXAMPLE_SHOWCASE_ROOT;
+  } else {
+    env.EXAMPLE_SHOWCASE_ROOT = realpathSync(showcaseRoot);
+  }
 
   return spawnSync(
     process.execPath,
     [
       path.join(repositoryRoot, 'scripts/run-example-jest.mjs'),
       '--forbidOnly',
+      ...args,
+    ],
+    {
+      cwd,
+      encoding: 'utf8',
+      env,
+    }
+  );
+}
+
+function runExampleAcceptanceTest(
+  fixture,
+  testFile,
+  { showcaseRoot = fixture } = {}
+) {
+  const { fixtureExampleRoot } = prepareFixtureExampleRuntime(fixture);
+  return runExampleJestWrapper(
+    fixture,
+    [
       '--config',
-      JSON.stringify(config),
+      JSON.stringify(createFixtureJestConfig(fixture)),
       '--runInBand',
       '--runTestsByPath',
       path.join(fixtureExampleRoot, 'src/__tests__', testFile),
     ],
-    {
-      cwd: repositoryRoot,
-      encoding: 'utf8',
-      env: {
-        ...process.env,
-        EXAMPLE_SHOWCASE_ROOT: fixtureRoot,
-      },
-    }
+    { showcaseRoot }
   );
 }
 
@@ -322,6 +354,15 @@ function assertVerifierCode(fixture, expectedCode, label) {
     },
     label
   );
+}
+
+function captureVerifierError(fixture) {
+  try {
+    showcaseVerifier.verifyExampleShowcase(fixture);
+    return undefined;
+  } catch (error) {
+    return error;
+  }
 }
 
 function plistArray(plist, key) {
@@ -1082,6 +1123,142 @@ test('runtime proof lifecycle 拒绝 if(false) 包裹 prove 与 completion', () 
   });
 });
 
+test('整个 governed proof registration 不得位于 SourceFile 顶层 if(false)', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const clean = runExampleAcceptanceTest(fixture, 'BusinessScene.test.tsx');
+    assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'entire-registration mutation 的 clean fixture 必须先完整通过'
+    );
+
+    mutateFixtureFile(
+      fixture,
+      'example/src/showcases/business/BusinessScene.tsx',
+      (source) =>
+        source
+          .replace(
+            "  const washGradientId = useSvgId('business-wash');",
+            "  const washGradientId = 'business-wash';"
+          )
+          .replace(
+            "  const haloGradientId = useSvgId('business-halo');",
+            "  const haloGradientId = 'business-halo';"
+          )
+          .replace(
+            '  const draft = state.scenes.business;',
+            [
+              '  const draft = state.scenes.business;',
+              '  if (false) {',
+              "    useSvgId('dead-wash');",
+              "    useSvgId('dead-halo');",
+              '  }',
+            ].join('\n')
+          ),
+      '删除真实 useSvgId calls 并用 Scene dead branch 保留静态 binding'
+    );
+    mutateFixtureFile(
+      fixture,
+      'example/src/__tests__/BusinessScene.test.tsx',
+      (source) =>
+        source
+          .replace(
+            "test('scene 直接生成并使用两个唯一合法 SVG id，装饰 wrapper 隐藏完整 a11y 子树', () => {",
+            "if (false) {\n  test('scene 直接生成并使用两个唯一合法 SVG id，装饰 wrapper 隐藏完整 a11y 子树', () => {"
+          )
+          .replace(
+            "  runtimeCoverage.expectComplete();\n});\n\ntest('GradientWash、RadialHalo",
+            "  runtimeCoverage.expectComplete();\n  });\n}\n\ntest('GradientWash、RadialHalo"
+          ),
+      '把整个 Business runtime proof registration 包进顶层 if(false)'
+    );
+
+    const verificationError = captureVerifierError(fixture);
+    const mutated = runExampleAcceptanceTest(
+      fixture,
+      'BusinessScene.test.tsx'
+    );
+    assert.ok(
+      verificationError instanceof
+        showcaseVerifier.ExampleShowcaseVerificationError,
+      `static=${verificationError ? String(verificationError) : 'PASS'} Jest status=${mutated.status}\n${mutated.stdout}\n${mutated.stderr}`
+    );
+    assert.equal(
+      verificationError.code,
+      'RUNTIME_API_TEST_PROOF',
+      String(verificationError)
+    );
+    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
+  });
+});
+
+test('governed proof registration 必须是 SourceFile 直接 ExpressionStatement', () => {
+  const mutations = [
+    {
+      label: 'nested block registration',
+      mutate: (source) =>
+        source
+          .replace(
+            "test('scene 直接生成并使用两个唯一合法 SVG id，装饰 wrapper 隐藏完整 a11y 子树', () => {",
+            "{\n  test('scene 直接生成并使用两个唯一合法 SVG id，装饰 wrapper 隐藏完整 a11y 子树', () => {"
+          )
+          .replace(
+            "  runtimeCoverage.expectComplete();\n});\n\ntest('GradientWash、RadialHalo",
+            "  runtimeCoverage.expectComplete();\n  });\n}\n\ntest('GradientWash、RadialHalo"
+          ),
+    },
+    {
+      label: 'conditional registration',
+      mutate: (source) =>
+        source.replace(
+          "test('scene 直接生成并使用两个唯一合法 SVG id，装饰 wrapper 隐藏完整 a11y 子树', () => {",
+          "true && test('scene 直接生成并使用两个唯一合法 SVG id，装饰 wrapper 隐藏完整 a11y 子树', () => {"
+        ),
+    },
+    {
+      label: 'dead function registration',
+      mutate: (source) =>
+        source
+          .replace(
+            "test('scene 直接生成并使用两个唯一合法 SVG id，装饰 wrapper 隐藏完整 a11y 子树', () => {",
+            "function registerDeadBusinessProof(): void {\n  test('scene 直接生成并使用两个唯一合法 SVG id，装饰 wrapper 隐藏完整 a11y 子树', () => {"
+          )
+          .replace(
+            "  runtimeCoverage.expectComplete();\n});\n\ntest('GradientWash、RadialHalo",
+            "  runtimeCoverage.expectComplete();\n  });\n}\n\ntest('GradientWash、RadialHalo"
+          ),
+    },
+    {
+      label: 'test.each proof owner',
+      mutate: (source) =>
+        source.replace(
+          "test('scene 直接生成并使用两个唯一合法 SVG id，装饰 wrapper 隐藏完整 a11y 子树', () => {",
+          "test.each([[1]])('scene 直接生成并使用两个唯一合法 SVG id，装饰 wrapper 隐藏完整 a11y 子树', () => {"
+        ),
+    },
+  ];
+
+  for (const mutation of mutations) {
+    withFixture([...new Set(sourceContractFiles)], (fixture) => {
+      assert.doesNotThrow(
+        () => showcaseVerifier.verifyExampleShowcase(fixture),
+        `${mutation.label} clean fixture 必须先完整通过`
+      );
+      mutateFixtureFile(
+        fixture,
+        'example/src/__tests__/BusinessScene.test.tsx',
+        mutation.mutate,
+        mutation.label
+      );
+      assertVerifierCode(
+        fixture,
+        'RUNTIME_API_TEST_PROOF',
+        mutation.label
+      );
+    });
+  }
+});
+
 test('focused sibling test 不能跳过 runtime proof test', () => {
   withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
     const clean = runExampleAcceptanceTest(fixture, 'BusinessScene.test.tsx');
@@ -1168,6 +1345,215 @@ test('--forbidOnly 入口拒绝没有 sibling skip 的单一 focused test', () =
     assert.match(
       `${mutated.stdout}\n${mutated.stderr}`,
       /forbidOnly|focused|test\.only/u
+    );
+  });
+});
+
+test('--forbidOnly 入口拒绝没有 sibling skip 的 single fit.each', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const clean = runExampleAcceptanceTest(fixture, 'BusinessScene.test.tsx');
+    assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
+
+    const singleFocusedTest = path.join(
+      fixture,
+      'example/src/__tests__/SingleFocusedEach.test.ts'
+    );
+    writeFileSync(
+      singleFocusedTest,
+      [
+        "fit.each([[1]])('single focused each %s', (value) => {",
+        '  expect(value).toBe(1);',
+        '});',
+        '',
+      ].join('\n')
+    );
+
+    const mutated = runExampleAcceptanceTest(
+      fixture,
+      'SingleFocusedEach.test.ts'
+    );
+    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /RUNTIME_API_TEST_PROOF|forbidOnly|focused|fit/u
+    );
+  });
+});
+
+test('wrapper 拒绝 env scan root 与 inline config/runTestsByPath execution root 错配', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const clean = runExampleAcceptanceTest(fixture, 'BusinessScene.test.tsx');
+    assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
+
+    const singleFocusedTest = path.join(
+      fixture,
+      'example/src/__tests__/SingleFocusedMismatch.test.ts'
+    );
+    writeFileSync(
+      singleFocusedTest,
+      [
+        "test.only('single focused mismatch', () => {",
+        '  expect(1).toBe(1);',
+        '});',
+        '',
+      ].join('\n')
+    );
+
+    const mutated = runExampleAcceptanceTest(
+      fixture,
+      'SingleFocusedMismatch.test.ts',
+      { showcaseRoot: repositoryRoot }
+    );
+    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /JEST_ROOT_MISMATCH/u
+    );
+  });
+});
+
+test('wrapper 从 config file、CLI rootDir 与无显式 config 的 cwd 解析同一 Jest root', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const { fixtureExampleRoot, fixtureRoot } =
+      prepareFixtureExampleRuntime(fixture);
+    const testPath = path.join(
+      fixtureExampleRoot,
+      'src/__tests__/BusinessScene.test.tsx'
+    );
+
+    const configFromDirectory = createFixtureJestConfig(fixture);
+    delete configFromDirectory.rootDir;
+    const directoryConfigPath = path.join(
+      fixtureExampleRoot,
+      'jest.wrapper-directory.config.cjs'
+    );
+    writeFileSync(
+      directoryConfigPath,
+      `module.exports = ${JSON.stringify(configFromDirectory)};\n`
+    );
+    const directoryResult = runExampleJestWrapper(fixture, [
+      '--config',
+      directoryConfigPath,
+      '--runInBand',
+      '--runTestsByPath',
+      testPath,
+    ]);
+    assert.equal(
+      directoryResult.status,
+      0,
+      `${directoryResult.stdout}\n${directoryResult.stderr}`
+    );
+
+    const configWithRelativeRoot = createFixtureJestConfig(fixture, {
+      rootDir: './example',
+    });
+    const relativeConfigPath = path.join(
+      fixtureRoot,
+      'jest.wrapper-relative.config.cjs'
+    );
+    writeFileSync(
+      relativeConfigPath,
+      `module.exports = ${JSON.stringify(configWithRelativeRoot)};\n`
+    );
+    const relativeResult = runExampleJestWrapper(fixture, [
+      '--config',
+      relativeConfigPath,
+      '--runInBand',
+      '--runTestsByPath',
+      testPath,
+    ]);
+    assert.equal(
+      relativeResult.status,
+      0,
+      `${relativeResult.stdout}\n${relativeResult.stderr}`
+    );
+
+    const cliOverrideResult = runExampleJestWrapper(fixture, [
+      '--config',
+      JSON.stringify(
+        createFixtureJestConfig(fixture, {
+          rootDir: path.join(repositoryRoot, 'example'),
+        })
+      ),
+      '--rootDir',
+      fixtureExampleRoot,
+      '--runInBand',
+      '--runTestsByPath',
+      testPath,
+    ]);
+    assert.equal(
+      cliOverrideResult.status,
+      0,
+      `${cliOverrideResult.stdout}\n${cliOverrideResult.stderr}`
+    );
+
+    const cwdConfig = createFixtureJestConfig(fixture);
+    delete cwdConfig.rootDir;
+    writeFileSync(
+      path.join(fixtureExampleRoot, 'jest.config.js'),
+      `module.exports = ${JSON.stringify(cwdConfig)};\n`
+    );
+    const cwdResult = runExampleJestWrapper(
+      fixture,
+      ['--runInBand', '--runTestsByPath', testPath],
+      { cwd: fixtureExampleRoot, showcaseRoot: undefined }
+    );
+    assert.equal(cwdResult.status, 0, `${cwdResult.stdout}\n${cwdResult.stderr}`);
+  });
+});
+
+test('wrapper 拒绝 --runTestsByPath 逃逸 actual Jest root', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const clean = runExampleAcceptanceTest(fixture, 'BusinessScene.test.tsx');
+    assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
+    const { fixtureExampleRoot, fixtureRoot } =
+      prepareFixtureExampleRuntime(fixture);
+    const outsideTestDirectory = path.join(fixtureRoot, 'outside');
+    mkdirSync(outsideTestDirectory, { recursive: true });
+    const outsideTestPath = path.join(outsideTestDirectory, 'Outside.test.js');
+    writeFileSync(
+      outsideTestPath,
+      "test('outside root', () => { expect(1).toBe(1); });\n"
+    );
+
+    const mutated = runExampleJestWrapper(fixture, [
+      '--config',
+      JSON.stringify(createFixtureJestConfig(fixture)),
+      '--runInBand',
+      '--runTestsByPath',
+      outsideTestPath,
+    ]);
+    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /JEST_TEST_PATH_OUTSIDE_ROOT/u
+    );
+  });
+});
+
+test('wrapper 拒绝 config.roots 将 Jest discovery 边界移出 actual root', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const clean = runExampleAcceptanceTest(fixture, 'BusinessScene.test.tsx');
+    assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
+    const { fixtureRoot } = prepareFixtureExampleRuntime(fixture);
+    const outsideTestDirectory = path.join(fixtureRoot, 'outside-discovery');
+    mkdirSync(outsideTestDirectory, { recursive: true });
+    writeFileSync(
+      path.join(outsideTestDirectory, 'SingleOutsideRoot.test.js'),
+      "test.only('single outside discovery root', () => { expect(1).toBe(1); });\n"
+    );
+
+    const mutated = runExampleJestWrapper(fixture, [
+      '--config',
+      JSON.stringify(
+        createFixtureJestConfig(fixture, { roots: [outsideTestDirectory] })
+      ),
+      '--runInBand',
+    ]);
+    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /JEST_DISCOVERY_ROOT_MISMATCH/u
     );
   });
 });
@@ -1271,10 +1657,37 @@ test('governed example tests 全局拒绝 focused、skipped 与 todo registratio
       (source) => `describe.only('focused', () => {});\n${source}`,
     ],
     ['fdescribe', (source) => `fdescribe('focused', () => {});\n${source}`],
+    [
+      'fit.each',
+      (source) => `fit.each([[1]])('focused each', () => {});\n${source}`,
+    ],
+    [
+      'fdescribe.each',
+      (source) =>
+        `fdescribe.each([[1]])('focused describe each', () => {});\n${source}`,
+    ],
+    [
+      'fit.concurrent.each',
+      (source) =>
+        `fit.concurrent.each([[1]])('focused concurrent each', () => {});\n${source}`,
+    ],
     ['test.skip', (source) => source.replace('test(', 'test.skip(')],
     ['it.skip', (source) => source.replace('test(', 'it.skip(')],
     ['xit', (source) => source.replace('test(', 'xit(')],
     ['xtest', (source) => source.replace('test(', 'xtest(')],
+    [
+      'xit.each',
+      (source) => `xit.each([[1]])('skipped each', () => {});\n${source}`,
+    ],
+    [
+      'xtest.each',
+      (source) => `xtest.each([[1]])('skipped each', () => {});\n${source}`,
+    ],
+    [
+      'xtest.concurrent.each',
+      (source) =>
+        `xtest.concurrent.each([[1]])('skipped concurrent each', () => {});\n${source}`,
+    ],
     [
       'describe.skip',
       (source) => `describe.skip('skipped', () => {});\n${source}`,
@@ -1387,6 +1800,56 @@ test('完整验收链拒绝 BRAND_ORANGE 默认值硬编码与 dead binding 冒�
     assert.match(
       `${mutated.stdout}\n${mutated.stderr}`,
       /BRAND_ORANGE|品牌|runtime proof/u
+    );
+  });
+});
+
+test('完整验收链拒绝 ICONS 完整性硬编码 false 与 dead binding 冒充', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const clean = runExampleAcceptanceTest(fixture, 'FoundationScene.test.tsx');
+    assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'ICONS causal mutation 的 clean fixture 必须先完整通过'
+    );
+
+    mutateFixtureFile(
+      fixture,
+      'example/src/showcases/foundation/FoundationScene.tsx',
+      (source) =>
+        source
+          .replace(
+            [
+              '  const iconDataComplete = ICON_NAMES.every(',
+              '    (name) => ICONS[name] !== undefined',
+              '  );',
+            ].join('\n'),
+            '  const iconDataComplete = false;'
+          )
+          .replace(
+            '  const draft = state.scenes.foundation;',
+            [
+              '  const draft = state.scenes.foundation;',
+              '  if (false) {',
+              '    void ICONS;',
+              '  }',
+            ].join('\n')
+          ),
+      '硬编码 iconDataComplete=false 并用 dead void ICONS 保留静态 binding'
+    );
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      '静态 binding gate 不解释 ICONS dead branch'
+    );
+
+    const mutated = runExampleAcceptanceTest(
+      fixture,
+      'FoundationScene.test.tsx'
+    );
+    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /ICONS|warning|图标访问|runtime proof/u
     );
   });
 });
