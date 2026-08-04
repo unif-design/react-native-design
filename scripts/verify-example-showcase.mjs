@@ -1353,6 +1353,7 @@ function collectRuntimeImportBindings(
           callUses: 0,
           callPaths: [],
           files: new Set(),
+          useNodes: [],
           jsxNodes: [],
         };
         const symbol = bindingAnalysis.checker.getSymbolAtLocation(
@@ -1377,6 +1378,7 @@ function collectRuntimeImportBindings(
         const binding = symbol ? bindingsBySymbol.get(symbol) : undefined;
         if (binding) {
           binding.uses += 1;
+          binding.useNodes.push(node);
           const jsxNode = jsxUseNode(node);
           if (jsxNode) {
             binding.jsxUses += 1;
@@ -1412,6 +1414,231 @@ function collectRuntimeImportBindings(
     visit(sourceFile);
   }
   return bindings;
+}
+
+function findRuntimeDeclaration(sourceFile, name) {
+  for (const statement of sourceFile.statements) {
+    if (ts.isFunctionDeclaration(statement) && statement.name?.text === name) {
+      return statement;
+    }
+    if (!ts.isVariableStatement(statement)) continue;
+    for (const declaration of statement.declarationList.declarations) {
+      if (ts.isIdentifier(declaration.name) && declaration.name.text === name) {
+        return declaration;
+      }
+    }
+  }
+  return undefined;
+}
+
+function enclosingImportDeclaration(node) {
+  let current = node.parent;
+  while (current && !ts.isSourceFile(current)) {
+    if (ts.isImportDeclaration(current)) return current;
+    current = current.parent;
+  }
+  return undefined;
+}
+
+function callableNodeFromDeclaration(
+  declaration,
+  bindingAnalysis,
+  seenDeclarations = new Set()
+) {
+  if (!declaration || seenDeclarations.has(declaration)) return undefined;
+  seenDeclarations.add(declaration);
+
+  if (isFunctionLikeNode(declaration)) return declaration;
+  if (ts.isVariableDeclaration(declaration) && declaration.initializer) {
+    return callableNodeFromExpression(
+      declaration.initializer,
+      bindingAnalysis,
+      seenDeclarations
+    );
+  }
+  if (ts.isImportSpecifier(declaration)) {
+    const importDeclaration = enclosingImportDeclaration(declaration);
+    const moduleName = importDeclaration
+      ? importModuleName(importDeclaration)
+      : undefined;
+    if (!importDeclaration || !moduleName?.startsWith('.')) return undefined;
+    const importedName =
+      declaration.propertyName?.text ?? declaration.name.text;
+    const targetFile = resolveModuleFile(
+      importDeclaration.getSourceFile().fileName,
+      moduleName
+    );
+    const targetSource = bindingAnalysis.sourceFiles.get(
+      path.resolve(targetFile)
+    );
+    if (!targetSource) return undefined;
+    return callableNodeFromDeclaration(
+      findRuntimeDeclaration(targetSource, importedName),
+      bindingAnalysis,
+      seenDeclarations
+    );
+  }
+  return undefined;
+}
+
+function callableNodeFromExpression(
+  expression,
+  bindingAnalysis,
+  seenDeclarations = new Set()
+) {
+  const value = unwrapExpression(expression);
+  if (isFunctionLikeNode(value)) return value;
+  if (!ts.isIdentifier(value)) return undefined;
+  const symbol = bindingAnalysis.checker.getSymbolAtLocation(value);
+  for (const declaration of symbol?.declarations ?? []) {
+    const callable = callableNodeFromDeclaration(
+      declaration,
+      bindingAnalysis,
+      seenDeclarations
+    );
+    if (callable) return callable;
+  }
+  return undefined;
+}
+
+function collectSceneExecutableNodes(
+  routeTargetFile,
+  routeTargetName,
+  reachableSceneFiles,
+  bindingAnalysis
+) {
+  const allowedFiles = new Set(
+    reachableSceneFiles.map((filePath) => path.resolve(filePath))
+  );
+  const sourceFile = bindingAnalysis.sourceFiles.get(
+    path.resolve(routeTargetFile)
+  );
+  const routeDeclaration = sourceFile
+    ? findRuntimeDeclaration(sourceFile, routeTargetName)
+    : undefined;
+  const routeFunction = routeDeclaration
+    ? callableNodeFromDeclaration(routeDeclaration, bindingAnalysis)
+    : undefined;
+  if (!routeFunction || !isFunctionLikeNode(routeFunction)) {
+    failVerification(
+      'ROUTE_REGISTRY',
+      `${routeTargetName} 缺少可执行 routed scene function`
+    );
+  }
+
+  const activeNodes = new Set();
+  const activeFunctions = new Set();
+
+  const isAllowedFunction = (node) =>
+    allowedFiles.has(path.resolve(node.getSourceFile().fileName));
+
+  const activateExpression = (expression) => {
+    const value = unwrapExpression(expression);
+    if (ts.isConditionalExpression(value)) {
+      activateExpression(value.whenTrue);
+      activateExpression(value.whenFalse);
+      return;
+    }
+    const callable = callableNodeFromExpression(value, bindingAnalysis);
+    if (callable) activateFunction(callable);
+  };
+
+  const visitActive = (node) => {
+    if (isFunctionLikeNode(node)) return;
+    activeNodes.add(node);
+
+    if (ts.isCallExpression(node)) {
+      activateExpression(node.expression);
+      for (const argument of node.arguments) activateExpression(argument);
+    }
+
+    if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
+      const opening = ts.isJsxElement(node) ? node.openingElement : node;
+      if (ts.isIdentifier(opening.tagName)) {
+        activateExpression(opening.tagName);
+      }
+    }
+
+    if (
+      ts.isJsxAttribute(node) &&
+      node.initializer &&
+      ts.isJsxExpression(node.initializer) &&
+      node.initializer.expression
+    ) {
+      activateExpression(node.initializer.expression);
+    }
+
+    ts.forEachChild(node, visitActive);
+  };
+
+  function activateFunction(node) {
+    if (activeFunctions.has(node) || !isAllowedFunction(node)) return;
+    activeFunctions.add(node);
+    activeNodes.add(node);
+    for (const parameter of node.parameters) {
+      if (parameter.initializer) visitActive(parameter.initializer);
+    }
+    if (node.body) visitActive(node.body);
+  }
+
+  activateFunction(routeFunction);
+  return activeNodes;
+}
+
+function collectModuleExecutableNodes(filePaths, bindingAnalysis) {
+  const activeNodes = new Set();
+  const visitModuleExecution = (node) => {
+    if (
+      isFunctionLikeNode(node) ||
+      ts.isClassDeclaration(node) ||
+      ts.isClassExpression(node)
+    ) {
+      return;
+    }
+    activeNodes.add(node);
+    ts.forEachChild(node, visitModuleExecution);
+  };
+
+  for (const filePath of filePaths) {
+    const sourceFile = bindingAnalysis.sourceFiles.get(path.resolve(filePath));
+    if (!sourceFile) {
+      failVerification(
+        'SOURCE_READ',
+        `binding analysis 缺少 module execution source: ${filePath}`
+      );
+    }
+    for (const statement of sourceFile.statements) {
+      if (
+        ts.isImportDeclaration(statement) ||
+        ts.isExportDeclaration(statement)
+      ) {
+        continue;
+      }
+      visitModuleExecution(statement);
+    }
+  }
+  return activeNodes;
+}
+
+function filterRuntimeBindingsByActiveNodes(bindings, activeNodes) {
+  const filtered = new Map();
+  for (const [name, binding] of bindings) {
+    const useNodes = binding.useNodes.filter((node) => activeNodes.has(node));
+    const jsxNodes = binding.jsxNodes.filter((node) => activeNodes.has(node));
+    const callPaths = binding.callPaths.filter((call) =>
+      activeNodes.has(call.node)
+    );
+    filtered.set(name, {
+      ...binding,
+      uses: useNodes.length,
+      jsxUses: jsxNodes.length,
+      callUses: callPaths.length,
+      useNodes,
+      jsxNodes,
+      callPaths,
+    });
+  }
+  return filtered;
 }
 
 function importDeclarationHasRuntimeValue(statement) {
@@ -2494,10 +2721,28 @@ function verifySceneContract(root, entries, bindingAnalysis) {
       );
     }
 
-    const bindings = collectRuntimeImportBindings(
+    const allBindings = collectRuntimeImportBindings(
       reachableSceneFiles,
       '@unif/react-native-design',
       bindingAnalysis
+    );
+    const sceneActiveNodes = collectSceneExecutableNodes(
+      routeTargetFile,
+      routeTarget.importedName,
+      reachableSceneFiles,
+      bindingAnalysis
+    );
+    const bindings = filterRuntimeBindingsByActiveNodes(
+      allBindings,
+      sceneActiveNodes
+    );
+    const runtimeActiveNodes = new Set([
+      ...sceneActiveNodes,
+      ...collectModuleExecutableNodes(reachableSceneFiles, bindingAnalysis),
+    ]);
+    const runtimeBindings = filterRuntimeBindingsByActiveNodes(
+      allBindings,
+      runtimeActiveNodes
     );
     sceneContexts.set(scene, { bindings, reachableSceneFiles });
     const requiredComponents = entries
@@ -2535,8 +2780,8 @@ function verifySceneContract(root, entries, bindingAnalysis) {
             : [];
     const missingApis = requiredByScene.filter((name) =>
       requiredCallableApis.has(name)
-        ? (bindings.get(name)?.callUses ?? 0) === 0
-        : (bindings.get(name)?.uses ?? 0) === 0
+        ? (runtimeBindings.get(name)?.callUses ?? 0) === 0
+        : (runtimeBindings.get(name)?.uses ?? 0) === 0
     );
     if (missingApis.length) {
       failVerification(
@@ -2544,7 +2789,10 @@ function verifySceneContract(root, entries, bindingAnalysis) {
         `${scene} 未真实消费 required runtime API: ${missingApis.join(', ')}`
       );
     }
-    if (scene === 'business' && (bindings.get('useSvgId')?.callUses ?? 0) < 2) {
+    if (
+      scene === 'business' &&
+      (runtimeBindings.get('useSvgId')?.callUses ?? 0) < 2
+    ) {
       failVerification(
         'SCENE_RUNTIME_API_CONSUMPTION',
         'Business 必须至少两次调用 useSvgId 证明同屏唯一性'

@@ -771,6 +771,35 @@ test('exhaustive verifier 将 sceneIds、Router、Home 与真实 scene consumpti
   }
 });
 
+test('scene runtime API 不能由未调用的 dead helper 冒充 consumption', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'runtime API dead helper mutation 的 clean fixture 必须先完整通过'
+    );
+    mutateFixtureFile(
+      fixture,
+      'example/src/showcases/business/BusinessScene.tsx',
+      (source) =>
+        `${source
+          .replace(
+            "const washGradientId = useSvgId('business-wash');",
+            "const washGradientId = 'business-wash';"
+          )
+          .replace(
+            "const haloGradientId = useSvgId('business-halo');",
+            "const haloGradientId = 'business-halo';"
+          )}\nfunction deadUseSvgIdWitness(): void {\n  useSvgId('dead-wash');\n  useSvgId('dead-halo');\n}\n`,
+      '删除真实 useSvgId calls 并追加未调用的 dead helper'
+    );
+    assertVerifierCode(
+      fixture,
+      'SCENE_RUNTIME_API_CONSUMPTION',
+      'useSvgId consumption 不得由未调用的 dead helper 冒充'
+    );
+  });
+});
+
 test('scene consumption 仅接受 Router 可达文件，拒绝 dead-file 冒充 StatusDot', () => {
   withFixture([...new Set(sourceContractFiles)], (fixture) => {
     assert.doesNotThrow(
@@ -886,6 +915,27 @@ test('Button loading 真实 routed specimen 删除时 typed witness gate 失败'
   });
 });
 
+test('Button loading 不能由未渲染的 dead component 冒充 witness', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'Button dead component mutation 的 clean fixture 必须先完整通过'
+    );
+    mutateFixtureFile(
+      fixture,
+      'example/src/showcases/actions/ActionsScene.tsx',
+      (source) =>
+        `${removeButtonLoadingSpecimen(source)}\nfunction DeadButtonLoadingWitness() {\n  return (\n    <Button\n      label="加载按钮"\n      loading\n      testID="actions-button-loading"\n      onPress={() => {}}\n    />\n  );\n}\n`,
+      '删除真实 loading Button 并追加未渲染的 dead component'
+    );
+    assertVerifierCode(
+      fixture,
+      'COMPONENT_STATE_WITNESS',
+      'button.loading 不得由未渲染的 dead component 冒充'
+    );
+  });
+});
+
 test('Button loading 同时从 catalog 与 mutable state contract 删除仍失败', () => {
   withFixture([...new Set(sourceContractFiles)], (fixture) => {
     assert.doesNotThrow(
@@ -983,6 +1033,27 @@ test('Chip selected 删除真实 routed interaction specimen 时 typed gate 失�
   });
 });
 
+test('Chip selected 不能由未渲染的 dead component 冒充 interaction witness', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'Chip dead component mutation 的 clean fixture 必须先完整通过'
+    );
+    mutateFixtureFile(
+      fixture,
+      'example/src/showcases/actions/ActionsScene.tsx',
+      (source) =>
+        `${removeSelectableChipSpecimen(source)}\nfunction DeadChipWitness() {\n  return (\n    <Chip\n      label="可选择标签"\n      selected={false}\n      testID="actions-chip-selectable"\n      onPress={() => {}}\n    />\n  );\n}\n`,
+      '删除真实 selectable Chip 并追加未渲染的 dead component'
+    );
+    assertVerifierCode(
+      fixture,
+      'COMPONENT_STATE_WITNESS',
+      'chip.selected 不得由未渲染的 dead component 冒充'
+    );
+  });
+});
+
 test('Toast kinds 的 error runtime-api 分支被偷换时 typed gate 失败', () => {
   withFixture([...new Set(sourceContractFiles)], (fixture) => {
     assert.doesNotThrow(
@@ -1000,6 +1071,30 @@ test('Toast kinds 的 error runtime-api 分支被偷换时 typed gate 失败', (
       fixture,
       'COMPONENT_STATE_WITNESS',
       'ToastHost.kinds 必须保留 error public runtime-api call'
+    );
+  });
+});
+
+test('Toast error 不能由未调用的 dead helper 冒充 runtime witness', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'Toast dead helper mutation 的 clean fixture 必须先完整通过'
+    );
+    mutateFixtureFile(
+      fixture,
+      'example/src/showcases/feedback/FeedbackScene.tsx',
+      (source) =>
+        `${source.replace(
+          'toast.error(input);',
+          'toast.success(input);'
+        )}\nfunction deadToastWitness(): void {\n  toast.error({\n    message: 'dead witness',\n    position: 'bottom',\n    duration: 1,\n  });\n}\n`,
+      '偷换真实 toast.error 并追加未调用的 dead helper'
+    );
+    assertVerifierCode(
+      fixture,
+      'COMPONENT_STATE_WITNESS',
+      'toast-host.kinds 不得由未调用的 dead helper 冒充'
     );
   });
 });
