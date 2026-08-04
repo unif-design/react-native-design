@@ -149,7 +149,6 @@ test('GradientWash、RadialHalo 与 ScreenBackdrop 覆盖互斥 simple/custom �
     fromOpacity: 0.2,
     toOpacity: 0,
     color: expect.any(String),
-    gradientId: expect.stringMatching(/^[A-Za-z_][A-Za-z0-9_.-]*$/),
   });
   gradientCoverage.prove(
     'gradient-wash.color-opacity',
@@ -161,6 +160,7 @@ test('GradientWash、RadialHalo 与 ScreenBackdrop 覆盖互斥 simple/custom �
         fromOpacity: 0.2,
         toOpacity: 0,
         color: expect.any(String),
+        gradientId: expect.stringMatching(/^[A-Za-z_][A-Za-z0-9_.-]*$/),
       });
     }
   );
@@ -179,14 +179,17 @@ test('GradientWash、RadialHalo 与 ScreenBackdrop 覆盖互斥 simple/custom �
   expect(circleHalo?.props).toMatchObject({
     size: 120,
     maxOpacity: 0.22,
-    gradientId: expect.stringMatching(/^[A-Za-z_][A-Za-z0-9_.-]*$/),
   });
   haloCoverage.prove(
     'radial-halo.circle',
     'radial-halo.max-opacity',
     'radial-halo.gradient-id',
     () => {
-      expect(circleHalo?.props).toMatchObject({ size: 120, maxOpacity: 0.22 });
+      expect(circleHalo?.props).toMatchObject({
+        size: 120,
+        maxOpacity: 0.22,
+        gradientId: expect.stringMatching(/^[A-Za-z_][A-Za-z0-9_.-]*$/),
+      });
     }
   );
   expect(ellipseHalo?.props).toMatchObject({
@@ -215,13 +218,6 @@ test('GradientWash、RadialHalo 与 ScreenBackdrop 覆盖互斥 simple/custom �
   });
   fireEvent.press(screen.getByRole('tab', { name: '自定义背景' }));
   expect(screen.UNSAFE_getAllByType(ScreenBackdrop)).toHaveLength(1);
-  expect(screen.UNSAFE_getByType(ScreenBackdrop).props).toMatchObject({
-    stops: {
-      light: expect.any(Array),
-      dark: expect.any(Array),
-    },
-    halos: [expect.objectContaining({ maxOpacity: 0.18, centerX: true })],
-  });
   backdropCoverage.prove(
     'screen-backdrop.custom-halo',
     'screen-backdrop.theme',
@@ -229,9 +225,15 @@ test('GradientWash、RadialHalo 与 ScreenBackdrop 覆盖互斥 simple/custom �
       expect(screen.UNSAFE_getByType(ScreenBackdrop).props.halos).toEqual([
         expect.objectContaining({ maxOpacity: 0.18, centerX: true }),
       ]);
+      expect(screen.UNSAFE_getByType(ScreenBackdrop).props.stops).toEqual({
+        light: expect.any(Array),
+        dark: expect.any(Array),
+      });
+      expect(
+        screen.UNSAFE_getByType(ScreenBackdrop).props.preset
+      ).toBeUndefined();
     }
   );
-  expect(screen.UNSAFE_getByType(ScreenBackdrop).props.preset).toBeUndefined();
   const backdropWrapper = screen.getByTestId('business-backdrop-wrapper', {
     includeHiddenElements: true,
   });

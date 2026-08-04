@@ -13,6 +13,7 @@ module.exports = {
       '<rootDir>/node_modules/react-native-worklets/src/mock.ts',
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  reporters: ['default', '<rootDir>/jest.forbidOnlyReporter.js'],
   transformIgnorePatterns: [
     'node_modules/(?!((jest-)?react-native|@react-native(-community)?|@unif/react-native-design|@sbaiahmed1/react-native-blur|react-native-(gesture-handler|reanimated|worklets|safe-area-context|svg|reanimated-carousel))/)',
   ],

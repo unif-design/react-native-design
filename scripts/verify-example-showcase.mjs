@@ -1599,11 +1599,28 @@ function verifyRuntimeAndNativeContract(root) {
     rootPackage.scripts?.example !==
       'yarn workspace @unif/react-native-design-example' ||
     rootPackage.scripts?.['verify:example-showcase'] !== expectedVerifyScript ||
-    examplePackage.scripts?.test !== 'jest' ||
+    examplePackage.scripts?.test !==
+      'node ../scripts/run-example-jest.mjs --forbidOnly' ||
     examplePackage.scripts?.typecheck !== 'tsc --noEmit' ||
     examplePackage.scripts?.lint !== 'eslint .'
   ) {
     failVerification('WORKSPACE_SCRIPTS', 'root/example scripts contract 漂移');
+  }
+  const exampleJestConfig = readFileSync(
+    path.join(root, 'example/jest.config.js'),
+    'utf8'
+  );
+  if (
+    !existsSync(path.join(root, 'scripts/run-example-jest.mjs')) ||
+    !existsSync(path.join(root, 'example/jest.forbidOnlyReporter.js')) ||
+    !/reporters:\s*\[\s*'default',\s*'<rootDir>\/jest\.forbidOnlyReporter\.js'\s*\]/u.test(
+      exampleJestConfig
+    )
+  ) {
+    failVerification(
+      'WORKSPACE_SCRIPTS',
+      'example Jest 必须通过 --forbidOnly 入口与 reporter 拒绝 focused/skipped/todo tests'
+    );
   }
   if (
     JSON.stringify(rootPackage.jest?.testPathIgnorePatterns) !==
@@ -1834,15 +1851,91 @@ function isUnshadowedJestIdentifier(identifier, names, checker) {
 
 function isJestTestRootExpression(expression, checker) {
   const value = unwrapExpression(expression);
-  if (ts.isIdentifier(value)) {
-    return isUnshadowedJestIdentifier(value, ['test', 'it'], checker);
-  }
   return (
-    ts.isPropertyAccessExpression(value) &&
-    value.name.text === 'only' &&
-    ts.isIdentifier(value.expression) &&
-    isUnshadowedJestIdentifier(value.expression, ['test', 'it'], checker)
+    ts.isIdentifier(value) &&
+    isUnshadowedJestIdentifier(value, ['test', 'it'], checker)
   );
+}
+
+function jestRegistrationRoot(expression, checker) {
+  const value = unwrapExpression(expression);
+  if (ts.isIdentifier(value)) {
+    return isUnshadowedJestIdentifier(
+      value,
+      ['test', 'it', 'describe'],
+      checker
+    )
+      ? value.text
+      : undefined;
+  }
+  if (ts.isPropertyAccessExpression(value)) {
+    return jestRegistrationRoot(value.expression, checker);
+  }
+  if (ts.isElementAccessExpression(value)) {
+    return jestRegistrationRoot(value.expression, checker);
+  }
+  if (ts.isCallExpression(value)) {
+    return jestRegistrationRoot(value.expression, checker);
+  }
+  return undefined;
+}
+
+function jestRegistrationModifier(node) {
+  if (ts.isPropertyAccessExpression(node)) return node.name.text;
+  if (
+    ts.isElementAccessExpression(node) &&
+    node.argumentExpression &&
+    ts.isStringLiteralLike(node.argumentExpression)
+  ) {
+    return node.argumentExpression.text;
+  }
+  return undefined;
+}
+
+function verifyGovernedJestRegistrations(root) {
+  const testDirectory = path.join(root, 'example/src/__tests__');
+  const testFiles = listSourceFiles(testDirectory, true);
+  const analysis = createRuntimeBindingAnalysis(testFiles);
+  for (const testFile of testFiles) {
+    const sourceFile = analysis.sourceFiles.get(path.resolve(testFile));
+    if (!sourceFile) continue;
+    const checker = analysis.checker;
+    const visit = (node) => {
+      if (
+        ts.isCallExpression(node) &&
+        ts.isIdentifier(unwrapExpression(node.expression)) &&
+        isUnshadowedJestIdentifier(
+          unwrapExpression(node.expression),
+          ['fit', 'fdescribe', 'xit', 'xtest'],
+          checker
+        )
+      ) {
+        failVerification(
+          'RUNTIME_API_TEST_PROOF',
+          `${path.relative(root, testFile)} 禁止 focused/skipped Jest registration: ${unwrapExpression(node.expression).text}`
+        );
+      }
+      if (
+        (ts.isPropertyAccessExpression(node) ||
+          ts.isElementAccessExpression(node)) &&
+        jestRegistrationRoot(node, checker)
+      ) {
+        const modifier = jestRegistrationModifier(node);
+        if (modifier === 'only' || modifier === 'skip' || modifier === 'todo') {
+          failVerification(
+            'RUNTIME_API_TEST_PROOF',
+            `${path.relative(root, testFile)} 禁止 focused/skipped Jest registration modifier: ${modifier}`
+          );
+        }
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(sourceFile);
+  }
+}
+
+export function verifyExampleTestRegistrations(root) {
+  verifyGovernedJestRegistrations(path.resolve(root));
 }
 
 function isJestEachFactoryCall(node, checker) {
@@ -2012,11 +2105,23 @@ function verifyTypedProofCoverage({
           `${relativeTestFile}/${ownerNode.text} factory 必须位于顶层、未 skip 的 test/it callback`
         );
       }
+      if (
+        !ts.isBlock(testCallback.body) ||
+        !ts.isVariableDeclarationList(node.parent.parent) ||
+        !ts.isVariableStatement(node.parent.parent.parent) ||
+        node.parent.parent.parent.parent !== testCallback.body
+      ) {
+        failVerification(
+          code,
+          `${relativeTestFile}/${ownerNode.text} factory declaration 必须是 owned test/it callback block 的直接 VariableStatement`
+        );
+      }
       const record = {
         callback: testCallback,
         owner: ownerNode.text,
         proved: [],
-        expectCompleteCalls: 0,
+        proofPositions: [],
+        expectCompletePositions: [],
       };
       coverageRecords.push(record);
       coverageBySymbol.set(coverageSymbol, record);
@@ -2045,10 +2150,15 @@ function verifyTypedProofCoverage({
         );
       }
       if (record && method === 'prove') {
-        if (nearestFunctionLike(node) !== record.callback) {
+        if (
+          nearestFunctionLike(node) !== record.callback ||
+          !ts.isBlock(record.callback.body) ||
+          !ts.isExpressionStatement(node.parent) ||
+          node.parent.parent !== record.callback.body
+        ) {
           failVerification(
             code,
-            `${relativeTestFile}/${record.owner} prove 必须直接属于 factory 所在 test/it callback`
+            `${relativeTestFile}/${record.owner} prove 必须是 factory 所在 test/it callback block 的直接 ExpressionStatement`
           );
         }
         if (node.arguments.length < 2) {
@@ -2083,11 +2193,17 @@ function verifyTypedProofCoverage({
           }
           record.proved.push(argument.text);
         }
+        record.proofPositions.push(node.getStart(sourceFile));
       } else if (record && method === 'expectComplete') {
-        if (nearestFunctionLike(node) !== record.callback) {
+        if (
+          nearestFunctionLike(node) !== record.callback ||
+          !ts.isBlock(record.callback.body) ||
+          !ts.isExpressionStatement(node.parent) ||
+          node.parent.parent !== record.callback.body
+        ) {
           failVerification(
             code,
-            `${relativeTestFile}/${record.owner} expectComplete 必须直接属于 factory 所在 test/it callback`
+            `${relativeTestFile}/${record.owner} expectComplete 必须是 factory 所在 test/it callback block 的直接 ExpressionStatement`
           );
         }
         if (node.arguments.length !== 0) {
@@ -2096,7 +2212,7 @@ function verifyTypedProofCoverage({
             `${relativeTestFile}/${record.owner} expectComplete 不接受参数`
           );
         }
-        record.expectCompleteCalls += 1;
+        record.expectCompletePositions.push(node.getStart(sourceFile));
       }
     }
     ts.forEachChild(node, collectProofCalls);
@@ -2123,12 +2239,35 @@ function verifyTypedProofCoverage({
       expectedIds,
       { duplicateCode: code, mismatchCode: code }
     );
-    if (record.expectCompleteCalls !== 1) {
+    if (record.expectCompletePositions.length !== 1) {
       failVerification(
         code,
-        `${relativeTestFile}/${record.owner} 必须恰好调用一次 expectComplete，实际=${record.expectCompleteCalls}`
+        `${relativeTestFile}/${record.owner} 必须恰好调用一次 expectComplete，实际=${record.expectCompletePositions.length}`
       );
     }
+    const [completionPosition] = record.expectCompletePositions;
+    if (
+      completionPosition !== undefined &&
+      record.proofPositions.some((position) => position > completionPosition)
+    ) {
+      failVerification(
+        code,
+        `${relativeTestFile}/${record.owner} expectComplete 必须位于全部 prove 之后`
+      );
+    }
+    const inspectReturn = (node) => {
+      if (
+        ts.isReturnStatement(node) &&
+        nearestFunctionLike(node) === record.callback
+      ) {
+        failVerification(
+          code,
+          `${relativeTestFile}/${record.owner} owned proof test callback 禁止 return，以免跳过 proof lifecycle`
+        );
+      }
+      ts.forEachChild(node, inspectReturn);
+    };
+    inspectReturn(record.callback.body);
   }
 }
 
@@ -2258,6 +2397,7 @@ function verifyShowcaseStateContract(root, catalogEntries) {
       }
     }
   }
+  verifyGovernedJestRegistrations(root);
   verifySceneStateTestProofs(root);
   verifyRuntimeApiTestProofs(root);
 }

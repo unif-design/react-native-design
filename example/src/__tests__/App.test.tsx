@@ -5,6 +5,7 @@ import type {
   ReactTestRendererNode,
 } from 'react-test-renderer';
 import { ThemeProvider, normalizeFontScale } from '@unif/react-native-design';
+import * as DesignRuntime from '@unif/react-native-design';
 import App from '../App';
 import { AppProviders } from '../app/AppProviders';
 import {
@@ -43,13 +44,16 @@ jest.mock('react-native-safe-area-context', () => {
 });
 
 jest.mock('@unif/react-native-design', () => {
-  const actual = jest.requireActual('@unif/react-native-design');
+  const actual = jest.requireActual<typeof DesignRuntime>(
+    '@unif/react-native-design'
+  );
   const ReactModule = jest.requireActual<typeof import('react')>('react');
   const { View } =
     jest.requireActual<typeof import('react-native')>('react-native');
 
   return {
     ...actual,
+    normalizeFontScale: jest.fn(actual.normalizeFontScale),
     ThemeProvider: function MockThemeProvider(
       props: React.ComponentProps<typeof actual.ThemeProvider>
     ) {
@@ -148,6 +152,10 @@ function onlyDirectHostChild(
   return children[0];
 }
 
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 afterEach(() => {
   restoreNativeMocks();
   jest.restoreAllMocks();
@@ -192,6 +200,11 @@ test('ThemeProvider 将 system 映射为 undefined，并窄化三档主题与四
       fontScale: 1,
     });
   });
+  runtimeCoverage.prove('normalizeFontScale', () => {
+    expect(jest.mocked(normalizeFontScale)).toHaveBeenCalledTimes(1);
+    expect(jest.mocked(normalizeFontScale)).toHaveBeenCalledWith(1);
+    expect(screen.UNSAFE_getByType(ThemeProvider).props.fontScale).toBe(1);
+  });
 
   fireEvent.press(screen.getByRole('button', { name: /基础能力与图标/ }));
   expect(screen.getByTestId('foundation-screen')).toBeOnTheScreen();
@@ -229,11 +242,6 @@ test('ThemeProvider 将 system 映射为 undefined，并窄化三档主题与四
       screen.getByRole('tab', { name: label }).props.accessibilityState
     ).toMatchObject({ selected: true });
   }
-  runtimeCoverage.prove('normalizeFontScale', () => {
-    expect(
-      [undefined, Number.NaN, -1, 1, 1.25, 1.5, 2].map(normalizeFontScale)
-    ).toEqual([1, 1, 1, 1, 1.25, 1.5, 2]);
-  });
   runtimeCoverage.expectComplete();
 });
 

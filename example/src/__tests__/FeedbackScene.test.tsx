@@ -66,6 +66,12 @@ jest.mock('@unif/react-native-design', () => {
   return {
     ...actual,
     confirm: jest.fn(actual.confirm),
+    toast: {
+      ...actual.toast,
+      error: jest.fn(actual.toast.error),
+      info: jest.fn(actual.toast.info),
+      success: jest.fn(actual.toast.success),
+    },
     usePulse: jest.fn(actual.usePulse),
   };
 });
@@ -650,9 +656,9 @@ test('连续调用 Confirm 时第二个请求返回 false，第一个仍由用�
 
 test('ConfirmHost 与 ToastHost 的全部公开状态都由真实命令结果证明', async () => {
   jest.useFakeTimers();
-  const infoSpy = jest.spyOn(toast, 'info');
-  const successSpy = jest.spyOn(toast, 'success');
-  const errorSpy = jest.spyOn(toast, 'error');
+  const infoSpy = jest.mocked(toast.info);
+  const successSpy = jest.mocked(toast.success);
+  const errorSpy = jest.mocked(toast.error);
   const toastSpies = {
     信息: infoSpy,
     成功: successSpy,
@@ -705,6 +711,19 @@ test('ConfirmHost 与 ToastHost 的全部公开状态都由真实命令结果证
     }
   );
   runtimeCoverage.prove('toast', () => {
+    expect(infoSpy).toHaveBeenCalledTimes(1);
+    expect(successSpy).toHaveBeenCalledTimes(1);
+    expect(errorSpy).toHaveBeenCalledTimes(1);
+    expect(infoSpy).toHaveBeenLastCalledWith({
+      message: '信息提示 · 顶部',
+      position: 'top',
+      duration: 10_000,
+    });
+    expect(successSpy).toHaveBeenLastCalledWith({
+      message: '成功提示 · 居中',
+      position: 'center',
+      duration: 10_000,
+    });
     expect(errorSpy).toHaveBeenLastCalledWith({
       message: '错误提示 · 底部',
       position: 'bottom',
@@ -808,6 +827,7 @@ test('ConfirmHost 与 ToastHost 的全部公开状态都由真实命令结果证
   });
   confirmCoverage.expectComplete();
   runtimeCoverage.prove('confirm', () => {
+    expect(jest.mocked(confirm)).toHaveBeenCalledTimes(6);
     expect(jest.mocked(confirm)).toHaveBeenCalledWith(
       expect.objectContaining({ title: '继续当前操作？' })
     );

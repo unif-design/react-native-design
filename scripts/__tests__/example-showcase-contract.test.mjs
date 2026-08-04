@@ -127,7 +127,8 @@ function runExampleAcceptanceTest(fixture, testFile) {
   return spawnSync(
     process.execPath,
     [
-      path.join(repositoryRoot, 'example/node_modules/jest/bin/jest.js'),
+      path.join(repositoryRoot, 'scripts/run-example-jest.mjs'),
+      '--forbidOnly',
       '--config',
       JSON.stringify(config),
       '--runInBand',
@@ -137,7 +138,10 @@ function runExampleAcceptanceTest(fixture, testFile) {
     {
       cwd: repositoryRoot,
       encoding: 'utf8',
-      env: process.env,
+      env: {
+        ...process.env,
+        EXAMPLE_SHOWCASE_ROOT: fixtureRoot,
+      },
     }
   );
 }
@@ -211,6 +215,7 @@ const sourceContractFiles = [
   'example/babel.config.js',
   'example/metro.config.js',
   'example/jest.config.js',
+  'example/jest.forbidOnlyReporter.js',
   'example/tsconfig.json',
   'example/app.json',
   'example/index.js',
@@ -229,6 +234,7 @@ const sourceContractFiles = [
   'example/ios/ReactNativeDesignExample/Info.plist',
   'example/ios/ReactNativeDesignExample.xcodeproj/project.pbxproj',
   'example/ios/ReactNativeDesignExample.xcodeproj/xcshareddata/xcschemes/ReactNativeDesignExample.xcscheme',
+  'scripts/run-example-jest.mjs',
 ];
 
 const runtimeAcceptanceFiles = [
@@ -366,7 +372,14 @@ test('workspace scripts 暴露真实 example 及完整本地 gate', () => {
     existsSync(path.join(root, 'scripts/verify-example-showcase.mjs')),
     'verify:example-showcase 入口必须存在'
   );
-  assert.equal(examplePackage.scripts.test, 'jest');
+  assert.equal(
+    examplePackage.scripts.test,
+    'node ../scripts/run-example-jest.mjs --forbidOnly'
+  );
+  assert.deepEqual(
+    require(path.join(root, 'example/jest.config.js')).reporters,
+    ['default', '<rootDir>/jest.forbidOnlyReporter.js']
+  );
   assert.equal(examplePackage.scripts.typecheck, 'tsc --noEmit');
   assert.equal(examplePackage.scripts.lint, 'eslint .');
   assert.ok(
@@ -1009,6 +1022,371 @@ test('完整验收链拒绝 module if(false) 中的 createLogger', () => {
     assert.match(
       `${mutated.stdout}\n${mutated.stderr}`,
       /createLogger|runtime proof/u
+    );
+  });
+});
+
+test('runtime proof lifecycle 拒绝 if(false) 包裹 prove 与 completion', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'runtime proof lifecycle mutation 的 clean fixture 必须先完整通过'
+    );
+
+    mutateFixtureFile(
+      fixture,
+      'example/src/showcases/business/BusinessScene.tsx',
+      (source) =>
+        source
+          .replace(
+            "  const washGradientId = useSvgId('business-wash');",
+            "  const washGradientId = 'business-wash';"
+          )
+          .replace(
+            "  const haloGradientId = useSvgId('business-halo');",
+            "  const haloGradientId = 'business-halo';"
+          )
+          .replace(
+            '  const draft = state.scenes.business;',
+            [
+              '  const draft = state.scenes.business;',
+              '  if (false) {',
+              "    useSvgId('dead-wash');",
+              "    useSvgId('dead-halo');",
+              '  }',
+            ].join('\n')
+          ),
+      '删除真实 useSvgId calls 并用 Scene dead branch 保留静态 binding'
+    );
+    mutateFixtureFile(
+      fixture,
+      'example/src/__tests__/BusinessScene.test.tsx',
+      (source) =>
+        source
+          .replace(
+            "  runtimeCoverage.prove('useSvgId', () => {",
+            "  if (false) {\n    runtimeCoverage.prove('useSvgId', () => {"
+          )
+          .replace(
+            '  runtimeCoverage.expectComplete();',
+            '    runtimeCoverage.expectComplete();\n  }'
+          ),
+      '把 runtime prove 与 completion 一起包进 if(false)'
+    );
+
+    assertVerifierCode(
+      fixture,
+      'RUNTIME_API_TEST_PROOF',
+      'factory/prove/completion 必须是 owned test callback block 的直接语句'
+    );
+  });
+});
+
+test('focused sibling test 不能跳过 runtime proof test', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const clean = runExampleAcceptanceTest(fixture, 'BusinessScene.test.tsx');
+    assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'focused-test mutation 的 clean fixture 必须先完整通过'
+    );
+
+    mutateFixtureFile(
+      fixture,
+      'example/src/showcases/business/BusinessScene.tsx',
+      (source) =>
+        source
+          .replace(
+            "  const washGradientId = useSvgId('business-wash');",
+            "  const washGradientId = 'business-wash';"
+          )
+          .replace(
+            "  const haloGradientId = useSvgId('business-halo');",
+            "  const haloGradientId = 'business-halo';"
+          )
+          .replace(
+            '  const draft = state.scenes.business;',
+            [
+              '  const draft = state.scenes.business;',
+              '  if (false) {',
+              "    useSvgId('dead-wash');",
+              "    useSvgId('dead-halo');",
+              '  }',
+            ].join('\n')
+          ),
+      '删除真实 useSvgId calls 并用 Scene dead branch 保留静态 binding'
+    );
+    mutateFixtureFile(
+      fixture,
+      'example/src/__tests__/BusinessScene.test.tsx',
+      (source) =>
+        source.replace(
+          "test('GradientWash、RadialHalo 与 ScreenBackdrop",
+          "test.only('GradientWash、RadialHalo 与 ScreenBackdrop"
+        ),
+      '把不含 runtime proof 的 sibling test 改成 test.only'
+    );
+
+    const mutated = runExampleAcceptanceTest(
+      fixture,
+      'BusinessScene.test.tsx'
+    );
+    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /forbidOnly|focused|test\.only|exclusive/u
+    );
+    assertVerifierCode(
+      fixture,
+      'RUNTIME_API_TEST_PROOF',
+      'production verifier 必须拒绝 governed example tests 的 focused registration'
+    );
+  });
+});
+
+test('--forbidOnly 入口拒绝没有 sibling skip 的单一 focused test', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const singleFocusedTest = path.join(
+      fixture,
+      'example/src/__tests__/SingleFocused.test.ts'
+    );
+    writeFileSync(
+      singleFocusedTest,
+      [
+        "test.only('single focused test', () => {",
+        '  expect(1).toBe(1);',
+        '});',
+        '',
+      ].join('\n')
+    );
+
+    const mutated = runExampleAcceptanceTest(
+      fixture,
+      'SingleFocused.test.ts'
+    );
+    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /forbidOnly|focused|test\.only/u
+    );
+  });
+});
+
+test('runtime proof test callback 不能提前 return 跳过 lifecycle', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      'early-return mutation 的 clean fixture 必须先完整通过'
+    );
+    mutateFixtureFile(
+      fixture,
+      'example/src/__tests__/BusinessScene.test.tsx',
+      (source) =>
+        source.replace(
+          "test('scene 直接生成并使用两个唯一合法 SVG id，装饰 wrapper 隐藏完整 a11y 子树', () => {",
+          [
+            "test('scene 直接生成并使用两个唯一合法 SVG id，装饰 wrapper 隐藏完整 a11y 子树', () => {",
+            '  return;',
+          ].join('\n')
+        ),
+      '在 owned runtime proof test callback 顶部提前 return'
+    );
+    assertVerifierCode(
+      fixture,
+      'RUNTIME_API_TEST_PROOF',
+      'owned proof test callback 中任何 return 都可能跳过 lifecycle'
+    );
+  });
+});
+
+test('proof lifecycle 要求 factory 直接声明且 completion 位于全部 prove 之后', () => {
+  const mutations = [
+    {
+      label: 'factory declaration 包进 if block',
+      mutate: (source) =>
+        source
+          .replace(
+            "  const runtimeCoverage = createShowcaseRuntimeCoverage('business');",
+            [
+              '  if (true) {',
+              "    const runtimeCoverage = createShowcaseRuntimeCoverage('business');",
+            ].join('\n')
+          )
+          .replace(
+            '  runtimeCoverage.expectComplete();',
+            '    runtimeCoverage.expectComplete();\n  }'
+          ),
+    },
+    {
+      label: 'completion 移到 prove 之前',
+      mutate: (source) =>
+        source
+          .replace('  runtimeCoverage.expectComplete();\n', '')
+          .replace(
+            "  runtimeCoverage.prove('useSvgId', () => {",
+            [
+              '  runtimeCoverage.expectComplete();',
+              "  runtimeCoverage.prove('useSvgId', () => {",
+            ].join('\n')
+          ),
+    },
+  ];
+
+  for (const mutation of mutations) {
+    withFixture([...new Set(sourceContractFiles)], (fixture) => {
+      assert.doesNotThrow(
+        () => showcaseVerifier.verifyExampleShowcase(fixture),
+        `${mutation.label} clean fixture 必须先完整通过`
+      );
+      mutateFixtureFile(
+        fixture,
+        'example/src/__tests__/BusinessScene.test.tsx',
+        mutation.mutate,
+        mutation.label
+      );
+      assertVerifierCode(
+        fixture,
+        'RUNTIME_API_TEST_PROOF',
+        mutation.label
+      );
+    });
+  }
+});
+
+test('governed example tests 全局拒绝 focused、skipped 与 todo registrations', () => {
+  const mutations = [
+    ['test.only', (source) => source.replace('test(', 'test.only(')],
+    ['it.only', (source) => source.replace('test(', 'it.only(')],
+    ['fit', (source) => source.replace('test(', 'fit(')],
+    [
+      'test.concurrent.only',
+      (source) => source.replace('test(', 'test.concurrent.only('),
+    ],
+    [
+      'test.each.only',
+      (source) => source.replace('test(', 'test.each([1]).only('),
+    ],
+    [
+      'describe.only',
+      (source) => `describe.only('focused', () => {});\n${source}`,
+    ],
+    ['fdescribe', (source) => `fdescribe('focused', () => {});\n${source}`],
+    ['test.skip', (source) => source.replace('test(', 'test.skip(')],
+    ['it.skip', (source) => source.replace('test(', 'it.skip(')],
+    ['xit', (source) => source.replace('test(', 'xit(')],
+    ['xtest', (source) => source.replace('test(', 'xtest(')],
+    [
+      'describe.skip',
+      (source) => `describe.skip('skipped', () => {});\n${source}`,
+    ],
+    [
+      'test.todo',
+      (source) => `test.todo('todo registration');\n${source}`,
+    ],
+    [
+      'describe.each.only',
+      (source) =>
+        `describe.each([1]).only('focused each', () => {});\n${source}`,
+    ],
+  ];
+
+  for (const [label, mutate] of mutations) {
+    withFixture([...new Set(sourceContractFiles)], (fixture) => {
+      assert.doesNotThrow(
+        () => showcaseVerifier.verifyExampleShowcase(fixture),
+        `${label} clean fixture 必须先完整通过`
+      );
+      mutateFixtureFile(
+        fixture,
+        'example/src/__tests__/BusinessScene.test.tsx',
+        mutate,
+        label
+      );
+      assertVerifierCode(fixture, 'RUNTIME_API_TEST_PROOF', label);
+    });
+  }
+});
+
+test('完整验收链拒绝 useTheme 硬编码结果与 dead call 冒充', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const clean = runExampleAcceptanceTest(fixture, 'FoundationScene.test.tsx');
+    assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
+
+    mutateFixtureFile(
+      fixture,
+      'example/src/showcases/foundation/FoundationScene.tsx',
+      (source) =>
+        source
+          .replace(
+            '  const theme = useTheme();',
+            "  const theme = { scheme: 'light' as const };"
+          )
+          .replace(
+            '  const draft = state.scenes.foundation;',
+            [
+              '  const draft = state.scenes.foundation;',
+              '  if (false) {',
+              '    useTheme();',
+              '  }',
+            ].join('\n')
+          ),
+      '用硬编码 light theme 替代真实 useTheme 并保留 dead call'
+    );
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      '静态 binding gate 不解释 useTheme dead branch'
+    );
+
+    const mutated = runExampleAcceptanceTest(
+      fixture,
+      'FoundationScene.test.tsx'
+    );
+    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /useTheme|runtime proof/u
+    );
+  });
+});
+
+test('完整验收链拒绝 BRAND_ORANGE 默认值硬编码与 dead binding 冒充', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const clean = runExampleAcceptanceTest(fixture, 'FoundationScene.test.tsx');
+    assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
+
+    mutateFixtureFile(
+      fixture,
+      'example/src/showcases/foundation/FoundationScene.tsx',
+      (source) =>
+        source
+          .replace(
+            '；品牌 {BRAND_ORANGE}',
+            "；品牌 {['#', 'EB6E00'].join('')}"
+          )
+          .replace(
+            '  const draft = state.scenes.foundation;',
+            [
+              '  const draft = state.scenes.foundation;',
+              '  if (false) {',
+              '    void BRAND_ORANGE;',
+              '  }',
+            ].join('\n')
+          ),
+      '用默认品牌色表达式替代 BRAND_ORANGE 并保留 dead binding'
+    );
+    assert.doesNotThrow(
+      () => showcaseVerifier.verifyExampleShowcase(fixture),
+      '静态 binding gate 不解释 BRAND_ORANGE dead branch'
+    );
+
+    const mutated = runExampleAcceptanceTest(
+      fixture,
+      'FoundationScene.test.tsx'
+    );
+    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /BRAND_ORANGE|品牌|runtime proof/u
     );
   });
 });

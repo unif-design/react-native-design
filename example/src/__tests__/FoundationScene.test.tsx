@@ -8,7 +8,6 @@ import {
   avatar,
   avatarGradient,
   blur,
-  childTestID,
   consoleTransport,
   control,
   darkColors,
@@ -22,10 +21,7 @@ import {
   lightShadow,
   motion,
   pressedOpacity,
-  r,
   radius,
-  rf,
-  scaleFontMetric,
   space,
   type,
   warmOrangePalette,
@@ -45,11 +41,64 @@ jest.mock('@unif/react-native-design', () => {
   );
   return {
     ...actual,
+    BRAND_ORANGE: 'magenta',
+    ICONS: { ...actual.ICONS, warning: undefined },
+    ICON_NAMES: [...actual.ICON_NAMES].reverse(),
     addTransport: jest.fn(actual.addTransport),
+    avatar: { ...actual.avatar, md: 37 },
+    avatarGradient: ['orange', 'magenta', 'purple'],
+    blur: { ...actual.blur, soft: 12, strong: 44 },
+    childTestID: jest.fn(actual.childTestID),
+    consoleTransport: {
+      id: 'foundation-console-sentinel',
+      log: actual.consoleTransport.log,
+    },
+    control: { ...actual.control, lg: 47 },
     createLogger: jest.fn(actual.createLogger),
+    darkColors: {
+      ...actual.darkColors,
+      primary: 'cyan',
+      background: 'navy',
+    },
+    darkShadow: {
+      ...actual.darkShadow,
+      card: { ...actual.darkShadow.card, shadowOpacity: 0.41 },
+    },
+    dim: { ...actual.dim, sendBtn: 35 },
+    fixed: { ...actual.fixed, hitTarget: 48 },
+    fontMono: 'Courier',
+    fw: { ...actual.fw, semi: '800' },
     getLogLevel: jest.fn(actual.getLogLevel),
+    icon: { ...actual.icon, md: 29 },
+    lightColors: {
+      ...actual.lightColors,
+      primary: 'magenta',
+      background: 'yellow',
+    },
+    lightShadow: {
+      ...actual.lightShadow,
+      card: { ...actual.lightShadow.card, shadowOpacity: 0.31 },
+    },
+    motion: { ...actual.motion, base: 240 },
+    pressedOpacity: 0.63,
+    r: jest.fn(actual.r),
+    radius: { ...actual.radius, md: 13 },
     removeTransport: jest.fn(actual.removeTransport),
+    rf: jest.fn(actual.rf),
+    scaleFontMetric: jest.fn(actual.scaleFontMetric),
     setLogLevel: jest.fn(actual.setLogLevel),
+    space: { ...actual.space, '4': 13 },
+    type: { ...actual.type, body: 23, sm: 17, xxs: 11 },
+    useColors: jest.fn(actual.useColors),
+    useFontScale: jest.fn(actual.useFontScale),
+    usePrefersReducedMotion: jest.fn(actual.usePrefersReducedMotion),
+    useShadow: jest.fn(actual.useShadow),
+    useTheme: jest.fn(actual.useTheme),
+    useThemedStyles: jest.fn(actual.useThemedStyles),
+    warmOrangePalette: {
+      light: ['orange', 'yellow', 'white'],
+      dark: ['black', 'purple'],
+    },
     ConfirmHost: function MockConfirmHost() {
       return null;
     },
@@ -79,16 +128,34 @@ afterEach(() => {
 test('Foundation 展示真实 theme、token、palette、scale、blur 与 Icon 事实', () => {
   installReducedMotionMock(false);
   render(<App />);
+  const callableMocks = [
+    DesignRuntime.childTestID,
+    DesignRuntime.r,
+    DesignRuntime.rf,
+    DesignRuntime.scaleFontMetric,
+    DesignRuntime.useColors,
+    DesignRuntime.useFontScale,
+    DesignRuntime.usePrefersReducedMotion,
+    DesignRuntime.useShadow,
+    DesignRuntime.useTheme,
+    DesignRuntime.useThemedStyles,
+  ].map((callable) => jest.mocked(callable));
+  for (const callable of callableMocks) callable.mockClear();
   enterFoundation();
   const runtimeCoverage = createShowcaseRuntimeCoverage('foundation');
 
   runtimeCoverage.prove('useTheme', () => {
+    expect(jest.mocked(DesignRuntime.useTheme)).toHaveBeenCalledTimes(1);
     expect(screen.getByText('当前主题：浅色')).toBeOnTheScreen();
   });
   runtimeCoverage.prove('useFontScale', () => {
+    expect(jest.mocked(DesignRuntime.useFontScale)).toHaveBeenCalledTimes(1);
     expect(screen.getByText('字号倍率：1')).toBeOnTheScreen();
   });
   runtimeCoverage.prove('usePrefersReducedMotion', () => {
+    expect(
+      jest.mocked(DesignRuntime.usePrefersReducedMotion)
+    ).toHaveBeenCalledTimes(1);
     expect(screen.getByText('减少动态效果：否')).toBeOnTheScreen();
   });
   runtimeCoverage.prove(
@@ -97,6 +164,15 @@ test('Foundation 展示真实 theme、token、palette、scale、blur 与 Icon �
     'lightColors',
     'darkColors',
     () => {
+      const useColors = jest.mocked(DesignRuntime.useColors);
+      const useThemedStyles = jest.mocked(DesignRuntime.useThemedStyles);
+      expect(useColors).toHaveBeenCalledTimes(2);
+      expect(useThemedStyles).toHaveBeenCalledTimes(10);
+      expect(
+        useThemedStyles.mock.calls.every(
+          ([maker]) => typeof maker === 'function'
+        )
+      ).toBe(true);
       expect(
         screen.getByText(
           `配对色板：浅色 ${lightColors.primary} / 深色 ${darkColors.primary}`
@@ -113,11 +189,15 @@ test('Foundation 展示真实 theme、token、palette、scale、blur 与 Icon �
         })
       ).toHaveStyle({ backgroundColor: darkColors.background });
       expect(
-        screen.getByText(`当前 primary：${lightColors.primary}`)
+        screen.getByText(
+          `当前 primary：${String(useColors.mock.results[0]?.value.primary)}`
+        )
       ).toBeOnTheScreen();
     }
   );
   runtimeCoverage.prove('useShadow', 'lightShadow', 'darkShadow', () => {
+    const useShadow = jest.mocked(DesignRuntime.useShadow);
+    expect(useShadow).toHaveBeenCalledTimes(1);
     const shadowMetrics = screen.getByTestId('foundation-shadow-metrics');
     expect(shadowMetrics).toHaveTextContent(
       new RegExp(`浅色 card ${escapeRegExp(lightShadow.card.shadowOpacity)}`)
@@ -125,7 +205,11 @@ test('Foundation 展示真实 theme、token、palette、scale、blur 与 Icon �
     expect(shadowMetrics).toHaveTextContent(
       new RegExp(`深色 card ${escapeRegExp(darkShadow.card.shadowOpacity)}`)
     );
-    expect(shadowMetrics).toHaveTextContent(/当前 subtle/u);
+    expect(shadowMetrics).toHaveTextContent(
+      new RegExp(
+        `当前 subtle ${escapeRegExp(String(useShadow.mock.results[0]?.value.subtle.shadowOpacity))}`
+      )
+    );
   });
   runtimeCoverage.prove(
     'warmOrangePalette',
@@ -208,27 +292,54 @@ test('Foundation 展示真实 theme、token、palette、scale、blur 与 Icon �
     }
   );
   runtimeCoverage.prove('scaleFontMetric', 'r', 'rf', () => {
+    const rMock = jest.mocked(DesignRuntime.r);
+    const rfMock = jest.mocked(DesignRuntime.rf);
+    const scaleFontMetricMock = jest.mocked(DesignRuntime.scaleFontMetric);
+    expect(rMock).toHaveBeenCalledTimes(1);
+    expect(rMock).toHaveBeenCalledWith(8);
+    expect(rfMock).toHaveBeenCalledTimes(1);
+    expect(rfMock).toHaveBeenCalledWith(15);
+    expect(scaleFontMetricMock).toHaveBeenCalledTimes(1);
+    expect(scaleFontMetricMock).toHaveBeenCalledWith(type.body, 1);
     const scaleMetrics = screen.getByTestId('foundation-scale-metrics');
     expect(scaleMetrics).toHaveTextContent(
-      new RegExp(`r\\(8\\)=${escapeRegExp(r(8))}`)
+      new RegExp(
+        `r\\(8\\)=${escapeRegExp(String(rMock.mock.results[0]?.value))}`
+      )
     );
     expect(scaleMetrics).toHaveTextContent(
-      new RegExp(`rf\\(15\\)=${escapeRegExp(rf(15))}`)
+      new RegExp(
+        `rf\\(15\\)=${escapeRegExp(String(rfMock.mock.results[0]?.value))}`
+      )
     );
     expect(scaleMetrics).toHaveTextContent(
-      new RegExp(`dynamic body=${escapeRegExp(scaleFontMetric(type.body, 1))}`)
+      new RegExp(
+        `dynamic body=${escapeRegExp(String(scaleFontMetricMock.mock.results[0]?.value))}`
+      )
     );
   });
   runtimeCoverage.prove('ICONS', 'ICON_NAMES', () => {
-    expect(ICON_NAMES.every((name) => ICONS[name] !== undefined)).toBe(true);
+    expect(ICONS.warning).toBeUndefined();
+    expect(ICON_NAMES.every((name) => ICONS[name] !== undefined)).toBe(false);
     expect(
-      screen.getByText(`图标诊断：${ICON_NAMES.length} / 数据完整`)
+      screen.getByText(`图标诊断：${ICON_NAMES.length} / 数据缺失`)
     ).toBeOnTheScreen();
+    expect(screen.getByText(ICON_NAMES[0] ?? '')).toBeOnTheScreen();
   });
   runtimeCoverage.prove('childTestID', () => {
     const firstIconName = ICON_NAMES[0];
     if (!firstIconName) throw new Error('Icon catalog 必须至少包含一个名称');
-    const iconTestID = childTestID('foundation-icons', firstIconName);
+    const childTestIDMock = jest.mocked(DesignRuntime.childTestID);
+    expect(childTestIDMock).toHaveBeenCalledTimes(24);
+    expect(childTestIDMock).toHaveBeenCalledWith(
+      'foundation-icons',
+      firstIconName
+    );
+    const firstCallIndex = childTestIDMock.mock.calls.findIndex(
+      ([parent, child]) =>
+        parent === 'foundation-icons' && child === firstIconName
+    );
+    const iconTestID = childTestIDMock.mock.results[firstCallIndex]?.value;
     if (!iconTestID) throw new Error('childTestID 必须生成非空 ID');
     expect(screen.getByTestId(iconTestID)).toBeOnTheScreen();
   });
@@ -238,6 +349,7 @@ test('Foundation 展示真实 theme、token、palette、scale、blur 与 Icon �
     ).toBeOnTheScreen();
   });
   runtimeCoverage.prove('createLogger', () => {
+    expect(jest.mocked(DesignRuntime.createLogger)).toHaveBeenCalledTimes(1);
     expect(jest.mocked(DesignRuntime.createLogger)).toHaveBeenCalledWith(
       'FoundationScene'
     );
@@ -259,11 +371,15 @@ test('Foundation 展示真实 theme、token、palette、scale、blur 与 Icon �
     'removeTransport',
     () => {
       expect(getLogLevel).toHaveBeenCalled();
+      expect(getLogLevel).toHaveBeenCalledTimes(2);
       expect(setLogLevel).toHaveBeenCalledWith('info');
+      expect(setLogLevel).toHaveBeenCalledTimes(2);
       expect(addTransport).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'foundation-scene-one-shot' })
       );
+      expect(addTransport).toHaveBeenCalledTimes(1);
       expect(removeTransport).toHaveBeenCalledWith('foundation-scene-one-shot');
+      expect(removeTransport).toHaveBeenCalledTimes(1);
       expect(
         screen.getByText('最新结果：Logger · 记录 · 主题诊断示例已记录')
       ).toBeOnTheScreen();
@@ -300,7 +416,10 @@ test('Icon catalog 初始 24 个、每次多 24 个，并由大小写不敏感�
   });
   const firstIcon = iconWrappers[0]?.findByType(Icon);
   stateCoverage.prove('icon.color', () => {
-    expect(firstIcon?.props.color).toBe(lightColors.primary);
+    const renderedColors = jest
+      .mocked(DesignRuntime.useColors)
+      .mock.results.at(-1)?.value;
+    expect(firstIcon?.props.color).toBe(renderedColors?.primary);
   });
   stateCoverage.prove('icon.a11y-hidden', () => {
     expect(
