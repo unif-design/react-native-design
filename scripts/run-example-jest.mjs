@@ -122,6 +122,18 @@ function assertReporterContract(globalConfig, jestRoot) {
       'resolved reporters 必须恰好保留 default 与 governed owner attestation reporter'
     );
   }
+  return reporterPath;
+}
+
+function buildActualJestArguments(jestArgs, discoveredTests, reporterPath) {
+  return [
+    ...jestArgs,
+    '--runTestsByPath',
+    '--reporters=default',
+    `--reporters=${reporterPath}`,
+    '--testFailureExitCode=1',
+    ...discoveredTests,
+  ];
 }
 
 function discoverSelectedTests(jestRoot, configPath) {
@@ -276,7 +288,10 @@ async function resolveProductionGate(jestArgs) {
       'resolved filter/ignore config 不得缩小 production discovery set'
     );
   }
-  assertReporterContract(resolvedConfigs.globalConfig, jestRoot);
+  const reporterPath = assertReporterContract(
+    resolvedConfigs.globalConfig,
+    jestRoot
+  );
 
   const gateContract = require(path.join(jestRoot, 'jest.showcaseGate.js'));
   const ownerFiles = gateContract.governedOwnerTestFiles;
@@ -298,9 +313,10 @@ async function resolveProductionGate(jestArgs) {
     'JEST_CONFIG_ROOT',
     'production jest.config.js'
   );
-  const discoveredTests = new Set(discoverSelectedTests(jestRoot, configPath));
+  const discoveredTests = discoverSelectedTests(jestRoot, configPath);
+  const discoveredTestSet = new Set(discoveredTests);
   const missingSelected = requiredTestPaths.filter(
-    (testPath) => !discoveredTests.has(testPath)
+    (testPath) => !discoveredTestSet.has(testPath)
   );
   if (missingSelected.length > 0) {
     failGate(
@@ -311,7 +327,13 @@ async function resolveProductionGate(jestArgs) {
   process.stderr.write(
     `[showcaseOwners] JEST_GOVERNED_SUITES_SELECTED count=${requiredTestPaths.length}\n`
   );
-  return { contractRoot, jestRoot, requiredTestPaths };
+  return {
+    contractRoot,
+    discoveredTests,
+    jestRoot,
+    reporterPath,
+    requiredTestPaths,
+  };
 }
 
 let gate;
@@ -329,12 +351,16 @@ try {
 
 const result = spawnSync(
   process.execPath,
-  [path.join(repositoryRoot, 'example/node_modules/jest/bin/jest.js'), ...args],
+  [
+    path.join(repositoryRoot, 'example/node_modules/jest/bin/jest.js'),
+    ...buildActualJestArguments(args, gate.discoveredTests, gate.reporterPath),
+  ],
   {
     cwd: gate.jestRoot,
     env: {
       ...process.env,
       EXAMPLE_SHOWCASE_JEST_ATTESTATION: JSON.stringify({
+        expectedTestPaths: gate.discoveredTests,
         rootDir: gate.jestRoot,
         requiredTestPaths: gate.requiredTestPaths,
       }),

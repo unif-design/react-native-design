@@ -144,6 +144,58 @@ function writeFixtureProductionJestConfig(fixture, overrides = {}) {
   return fixtureExampleRoot;
 }
 
+function writePhaseDependentFixtureProductionJestConfig(fixture) {
+  const { fixtureExampleRoot } = prepareFixtureExampleRuntime(fixture);
+  const productionConfig = readFileSync(
+    path.join(repositoryRoot, 'example/jest.config.js'),
+    'utf8'
+  ).replace('module.exports = {', 'const safeConfig = {');
+  writeFileSync(
+    path.join(fixtureExampleRoot, 'jest.config.js'),
+    [
+      productionConfig.trimEnd(),
+      '',
+      'module.exports = process.env.EXAMPLE_SHOWCASE_JEST_ATTESTATION',
+      '  ? {',
+      '      ...safeConfig,',
+      "      testMatch: ['**/exampleNavigation.test.ts'],",
+      "      reporters: ['default'],",
+      '      testFailureExitCode: 0,',
+      '    }',
+      '  : safeConfig;',
+      '',
+    ].join('\n')
+  );
+  return fixtureExampleRoot;
+}
+
+function writeArgvSensitiveFixtureProductionJestConfig(fixture) {
+  const { fixtureExampleRoot } = prepareFixtureExampleRuntime(fixture);
+  const productionConfig = readFileSync(
+    path.join(repositoryRoot, 'example/jest.config.js'),
+    'utf8'
+  ).replace('module.exports = {', 'const safeConfig = {');
+  writeFileSync(
+    path.join(fixtureExampleRoot, 'jest.config.js'),
+    [
+      productionConfig.trimEnd(),
+      '',
+      'module.exports =',
+      '  !process.env.EXAMPLE_SHOWCASE_JEST_ATTESTATION ||',
+      "  process.argv.includes('--runTestsByPath')",
+      '    ? safeConfig',
+      '    : {',
+      '        ...safeConfig,',
+      "        testMatch: ['**/exampleNavigation.test.ts'],",
+      "        reporters: ['default'],",
+      '        testFailureExitCode: 0,',
+      '      };',
+      '',
+    ].join('\n')
+  );
+  return fixtureExampleRoot;
+}
+
 function runExampleJestWrapper(
   fixture,
   args,
@@ -219,6 +271,109 @@ function runExampleAcceptanceTest(
     ],
     { showcaseRoot }
   );
+}
+
+function withActualJestReporterFixture(run) {
+  const fixture = realpathSync(
+    mkdtempSync(
+      path.join(os.tmpdir(), 'react-native-design-actual-jest-reporter-')
+    )
+  );
+  const outsideFixture = realpathSync(
+    mkdtempSync(
+      path.join(os.tmpdir(), 'react-native-design-outside-jest-reporter-')
+    )
+  );
+  try {
+    const testRoot = path.join(fixture, 'src/__tests__');
+    mkdirSync(testRoot, { recursive: true });
+    const ownerNames = [
+      'App',
+      'FoundationScene',
+      'ActionsScene',
+      'FeedbackScene',
+      'FormsScene',
+      'NavigationScene',
+      'CollectionsScene',
+      'MediaScene',
+      'BusinessScene',
+    ];
+    const requiredTestPaths = ownerNames.map((name) =>
+      path.join(testRoot, `${name}.test.js`)
+    );
+    const nonOwnerTestPath = path.join(testRoot, 'NonOwner.test.js');
+    const outsideExpectedTestPath = path.join(
+      outsideFixture,
+      'OutsideExpected.test.js'
+    );
+    const expectedTestPaths = [...requiredTestPaths, nonOwnerTestPath];
+    for (const testPath of expectedTestPaths) {
+      writeFileSync(
+        testPath,
+        `test(${JSON.stringify(path.basename(testPath))}, () => { expect(1).toBe(1); });\n`
+      );
+    }
+    writeFileSync(
+      outsideExpectedTestPath,
+      "test('outside expected', () => { expect(1).toBe(1); });\n"
+    );
+    const configPath = path.join(fixture, 'jest.config.cjs');
+    writeFileSync(
+      configPath,
+      `module.exports = ${JSON.stringify({
+        rootDir: fixture,
+        testEnvironment: 'node',
+        testMatch: ['**/*.test.js'],
+        reporters: [
+          'default',
+          path.join(repositoryRoot, 'example/jest.forbidOnlyReporter.js'),
+        ],
+        transform: {},
+      })};\n`
+    );
+
+    const runReporter = ({
+      attestation,
+      attestedExpectedTestPaths = expectedTestPaths,
+      attestedRequiredTestPaths = requiredTestPaths,
+      selectedTestPaths = expectedTestPaths,
+    } = {}) => {
+      const env = {
+        ...process.env,
+        EXAMPLE_SHOWCASE_JEST_ATTESTATION: JSON.stringify(
+          attestation ?? {
+            rootDir: fixture,
+            requiredTestPaths: attestedRequiredTestPaths,
+            expectedTestPaths: attestedExpectedTestPaths,
+          }
+        ),
+      };
+      return spawnSync(
+        process.execPath,
+        [
+          path.join(repositoryRoot, 'example/node_modules/jest/bin/jest.js'),
+          '--config',
+          configPath,
+          '--runInBand',
+          '--runTestsByPath',
+          ...selectedTestPaths,
+        ],
+        { cwd: fixture, encoding: 'utf8', env }
+      );
+    };
+
+    return run({
+      expectedTestPaths,
+      fixture,
+      nonOwnerTestPath,
+      outsideExpectedTestPath,
+      requiredTestPaths,
+      runReporter,
+    });
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
+    rmSync(outsideFixture, { recursive: true, force: true });
+  }
 }
 
 const expectedRuntimeDependencies = {
@@ -1723,6 +1878,44 @@ test('production Jest gate 从 resolved config 拒绝 owner discovery 与 report
   }
 });
 
+test('production Jest actual execution contract survives phase-dependent config', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const fixtureExampleRoot =
+      writePhaseDependentFixtureProductionJestConfig(fixture);
+    assert.doesNotThrow(() => showcaseVerifier.verifyExampleShowcase(fixture));
+
+    const result = runExampleJestWrapper(fixture, ['--runInBand'], {
+      cwd: fixtureExampleRoot,
+    });
+    const output = `${result.stdout}\n${result.stderr}`;
+    assert.equal(result.status, 1, output);
+    assert.match(output, /JEST_EXECUTION_SET_COMPLETED missing=/u);
+    assert.match(output, /JEST_GOVERNED_SUITES_COMPLETED missing=/u);
+  });
+});
+
+test('production Jest actual execution binds discovered paths with runTestsByPath', () => {
+  withFixture(
+    [...new Set([...runtimeAcceptanceFiles, ...listFiles('src')])],
+    (fixture) => {
+      const fixtureExampleRoot =
+        writeArgvSensitiveFixtureProductionJestConfig(fixture);
+      assert.doesNotThrow(() =>
+        showcaseVerifier.verifyExampleShowcase(fixture)
+      );
+
+      const result = runExampleJestWrapper(fixture, ['--runInBand'], {
+        cwd: fixtureExampleRoot,
+      });
+      const output = `${result.stdout}\n${result.stderr}`;
+      assert.equal(result.status, 0, output);
+      assert.match(output, /JEST_EXECUTION_SET_COMPLETED count=15/u);
+      assert.match(output, /JEST_GOVERNED_SUITES_COMPLETED count=9/u);
+      assert.doesNotMatch(output, /Test Suites:\s+1 passed, 1 total/u);
+    }
+  );
+});
+
 test('production Jest gate 精确拒绝 shared owner contract 替换真实 App suite', () => {
   withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
     const fixtureExampleRoot = writeFixtureProductionJestConfig(fixture);
@@ -1752,83 +1945,171 @@ test('production Jest gate 精确拒绝 shared owner contract 替换真实 App s
   });
 });
 
-test('actual Jest reporter 在缺少任一 required owner suite 时返回 non-zero', () => {
-  const fixture = mkdtempSync(
-    path.join(os.tmpdir(), 'react-native-design-owner-reporter-')
-  );
-  try {
-    const testRoot = path.join(fixture, 'src/__tests__');
-    mkdirSync(testRoot, { recursive: true });
-    const ownerNames = [
-      'App',
-      'FoundationScene',
-      'ActionsScene',
-      'FeedbackScene',
-      'FormsScene',
-      'NavigationScene',
-      'CollectionsScene',
-      'MediaScene',
-      'BusinessScene',
-    ];
-    const requiredTestPaths = ownerNames.map((name) =>
-      path.join(testRoot, `${name}.test.js`)
+test('actual Jest reporter 接受 clean exact expected set 并输出双 completion marker', () => {
+  withActualJestReporterFixture(({ runReporter }) => {
+    const clean = runReporter();
+    const output = `${clean.stdout}\n${clean.stderr}`;
+    assert.equal(clean.status, 0, output);
+    assert.match(output, /JEST_EXECUTION_SET_COMPLETED count=10/u);
+    assert.match(output, /JEST_GOVERNED_SUITES_COMPLETED count=9/u);
+    assert.doesNotMatch(
+      output,
+      /JEST_(?:EXECUTION_SET_COMPLETED|ATTESTATION_CONFIG).*?(?:missing|unexpected|非法)/u
     );
-    for (const testPath of requiredTestPaths) {
-      writeFileSync(
-        testPath,
-        `test(${JSON.stringify(path.basename(testPath))}, () => { expect(1).toBe(1); });\n`
+  });
+});
+
+test('actual Jest reporter 在缺少 non-owner expected file 时返回 non-zero', () => {
+  withActualJestReporterFixture(
+    ({ nonOwnerTestPath, requiredTestPaths, runReporter }) => {
+      const mutated = runReporter({ selectedTestPaths: requiredTestPaths });
+      const output = `${mutated.stdout}\n${mutated.stderr}`;
+      assert.equal(mutated.status, 1, output);
+      assert.match(
+        output,
+        new RegExp(
+          `JEST_EXECUTION_SET_COMPLETED.*missing=.*${path.basename(nonOwnerTestPath)}`,
+          'u'
+        )
       );
     }
-    const configPath = path.join(fixture, 'jest.config.cjs');
-    writeFileSync(
-      configPath,
-      `module.exports = ${JSON.stringify({
-        rootDir: fixture,
-        testEnvironment: 'node',
-        testMatch: ['**/*.test.js'],
-        reporters: [
-          'default',
-          path.join(repositoryRoot, 'example/jest.forbidOnlyReporter.js'),
-        ],
-        transform: {},
-      })};\n`
-    );
-    const env = {
-      ...process.env,
-      EXAMPLE_SHOWCASE_JEST_ATTESTATION: JSON.stringify({
-        rootDir: fixture,
-        requiredTestPaths,
-      }),
-    };
-    const runReporter = () =>
-      spawnSync(
-        process.execPath,
-        [
-          path.join(repositoryRoot, 'example/node_modules/jest/bin/jest.js'),
-          '--config',
-          configPath,
-          '--runInBand',
-        ],
-        { cwd: fixture, encoding: 'utf8', env }
+  );
+});
+
+test('actual Jest reporter 在完成 unexpected file 时返回 non-zero', () => {
+  withActualJestReporterFixture(
+    ({ nonOwnerTestPath, requiredTestPaths, runReporter }) => {
+      const mutated = runReporter({
+        attestedExpectedTestPaths: requiredTestPaths,
+      });
+      const output = `${mutated.stdout}\n${mutated.stderr}`;
+      assert.equal(mutated.status, 1, output);
+      assert.match(
+        output,
+        new RegExp(
+          `JEST_EXECUTION_SET_COMPLETED.*unexpected=.*${path.basename(nonOwnerTestPath)}`,
+          'u'
+        )
       );
+    }
+  );
+});
 
-    const clean = runReporter();
-    assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
-    assert.match(
-      `${clean.stdout}\n${clean.stderr}`,
-      /JEST_GOVERNED_SUITES_COMPLETED/u
-    );
+test('actual Jest reporter 在缺少任一 required owner suite 时保留 owner failure marker', () => {
+  withActualJestReporterFixture(
+    ({ expectedTestPaths, requiredTestPaths, runReporter }) => {
+      const missingOwnerPath = requiredTestPaths.at(-1);
+      const mutated = runReporter({
+        selectedTestPaths: expectedTestPaths.filter(
+          (testPath) => testPath !== missingOwnerPath
+        ),
+      });
+      const output = `${mutated.stdout}\n${mutated.stderr}`;
+      assert.equal(mutated.status, 1, output);
+      assert.match(
+        output,
+        /JEST_GOVERNED_SUITES_COMPLETED.*BusinessScene\.test\.js/u
+      );
+    }
+  );
+});
 
-    rmSync(requiredTestPaths.at(-1));
-    const mutated = runReporter();
-    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
-    assert.match(
-      `${mutated.stdout}\n${mutated.stderr}`,
-      /JEST_GOVERNED_SUITES_COMPLETED.*BusinessScene\.test\.js/u
-    );
-  } finally {
-    rmSync(fixture, { recursive: true, force: true });
-  }
+test('actual Jest reporter 在 skipped 与 owner missing 并存时仍输出两个 set marker', () => {
+  withActualJestReporterFixture(
+    ({ expectedTestPaths, requiredTestPaths, runReporter }) => {
+      const skippedOwnerPath = requiredTestPaths[0];
+      const missingOwnerPath = requiredTestPaths.at(-1);
+      writeFileSync(
+        skippedOwnerPath,
+        "test.skip('skipped owner', () => { expect(1).toBe(1); });\n"
+      );
+      const mutated = runReporter({
+        selectedTestPaths: expectedTestPaths.filter(
+          (testPath) => testPath !== missingOwnerPath
+        ),
+      });
+      const output = `${mutated.stdout}\n${mutated.stderr}`;
+      assert.equal(mutated.status, 1, output);
+      assert.match(output, /forbidOnly.*skipped=1/u);
+      assert.match(
+        output,
+        /JEST_EXECUTION_SET_COMPLETED.*missing=.*BusinessScene\.test\.js/u
+      );
+      assert.match(
+        output,
+        /JEST_GOVERNED_SUITES_COMPLETED.*missing=.*BusinessScene\.test\.js/u
+      );
+    }
+  );
+});
+
+test('actual Jest reporter 拒绝 malformed、duplicate、outside 与缺 owner membership 的 expected set', () => {
+  withActualJestReporterFixture(
+    ({
+      expectedTestPaths,
+      fixture,
+      outsideExpectedTestPath,
+      requiredTestPaths,
+      runReporter,
+    }) => {
+      const invalidAttestations = [
+        {
+          label: 'missing expectedTestPaths',
+          value: { rootDir: fixture, requiredTestPaths },
+        },
+        {
+          label: 'relative expected path',
+          value: {
+            rootDir: fixture,
+            requiredTestPaths,
+            expectedTestPaths: [
+              path.relative(fixture, expectedTestPaths[0]),
+              ...expectedTestPaths.slice(1),
+            ],
+          },
+        },
+        {
+          label: 'duplicate expected path',
+          value: {
+            rootDir: fixture,
+            requiredTestPaths,
+            expectedTestPaths: [...expectedTestPaths, expectedTestPaths[0]],
+          },
+        },
+        {
+          label: 'outside expected path',
+          value: {
+            rootDir: fixture,
+            requiredTestPaths,
+            expectedTestPaths: [...expectedTestPaths, outsideExpectedTestPath],
+          },
+        },
+        {
+          label: 'unresolvable attested root',
+          value: {
+            rootDir: path.join(fixture, 'missing-root'),
+            requiredTestPaths,
+            expectedTestPaths,
+          },
+        },
+        {
+          label: 'required owner missing from expected set',
+          value: {
+            rootDir: fixture,
+            requiredTestPaths,
+            expectedTestPaths: expectedTestPaths.slice(1),
+          },
+        },
+      ];
+
+      for (const invalid of invalidAttestations) {
+        const mutated = runReporter({ attestation: invalid.value });
+        const output = `${invalid.label}\n${mutated.stdout}\n${mutated.stderr}`;
+        assert.equal(mutated.status, 1, output);
+        assert.match(output, /JEST_ATTESTATION_CONFIG/u, invalid.label);
+      }
+    }
+  );
 });
 
 test('runtime proof test callback 不能提前 return 跳过 lifecycle', () => {
