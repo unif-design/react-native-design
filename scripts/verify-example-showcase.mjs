@@ -166,10 +166,13 @@ const expectedStateIdsByComponent = {
     'icon-button.loading',
   ],
   Chip: [
+    'chip.static',
+    'chip.clickable',
     'chip.unselected',
     'chip.selected',
     'chip.icon-slots',
     'chip.disabled',
+    'chip.busy',
   ],
   Tag: ['tag.variants', 'tag.sizes'],
   StatusDot: [
@@ -178,7 +181,12 @@ const expectedStateIdsByComponent = {
     'status-dot.sizes',
     'status-dot.a11y-name',
   ],
-  Empty: ['empty.title', 'empty.description', 'empty.custom-icon'],
+  Empty: [
+    'empty.title',
+    'empty.description',
+    'empty.custom-icon',
+    'empty.data-boundary',
+  ],
   Skeleton: ['skeleton.line', 'skeleton.rect', 'skeleton.circle'],
   Spinner: ['spinner.sizes', 'spinner.color', 'spinner.stroke-width'],
   Pulse: [
@@ -222,8 +230,13 @@ const expectedStateIdsByComponent = {
   Input: [
     'input.controlled',
     'input.uncontrolled',
+    'input.idle',
+    'input.focus',
+    'input.filled',
     'input.error',
     'input.disabled',
+    'input.editable',
+    'input.read-only',
     'input.display-slots',
     'input.action-slot',
   ],
@@ -261,6 +274,8 @@ const expectedStateIdsByComponent = {
     'stepper.min',
     'stepper.mid',
     'stepper.max',
+    'stepper.step',
+    'stepper.zero-range',
     'stepper.disabled',
     'stepper.sizes',
   ],
@@ -277,6 +292,9 @@ const expectedStateIdsByComponent = {
     'nav-bar.back',
     'nav-bar.actions',
     'nav-bar.safe-area',
+    'nav-bar.default',
+    'nav-bar.brand',
+    'nav-bar.transparent',
   ],
   DrawerHeader: [
     'drawer-header.name',
@@ -326,7 +344,6 @@ const expectedStateIdsByComponent = {
     'entry-card.without-subtitle',
   ],
   Carousel: [
-    'carousel.empty',
     'carousel.single',
     'carousel.multiple',
     'carousel.action',
@@ -379,6 +396,10 @@ const expectedStateIdsByComponent = {
     'avatar-with-ring.ring-color',
   ],
   VersionPill: ['version-pill.status', 'version-pill.version-text'],
+};
+
+const expectedWitnessTargetsByStateId = {
+  'empty.data-boundary': 'Empty',
 };
 
 const expectedRuntimeApis = [
@@ -2432,6 +2453,13 @@ function verifyShowcaseStateContract(root, catalogEntries) {
           `${state.id} rootHost=${state.witness.rootHost} 与 component=${component} 不一致`
         );
       }
+      const expectedTarget = expectedWitnessTargetsByStateId[state.id];
+      if (expectedTarget && state.witness.targetComponent !== expectedTarget) {
+        failVerification(
+          'COMPONENT_STATE_WITNESS',
+          `${state.id} targetComponent=${state.witness.targetComponent ?? '<missing>'} 与 required target=${expectedTarget} 不一致`
+        );
+      }
     }
   }
   verifyGovernedJestRegistrations(root);
@@ -3285,6 +3313,36 @@ function verifyDocumentation(root) {
   const exampleReadme = readText(root, 'example/README.md');
   const agents = readText(root, 'AGENTS.md');
   const contributing = readText(root, 'CONTRIBUTING.md');
+  const canonicalIosCommands = [
+    '(cd example && bundle install)',
+    '(cd example && bundle exec pod install --project-directory=ios)',
+  ];
+
+  for (const [label, source] of [
+    ['AGENTS', agents],
+    ['CONTRIBUTING', contributing],
+    ['example README', exampleReadme],
+  ]) {
+    const commandLines = source
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(
+        (line) =>
+          line.includes('bundle install') ||
+          line.includes('bundle exec pod install --project-directory=ios')
+      );
+    if (
+      commandLines.length !== canonicalIosCommands.length ||
+      commandLines.some(
+        (command, index) => command !== canonicalIosCommands[index]
+      )
+    ) {
+      failVerification(
+        'DOCUMENTATION_IOS_COMMANDS',
+        `${label} 必须精确保留可从 repo root 顺序执行的 canonical iOS commands`
+      );
+    }
+  }
 
   verifyDocumentSceneTable('root README', rootReadme, '## RN 0.86.2 组件展厅');
   verifyDocumentSceneTable('example README', exampleReadme, '## 5. 八个场景');
@@ -3308,8 +3366,7 @@ function verifyDocumentation(root) {
     exampleReadme,
     [
       'yarn install --immutable',
-      'cd example && bundle install',
-      'cd example && bundle exec pod install --project-directory=ios',
+      ...canonicalIosCommands,
       'yarn example start',
       'yarn example android',
       'yarn example ios',

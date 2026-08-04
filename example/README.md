@@ -21,8 +21,8 @@ Carousel 5 / RNGH 3 workspace warning 由 `yarn check:runtime-peers` 的窄 allo
 首次运行 iOS 或 native 依赖、Podfile、lockfile 变化后，从 repo root 执行：
 
 ```sh
-cd example && bundle install
-cd example && bundle exec pod install --project-directory=ios
+(cd example && bundle install)
+(cd example && bundle exec pod install --project-directory=ios)
 ```
 
 必须通过 Bundler 使用 `example/Gemfile.lock`；不要直接运行系统 `pod install`。

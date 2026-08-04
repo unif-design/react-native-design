@@ -12,6 +12,7 @@ const TEST_AUDITED_RUNTIME_PACKAGES = new Set([
   'react-native-reanimated-carousel',
   'react-native-reanimated',
   'react-native-worklets',
+  '@mdx-js/react',
 ]);
 const auditRuntimePeers = (
   summaries: Parameters<typeof auditRuntimePeersWithSet>[0],
@@ -88,28 +89,51 @@ const REAL_EXAMPLE_DETAIL = REAL_ROOT_DETAIL.replaceAll(
   '@unif/react-native-design-example@workspace:example'
 ).replaceAll('[c9356]', '[e1234]');
 
+// Yarn 4.11 binary 的 list/detail formatter 分别使用 contraction 与完整否定：
+// list: "doesn't provide"；detail: "does not provide"。
+const REAL_MISSING_LIST =
+  "p0abc12 → ✘ @unif/react-native-design@workspace:. doesn't provide react-native-worklets to react-native-reanimated@npm:4.5.3 [c9356]";
+
+const REAL_MISSING_DETAIL = [
+  'Package @unif/react-native-design@workspace:. is requested to provide react-native-worklets by its descendants',
+  '',
+  '@unif/react-native-design@workspace:.',
+  '└─ react-native-reanimated@npm:4.5.3 [c9356] (via >=0.11.0 <0.12.0)',
+  '',
+  '✘ Package @unif/react-native-design@workspace:. does not provide react-native-worklets.',
+].join('\n');
+
+const DOTTED_SCOPED_MISSING_DETAIL = REAL_MISSING_DETAIL.replaceAll(
+  'react-native-worklets',
+  '@scope/runtime.peer'
+);
+
 describe('parseRequirementList — yarn explain peer-requirements 列表', () => {
   test('只抽取失败(✘)行的 hash / provider / 包名 / 版本', () => {
     expect(parseRequirementList(LIST)).toEqual([
       {
+        kind: 'provided-mismatch',
         hash: 'pc850d5',
         providerLocator: '@unif/react-native-design@workspace:.',
         packageName: 'react-native-gesture-handler',
         providerVersion: '3.1.0',
       },
       {
+        kind: 'provided-mismatch',
         hash: 'pexample',
         providerLocator: '@unif/react-native-design-example@workspace:example',
         packageName: 'react-native-gesture-handler',
         providerVersion: '3.1.0',
       },
       {
+        kind: 'provided-mismatch',
         hash: 'pwebsite',
         providerLocator: '@unif/react-native-design-website@workspace:website',
         packageName: 'react-native-gesture-handler',
         providerVersion: '3.1.0',
       },
       {
+        kind: 'provided-mismatch',
         hash: 'punrelated',
         providerLocator: '@unif/react-native-design@workspace:.',
         packageName: 'react',
@@ -122,6 +146,17 @@ describe('parseRequirementList — yarn explain peer-requirements 列表', () =>
     expect(
       parseRequirementList('Some unrelated banner\n\n✔ all good\n')
     ).toEqual([]);
+  });
+
+  test("解析 Yarn 4.11 doesn't provide missing-provider 失败并保留身份", () => {
+    expect(parseRequirementList(REAL_MISSING_LIST)).toEqual([
+      {
+        kind: 'missing-provider',
+        hash: 'p0abc12',
+        providerLocator: '@unif/react-native-design@workspace:.',
+        packageName: 'react-native-worklets',
+      },
+    ]);
   });
 });
 
@@ -166,6 +201,7 @@ describe('deriveAuditedRuntimePackages — 项目可控 runtime manifest', () =>
 describe('parseRequirementDetail — 明细解析', () => {
   test('抽取 provider / 版本 / 全部请求方与 range', () => {
     expect(parseRequirementDetail('pc850d5', rootDetail)).toEqual({
+      kind: 'provided-mismatch',
       hash: 'pc850d5',
       providerLocator: '@unif/react-native-design@workspace:.',
       packageName: 'react-native-gesture-handler',
@@ -184,6 +220,30 @@ describe('parseRequirementDetail — 明细解析', () => {
     expect(() => parseRequirementDetail('pbroken', 'garbage')).toThrow(
       'pbroken'
     );
+  });
+
+  test('解析 Yarn 4.11 does not provide 明细与请求方', () => {
+    expect(parseRequirementDetail('p0abc12', REAL_MISSING_DETAIL)).toEqual({
+      kind: 'missing-provider',
+      hash: 'p0abc12',
+      providerLocator: '@unif/react-native-design@workspace:.',
+      packageName: 'react-native-worklets',
+      requests: [
+        {
+          requester: 'react-native-reanimated@npm:4.5.3',
+          range: '>=0.11.0 <0.12.0',
+        },
+      ],
+    });
+  });
+
+  test('missing-provider 明细完整保留 scoped 且含点的合法 package name', () => {
+    expect(
+      parseRequirementDetail('p0abc12', DOTTED_SCOPED_MISSING_DETAIL)
+    ).toMatchObject({
+      kind: 'missing-provider',
+      packageName: '@scope/runtime.peer',
+    });
   });
 });
 
@@ -244,10 +304,138 @@ describe('auditRuntimePeers — 严格 allowlist', () => {
     expect(result.errors.join('\n')).toContain('react@19.2.3');
   });
 
+  test('audited runtime missing-provider 立即显式失败，不能进入 RNRC/RNGH 例外', () => {
+    const summaries = [
+      ...parseRequirementList(LIST.split('\n').slice(0, 3).join('\n')),
+      {
+        kind: 'missing-provider' as const,
+        hash: 'p0abc12',
+        providerLocator: '@unif/react-native-design@workspace:.',
+        packageName: 'react-native-worklets',
+      },
+    ];
+    const details = new Map([
+      ['pc850d5', parseRequirementDetail('pc850d5', rootDetail)],
+      ['pexample', parseRequirementDetail('pexample', exampleDetail)],
+      ['pwebsite', parseRequirementDetail('pwebsite', websiteDetail)],
+      [
+        'p0abc12',
+        {
+          kind: 'missing-provider' as const,
+          hash: 'p0abc12',
+          providerLocator: '@unif/react-native-design@workspace:.',
+          packageName: 'react-native-worklets',
+          requests: [
+            {
+              requester: 'react-native-reanimated@npm:4.5.3',
+              range: '>=0.11.0 <0.12.0',
+            },
+          ],
+        },
+      ],
+    ]);
+    const result = auditRuntimePeers(summaries, details);
+
+    expect(result.knownExceptions).toEqual(['pc850d5', 'pexample', 'pwebsite']);
+    expect(result.errors.join('\n')).toContain(
+      'p0abc12: audited runtime peer missing provider'
+    );
+    expect(result.errors.join('\n')).toContain('react-native-worklets');
+  });
+
+  test('三个 repository workspace 的 audited missing-provider 均明确失败', () => {
+    const missingSummaries = [
+      {
+        kind: 'missing-provider' as const,
+        hash: 'pmissingroot',
+        providerLocator: '@unif/react-native-design@workspace:.',
+        packageName: 'react',
+      },
+      {
+        kind: 'missing-provider' as const,
+        hash: 'pmissingexample',
+        providerLocator: '@unif/react-native-design-example@workspace:example',
+        packageName: 'react-native-worklets',
+      },
+      {
+        kind: 'missing-provider' as const,
+        hash: 'pmissingwebsite',
+        providerLocator: '@unif/react-native-design-website@workspace:website',
+        packageName: 'react',
+      },
+    ];
+    const summaries = [
+      ...parseRequirementList(LIST.split('\n').slice(0, 3).join('\n')),
+      ...missingSummaries,
+    ];
+    const details = new Map([
+      ['pc850d5', parseRequirementDetail('pc850d5', rootDetail)],
+      ['pexample', parseRequirementDetail('pexample', exampleDetail)],
+      ['pwebsite', parseRequirementDetail('pwebsite', websiteDetail)],
+      ...missingSummaries.map(
+        (summary): [string, ReturnType<typeof parseRequirementDetail>] => [
+          summary.hash,
+          { ...summary, requests: [{ requester: 'consumer', range: '*' }] },
+        ]
+      ),
+    ]);
+
+    const result = auditRuntimePeers(summaries, details);
+    for (const summary of missingSummaries) {
+      expect(result.errors.join('\n')).toContain(
+        `${summary.hash}: audited runtime peer missing provider`
+      );
+    }
+  });
+
+  test('external Docusaurus missing-provider 即使包名 audited 也不要求明细或伪造 workspace failure', () => {
+    const externalMissing = parseRequirementList(
+      [
+        "pdocusaurus → ✘ @docusaurus/bundler@npm:3.10.1 doesn't provide react to @docusaurus/core@npm:3.10.1",
+        "pmdxplugin → ✘ @docusaurus/plugin-content-docs@npm:3.10.1 doesn't provide @mdx-js/react to @docusaurus/mdx-loader@npm:3.10.1",
+      ].join('\n')
+    );
+    const summaries = [
+      ...parseRequirementList(LIST.split('\n').slice(0, 3).join('\n')),
+      ...externalMissing,
+    ];
+    const details = new Map([
+      ['pc850d5', parseRequirementDetail('pc850d5', rootDetail)],
+      ['pexample', parseRequirementDetail('pexample', exampleDetail)],
+      ['pwebsite', parseRequirementDetail('pwebsite', websiteDetail)],
+    ]);
+
+    expect(auditRuntimePeers(summaries, details)).toEqual({
+      knownExceptions: ['pc850d5', 'pexample', 'pwebsite'],
+      errors: [],
+    });
+  });
+
   test('dev-only failure 不在派生集合时不要求明细也不产生错误', () => {
     const summaries = parseRequirementList(
       `${LIST.split('\n').slice(0, 3).join('\n')}\npdevonly → ✘ @unif/react-native-design@workspace:. provides eslint@npm:9.0.0`
     );
+    const details = new Map([
+      ['pc850d5', parseRequirementDetail('pc850d5', rootDetail)],
+      ['pexample', parseRequirementDetail('pexample', exampleDetail)],
+      ['pwebsite', parseRequirementDetail('pwebsite', websiteDetail)],
+    ]);
+
+    expect(auditRuntimePeers(summaries, details)).toEqual({
+      knownExceptions: ['pc850d5', 'pexample', 'pwebsite'],
+      errors: [],
+    });
+  });
+
+  test('非 runtime missing-provider 会被解析，但不会伪造 audited failure 或要求明细', () => {
+    const summaries = parseRequirementList(
+      `${LIST.split('\n').slice(0, 3).join('\n')}\npdevmis → ✘ @unif/react-native-design@workspace:. doesn't provide eslint to @unif/dev-tool@npm:1.0.0`
+    );
+    expect(summaries.at(-1)).toMatchObject({
+      kind: 'missing-provider',
+      hash: 'pdevmis',
+      packageName: 'eslint',
+    });
     const details = new Map([
       ['pc850d5', parseRequirementDetail('pc850d5', rootDetail)],
       ['pexample', parseRequirementDetail('pexample', exampleDetail)],
@@ -306,6 +494,13 @@ describe('auditRuntimePeers — 严格 allowlist', () => {
   });
 
   test.each([
+    [
+      'kind',
+      {
+        ...parseRequirementDetail('pc850d5', rootDetail),
+        kind: 'missing-provider' as const,
+      },
+    ],
     [
       'hash',
       {

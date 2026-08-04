@@ -336,6 +336,7 @@ export function CollectionsScene(): React.JSX.Element {
                 title="空数据由消费方显示空态"
                 desc="Carousel 本身不负责空数据内容。"
                 icon="image"
+                testID="collections-empty-data-boundary"
               />
               <Carousel
                 data={oneCarouselItem}

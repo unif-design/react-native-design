@@ -217,6 +217,7 @@ export function FeedbackScene(): React.JSX.Element {
             title="暂无反馈记录"
             desc="触发下方动作后可在结果面板查看安全摘要。"
             icon="clipboard"
+            testID="feedback-empty-data-boundary"
           />
           <View style={styles.skeletonStack}>
             <Skeleton shape="line" testID="feedback-skeleton-line" />

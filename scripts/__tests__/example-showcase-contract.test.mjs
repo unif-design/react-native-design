@@ -196,6 +196,99 @@ function writeArgvSensitiveFixtureProductionJestConfig(fixture) {
   return fixtureExampleRoot;
 }
 
+function writeListTestsSensitiveFixtureProductionJestConfig(
+  fixture,
+  { omitOnlyOneNonOwner = false } = {}
+) {
+  const { fixtureExampleRoot } = prepareFixtureExampleRuntime(fixture);
+  const productionConfig = readFileSync(
+    path.join(repositoryRoot, 'example/jest.config.js'),
+    'utf8'
+  ).replace('module.exports = {', 'const safeConfig = {');
+  const listTestsOverride = omitOnlyOneNonOwner
+    ? [
+        '      ...safeConfig,',
+        '      testPathIgnorePatterns: [',
+        "        '/node_modules/',",
+        "        '/showcaseStateCoverage\\\\.test\\\\.ts$',",
+        '      ],',
+      ]
+    : [
+        '      ...safeConfig,',
+        '      testMatch: [',
+        "        '**/App.test.tsx',",
+        "        '**/FoundationScene.test.tsx',",
+        "        '**/ActionsScene.test.tsx',",
+        "        '**/FeedbackScene.test.tsx',",
+        "        '**/FormsScene.test.tsx',",
+        "        '**/NavigationScene.test.tsx',",
+        "        '**/CollectionsScene.test.tsx',",
+        "        '**/MediaScene.test.tsx',",
+        "        '**/BusinessScene.test.tsx',",
+        '      ],',
+      ];
+  writeFileSync(
+    path.join(fixtureExampleRoot, 'jest.config.js'),
+    [
+      productionConfig.trimEnd(),
+      '',
+      "module.exports = process.argv.includes('--listTests')",
+      '  ? {',
+      ...listTestsOverride,
+      '    }',
+      '  : safeConfig;',
+      '',
+    ].join('\n')
+  );
+  return fixtureExampleRoot;
+}
+
+function writeAttestationRewritingFixtureProductionJestConfig(fixture) {
+  const { fixtureExampleRoot } = prepareFixtureExampleRuntime(fixture);
+  const productionConfig = readFileSync(
+    path.join(repositoryRoot, 'example/jest.config.js'),
+    'utf8'
+  ).replace('module.exports = {', 'const safeConfig = {');
+  writeFileSync(
+    path.join(fixtureExampleRoot, 'jest.config.js'),
+    [
+      "const path = require('node:path');",
+      productionConfig.trimEnd(),
+      '',
+      'const ownerFiles = [',
+      "  'App.test.tsx',",
+      "  'FoundationScene.test.tsx',",
+      "  'ActionsScene.test.tsx',",
+      "  'FeedbackScene.test.tsx',",
+      "  'FormsScene.test.tsx',",
+      "  'NavigationScene.test.tsx',",
+      "  'CollectionsScene.test.tsx',",
+      "  'MediaScene.test.tsx',",
+      "  'BusinessScene.test.tsx',",
+      '];',
+      'if (process.env.EXAMPLE_SHOWCASE_JEST_ATTESTATION) {',
+      '  const ownerPaths = ownerFiles.map((file) =>',
+      "    path.join(__dirname, 'src/__tests__', file)",
+      '  );',
+      '  process.env.EXAMPLE_SHOWCASE_JEST_ATTESTATION = JSON.stringify({',
+      '    rootDir: __dirname,',
+      '    requiredTestPaths: ownerPaths,',
+      '    expectedTestPaths: ownerPaths,',
+      '  });',
+      '}',
+      '',
+      'module.exports = process.env.EXAMPLE_SHOWCASE_JEST_ATTESTATION',
+      '  ? {',
+      '      ...safeConfig,',
+      '      testMatch: ownerFiles.map((file) => `**/${file}`),',
+      '    }',
+      '  : safeConfig;',
+      '',
+    ].join('\n')
+  );
+  return fixtureExampleRoot;
+}
+
 function runExampleJestWrapper(
   fixture,
   args,
@@ -299,9 +392,9 @@ function withActualJestReporterFixture(run) {
       'BusinessScene',
     ];
     const requiredTestPaths = ownerNames.map((name) =>
-      path.join(testRoot, `${name}.test.js`)
+      path.join(testRoot, `${name}.test.tsx`)
     );
-    const nonOwnerTestPath = path.join(testRoot, 'NonOwner.test.js');
+    const nonOwnerTestPath = path.join(testRoot, 'NonOwner.test.ts');
     const outsideExpectedTestPath = path.join(
       outsideFixture,
       'OutsideExpected.test.js'
@@ -317,26 +410,43 @@ function withActualJestReporterFixture(run) {
       outsideExpectedTestPath,
       "test('outside expected', () => { expect(1).toBe(1); });\n"
     );
+    const reporterPath = path.join(fixture, 'jest.forbidOnlyReporter.js');
+    copyFileSync(
+      path.join(repositoryRoot, 'example/jest.forbidOnlyReporter.js'),
+      reporterPath
+    );
     const configPath = path.join(fixture, 'jest.config.cjs');
+    const baseReporterConfig = {
+      rootDir: fixture,
+      testEnvironment: 'node',
+      testMatch: ['**/*.test.[jt]s?(x)'],
+      reporters: ['default', reporterPath],
+      transform: {},
+    };
     writeFileSync(
       configPath,
-      `module.exports = ${JSON.stringify({
-        rootDir: fixture,
-        testEnvironment: 'node',
-        testMatch: ['**/*.test.js'],
-        reporters: [
-          'default',
-          path.join(repositoryRoot, 'example/jest.forbidOnlyReporter.js'),
-        ],
-        transform: {},
-      })};\n`
+      [
+        `const baseConfig = ${JSON.stringify(baseReporterConfig)};`,
+        'module.exports = process.env.REPORTER_FIXTURE_IGNORE_PATTERN',
+        '  ? {',
+        '      ...baseConfig,',
+        '      testPathIgnorePatterns: [',
+        '        process.env.REPORTER_FIXTURE_IGNORE_PATTERN,',
+        '      ],',
+        '    }',
+        '  : baseConfig;',
+        '',
+      ].join('\n')
     );
 
     const runReporter = ({
       attestation,
       attestedExpectedTestPaths = expectedTestPaths,
       attestedRequiredTestPaths = requiredTestPaths,
+      ignoredTestPath,
+      runTestsByPath = true,
       selectedTestPaths = expectedTestPaths,
+      testFailureExitCode = 1,
     } = {}) => {
       const env = {
         ...process.env,
@@ -348,6 +458,13 @@ function withActualJestReporterFixture(run) {
           }
         ),
       };
+      if (ignoredTestPath) {
+        env.REPORTER_FIXTURE_IGNORE_PATTERN = `${path
+          .basename(ignoredTestPath)
+          .replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')}$`;
+      } else {
+        delete env.REPORTER_FIXTURE_IGNORE_PATTERN;
+      }
       return spawnSync(
         process.execPath,
         [
@@ -355,11 +472,46 @@ function withActualJestReporterFixture(run) {
           '--config',
           configPath,
           '--runInBand',
-          '--runTestsByPath',
+          ...(runTestsByPath ? ['--runTestsByPath'] : []),
+          `--testFailureExitCode=${testFailureExitCode}`,
           ...selectedTestPaths,
         ],
         { cwd: fixture, encoding: 'utf8', env }
       );
+    };
+
+    const runReporterDirect = ({
+      completedTestPaths,
+      forcedExpectedTestPaths,
+    }) => {
+      const previousAttestation = process.env.EXAMPLE_SHOWCASE_JEST_ATTESTATION;
+      const previousExitCode = process.exitCode;
+      process.env.EXAMPLE_SHOWCASE_JEST_ATTESTATION = JSON.stringify({
+        rootDir: fixture,
+        requiredTestPaths,
+        expectedTestPaths: forcedExpectedTestPaths,
+      });
+      try {
+        delete require.cache[reporterPath];
+        const Reporter = require(reporterPath);
+        const reporter = new Reporter({
+          nonFlagArgs: forcedExpectedTestPaths,
+          runTestsByPath: true,
+          testFailureExitCode: 1,
+        });
+        for (const completedTestPath of completedTestPaths) {
+          reporter.onTestResult({ path: completedTestPath });
+        }
+        reporter.onRunComplete([], { numPendingTests: 0, numTodoTests: 0 });
+        return reporter.getLastError();
+      } finally {
+        if (previousAttestation === undefined) {
+          delete process.env.EXAMPLE_SHOWCASE_JEST_ATTESTATION;
+        } else {
+          process.env.EXAMPLE_SHOWCASE_JEST_ATTESTATION = previousAttestation;
+        }
+        process.exitCode = previousExitCode;
+      }
     };
 
     return run({
@@ -369,10 +521,69 @@ function withActualJestReporterFixture(run) {
       outsideExpectedTestPath,
       requiredTestPaths,
       runReporter,
+      runReporterDirect,
     });
   } finally {
     rmSync(fixture, { recursive: true, force: true });
     rmSync(outsideFixture, { recursive: true, force: true });
+  }
+}
+
+function withJestGlobalConfigProbeFixture(run) {
+  const fixture = realpathSync(
+    mkdtempSync(
+      path.join(os.tmpdir(), 'react-native-design-jest-config-probe-')
+    )
+  );
+  try {
+    const testPath = path.join(fixture, 'probe.test.js');
+    const reporterPath = path.join(fixture, 'probe-reporter.cjs');
+    const configPath = path.join(fixture, 'jest.config.cjs');
+    writeFileSync(testPath, "test('probe', () => { expect(1).toBe(1); });\n");
+    writeFileSync(
+      reporterPath,
+      [
+        "'use strict';",
+        'class ProbeReporter {',
+        '  constructor(globalConfig) {',
+        '    const payload = JSON.stringify({',
+        '        nonFlagArgs: globalConfig.nonFlagArgs,',
+        '        runTestsByPath: globalConfig.runTestsByPath,',
+        '        testFailureExitCode: globalConfig.testFailureExitCode,',
+        '    });',
+        '    process.stderr.write(`JEST_GLOBAL_CONFIG_PROBE ${payload}\\n`);',
+        '  }',
+        '}',
+        'module.exports = ProbeReporter;',
+        '',
+      ].join('\n')
+    );
+    writeFileSync(
+      configPath,
+      `module.exports = ${JSON.stringify({
+        rootDir: fixture,
+        testEnvironment: 'node',
+        testMatch: ['**/*.test.js'],
+        reporters: ['default', reporterPath],
+        transform: {},
+      })};\n`
+    );
+    const result = spawnSync(
+      process.execPath,
+      [
+        path.join(repositoryRoot, 'example/node_modules/jest/bin/jest.js'),
+        '--config',
+        configPath,
+        '--runInBand',
+        '--runTestsByPath',
+        '--testFailureExitCode=1',
+        testPath,
+      ],
+      { cwd: fixture, encoding: 'utf8', env: { ...process.env } }
+    );
+    return run({ fixture, result, testPath });
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
   }
 }
 
@@ -495,6 +706,23 @@ function removeButtonLoadingCatalogState(source) {
   );
 }
 
+function removeCatalogStateLabel(source, componentId, label) {
+  const idIndex = source.indexOf(`    id: '${componentId}',`);
+  if (idIndex < 0) return source;
+  const blockStart = source.lastIndexOf('  {\n', idIndex);
+  const blockEnd = source.indexOf('\n  },', idIndex);
+  if (blockStart < 0 || blockEnd < 0) return source;
+  const block = source.slice(blockStart, blockEnd + 5);
+  const quotedLabel = `'${label}'`;
+  const mutatedBlock = block
+    .replace(`      ${quotedLabel},\n`, '')
+    .replace(`    ${quotedLabel},\n`, '')
+    .replace(`, ${quotedLabel}`, '')
+    .replace(`${quotedLabel}, `, '')
+    .replace(quotedLabel, '');
+  return source.replace(block, mutatedBlock);
+}
+
 function removeButtonLoadingSpecimen(source) {
   const startMarker = '            <Button\n              label="加载按钮"';
   const start = source.indexOf(startMarker);
@@ -518,6 +746,16 @@ function proofCallBlock(source, coverageName, proofId) {
 function replaceProofCall(source, coverageName, proofId, replacement) {
   const block = proofCallBlock(source, coverageName, proofId);
   return block ? source.replace(block, replacement) : source;
+}
+
+function removeProofIdArgument(source, proofId) {
+  const quotedId = `'${proofId}'`;
+  return source
+    .replace(`    ${quotedId},\n`, '')
+    .replace(`  ${quotedId},\n`, '')
+    .replace(`${quotedId}, `, '')
+    .replace(`, ${quotedId}`, '')
+    .replace(quotedId, '');
 }
 
 function removeRoutedStatusDotSpecimens(source) {
@@ -1878,6 +2116,77 @@ test('production Jest gate 从 resolved config 拒绝 owner discovery 与 report
   }
 });
 
+test('Jest 29 reporter constructor 暴露 wrapper 强制的 positional path 与 normalized flags', () => {
+  withJestGlobalConfigProbeFixture(({ result, testPath }) => {
+    const output = `${result.stdout}\n${result.stderr}`;
+    assert.equal(result.status, 0, output);
+    const match = output.match(/JEST_GLOBAL_CONFIG_PROBE (\{[^\n]+\})/u);
+    assert.ok(match, output);
+    assert.deepEqual(JSON.parse(match[1]), {
+      nonFlagArgs: [testPath],
+      runTestsByPath: true,
+      testFailureExitCode: 1,
+    });
+  });
+});
+
+test('production Jest discovery 不信任 --listTests role 的 executable config', () => {
+  const mutations = [
+    {
+      label: '--listTests role 只返回九个 owner suites',
+      options: {},
+    },
+    {
+      label: '--listTests role 只遗漏一个 non-owner suite',
+      options: { omitOnlyOneNonOwner: true },
+    },
+  ];
+
+  for (const mutation of mutations) {
+    withFixture(
+      [...new Set([...runtimeAcceptanceFiles, ...listFiles('src')])],
+      (fixture) => {
+        const fixtureExampleRoot =
+          writeListTestsSensitiveFixtureProductionJestConfig(
+            fixture,
+            mutation.options
+          );
+        assert.doesNotThrow(() =>
+          showcaseVerifier.verifyExampleShowcase(fixture)
+        );
+
+        const result = runExampleJestWrapper(fixture, ['--runInBand'], {
+          cwd: fixtureExampleRoot,
+        });
+        const output = `${mutation.label}\n${result.stdout}\n${result.stderr}`;
+        assert.equal(result.status, 0, output);
+        assert.match(output, /JEST_EXECUTION_SET_COMPLETED count=15/u);
+        assert.match(output, /JEST_GOVERNED_SUITES_COMPLETED count=9/u);
+      }
+    );
+  }
+});
+
+test('actual config 改写 attestation 并缩小 selection 时不能产生 9/9 false green', () => {
+  withFixture(
+    [...new Set([...runtimeAcceptanceFiles, ...listFiles('src')])],
+    (fixture) => {
+      const fixtureExampleRoot =
+        writeAttestationRewritingFixtureProductionJestConfig(fixture);
+      assert.doesNotThrow(() =>
+        showcaseVerifier.verifyExampleShowcase(fixture)
+      );
+
+      const result = runExampleJestWrapper(fixture, ['--runInBand'], {
+        cwd: fixtureExampleRoot,
+      });
+      const output = `${result.stdout}\n${result.stderr}`;
+      assert.notEqual(result.status, 0, output);
+      assert.doesNotMatch(output, /JEST_EXECUTION_SET_COMPLETED count=9/u);
+    }
+  );
+});
+
 test('production Jest actual execution contract survives phase-dependent config', () => {
   withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
     const fixtureExampleRoot =
@@ -1959,33 +2268,66 @@ test('actual Jest reporter 接受 clean exact expected set 并输出双 completi
   });
 });
 
-test('actual Jest reporter 在缺少 non-owner expected file 时返回 non-zero', () => {
+test('actual Jest reporter 以 forced positional paths 为 authority，拒绝 mutable env 缩集', () => {
   withActualJestReporterFixture(
-    ({ nonOwnerTestPath, requiredTestPaths, runReporter }) => {
-      const mutated = runReporter({ selectedTestPaths: requiredTestPaths });
+    ({ expectedTestPaths, requiredTestPaths, runReporter }) => {
+      const mutated = runReporter({
+        attestedExpectedTestPaths: requiredTestPaths,
+        selectedTestPaths: expectedTestPaths,
+      });
       const output = `${mutated.stdout}\n${mutated.stderr}`;
       assert.equal(mutated.status, 1, output);
-      assert.match(
-        output,
-        new RegExp(
-          `JEST_EXECUTION_SET_COMPLETED.*missing=.*${path.basename(nonOwnerTestPath)}`,
-          'u'
-        )
-      );
+      assert.match(output, /JEST_ATTESTATION_CONFIG/u);
     }
   );
 });
 
+test('actual Jest reporter 校验 runTestsByPath 与 testFailureExitCode 的 normalized contract', () => {
+  withActualJestReporterFixture(({ runReporter }) => {
+    const mutations = [
+      {
+        label: 'runTestsByPath=false',
+        options: { runTestsByPath: false },
+      },
+      {
+        label: 'testFailureExitCode=0',
+        options: { testFailureExitCode: 0 },
+      },
+    ];
+    for (const mutation of mutations) {
+      const mutated = runReporter(mutation.options);
+      const output = `${mutation.label}\n${mutated.stdout}\n${mutated.stderr}`;
+      assert.equal(mutated.status, 1, output);
+      assert.match(output, /JEST_ATTESTATION_CONFIG/u, mutation.label);
+    }
+  });
+});
+
+test('actual Jest reporter 在缺少 non-owner expected file 时返回 non-zero', () => {
+  withActualJestReporterFixture(({ nonOwnerTestPath, runReporter }) => {
+    const mutated = runReporter({ ignoredTestPath: nonOwnerTestPath });
+    const output = `${mutated.stdout}\n${mutated.stderr}`;
+    assert.equal(mutated.status, 1, output);
+    assert.match(
+      output,
+      new RegExp(
+        `JEST_EXECUTION_SET_COMPLETED.*missing=.*${path.basename(nonOwnerTestPath)}`,
+        'u'
+      )
+    );
+  });
+});
+
 test('actual Jest reporter 在完成 unexpected file 时返回 non-zero', () => {
   withActualJestReporterFixture(
-    ({ nonOwnerTestPath, requiredTestPaths, runReporter }) => {
-      const mutated = runReporter({
-        attestedExpectedTestPaths: requiredTestPaths,
+    ({ nonOwnerTestPath, requiredTestPaths, runReporterDirect }) => {
+      const error = runReporterDirect({
+        forcedExpectedTestPaths: requiredTestPaths,
+        completedTestPaths: [...requiredTestPaths, nonOwnerTestPath],
       });
-      const output = `${mutated.stdout}\n${mutated.stderr}`;
-      assert.equal(mutated.status, 1, output);
+      assert.ok(error instanceof Error);
       assert.match(
-        output,
+        error.message,
         new RegExp(
           `JEST_EXECUTION_SET_COMPLETED.*unexpected=.*${path.basename(nonOwnerTestPath)}`,
           'u'
@@ -1996,51 +2338,43 @@ test('actual Jest reporter 在完成 unexpected file 时返回 non-zero', () => 
 });
 
 test('actual Jest reporter 在缺少任一 required owner suite 时保留 owner failure marker', () => {
-  withActualJestReporterFixture(
-    ({ expectedTestPaths, requiredTestPaths, runReporter }) => {
-      const missingOwnerPath = requiredTestPaths.at(-1);
-      const mutated = runReporter({
-        selectedTestPaths: expectedTestPaths.filter(
-          (testPath) => testPath !== missingOwnerPath
-        ),
-      });
-      const output = `${mutated.stdout}\n${mutated.stderr}`;
-      assert.equal(mutated.status, 1, output);
-      assert.match(
-        output,
-        /JEST_GOVERNED_SUITES_COMPLETED.*BusinessScene\.test\.js/u
-      );
-    }
-  );
+  withActualJestReporterFixture(({ requiredTestPaths, runReporter }) => {
+    const missingOwnerPath = requiredTestPaths.at(-1);
+    const mutated = runReporter({
+      ignoredTestPath: missingOwnerPath,
+    });
+    const output = `${mutated.stdout}\n${mutated.stderr}`;
+    assert.equal(mutated.status, 1, output);
+    assert.match(
+      output,
+      /JEST_GOVERNED_SUITES_COMPLETED.*BusinessScene\.test\.tsx/u
+    );
+  });
 });
 
 test('actual Jest reporter 在 skipped 与 owner missing 并存时仍输出两个 set marker', () => {
-  withActualJestReporterFixture(
-    ({ expectedTestPaths, requiredTestPaths, runReporter }) => {
-      const skippedOwnerPath = requiredTestPaths[0];
-      const missingOwnerPath = requiredTestPaths.at(-1);
-      writeFileSync(
-        skippedOwnerPath,
-        "test.skip('skipped owner', () => { expect(1).toBe(1); });\n"
-      );
-      const mutated = runReporter({
-        selectedTestPaths: expectedTestPaths.filter(
-          (testPath) => testPath !== missingOwnerPath
-        ),
-      });
-      const output = `${mutated.stdout}\n${mutated.stderr}`;
-      assert.equal(mutated.status, 1, output);
-      assert.match(output, /forbidOnly.*skipped=1/u);
-      assert.match(
-        output,
-        /JEST_EXECUTION_SET_COMPLETED.*missing=.*BusinessScene\.test\.js/u
-      );
-      assert.match(
-        output,
-        /JEST_GOVERNED_SUITES_COMPLETED.*missing=.*BusinessScene\.test\.js/u
-      );
-    }
-  );
+  withActualJestReporterFixture(({ requiredTestPaths, runReporter }) => {
+    const skippedOwnerPath = requiredTestPaths[0];
+    const missingOwnerPath = requiredTestPaths.at(-1);
+    writeFileSync(
+      skippedOwnerPath,
+      "test.skip('skipped owner', () => { expect(1).toBe(1); });\n"
+    );
+    const mutated = runReporter({
+      ignoredTestPath: missingOwnerPath,
+    });
+    const output = `${mutated.stdout}\n${mutated.stderr}`;
+    assert.equal(mutated.status, 1, output);
+    assert.match(output, /forbidOnly.*skipped=1/u);
+    assert.match(
+      output,
+      /JEST_EXECUTION_SET_COMPLETED.*missing=.*BusinessScene\.test\.tsx/u
+    );
+    assert.match(
+      output,
+      /JEST_GOVERNED_SUITES_COMPLETED.*missing=.*BusinessScene\.test\.tsx/u
+    );
+  });
 });
 
 test('actual Jest reporter 拒绝 malformed、duplicate、outside 与缺 owner membership 的 expected set', () => {
@@ -2558,6 +2892,132 @@ test('Button loading 同时从 catalog 与 mutable state contract 删除仍失�
   });
 });
 
+test('新增 major-state category 同步删除 catalog、contract 与 proof 仍被独立锚点拒绝', () => {
+  const mutations = [
+    {
+      component: 'Chip',
+      label: '处理中',
+      stateId: 'chip.busy',
+      testFile: 'example/src/__tests__/ActionsScene.test.tsx',
+      mutateProof: (source) =>
+        replaceProofCall(source, 'stateCoverage', 'chip.busy', ''),
+    },
+    {
+      component: 'Input',
+      label: '聚焦',
+      stateId: 'input.focus',
+      testFile: 'example/src/__tests__/FormsScene.test.tsx',
+      mutateProof: (source) =>
+        replaceProofCall(source, 'inputCoverage', 'input.focus', ''),
+    },
+    {
+      component: 'Stepper',
+      label: '步长',
+      stateId: 'stepper.step',
+      testFile: 'example/src/__tests__/FormsScene.test.tsx',
+      mutateProof: (source) =>
+        replaceProofCall(source, 'stateCoverage', 'stepper.step', ''),
+    },
+    {
+      component: 'NavBar',
+      label: 'default',
+      stateId: 'nav-bar.default',
+      testFile: 'example/src/__tests__/NavigationScene.test.tsx',
+      mutateProof: (source) => removeProofIdArgument(source, 'nav-bar.default'),
+    },
+    {
+      component: 'Empty',
+      label: '调用方空数据边界',
+      stateId: 'empty.data-boundary',
+      testFile: 'example/src/__tests__/FeedbackScene.test.tsx',
+      mutateProof: (source) =>
+        removeProofIdArgument(source, 'empty.data-boundary'),
+    },
+  ];
+
+  for (const mutation of mutations) {
+    withFixture([...new Set(sourceContractFiles)], (fixture) => {
+      assert.doesNotThrow(
+        () => showcaseVerifier.verifyExampleShowcase(fixture),
+        `${mutation.stateId} clean fixture 必须先完整通过`
+      );
+      mutateFixtureFile(
+        fixture,
+        'example/src/catalog/componentCatalog.ts',
+        (source) =>
+          removeCatalogStateLabel(source, mutation.component, mutation.label),
+        `从 ${mutation.component} catalog 删除 ${mutation.label}`
+      );
+      mutateFixtureFile(
+        fixture,
+        'example/src/catalog/showcaseStateContract.ts',
+        (source) => removeStateContractEntry(source, mutation.stateId),
+        `从 state contract 删除 ${mutation.stateId}`
+      );
+      mutateFixtureFile(
+        fixture,
+        mutation.testFile,
+        mutation.mutateProof,
+        `从 scene proof 删除 ${mutation.stateId}`
+      );
+      assertVerifierCode(
+        fixture,
+        'COMPONENT_STATE_REQUIRED_SET',
+        `独立 expected ID 必须拒绝同步删除 ${mutation.stateId}`
+      );
+    });
+  }
+});
+
+test('Empty 调用方空数据边界拒绝 ownership 与 target-component 漂移', () => {
+  const mutations = [
+    {
+      label: 'owner 改成 Carousel',
+      mutate: (source) =>
+        source.replace(
+          "    id: 'empty.data-boundary',\n    component: 'Empty',",
+          "    id: 'empty.data-boundary',\n    component: 'Carousel',"
+        ),
+      code: 'COMPONENT_STATE_REQUIRED_SET',
+    },
+    {
+      label: 'targetComponent 改成 Carousel',
+      mutate: (source) => {
+        const marker = "    id: 'empty.data-boundary',";
+        const start = source.indexOf(marker);
+        if (start < 0) return source;
+        const end = source.indexOf('\n  },', start);
+        if (end < 0) return source;
+        const block = source.slice(start, end);
+        return source.replace(
+          block,
+          block.replace(
+            "targetComponent: 'Empty'",
+            "targetComponent: 'Carousel'"
+          )
+        );
+      },
+      code: 'COMPONENT_STATE_WITNESS',
+    },
+  ];
+
+  for (const mutation of mutations) {
+    withFixture([...new Set(sourceContractFiles)], (fixture) => {
+      assert.doesNotThrow(
+        () => showcaseVerifier.verifyExampleShowcase(fixture),
+        `${mutation.label} clean fixture 必须先完整通过`
+      );
+      mutateFixtureFile(
+        fixture,
+        'example/src/catalog/showcaseStateContract.ts',
+        mutation.mutate,
+        mutation.label
+      );
+      assertVerifierCode(fixture, mutation.code, mutation.label);
+    });
+  }
+});
+
 test('Button loading 的 Jest prove 调用删除时 typed gate 失败', () => {
   withFixture([...new Set(sourceContractFiles)], (fixture) => {
     assert.doesNotThrow(
@@ -2738,8 +3198,8 @@ test('Chip selected 交互真值不由静态 AST gate 判断', () => {
     );
     assert.match(
       `${mutated.stdout}\n${mutated.stderr}`,
-      /SHOWCASE_CHIP_SELECTED_PROOF/,
-      'mutation 必须由 Chip selected 专属运行时证明拒绝'
+      /SHOWCASE_STATE_PROOF_FAILED component=Chip states=chip\.clickable:/u,
+      'mutation 必须由通用 typed Chip state proof 拒绝'
     );
   });
 });
@@ -2775,8 +3235,8 @@ test('Chip selected dead component 不改变静态 gate 与 runtime proof 的职
     );
     assert.match(
       `${mutated.stdout}\n${mutated.stderr}`,
-      /SHOWCASE_CHIP_SELECTED_PROOF/,
-      'dead-code mutation 必须由 Chip selected 专属运行时证明拒绝'
+      /SHOWCASE_STATE_PROOF_FAILED component=Chip states=chip\.clickable:/u,
+      'dead-code mutation 必须由通用 typed Chip state proof 拒绝'
     );
   });
 });
@@ -3172,8 +3632,8 @@ test('example README 按运行顺序记录 Pods、主题与未冒充 PASS 的人
   }
 
   for (const required of [
-    'cd example && bundle install',
-    'cd example && bundle exec pod install --project-directory=ios',
+    '(cd example && bundle install)',
+    '(cd example && bundle exec pod install --project-directory=ios)',
     'system',
     'light',
     'dark',
@@ -3213,6 +3673,12 @@ test('AGENTS 与 CONTRIBUTING 使用 RN 0.86.2 showcase 的真实 workspace 和 
     assert.match(source, /RN `?0\.86\.2/u);
     assert.match(source, /yarn install --immutable/u);
     assert.match(source, /yarn verify:example-showcase/u);
+    assert.match(source, /^\(cd example && bundle install\)$/mu);
+    assert.match(
+      source,
+      /^\(cd example && bundle exec pod install --project-directory=ios\)$/mu
+    );
+    assert.doesNotMatch(source, /^cd example && bundle (?:install|exec pod)/mu);
     assert.doesNotMatch(
       source,
       /react-native-designdd-example|DesignddExample|RN `?0\.85\.3/u
@@ -3225,6 +3691,117 @@ test('AGENTS 与 CONTRIBUTING 使用 RN 0.86.2 showcase 的真实 workspace 和 
     contributing,
     /bundle exec pod install --project-directory=ios/u
   );
+});
+
+test('三份文档的 canonical iOS 命令可从 repo root 顺序执行', () => {
+  const canonicalCommands = [
+    '(cd example && bundle install)',
+    '(cd example && bundle exec pod install --project-directory=ios)',
+  ];
+  const fixture = mkdtempSync(
+    path.join(os.tmpdir(), 'react-native-design-ios-docs-')
+  );
+  try {
+    mkdirSync(path.join(fixture, 'example'), { recursive: true });
+    for (const relativePath of [
+      'AGENTS.md',
+      'CONTRIBUTING.md',
+      'example/README.md',
+    ]) {
+      const commandLines = read(relativePath)
+        .split('\n')
+        .filter((line) => canonicalCommands.includes(line.trim()))
+        .map((line) => line.trim());
+      assert.deepEqual(
+        commandLines,
+        canonicalCommands,
+        `${relativePath} 必须精确保留 canonical iOS command block`
+      );
+      const result = spawnSync(
+        '/bin/sh',
+        [
+          '-c',
+          [
+            'bundle() {',
+            '  test "${PWD##*/}" = "example" || return 91',
+            '}',
+            ...commandLines,
+          ].join('\n'),
+        ],
+        {
+          cwd: fixture,
+          encoding: 'utf8',
+          env: { ...process.env },
+        }
+      );
+      assert.equal(
+        result.status,
+        0,
+        `${relativePath} canonical block 必须可顺序执行：${result.stderr}`
+      );
+    }
+
+    const broken = spawnSync(
+      '/bin/sh',
+      [
+        '-c',
+        [
+          'bundle() {',
+          '  test "${PWD##*/}" = "example" || return 91',
+          '}',
+          'cd example && bundle install',
+          'cd example && bundle exec pod install --project-directory=ios',
+        ].join('\n'),
+      ],
+      {
+        cwd: fixture,
+        encoding: 'utf8',
+        env: { ...process.env },
+      }
+    );
+    assert.notEqual(
+      broken.status,
+      0,
+      '连续两次 cd example 必须被 executable test 证伪'
+    );
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
+  }
+});
+
+test('文档 verifier 拒绝任一 canonical iOS block 退回连续两次 cd', () => {
+  for (const relativePath of [
+    'AGENTS.md',
+    'CONTRIBUTING.md',
+    'example/README.md',
+  ]) {
+    withFixture([...new Set(sourceContractFiles)], (fixture) => {
+      assert.doesNotThrow(
+        () => showcaseVerifier.verifyExampleShowcase(fixture),
+        `${relativePath} clean fixture 必须先完整通过`
+      );
+      mutateFixtureFile(
+        fixture,
+        relativePath,
+        (source) =>
+          source
+            .replace(
+              '(cd example && bundle install)',
+              'cd example && bundle install'
+            )
+            .replace(
+              '(cd example && bundle exec pod install --project-directory=ios)',
+              'cd example && bundle exec pod install --project-directory=ios'
+            ),
+        `${relativePath} 退回连续两次 cd example`
+      );
+      assertVerifierCode(
+        fixture,
+        'DOCUMENTATION_IOS_COMMANDS',
+        `${relativePath} broken iOS command block 必须被拒绝`
+      );
+    });
+  }
 });
 
 test('repo-specific workflow 使用强并集 gate 且共享 CI digest 不漂移', () => {
@@ -3334,11 +3911,11 @@ test('README mutation gate 拒绝缺少安装、Pods、Metro、build、scene、t
     },
     {
       label: '缺 Bundler Pods 命令',
-      code: 'README_COMMANDS',
+      code: 'DOCUMENTATION_IOS_COMMANDS',
       mutate: (source) =>
         source.replace(
-          'cd example && bundle exec pod install --project-directory=ios',
-          'cd example && pod install'
+          '(cd example && bundle exec pod install --project-directory=ios)',
+          '(cd example && pod install --project-directory=ios)'
         ),
     },
     {

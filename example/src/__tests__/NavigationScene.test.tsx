@@ -98,6 +98,19 @@ test('NavBar 展示三种 variant、action/display slot，DrawerHeader 保持纯
   expect(
     componentByTestID(NavBar, 'navigation-navbar-transparent').props.variant
   ).toBe('transparent');
+  navBarCoverage.prove(
+    'nav-bar.default',
+    'nav-bar.brand',
+    'nav-bar.transparent',
+    () => {
+      expect([
+        componentByTestID(NavBar, 'navigation-navbar-default').props.variant,
+        componentByTestID(NavBar, 'navigation-navbar-brand').props.variant,
+        componentByTestID(NavBar, 'navigation-navbar-transparent').props
+          .variant,
+      ]).toEqual(['default', 'brand', 'transparent']);
+    }
+  );
 
   fireEvent.press(screen.getByRole('button', { name: '演示更多动作' }));
   expect(

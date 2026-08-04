@@ -134,6 +134,7 @@ export function FormsScene(): React.JSX.Element {
             <Input
               value="已填写"
               onChangeText={() => {}}
+              editable
               accessibilityLabel="已填写输入"
               testID="forms-input-filled"
             />
@@ -486,6 +487,7 @@ export function FormsScene(): React.JSX.Element {
             <Button
               label="聚焦演示输入"
               variant="secondary"
+              testID="forms-ref-focus"
               onPress={() => {
                 refInput.current?.focus();
                 setRefStatus('已聚焦');
@@ -494,6 +496,7 @@ export function FormsScene(): React.JSX.Element {
             <Button
               label="移开演示输入"
               variant="secondary"
+              testID="forms-ref-blur"
               onPress={() => {
                 refInput.current?.blur();
                 setRefStatus('已失焦');

@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { realpathSync } from 'node:fs';
+import { mkdirSync, realpathSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -136,43 +136,78 @@ function buildActualJestArguments(jestArgs, discoveredTests, reporterPath) {
   ];
 }
 
-function discoverSelectedTests(jestRoot, configPath) {
-  const result = spawnSync(
-    process.execPath,
-    [
-      path.join(repositoryRoot, 'example/node_modules/jest/bin/jest.js'),
-      '--config',
-      configPath,
-      '--listTests',
-      '--json',
-    ],
-    {
-      cwd: jestRoot,
-      encoding: 'utf8',
-      env: process.env,
-    }
-  );
-  if (result.error || result.status !== 0) {
-    failGate(
-      'JEST_GOVERNED_SUITES_SELECTED',
-      `无法取得 production Jest 最终 discovery set：${String(result.error ?? `${result.stdout}\n${result.stderr}`)}`
-    );
+function assertPathWithinRoot(rootDir, testPath, code, label) {
+  const relative = path.relative(rootDir, testPath);
+  if (
+    relative === '..' ||
+    relative.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(relative)
+  ) {
+    failGate(code, `${label} 必须位于 canonical Jest root：${testPath}`);
   }
+}
+
+async function discoverSelectedTests(projectConfig, globalConfig, jestRoot) {
+  // 本仓固定 Jest 29；这些 internal API 让 discovery 复用首次已验证的 resolved config，
+  // 避免再次执行仓库配置。真实对抗 fixture 会在 Jest 升级导致 shape 漂移时直接失败。
+  const Runtime = require(
+    path.join(repositoryRoot, 'example/node_modules/jest-runtime')
+  ).default;
+  const { SearchSource } = require(
+    path.join(repositoryRoot, 'example/node_modules/@jest/core/build/index.js')
+  );
+  const createContext = require(
+    path.join(
+      repositoryRoot,
+      'example/node_modules/@jest/core/build/lib/createContext.js'
+    )
+  ).default;
+  const { CustomConsole } = require(
+    path.join(repositoryRoot, 'example/node_modules/@jest/console')
+  );
+  mkdirSync(projectConfig.cacheDirectory, { recursive: true });
+  let hasteMap;
   try {
-    const discovered = JSON.parse(result.stdout);
-    if (!Array.isArray(discovered)) throw new Error('listTests 结果不是数组');
-    return discovered.map((testPath) =>
+    hasteMap = await Runtime.createHasteMap(projectConfig, {
+      console: new CustomConsole(process.stderr, process.stderr),
+      maxWorkers: Math.max(1, globalConfig.maxWorkers),
+      resetCache: !projectConfig.cache,
+      watch: false,
+      watchman: globalConfig.watchman,
+      workerThreads: globalConfig.workerThreads,
+    });
+    const context = createContext(projectConfig, await hasteMap.build());
+    const searchResult = new SearchSource(context).findMatchingTests('');
+    const discovered = searchResult.tests.map(({ path: testPath }) =>
       canonicalPath(
         testPath,
         'JEST_GOVERNED_SUITES_SELECTED',
         'discovered test path'
       )
     );
+    for (const testPath of discovered) {
+      assertPathWithinRoot(
+        jestRoot,
+        testPath,
+        'JEST_GOVERNED_SUITES_SELECTED',
+        'discovered test path'
+      );
+    }
+    if (new Set(discovered).size !== discovered.length) {
+      failGate(
+        'JEST_GOVERNED_SUITES_SELECTED',
+        'production Jest canonical discovery set 必须唯一'
+      );
+    }
+    return discovered.sort((left, right) => left.localeCompare(right));
   } catch (error) {
+    if (error instanceof JestProductionGateError) throw error;
     failGate(
       'JEST_GOVERNED_SUITES_SELECTED',
-      `无法解析 production Jest discovery JSON：${String(error)}`
+      `无法从首次 validated resolved config 构建 canonical discovery set：${String(error)}`
     );
+  } finally {
+    await hasteMap?.end();
   }
 }
 
@@ -308,12 +343,11 @@ async function resolveProductionGate(jestArgs) {
       `governed owner suite ${String(relativePath)}`
     )
   );
-  const configPath = canonicalPath(
-    path.join(jestRoot, 'jest.config.js'),
-    'JEST_CONFIG_ROOT',
-    'production jest.config.js'
+  const discoveredTests = await discoverSelectedTests(
+    projectConfig,
+    resolvedConfigs.globalConfig,
+    jestRoot
   );
-  const discoveredTests = discoverSelectedTests(jestRoot, configPath);
   const discoveredTestSet = new Set(discoveredTests);
   const missingSelected = requiredTestPaths.filter(
     (testPath) => !discoveredTestSet.has(testPath)

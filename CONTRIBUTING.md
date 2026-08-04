@@ -37,8 +37,8 @@ yarn example ios
 iOS 首次运行或 native 依赖变化后，从 repo root 执行：
 
 ```sh
-cd example && bundle install
-cd example && bundle exec pod install --project-directory=ios
+(cd example && bundle install)
+(cd example && bundle exec pod install --project-directory=ios)
 ```
 
 只构建 binary 时：

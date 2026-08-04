@@ -23,6 +23,28 @@ function isThenable(value: unknown): value is PromiseLike<unknown> {
   );
 }
 
+export class ShowcaseStateProofError extends Error {
+  readonly code = 'SHOWCASE_STATE_PROOF_FAILED';
+  readonly component: PublicComponentId;
+  readonly stateIds: readonly string[];
+  readonly cause: unknown;
+
+  constructor(
+    component: PublicComponentId,
+    stateIds: readonly string[],
+    cause: unknown
+  ) {
+    const detail = cause instanceof Error ? cause.message : String(cause);
+    super(
+      `SHOWCASE_STATE_PROOF_FAILED component=${component} states=${stateIds.join(',')}: ${detail}`
+    );
+    this.name = 'ShowcaseStateProofError';
+    this.component = component;
+    this.stateIds = [...stateIds];
+    this.cause = cause;
+  }
+}
+
 export function createShowcaseStateCoverage<
   Component extends PublicComponentId,
 >(component: Component) {
@@ -63,13 +85,26 @@ export function createShowcaseStateCoverage<
       }
 
       const assertionsBefore = expect.getState().assertionCalls;
-      const result: unknown = proof();
+      let result: unknown;
+      try {
+        result = proof();
+      } catch (cause) {
+        throw new ShowcaseStateProofError(component, stateIds, cause);
+      }
       if (isThenable(result)) {
-        throw new Error(`${component} state proof 只接受同步 callback`);
+        throw new ShowcaseStateProofError(
+          component,
+          stateIds,
+          new Error(`${component} state proof 只接受同步 callback`)
+        );
       }
       if (expect.getState().assertionCalls <= assertionsBefore) {
-        throw new Error(
-          `${component} state proof callback 必须至少产生一个 Jest assertion`
+        throw new ShowcaseStateProofError(
+          component,
+          stateIds,
+          new Error(
+            `${component} state proof callback 必须至少产生一个 Jest assertion`
+          )
         );
       }
       for (const stateId of pending) {

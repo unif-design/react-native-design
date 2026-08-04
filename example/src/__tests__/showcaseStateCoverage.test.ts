@@ -1,4 +1,7 @@
-import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
+import {
+  createShowcaseStateCoverage,
+  ShowcaseStateProofError,
+} from './helpers/showcaseStateCoverage';
 
 test('state proof 只在内联 callback 实际产生 Jest assertion 后原子记账', () => {
   const coverage = createShowcaseStateCoverage('Tag');
@@ -53,6 +56,26 @@ test('state proof callback 抛错或返回 thenable 时不提交任何 ID', () =
     })
   ).toThrow(/同步 callback/u);
   expect(() => asyncCoverage.expectComplete()).toThrow();
+});
+
+test('state proof callback 失败时暴露通用 typed context 并保留 cause', () => {
+  const coverage = createShowcaseStateCoverage('Tag');
+  const cause = new Error('specimen missing');
+
+  expect(() =>
+    coverage.prove('tag.variants', 'tag.sizes', () => {
+      throw cause;
+    })
+  ).toThrow(
+    expect.objectContaining({
+      name: 'ShowcaseStateProofError',
+      code: 'SHOWCASE_STATE_PROOF_FAILED',
+      component: 'Tag',
+      stateIds: ['tag.variants', 'tag.sizes'],
+      cause,
+    }) satisfies Partial<ShowcaseStateProofError>
+  );
+  expect(() => coverage.expectComplete()).toThrow();
 });
 
 test('state proof 在 callback 前拒绝越界与整组重复 ID', () => {

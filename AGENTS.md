@@ -72,8 +72,8 @@ yarn example ios
 yarn example build:android
 yarn example build:ios
 
-cd example && bundle install
-cd example && bundle exec pod install --project-directory=ios
+(cd example && bundle install)
+(cd example && bundle exec pod install --project-directory=ios)
 
 yarn workspace @unif/react-native-design-website typecheck
 node website/scripts/build-llms.test.js

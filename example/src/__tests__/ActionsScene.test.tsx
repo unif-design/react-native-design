@@ -228,33 +228,38 @@ test('Chip 覆盖静态、selected、disabled、busy 与前后插槽，只有真
   render(<App />);
   enterActions();
   const stateCoverage = createShowcaseStateCoverage('Chip');
-  const getSelectableChip = () => {
-    const chip = screen.queryByRole('button', { name: '可选择标签' });
-    if (!chip) throw new Error('SHOWCASE_CHIP_SELECTED_PROOF');
-    return chip;
-  };
 
   expect(screen.getByText('静态标签')).toBeOnTheScreen();
   expect(
     screen.queryByRole('button', { name: '静态标签' })
   ).not.toBeOnTheScreen();
+  stateCoverage.prove('chip.static', () => {
+    expect(componentByTestID(Chip, 'actions-chip-static').props.onPress).toBe(
+      undefined
+    );
+  });
+  stateCoverage.prove('chip.clickable', () => {
+    expect(
+      componentByTestID(Chip, 'actions-chip-selectable').props.onPress
+    ).toEqual(expect.any(Function));
+  });
   stateCoverage.prove('chip.unselected', () => {
-    expect(getSelectableChip().props.accessibilityState).toMatchObject({
-      selected: false,
-      disabled: false,
-      busy: false,
-    });
+    expect(
+      screen.getByRole('button', { name: '可选择标签' }).props
+        .accessibilityState
+    ).toMatchObject({ selected: false, disabled: false, busy: false });
   });
 
-  fireEvent.press(getSelectableChip());
   stateCoverage.prove('chip.selected', () => {
-    expect(getSelectableChip().props.accessibilityState).toMatchObject({
-      selected: true,
-    });
+    fireEvent.press(screen.getByRole('button', { name: '可选择标签' }));
+    expect(
+      screen.getByRole('button', { name: '可选择标签' }).props
+        .accessibilityState
+    ).toMatchObject({ selected: true });
+    expect(
+      screen.getByText('最新结果：Chip · 选择 · 标签已选中')
+    ).toBeOnTheScreen();
   });
-  expect(
-    screen.getByText('最新结果：Chip · 选择 · 标签已选中')
-  ).toBeOnTheScreen();
 
   const disabled = screen.getByRole('button', { name: '禁用标签' });
   const busy = screen.getByRole('button', { name: '处理中标签' });
@@ -274,6 +279,9 @@ test('Chip 覆盖静态、selected、disabled、busy 与前后插槽，只有真
   expect(busyDisabled.props.accessibilityState).toMatchObject({
     disabled: true,
     busy: true,
+  });
+  stateCoverage.prove('chip.busy', () => {
+    expect(componentByTestID(Chip, 'actions-chip-busy').props.busy).toBe(true);
   });
   fireEvent.press(disabled);
   fireEvent.press(busy);

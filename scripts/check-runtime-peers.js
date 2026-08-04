@@ -39,6 +39,16 @@ function deriveAuditedRuntimePackages(
   ]);
 }
 
+function isAuditedRuntimeFailure(summary, auditedPackages) {
+  if (!auditedPackages.has(summary.packageName)) return false;
+  // missing-provider 只有在 repository 可控的三个 workspace provider 上才属于本门禁；
+  // Docusaurus 等外部 npm package 的内部 peer 拓扑不由本仓 manifest 控制。
+  return (
+    summary.kind !== 'missing-provider' ||
+    REQUIRED_PROVIDERS.has(summary.providerLocator)
+  );
+}
+
 /**
  * Yarn 会在 locator 尾部挂 ` [hash]` 虚拟实例标记(同一包在不同 peer 上下文各一份),
  * 该 hash 随依赖图变化而变、不承载版本语义。allowlist 必须比较去掉它之后的实体 locator,
@@ -53,15 +63,27 @@ function parseRequirementList(output) {
     .split(/\r?\n/u)
     .map((line) => {
       // provider 名允许 scope(`@scope/name`),否则 scoped 包的失败行会被静默跳过 —— 门禁漏洞。
-      const match = line.match(
+      const providedMismatch = line.match(
         /^(p[a-z0-9]+)\s+→\s+✘\s+(.+?)\s+provides\s+(@?[^@\s]+)@npm:([^\s]+)/u
       );
-      return match
+      if (providedMismatch) {
+        return {
+          kind: 'provided-mismatch',
+          hash: providedMismatch[1],
+          providerLocator: stripVirtualInstance(providedMismatch[2]),
+          packageName: providedMismatch[3],
+          providerVersion: providedMismatch[4],
+        };
+      }
+      const missingProvider = line.match(
+        /^(p[a-z0-9]+)\s+→\s+✘\s+(.+?)\s+(?:doesn't|does not) provide\s+(@?[^@\s]+)(?:\s+to\s+|$)/u
+      );
+      return missingProvider
         ? {
-            hash: match[1],
-            providerLocator: match[2],
-            packageName: match[3],
-            providerVersion: match[4],
+            kind: 'missing-provider',
+            hash: missingProvider[1],
+            providerLocator: stripVirtualInstance(missingProvider[2]),
+            packageName: missingProvider[3],
           }
         : null;
     })
@@ -72,8 +94,11 @@ function parseRequirementDetail(hash, output) {
   const provider = output.match(
     /^Package (.+?) is requested to provide ([^\s]+) by its descendants/mu
   );
-  const version = output.match(
-    /provides ([^\s]+) with version ([^,\s]+), which does not satisfy/u
+  const providedMismatch = output.match(
+    /^✘ Package (.+?) provides ([^\s]+) with version ([^,\s]+), which does not satisfy/mu
+  );
+  const missingProvider = output.match(
+    /^✘ Package (.+?) (?:does not|doesn't) provide (\S+?)\.?$/mu
   );
   const requests = [
     ...output.matchAll(/[├└]─\s+(.+?)\s+\(via (.+?)\)\r?$/gmu),
@@ -81,14 +106,33 @@ function parseRequirementDetail(hash, output) {
     requester: stripVirtualInstance(match[1]),
     range: match[2],
   }));
-  if (!provider || !version || requests.length === 0) {
+  const failure = providedMismatch ?? missingProvider;
+  if (!provider || !failure || requests.length === 0) {
     throw new Error(`${hash}: 无法解析 yarn explain peer-requirements 明细`);
   }
+  const providerLocator = stripVirtualInstance(provider[1]);
+  const packageName = provider[2];
+  if (
+    providerLocator !== stripVirtualInstance(failure[1]) ||
+    packageName !== failure[2]
+  ) {
+    throw new Error(`${hash}: yarn peer requirement 明细身份不一致`);
+  }
+  if (missingProvider) {
+    return {
+      kind: 'missing-provider',
+      hash,
+      providerLocator,
+      packageName,
+      requests,
+    };
+  }
   return {
+    kind: 'provided-mismatch',
     hash,
-    providerLocator: stripVirtualInstance(provider[1]),
-    packageName: provider[2],
-    providerVersion: version[2],
+    providerLocator,
+    packageName,
+    providerVersion: providedMismatch[3],
     requests,
   };
 }
@@ -104,7 +148,7 @@ function auditRuntimePeers(summaries, details, auditedPackages) {
   const seenProviders = new Set();
   const acceptedProviders = new Set();
   for (const summary of summaries) {
-    if (!auditedPackages.has(summary.packageName)) continue;
+    if (!isAuditedRuntimeFailure(summary, auditedPackages)) continue;
     const detail = details.get(summary.hash);
     if (!detail) {
       errors.push(`${summary.hash}: 缺少 runtime peer 明细`);
@@ -112,11 +156,19 @@ function auditRuntimePeers(summaries, details, auditedPackages) {
     }
     if (
       detail.hash !== summary.hash ||
+      detail.kind !== summary.kind ||
       detail.providerLocator !== summary.providerLocator ||
       detail.packageName !== summary.packageName ||
-      detail.providerVersion !== summary.providerVersion
+      (summary.kind === 'provided-mismatch' &&
+        detail.providerVersion !== summary.providerVersion)
     ) {
       errors.push(`${summary.hash}: summary/detail 身份不一致`);
+      continue;
+    }
+    if (summary.kind === 'missing-provider') {
+      errors.push(
+        `${summary.hash}: audited runtime peer missing provider —— ${detail.providerLocator} does not provide ${detail.packageName}`
+      );
       continue;
     }
     if (!REQUIRED_PROVIDERS.has(detail.providerLocator)) {
@@ -201,7 +253,7 @@ function main() {
     runYarn(['explain', 'peer-requirements'])
   );
   const runtimeSummaries = summaries.filter((item) =>
-    auditedPackages.has(item.packageName)
+    isAuditedRuntimeFailure(item, auditedPackages)
   );
   const details = new Map(
     runtimeSummaries.map((item) => [

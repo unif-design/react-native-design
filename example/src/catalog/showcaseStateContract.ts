@@ -309,6 +309,32 @@ export const showcaseStateContract = [
     },
   },
   {
+    id: 'chip.static',
+    component: 'Chip',
+    scene: 'actions',
+    label: '静态',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [{ testID: 'actions-chip-static', props: {} }],
+    },
+  },
+  {
+    id: 'chip.clickable',
+    component: 'Chip',
+    scene: 'actions',
+    label: '可点击',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'actions-chip-selectable',
+          props: {},
+          presentProps: ['onPress'],
+        },
+      ],
+    },
+  },
+  {
     id: 'chip.unselected',
     component: 'Chip',
     scene: 'actions',
@@ -354,6 +380,16 @@ export const showcaseStateContract = [
       specimens: [
         { testID: 'actions-chip-disabled', props: { disabled: true } },
       ],
+    },
+  },
+  {
+    id: 'chip.busy',
+    component: 'Chip',
+    scene: 'actions',
+    label: '处理中',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [{ testID: 'actions-chip-busy', props: { busy: true } }],
     },
   },
   {
@@ -497,6 +533,44 @@ export const showcaseStateContract = [
     },
   },
   {
+    id: 'input.idle',
+    component: 'Input',
+    scene: 'forms',
+    label: '空闲',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'forms-input-idle',
+          props: { placeholder: '空闲状态' },
+        },
+      ],
+    },
+  },
+  {
+    id: 'input.focus',
+    component: 'Input',
+    scene: 'forms',
+    label: '聚焦',
+    witness: {
+      kind: 'interaction',
+      targetComponent: 'Button',
+      testID: 'forms-ref-focus',
+      handler: 'onPress',
+      calls: [],
+    },
+  },
+  {
+    id: 'input.filled',
+    component: 'Input',
+    scene: 'forms',
+    label: '已填写',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [{ testID: 'forms-input-filled', props: { value: '已填写' } }],
+    },
+  },
+  {
     id: 'input.error',
     component: 'Input',
     scene: 'forms',
@@ -517,6 +591,28 @@ export const showcaseStateContract = [
       kind: 'jsx-props',
       specimens: [
         { testID: 'forms-input-disabled', props: { disabled: true } },
+      ],
+    },
+  },
+  {
+    id: 'input.editable',
+    component: 'Input',
+    scene: 'forms',
+    label: '可编辑',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [{ testID: 'forms-input-filled', props: { editable: true } }],
+    },
+  },
+  {
+    id: 'input.read-only',
+    component: 'Input',
+    scene: 'forms',
+    label: '只读',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        { testID: 'forms-input-readonly', props: { editable: false } },
       ],
     },
   },
@@ -919,6 +1015,31 @@ export const showcaseStateContract = [
     },
   },
   {
+    id: 'stepper.step',
+    component: 'Stepper',
+    scene: 'forms',
+    label: '步长',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [{ testID: 'forms-stepper-main', props: { step: 2 } }],
+    },
+  },
+  {
+    id: 'stepper.zero-range',
+    component: 'Stepper',
+    scene: 'forms',
+    label: '零范围',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'forms-stepper-zero',
+          props: { value: 4, min: 4, max: 4 },
+        },
+      ],
+    },
+  },
+  {
     id: 'stepper.disabled',
     component: 'Stepper',
     scene: 'forms',
@@ -1308,17 +1429,6 @@ export const showcaseStateContract = [
     witness: {
       kind: 'jsx-props',
       specimens: [{ testID: 'collections-entry-action', props: {} }],
-    },
-  },
-  {
-    id: 'carousel.empty',
-    component: 'Carousel',
-    scene: 'collections',
-    label: '空数据',
-    witness: {
-      kind: 'jsx-props',
-      targetComponent: 'Empty',
-      specimens: [{ props: { title: '空数据由消费方显示空态' } }],
     },
   },
   {
@@ -1958,6 +2068,51 @@ export const showcaseStateContract = [
     },
   },
   {
+    id: 'nav-bar.default',
+    component: 'NavBar',
+    scene: 'navigation',
+    label: 'default',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'navigation-navbar-default',
+          props: { variant: 'default' },
+        },
+      ],
+    },
+  },
+  {
+    id: 'nav-bar.brand',
+    component: 'NavBar',
+    scene: 'navigation',
+    label: 'brand',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'navigation-navbar-brand',
+          props: { variant: 'brand' },
+        },
+      ],
+    },
+  },
+  {
+    id: 'nav-bar.transparent',
+    component: 'NavBar',
+    scene: 'navigation',
+    label: 'transparent',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'navigation-navbar-transparent',
+          props: { variant: 'transparent' },
+        },
+      ],
+    },
+  },
+  {
     id: 'drawer-header.name',
     component: 'DrawerHeader',
     scene: 'navigation',
@@ -2220,6 +2375,23 @@ export const showcaseStateContract = [
     witness: {
       kind: 'jsx-props',
       specimens: [{ props: { icon: 'clipboard' } }],
+    },
+  },
+  {
+    id: 'empty.data-boundary',
+    component: 'Empty',
+    scene: 'feedback',
+    label: '调用方空数据边界',
+    witness: {
+      kind: 'jsx-props',
+      targetComponent: 'Empty',
+      specimens: [
+        {
+          testID: 'feedback-empty-data-boundary',
+          props: { title: '暂无反馈记录' },
+          presentProps: ['desc', 'icon'],
+        },
+      ],
     },
   },
   {

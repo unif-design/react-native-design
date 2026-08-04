@@ -326,6 +326,7 @@ export function ActionsScene(): React.JSX.Element {
             <Chip
               label="处理中标签"
               busy
+              testID="actions-chip-busy"
               onPress={() => record('Chip', '点击', '处理中标签已触发')}
             />
             <Chip

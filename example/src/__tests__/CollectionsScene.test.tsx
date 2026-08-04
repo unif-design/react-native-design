@@ -4,6 +4,7 @@ import {
   Card,
   Carousel,
   Cell,
+  Empty,
   EntryCard,
   Grid,
   Icon,
@@ -418,9 +419,11 @@ test('Carousel ref 四个公开方法可执行，reduced motion 停止 upstream 
   enterCollections();
   const stateCoverage = createShowcaseStateCoverage('Carousel');
   fireEvent.press(screen.getByRole('button', { name: '挂载轮播演示' }));
-  expect(screen.getByText('空数据由消费方显示空态')).toBeOnTheScreen();
-  stateCoverage.prove('carousel.empty', () => {
-    expect(screen.getByText('空数据由消费方显示空态')).toBeOnTheScreen();
+  expect(
+    componentByTestID(Empty, 'collections-empty-data-boundary').props
+  ).toMatchObject({
+    title: '空数据由消费方显示空态',
+    desc: 'Carousel 本身不负责空数据内容。',
   });
   expect(
     componentByTestID(Carousel, 'collections-carousel-one').props.data

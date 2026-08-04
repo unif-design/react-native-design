@@ -159,8 +159,11 @@ test('Feedback 展示 Empty、三种 Skeleton 与具备外层加载语义的 Spi
     'empty.title',
     'empty.description',
     'empty.custom-icon',
+    'empty.data-boundary',
     () => {
-      expect(screen.UNSAFE_getByType(Empty).props).toMatchObject({
+      expect(
+        componentByTestID(Empty, 'feedback-empty-data-boundary').props
+      ).toMatchObject({
         title: '暂无反馈记录',
         desc: '触发下方动作后可在结果面板查看安全摘要。',
         icon: 'clipboard',

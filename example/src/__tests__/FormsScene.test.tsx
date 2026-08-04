@@ -131,6 +131,30 @@ test('Input 与 Textarea 分别保持 controlled/uncontrolled mode，并覆盖�
       trailing: { kind: 'text', value: '选填' },
     });
   });
+  inputCoverage.prove('input.idle', () => {
+    const idleInput = componentByTestID(Input, 'forms-input-idle').props;
+    expect(idleInput.defaultValue).toBe('');
+    expect(idleInput.placeholder).toBe('空闲状态');
+    expect(idleInput.error).toBeUndefined();
+  });
+  inputCoverage.prove('input.filled', () => {
+    expect(componentByTestID(Input, 'forms-input-filled').props.value).toBe(
+      '已填写'
+    );
+  });
+  inputCoverage.prove('input.editable', 'input.read-only', () => {
+    expect(componentByTestID(Input, 'forms-input-filled').props.editable).toBe(
+      true
+    );
+    expect(
+      componentByTestID(Input, 'forms-input-readonly').props.editable
+    ).toBe(false);
+  });
+  fireEvent.press(screen.getByRole('button', { name: '聚焦演示输入' }));
+  inputCoverage.prove('input.focus', () => {
+    expect(mockTextFieldFocus).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('引用状态：已聚焦')).toBeOnTheScreen();
+  });
   const uncontrolledTextarea = componentByTestID(
     Textarea,
     'forms-textarea-uncontrolled'
@@ -642,6 +666,9 @@ test('Stepper 覆盖尺寸、步长、边界、零范围与禁用语义，只保
       componentByTestID(Stepper, 'forms-stepper-main').props
     ).toMatchObject({ value: 0, min: 0, max: 10, step: 2 });
   });
+  stateCoverage.prove('stepper.step', () => {
+    expect(componentByTestID(Stepper, 'forms-stepper-main').props.step).toBe(2);
+  });
   expect(
     screen.getByRole('button', { name: '数量，减少' }).props.accessibilityState
   ).toMatchObject({ disabled: true });
@@ -681,6 +708,11 @@ test('Stepper 覆盖尺寸、步长、边界、零范围与禁用语义，只保
   expect(
     screen.getByRole('adjustable', { name: '零范围' }).props.accessibilityState
   ).toMatchObject({ disabled: true });
+  stateCoverage.prove('stepper.zero-range', () => {
+    expect(
+      componentByTestID(Stepper, 'forms-stepper-zero').props
+    ).toMatchObject({ value: 4, min: 4, max: 4 });
+  });
   expect(
     screen.getByRole('adjustable', { name: '禁用数量' }).props
       .accessibilityState

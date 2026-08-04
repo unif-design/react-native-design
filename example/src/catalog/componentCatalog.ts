@@ -87,7 +87,7 @@ export const componentCatalog = [
   {
     id: 'Chip',
     scene: 'actions',
-    states: ['未选中', '选中', '图标', '禁用'],
+    states: ['静态', '可点击', '未选中', '选中', '图标', '禁用', '处理中'],
   },
   { id: 'Tag', scene: 'actions', states: ['变体', '尺寸'] },
   {
@@ -95,7 +95,11 @@ export const componentCatalog = [
     scene: 'actions',
     states: ['pending/active/done/error', 'flat/soft', '尺寸', '无障碍名称'],
   },
-  { id: 'Empty', scene: 'feedback', states: ['标题', '描述', '自定义图标'] },
+  {
+    id: 'Empty',
+    scene: 'feedback',
+    states: ['标题', '描述', '自定义图标', '调用方空数据边界'],
+  },
   { id: 'Skeleton', scene: 'feedback', states: ['line', 'rect', 'circle'] },
   { id: 'Spinner', scene: 'feedback', states: ['尺寸', '颜色', '描边宽度'] },
   {
@@ -131,7 +135,19 @@ export const componentCatalog = [
   {
     id: 'Input',
     scene: 'forms',
-    states: ['受控', '非受控', '错误', '禁用', '前后展示槽', '操作槽'],
+    states: [
+      '受控',
+      '非受控',
+      '空闲',
+      '聚焦',
+      '已填写',
+      '错误',
+      '禁用',
+      '可编辑',
+      '只读',
+      '前后展示槽',
+      '操作槽',
+    ],
   },
   {
     id: 'PasswordInput',
@@ -162,7 +178,7 @@ export const componentCatalog = [
   {
     id: 'Stepper',
     scene: 'forms',
-    states: ['最小值', '中间值', '最大值', '禁用', '尺寸'],
+    states: ['最小值', '中间值', '最大值', '步长', '零范围', '禁用', '尺寸'],
   },
   { id: 'Form', scene: 'forms', states: ['单分组', '多分组'] },
   { id: 'FormGroup', scene: 'forms', states: ['有标题', '无标题'] },
@@ -174,7 +190,15 @@ export const componentCatalog = [
   {
     id: 'NavBar',
     scene: 'navigation',
-    states: ['标题', '返回', '左右操作', '安全区'],
+    states: [
+      '标题',
+      '返回',
+      '左右操作',
+      '安全区',
+      'default',
+      'brand',
+      'transparent',
+    ],
   },
   {
     id: 'DrawerHeader',
@@ -225,7 +249,6 @@ export const componentCatalog = [
     id: 'Carousel',
     scene: 'collections',
     states: [
-      '空数据',
       '单页',
       '多页',
       '可操作项',
