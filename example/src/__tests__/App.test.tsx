@@ -314,15 +314,19 @@ test('Android BackHandler 只订阅一次，child consume、Home 不 consume，�
   expect(nativeBack.remove).toHaveBeenCalledTimes(1);
 });
 
-test('Android back 离开 Feedback 时恢复默认唯一 Hosts', () => {
+test('根级 Hosts 在进入、重置与离开 Feedback 全程各保持唯一一份', () => {
   installReducedMotionMock(false);
   const nativeBack = installAndroidBackHandlerMock();
   render(<App />);
 
+  expect(screen.getAllByTestId('capture-confirm-host')).toHaveLength(1);
+  expect(screen.getAllByTestId('capture-toast-host')).toHaveLength(1);
   fireEvent.press(screen.getByRole('button', { name: /反馈与浮层/ }));
-  fireEvent.press(screen.getByTestId('feedback-hosts-unmount'));
-  expect(screen.queryByTestId('capture-confirm-host')).not.toBeOnTheScreen();
-  expect(screen.queryByTestId('capture-toast-host')).not.toBeOnTheScreen();
+  expect(screen.getAllByTestId('capture-confirm-host')).toHaveLength(1);
+  expect(screen.getAllByTestId('capture-toast-host')).toHaveLength(1);
+  fireEvent.press(screen.getByRole('button', { name: '重置本场景' }));
+  expect(screen.getAllByTestId('capture-confirm-host')).toHaveLength(1);
+  expect(screen.getAllByTestId('capture-toast-host')).toHaveLength(1);
 
   act(() => {
     expect(nativeBack.getHandler()()).toBe(true);

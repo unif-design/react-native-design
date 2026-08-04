@@ -228,24 +228,29 @@ test('Chip 覆盖静态、selected、disabled、busy 与前后插槽，只有真
   render(<App />);
   enterActions();
   const stateCoverage = createShowcaseStateCoverage('Chip');
+  const getSelectableChip = () => {
+    const chip = screen.queryByRole('button', { name: '可选择标签' });
+    if (!chip) throw new Error('SHOWCASE_CHIP_SELECTED_PROOF');
+    return chip;
+  };
 
   expect(screen.getByText('静态标签')).toBeOnTheScreen();
   expect(
     screen.queryByRole('button', { name: '静态标签' })
   ).not.toBeOnTheScreen();
   stateCoverage.prove('chip.unselected', () => {
-    expect(
-      screen.getByRole('button', { name: '可选择标签' }).props
-        .accessibilityState
-    ).toMatchObject({ selected: false, disabled: false, busy: false });
+    expect(getSelectableChip().props.accessibilityState).toMatchObject({
+      selected: false,
+      disabled: false,
+      busy: false,
+    });
   });
 
-  fireEvent.press(screen.getByRole('button', { name: '可选择标签' }));
+  fireEvent.press(getSelectableChip());
   stateCoverage.prove('chip.selected', () => {
-    expect(
-      screen.getByRole('button', { name: '可选择标签' }).props
-        .accessibilityState
-    ).toMatchObject({ selected: true });
+    expect(getSelectableChip().props.accessibilityState).toMatchObject({
+      selected: true,
+    });
   });
   expect(
     screen.getByText('最新结果：Chip · 选择 · 标签已选中')

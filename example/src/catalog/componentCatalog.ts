@@ -121,12 +121,12 @@ export const componentCatalog = [
   {
     id: 'ConfirmHost',
     scene: 'feedback',
-    states: ['确认', '取消', '危险操作', '无 Host', '重入'],
+    states: ['确认', '取消', '危险操作', '重入'],
   },
   {
     id: 'ToastHost',
     scene: 'feedback',
-    states: ['类型', '位置', '持续时间', 'Host 前调用', 'latest wins'],
+    states: ['类型', '位置', '持续时间', 'latest wins'],
   },
   {
     id: 'Input',

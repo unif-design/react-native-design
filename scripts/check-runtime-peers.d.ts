@@ -20,6 +20,12 @@ export type PeerAuditResult = {
   errors: string[];
 };
 
+export type RuntimePeerManifest = {
+  peerDependencies?: Readonly<Record<string, string>>;
+  dependencies?: Readonly<Record<string, string>>;
+  devDependencies?: Readonly<Record<string, string>>;
+};
+
 export declare function parseRequirementList(
   output: string
 ): PeerRequirementSummary[];
@@ -27,7 +33,13 @@ export declare function parseRequirementDetail(
   hash: string,
   output: string
 ): PeerRequirementDetail;
+export declare function deriveAuditedRuntimePackages(
+  rootManifest: RuntimePeerManifest,
+  exampleManifest: RuntimePeerManifest,
+  websiteManifest: RuntimePeerManifest
+): Set<string>;
 export declare function auditRuntimePeers(
   summaries: readonly PeerRequirementSummary[],
-  details: ReadonlyMap<string, PeerRequirementDetail>
+  details: ReadonlyMap<string, PeerRequirementDetail>,
+  auditedPackages: ReadonlySet<string>
 ): PeerAuditResult;

@@ -9,6 +9,11 @@ import {
 } from './helpers/nativeMocks';
 import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
 
+const SUCCESS_FIXTURE_URI =
+  'https://unif-design.github.io/react-native-design/img/logo.png';
+const FAILURE_FIXTURE_URI =
+  'https://unif-design.github.io/react-native-design/example-fixtures/media-decode-failure-v1.png';
+
 jest.mock('react-native-safe-area-context', () => {
   const safeAreaMock = jest.requireActual(
     'react-native-safe-area-context/jest/mock'
@@ -100,24 +105,27 @@ test('Avatar 覆盖五档尺寸、四种 variant、monogram、本地/HTTPS 与�
   );
   expect(componentByTestID(Avatar, 'media-avatar-remote').props.source).toEqual(
     {
-      uri: 'https://images.example.com/unif-avatar.png',
+      uri: SUCCESS_FIXTURE_URI,
     }
   );
   stateCoverage.prove('avatar.image', () => {
     expect(
       componentByTestID(Avatar, 'media-avatar-remote').props.source
-    ).toEqual({ uri: 'https://images.example.com/unif-avatar.png' });
+    ).toEqual({ uri: SUCCESS_FIXTURE_URI });
   });
-  expect(
-    componentByTestID(Avatar, 'media-avatar-invalid').findAllByType(Image)
-  ).toHaveLength(0);
 
   const remoteAvatar = componentByTestID(Avatar, 'media-avatar-remote');
-  fireEvent(remoteAvatar.findByType(Image), 'error');
-  expect(screen.getByText('远程头像')).toBeOnTheScreen();
+  fireEvent(remoteAvatar.findByType(Image), 'load');
+  expect(remoteAvatar.findAllByType(Image)).toHaveLength(1);
   expect(screen.getByLabelText('远程头像')).toBeOnTheScreen();
+
+  const failureAvatar = componentByTestID(Avatar, 'media-avatar-failure');
+  expect(failureAvatar.props.source).toEqual({ uri: FAILURE_FIXTURE_URI });
+  fireEvent(failureAvatar.findByType(Image), 'error');
+  expect(screen.getByText('失效头像')).toBeOnTheScreen();
+  expect(screen.getByLabelText('失效头像')).toBeOnTheScreen();
   stateCoverage.prove('avatar.initial-fallback', () => {
-    expect(screen.getByLabelText('远程头像')).toBeOnTheScreen();
+    expect(screen.getByLabelText('失效头像')).toBeOnTheScreen();
   });
   stateCoverage.expectComplete();
 });
@@ -130,7 +138,7 @@ test('Thumbnail 覆盖 uri/source、三档尺寸、selected、具名/装饰与�
   expect(
     componentByTestID(Thumbnail, 'media-thumbnail-uri-sm').props
   ).toMatchObject({
-    uri: 'https://images.example.com/unif-avatar.png',
+    uri: SUCCESS_FIXTURE_URI,
     size: 'sm',
     accessibilityLabel: '远程缩略图',
   });
@@ -138,7 +146,7 @@ test('Thumbnail 覆盖 uri/source、三档尺寸、selected、具名/装饰与�
     expect(
       componentByTestID(Thumbnail, 'media-thumbnail-uri-sm').props
     ).toMatchObject({
-      uri: 'https://images.example.com/unif-avatar.png',
+      uri: SUCCESS_FIXTURE_URI,
       size: 'sm',
     });
   });
@@ -186,14 +194,23 @@ test('Thumbnail 覆盖 uri/source、三档尺寸、selected、具名/装饰与�
     expect(screen.getByRole('image', { name: '远程缩略图' })).toBeOnTheScreen();
   });
 
-  const remoteThumbnail = componentByTestID(
+  const successThumbnail = componentByTestID(
     Thumbnail,
     'media-thumbnail-uri-sm'
   );
-  fireEvent(remoteThumbnail.findByType(Image), 'error');
-  expect(screen.getByTestId('media-thumbnail-uri-sm')).toBeOnTheScreen();
+  fireEvent(successThumbnail.findByType(Image), 'load');
+  expect(successThumbnail.findAllByType(Image)).toHaveLength(1);
+  expect(screen.getByRole('image', { name: '远程缩略图' })).toBeOnTheScreen();
+
+  const failureThumbnail = componentByTestID(
+    Thumbnail,
+    'media-thumbnail-failure'
+  );
+  expect(failureThumbnail.props.uri).toBe(FAILURE_FIXTURE_URI);
+  fireEvent(failureThumbnail.findByType(Image), 'error');
+  expect(screen.getByTestId('media-thumbnail-failure')).toBeOnTheScreen();
   expect(
-    screen.queryByRole('image', { name: '远程缩略图' })
+    screen.queryByRole('image', { name: '失效缩略图' })
   ).not.toBeOnTheScreen();
   expect(screen.getByText('失败后保留固定缩略图框')).toBeOnTheScreen();
   stateCoverage.prove('thumbnail.load-error', () => {
@@ -255,7 +272,7 @@ test('远程 URI 只接受 HTTPS，跨路由保留合法值且结果/a11y/testID
   fireEvent.changeText(input, unsafeUri);
   fireEvent.press(screen.getByRole('button', { name: '应用远程头像地址' }));
   expect(componentByTestID(Avatar, 'media-avatar-remote').props.source).toEqual(
-    { uri: 'https://images.example.com/unif-avatar.png' }
+    { uri: SUCCESS_FIXTURE_URI }
   );
   expect(
     screen.getByText('最新结果：Avatar · 更新来源 · 地址未通过 HTTPS 校验')
@@ -299,6 +316,6 @@ test('远程 URI 只接受 HTTPS，跨路由保留合法值且结果/a11y/testID
   );
   fireEvent.press(screen.getByRole('button', { name: '重置本场景' }));
   expect(componentByTestID(Avatar, 'media-avatar-remote').props.source).toEqual(
-    { uri: 'https://images.example.com/unif-avatar.png' }
+    { uri: SUCCESS_FIXTURE_URI }
   );
 });

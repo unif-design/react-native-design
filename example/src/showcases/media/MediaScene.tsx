@@ -19,9 +19,12 @@ import {
 } from '@unif/react-native-design';
 import { ShowcaseScaffold } from '../../shared/ShowcaseScaffold';
 import { SectionCard } from '../../shared/SectionCard';
+import {
+  DEFAULT_MEDIA_REMOTE_URI,
+  MEDIA_DECODE_FAILURE_URI,
+} from '../../state/showcaseState';
 import { useShowcase } from '../../state/useShowcase';
 
-const DEFAULT_REMOTE_URI = 'https://images.example.com/unif-avatar.png';
 const LOCAL_IMAGE: ImageSourcePropType = require('../../../android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png');
 const avatarSizes: readonly AvatarSize[] = ['xs', 'sm', 'md', 'lg', 'xl'];
 const avatarVariants: readonly AvatarVariant[] = [
@@ -102,7 +105,7 @@ export function MediaScene(): React.JSX.Element {
         back();
       }}
       onReset={() => {
-        setUriInput(DEFAULT_REMOTE_URI);
+        setUriInput(DEFAULT_MEDIA_REMOTE_URI);
       }}
       testID="media-screen"
     >
@@ -221,9 +224,9 @@ export function MediaScene(): React.JSX.Element {
             />
             <Avatar
               label="失效头像"
-              source={{ uri: ' ' }}
+              source={{ uri: MEDIA_DECODE_FAILURE_URI }}
               variant="soft"
-              testID="media-avatar-invalid"
+              testID="media-avatar-failure"
             />
           </View>
         </SectionCard>
@@ -273,6 +276,12 @@ export function MediaScene(): React.JSX.Element {
               size="sm"
               accessibilityLabel="远程缩略图"
               testID="media-thumbnail-uri-sm"
+            />
+            <Thumbnail
+              uri={MEDIA_DECODE_FAILURE_URI}
+              size="sm"
+              accessibilityLabel="失效缩略图"
+              testID="media-thumbnail-failure"
             />
             <Thumbnail
               source={LOCAL_IMAGE}

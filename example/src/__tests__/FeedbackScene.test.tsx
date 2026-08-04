@@ -568,66 +568,17 @@ test('Toast 连续调用遵守 latest-wins，页面不把 void API 伪称为 set
   });
 });
 
-test('用户显式卸载 Host 后 Confirm 安全返回 false，Toast 在重挂后补投', async () => {
-  jest.useFakeTimers();
+test('Feedback 不暴露根级 ConfirmHost 与 ToastHost 的生命周期控制', () => {
   render(<App />);
   enterFeedback();
 
-  expect(screen.getByTestId('feedback-host-status')).toHaveTextContent(
-    '全局 Host：已挂载'
-  );
-  fireEvent.press(screen.getByTestId('feedback-hosts-unmount'));
-  expect(screen.getByTestId('feedback-host-status')).toHaveTextContent(
-    '全局 Host：已卸载'
-  );
-
-  fireEvent.press(screen.getByTestId('feedback-confirm-no-host'));
-  await waitFor(() => {
-    expect(
-      screen.getByText(
-        '最新结果：ConfirmHost · 无 Host · 未挂载时安全返回 false'
-      )
-    ).toBeOnTheScreen();
-  });
-  expect(screen.queryByText('无 Host 确认不会显示')).not.toBeOnTheScreen();
-
-  fireEvent.press(screen.getByTestId('feedback-toast-pre-host'));
-  expect(screen.queryByText('Host 重挂后补投的提示')).not.toBeOnTheScreen();
-  fireEvent.press(screen.getByTestId('feedback-hosts-remount'));
-  expect(screen.getByTestId('feedback-host-status')).toHaveTextContent(
-    '全局 Host：已挂载'
-  );
-  expect(screen.getByText('Host 重挂后补投的提示')).toBeOnTheScreen();
-
-  act(() => {
-    jest.advanceTimersByTime(10_000);
-  });
-});
-
-test('重置与返回会恢复 Hosts，pre-host 静态提示在返回时如实补投', () => {
-  jest.useFakeTimers();
-  render(<App />);
-  enterFeedback();
-
-  fireEvent.press(screen.getByTestId('feedback-hosts-unmount'));
-  fireEvent.press(screen.getByRole('button', { name: '重置本场景' }));
-  expect(screen.getByTestId('feedback-host-status')).toHaveTextContent(
-    '全局 Host：已挂载'
-  );
-
-  fireEvent.press(screen.getByTestId('feedback-hosts-unmount'));
-  fireEvent.press(screen.getByTestId('feedback-toast-pre-host'));
-  fireEvent.press(screen.getByRole('button', { name: '返回首页' }));
-  expect(screen.getByText('设计系统示例')).toBeOnTheScreen();
-  expect(screen.getByText('Host 重挂后补投的提示')).toBeOnTheScreen();
-
-  enterFeedback();
-  expect(screen.getByTestId('feedback-host-status')).toHaveTextContent(
-    '全局 Host：已挂载'
-  );
-  act(() => {
-    jest.advanceTimersByTime(10_000);
-  });
+  expect(screen.queryByTestId('feedback-host-status')).not.toBeOnTheScreen();
+  expect(screen.queryByTestId('feedback-hosts-unmount')).not.toBeOnTheScreen();
+  expect(screen.queryByTestId('feedback-hosts-remount')).not.toBeOnTheScreen();
+  expect(
+    screen.queryByTestId('feedback-confirm-no-host')
+  ).not.toBeOnTheScreen();
+  expect(screen.queryByTestId('feedback-toast-pre-host')).not.toBeOnTheScreen();
 });
 
 test('连续调用 Confirm 时第二个请求返回 false，第一个仍由用户结算', async () => {
@@ -659,6 +610,18 @@ test('ConfirmHost 与 ToastHost 的全部公开状态都由真实命令结果证
   const infoSpy = jest.mocked(toast.info);
   const successSpy = jest.mocked(toast.success);
   const errorSpy = jest.mocked(toast.error);
+  const assertToastErrorProof = () => {
+    const input = errorSpy.mock.calls[0]?.[0];
+    if (
+      errorSpy.mock.calls.length !== 1 ||
+      typeof input !== 'object' ||
+      input === null ||
+      !('message' in input) ||
+      input.message !== '错误提示 · 底部'
+    ) {
+      throw new Error('SHOWCASE_TOAST_ERROR_PROOF');
+    }
+  };
   const toastSpies = {
     信息: infoSpy,
     成功: successSpy,
@@ -691,6 +654,7 @@ test('ConfirmHost 与 ToastHost 的全部公开状态都由真实命令结果证
       screen.getByRole('button', { name: `展示${kind}${position}提示` })
     );
     expect(screen.getByText(`${kind}提示 · ${position}`)).toBeOnTheScreen();
+    if (kind === '错误') assertToastErrorProof();
     expect(toastSpies[kind]).toHaveBeenLastCalledWith({
       message: `${kind}提示 · ${position}`,
       position:
@@ -739,27 +703,6 @@ test('ConfirmHost 与 ToastHost 的全部公开状态都由真实命令结果证
     expect(screen.queryByText('信息提示 · 顶部')).not.toBeOnTheScreen();
   });
 
-  fireEvent.press(screen.getByTestId('feedback-hosts-unmount'));
-  fireEvent.press(screen.getByTestId('feedback-confirm-no-host'));
-  await waitFor(() => {
-    expect(
-      screen.getByText(
-        '最新结果：ConfirmHost · 无 Host · 未挂载时安全返回 false'
-      )
-    ).toBeOnTheScreen();
-  });
-  expect(screen.queryByText('无 Host 确认不会显示')).not.toBeOnTheScreen();
-  confirmCoverage.prove('confirm-host.no-host', () => {
-    expect(screen.queryByText('无 Host 确认不会显示')).not.toBeOnTheScreen();
-  });
-
-  fireEvent.press(screen.getByTestId('feedback-toast-pre-host'));
-  expect(screen.queryByText('Host 重挂后补投的提示')).not.toBeOnTheScreen();
-  fireEvent.press(screen.getByTestId('feedback-hosts-remount'));
-  expect(screen.getByText('Host 重挂后补投的提示')).toBeOnTheScreen();
-  toastCoverage.prove('toast-host.pre-host', () => {
-    expect(screen.getByText('Host 重挂后补投的提示')).toBeOnTheScreen();
-  });
   toastCoverage.expectComplete();
 
   fireEvent.press(screen.getByRole('button', { name: '打开普通确认' }));
@@ -827,7 +770,7 @@ test('ConfirmHost 与 ToastHost 的全部公开状态都由真实命令结果证
   });
   confirmCoverage.expectComplete();
   runtimeCoverage.prove('confirm', () => {
-    expect(jest.mocked(confirm)).toHaveBeenCalledTimes(6);
+    expect(jest.mocked(confirm)).toHaveBeenCalledTimes(5);
     expect(jest.mocked(confirm)).toHaveBeenCalledWith(
       expect.objectContaining({ title: '继续当前操作？' })
     );

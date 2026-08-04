@@ -19,10 +19,14 @@
         "$TURBO_ROOT$/example/babel.config.js",
         "$TURBO_ROOT$/example/metro.config.js",
         "$TURBO_ROOT$/example/jest.config.js",
+        "$TURBO_ROOT$/example/jest.showcaseGate.js",
         "$TURBO_ROOT$/example/jest.setup.ts",
+        "$TURBO_ROOT$/example/jest.forbidOnlyReporter.js",
         "$TURBO_ROOT$/example/tsconfig.json",
         "$TURBO_ROOT$/example/.eslintrc.js",
-        "$TURBO_ROOT$/example/src/**"
+        "$TURBO_ROOT$/example/src/**",
+        "$TURBO_ROOT$/scripts/run-example-jest.mjs",
+        "$TURBO_ROOT$/scripts/verify-example-showcase.mjs"
       ],
       "outputs": []
     },

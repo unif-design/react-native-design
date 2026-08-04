@@ -13,7 +13,7 @@ import { useShowcase } from '../state/useShowcase';
 
 function DesignRuntime({ children }: { children: ReactNode }) {
   const {
-    state: { fontScale, runtimeHostsMounted, themeMode },
+    state: { fontScale, themeMode },
   } = useShowcase();
 
   return (
@@ -22,8 +22,8 @@ function DesignRuntime({ children }: { children: ReactNode }) {
       fontScale={normalizeFontScale(fontScale)}
     >
       {children}
-      {runtimeHostsMounted ? <ConfirmHost /> : null}
-      {runtimeHostsMounted ? <ToastHost /> : null}
+      <ConfirmHost />
+      <ToastHost />
     </ThemeProvider>
   );
 }

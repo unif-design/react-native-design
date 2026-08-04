@@ -138,8 +138,7 @@ function showToast(
 }
 
 export function FeedbackScene(): React.JSX.Element {
-  const { appendResult, back, setRuntimeHostsMounted, state, updateScene } =
-    useShowcase();
+  const { appendResult, back, state, updateScene } = useShowcase();
   const colors = useColors();
   const reducedMotion = usePrefersReducedMotion();
   const pulseStyle = usePulse({
@@ -175,25 +174,6 @@ export function FeedbackScene(): React.JSX.Element {
       destructive ? '破坏性确认' : '普通确认',
       accepted ? '已确认' : '已取消'
     );
-  };
-  const runNoHostConfirm = async (): Promise<void> => {
-    const accepted = await confirm({
-      title: '无 Host 确认不会显示',
-      message: '该请求应立即安全返回 false。',
-    });
-    record(
-      'ConfirmHost',
-      '无 Host',
-      accepted ? '异常返回 true' : '未挂载时安全返回 false'
-    );
-  };
-  const queueToastBeforeHost = (): void => {
-    toast.info({
-      message: 'Host 重挂后补投的提示',
-      position: 'bottom',
-      duration: 10_000,
-    });
-    record('ToastHost', 'Host 前请求', '等待 Host 重挂后补投');
   };
   const runReentrantConfirm = async (): Promise<void> => {
     const first = confirm({
@@ -444,55 +424,9 @@ export function FeedbackScene(): React.JSX.Element {
             <Button
               label="连续调用两次 Confirm"
               variant="secondary"
-              disabled={!state.runtimeHostsMounted}
               testID="feedback-confirm-reentrant"
               onPress={() => {
                 runReentrantConfirm().catch(() => undefined);
-              }}
-            />
-          </View>
-        </SectionCard>
-
-        <SectionCard
-          title="Host 生命周期"
-          description="显式卸载后可执行无 Host 与启动前请求，再重新挂载验证补投。"
-        >
-          <Text style={styles.fact} testID="feedback-host-status">
-            全局 Host：{state.runtimeHostsMounted ? '已挂载' : '已卸载'}
-          </Text>
-          <View style={styles.row}>
-            <Button
-              label="卸载全局 Host"
-              variant="secondary"
-              disabled={!state.runtimeHostsMounted}
-              testID="feedback-hosts-unmount"
-              onPress={() => {
-                setRuntimeHostsMounted(false);
-              }}
-            />
-            <Button
-              label="无 Host 调用 Confirm"
-              variant="secondary"
-              disabled={state.runtimeHostsMounted}
-              testID="feedback-confirm-no-host"
-              onPress={() => {
-                runNoHostConfirm().catch(() => undefined);
-              }}
-            />
-            <Button
-              label="Host 前请求 Toast"
-              variant="secondary"
-              disabled={state.runtimeHostsMounted}
-              testID="feedback-toast-pre-host"
-              onPress={queueToastBeforeHost}
-            />
-            <Button
-              label="重新挂载全局 Host"
-              variant="secondary"
-              disabled={state.runtimeHostsMounted}
-              testID="feedback-hosts-remount"
-              onPress={() => {
-                setRuntimeHostsMounted(true);
               }}
             />
           </View>

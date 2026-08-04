@@ -51,7 +51,7 @@ export function FormsScene(): React.JSX.Element {
   const draft = state.scenes.forms;
   const refInput = useRef<TextFieldHandle>(null);
   const [refStatus, setRefStatus] = useState('等待操作');
-  const [textareaRevision, setTextareaRevision] = useState(0);
+  const [localSpecimenRevision, setLocalSpecimenRevision] = useState(0);
   const record = (component: string, action: string, summary: string) => {
     appendResult({ scene: 'forms', component, action, summary });
   };
@@ -63,7 +63,10 @@ export function FormsScene(): React.JSX.Element {
       onBack={() => {
         back();
       }}
-      onReset={() => setTextareaRevision((revision) => revision + 1)}
+      onReset={() => {
+        setLocalSpecimenRevision((revision) => revision + 1);
+        setRefStatus('等待操作');
+      }}
       testID="forms-screen"
     >
       <View style={styles.stack}>
@@ -98,7 +101,7 @@ export function FormsScene(): React.JSX.Element {
               testID="forms-input-controlled"
             />
             <Textarea
-              key={textareaRevision}
+              key={localSpecimenRevision}
               defaultValue={draft.textareaValue}
               onChangeText={(textareaValue) => {
                 updateScene('forms', (current) => ({
@@ -121,6 +124,7 @@ export function FormsScene(): React.JSX.Element {
         <SectionCard title="输入状态">
           <View style={styles.controls}>
             <Input
+              key={localSpecimenRevision}
               defaultValue=""
               placeholder="空闲状态"
               trailing={{ kind: 'text', value: '选填' }}
@@ -267,6 +271,7 @@ export function FormsScene(): React.JSX.Element {
               testID="forms-search"
             />
             <Search
+              key={localSpecimenRevision}
               defaultValue=""
               placeholder="非受控搜索"
               accessibilityLabel="非受控组件搜索"
@@ -453,7 +458,12 @@ export function FormsScene(): React.JSX.Element {
           <Form testID="forms-form-single">
             <FormGroup label="单组示例" testID="forms-form-single-group">
               <FormRow label="备注" testID="forms-form-single-row">
-                <Input defaultValue="" accessibilityLabel="单组备注" />
+                <Input
+                  key={localSpecimenRevision}
+                  defaultValue=""
+                  accessibilityLabel="单组备注"
+                  testID="forms-form-single-note"
+                />
               </FormRow>
             </FormGroup>
           </Form>
@@ -464,6 +474,7 @@ export function FormsScene(): React.JSX.Element {
           description="公开引用只演示聚焦与失焦，不暴露清除或原生属性写入。"
         >
           <Input
+            key={localSpecimenRevision}
             ref={refInput}
             defaultValue=""
             onFocus={() => setRefStatus('已聚焦')}

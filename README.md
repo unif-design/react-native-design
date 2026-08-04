@@ -36,7 +36,7 @@ iOS 另需在 `ios/` 执行 `bundle exec pod install`。完整步骤见[文档�
 
 `react-native-worklets` 的 Babel 插件与 Metro transformer 由宿主工程提供,不随本库分发 —— 宿主需自备与 RN `0.86.2` 匹配的 `@babel/core`、`@react-native/babel-preset@0.86.x`、`@react-native/metro-config@0.86.x`。
 
-`react-native-reanimated-carousel@5.0.0` 发布的 RNGH peer 是 `>=2.9.0 <3.0.0`,与本包要求的 `>=3.0.0 <4.0.0` 无交集;该组合已实测适配。消费端只能**接受这条警告**或加**只作用于 Carousel 的窄 override**(npm `overrides`、pnpm `peerDependencyRules.allowedVersions`、Yarn scoped `logFilters`),不要用全局 peer 忽略、`--force` 或 `--legacy-peer-deps`。本仓 `.yarnrc.yml` 里的 `logFilters` 不随 npm 包分发。
+`react-native-reanimated-carousel@5.0.0` 发布的 RNGH peer 是 `>=2.9.0 <3.0.0`,与本包要求的 `>=3.0.0 <4.0.0` 无交集;该组合已实测适配。消费端只能**接受这条警告**或加**只作用于 Carousel 的窄 override**(npm `overrides`、pnpm `peerDependencyRules.allowedVersions`、Yarn scoped `logFilters`),不要用全局 peer 忽略、`--force` 或 `--legacy-peer-deps`。本仓不使用全局 `logFilters`；`yarn check:runtime-peers` 只接受 root、example、website 三条精确的 RNRC 5 / RNGH 3 例外。
 
 ## 快速开始
 
@@ -120,6 +120,14 @@ fontScale 操作，以及 VoiceOver/TalkBack、真机、旋转、remote image fa
 执行的矩阵见 [`example/README.md`](example/README.md)。自动化结果不等同于真机或 a11y
 验收通过。
 
+Media 默认 success fixture 是项目部署的
+`https://unif-design.github.io/react-native-design/img/logo.png`，failure specimen 使用固定的
+invalid-image fixture
+`https://unif-design.github.io/react-native-design/example-fixtures/media-decode-failure-v1.png`，
+确保 HTTP 成功后仍稳定进入 native decode failure/fallback 分支。
+Jest 只证明 source wiring 以及合成 load/error event 后的组件状态；真实 HTTPS、缓存和 native
+decode 仍按 `example/README.md` 的 Android/iOS 手工矩阵标记为待执行。
+
 ## 文档
 
 - **文档站**(快速开始 · 组件 API · 设计令牌 · 设计原则):https://unif-design.github.io/react-native-design/
@@ -159,7 +167,7 @@ yarn android
 yarn ios
 ```
 
-harness 不携带本仓的 `.yarnrc.yml` `logFilters`,所以安装时会看到那条已知的 RNRC / RNGH peer 警告 —— 这正是消费端会看到的真实情况。
+harness 不继承本仓 `check:runtime-peers` 的 workspace 精确 allowlist；安装输出会如实暴露这条已知的 RNRC / RNGH peer warning，等同消费端实际可见结果。
 
 ## 兼容性
 

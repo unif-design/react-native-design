@@ -15,8 +15,10 @@ import {
 import { useShowcase } from '../state/useShowcase';
 
 let showcase: ShowcaseContextValue | undefined;
+let probeRenderCount = 0;
 
 function Probe() {
+  probeRenderCount += 1;
   showcase = useShowcase();
   return null;
 }
@@ -24,6 +26,7 @@ function Probe() {
 beforeEach(() => {
   jest.clearAllMocks();
   showcase = undefined;
+  probeRenderCount = 0;
   jest.spyOn(console, 'info').mockImplementation(() => {});
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -72,40 +75,25 @@ test('Provider 暴露 typed navigation、持久 scene draft 与 target reset', (
   expect(showcase?.state.scenes.forms.inputValue).toBe('');
 });
 
-test('离开或重置 Feedback 时原子恢复 runtime Hosts', () => {
+test('重复导航到当前 scene 保持 state identity 且不触发 Consumer render', () => {
   render(
     <ShowcaseProvider>
       <Probe />
     </ShowcaseProvider>
   );
 
-  expect(showcase?.state.runtimeHostsMounted).toBe(true);
   act(() => {
-    showcase?.navigate('feedback');
-    showcase?.setRuntimeHostsMounted(false);
-  });
-  expect(showcase?.state.runtimeHostsMounted).toBe(false);
-
-  act(() => {
-    showcase?.back();
-  });
-  expect(showcase?.state.navigation).toEqual(['home']);
-  expect(showcase?.state.runtimeHostsMounted).toBe(true);
-
-  act(() => {
-    showcase?.navigate('feedback');
-    showcase?.setRuntimeHostsMounted(false);
-    showcase?.resetScene('feedback');
-  });
-  expect(showcase?.state.navigation).toEqual(['home', 'feedback']);
-  expect(showcase?.state.runtimeHostsMounted).toBe(true);
-
-  act(() => {
-    showcase?.setRuntimeHostsMounted(false);
     showcase?.navigate('forms');
   });
   expect(showcase?.state.navigation).toEqual(['home', 'forms']);
-  expect(showcase?.state.runtimeHostsMounted).toBe(true);
+  const stateAfterFirstNavigation = showcase?.state;
+  const rendersAfterFirstNavigation = probeRenderCount;
+
+  act(() => {
+    showcase?.navigate('forms');
+  });
+  expect(showcase?.state).toBe(stateAfterFirstNavigation);
+  expect(probeRenderCount).toBe(rendersAfterFirstNavigation);
 });
 
 test('custom logger transport 只映射白名单安全摘要并在 unmount 恢复', () => {

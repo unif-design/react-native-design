@@ -15,15 +15,10 @@
  */
 
 const path = require('node:path');
+const fs = require('node:fs');
 const { execFileSync } = require('node:child_process');
 const semver = require('semver');
 
-const RUNTIME_PACKAGES = new Set([
-  'react-native-gesture-handler',
-  'react-native-reanimated-carousel',
-  'react-native-reanimated',
-  'react-native-worklets',
-]);
 const REQUIRED_PROVIDERS = new Set([
   '@unif/react-native-design@workspace:.',
   '@unif/react-native-design-example@workspace:example',
@@ -31,6 +26,18 @@ const REQUIRED_PROVIDERS = new Set([
 ]);
 const KNOWN_REQUESTER = 'react-native-reanimated-carousel@npm:5.0.0';
 const KNOWN_RANGE = '>=2.9.0 <3.0.0';
+
+function deriveAuditedRuntimePackages(
+  rootManifest,
+  exampleManifest,
+  websiteManifest
+) {
+  return new Set([
+    ...Object.keys(rootManifest.peerDependencies ?? {}),
+    ...Object.keys(exampleManifest.dependencies ?? {}),
+    ...Object.keys(websiteManifest.dependencies ?? {}),
+  ]);
+}
 
 /**
  * Yarn 会在 locator 尾部挂 ` [hash]` 虚拟实例标记(同一包在不同 peer 上下文各一份),
@@ -86,13 +93,18 @@ function parseRequirementDetail(hash, output) {
   };
 }
 
-function auditRuntimePeers(summaries, details) {
+function auditRuntimePeers(summaries, details, auditedPackages) {
+  if (!auditedPackages) {
+    throw new TypeError(
+      'auditRuntimePeers 缺少由 runtime manifests 派生的审计集合'
+    );
+  }
   const knownExceptions = [];
   const errors = [];
   const seenProviders = new Set();
   const acceptedProviders = new Set();
   for (const summary of summaries) {
-    if (!RUNTIME_PACKAGES.has(summary.packageName)) continue;
+    if (!auditedPackages.has(summary.packageName)) continue;
     const detail = details.get(summary.hash);
     if (!detail) {
       errors.push(`${summary.hash}: 缺少 runtime peer 明细`);
@@ -113,13 +125,6 @@ function auditRuntimePeers(summaries, details) {
       );
       continue;
     }
-    if (seenProviders.has(detail.providerLocator)) {
-      errors.push(
-        `${summary.hash}: runtime peer provider ${detail.providerLocator} 重复`
-      );
-      continue;
-    }
-    seenProviders.add(detail.providerLocator);
     const knownRequest = detail.requests.filter(
       (request) => request.requester === KNOWN_REQUESTER
     );
@@ -142,6 +147,13 @@ function auditRuntimePeers(summaries, details) {
       );
       continue;
     }
+    if (seenProviders.has(detail.providerLocator)) {
+      errors.push(
+        `${summary.hash}: runtime peer provider ${detail.providerLocator} 重复`
+      );
+      continue;
+    }
+    seenProviders.add(detail.providerLocator);
     knownExceptions.push(summary.hash);
     acceptedProviders.add(detail.providerLocator);
   }
@@ -171,11 +183,25 @@ function runYarn(args) {
 }
 
 function main() {
+  const rootManifest = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf8')
+  );
+  const exampleManifest = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, '../example/package.json'), 'utf8')
+  );
+  const websiteManifest = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, '../website/package.json'), 'utf8')
+  );
+  const auditedPackages = deriveAuditedRuntimePackages(
+    rootManifest,
+    exampleManifest,
+    websiteManifest
+  );
   const summaries = parseRequirementList(
     runYarn(['explain', 'peer-requirements'])
   );
   const runtimeSummaries = summaries.filter((item) =>
-    RUNTIME_PACKAGES.has(item.packageName)
+    auditedPackages.has(item.packageName)
   );
   const details = new Map(
     runtimeSummaries.map((item) => [
@@ -186,7 +212,7 @@ function main() {
       ),
     ])
   );
-  const result = auditRuntimePeers(summaries, details);
+  const result = auditRuntimePeers(summaries, details, auditedPackages);
   if (result.errors.length > 0) {
     throw new Error(result.errors.join('\n'));
   }
@@ -199,6 +225,7 @@ function main() {
 
 module.exports = {
   auditRuntimePeers,
+  deriveAuditedRuntimePackages,
   parseRequirementDetail,
   parseRequirementList,
 };

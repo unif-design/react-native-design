@@ -156,7 +156,7 @@ test('Feedback blurIntensity 初始化与 reset 都回到 soft', () => {
 test('Media 只持久化稳定 HTTPS fixture，Business reset 回到暖橙预设', () => {
   const initial = createInitialShowcaseState();
   expect(initial.scenes.media.remoteUri).toBe(
-    'https://images.example.com/unif-avatar.png'
+    'https://unif-design.github.io/react-native-design/img/logo.png'
   );
   expect(initial.scenes.business.backdropPreset).toBe('warmOrange');
 
@@ -179,7 +179,7 @@ test('Media 只持久化稳定 HTTPS fixture，Business reset 回到暖橙预设
   expect(customizedBusiness.scenes.business.backdropPreset).toBe('custom');
   expect(
     resetShowcaseScene(customizedBusiness, 'media').scenes.media.remoteUri
-  ).toBe('https://images.example.com/unif-avatar.png');
+  ).toBe('https://unif-design.github.io/react-native-design/img/logo.png');
   expect(
     resetShowcaseScene(customizedBusiness, 'business').scenes.business
       .backdropPreset

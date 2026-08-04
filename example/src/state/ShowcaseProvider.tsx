@@ -43,7 +43,6 @@ export type ShowcaseContextValue = {
   back: () => boolean;
   setThemeMode: (mode: ThemeMode) => void;
   setFontScale: (scale: FontScalePreset) => void;
-  setRuntimeHostsMounted: (mounted: boolean) => void;
   updateScene: <K extends SceneId>(
     scene: K,
     updater: (current: SceneStateMap[K]) => SceneStateMap[K]
@@ -151,11 +150,12 @@ export function ShowcaseProvider({
 
   const navigate = useCallback(
     (scene: SceneId) => {
-      commit((current) => ({
-        ...current,
-        navigation: navigateToScene(current.navigation, scene),
-        runtimeHostsMounted: true,
-      }));
+      commit((current) => {
+        const navigation = navigateToScene(current.navigation, scene);
+        return navigation === current.navigation
+          ? current
+          : { ...current, navigation };
+      });
     },
     [commit]
   );
@@ -165,11 +165,12 @@ export function ShowcaseProvider({
       stateRef.current.navigation
     );
     if (!shouldConsume) return false;
-    commit((current) => ({
-      ...current,
-      navigation: backNavigation(current.navigation),
-      runtimeHostsMounted: true,
-    }));
+    commit((current) => {
+      const navigation = backNavigation(current.navigation);
+      return navigation === current.navigation
+        ? current
+        : { ...current, navigation };
+    });
     return true;
   }, [commit]);
 
@@ -187,17 +188,6 @@ export function ShowcaseProvider({
     [commit]
   );
 
-  const setRuntimeHostsMounted = useCallback(
-    (mounted: boolean) => {
-      commit((current) =>
-        current.runtimeHostsMounted === mounted
-          ? current
-          : { ...current, runtimeHostsMounted: mounted }
-      );
-    },
-    [commit]
-  );
-
   const updateScene = useCallback(
     <K extends SceneId>(
       scene: K,
@@ -210,12 +200,7 @@ export function ShowcaseProvider({
 
   const resetScene = useCallback(
     (scene: SceneId) => {
-      commit((current) => {
-        const reset = resetShowcaseScene(current, scene);
-        return scene === 'feedback'
-          ? { ...reset, runtimeHostsMounted: true }
-          : reset;
-      });
+      commit((current) => resetShowcaseScene(current, scene));
     },
     [commit]
   );
@@ -240,7 +225,6 @@ export function ShowcaseProvider({
       back,
       setThemeMode,
       setFontScale,
-      setRuntimeHostsMounted,
       updateScene,
       resetScene,
       appendResult,
@@ -253,7 +237,6 @@ export function ShowcaseProvider({
       navigate,
       resetScene,
       setFontScale,
-      setRuntimeHostsMounted,
       setThemeMode,
       state,
       updateScene,

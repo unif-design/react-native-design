@@ -1,9 +1,25 @@
 import { describe, expect, test } from '@jest/globals';
 import {
-  auditRuntimePeers,
+  auditRuntimePeers as auditRuntimePeersWithSet,
+  deriveAuditedRuntimePackages,
   parseRequirementDetail,
   parseRequirementList,
 } from '../../scripts/check-runtime-peers';
+
+const TEST_AUDITED_RUNTIME_PACKAGES = new Set([
+  'react',
+  'react-native-gesture-handler',
+  'react-native-reanimated-carousel',
+  'react-native-reanimated',
+  'react-native-worklets',
+]);
+const auditRuntimePeers = (
+  summaries: Parameters<typeof auditRuntimePeersWithSet>[0],
+  details: Parameters<typeof auditRuntimePeersWithSet>[1],
+  auditedPackages: Parameters<
+    typeof auditRuntimePeersWithSet
+  >[2] = TEST_AUDITED_RUNTIME_PACKAGES
+) => auditRuntimePeersWithSet(summaries, details, auditedPackages);
 
 const LIST = [
   'pc850d5 → ✘ @unif/react-native-design@workspace:. provides react-native-gesture-handler@npm:3.1.0',
@@ -31,6 +47,11 @@ const exampleDetail = rootDetail.replaceAll(
   '@unif/react-native-design@workspace:.',
   '@unif/react-native-design-example@workspace:example'
 );
+
+const reactDetail = rootDetail
+  .replaceAll('react-native-gesture-handler', 'react')
+  .replaceAll('3.1.0', '19.2.3')
+  .replaceAll('>=2.9.0 <3.0.0', '>=19.2.3 <20.0.0');
 
 // Yarn 4.11 真实输出:请求方 locator 后面还挂着 `[hash]` 虚拟实例标记。
 // 逐字复制自本仓 `yarn explain peer-requirements pc850d5 / p86ac4b`。
@@ -104,6 +125,44 @@ describe('parseRequirementList — yarn explain peer-requirements 列表', () =>
   });
 });
 
+describe('deriveAuditedRuntimePackages — 项目可控 runtime manifest', () => {
+  test('合并 root public peer 与 example/website dependencies，忽略纯 devDependencies', () => {
+    expect(
+      [
+        ...deriveAuditedRuntimePackages(
+          {
+            peerDependencies: {
+              'react': '>=19.2.3 <20',
+              'react-native-svg': '>=15',
+            },
+            devDependencies: { eslint: '^9.0.0' },
+          },
+          {
+            dependencies: {
+              'example-runtime-only': '1.0.0',
+              'react': '19.2.3',
+            },
+            devDependencies: { jest: '^29.0.0' },
+          },
+          {
+            dependencies: {
+              'website-runtime-only': '1.0.0',
+              'react-dom': '19.2.3',
+            },
+            devDependencies: { typescript: '^5.0.0' },
+          }
+        ),
+      ].sort()
+    ).toEqual([
+      'example-runtime-only',
+      'react',
+      'react-dom',
+      'react-native-svg',
+      'website-runtime-only',
+    ]);
+  });
+});
+
 describe('parseRequirementDetail — 明细解析', () => {
   test('抽取 provider / 版本 / 全部请求方与 range', () => {
     expect(parseRequirementDetail('pc850d5', rootDetail)).toEqual({
@@ -130,7 +189,9 @@ describe('parseRequirementDetail — 明细解析', () => {
 
 describe('auditRuntimePeers — 严格 allowlist', () => {
   test('只接受 root、example 与 website 的 RNRC 5.0.0/RNGH 3 三条已知例外', () => {
-    const summaries = parseRequirementList(LIST);
+    const summaries = parseRequirementList(
+      LIST.split('\n').slice(0, 3).join('\n')
+    );
     const details = new Map([
       ['pc850d5', parseRequirementDetail('pc850d5', rootDetail)],
       ['pexample', parseRequirementDetail('pexample', exampleDetail)],
@@ -157,19 +218,46 @@ describe('auditRuntimePeers — 严格 allowlist', () => {
     expect(result.knownExceptions).toHaveLength(0);
   });
 
-  test('非 runtime 包的失败项被忽略,不进 knownExceptions', () => {
+  test('root public React peer failure 被拒绝，不能被 RNRC/RNGH allowlist 吞掉', () => {
     const summaries = parseRequirementList(LIST);
     const details = new Map([
       ['pc850d5', parseRequirementDetail('pc850d5', rootDetail)],
       ['pexample', parseRequirementDetail('pexample', exampleDetail)],
       ['pwebsite', parseRequirementDetail('pwebsite', websiteDetail)],
-      ['punrelated', parseRequirementDetail('punrelated', rootDetail)],
+      ['punrelated', parseRequirementDetail('punrelated', reactDetail)],
     ]);
-    expect(auditRuntimePeers(summaries, details).knownExceptions).toEqual([
-      'pc850d5',
-      'pexample',
-      'pwebsite',
+    const result = auditRuntimePeers(
+      summaries,
+      details,
+      deriveAuditedRuntimePackages(
+        {
+          peerDependencies: {
+            'react': '>=19.2.3 <20.0.0',
+            'react-native-gesture-handler': '>=3.0.0 <4.0.0',
+          },
+        },
+        { dependencies: {} },
+        { dependencies: {} }
+      )
+    );
+    expect(result.knownExceptions).toEqual(['pc850d5', 'pexample', 'pwebsite']);
+    expect(result.errors.join('\n')).toContain('react@19.2.3');
+  });
+
+  test('dev-only failure 不在派生集合时不要求明细也不产生错误', () => {
+    const summaries = parseRequirementList(
+      `${LIST.split('\n').slice(0, 3).join('\n')}\npdevonly → ✘ @unif/react-native-design@workspace:. provides eslint@npm:9.0.0`
+    );
+    const details = new Map([
+      ['pc850d5', parseRequirementDetail('pc850d5', rootDetail)],
+      ['pexample', parseRequirementDetail('pexample', exampleDetail)],
+      ['pwebsite', parseRequirementDetail('pwebsite', websiteDetail)],
     ]);
+
+    expect(auditRuntimePeers(summaries, details)).toEqual({
+      knownExceptions: ['pc850d5', 'pexample', 'pwebsite'],
+      errors: [],
+    });
   });
 
   test('缺少明细的 runtime 失败项直接报错', () => {

@@ -3,12 +3,14 @@
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptsDir, '..');
+const require = createRequire(import.meta.url);
 
 export class ExampleShowcaseVerificationError extends Error {
   constructor(code, message) {
@@ -32,6 +34,17 @@ const expectedScenes = [
   'media',
   'business',
 ];
+
+const expectedMediaDeployment = Object.freeze({
+  origin: 'https://unif-design.github.io',
+  baseUrl: '/react-native-design/',
+  successUri: 'https://unif-design.github.io/react-native-design/img/logo.png',
+  successSha256:
+    '20bcaa5e8e5c090d84467f01fe1d3be90115cab90eba099a5674d054738c5a88',
+  failureUri:
+    'https://unif-design.github.io/react-native-design/example-fixtures/media-decode-failure-v1.png',
+  failureMarker: 'UNIF_MEDIA_DECODE_FAILURE_FIXTURE_V1\n',
+});
 
 const expectedUiComponents = [
   'Avatar',
@@ -198,14 +211,12 @@ const expectedStateIdsByComponent = {
     'confirm-host.confirm',
     'confirm-host.cancel',
     'confirm-host.destructive',
-    'confirm-host.no-host',
     'confirm-host.reentrant',
   ],
   ToastHost: [
     'toast-host.kinds',
     'toast-host.positions',
     'toast-host.duration',
-    'toast-host.pre-host',
     'toast-host.latest-wins',
   ],
   Input: [
@@ -1469,6 +1480,21 @@ function assertDirectRuntimeChild(parent, binding, expectedName) {
   return matches[0];
 }
 
+function assertPersistentRuntimeChild(parent, binding, expectedName) {
+  const expectedNodes = new Set(binding?.jsxNodes ?? []);
+  const matches = parent.children.filter(
+    (child) =>
+      (ts.isJsxElement(child) || ts.isJsxSelfClosingElement(child)) &&
+      expectedNodes.has(child)
+  );
+  if (matches.length !== 1) {
+    failVerification(
+      'ROOT_RUNTIME_PERSISTENCE',
+      `root runtime ${expectedName} 必须作为 ThemeProvider 的无条件直接子节点常驻`
+    );
+  }
+}
+
 function jsxAttributeLiteral(element, attributeName, code) {
   const attributes = ts.isJsxElement(element)
     ? element.openingElement.attributes.properties
@@ -1601,6 +1627,8 @@ function verifyRuntimeAndNativeContract(root) {
     rootPackage.scripts?.['verify:example-showcase'] !== expectedVerifyScript ||
     examplePackage.scripts?.test !==
       'node ../scripts/run-example-jest.mjs --forbidOnly' ||
+    examplePackage.scripts?.['test:focused'] !==
+      'node ../scripts/run-example-jest-focused.mjs --forbidOnly --config jest.focused.config.js' ||
     examplePackage.scripts?.typecheck !== 'tsc --noEmit' ||
     examplePackage.scripts?.lint !== 'eslint .'
   ) {
@@ -1612,6 +1640,9 @@ function verifyRuntimeAndNativeContract(root) {
   );
   if (
     !existsSync(path.join(root, 'scripts/run-example-jest.mjs')) ||
+    !existsSync(path.join(root, 'scripts/run-example-jest-focused.mjs')) ||
+    !existsSync(path.join(root, 'example/jest.focused.config.js')) ||
+    !existsSync(path.join(root, 'example/jest.showcaseGate.js')) ||
     !existsSync(path.join(root, 'example/jest.forbidOnlyReporter.js')) ||
     !/reporters:\s*\[\s*'default',\s*'<rootDir>\/jest\.forbidOnlyReporter\.js'\s*\]/u.test(
       exampleJestConfig
@@ -1622,6 +1653,23 @@ function verifyRuntimeAndNativeContract(root) {
       'example Jest 必须通过 --forbidOnly 入口与 reporter 拒绝 focused/skipped/todo tests'
     );
   }
+  const governedOwnerTestFiles = require(
+    path.join(root, 'example/jest.showcaseGate.js')
+  ).governedOwnerTestFiles;
+  assertExactSet(
+    'production Jest governed owner suites',
+    governedOwnerTestFiles,
+    [
+      'src/__tests__/App.test.tsx',
+      ...Object.values(expectedSceneTestFiles).map(
+        (testFile) => `src/__tests__/${testFile}`
+      ),
+    ],
+    {
+      duplicateCode: 'JEST_GOVERNED_SUITE_CONTRACT',
+      mismatchCode: 'JEST_GOVERNED_SUITE_CONTRACT',
+    }
+  );
   if (
     JSON.stringify(rootPackage.jest?.testPathIgnorePatterns) !==
     JSON.stringify(expectedRootJestTestPathIgnorePatterns)
@@ -1902,10 +1950,7 @@ function verifyGovernedJestRegistrations(root) {
     const checker = analysis.checker;
     const visit = (node) => {
       if (ts.isCallExpression(node)) {
-        const registrationRoot = jestRegistrationRoot(
-          node.expression,
-          checker
-        );
+        const registrationRoot = jestRegistrationRoot(node.expression, checker);
         if (
           registrationRoot &&
           ['fit', 'fdescribe', 'xit', 'xtest'].includes(registrationRoot)
@@ -2727,6 +2772,16 @@ function verifyRootRuntime(root, bindingAnalysis) {
     providerDesignBindings.get('ToastHost'),
     'ToastHost'
   );
+  assertPersistentRuntimeChild(
+    theme,
+    providerDesignBindings.get('ConfirmHost'),
+    'ConfirmHost'
+  );
+  assertPersistentRuntimeChild(
+    theme,
+    providerDesignBindings.get('ToastHost'),
+    'ToastHost'
+  );
 }
 
 function documentSection(source, heading, code) {
@@ -2772,6 +2827,456 @@ function assertDocumentContainsAll(source, values, code, label) {
   const missing = values.filter((value) => !source.includes(value));
   if (missing.length) {
     failVerification(code, `${label} 缺少: ${missing.join(', ')}`);
+  }
+}
+
+function mediaVariableInitializer(sourceFile, variableName, requireExport) {
+  const matches = [];
+  for (const statement of sourceFile.statements) {
+    if (!ts.isVariableStatement(statement)) continue;
+    for (const declaration of statement.declarationList.declarations) {
+      if (
+        ts.isIdentifier(declaration.name) &&
+        declaration.name.text === variableName
+      ) {
+        matches.push({ declaration, statement });
+      }
+    }
+  }
+  const match = matches[0];
+  const exported = match?.statement.modifiers?.some(
+    (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword
+  );
+  if (
+    matches.length !== 1 ||
+    !match?.declaration.initializer ||
+    (match.statement.declarationList.flags & ts.NodeFlags.Const) === 0 ||
+    (requireExport && !exported)
+  ) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      `${variableName} 必须是唯一的${requireExport ? ' exported' : ''} const initializer`
+    );
+  }
+  return unwrapExpression(match.declaration.initializer);
+}
+
+function mediaStringConstant(sourceFile, variableName) {
+  const initializer = mediaVariableInitializer(sourceFile, variableName, true);
+  if (!ts.isStringLiteral(initializer)) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      `${variableName} 必须是 string literal`
+    );
+  }
+  return initializer.text;
+}
+
+function mediaPropertyName(property) {
+  const name = property.name;
+  if (!name) return undefined;
+  if (ts.isIdentifier(name) || ts.isStringLiteral(name)) return name.text;
+  if (ts.isComputedPropertyName(name) && ts.isStringLiteral(name.expression)) {
+    return name.expression.text;
+  }
+  return undefined;
+}
+
+function mediaObjectProperty(object, propertyName, label) {
+  const matches = object.properties.filter(
+    (property) => mediaPropertyName(property) === propertyName
+  );
+  if (matches.length !== 1 || !ts.isPropertyAssignment(matches[0])) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      `${label}.${propertyName} 必须是唯一的 direct property assignment`
+    );
+  }
+  return unwrapExpression(matches[0].initializer);
+}
+
+function mediaObjectStringProperty(object, propertyName) {
+  const initializer = mediaObjectProperty(
+    object,
+    propertyName,
+    'Docusaurus config'
+  );
+  if (!initializer || !ts.isStringLiteral(initializer)) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      `Docusaurus config.${propertyName} 必须是唯一的 direct string property`
+    );
+  }
+  return initializer.text;
+}
+
+function jsxAttributes(element) {
+  return ts.isJsxElement(element)
+    ? element.openingElement.attributes.properties
+    : element.attributes.properties;
+}
+
+function mediaJsxSpecimen(sourceFile, componentName, testID) {
+  const matches = findJsxElements(sourceFile, componentName).filter((element) =>
+    jsxAttributes(element).some(
+      (attribute) =>
+        ts.isJsxAttribute(attribute) &&
+        ts.isIdentifier(attribute.name) &&
+        attribute.name.text === 'testID' &&
+        attribute.initializer &&
+        ts.isStringLiteral(attribute.initializer) &&
+        attribute.initializer.text === testID
+    )
+  );
+  if (matches.length !== 1) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      `${componentName} ${testID} 必须恰有一个 route-reachable specimen`
+    );
+  }
+  return matches[0];
+}
+
+function mediaJsxExpression(element, attributeName) {
+  const matches = jsxAttributes(element).filter(
+    (attribute) =>
+      ts.isJsxAttribute(attribute) &&
+      ts.isIdentifier(attribute.name) &&
+      attribute.name.text === attributeName
+  );
+  const initializer =
+    matches.length === 1 && ts.isJsxAttribute(matches[0])
+      ? matches[0].initializer
+      : undefined;
+  if (
+    !initializer ||
+    !ts.isJsxExpression(initializer) ||
+    !initializer.expression
+  ) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      `Media controlled specimen ${attributeName} 必须是唯一的 JSX expression`
+    );
+  }
+  return unwrapExpression(initializer.expression);
+}
+
+function assertMediaSpecimenHasNoSpread(element, testID) {
+  if (
+    jsxAttributes(element).some((attribute) =>
+      ts.isJsxSpreadAttribute(attribute)
+    )
+  ) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      `${testID} 禁止 JSX spread 覆盖受控 URI props`
+    );
+  }
+}
+
+function mediaAvatarSourceUri(expression, testID) {
+  if (
+    !ts.isObjectLiteralExpression(expression) ||
+    expression.properties.length !== 1 ||
+    expression.properties.some(
+      (property) =>
+        ts.isSpreadAssignment(property) ||
+        (property.name && ts.isComputedPropertyName(property.name))
+    )
+  ) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      `${testID} source 必须是只含 direct uri 的 object literal`
+    );
+  }
+  return mediaObjectProperty(expression, 'uri', `${testID} source`);
+}
+
+function verifyMediaFixtureDeployment(root, bindingAnalysis) {
+  const gitAttributes = readText(root, '.gitattributes');
+  if (
+    !/^website\/static\/example-fixtures\/media-decode-failure-v1\.png -text$/mu.test(
+      gitAttributes
+    )
+  ) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      'decode-failure fixture 必须以 -text 禁止跨平台换行转换'
+    );
+  }
+  const docusaurusConfig = parseSource(
+    path.join(root, 'website/docusaurus.config.ts')
+  );
+  const configInitializer = mediaVariableInitializer(
+    docusaurusConfig,
+    'config',
+    false
+  );
+  const defaultExports = docusaurusConfig.statements.filter(
+    (statement) => ts.isExportAssignment(statement) && !statement.isExportEquals
+  );
+  const configIdentifiers = [];
+  const visitConfigIdentifiers = (node) => {
+    if (ts.isIdentifier(node) && node.text === 'config') {
+      configIdentifiers.push(node);
+    }
+    ts.forEachChild(node, visitConfigIdentifiers);
+  };
+  visitConfigIdentifiers(docusaurusConfig);
+  if (
+    !ts.isObjectLiteralExpression(configInitializer) ||
+    configInitializer.properties.some(
+      (property) =>
+        ts.isSpreadAssignment(property) ||
+        (property.name && ts.isComputedPropertyName(property.name))
+    ) ||
+    defaultExports.length !== 1 ||
+    !ts.isExportAssignment(defaultExports[0]) ||
+    !ts.isIdentifier(defaultExports[0].expression) ||
+    defaultExports[0].expression.text !== 'config' ||
+    configIdentifiers.length !== 2 ||
+    mediaObjectStringProperty(configInitializer, 'url') !==
+      expectedMediaDeployment.origin ||
+    mediaObjectStringProperty(configInitializer, 'baseUrl') !==
+      expectedMediaDeployment.baseUrl
+  ) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      `Docusaurus deployment 必须固定为 ${expectedMediaDeployment.origin}${expectedMediaDeployment.baseUrl}`
+    );
+  }
+
+  let successFixture;
+  let failureFixture;
+  try {
+    successFixture = readFileSync(
+      path.join(root, 'website/static/img/logo.png')
+    );
+    failureFixture = readFileSync(
+      path.join(
+        root,
+        'website/static/example-fixtures/media-decode-failure-v1.png'
+      )
+    );
+  } catch (error) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      `Media deployment fixture 无法读取：${String(error)}`
+    );
+  }
+
+  const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10];
+  if (
+    successFixture.length <= pngSignature.length ||
+    pngSignature.some((byte, index) => successFixture[index] !== byte) ||
+    createHash('sha256').update(successFixture).digest('hex') !==
+      expectedMediaDeployment.successSha256
+  ) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      'Media success fixture 必须是仓库内非空 PNG 资产'
+    );
+  }
+  if (
+    failureFixture.toString('utf8') !== expectedMediaDeployment.failureMarker ||
+    pngSignature.every((byte, index) => failureFixture[index] === byte)
+  ) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      'Media failure fixture 必须是仓库控制、明确不可解码的固定 marker'
+    );
+  }
+
+  const showcaseState = parseSource(
+    path.join(root, 'example/src/state/showcaseState.ts')
+  );
+  const mediaScenePath = path.join(
+    root,
+    'example/src/showcases/media/MediaScene.tsx'
+  );
+  const mediaScene = bindingAnalysis.sourceFiles.get(
+    path.resolve(mediaScenePath)
+  );
+  if (!mediaScene) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      'binding analysis 缺少 MediaScene source'
+    );
+  }
+  if (
+    mediaStringConstant(showcaseState, 'DEFAULT_MEDIA_REMOTE_URI') !==
+      expectedMediaDeployment.successUri ||
+    mediaStringConstant(showcaseState, 'MEDIA_DECODE_FAILURE_URI') !==
+      expectedMediaDeployment.failureUri
+  ) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      'Media scene URI wiring 必须精确指向 Docusaurus static success/decode-failure fixtures'
+    );
+  }
+
+  const sceneFactories = mediaVariableInitializer(
+    showcaseState,
+    'sceneStateFactories',
+    false
+  );
+  if (
+    !ts.isObjectLiteralExpression(sceneFactories) ||
+    sceneFactories.properties.some((property) =>
+      ts.isSpreadAssignment(property)
+    )
+  ) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      'sceneStateFactories 必须是无 spread 的 static object literal'
+    );
+  }
+  const mediaFactory = mediaObjectProperty(
+    sceneFactories,
+    'media',
+    'sceneStateFactories'
+  );
+  const mediaFactoryBody = ts.isArrowFunction(mediaFactory)
+    ? unwrapExpression(mediaFactory.body)
+    : undefined;
+  if (
+    !mediaFactoryBody ||
+    !ts.isObjectLiteralExpression(mediaFactoryBody) ||
+    mediaFactory.parameters.length !== 0 ||
+    mediaFactoryBody.properties.some((property) =>
+      ts.isSpreadAssignment(property)
+    )
+  ) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      'sceneStateFactories.media 必须返回无 spread 的 static draft'
+    );
+  }
+  const defaultRemoteUri = mediaObjectProperty(
+    mediaFactoryBody,
+    'remoteUri',
+    'sceneStateFactories.media draft'
+  );
+  if (
+    !ts.isIdentifier(defaultRemoteUri) ||
+    defaultRemoteUri.text !== 'DEFAULT_MEDIA_REMOTE_URI'
+  ) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      'Media initial draft remoteUri 必须直接使用 DEFAULT_MEDIA_REMOTE_URI'
+    );
+  }
+
+  const stateImports = mediaScene.statements.filter(
+    (statement) =>
+      ts.isImportDeclaration(statement) &&
+      ts.isStringLiteral(statement.moduleSpecifier) &&
+      statement.moduleSpecifier.text === '../../state/showcaseState'
+  );
+  const importedNames =
+    stateImports.length === 1 &&
+    ts.isImportDeclaration(stateImports[0]) &&
+    stateImports[0].importClause?.namedBindings &&
+    ts.isNamedImports(stateImports[0].importClause.namedBindings)
+      ? stateImports[0].importClause.namedBindings.elements.map((element) => ({
+          imported: element.propertyName?.text ?? element.name.text,
+          local: element.name.text,
+        }))
+      : [];
+  const requiredImports = [
+    'DEFAULT_MEDIA_REMOTE_URI',
+    'MEDIA_DECODE_FAILURE_URI',
+  ];
+  if (
+    requiredImports.some(
+      (name) =>
+        importedNames.filter(
+          (binding) => binding.imported === name && binding.local === name
+        ).length !== 1
+    )
+  ) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      'Media scene 必须从 showcaseState 无别名导入精确 fixture URI'
+    );
+  }
+
+  const failureAvatar = mediaJsxSpecimen(
+    mediaScene,
+    'Avatar',
+    'media-avatar-failure'
+  );
+  const avatarSource = mediaJsxExpression(failureAvatar, 'source');
+  const avatarUriInitializer = mediaAvatarSourceUri(
+    avatarSource,
+    'media-avatar-failure'
+  );
+  const failureThumbnail = mediaJsxSpecimen(
+    mediaScene,
+    'Thumbnail',
+    'media-thumbnail-failure'
+  );
+  const thumbnailUri = mediaJsxExpression(failureThumbnail, 'uri');
+  const successAvatar = mediaJsxSpecimen(
+    mediaScene,
+    'Avatar',
+    'media-avatar-remote'
+  );
+  const successAvatarSource = mediaJsxExpression(successAvatar, 'source');
+  const successAvatarUri = mediaAvatarSourceUri(
+    successAvatarSource,
+    'media-avatar-remote'
+  );
+  const successThumbnail = mediaJsxSpecimen(
+    mediaScene,
+    'Thumbnail',
+    'media-thumbnail-uri-sm'
+  );
+  const successThumbnailUri = mediaJsxExpression(successThumbnail, 'uri');
+  for (const [specimen, testID] of [
+    [failureAvatar, 'media-avatar-failure'],
+    [failureThumbnail, 'media-thumbnail-failure'],
+    [successAvatar, 'media-avatar-remote'],
+    [successThumbnail, 'media-thumbnail-uri-sm'],
+  ]) {
+    assertMediaSpecimenHasNoSpread(specimen, testID);
+  }
+  const isDraftRemoteUri = (expression) =>
+    Boolean(
+      expression &&
+      ts.isPropertyAccessExpression(expression) &&
+      ts.isIdentifier(expression.expression) &&
+      expression.expression.text === 'draft' &&
+      expression.name.text === 'remoteUri'
+    );
+  const mediaDesignBindings = collectRuntimeImportBindings(
+    [mediaScenePath],
+    '@unif/react-native-design',
+    bindingAnalysis
+  );
+  const avatarNodes = new Set(
+    mediaDesignBindings.get('Avatar')?.jsxNodes ?? []
+  );
+  const thumbnailNodes = new Set(
+    mediaDesignBindings.get('Thumbnail')?.jsxNodes ?? []
+  );
+  if (
+    !avatarUriInitializer ||
+    !ts.isIdentifier(avatarUriInitializer) ||
+    avatarUriInitializer.text !== 'MEDIA_DECODE_FAILURE_URI' ||
+    !ts.isIdentifier(thumbnailUri) ||
+    thumbnailUri.text !== 'MEDIA_DECODE_FAILURE_URI' ||
+    !isDraftRemoteUri(successAvatarUri) ||
+    !isDraftRemoteUri(successThumbnailUri) ||
+    !avatarNodes.has(failureAvatar) ||
+    !avatarNodes.has(successAvatar) ||
+    !thumbnailNodes.has(failureThumbnail) ||
+    !thumbnailNodes.has(successThumbnail)
+  ) {
+    failVerification(
+      'MEDIA_FIXTURE_DEPLOYMENT',
+      'public Avatar/Thumbnail success/failure specimens 必须直接使用对应受控 URI'
+    );
   }
 }
 
@@ -2874,6 +3379,38 @@ function verifyDocumentation(root) {
     'README_MANUAL_MATRIX',
     'example README manual/public boundary'
   );
+  const mediaFixtureUris = [
+    'https://unif-design.github.io/react-native-design/img/logo.png',
+    'https://unif-design.github.io/react-native-design/example-fixtures/media-decode-failure-v1.png',
+  ];
+  assertDocumentContainsAll(
+    rootReadme,
+    [...mediaFixtureUris, 'Jest 只证明 source wiring'],
+    'README_MEDIA_FIXTURES',
+    'root README media fixture boundary'
+  );
+  assertDocumentContainsAll(
+    exampleReadme,
+    [...mediaFixtureUris, 'Jest 只验证 source wiring'],
+    'README_MEDIA_FIXTURES',
+    'example README media fixture boundary'
+  );
+  assertDocumentContainsAll(
+    rootReadme,
+    [
+      '本仓不使用全局 `logFilters`',
+      '`yarn check:runtime-peers` 只接受 root、example、website 三条精确的 RNRC 5 / RNGH 3 例外',
+      'harness 不继承本仓 `check:runtime-peers` 的 workspace 精确 allowlist',
+    ],
+    'README_PEER_FACTS',
+    'root README runtime peer facts'
+  );
+  if (/本仓[^\n]*\.yarnrc\.yml[^\n]*logFilters/u.test(rootReadme)) {
+    failVerification(
+      'README_PEER_FACTS',
+      'root README 不得声称 .yarnrc.yml 存在已删除的 logFilters'
+    );
+  }
   if (/^\|[^\n]*\|\s*PASS\s*\|/gmu.test(exampleReadme)) {
     failVerification(
       'README_MANUAL_MATRIX',
@@ -3044,10 +3581,25 @@ function verifyTurboContract(root) {
 
   const testInputs =
     turbo.tasks['@unif/react-native-design-example#test'].inputs;
+  const requiredTestInputs = [
+    '$TURBO_ROOT$/scripts/run-example-jest.mjs',
+    '$TURBO_ROOT$/scripts/verify-example-showcase.mjs',
+    '$TURBO_ROOT$/example/jest.forbidOnlyReporter.js',
+    '$TURBO_ROOT$/example/jest.showcaseGate.js',
+  ];
   const androidInputs =
     turbo.tasks['@unif/react-native-design-example#build:android'].inputs;
   const iosInputs =
     turbo.tasks['@unif/react-native-design-example#build:ios'].inputs;
+  const missingTestInputs = requiredTestInputs.filter(
+    (input) => !testInputs.includes(input)
+  );
+  if (missingTestInputs.length > 0) {
+    failVerification(
+      'TURBO_INPUTS',
+      `example test task 缺少直接 gate inputs: ${missingTestInputs.join(', ')}`
+    );
+  }
   const androidValid =
     androidInputs.includes('$TURBO_ROOT$/example/android/**') &&
     androidInputs.includes('!$TURBO_ROOT$/example/android/.gradle/**') &&
@@ -3175,6 +3727,7 @@ export function verifyExampleShowcase(root) {
   const bindingAnalysis = createRuntimeBindingAnalysis(exampleSourceFiles);
   verifySceneContract(root, entries, bindingAnalysis);
   verifyRootRuntime(root, bindingAnalysis);
+  verifyMediaFixtureDeployment(root, bindingAnalysis);
   verifyDocumentation(root);
   verifyWorkflowContract(root);
   verifyTurboContract(root);

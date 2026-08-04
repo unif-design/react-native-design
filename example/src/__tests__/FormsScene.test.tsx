@@ -800,6 +800,107 @@ test('TextField ref specimen 只通过 focus/blur 改变现场状态', () => {
   expect(screen.getByText('引用状态：已失焦')).toBeOnTheScreen();
 });
 
+test('重置 Forms 会清空所有 ephemeral 非受控输入并复位 ref 状态，同时清空 Provider 草稿', () => {
+  render(<App />);
+  enterForms();
+
+  fireEvent.changeText(
+    screen.getByTestId('forms-input-controlled-input'),
+    'Provider 姓名草稿'
+  );
+  fireEvent.changeText(
+    screen.getByTestId('forms-textarea-uncontrolled-input'),
+    'Provider 备注草稿'
+  );
+  fireEvent.changeText(
+    screen.getByTestId('forms-input-idle-input'),
+    '空闲本地输入'
+  );
+  fireEvent.changeText(
+    screen.getByTestId('forms-search-uncontrolled-input'),
+    '本地搜索内容'
+  );
+  fireEvent.changeText(
+    screen.getByTestId('forms-form-single-note-input'),
+    '单组本地备注'
+  );
+  fireEvent.changeText(
+    screen.getByTestId('forms-ref-input-input'),
+    '引用本地输入'
+  );
+  fireEvent.press(screen.getByRole('button', { name: '聚焦演示输入' }));
+  expect(screen.getByText('引用状态：已聚焦')).toBeOnTheScreen();
+
+  fireEvent.press(screen.getByRole('button', { name: '重置本场景' }));
+
+  expect(componentByTestID(Input, 'forms-input-controlled').props.value).toBe(
+    ''
+  );
+  expect(
+    screen.getByTestId('forms-textarea-uncontrolled-input').props.value
+  ).toBe('');
+  for (const testID of [
+    'forms-input-idle-input',
+    'forms-search-uncontrolled-input',
+    'forms-form-single-note-input',
+    'forms-ref-input-input',
+  ]) {
+    expect(screen.getByTestId(testID).props.value).toBe('');
+  }
+  expect(screen.getByText('引用状态：等待操作')).toBeOnTheScreen();
+});
+
+test('离开 Forms 再返回只恢复 Provider draft，不恢复 ephemeral 输入或 ref 状态', () => {
+  render(<App />);
+  enterForms();
+
+  fireEvent.changeText(
+    screen.getByTestId('forms-input-controlled-input'),
+    '跨路由姓名草稿'
+  );
+  fireEvent.changeText(
+    screen.getByTestId('forms-textarea-uncontrolled-input'),
+    '跨路由备注草稿'
+  );
+  fireEvent.changeText(
+    screen.getByTestId('forms-input-idle-input'),
+    '仅本地空闲输入'
+  );
+  fireEvent.changeText(
+    screen.getByTestId('forms-search-uncontrolled-input'),
+    '仅本地搜索'
+  );
+  fireEvent.changeText(
+    screen.getByTestId('forms-form-single-note-input'),
+    '仅本地单组备注'
+  );
+  fireEvent.changeText(
+    screen.getByTestId('forms-ref-input-input'),
+    '仅本地引用输入'
+  );
+  fireEvent.press(screen.getByRole('button', { name: '聚焦演示输入' }));
+  expect(screen.getByText('引用状态：已聚焦')).toBeOnTheScreen();
+
+  fireEvent.press(screen.getByRole('button', { name: '返回首页' }));
+  enterForms();
+
+  expect(componentByTestID(Input, 'forms-input-controlled').props.value).toBe(
+    '跨路由姓名草稿'
+  );
+  expect(
+    screen.getByTestId('forms-textarea-uncontrolled-input').props.value
+  ).toBe('跨路由备注草稿');
+  for (const testID of [
+    'forms-input-idle-input',
+    'forms-search-uncontrolled-input',
+    'forms-form-single-note-input',
+    'forms-ref-input-input',
+  ]) {
+    expect(screen.getByTestId(testID).props.value).toBe('');
+  }
+  expect(screen.getByText('引用状态：等待操作')).toBeOnTheScreen();
+});
+
 test('四个文本与受控状态跨路由保留，重置只恢复 Forms 且不清结果或 Navigation draft', () => {
   const inputValue = '姓名草稿';
   const passwordValue = '隐私草稿';

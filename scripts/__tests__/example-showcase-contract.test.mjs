@@ -131,6 +131,19 @@ function createFixtureJestConfig(fixture, overrides = {}) {
   };
 }
 
+function writeFixtureProductionJestConfig(fixture, overrides = {}) {
+  const { fixtureExampleRoot } = prepareFixtureExampleRuntime(fixture);
+  writeFileSync(
+    path.join(fixtureExampleRoot, 'jest.config.js'),
+    `module.exports = ${JSON.stringify(
+      createFixtureJestConfig(fixture, overrides),
+      null,
+      2
+    )};\n`
+  );
+  return fixtureExampleRoot;
+}
+
 function runExampleJestWrapper(
   fixture,
   args,
@@ -159,17 +172,47 @@ function runExampleJestWrapper(
   );
 }
 
+function runExampleFocusedJestWrapper(
+  fixture,
+  args,
+  { cwd = repositoryRoot, showcaseRoot = fixture } = {}
+) {
+  prepareFixtureExampleRuntime(fixture);
+  const env = { ...process.env };
+  if (showcaseRoot === undefined) {
+    delete env.EXAMPLE_SHOWCASE_ROOT;
+  } else {
+    env.EXAMPLE_SHOWCASE_ROOT = realpathSync(showcaseRoot);
+  }
+
+  return spawnSync(
+    process.execPath,
+    [
+      path.join(repositoryRoot, 'scripts/run-example-jest-focused.mjs'),
+      '--forbidOnly',
+      ...args,
+    ],
+    {
+      cwd,
+      encoding: 'utf8',
+      env,
+    }
+  );
+}
+
 function runExampleAcceptanceTest(
   fixture,
   testFile,
   { showcaseRoot = fixture } = {}
 ) {
   const { fixtureExampleRoot } = prepareFixtureExampleRuntime(fixture);
-  return runExampleJestWrapper(
+  return runExampleFocusedJestWrapper(
     fixture,
     [
       '--config',
-      JSON.stringify(createFixtureJestConfig(fixture)),
+      JSON.stringify(
+        createFixtureJestConfig(fixture, { reporters: ['default'] })
+      ),
       '--runInBand',
       '--runTestsByPath',
       path.join(fixtureExampleRoot, 'src/__tests__', testFile),
@@ -239,6 +282,7 @@ const sourceContractFiles = [
   'README.md',
   'AGENTS.md',
   'CONTRIBUTING.md',
+  '.gitattributes',
   'turbo.json',
   '.github/workflows/ci.yml',
   '.github/workflows/example-showcase.yml',
@@ -247,7 +291,9 @@ const sourceContractFiles = [
   'example/babel.config.js',
   'example/metro.config.js',
   'example/jest.config.js',
+  'example/jest.focused.config.js',
   'example/jest.forbidOnlyReporter.js',
+  'example/jest.showcaseGate.js',
   'example/tsconfig.json',
   'example/app.json',
   'example/index.js',
@@ -266,7 +312,11 @@ const sourceContractFiles = [
   'example/ios/ReactNativeDesignExample/Info.plist',
   'example/ios/ReactNativeDesignExample.xcodeproj/project.pbxproj',
   'example/ios/ReactNativeDesignExample.xcodeproj/xcshareddata/xcschemes/ReactNativeDesignExample.xcscheme',
+  'website/docusaurus.config.ts',
+  'website/static/img/logo.png',
+  'website/static/example-fixtures/media-decode-failure-v1.png',
   'scripts/run-example-jest.mjs',
+  'scripts/run-example-jest-focused.mjs',
 ];
 
 const runtimeAcceptanceFiles = [
@@ -416,6 +466,14 @@ test('workspace scripts 暴露真实 example 及完整本地 gate', () => {
   assert.equal(
     examplePackage.scripts.test,
     'node ../scripts/run-example-jest.mjs --forbidOnly'
+  );
+  assert.equal(
+    examplePackage.scripts['test:focused'],
+    'node ../scripts/run-example-jest-focused.mjs --forbidOnly --config jest.focused.config.js'
+  );
+  assert.ok(
+    existsSync(path.join(root, 'scripts/run-example-jest-focused.mjs')),
+    'focused development runner 必须与 production gate 隔离'
   );
   assert.deepEqual(
     require(path.join(root, 'example/jest.config.js')).reporters,
@@ -1174,10 +1232,7 @@ test('整个 governed proof registration 不得位于 SourceFile 顶层 if(false
     );
 
     const verificationError = captureVerifierError(fixture);
-    const mutated = runExampleAcceptanceTest(
-      fixture,
-      'BusinessScene.test.tsx'
-    );
+    const mutated = runExampleAcceptanceTest(fixture, 'BusinessScene.test.tsx');
     assert.ok(
       verificationError instanceof
         showcaseVerifier.ExampleShowcaseVerificationError,
@@ -1250,11 +1305,7 @@ test('governed proof registration 必须是 SourceFile 直接 ExpressionStatemen
         mutation.mutate,
         mutation.label
       );
-      assertVerifierCode(
-        fixture,
-        'RUNTIME_API_TEST_PROOF',
-        mutation.label
-      );
+      assertVerifierCode(fixture, 'RUNTIME_API_TEST_PROOF', mutation.label);
     });
   }
 });
@@ -1304,10 +1355,7 @@ test('focused sibling test 不能跳过 runtime proof test', () => {
       '把不含 runtime proof 的 sibling test 改成 test.only'
     );
 
-    const mutated = runExampleAcceptanceTest(
-      fixture,
-      'BusinessScene.test.tsx'
-    );
+    const mutated = runExampleAcceptanceTest(fixture, 'BusinessScene.test.tsx');
     assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
     assert.match(
       `${mutated.stdout}\n${mutated.stderr}`,
@@ -1337,10 +1385,7 @@ test('--forbidOnly 入口拒绝没有 sibling skip 的单一 focused test', () =
       ].join('\n')
     );
 
-    const mutated = runExampleAcceptanceTest(
-      fixture,
-      'SingleFocused.test.ts'
-    );
+    const mutated = runExampleAcceptanceTest(fixture, 'SingleFocused.test.ts');
     assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
     assert.match(
       `${mutated.stdout}\n${mutated.stderr}`,
@@ -1405,14 +1450,11 @@ test('wrapper 拒绝 env scan root 与 inline config/runTestsByPath execution ro
       { showcaseRoot: repositoryRoot }
     );
     assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
-    assert.match(
-      `${mutated.stdout}\n${mutated.stderr}`,
-      /JEST_ROOT_MISMATCH/u
-    );
+    assert.match(`${mutated.stdout}\n${mutated.stderr}`, /JEST_ROOT_MISMATCH/u);
   });
 });
 
-test('wrapper 从 config file、CLI rootDir 与无显式 config 的 cwd 解析同一 Jest root', () => {
+test('focused wrapper 从 config file、CLI rootDir 与无显式 config 的 cwd 解析同一 Jest root', () => {
   withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
     const { fixtureExampleRoot, fixtureRoot } =
       prepareFixtureExampleRuntime(fixture);
@@ -1421,7 +1463,9 @@ test('wrapper 从 config file、CLI rootDir 与无显式 config 的 cwd 解析�
       'src/__tests__/BusinessScene.test.tsx'
     );
 
-    const configFromDirectory = createFixtureJestConfig(fixture);
+    const configFromDirectory = createFixtureJestConfig(fixture, {
+      reporters: ['default'],
+    });
     delete configFromDirectory.rootDir;
     const directoryConfigPath = path.join(
       fixtureExampleRoot,
@@ -1431,7 +1475,7 @@ test('wrapper 从 config file、CLI rootDir 与无显式 config 的 cwd 解析�
       directoryConfigPath,
       `module.exports = ${JSON.stringify(configFromDirectory)};\n`
     );
-    const directoryResult = runExampleJestWrapper(fixture, [
+    const directoryResult = runExampleFocusedJestWrapper(fixture, [
       '--config',
       directoryConfigPath,
       '--runInBand',
@@ -1445,6 +1489,7 @@ test('wrapper 从 config file、CLI rootDir 与无显式 config 的 cwd 解析�
     );
 
     const configWithRelativeRoot = createFixtureJestConfig(fixture, {
+      reporters: ['default'],
       rootDir: './example',
     });
     const relativeConfigPath = path.join(
@@ -1455,7 +1500,7 @@ test('wrapper 从 config file、CLI rootDir 与无显式 config 的 cwd 解析�
       relativeConfigPath,
       `module.exports = ${JSON.stringify(configWithRelativeRoot)};\n`
     );
-    const relativeResult = runExampleJestWrapper(fixture, [
+    const relativeResult = runExampleFocusedJestWrapper(fixture, [
       '--config',
       relativeConfigPath,
       '--runInBand',
@@ -1468,10 +1513,11 @@ test('wrapper 从 config file、CLI rootDir 与无显式 config 的 cwd 解析�
       `${relativeResult.stdout}\n${relativeResult.stderr}`
     );
 
-    const cliOverrideResult = runExampleJestWrapper(fixture, [
+    const cliOverrideResult = runExampleFocusedJestWrapper(fixture, [
       '--config',
       JSON.stringify(
         createFixtureJestConfig(fixture, {
+          reporters: ['default'],
           rootDir: path.join(repositoryRoot, 'example'),
         })
       ),
@@ -1487,22 +1533,28 @@ test('wrapper 从 config file、CLI rootDir 与无显式 config 的 cwd 解析�
       `${cliOverrideResult.stdout}\n${cliOverrideResult.stderr}`
     );
 
-    const cwdConfig = createFixtureJestConfig(fixture);
+    const cwdConfig = createFixtureJestConfig(fixture, {
+      reporters: ['default'],
+    });
     delete cwdConfig.rootDir;
     writeFileSync(
       path.join(fixtureExampleRoot, 'jest.config.js'),
       `module.exports = ${JSON.stringify(cwdConfig)};\n`
     );
-    const cwdResult = runExampleJestWrapper(
+    const cwdResult = runExampleFocusedJestWrapper(
       fixture,
       ['--runInBand', '--runTestsByPath', testPath],
       { cwd: fixtureExampleRoot, showcaseRoot: undefined }
     );
-    assert.equal(cwdResult.status, 0, `${cwdResult.stdout}\n${cwdResult.stderr}`);
+    assert.equal(
+      cwdResult.status,
+      0,
+      `${cwdResult.stdout}\n${cwdResult.stderr}`
+    );
   });
 });
 
-test('wrapper 拒绝 --runTestsByPath 逃逸 actual Jest root', () => {
+test('focused wrapper 拒绝 --runTestsByPath 逃逸 actual Jest root', () => {
   withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
     const clean = runExampleAcceptanceTest(fixture, 'BusinessScene.test.tsx');
     assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
@@ -1516,7 +1568,7 @@ test('wrapper 拒绝 --runTestsByPath 逃逸 actual Jest root', () => {
       "test('outside root', () => { expect(1).toBe(1); });\n"
     );
 
-    const mutated = runExampleJestWrapper(fixture, [
+    const mutated = runExampleFocusedJestWrapper(fixture, [
       '--config',
       JSON.stringify(createFixtureJestConfig(fixture)),
       '--runInBand',
@@ -1531,7 +1583,7 @@ test('wrapper 拒绝 --runTestsByPath 逃逸 actual Jest root', () => {
   });
 });
 
-test('wrapper 拒绝 config.roots 将 Jest discovery 边界移出 actual root', () => {
+test('focused wrapper 拒绝 config.roots 将 Jest discovery 边界移出 actual root', () => {
   withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
     const clean = runExampleAcceptanceTest(fixture, 'BusinessScene.test.tsx');
     assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
@@ -1543,7 +1595,7 @@ test('wrapper 拒绝 config.roots 将 Jest discovery 边界移出 actual root', 
       "test.only('single outside discovery root', () => { expect(1).toBe(1); });\n"
     );
 
-    const mutated = runExampleJestWrapper(fixture, [
+    const mutated = runExampleFocusedJestWrapper(fixture, [
       '--config',
       JSON.stringify(
         createFixtureJestConfig(fixture, { roots: [outsideTestDirectory] })
@@ -1556,6 +1608,227 @@ test('wrapper 拒绝 config.roots 将 Jest discovery 边界移出 actual root', 
       /JEST_DISCOVERY_ROOT_MISMATCH/u
     );
   });
+});
+
+test('production Jest gate 拒绝所有 selection、config、reporter 与非执行参数', () => {
+  const clean = runExampleJestWrapper(root, ['--runInBand', '--no-cache'], {
+    cwd: exampleRoot,
+    showcaseRoot: undefined,
+  });
+  assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
+
+  const navigationTest = path.join(
+    exampleRoot,
+    'src/__tests__/exampleNavigation.test.ts'
+  );
+  const navigationSource = path.join(
+    exampleRoot,
+    'src/navigation/exampleNavigation.ts'
+  );
+  const unsafeArguments = [
+    ['--runTestsByPath', navigationTest],
+    ['exampleNavigation'],
+    ['--testNamePattern=navigate'],
+    ['--testPathPattern=exampleNavigation'],
+    ['--testMatch=**/exampleNavigation.test.ts'],
+    ['--testPathIgnorePatterns=App.test.tsx'],
+    ['--findRelatedTests', navigationSource],
+    ['--onlyChanged'],
+    ['--lastCommit'],
+    ['--changedSince=HEAD~1'],
+    ['--selectProjects=example'],
+    ['--shard=1/2'],
+    ['--filter=./filter-tests.js'],
+    ['--config', path.join(exampleRoot, 'jest.config.js')],
+    ['--rootDir', exampleRoot],
+    ['--roots', exampleRoot],
+    ['--projects', exampleRoot],
+    ['--reporters=default'],
+    ['--listTests'],
+    ['--showConfig'],
+    ['--watch'],
+    ['--watchAll'],
+  ];
+
+  for (const args of unsafeArguments) {
+    const result = runExampleJestWrapper(root, args, {
+      cwd: exampleRoot,
+      showcaseRoot: undefined,
+    });
+    assert.equal(
+      result.status,
+      1,
+      `${args.join(' ')}\n${result.stdout}\n${result.stderr}`
+    );
+    assert.match(
+      `${result.stdout}\n${result.stderr}`,
+      /JEST_PRODUCTION_ARGUMENT/u,
+      args.join(' ')
+    );
+  }
+});
+
+test('production Jest gate 从 resolved config 拒绝 owner discovery 与 reporter 漂移', () => {
+  const mutations = [
+    {
+      label: 'testMatch 只选择普通 navigation suite',
+      code: 'JEST_CONFIG_SELECTION',
+      overrides: {
+        testMatch: ['**/exampleNavigation.test.ts'],
+      },
+    },
+    {
+      label: 'testPathIgnorePatterns 排除 App owner suite',
+      code: 'JEST_CONFIG_SELECTION',
+      overrides: {
+        testPathIgnorePatterns: ['/node_modules/', '/App\\.test\\.tsx$'],
+      },
+    },
+    {
+      label: 'resolved reporters 移除 production attestation',
+      code: 'JEST_REPORTER_CONTRACT',
+      overrides: {
+        reporters: ['default'],
+      },
+    },
+  ];
+
+  for (const mutation of mutations) {
+    withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+      const fixtureExampleRoot = writeFixtureProductionJestConfig(fixture);
+      const clean = runExampleJestWrapper(fixture, ['--runInBand'], {
+        cwd: fixtureExampleRoot,
+      });
+      assert.equal(
+        clean.status,
+        0,
+        `${mutation.label} clean\n${clean.stdout}\n${clean.stderr}`
+      );
+
+      writeFixtureProductionJestConfig(fixture, mutation.overrides);
+      const mutated = runExampleJestWrapper(fixture, ['--runInBand'], {
+        cwd: fixtureExampleRoot,
+      });
+      assert.equal(
+        mutated.status,
+        1,
+        `${mutation.label}\n${mutated.stdout}\n${mutated.stderr}`
+      );
+      assert.match(
+        `${mutated.stdout}\n${mutated.stderr}`,
+        new RegExp(mutation.code, 'u'),
+        mutation.label
+      );
+    });
+  }
+});
+
+test('production Jest gate 精确拒绝 shared owner contract 替换真实 App suite', () => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const fixtureExampleRoot = writeFixtureProductionJestConfig(fixture);
+    const clean = runExampleJestWrapper(fixture, ['--runInBand'], {
+      cwd: fixtureExampleRoot,
+    });
+    assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
+
+    mutateFixtureFile(
+      fixture,
+      'example/jest.showcaseGate.js',
+      (source) =>
+        source.replace(
+          "  'src/__tests__/App.test.tsx',",
+          "  'src/__tests__/exampleNavigation.test.ts',"
+        ),
+      'shared owner contract 用普通 suite 替换 App owner'
+    );
+    const mutated = runExampleJestWrapper(fixture, ['--runInBand'], {
+      cwd: fixtureExampleRoot,
+    });
+    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /JEST_GOVERNED_SUITE_CONTRACT/u
+    );
+  });
+});
+
+test('actual Jest reporter 在缺少任一 required owner suite 时返回 non-zero', () => {
+  const fixture = mkdtempSync(
+    path.join(os.tmpdir(), 'react-native-design-owner-reporter-')
+  );
+  try {
+    const testRoot = path.join(fixture, 'src/__tests__');
+    mkdirSync(testRoot, { recursive: true });
+    const ownerNames = [
+      'App',
+      'FoundationScene',
+      'ActionsScene',
+      'FeedbackScene',
+      'FormsScene',
+      'NavigationScene',
+      'CollectionsScene',
+      'MediaScene',
+      'BusinessScene',
+    ];
+    const requiredTestPaths = ownerNames.map((name) =>
+      path.join(testRoot, `${name}.test.js`)
+    );
+    for (const testPath of requiredTestPaths) {
+      writeFileSync(
+        testPath,
+        `test(${JSON.stringify(path.basename(testPath))}, () => { expect(1).toBe(1); });\n`
+      );
+    }
+    const configPath = path.join(fixture, 'jest.config.cjs');
+    writeFileSync(
+      configPath,
+      `module.exports = ${JSON.stringify({
+        rootDir: fixture,
+        testEnvironment: 'node',
+        testMatch: ['**/*.test.js'],
+        reporters: [
+          'default',
+          path.join(repositoryRoot, 'example/jest.forbidOnlyReporter.js'),
+        ],
+        transform: {},
+      })};\n`
+    );
+    const env = {
+      ...process.env,
+      EXAMPLE_SHOWCASE_JEST_ATTESTATION: JSON.stringify({
+        rootDir: fixture,
+        requiredTestPaths,
+      }),
+    };
+    const runReporter = () =>
+      spawnSync(
+        process.execPath,
+        [
+          path.join(repositoryRoot, 'example/node_modules/jest/bin/jest.js'),
+          '--config',
+          configPath,
+          '--runInBand',
+        ],
+        { cwd: fixture, encoding: 'utf8', env }
+      );
+
+    const clean = runReporter();
+    assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
+    assert.match(
+      `${clean.stdout}\n${clean.stderr}`,
+      /JEST_GOVERNED_SUITES_COMPLETED/u
+    );
+
+    rmSync(requiredTestPaths.at(-1));
+    const mutated = runReporter();
+    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /JEST_GOVERNED_SUITES_COMPLETED.*BusinessScene\.test\.js/u
+    );
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
+  }
 });
 
 test('runtime proof test callback 不能提前 return 跳过 lifecycle', () => {
@@ -1630,11 +1903,7 @@ test('proof lifecycle 要求 factory 直接声明且 completion 位于全部 pro
         mutation.mutate,
         mutation.label
       );
-      assertVerifierCode(
-        fixture,
-        'RUNTIME_API_TEST_PROOF',
-        mutation.label
-      );
+      assertVerifierCode(fixture, 'RUNTIME_API_TEST_PROOF', mutation.label);
     });
   }
 });
@@ -1692,10 +1961,7 @@ test('governed example tests 全局拒绝 focused、skipped 与 todo registratio
       'describe.skip',
       (source) => `describe.skip('skipped', () => {});\n${source}`,
     ],
-    [
-      'test.todo',
-      (source) => `test.todo('todo registration');\n${source}`,
-    ],
+    ['test.todo', (source) => `test.todo('todo registration');\n${source}`],
     [
       'describe.each.only',
       (source) =>
@@ -1772,10 +2038,7 @@ test('完整验收链拒绝 BRAND_ORANGE 默认值硬编码与 dead binding 冒�
       'example/src/showcases/foundation/FoundationScene.tsx',
       (source) =>
         source
-          .replace(
-            '；品牌 {BRAND_ORANGE}',
-            "；品牌 {['#', 'EB6E00'].join('')}"
-          )
+          .replace('；品牌 {BRAND_ORANGE}', "；品牌 {['#', 'EB6E00'].join('')}")
           .replace(
             '  const draft = state.scenes.foundation;',
             [
@@ -2165,7 +2428,13 @@ test('runtime API proof gate 拒绝 missing、空 callback 与 legacy consume', 
 });
 
 test('Chip selected 交互真值不由静态 AST gate 判断', () => {
-  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const clean = runExampleAcceptanceTest(fixture, 'ActionsScene.test.tsx');
+    assert.equal(
+      clean.status,
+      0,
+      `Chip interaction mutation 的 clean owner suite 必须先完整通过\n${clean.stdout}\n${clean.stderr}`
+    );
     assert.doesNotThrow(
       () => showcaseVerifier.verifyExampleShowcase(fixture),
       'Chip interaction mutation 的 clean fixture 必须先完整通过'
@@ -2180,11 +2449,28 @@ test('Chip selected 交互真值不由静态 AST gate 判断', () => {
       () => showcaseVerifier.verifyExampleShowcase(fixture),
       '交互后态由 scene Jest proof 负责'
     );
+    const mutated = runExampleAcceptanceTest(fixture, 'ActionsScene.test.tsx');
+    assert.notEqual(
+      mutated.status,
+      0,
+      '删除 selectable Chip 后 owner suite 必须失败'
+    );
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /SHOWCASE_CHIP_SELECTED_PROOF/,
+      'mutation 必须由 Chip selected 专属运行时证明拒绝'
+    );
   });
 });
 
 test('Chip selected dead component 不改变静态 gate 与 runtime proof 的职责边界', () => {
-  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const clean = runExampleAcceptanceTest(fixture, 'ActionsScene.test.tsx');
+    assert.equal(
+      clean.status,
+      0,
+      `Chip dead component mutation 的 clean owner suite 必须先完整通过\n${clean.stdout}\n${clean.stderr}`
+    );
     assert.doesNotThrow(
       () => showcaseVerifier.verifyExampleShowcase(fixture),
       'Chip dead component mutation 的 clean fixture 必须先完整通过'
@@ -2200,11 +2486,28 @@ test('Chip selected dead component 不改变静态 gate 与 runtime proof 的职
       () => showcaseVerifier.verifyExampleShowcase(fixture),
       '静态 verifier 不手写 React render/JavaScript CFG'
     );
+    const mutated = runExampleAcceptanceTest(fixture, 'ActionsScene.test.tsx');
+    assert.notEqual(
+      mutated.status,
+      0,
+      'dead Chip witness 不得替代 routed owner proof'
+    );
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /SHOWCASE_CHIP_SELECTED_PROOF/,
+      'dead-code mutation 必须由 Chip selected 专属运行时证明拒绝'
+    );
   });
 });
 
 test('Toast error 分支执行事实交给 runtime proof', () => {
-  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const clean = runExampleAcceptanceTest(fixture, 'FeedbackScene.test.tsx');
+    assert.equal(
+      clean.status,
+      0,
+      `Toast runtime-api mutation 的 clean owner suite 必须先完整通过\n${clean.stdout}\n${clean.stderr}`
+    );
     assert.doesNotThrow(
       () => showcaseVerifier.verifyExampleShowcase(fixture),
       'Toast runtime-api mutation 的 clean fixture 必须先完整通过'
@@ -2220,11 +2523,28 @@ test('Toast error 分支执行事实交给 runtime proof', () => {
       () => showcaseVerifier.verifyExampleShowcase(fixture),
       '静态 binding gate 不解释 switch 分支；toast.error spy proof 会拒绝 mutation'
     );
+    const mutated = runExampleAcceptanceTest(fixture, 'FeedbackScene.test.tsx');
+    assert.notEqual(
+      mutated.status,
+      0,
+      'toast.error 被替换后 owner suite 必须失败'
+    );
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /SHOWCASE_TOAST_ERROR_PROOF/,
+      'mutation 必须由 Toast error 专属运行时证明拒绝'
+    );
   });
 });
 
 test('Toast dead helper 不由静态 verifier 猜测是否执行', () => {
-  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
+    const clean = runExampleAcceptanceTest(fixture, 'FeedbackScene.test.tsx');
+    assert.equal(
+      clean.status,
+      0,
+      `Toast dead helper mutation 的 clean owner suite 必须先完整通过\n${clean.stdout}\n${clean.stderr}`
+    );
     assert.doesNotThrow(
       () => showcaseVerifier.verifyExampleShowcase(fixture),
       'Toast dead helper mutation 的 clean fixture 必须先完整通过'
@@ -2242,6 +2562,17 @@ test('Toast dead helper 不由静态 verifier 猜测是否执行', () => {
     assert.doesNotThrow(
       () => showcaseVerifier.verifyExampleShowcase(fixture),
       'runtime Jest 的 toast.error spy 是执行真值'
+    );
+    const mutated = runExampleAcceptanceTest(fixture, 'FeedbackScene.test.tsx');
+    assert.notEqual(
+      mutated.status,
+      0,
+      'dead toast.error helper 不得替代 routed owner proof'
+    );
+    assert.match(
+      `${mutated.stdout}\n${mutated.stderr}`,
+      /SHOWCASE_TOAST_ERROR_PROOF/,
+      'dead-code mutation 必须由 Toast error 专属运行时证明拒绝'
     );
   });
 });
@@ -2262,8 +2593,8 @@ test('exhaustive verifier 拒绝重复根 runtime 与 Home heavy eager import', 
       code: 'ROOT_RUNTIME_UNIQUENESS',
       mutate: (source) =>
         source.replace(
-          '      {runtimeHostsMounted ? <ToastHost /> : null}',
-          '      {runtimeHostsMounted ? <ToastHost /> : null}\n      <ThemeProvider />'
+          '      <ToastHost />',
+          '      <ToastHost />\n      <ThemeProvider />'
         ),
     },
     {
@@ -2271,8 +2602,8 @@ test('exhaustive verifier 拒绝重复根 runtime 与 Home heavy eager import', 
       code: 'ROOT_RUNTIME_UNIQUENESS',
       mutate: (source) =>
         source.replace(
-          '      {runtimeHostsMounted ? <ConfirmHost /> : null}',
-          '      {runtimeHostsMounted ? <ConfirmHost /> : null}\n      <ConfirmHost />'
+          '      <ConfirmHost />',
+          '      <ConfirmHost />\n      <ConfirmHost />'
         ),
     },
     {
@@ -2280,8 +2611,8 @@ test('exhaustive verifier 拒绝重复根 runtime 与 Home heavy eager import', 
       code: 'ROOT_RUNTIME_UNIQUENESS',
       mutate: (source) =>
         source.replace(
-          '      {runtimeHostsMounted ? <ToastHost /> : null}',
-          '      {runtimeHostsMounted ? <ToastHost /> : null}\n      <ToastHost />'
+          '      <ToastHost />',
+          '      <ToastHost />\n      <ToastHost />'
         ),
     },
   ];
@@ -2316,6 +2647,36 @@ test('exhaustive verifier 拒绝重复根 runtime 与 Home heavy eager import', 
       'Home eager import Carousel'
     );
   });
+});
+
+test('root runtime verifier 拒绝把 ConfirmHost 或 ToastHost 放进条件分支', () => {
+  for (const host of ['ConfirmHost', 'ToastHost']) {
+    withFixture([...new Set(sourceContractFiles)], (fixture) => {
+      assert.doesNotThrow(() =>
+        showcaseVerifier.verifyExampleShowcase(fixture)
+      );
+      mutateFixtureFile(
+        fixture,
+        'example/src/app/AppProviders.tsx',
+        (source) => {
+          const conditional = `{runtimeHostsMounted ? <${host} /> : null}`;
+          if (source.includes(conditional)) {
+            return source.replace(conditional, `{false ? <${host} /> : null}`);
+          }
+          return source.replace(
+            `      <${host} />`,
+            `      {true ? <${host} /> : null}`
+          );
+        },
+        `${host} conditional root runtime`
+      );
+      assertVerifierCode(
+        fixture,
+        'ROOT_RUNTIME_PERSISTENCE',
+        `${host} 必须无条件常驻`
+      );
+    });
+  }
 });
 
 test('exhaustive verifier 拒绝 deep import、旧包、硬编码颜色、console 与 RN Pressable', () => {
@@ -2655,6 +3016,19 @@ test('Turbo 只定义 package-qualified example tasks 并隔离双端 native inp
   const android =
     turbo.tasks['@unif/react-native-design-example#build:android'].inputs;
   const ios = turbo.tasks['@unif/react-native-design-example#build:ios'].inputs;
+  const testInputs =
+    turbo.tasks['@unif/react-native-design-example#test'].inputs;
+  for (const directInput of [
+    '$TURBO_ROOT$/scripts/run-example-jest.mjs',
+    '$TURBO_ROOT$/scripts/verify-example-showcase.mjs',
+    '$TURBO_ROOT$/example/jest.forbidOnlyReporter.js',
+    '$TURBO_ROOT$/example/jest.showcaseGate.js',
+  ]) {
+    assert.ok(
+      testInputs.includes(directInput),
+      `example test task 缺少直接执行 input ${directInput}`
+    );
+  }
   assert.ok(android.includes('$TURBO_ROOT$/example/android/**'));
   assert.ok(android.includes('!$TURBO_ROOT$/example/android/local.properties'));
   assert.ok(android.includes('!$TURBO_ROOT$/example/android/**/build/**'));
@@ -2736,6 +3110,248 @@ test('README mutation gate 拒绝缺少安装、Pods、Metro、build、scene、t
   }
 });
 
+test('README mutation gate 拒绝媒体 fixture 与 runtime peer 事实漂移', () => {
+  const mutations = [
+    {
+      label: 'example README 缺 decode-failure fixture',
+      file: 'example/README.md',
+      code: 'README_MEDIA_FIXTURES',
+      mutate: (source) =>
+        source.replaceAll(
+          'https://unif-design.github.io/react-native-design/example-fixtures/media-decode-failure-v1.png',
+          'https://example.invalid/missing.png'
+        ),
+    },
+    {
+      label: 'root README 误称 yarnrc 存在 logFilters',
+      file: 'README.md',
+      code: 'README_PEER_FACTS',
+      mutate: (source) =>
+        source.replace(
+          '本仓不使用全局 `logFilters`',
+          '本仓 `.yarnrc.yml` 使用全局 `logFilters`'
+        ),
+    },
+  ];
+
+  for (const mutation of mutations) {
+    withFixture([...new Set(sourceContractFiles)], (fixture) => {
+      assert.doesNotThrow(() =>
+        showcaseVerifier.verifyExampleShowcase(fixture)
+      );
+      mutateFixtureFile(
+        fixture,
+        mutation.file,
+        mutation.mutate,
+        mutation.label
+      );
+      assertVerifierCode(fixture, mutation.code, mutation.label);
+    });
+  }
+});
+
+test('Media fixture deployment mutation gate 拒绝部署配置与资产漂移', () => {
+  assert.match(
+    read('.gitattributes'),
+    /^website\/static\/example-fixtures\/media-decode-failure-v1\.png -text$/mu
+  );
+  const mutations = [
+    {
+      label: 'Docusaurus origin 漂移',
+      file: 'website/docusaurus.config.ts',
+      mutate: (source) =>
+        source.replace(
+          "  url: 'https://unif-design.github.io',",
+          "  url: 'https://preview.invalid',"
+        ),
+    },
+    {
+      label: 'Docusaurus baseUrl 漂移',
+      file: 'website/docusaurus.config.ts',
+      mutate: (source) =>
+        source.replace(
+          "  baseUrl: '/react-native-design/',",
+          "  baseUrl: '/design-preview/',"
+        ),
+    },
+    {
+      label: 'Docusaurus active config 漂移但注释保留旧 token',
+      file: 'website/docusaurus.config.ts',
+      mutate: (source) =>
+        source.replace(
+          "  url: 'https://unif-design.github.io',\n  baseUrl: '/react-native-design/',",
+          "  // stale:   url: 'https://unif-design.github.io',\n  // stale:   baseUrl: '/react-native-design/',\n  url: 'https://preview.invalid',\n  baseUrl: '/design-preview/',"
+        ),
+    },
+    {
+      label: 'Docusaurus spread 在 direct deployment properties 后覆盖',
+      file: 'website/docusaurus.config.ts',
+      mutate: (source) =>
+        source
+          .replace(
+            'const config: Config = {',
+            "const deploymentOverride: Partial<Config> = {\n  url: 'https://preview.invalid',\n  baseUrl: '/design-preview/',\n};\n\nconst config: Config = {"
+          )
+          .replace(
+            "  baseUrl: '/react-native-design/',",
+            "  baseUrl: '/react-native-design/',\n  ...deploymentOverride,"
+          ),
+    },
+    {
+      label: 'success fixture 仅保留 PNG signature',
+      file: 'website/static/img/logo.png',
+      mutate: () => Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 0]),
+    },
+    {
+      label: 'failure fixture marker 漂移',
+      file: 'website/static/example-fixtures/media-decode-failure-v1.png',
+      mutate: (source) =>
+        source.replace(
+          'UNIF_MEDIA_DECODE_FAILURE_FIXTURE_V1',
+          'UNIF_MEDIA_DECODE_FAILURE_FIXTURE_V2'
+        ),
+    },
+    {
+      label: 'failure fixture 丢失 binary checkout contract',
+      file: '.gitattributes',
+      mutate: (source) =>
+        source.replace(
+          'website/static/example-fixtures/media-decode-failure-v1.png -text\n',
+          ''
+        ),
+    },
+    {
+      label: 'failure fixture URI 漂移',
+      file: 'example/src/state/showcaseState.ts',
+      mutate: (source) =>
+        source.replace(
+          'https://unif-design.github.io/react-native-design/example-fixtures/media-decode-failure-v1.png',
+          'https://example.invalid/media-decode-failure-v1.png'
+        ),
+    },
+    {
+      label: 'failure fixture active URI 漂移但注释保留旧 URI',
+      file: 'example/src/state/showcaseState.ts',
+      mutate: (source) =>
+        source.replace(
+          "export const MEDIA_DECODE_FAILURE_URI =\n  'https://unif-design.github.io/react-native-design/example-fixtures/media-decode-failure-v1.png';",
+          "// stale: 'https://unif-design.github.io/react-native-design/example-fixtures/media-decode-failure-v1.png'\nexport const MEDIA_DECODE_FAILURE_URI =\n  'https://example.invalid/media-decode-failure-v1.png';"
+        ),
+    },
+    {
+      label: 'media state factory 不再使用 success fixture const',
+      file: 'example/src/state/showcaseState.ts',
+      mutate: (source) =>
+        source.replace(
+          '    remoteUri: DEFAULT_MEDIA_REMOTE_URI,',
+          "    remoteUri: 'https://images.example.com/unif-avatar.png',"
+        ),
+    },
+    {
+      label: 'Media success specimens 不再使用 draft remoteUri',
+      file: 'example/src/showcases/media/MediaScene.tsx',
+      mutate: (source) =>
+        source
+          .replace(
+            'source={{ uri: draft.remoteUri }}',
+            'source={{ uri: DEFAULT_MEDIA_REMOTE_URI }}'
+          )
+          .replace(
+            'uri={draft.remoteUri}\n              size="sm"',
+            'uri={DEFAULT_MEDIA_REMOTE_URI}\n              size="sm"'
+          ),
+    },
+    {
+      label: 'Media scene 不再使用 failure fixture',
+      file: 'example/src/showcases/media/MediaScene.tsx',
+      mutate: (source) =>
+        source.replaceAll(
+          'MEDIA_DECODE_FAILURE_URI',
+          'DEFAULT_MEDIA_REMOTE_URI'
+        ),
+    },
+    {
+      label: 'Media scene 只保留 stale failure import',
+      file: 'example/src/showcases/media/MediaScene.tsx',
+      mutate: (source) =>
+        source
+          .replace(
+            'source={{ uri: MEDIA_DECODE_FAILURE_URI }}',
+            'source={{ uri: DEFAULT_MEDIA_REMOTE_URI }}'
+          )
+          .replace(
+            'uri={MEDIA_DECODE_FAILURE_URI}',
+            'uri={DEFAULT_MEDIA_REMOTE_URI}'
+          ),
+    },
+    {
+      label: 'Media failure testIDs 挂到 local fake components',
+      file: 'example/src/showcases/media/MediaScene.tsx',
+      mutate: (source) =>
+        source
+          .replace('  Avatar,', '  Avatar as DesignAvatar,')
+          .replace('  Thumbnail,', '  Thumbnail as DesignThumbnail,')
+          .replaceAll('<Avatar', '<DesignAvatar')
+          .replaceAll('<Thumbnail', '<DesignThumbnail')
+          .replace(
+            'const LOCAL_IMAGE:',
+            'const Avatar = (_props: unknown): null => null;\nconst Thumbnail = (_props: unknown): null => null;\n\nconst LOCAL_IMAGE:'
+          )
+          .replace(
+            '<DesignAvatar\n              label="失效头像"',
+            '<Avatar\n              label="失效头像"'
+          )
+          .replace(
+            '<DesignThumbnail\n              uri={MEDIA_DECODE_FAILURE_URI}',
+            '<Thumbnail\n              uri={MEDIA_DECODE_FAILURE_URI}'
+          ),
+    },
+    {
+      label: 'Media failure Thumbnail 被后置 JSX spread 覆盖',
+      file: 'example/src/showcases/media/MediaScene.tsx',
+      mutate: (source) =>
+        source
+          .replace(
+            'const LOCAL_IMAGE:',
+            'const thumbnailOverride = { uri: DEFAULT_MEDIA_REMOTE_URI };\n\nconst LOCAL_IMAGE:'
+          )
+          .replace(
+            '              uri={MEDIA_DECODE_FAILURE_URI}\n              size="sm"',
+            '              uri={MEDIA_DECODE_FAILURE_URI}\n              {...thumbnailOverride}\n              size="sm"'
+          ),
+    },
+    {
+      label: 'Media failure Avatar source 被后置 object spread 覆盖',
+      file: 'example/src/showcases/media/MediaScene.tsx',
+      mutate: (source) =>
+        source
+          .replace(
+            'const LOCAL_IMAGE:',
+            'const avatarOverride = { uri: DEFAULT_MEDIA_REMOTE_URI };\n\nconst LOCAL_IMAGE:'
+          )
+          .replace(
+            'source={{ uri: MEDIA_DECODE_FAILURE_URI }}',
+            'source={{ uri: MEDIA_DECODE_FAILURE_URI, ...avatarOverride }}'
+          ),
+    },
+  ];
+
+  for (const mutation of mutations) {
+    withFixture([...new Set(sourceContractFiles)], (fixture) => {
+      assert.doesNotThrow(() =>
+        showcaseVerifier.verifyExampleShowcase(fixture)
+      );
+      mutateFixtureFile(
+        fixture,
+        mutation.file,
+        mutation.mutate,
+        mutation.label
+      );
+      assertVerifierCode(fixture, 'MEDIA_FIXTURE_DEPLOYMENT', mutation.label);
+    });
+  }
+});
+
 test('workflow 与 shared CI mutation gate 返回稳定 typed code', () => {
   const mutations = [
     {
@@ -2792,8 +3408,8 @@ test('Turbo mutation gate 拒绝 task、深层 source 与平台隔离漂移', ()
       code: 'TURBO_INPUTS',
       mutate: (source) =>
         source.replace(
-          '        "$TURBO_ROOT$/example/src/**"\n      ],',
-          '        "$TURBO_ROOT$/example/src/*.tsx"\n      ],'
+          '        "$TURBO_ROOT$/example/src/**",',
+          '        "$TURBO_ROOT$/example/src/*.tsx",'
         ),
     },
     {
@@ -2805,6 +3421,21 @@ test('Turbo mutation gate 拒绝 task、深层 source 与平台隔离漂移', ()
           '        "$TURBO_ROOT$/example/android/**",\n        "$TURBO_ROOT$/example/ios/**",'
         ),
     },
+    ...[
+      '$TURBO_ROOT$/scripts/run-example-jest.mjs',
+      '$TURBO_ROOT$/scripts/verify-example-showcase.mjs',
+      '$TURBO_ROOT$/example/jest.forbidOnlyReporter.js',
+      '$TURBO_ROOT$/example/jest.showcaseGate.js',
+    ].map((input) => ({
+      label: `test task 删除直接执行 input ${input}`,
+      code: 'TURBO_INPUTS',
+      mutate: (source) => {
+        const turbo = JSON.parse(source);
+        const task = turbo.tasks['@unif/react-native-design-example#test'];
+        task.inputs = task.inputs.filter((candidate) => candidate !== input);
+        return `${JSON.stringify(turbo, null, 2)}\n`;
+      },
+    })),
   ];
 
   for (const mutation of mutations) {
@@ -2865,6 +3496,21 @@ test('Turbo dry-run 只解析真实 example task 且纳入深层 showcase source
       ),
       `${command.taskId} dry inputs 缺少深层 showcase source`
     );
+    if (command.taskId === '@unif/react-native-design-example#test') {
+      for (const directInput of [
+        '../scripts/run-example-jest.mjs',
+        '../scripts/verify-example-showcase.mjs',
+        'jest.forbidOnlyReporter.js',
+        'jest.showcaseGate.js',
+      ]) {
+        assert.ok(
+          Object.keys(dry.tasks[0].inputs).some(
+            (input) => input === directInput
+          ),
+          `${command.taskId} dry inputs 缺少 ${directInput}`
+        );
+      }
+    }
     assert.ok(
       dry.tasks.every(
         (task) =>

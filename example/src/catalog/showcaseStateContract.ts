@@ -1500,7 +1500,7 @@ export const showcaseStateContract = [
       kind: 'jsx-props',
       specimens: [
         {
-          testID: 'media-avatar-invalid',
+          testID: 'media-avatar-failure',
           props: { label: '失效头像' },
           presentProps: ['source'],
         },
@@ -1579,7 +1579,7 @@ export const showcaseStateContract = [
       kind: 'jsx-props',
       specimens: [
         {
-          testID: 'media-thumbnail-uri-sm',
+          testID: 'media-thumbnail-failure',
           props: {},
           presentProps: ['uri'],
         },
@@ -2562,20 +2562,6 @@ export const showcaseStateContract = [
     },
   },
   {
-    id: 'confirm-host.no-host',
-    component: 'ConfirmHost',
-    scene: 'feedback',
-    label: '无 Host',
-    witness: {
-      kind: 'interaction',
-      targetComponent: 'Button',
-      testID: 'feedback-confirm-no-host',
-      handler: 'onPress',
-      calls: ['confirm'],
-      rootHost: 'ConfirmHost',
-    },
-  },
-  {
     id: 'confirm-host.reentrant',
     component: 'ConfirmHost',
     scene: 'feedback',
@@ -2618,20 +2604,6 @@ export const showcaseStateContract = [
     label: '持续时间',
     witness: {
       kind: 'runtime-api',
-      calls: ['toast.info'],
-      rootHost: 'ToastHost',
-    },
-  },
-  {
-    id: 'toast-host.pre-host',
-    component: 'ToastHost',
-    scene: 'feedback',
-    label: 'Host 前调用',
-    witness: {
-      kind: 'interaction',
-      targetComponent: 'Button',
-      testID: 'feedback-toast-pre-host',
-      handler: 'onPress',
       calls: ['toast.info'],
       rootHost: 'ToastHost',
     },

@@ -79,8 +79,12 @@ scene 会卸载，可复现 draft 保存在根 Provider 中。
 | `business`    | 业务复合组件   | GradientWash、RadialHalo、ScreenBackdrop、GlassStats、AvatarWithRing、VersionPill |
 
 Collections 中 Carousel 默认不挂载；开启后可切换 empty/one/multiple、display/action、
-indicator、autoplay、loop 和 ref 控制。Media 可编辑 HTTPS URI，并能显式触发 remote image
-failure；结果日志不会保存原始 URI。
+indicator、autoplay、loop 和 ref 控制。Media 默认使用项目控制的 success fixture
+`https://unif-design.github.io/react-native-design/img/logo.png`，并用固定的 invalid-image
+fixture
+`https://unif-design.github.io/react-native-design/example-fixtures/media-decode-failure-v1.png`
+分别展示成功与 native decode 失败路径；结果日志不会保存原始 URI。Jest 只验证 source wiring 与 native
+load/error event 后的组件状态，不代表真实网络、缓存或 native decode 已通过。
 
 ## 6. 主题、字号与减少动态效果
 
@@ -121,23 +125,23 @@ yarn workspace @unif/react-native-design-website build
 
 下面不预填 PASS。完成某一环境的真实操作并保留证据后，才可在对应交付记录中更新状态。
 
-| 项目                         | 核对内容                                                  | 状态       |
-| ---------------------------- | --------------------------------------------------------- | ---------- |
-| Android emulator             | 启动、8 scenes、portrait/landscape、Android hardware back | 待人工执行 |
-| Android 真机                 | 手势、性能、system theme、remote image success/failure    | 待人工执行 |
-| iOS Simulator                | 启动、8 scenes、portrait/landscape                        | 待人工执行 |
-| iOS 真机                     | 签名、手势、system theme、remote image success/failure    | 待人工执行 |
-| system/light/dark            | 系统、强制浅色、强制深色下 token 与可读性                 | 待人工执行 |
-| fontScale                    | 1 / 1.25 / 1.5 / 2 下布局、截断与动态文字                 | 待人工执行 |
-| reduced motion               | 系统开/关；Pulse、Reveal、Carousel autoplay               | 待人工执行 |
-| portrait/landscape           | Android 与 iOS 旋转、滚动和安全区                         | 待人工执行 |
-| VoiceOver                    | 角色、名称、state、顺序、live region、装饰隐藏            | 待人工执行 |
-| TalkBack                     | 角色、名称、state、顺序、live region、装饰隐藏            | 待人工执行 |
-| remote image success/failure | Avatar/Thumbnail 成功、错误、fallback、URI 隐私           | 待人工执行 |
-| Toast/Confirm                | 位置、类型、确认/取消、连续触发后的 settled 结果          | 待人工执行 |
-| Carousel action/autoplay     | display/action、ref、loop、指示器与 reduced motion 停播   | 待人工执行 |
-| Android hardware back        | scene 回 Home；Home 将事件交还系统                        | 待人工执行 |
-| Blur soft/strong/fallback    | 真机 soft/strong 与不支持原生 Blur 时的边界表现           | 待人工执行 |
+| 项目                         | 核对内容                                                                                        | 状态       |
+| ---------------------------- | ----------------------------------------------------------------------------------------------- | ---------- |
+| Android emulator             | 启动、8 scenes、portrait/landscape、Android hardware back                                       | 待人工执行 |
+| Android 真机                 | 手势、性能、system theme、remote image success/failure                                          | 待人工执行 |
+| iOS Simulator                | 启动、8 scenes、portrait/landscape                                                              | 待人工执行 |
+| iOS 真机                     | 签名、手势、system theme、remote image success/failure                                          | 待人工执行 |
+| system/light/dark            | 系统、强制浅色、强制深色下 token 与可读性                                                       | 待人工执行 |
+| fontScale                    | 1 / 1.25 / 1.5 / 2 下布局、截断与动态文字                                                       | 待人工执行 |
+| reduced motion               | 系统开/关；Pulse、Reveal、Carousel autoplay                                                     | 待人工执行 |
+| portrait/landscape           | Android 与 iOS 旋转、滚动和安全区                                                               | 待人工执行 |
+| VoiceOver                    | 角色、名称、state、顺序、live region、装饰隐藏                                                  | 待人工执行 |
+| TalkBack                     | 角色、名称、state、顺序、live region、装饰隐藏                                                  | 待人工执行 |
+| remote image success/failure | 使用上述 success/invalid-image fixture 核对真实 HTTP、缓存、native decode、fallback 与 URI 隐私 | 待人工执行 |
+| Toast/Confirm                | 位置、类型、确认/取消、连续触发后的 settled 结果                                                | 待人工执行 |
+| Carousel action/autoplay     | display/action、ref、loop、指示器与 reduced motion 停播                                         | 待人工执行 |
+| Android hardware back        | scene 回 Home；Home 将事件交还系统                                                              | 待人工执行 |
+| Blur soft/strong/fallback    | 真机 soft/strong 与不支持原生 Blur 时的边界表现                                                 | 待人工执行 |
 
 ## 9. 复制边界
 

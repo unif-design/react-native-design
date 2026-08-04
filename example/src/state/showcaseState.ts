@@ -98,11 +98,15 @@ export type SafeResult = Readonly<{
 export type SafeResultInput = SafeResult;
 export type ResultRecord = SafeResult & Readonly<{ id: number }>;
 
+export const DEFAULT_MEDIA_REMOTE_URI =
+  'https://unif-design.github.io/react-native-design/img/logo.png';
+export const MEDIA_DECODE_FAILURE_URI =
+  'https://unif-design.github.io/react-native-design/example-fixtures/media-decode-failure-v1.png';
+
 export type ShowcaseState = Readonly<{
   navigation: NavigationState;
   themeMode: ThemeMode;
   fontScale: FontScalePreset;
-  runtimeHostsMounted: boolean;
   scenes: SceneStateMap;
   results: readonly ResultRecord[];
   nextResultId: number;
@@ -158,7 +162,7 @@ const sceneStateFactories: {
     thumbnailSize: 'md',
     thumbnailSelected: false,
     logoSize: 64,
-    remoteUri: 'https://images.example.com/unif-avatar.png',
+    remoteUri: DEFAULT_MEDIA_REMOTE_URI,
   }),
   business: () => ({
     backdropPreset: 'warmOrange',
@@ -199,7 +203,6 @@ export function createInitialShowcaseState(): ShowcaseState {
     navigation: ['home'],
     themeMode: 'system',
     fontScale: 1,
-    runtimeHostsMounted: true,
     scenes: createInitialSceneStateMap(),
     results: [],
     nextResultId: 1,
