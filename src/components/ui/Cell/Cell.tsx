@@ -138,5 +138,16 @@ export function Cell(props: CellProps): React.JSX.Element {
       </Pressable>
     );
   }
+
+  // 不可点但显式给了整行名称(Static 分支):合成单个 a11y 节点按指定文案播报。
+  // 没给就保持裸渲染 —— 读屏按 title / desc / extra 各自的文本节点逐个读。
+  const staticLabel = props.accessibilityLabel;
+  if (staticLabel !== undefined && staticLabel.trim().length > 0) {
+    return (
+      <View accessible accessibilityLabel={staticLabel} testID={props.testID}>
+        {inner}
+      </View>
+    );
+  }
   return inner;
 }

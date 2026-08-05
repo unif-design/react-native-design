@@ -165,8 +165,12 @@ export function normalizeTextFieldSlot(slot: unknown): NormalizedTextFieldSlot {
         typeof candidate.disabled === 'boolean'
           ? candidate.disabled
           : undefined;
+      // icon 与 label **恰好给一个**:两个都给无法决定渲染成什么,一个都不给没有可视内容。
+      const actionLabel = normalizeNonBlankText(candidate.label);
+      const hasIcon = isIconName(candidate.icon);
+      const hasLabel = actionLabel !== undefined;
       if (
-        !isIconName(candidate.icon) ||
+        hasIcon === hasLabel ||
         typeof candidate.onPress !== 'function' ||
         accessibilityLabel === undefined ||
         !hasValidDisabled
@@ -176,7 +180,9 @@ export function normalizeTextFieldSlot(slot: unknown): NormalizedTextFieldSlot {
       return {
         slot: {
           kind: 'action',
-          icon: candidate.icon,
+          ...(hasIcon
+            ? { icon: candidate.icon as IconName }
+            : { label: actionLabel as string }),
           onPress: candidate.onPress as () => void,
           accessibilityLabel,
           ...(slotDisabled !== undefined && { disabled: slotDisabled }),

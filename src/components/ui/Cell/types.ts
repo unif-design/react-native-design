@@ -66,7 +66,15 @@ type StaticCellProps = {
   onPress?: never;
   arrow?: never;
   disabled?: never;
-  accessibilityLabel?: never;
+  /**
+   * 覆盖整行的 accessible name。**不可点不等于不需要名称** —— 状态型行
+   * (「定位权限,已授权·始终允许」)靠 title / desc / extra 自动拼,读屏会拆成三段读,
+   * 措辞与顺序都不受控。给了这个就把整行合成一个 a11y 节点、按指定文案播报。
+   *
+   * Control 分支刻意**不**开放它:那种行里有 Switch 等可聚焦控件,整行 accessible
+   * 会吞掉控件自己的焦点与状态播报。
+   */
+  accessibilityLabel?: string;
   accessibilityHint?: never;
 };
 
