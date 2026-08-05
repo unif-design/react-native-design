@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.1](https://github.com/unif-design/react-native-design/compare/v0.23.0...v0.23.1) (2026-08-05)
+
+
+### Bug Fixes
+
+* **cell:** display 的 accessibilityText 落成真实节点 —— 之前声明了等于没给 ([#114](https://github.com/unif-design/react-native-design/issues/114)) ([9c70b0d](https://github.com/unif-design/react-native-design/commit/9c70b0d9bf92255c5adf48a0892d1b705f9a89df))
+
 # [0.23.0](https://github.com/unif-design/react-native-design/compare/v0.22.0...v0.23.0) (2026-08-05)
 
 
