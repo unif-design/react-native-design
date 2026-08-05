@@ -16,3 +16,20 @@ export const A11Y_HIDDEN_PROPS = {
   'importantForAccessibility': 'no-hide-descendants',
   'aria-hidden': true,
 } as const;
+
+/**
+ * 视觉不可见、但对读屏与测试查询**可达**的文本样式。
+ *
+ * 用于「视觉由自定义节点承担、语义需要另给一份文字」的场景 —— 典型是 `Cell` 的
+ * `extra: { kind: 'display', accessibilityText }`:彩色 Tag 之类的节点本身要从 a11y
+ * 树移除(否则读屏逐个念视觉碎片),但它表达的状态必须留下一份可读文本。
+ *
+ * 不用 `display: 'none'` / `width: 0`:那会让节点连同文本一起从 a11y 树消失,
+ * 等于什么都没给。这里是**移出可视区**但保留在树里。
+ */
+export const A11Y_TEXT_ONLY_STYLE = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  opacity: 0,
+} as const;

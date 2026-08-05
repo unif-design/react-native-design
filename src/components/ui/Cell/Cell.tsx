@@ -4,10 +4,11 @@ import { Pressable } from 'react-native-gesture-handler';
 import { pressedOpacity, r, useColors, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { Icon } from '../Icon';
-import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
+import { A11Y_HIDDEN_PROPS, A11Y_TEXT_ONLY_STYLE } from '../shared/a11y';
 import {
   resolveCellActionAccessibilityLabel,
   resolveCellTitleColor,
+  resolveExtraSemanticText,
   stringifyCellText,
 } from './content';
 import { useListVariant } from './context';
@@ -32,8 +33,20 @@ function CellExtraContent({
           {stringifyCellText(extra.value)}
         </Text>
       );
-    case 'display':
-      return <View {...A11Y_HIDDEN_PROPS}>{extra.node}</View>;
+    case 'display': {
+      const semantic = resolveExtraSemanticText(extra);
+      return (
+        <>
+          <View {...A11Y_HIDDEN_PROPS}>{extra.node}</View>
+          {/* 视觉节点已从 a11y 树移除;accessibilityText 在这里落成一个真实的
+              文本节点,读屏才读得到、测试才按文字查得到。只声明不渲染的话,
+              它对两者都不存在。 */}
+          {semantic !== undefined ? (
+            <Text style={A11Y_TEXT_ONLY_STYLE}>{semantic}</Text>
+          ) : null}
+        </>
+      );
+    }
     case 'control':
       return extra.node;
   }
