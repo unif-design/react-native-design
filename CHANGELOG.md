@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.22.0](https://github.com/unif-design/react-native-design/compare/v0.21.1...v0.22.0) (2026-08-05)
+
+
+### Features
+
+* slot 补文字型 action,静态 Cell 补整行 accessible name ([#112](https://github.com/unif-design/react-native-design/issues/112)) ([7eb554a](https://github.com/unif-design/react-native-design/commit/7eb554ac9a7de60e3675655f98e68b2cb04b5f50))
+
 ## [0.21.1](https://github.com/unif-design/react-native-design/compare/v0.21.0...v0.21.1) (2026-08-05)
 
 # [0.21.0](https://github.com/unif-design/react-native-design/compare/v0.20.0...v0.21.0) (2026-08-03)
