@@ -7,6 +7,7 @@ import { Icon } from '../Icon';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import {
   resolveCellActionAccessibilityLabel,
+  resolveCellTitleColor,
   stringifyCellText,
 } from './content';
 import { useListVariant } from './context';
@@ -76,7 +77,12 @@ export function Cell(props: CellProps): React.JSX.Element {
     props.style,
   ];
 
-  const titleColor = props.danger ? c.error : undefined;
+  const titleColor = resolveCellTitleColor({
+    danger: props.danger,
+    selected: props.selected,
+    dangerColor: c.error,
+    selectedColor: c.primary,
+  });
   const titleStyle = [
     flush ? styles.titleFlush : styles.title,
     titleColor && { color: titleColor },
@@ -128,7 +134,9 @@ export function Cell(props: CellProps): React.JSX.Element {
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
         accessibilityHint={props.accessibilityHint}
-        accessibilityState={{ disabled: isDisabled }}
+        // 选中态必须进 a11y state:只靠 primary 色区分的话,色觉障碍与读屏用户
+        // 都感知不到「当前是哪一项」。
+        accessibilityState={{ disabled: isDisabled, selected: props.selected }}
         testID={props.testID}
         style={({ pressed }) => [
           { opacity: isDisabled ? 0.5 : pressed ? pressedOpacity : 1 },
@@ -144,7 +152,16 @@ export function Cell(props: CellProps): React.JSX.Element {
   const staticLabel = props.accessibilityLabel;
   if (staticLabel !== undefined && staticLabel.trim().length > 0) {
     return (
-      <View accessible accessibilityLabel={staticLabel} testID={props.testID}>
+      <View
+        accessible
+        accessibilityLabel={staticLabel}
+        accessibilityState={
+          props.selected === undefined
+            ? undefined
+            : { selected: props.selected }
+        }
+        testID={props.testID}
+      >
         {inner}
       </View>
     );

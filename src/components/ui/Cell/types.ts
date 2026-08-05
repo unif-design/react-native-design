@@ -35,6 +35,12 @@ type SharedCellProps = {
   leading?: CellLeading;
   /** 危险态：icon 盒子与标题使用 error 色；action arrow 不显示。 */
   danger?: boolean;
+  /**
+   * 选中态：标题使用 primary 色，表示「列表里当前这一项」（会话列表的当前会话、
+   * 设置列表的当前选项等）。与 `danger` 互斥——同时给时 `danger` 优先，
+   * 危险语义比选中语义更需要被看见。
+   */
+  selected?: boolean;
   /** 额外样式覆盖。 */
   style?: StyleProp<ViewStyle>;
   /** E2E / 测试定位。 */
