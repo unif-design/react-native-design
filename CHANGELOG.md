@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.23.0](https://github.com/unif-design/react-native-design/compare/v0.22.0...v0.23.0) (2026-08-05)
+
+
+### Features
+
+* **cell:** 加 selected 语义态 —— 列表里的「当前这一项」 ([#113](https://github.com/unif-design/react-native-design/issues/113)) ([ed4ea8a](https://github.com/unif-design/react-native-design/commit/ed4ea8af9ce99c49e2028b2152a2b9f4216cf197))
+
 # [0.22.0](https://github.com/unif-design/react-native-design/compare/v0.21.1...v0.22.0) (2026-08-05)
 
 
