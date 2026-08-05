@@ -17,6 +17,7 @@
 const path = require('node:path');
 const fs = require('node:fs');
 const { execFileSync } = require('node:child_process');
+const { stripVTControlCharacters } = require('node:util');
 const semver = require('semver');
 
 const REQUIRED_PROVIDERS = new Set([
@@ -59,7 +60,7 @@ function stripVirtualInstance(locator) {
 }
 
 function parseRequirementList(output) {
-  return output
+  return stripVTControlCharacters(output)
     .split(/\r?\n/u)
     .map((line) => {
       // provider 名允许 scope(`@scope/name`),否则 scoped 包的失败行会被静默跳过 —— 门禁漏洞。
@@ -91,17 +92,18 @@ function parseRequirementList(output) {
 }
 
 function parseRequirementDetail(hash, output) {
-  const provider = output.match(
+  const normalizedOutput = stripVTControlCharacters(output);
+  const provider = normalizedOutput.match(
     /^Package (.+?) is requested to provide ([^\s]+) by its descendants/mu
   );
-  const providedMismatch = output.match(
+  const providedMismatch = normalizedOutput.match(
     /^✘ Package (.+?) provides ([^\s]+) with version ([^,\s]+), which does not satisfy/mu
   );
-  const missingProvider = output.match(
+  const missingProvider = normalizedOutput.match(
     /^✘ Package (.+?) (?:does not|doesn't) provide (\S+?)\.?$/mu
   );
   const requests = [
-    ...output.matchAll(/[├└]─\s+(.+?)\s+\(via (.+?)\)\r?$/gmu),
+    ...normalizedOutput.matchAll(/[├└]─\s+(.+?)\s+\(via (.+?)\)\r?$/gmu),
   ].map((match) => ({
     requester: stripVirtualInstance(match[1]),
     range: match[2],

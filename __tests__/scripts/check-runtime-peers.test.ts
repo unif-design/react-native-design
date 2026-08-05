@@ -108,6 +108,22 @@ const DOTTED_SCOPED_MISSING_DETAIL = REAL_MISSING_DETAIL.replaceAll(
   '@scope/runtime.peer'
 );
 
+const ANSI_REAL_LIST =
+  '\u001B[38;5;111mpc850d5\u001B[39m → \u001B[31m✘\u001B[39m ' +
+  '\u001B[38;5;166m@unif/\u001B[39m\u001B[38;5;173mreact-native-design\u001B[39m' +
+  '\u001B[38;5;111m@\u001B[39m\u001B[38;5;111mworkspace:.\u001B[39m provides ' +
+  '\u001B[38;5;173mreact-native-gesture-handler\u001B[39m' +
+  '\u001B[38;5;111m@\u001B[39m\u001B[38;5;111mnpm:3.1.0 [c9356]\u001B[39m';
+
+const ANSI_REAL_ROOT_DETAIL = REAL_ROOT_DETAIL.replaceAll(
+  '@unif/react-native-design@workspace:.',
+  '\u001B[38;5;173m@unif/react-native-design\u001B[39m' +
+    '\u001B[38;5;111m@workspace:.\u001B[39m'
+).replaceAll(
+  'react-native-gesture-handler',
+  '\u001B[38;5;173mreact-native-gesture-handler\u001B[39m'
+);
+
 describe('parseRequirementList — yarn explain peer-requirements 列表', () => {
   test('只抽取失败(✘)行的 hash / provider / 包名 / 版本', () => {
     expect(parseRequirementList(LIST)).toEqual([
@@ -155,6 +171,18 @@ describe('parseRequirementList — yarn explain peer-requirements 列表', () =>
         hash: 'p0abc12',
         providerLocator: '@unif/react-native-design@workspace:.',
         packageName: 'react-native-worklets',
+      },
+    ]);
+  });
+
+  test('解析 GitHub Actions 中带 ANSI 颜色码的 Yarn 4.11 输出', () => {
+    expect(parseRequirementList(ANSI_REAL_LIST)).toEqual([
+      {
+        kind: 'provided-mismatch',
+        hash: 'pc850d5',
+        providerLocator: '@unif/react-native-design@workspace:.',
+        packageName: 'react-native-gesture-handler',
+        providerVersion: '3.1.0',
       },
     ]);
   });
@@ -243,6 +271,22 @@ describe('parseRequirementDetail — 明细解析', () => {
     ).toMatchObject({
       kind: 'missing-provider',
       packageName: '@scope/runtime.peer',
+    });
+  });
+
+  test('解析 GitHub Actions 中带 ANSI 颜色码的 peer 明细', () => {
+    expect(parseRequirementDetail('pc850d5', ANSI_REAL_ROOT_DETAIL)).toEqual({
+      kind: 'provided-mismatch',
+      hash: 'pc850d5',
+      providerLocator: '@unif/react-native-design@workspace:.',
+      packageName: 'react-native-gesture-handler',
+      providerVersion: '3.1.0',
+      requests: [
+        {
+          requester: 'react-native-reanimated-carousel@npm:5.0.0',
+          range: '>=2.9.0 <3.0.0',
+        },
+      ],
     });
   });
 });
