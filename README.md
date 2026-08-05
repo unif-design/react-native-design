@@ -36,7 +36,7 @@ iOS 另需在 `ios/` 执行 `bundle exec pod install`。完整步骤见[文档�
 
 `react-native-worklets` 的 Babel 插件与 Metro transformer 由宿主工程提供,不随本库分发 —— 宿主需自备与 RN `0.86.2` 匹配的 `@babel/core`、`@react-native/babel-preset@0.86.x`、`@react-native/metro-config@0.86.x`。
 
-`react-native-reanimated-carousel@5.0.0` 发布的 RNGH peer 是 `>=2.9.0 <3.0.0`,与本包要求的 `>=3.0.0 <4.0.0` 无交集;该组合已实测适配。消费端只能**接受这条警告**或加**只作用于 Carousel 的窄 override**(npm `overrides`、pnpm `peerDependencyRules.allowedVersions`、Yarn scoped `logFilters`),不要用全局 peer 忽略、`--force` 或 `--legacy-peer-deps`。本仓 `.yarnrc.yml` 里的 `logFilters` 不随 npm 包分发。
+`react-native-reanimated-carousel@5.0.0` 发布的 RNGH peer 是 `>=2.9.0 <3.0.0`,与本包要求的 `>=3.0.0 <4.0.0` 无交集;该组合已实测适配。消费端只能**接受这条警告**或加**只作用于 Carousel 的窄 override**(npm `overrides`、pnpm `peerDependencyRules.allowedVersions`、Yarn scoped `logFilters`),不要用全局 peer 忽略、`--force` 或 `--legacy-peer-deps`。本仓不使用全局 `logFilters`；`yarn check:runtime-peers` 只接受 root、example、website 三条精确的 RNRC 5 / RNGH 3 例外。
 
 ## 快速开始
 
@@ -44,7 +44,12 @@ App 根必须按 `GestureHandlerRootView → SafeAreaProvider → ThemeProvider 
 
 ```tsx
 import {
-  ThemeProvider, ToastHost, ConfirmHost, Button, useThemedStyles, type ColorTokens,
+  ThemeProvider,
+  ToastHost,
+  ConfirmHost,
+  Button,
+  useThemedStyles,
+  type ColorTokens,
 } from '@unif/react-native-design';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -77,6 +82,52 @@ export const App = () => (
 );
 ```
 
+## RN 0.86.2 组件展厅
+
+仓库内的持久 `example/` 是 `@unif/react-native-design-example` workspace：它精确使用
+React Native `0.86.2`、React `19.2.3`、New Architecture 和 Hermes，并通过 Metro
+直接消费本仓 public package root。展厅只挂载当前路由，共有以下 8 个 scene：
+
+| Scene ID      | 标题           | 主要覆盖                                      |
+| ------------- | -------------- | --------------------------------------------- |
+| `foundation`  | 基础能力与图标 | Theme、token、Icon、logger、testID            |
+| `actions`     | 操作与状态     | Button、IconButton、Chip、Tag、StatusDot      |
+| `feedback`    | 反馈与浮层     | Empty、动效、Blur、Toast、Confirm             |
+| `forms`       | 表单与输入     | 文本输入、选择控件、Stepper、Form             |
+| `navigation`  | 导航组件       | NavBar、DrawerHeader、Tabs、Segmented、TabBar |
+| `collections` | 容器与集合     | Card、Cell、List、Grid、EntryCard、Carousel   |
+| `media`       | 媒体展示       | Avatar、Thumbnail、Logo 与图片失败边界        |
+| `business`    | 业务复合组件   | 渐变、背景、统计、头像环、版本状态            |
+
+从仓库根目录执行：
+
+```sh
+yarn install --immutable
+yarn example start
+yarn example android
+yarn example ios
+
+yarn verify:example-showcase
+yarn example typecheck
+yarn example lint
+yarn example test --maxWorkers=2
+```
+
+iOS 首次运行或 native 依赖变化后，先执行
+`cd example && bundle install`，再执行
+`cd example && bundle exec pod install --project-directory=ios`。完整启动步骤、主题与
+fontScale 操作，以及 VoiceOver/TalkBack、真机、旋转、remote image failure 等尚需人工
+执行的矩阵见 [`example/README.md`](example/README.md)。自动化结果不等同于真机或 a11y
+验收通过。
+
+Media 默认 success fixture 是项目部署的
+`https://unif-design.github.io/react-native-design/img/logo.png`，failure specimen 使用固定的
+invalid-image fixture
+`https://unif-design.github.io/react-native-design/example-fixtures/media-decode-failure-v1.png`，
+确保 HTTP 成功后仍稳定进入 native decode failure/fallback 分支。
+Jest 只证明 source wiring 以及合成 load/error event 后的组件状态；真实 HTTPS、缓存和 native
+decode 仍按 `example/README.md` 的 Android/iOS 手工矩阵标记为待执行。
+
 ## 文档
 
 - **文档站**(快速开始 · 组件 API · 设计令牌 · 设计原则):https://unif-design.github.io/react-native-design/
@@ -85,7 +136,7 @@ export const App = () => (
 - **Agent Skill** `design`(`unif` plugin,覆盖组件 API、token 规则、与原生 RN 的关键差异):
   `/plugin marketplace add unif-design/skills` → `/plugin install unif@skills`
 
-## 原生验证宿主(runtime harness)
+## 临时原生验证宿主(runtime harness)
 
 ```sh
 yarn create:runtime-harness
@@ -104,7 +155,9 @@ yarn create:runtime-harness
 边界:
 
 - app 只建在**脚本自持的系统临时目录**里(`fs.mkdtempSync`),**不接受调用方传目录**;脚手架之后的任一步失败也会递归删除自己那一个临时路径,只有完整成功才保留。
-- **完全不读、不写、不复制 `example/`** —— 那是启用新架构的 RN `0.85.3` 现有版本 shell,不能作为 RN `0.86.x` 的支持证据。
+- **完全不读、不写、不复制持久 `example/`** —— 两者职责不同：`example/` 提供公共面
+  coverage 与可运行 RN `0.86.2` native shell；临时 runtime harness 专门验证 packed
+  tarball、负向路径与竞态，不替代展厅。
 - 生成物不入库。
 
 随后在**打印出来的那个目录**里执行(不是在本仓):
@@ -114,23 +167,23 @@ yarn android
 yarn ios
 ```
 
-harness 不携带本仓的 `.yarnrc.yml` `logFilters`,所以安装时会看到那条已知的 RNRC / RNGH peer 警告 —— 这正是消费端会看到的真实情况。
+harness 不继承本仓 `check:runtime-peers` 的 workspace 精确 allowlist；安装输出会如实暴露这条已知的 RNRC / RNGH peer warning，等同消费端实际可见结果。
 
 ## 兼容性
 
 支持范围严格来自 `package.json#peerDependencies`;本仓直接验证的版本是 RN `0.86.2` + React `19.2.3`。
 
-| 依赖 | 支持范围 | 本仓验证版本 |
-| --- | --- | --- |
-| `react-native` | `>=0.86.0 <0.87.0` | `0.86.2` |
-| `react` | `>=19.2.3 <20.0.0` | `19.2.3` |
-| `react-native-gesture-handler` | `>=3.0.0 <4.0.0` | `3.1.0` |
-| `react-native-reanimated` | `>=4.5.2 <4.6.0` | `4.5.3` |
-| `react-native-worklets` | `>=0.11.0 <0.12.0` | `0.11.3` |
-| `react-native-reanimated-carousel` | `>=5.0.0 <6.0.0` | `5.0.0` |
-| `react-native-safe-area-context` | `>=5` | `5.7.x` |
-| `react-native-svg` | `>=15` | `15.15.x` |
-| `@sbaiahmed1/react-native-blur` | `>=4` | `4.6.x` |
+| 依赖                               | 支持范围           | 本仓验证版本 |
+| ---------------------------------- | ------------------ | ------------ |
+| `react-native`                     | `>=0.86.0 <0.87.0` | `0.86.2`     |
+| `react`                            | `>=19.2.3 <20.0.0` | `19.2.3`     |
+| `react-native-gesture-handler`     | `>=3.0.0 <4.0.0`   | `3.1.0`      |
+| `react-native-reanimated`          | `>=4.5.2 <4.6.0`   | `4.5.3`      |
+| `react-native-worklets`            | `>=0.11.0 <0.12.0` | `0.11.3`     |
+| `react-native-reanimated-carousel` | `>=5.0.0 <6.0.0`   | `5.0.0`      |
+| `react-native-safe-area-context`   | `>=5`              | `5.8.0`      |
+| `react-native-svg`                 | `>=15`             | `15.15.5`    |
+| `@sbaiahmed1/react-native-blur`    | `>=4`              | `4.6.2`      |
 
 - 新架构(Fabric + TurboModule)必须开启;旧架构 Bridge、RN `0.85` 及更低版本、RN `0.87+` 都不在支持范围。
 - Node.js `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`(`package.json#engines`;本仓 `.nvmrc` 固定 `v24.13.0`)

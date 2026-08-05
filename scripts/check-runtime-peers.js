@@ -4,9 +4,10 @@
 /**
  * runtime peer 漂移门禁。
  *
- * 唯一被允许的 peer 失败是 react-native-reanimated-carousel@5.0.0 对
- * react-native-gesture-handler 的错误 metadata(`>=2.9.0 <3.0.0`)——该组合已在本仓
- * 实测适配。除此之外任何 runtime peer 失败都必须让命令退出非零。
+ * 唯一被允许的 peer 失败类型是 react-native-reanimated-carousel@5.0.0 对
+ * react-native-gesture-handler 的错误 metadata(`>=2.9.0 <3.0.0`)。root、example、
+ * website 三个 workspace 各有一条该已验证例外;除此之外任何 runtime peer 失败都必须
+ * 让命令退出非零。
  *
  * 为什么不用全局 peer 忽略 / --legacy-peer-deps:那会连同真实的 major 漂移一起吞掉。
  * 这里把 allowlist 收窄到「包名 + 请求方 locator + 精确 range + provider major」四重匹配,
@@ -14,21 +15,40 @@
  */
 
 const path = require('node:path');
+const fs = require('node:fs');
 const { execFileSync } = require('node:child_process');
+const { stripVTControlCharacters } = require('node:util');
 const semver = require('semver');
 
-const RUNTIME_PACKAGES = new Set([
-  'react-native-gesture-handler',
-  'react-native-reanimated-carousel',
-  'react-native-reanimated',
-  'react-native-worklets',
-]);
 const REQUIRED_PROVIDERS = new Set([
   '@unif/react-native-design@workspace:.',
+  '@unif/react-native-design-example@workspace:example',
   '@unif/react-native-design-website@workspace:website',
 ]);
 const KNOWN_REQUESTER = 'react-native-reanimated-carousel@npm:5.0.0';
 const KNOWN_RANGE = '>=2.9.0 <3.0.0';
+
+function deriveAuditedRuntimePackages(
+  rootManifest,
+  exampleManifest,
+  websiteManifest
+) {
+  return new Set([
+    ...Object.keys(rootManifest.peerDependencies ?? {}),
+    ...Object.keys(exampleManifest.dependencies ?? {}),
+    ...Object.keys(websiteManifest.dependencies ?? {}),
+  ]);
+}
+
+function isAuditedRuntimeFailure(summary, auditedPackages) {
+  if (!auditedPackages.has(summary.packageName)) return false;
+  // missing-provider 只有在 repository 可控的三个 workspace provider 上才属于本门禁；
+  // Docusaurus 等外部 npm package 的内部 peer 拓扑不由本仓 manifest 控制。
+  return (
+    summary.kind !== 'missing-provider' ||
+    REQUIRED_PROVIDERS.has(summary.providerLocator)
+  );
+}
 
 /**
  * Yarn 会在 locator 尾部挂 ` [hash]` 虚拟实例标记(同一包在不同 peer 上下文各一份),
@@ -40,19 +60,31 @@ function stripVirtualInstance(locator) {
 }
 
 function parseRequirementList(output) {
-  return output
+  return stripVTControlCharacters(output)
     .split(/\r?\n/u)
     .map((line) => {
       // provider 名允许 scope(`@scope/name`),否则 scoped 包的失败行会被静默跳过 —— 门禁漏洞。
-      const match = line.match(
+      const providedMismatch = line.match(
         /^(p[a-z0-9]+)\s+→\s+✘\s+(.+?)\s+provides\s+(@?[^@\s]+)@npm:([^\s]+)/u
       );
-      return match
+      if (providedMismatch) {
+        return {
+          kind: 'provided-mismatch',
+          hash: providedMismatch[1],
+          providerLocator: stripVirtualInstance(providedMismatch[2]),
+          packageName: providedMismatch[3],
+          providerVersion: providedMismatch[4],
+        };
+      }
+      const missingProvider = line.match(
+        /^(p[a-z0-9]+)\s+→\s+✘\s+(.+?)\s+(?:doesn't|does not) provide\s+(@?[^@\s]+)(?:\s+to\s+|$)/u
+      );
+      return missingProvider
         ? {
-            hash: match[1],
-            providerLocator: match[2],
-            packageName: match[3],
-            providerVersion: match[4],
+            kind: 'missing-provider',
+            hash: missingProvider[1],
+            providerLocator: stripVirtualInstance(missingProvider[2]),
+            packageName: missingProvider[3],
           }
         : null;
     })
@@ -60,37 +92,65 @@ function parseRequirementList(output) {
 }
 
 function parseRequirementDetail(hash, output) {
-  const provider = output.match(
+  const normalizedOutput = stripVTControlCharacters(output);
+  const provider = normalizedOutput.match(
     /^Package (.+?) is requested to provide ([^\s]+) by its descendants/mu
   );
-  const version = output.match(
-    /provides ([^\s]+) with version ([^,\s]+), which does not satisfy/u
+  const providedMismatch = normalizedOutput.match(
+    /^✘ Package (.+?) provides ([^\s]+) with version ([^,\s]+), which does not satisfy/mu
+  );
+  const missingProvider = normalizedOutput.match(
+    /^✘ Package (.+?) (?:does not|doesn't) provide (\S+?)\.?$/mu
   );
   const requests = [
-    ...output.matchAll(/[├└]─\s+(.+?)\s+\(via (.+?)\)\r?$/gmu),
+    ...normalizedOutput.matchAll(/[├└]─\s+(.+?)\s+\(via (.+?)\)\r?$/gmu),
   ].map((match) => ({
     requester: stripVirtualInstance(match[1]),
     range: match[2],
   }));
-  if (!provider || !version || requests.length === 0) {
+  const failure = providedMismatch ?? missingProvider;
+  if (!provider || !failure || requests.length === 0) {
     throw new Error(`${hash}: 无法解析 yarn explain peer-requirements 明细`);
   }
+  const providerLocator = stripVirtualInstance(provider[1]);
+  const packageName = provider[2];
+  if (
+    providerLocator !== stripVirtualInstance(failure[1]) ||
+    packageName !== failure[2]
+  ) {
+    throw new Error(`${hash}: yarn peer requirement 明细身份不一致`);
+  }
+  if (missingProvider) {
+    return {
+      kind: 'missing-provider',
+      hash,
+      providerLocator,
+      packageName,
+      requests,
+    };
+  }
   return {
+    kind: 'provided-mismatch',
     hash,
-    providerLocator: stripVirtualInstance(provider[1]),
-    packageName: provider[2],
-    providerVersion: version[2],
+    providerLocator,
+    packageName,
+    providerVersion: providedMismatch[3],
     requests,
   };
 }
 
-function auditRuntimePeers(summaries, details) {
+function auditRuntimePeers(summaries, details, auditedPackages) {
+  if (!auditedPackages) {
+    throw new TypeError(
+      'auditRuntimePeers 缺少由 runtime manifests 派生的审计集合'
+    );
+  }
   const knownExceptions = [];
   const errors = [];
   const seenProviders = new Set();
   const acceptedProviders = new Set();
   for (const summary of summaries) {
-    if (!RUNTIME_PACKAGES.has(summary.packageName)) continue;
+    if (!isAuditedRuntimeFailure(summary, auditedPackages)) continue;
     const detail = details.get(summary.hash);
     if (!detail) {
       errors.push(`${summary.hash}: 缺少 runtime peer 明细`);
@@ -98,11 +158,19 @@ function auditRuntimePeers(summaries, details) {
     }
     if (
       detail.hash !== summary.hash ||
+      detail.kind !== summary.kind ||
       detail.providerLocator !== summary.providerLocator ||
       detail.packageName !== summary.packageName ||
-      detail.providerVersion !== summary.providerVersion
+      (summary.kind === 'provided-mismatch' &&
+        detail.providerVersion !== summary.providerVersion)
     ) {
       errors.push(`${summary.hash}: summary/detail 身份不一致`);
+      continue;
+    }
+    if (summary.kind === 'missing-provider') {
+      errors.push(
+        `${summary.hash}: audited runtime peer missing provider —— ${detail.providerLocator} does not provide ${detail.packageName}`
+      );
       continue;
     }
     if (!REQUIRED_PROVIDERS.has(detail.providerLocator)) {
@@ -111,13 +179,6 @@ function auditRuntimePeers(summaries, details) {
       );
       continue;
     }
-    if (seenProviders.has(detail.providerLocator)) {
-      errors.push(
-        `${summary.hash}: runtime peer provider ${detail.providerLocator} 重复`
-      );
-      continue;
-    }
-    seenProviders.add(detail.providerLocator);
     const knownRequest = detail.requests.filter(
       (request) => request.requester === KNOWN_REQUESTER
     );
@@ -140,6 +201,13 @@ function auditRuntimePeers(summaries, details) {
       );
       continue;
     }
+    if (seenProviders.has(detail.providerLocator)) {
+      errors.push(
+        `${summary.hash}: runtime peer provider ${detail.providerLocator} 重复`
+      );
+      continue;
+    }
+    seenProviders.add(detail.providerLocator);
     knownExceptions.push(summary.hash);
     acceptedProviders.add(detail.providerLocator);
   }
@@ -169,11 +237,25 @@ function runYarn(args) {
 }
 
 function main() {
+  const rootManifest = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf8')
+  );
+  const exampleManifest = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, '../example/package.json'), 'utf8')
+  );
+  const websiteManifest = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, '../website/package.json'), 'utf8')
+  );
+  const auditedPackages = deriveAuditedRuntimePackages(
+    rootManifest,
+    exampleManifest,
+    websiteManifest
+  );
   const summaries = parseRequirementList(
     runYarn(['explain', 'peer-requirements'])
   );
   const runtimeSummaries = summaries.filter((item) =>
-    RUNTIME_PACKAGES.has(item.packageName)
+    isAuditedRuntimeFailure(item, auditedPackages)
   );
   const details = new Map(
     runtimeSummaries.map((item) => [
@@ -184,7 +266,7 @@ function main() {
       ),
     ])
   );
-  const result = auditRuntimePeers(summaries, details);
+  const result = auditRuntimePeers(summaries, details, auditedPackages);
   if (result.errors.length > 0) {
     throw new Error(result.errors.join('\n'));
   }
@@ -197,6 +279,7 @@ function main() {
 
 module.exports = {
   auditRuntimePeers,
+  deriveAuditedRuntimePackages,
   parseRequirementDetail,
   parseRequirementList,
 };

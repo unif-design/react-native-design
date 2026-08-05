@@ -1,20 +1,11 @@
-import { Text, View, StyleSheet } from 'react-native';
-import { multiply } from 'react-native-designdd';
+import React from 'react';
+import { AppProviders } from './app/AppProviders';
+import { ExampleRouter } from './app/ExampleRouter';
 
-const result = multiply(3, 7);
-
-export default function App() {
+export default function App(): React.JSX.Element {
   return (
-    <View style={styles.container}>
-      <Text>Result: {result}</Text>
-    </View>
+    <AppProviders>
+      <ExampleRouter />
+    </AppProviders>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
