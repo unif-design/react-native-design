@@ -4,6 +4,7 @@ import {
   buildCellAccessibilityLabel,
   resolveCellActionAccessibilityLabel,
   resolveCellTitleColor,
+  resolveExtraSemanticText,
   stringifyCellText,
 } from '../../../../src/components/ui/Cell/content';
 
@@ -93,5 +94,45 @@ describe('resolveCellTitleColor — 语义态优先级', () => {
     expect(
       resolveCellTitleColor({ ...colors, danger: true, selected: true })
     ).toBe(colors.dangerColor);
+  });
+});
+
+describe('resolveExtraSemanticText — display 的语义文本要落成真实节点', () => {
+  test('display + 非空 accessibilityText → 返回它', () => {
+    expect(
+      resolveExtraSemanticText({
+        kind: 'display',
+        node: fakeElement,
+        accessibilityText: '已授权',
+      })
+    ).toBe('已授权');
+  });
+
+  test('两端空白被 trim', () => {
+    expect(
+      resolveExtraSemanticText({
+        kind: 'display',
+        node: fakeElement,
+        accessibilityText: '  已拒绝  ',
+      })
+    ).toBe('已拒绝');
+  });
+
+  test.each([
+    ['没给 accessibilityText', { kind: 'display', node: fakeElement }],
+    [
+      '空白 accessibilityText',
+      { kind: 'display', node: fakeElement, accessibilityText: '   ' },
+    ],
+  ])('%s → 不渲染语义节点', (_name, extra) => {
+    expect(resolveExtraSemanticText(extra as never)).toBeUndefined();
+  });
+
+  test.each([
+    ['text 分支本身就是可读文本', { kind: 'text', value: '已授权' }],
+    ['control 分支由控件自己负责名称', { kind: 'control', node: fakeElement }],
+    ['无 extra', undefined],
+  ])('%s → 不额外渲染', (_name, extra) => {
+    expect(resolveExtraSemanticText(extra as never)).toBeUndefined();
   });
 });
