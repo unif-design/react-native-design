@@ -3,6 +3,7 @@ import React from 'react';
 import {
   buildCellAccessibilityLabel,
   resolveCellActionAccessibilityLabel,
+  resolveCellTitleColor,
   stringifyCellText,
 } from '../../../../src/components/ui/Cell/content';
 
@@ -66,5 +67,31 @@ describe('Cell content', () => {
         desc: '',
       })
     ).toBeUndefined();
+  });
+});
+
+describe('resolveCellTitleColor — 语义态优先级', () => {
+  const colors = { dangerColor: '#E5484D', selectedColor: '#FF6B00' };
+
+  test('都没给时回落到默认(undefined)', () => {
+    expect(resolveCellTitleColor({ ...colors })).toBeUndefined();
+    expect(
+      resolveCellTitleColor({ ...colors, danger: false, selected: false })
+    ).toBeUndefined();
+  });
+
+  test('单独给时各取各的色', () => {
+    expect(resolveCellTitleColor({ ...colors, danger: true })).toBe(
+      colors.dangerColor
+    );
+    expect(resolveCellTitleColor({ ...colors, selected: true })).toBe(
+      colors.selectedColor
+    );
+  });
+
+  test('同时给时 danger 赢 —— 风险语义不该被选中高亮盖掉', () => {
+    expect(
+      resolveCellTitleColor({ ...colors, danger: true, selected: true })
+    ).toBe(colors.dangerColor);
   });
 });

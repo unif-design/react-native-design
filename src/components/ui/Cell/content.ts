@@ -51,3 +51,24 @@ export function resolveCellActionAccessibilityLabel({
     normalizeNonBlankText(buildCellAccessibilityLabel(content))
   );
 }
+
+/**
+ * 语义态 → 标题色。**danger 优先于 selected** —— 危险语义比选中语义更需要被看见,
+ * 两者同时给时不该让「当前项」的高亮盖掉「这一项有风险」。
+ * 都没给返回 undefined,由调用方回落到默认前景色。
+ */
+export function resolveCellTitleColor({
+  danger,
+  selected,
+  dangerColor,
+  selectedColor,
+}: {
+  danger?: boolean;
+  selected?: boolean;
+  dangerColor: string;
+  selectedColor: string;
+}): string | undefined {
+  if (danger === true) return dangerColor;
+  if (selected === true) return selectedColor;
+  return undefined;
+}
