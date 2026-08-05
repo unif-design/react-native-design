@@ -69,10 +69,24 @@ export const makeStyles = (c: ColorTokens) =>
       color: c.foregroundMuted,
       fontSize: t.sm,
     },
-    // 固定命中框不走 r()/fontScale:它是手指可达性约束,不是视觉 token。
+    // 文字型 action 的标签:用 primary 表达「可操作」,与图标型的 muted 展示区分开;
+    // 禁用降到 foregroundSubtle(与 disabled 的图标视觉降级同级)。
+    slotActionLabel: {
+      fontSize: t.xs,
+      color: c.primary,
+      fontWeight: fw.medium,
+    },
+    slotActionLabelDisabled: {
+      color: c.foregroundSubtle,
+    },
+    // 命中框:44 是**下限**不是定值。写死 width 会把「获取验证码」这类文字型 action
+    // 截断;用 minWidth 后图标型(内容 18)照样撑到 44,视觉不变,文字型自适应加宽。
+    // minWidth / height 不走 r()/fontScale —— 它是手指可达性约束,不是视觉 token;
+    // paddingHorizontal 是呼吸空间,可以随屏幕缩放。
     actionFrame: {
-      width: 44,
+      minWidth: 44,
       height: 44,
+      paddingHorizontal: space[2],
       alignItems: 'center',
       justifyContent: 'center',
     },

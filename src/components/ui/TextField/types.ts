@@ -43,13 +43,19 @@ export type TextFieldHandle = {
 export type TextFieldSlot =
   | { kind: 'icon'; icon: IconName; size?: number; color?: string }
   | { kind: 'text'; value: string | number }
-  | {
+  | ({
       kind: 'action';
-      icon: IconName;
       onPress: () => void;
       accessibilityLabel: string;
       disabled?: boolean;
-    };
+    } & (
+      | { icon: IconName; label?: never }
+      /**
+       * 文字型操作(「获取验证码」「重新发送」这类)。命中框、禁用态与可访问名称
+       * 与图标型完全一致 —— 只是渲染成文字。
+       */
+      | { label: string; icon?: never }
+    ));
 
 /**
  * containerStyle 的可用字段。六个尺寸/裁剪字段被排除 ——

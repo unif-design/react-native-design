@@ -166,6 +166,50 @@ describe('normalizeTextFieldSlot — 未类型化 action 不能绕过 handler/na
     });
   });
 
+  test('文字型 action 原样保留 —— 命中框与 a11y 与图标型同规格', () => {
+    const action = {
+      kind: 'action',
+      label: '获取验证码',
+      onPress: () => {},
+      accessibilityLabel: '获取验证码',
+    } as const;
+    expect(normalizeTextFieldSlot(action)).toEqual({
+      slot: action,
+      diagnostics: [],
+    });
+  });
+
+  test.each([
+    [
+      'icon 与 label 都给',
+      {
+        kind: 'action',
+        icon: 'close',
+        label: '清除',
+        onPress: () => {},
+        accessibilityLabel: '清除',
+      },
+    ],
+    [
+      'icon 与 label 都不给',
+      { kind: 'action', onPress: () => {}, accessibilityLabel: '清除' },
+    ],
+    [
+      '空白 label',
+      {
+        kind: 'action',
+        label: '   ',
+        onPress: () => {},
+        accessibilityLabel: '清除',
+      },
+    ],
+  ])('%s 时移除 action —— 二者恰好给一个', (_name, slot) => {
+    expect(normalizeTextFieldSlot(slot)).toEqual({
+      slot: undefined,
+      diagnostics: ['slot.action'],
+    });
+  });
+
   test('undefined 是唯一不产生诊断的空 slot', () => {
     expect(normalizeTextFieldSlot(undefined)).toEqual({
       slot: undefined,

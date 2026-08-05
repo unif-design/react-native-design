@@ -83,7 +83,24 @@ export function TextFieldSlot({
           style={styles.actionFrame}
           testID={testID}
         >
-          <Icon name={safeSlot.icon} size={18} color={colors.foregroundMuted} />
+          {safeSlot.icon !== undefined ? (
+            <Icon
+              name={safeSlot.icon}
+              size={18}
+              color={colors.foregroundMuted}
+            />
+          ) : (
+            // 文字型操作:命中框与 a11y 走同一个 Pressable,只是内容渲染成文字。
+            // 禁用态用 muted 前景色,与图标型的视觉降级一致。
+            <Text
+              style={[
+                styles.slotActionLabel,
+                disabled && styles.slotActionLabelDisabled,
+              ]}
+            >
+              {safeSlot.label}
+            </Text>
+          )}
         </Pressable>
       );
     }
