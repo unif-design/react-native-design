@@ -17,6 +17,12 @@ const manifest = JSON.parse(
 test('两个 jest 入口都进了 exports 与 files', () => {
   assert.equal(manifest.exports['./jest-setup'], './jest-setup.js');
   assert.equal(manifest.exports['./jest-preset'], './jest-preset.js');
+  // jest 会给非相对的 preset 说明符无条件追加 `/jest-preset`,少了这条别名,
+  // 文档化的 `preset: '@unif/react-native-design/jest-preset'` 直接 Validation Error。
+  assert.equal(
+    manifest.exports['./jest-preset/jest-preset'],
+    './jest-preset.js'
+  );
   assert.ok(manifest.files.includes('jest-setup.js'));
   assert.ok(manifest.files.includes('jest-preset.js'));
 });

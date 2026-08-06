@@ -262,12 +262,18 @@ module.exports = {
 
 - [ ] **Step 6: 加进 `package.json` 的 `exports` 与 `files`**
 
-`exports` 里 `"./package.json"` 之后加两行:
+`exports` 里 `"./package.json"` 之后加三行:
 
 ```json
     "./jest-setup": "./jest-setup.js",
     "./jest-preset": "./jest-preset.js",
+    "./jest-preset/jest-preset": "./jest-preset.js",
 ```
+
+第三行不是笔误:jest 会给非相对的 `preset` 说明符无条件追加 `/jest-preset`
+(`jest-config` `normalize.js` 的 `PRESET_NAME`),没有这条别名,文档化的
+`preset: '@unif/react-native-design/jest-preset'` 会直接 Validation Error。
+详见 `docs/specs/2026-08-05-jest-setup-entry-design.md` §4.1。
 
 `files` 数组里 `"docs-home.css"` 之后加三行:
 

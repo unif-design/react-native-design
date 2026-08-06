@@ -64,6 +64,8 @@
 
 三个文件都是**手写 CJS,不过 bob**:jest 直接 `require` preset 文件,不经 transform,必须是 CJS;其余两个同理。三者不 import `src/`,与库运行时代码零耦合。
 
+**`exports` 必须多一条 `"./jest-preset/jest-preset"` 别名**:jest 解析 `preset` 字段时,只对以 `.` 开头的说明符(部分版本另豁免绝对路径)原样使用,其余一律 `path.join(presetPath, 'jest-preset')` 拼上后缀 —— 见 `jest-config` 的 `normalize.js` `setupPreset()` 与其中的 `PRESET_NAME` 常量。也就是说消费者写的 `preset: '@unif/react-native-design/jest-preset'`,jest 实际去解析 `@unif/react-native-design/jest-preset/jest-preset`;`exports` 里没有这条,就直接报 `Validation Error: Module @unif/react-native-design/jest-preset should have "jest-preset.js" or "jest-preset.json" file at the root.`(已实测复现)。加一条指向同一个 `./jest-preset.js` 的别名,是让文档化说明符原样成立的最小改动 —— 比换成裸名 `preset: '@unif/react-native-design'`(靠追加命中 `./jest-preset`,可用但不直观)或让消费者写相对/绝对路径都干净。裸名形式因此顺带可用,但不进文档,避免两种写法并存。
+
 **为什么 resolver 必须组合而不是直接用 worklets 的**:`@react-native/jest-preset` 自带 `resolver`(其唯一职责是临时剥掉 `react-native` 的 package exports,jest 才能解析/mock 其深路径,如 portal 在 mock 的 `react-native/Libraries/Utilities/Dimensions`);jest 的 config `resolver` 是标量,写 worklets 的就把 RN 的顶掉。portal 今天就处于这个被顶掉的状态。组合文件把 worklets 的 `.native.*` extension 过滤内联,再委托给 RN 的 resolver,两边行为都保住。
 
 **setup 必须挂 `setupFilesAfterEnv`,不能挂 `setupFiles`**:reanimated `setUpTests()` 内部 `expect.extend`(实测 `src/jestUtils/index.ts:314`);`setupFiles` 阶段测试框架未装好,它会沿 fallback 链把 matcher 注册到独立的 expect 实例上 —— 不崩,但 `toHaveAnimatedStyle` 在用例里静默不可用。这直接影响 portal 迁移(它现在用的是 `setupFiles`)。
