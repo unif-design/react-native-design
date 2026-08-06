@@ -15,6 +15,12 @@
  * 文档化用法实际要解析的是 `@unif/react-native-design/jest-preset/jest-preset`。
  * 删掉别名,消费者会直接吃到
  * `Validation Error: Module ... should have "jest-preset.js" or "jest-preset.json" file at the root.`
+ *
+ * 同一句 Validation Error 还有第二个成因:消费者漏装 @react-native/jest-preset。
+ * jest-config 捕获下面那行 require 抛的 MODULE_NOT_FOUND 后,只判 error.message
+ * 是否含 preset 路径,而 Node 的 Require stack 带着本文件路径 —— 于是真因
+ * (`Cannot find module '@react-native/jest-preset'`)被换成同一句畸形报错。
+ * 排查顺序:先查 devDependency 是否安装,再怀疑别名。
  */
 
 const reactNativePreset = require('@react-native/jest-preset');

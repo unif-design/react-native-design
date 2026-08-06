@@ -51,11 +51,15 @@ test('点击保存会触发 onPress', () => {
 ```
 
 :::danger `@react-native/jest-preset` 必须由你自己装
-它**不是**本库的 dependency —— 本库的 preset 文件在运行时 `require` 它。漏装的表现是:
+它**不是**本库的 dependency —— 本库的 preset 文件在运行时 `require` 它。漏装后你看到的是这一行,**不会**提到 `@react-native/jest-preset`:
 
 ```text
-Cannot find module '@react-native/jest-preset' from 'node_modules/@unif/react-native-design/jest-preset.js'
+Validation Error: Module @unif/react-native-design/jest-preset should have "jest-preset.js" or "jest-preset.json" file at the root.
 ```
+
+底层真因确实是 `Cannot find module '@react-native/jest-preset'`,但它被 jest-config 吞掉了:jest 加载 preset 时捕获内层的 `MODULE_NOT_FOUND`,只看报错文本里有没有 preset 路径 —— Node 的 Require stack 恰好带着 `.../@unif/react-native-design/jest-preset.js`,于是被判成「preset 模块本身畸形」,换成了上面那句。
+
+**同一句 Validation Error 有两个成因**,按这个顺序查:先确认 `@react-native/jest-preset` 装没装(绝大多数是这个);其次才是本包 `exports` 里的 `./jest-preset/jest-preset` 别名缺失 —— 后者只会在改动本包自身时出现,装 npm 包用是碰不到的。
 
 上面那条 `yarn add -D` 里的六个包一个都不能省:`@react-native/babel-preset` 是你 `babel.config.js` 里的 preset,`react-test-renderer` 是 RNTL 的渲染后端,版本都跟着 `react-native` / `react` 走。
 :::
@@ -65,7 +69,7 @@ Cannot find module '@react-native/jest-preset' from 'node_modules/@unif/react-na
 `jest-preset` 在 RN 官方 preset 之上加三样东西:
 
 - **组合 resolver** —— RN 官方 resolver(临时剥掉 `react-native` 的 package exports,jest 才能解析 / mock 它的深路径)+ worklets 的 `.native.*` extension 过滤(让 worklets 走 web 实现,不触发 native init)。jest 的 `resolver` 是标量,两个不能并存,所以本库把它们组合在一个文件里。
-- **`transformIgnorePatterns`** —— 放行本库与 6 个发 ESM / TS 源码的 peer。
+- **`transformIgnorePatterns`** —— 放行本库与 7 个发 ESM / TS 源码的 peer。
 - **`setupFilesAfterEnv`** —— 在 RN preset 自己那几条之后追加本库的 `jest-setup`。你在 config 里写自己的 `setupFilesAfterEnv` 不会顶掉它,jest 会前置拼接。
 
 `jest-setup` 接的是 9 个 runtime peer 里在 Jest 中需要替身的那 4 个:
