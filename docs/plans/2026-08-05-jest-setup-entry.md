@@ -582,7 +582,11 @@ export function reanimatedWithReducedMotion(): unknown {
   const actual = jest.requireActual<Record<string, unknown>>(
     'react-native-reanimated'
   );
-  return { ...actual, useReducedMotion: () => reducedMotion };
+  // spread 会丢掉 babel 用 defineProperty 写的**不可枚举** __esModule:true,
+  // default import(Animated)会拿到整个 namespace 而不是 default 导出,
+  // Animated.View 变 undefined —— Task 3 已实证这正是 FeedbackScene 旧本地
+  // mock 21 条红的根因。必须显式补回。
+  return { ...actual, __esModule: true, useReducedMotion: () => reducedMotion };
 }
 ```
 
