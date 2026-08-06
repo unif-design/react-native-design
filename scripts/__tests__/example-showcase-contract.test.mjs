@@ -101,10 +101,10 @@ function createFixtureJestConfig(fixture, overrides = {}) {
     ...baseConfig,
     rootDir: fixtureExampleRoot,
     cacheDirectory: path.join(fixture, '.jest-cache'),
-    preset: path.join(
-      repositoryRoot,
-      'example/node_modules/@react-native/jest-preset'
-    ),
+    // preset 不覆写 —— 继承 production 的 '@unif/react-native-design/jest-preset',
+    // fixture 的 example/node_modules 是指向真实 workspace 的 symlink,同一条
+    // exports 子路径在这里也能解析到仓根 jest-preset.js。写死成别的值就等于让
+    // fixture 跑一套 production 不存在的接线。
     setupFilesAfterEnv: [path.join(repositoryRoot, 'example/jest.setup.ts')],
     moduleNameMapper: {
       ...baseConfig.moduleNameMapper,
@@ -118,13 +118,19 @@ function createFixtureJestConfig(fixture, overrides = {}) {
         repositoryRoot,
         'example/node_modules/react-native-gesture-handler/src/index.ts'
       ),
+      // reanimated / worklets 指向真实包根做身份钉住(mock 职责在 preset 的
+      // jest-setup),safe-area-context 同理 —— 与 production config 逐项一致。
       '^react-native-reanimated$': path.join(
         repositoryRoot,
-        'example/node_modules/react-native-reanimated/mock.js'
+        'example/node_modules/react-native-reanimated'
       ),
       '^react-native-worklets$': path.join(
         repositoryRoot,
-        'example/node_modules/react-native-worklets/src/mock.ts'
+        'example/node_modules/react-native-worklets'
+      ),
+      '^react-native-safe-area-context$': path.join(
+        repositoryRoot,
+        'example/node_modules/react-native-safe-area-context'
       ),
     },
     ...overrides,
@@ -989,7 +995,9 @@ test('Babel/Metro/Jest 使用 RN 0.86 workspace source contract', () => {
     metroConfig.resolver.extraNodeModules['@unif/react-native-design'],
     root
   );
-  assert.equal(jestConfig.preset, '@react-native/jest-preset');
+  assert.equal(jestConfig.preset, '@unif/react-native-design/jest-preset');
+  // 读的是 raw config 文件:preset 自带的 setupFilesAfterEnv 由 jest 在运行时前置
+  // 拼接,原文件里仍然只有 example 自己这一项。
   assert.deepEqual(jestConfig.setupFilesAfterEnv, ['<rootDir>/jest.setup.ts']);
   assert.match(
     read('example/tsconfig.json'),

@@ -1749,7 +1749,9 @@ function verifyRuntimeAndNativeContract(root) {
     );
   }
   if (
-    !jest.includes("preset: '@react-native/jest-preset'") ||
+    // example 吃本包发布的 preset(狗粮):走与消费者相同的 exports 子路径解析,
+    // 接线一改就被 example 的 15 个 suite 回归覆盖。
+    !jest.includes("preset: '@unif/react-native-design/jest-preset'") ||
     !jest.includes(
       "'^@unif/react-native-design$': '<rootDir>/../src/index.tsx'"
     ) ||

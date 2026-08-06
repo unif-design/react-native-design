@@ -1,10 +1,8 @@
-import 'react-native-gesture-handler/jestSetup';
+// design 自身的 peer 接线来自 `@unif/react-native-design/jest-setup`
+// (由 jest.config.js 的 preset 带入)。本文件只放 example 特有的替身。
 
-jest.mock(
-  'react-native-safe-area-context',
-  () => require('react-native-safe-area-context/jest/mock').default
-);
-
+// App.test.tsx 要断言根装配里有且只有一个 GestureHandlerRootView,
+// 给它一个可查询的 testID —— 这是测试缝,不是 design 接线的一部分。
 jest.mock('react-native-gesture-handler', () => {
   const actual = jest.requireActual('react-native-gesture-handler');
   const React = require('react');
@@ -13,6 +11,7 @@ jest.mock('react-native-gesture-handler', () => {
   return {
     ...actual,
     Pressable,
+    GestureDetector: ({ children }: { children: unknown }) => children,
     GestureHandlerRootView: function MockGestureHandlerRootView({
       children,
       ...props
@@ -25,5 +24,3 @@ jest.mock('react-native-gesture-handler', () => {
     },
   };
 });
-
-require('react-native-reanimated').setUpTests();
