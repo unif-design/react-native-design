@@ -10,6 +10,10 @@ jest.mock('react-native-gesture-handler', () => {
 
   return {
     ...actual,
+    // 下面两行看着和 design 的 jest-setup 重复,但删不得:同一 specifier 的
+    // jest.mock 工厂是**整体替换**,后注册的这份会把 design 那份连同它的
+    // Pressable / GestureDetector 一起顶掉。少了它们,render 阶段就崩在
+    // `useComposedEventHandler is not a function`(RNGH 3 Pressable 的路径)。
     Pressable,
     GestureDetector: ({ children }: { children: unknown }) => children,
     GestureHandlerRootView: function MockGestureHandlerRootView({

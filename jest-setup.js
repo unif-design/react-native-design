@@ -4,7 +4,8 @@
 
 /**
  * `@unif/react-native-design/jest-setup` —— 把本库 9 个 runtime peer 里在 Jest 中
- * 需要替身的那 4 个接上各自的**官方** mock。放进消费者的 `setupFilesAfterEnv`。
+ * 需要接线的那 4 个接上各自的**官方**桩 / mock / setup。放进消费者的
+ * `setupFilesAfterEnv`。(4 个里只有 3 个换了替身,reanimated 走真实模块。)
  *
  * 为什么由库提供:这份接线完全由本库的 peer 集决定,peer range 一变它就得变。
  * 让每个消费仓自己推导的结果是 5 个仓 5 种写法、3 个仓各自踩同一个坑

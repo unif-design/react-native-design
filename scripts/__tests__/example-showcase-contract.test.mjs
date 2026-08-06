@@ -3858,6 +3858,13 @@ test('repo-specific workflow 使用强并集 gate 且共享 CI digest 不漂移'
   ]) {
     assert.ok(workflow.includes(`run: ${command}`), `workflow 缺少 ${command}`);
   }
+  // jest 入口 step 是块标量,没有 `run: <command>` 字面串,所以单独断言。
+  for (const command of [
+    'yarn check:jest-entries',
+    'node --test "scripts/__tests__/jest-*.test.mjs"',
+  ]) {
+    assert.ok(workflow.includes(command), `workflow 缺少 ${command}`);
+  }
   assert.doesNotMatch(
     workflow,
     /yarn example (?:build:android|build:ios|android|ios)|pod install/u
@@ -4241,6 +4248,25 @@ test('workflow 与 shared CI mutation gate 返回稳定 typed code', () => {
       code: 'WORKFLOW_GATES',
       mutate: (source) =>
         source.replace('        run: yarn example lint\n', ''),
+    },
+    {
+      // 这一条锚定块标量里那行独有的 glob:上面 requiredCommands 的
+      // `run: <command>` 匹配对它无效,删掉整个 step 只会静默失去 gate。
+      label: 'workflow 漏 jest 入口 gate',
+      file: '.github/workflows/example-showcase.yml',
+      code: 'WORKFLOW_GATES',
+      mutate: (source) =>
+        source.replace(
+          '          node --test "scripts/__tests__/jest-*.test.mjs"\n',
+          ''
+        ),
+    },
+    {
+      label: 'workflow 漏 check:jest-entries',
+      file: '.github/workflows/example-showcase.yml',
+      code: 'WORKFLOW_GATES',
+      mutate: (source) =>
+        source.replace('          yarn check:jest-entries\n', ''),
     },
     {
       label: 'workflow 加入 paths filter',

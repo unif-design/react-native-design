@@ -16,14 +16,27 @@
  * 删掉别名,消费者会直接吃到
  * `Validation Error: Module ... should have "jest-preset.js" or "jest-preset.json" file at the root.`
  *
- * 同一句 Validation Error 还有第二个成因:消费者漏装 @react-native/jest-preset。
- * jest-config 捕获下面那行 require 抛的 MODULE_NOT_FOUND 后,只判 error.message
- * 是否含 preset 路径,而 Node 的 Require stack 带着本文件路径 —— 于是真因
- * (`Cannot find module '@react-native/jest-preset'`)被换成同一句畸形报错。
- * 排查顺序:先查 devDependency 是否安装,再怀疑别名。
+ * 下面那段 try/catch 就是为了不让「漏装 @react-native/jest-preset」也塌进同一句报错:
+ * jest-config 捕获 preset 模块抛出的 MODULE_NOT_FOUND 后,只判 error.message 里有没有
+ * preset 路径,而 Node 的 Require stack 恰好带着本文件路径 —— 裸 require 的真因
+ * (`Cannot find module '@react-native/jest-preset'`)会被换成上面那句畸形 Validation
+ * Error。改抛一个不带 MODULE_NOT_FOUND code 的错误,jest-config 就走
+ * `An unknown error occurred in <path>: <message>` 分支,下面这句话原样透出。
+ * 于是两个成因彻底分开:漏装有专属报错,Validation Error 只剩别名缺失一个成因。
  */
 
-const reactNativePreset = require('@react-native/jest-preset');
+let reactNativePreset;
+try {
+  reactNativePreset = require('@react-native/jest-preset');
+} catch (error) {
+  if (error && error.code === 'MODULE_NOT_FOUND') {
+    throw new Error(
+      '@unif/react-native-design/jest-preset 需要宿主工程自行安装 @react-native/jest-preset' +
+        '(它不是本包的依赖):yarn add -D @react-native/jest-preset'
+    );
+  }
+  throw error;
+}
 
 module.exports = {
   ...reactNativePreset,

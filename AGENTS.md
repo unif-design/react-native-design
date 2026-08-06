@@ -100,7 +100,9 @@ src/components/business
 
 除 barrel 外，`package.json#exports` 还发布 `./jest-setup` 与 `./jest-preset` 两个
 Jest 接线入口（仓根手写 CJS，不过 bob、不 import `src/`）。改动它们要同步
-`yarn check:jest-entries`、`example/jest.config.js`、Website 测试页与 `design` Skill。
+`yarn check:jest-entries`、`scripts/__tests__/jest-*.test.mjs`、`example/jest.config.js`、
+`.github/workflows/example-showcase.yml`（根 jest 不扫 `scripts/__tests__/`，那个
+workflow 是这两条 gate 唯一进 CI 的路径）、Website 测试页与 `design` Skill。
 
 - library 内部使用相对 import；example 只从 `@unif/react-native-design` package root
   导入，禁止 `src/`、`lib/`、`dist/` deep import。

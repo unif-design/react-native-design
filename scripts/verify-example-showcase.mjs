@@ -3584,6 +3584,20 @@ function verifyWorkflowContract(root) {
       `example workflow 缺少 gates: ${missingCommands.join(', ')}`
     );
   }
+  // jest 入口那个 step 是块标量(`run: |` + 两行命令),匹配不到上面那种
+  // `run: <command>` 字面串,所以单独断言。根 jest 忽略 scripts/__tests__/、
+  // 共享 ci.yml 又不能动 —— 这两条命令是它们唯一进 CI 的路径,漏了就是
+  // 「文件在、gate 永远不跑」。
+  const missingJestEntryGates = [
+    'yarn check:jest-entries',
+    'node --test "scripts/__tests__/jest-*.test.mjs"',
+  ].filter((command) => !workflow.includes(command));
+  if (missingJestEntryGates.length) {
+    failVerification(
+      'WORKFLOW_GATES',
+      `example workflow 缺少 jest 入口 gates: ${missingJestEntryGates.join(', ')}`
+    );
+  }
   if (
     /yarn example (?:build:android|build:ios|android|ios)|pod install/u.test(
       workflow
