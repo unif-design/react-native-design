@@ -194,4 +194,5 @@ toast.success('已保存');
 - [设计原则](/docs/design/principles) —— 5 条不可违背的设计规则
 - [颜色 token](/docs/design/tokens/colors) —— role-based 角色 token 与取色优先级链
 - [组件概览](/docs/components) —— 40+ 组件,按场景分组索引
+- [在宿主工程里测试](/docs/testing) —— Jest 配方:本库不发 mock 入口,要接的是底层 peer
 - [常见问题](/docs/troubleshooting) —— peer 缺失、Web 点击无响应、缓存不生效等排障

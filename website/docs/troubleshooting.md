@@ -2,12 +2,12 @@
 slug: /troubleshooting
 sidebar_position: 10
 title: 常见问题
-description: "@unif/react-native-design 排障决策树（症状 → 因 → 解）：Web / 文档站点击无响应与动画崩溃、主题样式不切换 / useThemedStyles 缓存失效、peerDeps 缺失与 iOS 链接错误。"
+description: "@unif/react-native-design 排障决策树（症状 → 因 → 解）：Web / 文档站点击无响应与动画崩溃、主题样式不切换 / useThemedStyles 缓存失效、peerDeps 缺失与 iOS 链接错误、Jest 里的 transform / RNGH Pressable / useReducedMotion 报错。"
 ---
 
 # 常见问题
 
-按**症状 → 原因 → 解法**排查。多数问题集中在「peer 缺失」「颜色没走 token / 主题不切」「web 环境特性」三类。
+按**症状 → 原因 → 解法**排查。多数问题集中在「peer 缺失」「颜色没走 token / 主题不切」「web 环境特性」「Jest 里没接上 peer 的 mock」四类。
 
 ---
 
@@ -154,6 +154,58 @@ yarn add -D @babel/core @react-native/babel-preset@0.86.2 @react-native/metro-co
 cd ios && bundle exec pod install --repo-update
 # 再 Xcode → Product → Clean Build Folder 后重新构建
 ```
+
+---
+
+## Jest / 单元测试 {#jest--单元测试}
+
+本库不发 mock 入口,Jest 里要接的是底层 peer。完整配方见[在宿主工程里测试](/docs/testing);下面是照着报错反查。
+
+### 症状:`SyntaxError: Unexpected token 'export'` 或 `Cannot use import statement outside a module` {#jest-transform}
+
+**原因。** 本库发布 ESM(`lib/module/*.js`),而 `@react-native/jest-preset` 默认的 `transformIgnorePatterns` 只放行 `react-native` / `@react-native` / `@react-native-community` 三个前缀,`node_modules` 里其余包一律不转译。
+
+**解法。** 把 `@unif/react-native-design` 和它的 RN 生态 peer 一起加进白名单,见[测试 → 最小可用配方](/docs/testing#最小可用配方)。只加 `@unif/react-native-design` 不够 —— 那几个 peer 同样发 ESM / TS 源码。
+
+---
+
+### 症状:render 任意 design 组件就抛 `useComposedEventHandler is not a function` {#jest-rngh-pressable}
+
+**原因。** design 的交互组件内部用 RNGH 的 `Pressable`;RNGH 3 的 `Pressable` 在 Jest 里会走到 reanimated 的组合事件路径。**这是 render 阶段的硬崩溃**,不是「点了没反应」。
+
+**解法。** 在 setup 文件里把 RNGH 的 `Pressable` 覆盖成 RN 的(保留 `...actual`,`GestureHandlerRootView` 仍要是真的),见[测试 → 最小可用配方](/docs/testing#最小可用配方)。
+
+---
+
+### 症状:render Switch / Carousel / Spinner / Skeleton / Reveal 抛 `useReducedMotion is not a function` {#jest-reduced-motion}
+
+**原因。** 把 `react-native-reanimated` 映射到了它自带的 `mock.js` —— `react-native-reanimated@4.5.3` 的 mock 里 `useReducedMotion` 那行是注释掉的(`// useReducedMotion: ADD ME IF NEEDED`),而这些组件都经 `usePrefersReducedMotion` 读它。
+
+**解法。** 别映射 reanimated,只映射 `react-native-worklets`(推荐);或保留映射并自己补上 `useReducedMotion`。两种写法见[测试 → 最小可用配方](/docs/testing#最小可用配方)。
+
+---
+
+### 症状:`Cannot read properties of undefined (reading 'loadUnpackersWithCode')` {#jest-worklets}
+
+**原因。** `react-native-worklets` 的 native 侧在 Jest 里不存在,import 阶段就崩,整个 suite 起不来。
+
+**解法。** `moduleNameMapper` 里把 `^react-native-worklets$` 指到 `react-native-worklets/src/mock`。
+
+---
+
+### 症状:`SafeAreaProvider` 里的内容一个都查不到 {#jest-safe-area}
+
+**原因。** 真实 `SafeAreaProvider` 要等 native 量出 inset 才渲染子树,Jest 里等不到,于是整棵子树不渲染。
+
+**解法。** 用 safe-area-context 自带的 `jest/mock`。只有被测树里含 `SafeAreaProvider`(以及根装配里的 `ToastHost` / `ConfirmHost`)时才需要,单独测一个 Button 不需要。
+
+---
+
+### 症状:测 Carousel 抛 `GestureDetector must be used as a descendant of GestureHandlerRootView` {#jest-carousel-root}
+
+**原因。** RNGH 3 的 `GestureDetector` 会检查祖先里有没有根视图。
+
+**解法。** 把用例包进 `<GestureHandlerRootView>` 再 render。
 
 ---
 

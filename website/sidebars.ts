@@ -19,6 +19,7 @@ const sidebars: SidebarsConfig = {
       ],
     },
     'design/donts',
+    'testing',
     'troubleshooting',
     'migration',
   ],
