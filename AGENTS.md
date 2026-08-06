@@ -56,6 +56,7 @@ yarn install --immutable
 yarn check:config
 yarn check:runtime-peers
 yarn check:icons
+yarn check:jest-entries
 yarn verify:example-showcase
 
 yarn typecheck
@@ -96,6 +97,10 @@ src/utils/logger
 src/components/ui
 src/components/business
 ```
+
+除 barrel 外，`package.json#exports` 还发布 `./jest-setup` 与 `./jest-preset` 两个
+Jest 接线入口（仓根手写 CJS，不过 bob、不 import `src/`）。改动它们要同步
+`yarn check:jest-entries`、`example/jest.config.js`、Website 测试页与 `design` Skill。
 
 - library 内部使用相对 import；example 只从 `@unif/react-native-design` package root
   导入，禁止 `src/`、`lib/`、`dist/` deep import。
