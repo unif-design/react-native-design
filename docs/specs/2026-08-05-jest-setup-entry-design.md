@@ -16,6 +16,8 @@
 | `design/react-native-hms-scan` | `jest.setup.ts`:把 `@unif/react-native-design` 整个渲染成轻量桩 | 用「不渲染真组件」绕开 |
 | `design/react-native-design`(本仓 `example/`) | `jest.config.js` 映射 reanimated → `mock.js`,再由 `helpers/nativeMocks.ts#installReducedMotionMock` 与 `FeedbackScene.test.tsx` 各补一次 | ✅ 两处补丁 |
 
+注:本仓 `example/` 行描述的是 2026-08-05 调研时点状态,该两处补丁已随本计划 Task 3/4 清除。
+
 `front/retail-pecportal` 用 `preset: 'react-native'`,目前不涉及 design 接线。
 
 ### 1.1 根因

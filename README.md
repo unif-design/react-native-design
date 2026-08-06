@@ -131,7 +131,7 @@ decode 仍按 `example/README.md` 的 Android/iOS 手工矩阵标记为待执行
 ## 文档
 
 - **文档站**(快速开始 · 组件 API · 设计令牌 · 设计原则):https://unif-design.github.io/react-native-design/
-- **在宿主工程里测试**(本库不发 mock 入口,Jest 里要接的是底层 peer):
+- **在宿主工程里测试**(一行接入 `@unif/react-native-design/jest-preset`):
   https://unif-design.github.io/react-native-design/docs/testing
 - **AI / LLM**(纯 Markdown,按需 fetch,别凭记忆猜 API):
   [llms.txt 索引](https://unif-design.github.io/react-native-design/llms.txt) · [llms-full.txt 全文](https://unif-design.github.io/react-native-design/llms-full.txt)
