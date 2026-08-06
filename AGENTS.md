@@ -128,7 +128,9 @@ src/components/business
 - Cell 使用 static/action/control 严格分支；Carousel 使用 display/action 严格分支。
   action Carousel 必须同时给 `onPressItem` 与 `getAccessibilityLabel`，reduced motion 下停止
   autoplay，单页不渲染 Pagination。
-- Checkbox/Radio/Switch 使用 `checked`；Tabs/TabBar/Segmented 使用 `selected`。
+- Checkbox/Radio/Switch 报告 `accessibilityState.checked`；Tabs/TabBar/Segmented 报告
+  `accessibilityState.selected`。这是 a11y 状态名，不是受控 prop 名：prop 只有 Checkbox 叫
+  `checked`，Radio/Switch/Tabs/Segmented 用 `value`，TabBar 用 `active`。
   装饰 View/Image/SVG 隐藏完整 a11y 子树，状态反馈避免重复播报。
 - `ConfirmStore` 单 owner/单 active、identity-guarded settle；`ToastStore` 使用
   latest-wins pending/delivery、owner token 与 lease/CAS。Store 内部类型不进入 public barrel。
