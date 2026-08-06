@@ -114,9 +114,19 @@ function createFixtureJestConfig(fixture, overrides = {}) {
         repositoryRoot,
         'example/node_modules/react/$1'
       ),
+      // RN 与 RNGH 子路径同样按绝对路径覆写:fixture 的每一条钉住都要指向真实
+      // workspace 拷贝,漏一条就会从 baseConfig 继承 <rootDir> 相对值。
+      '^react-native($|/.*)': path.join(
+        repositoryRoot,
+        'example/node_modules/react-native/$1'
+      ),
       '^react-native-gesture-handler$': path.join(
         repositoryRoot,
         'example/node_modules/react-native-gesture-handler/src/index.ts'
+      ),
+      '^react-native-gesture-handler/(.*)$': path.join(
+        repositoryRoot,
+        'example/node_modules/react-native-gesture-handler/$1'
       ),
       // reanimated / worklets 指向真实包根做身份钉住(mock 职责在 preset 的
       // jest-setup),safe-area-context 同理 —— 与 production config 逐项一致。

@@ -13,6 +13,13 @@ module.exports = {
     // 经过本 mapper)。独立消费者只有一份 node_modules,不需要这些。
     '^react$': '<rootDir>/node_modules/react',
     '^react/(.*)$': '<rootDir>/node_modules/react/$1',
+    // RN 自己也要按同一原则钉回来:@react-native/jest-preset 的
+    // `^react-native($|/.*)` 值是 require 位置算出来的,preset 现在从**仓根**加载,
+    // 那条就指向仓根拷贝 —— 而 `yarn example ios/android` 构建的是 example 拷贝,
+    // 于是「测的」和「构建的」不是同一份。config 条目在 resolved mapper 里排在
+    // preset 条目之前(first match wins),同名 key 直接覆盖 preset 那条。
+    // 两份今天同为 0.86.2,所以这条是防漂移,不是修当前的红。
+    '^react-native($|/.*)': '<rootDir>/node_modules/react-native/$1',
     '^react-native-gesture-handler$':
       '<rootDir>/node_modules/react-native-gesture-handler/src/index.ts',
     // 子路径也得钉:RNGH 的 jestSetup 用**相对**说明符注册桩
@@ -21,6 +28,10 @@ module.exports = {
     // 它桩的是 root 那份,而上面 bare specifier 指的是 example 这份 —— 结果
     // example 拷贝的 native module 没被桩,整棵 RN 渲染树在
     // TurboModuleRegistry.getEnforcing('RNGestureHandlerModule') 处炸。
+    // 边界:这条把子路径当**文件路径**转发,今天安全是因为 RNGH 3.1.0 没有
+    // exports 字段、且全仓唯一的 RNGH 子路径 import 就是仓根 jest-setup.js 的
+    // `jestSetup`。将来 RNGH 加了 exports、或出现被 exports 重映射的子路径,
+    // 这条会绕开重映射,与真实消费者(单份 node_modules,走 exports)行为分叉。
     '^react-native-gesture-handler/(.*)$':
       '<rootDir>/node_modules/react-native-gesture-handler/$1',
     '^react-native-reanimated$':
