@@ -2,9 +2,6 @@ import { BackHandler, Platform } from 'react-native';
 import type { BackPressEventName, HardwareBackPressEvent } from 'react-native';
 
 const originalPlatformOS = Platform.OS;
-type ReanimatedMotionMock = {
-  useReducedMotion?: () => boolean;
-};
 
 export type AndroidBackHandlerMock = Readonly<{
   addEventListener: jest.SpiedFunction<typeof BackHandler.addEventListener>;
@@ -57,20 +54,9 @@ export function installNonAndroidBackHandlerMock(): jest.SpiedFunction<
   return jest.spyOn(BackHandler, 'addEventListener');
 }
 
-export function installReducedMotionMock(value: boolean): void {
-  const reanimated = jest.requireActual<ReanimatedMotionMock>(
-    'react-native-reanimated'
-  );
-  reanimated.useReducedMotion = jest.fn(() => value);
-}
-
 export function restoreNativeMocks(): void {
   Object.defineProperty(Platform, 'OS', {
     configurable: true,
     value: originalPlatformOS,
   });
-  const reanimated = jest.requireActual<ReanimatedMotionMock>(
-    'react-native-reanimated'
-  );
-  delete reanimated.useReducedMotion;
 }

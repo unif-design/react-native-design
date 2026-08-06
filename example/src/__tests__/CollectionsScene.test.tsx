@@ -12,11 +12,13 @@ import {
   type CarouselRef,
 } from '@unif/react-native-design';
 import App from '../App';
-import {
-  installReducedMotionMock,
-  restoreNativeMocks,
-} from './helpers/nativeMocks';
+import { restoreNativeMocks } from './helpers/nativeMocks';
+import { setReducedMotion } from './helpers/reducedMotion';
 import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
+
+jest.mock('react-native-reanimated', () =>
+  require('./helpers/reducedMotion').reanimatedWithReducedMotion()
+);
 
 jest.mock('react-native-safe-area-context', () => {
   const safeAreaMock = jest.requireActual(
@@ -120,7 +122,7 @@ function componentByTestID<T extends React.ComponentType<never>>(
 }
 
 beforeEach(() => {
-  installReducedMotionMock(false);
+  setReducedMotion(false);
   mockCarouselRef.prev.mockClear();
   mockCarouselRef.next.mockClear();
   mockCarouselRef.getCurrentIndex.mockClear();
@@ -132,6 +134,7 @@ beforeEach(() => {
 
 afterEach(() => {
   restoreNativeMocks();
+  setReducedMotion(false);
   jest.restoreAllMocks();
 });
 
@@ -511,8 +514,7 @@ test('Carousel ref 四个公开方法可执行，reduced motion 停止 upstream 
   expect(screen.UNSAFE_getAllByType(Carousel)).toHaveLength(3);
   mounted.unmount();
 
-  restoreNativeMocks();
-  installReducedMotionMock(true);
+  setReducedMotion(true);
   mockUpstreamCarouselProps.length = 0;
   render(<App />);
   enterCollections();

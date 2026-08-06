@@ -9,10 +9,7 @@ import {
   Tag,
 } from '@unif/react-native-design';
 import App from '../App';
-import {
-  installReducedMotionMock,
-  restoreNativeMocks,
-} from './helpers/nativeMocks';
+import { restoreNativeMocks } from './helpers/nativeMocks';
 import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
 
 jest.mock('react-native-safe-area-context', () => {
@@ -70,10 +67,6 @@ function componentByTestID<T extends React.ComponentType<never>>(
   if (!found) throw new Error(`未找到组件：${testID}`);
   return found;
 }
-
-beforeEach(() => {
-  installReducedMotionMock(false);
-});
 
 afterEach(() => {
   restoreNativeMocks();

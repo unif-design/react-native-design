@@ -11,10 +11,14 @@ import { AppProviders } from '../app/AppProviders';
 import {
   installAndroidBackHandlerMock,
   installNonAndroidBackHandlerMock,
-  installReducedMotionMock,
   restoreNativeMocks,
 } from './helpers/nativeMocks';
+import { setReducedMotion } from './helpers/reducedMotion';
 import { createShowcaseRuntimeCoverage } from './helpers/showcaseRuntimeCoverage';
+
+jest.mock('react-native-reanimated', () =>
+  require('./helpers/reducedMotion').reanimatedWithReducedMotion()
+);
 
 jest.mock('react-native-safe-area-context', () => {
   const safeAreaMock = jest.requireActual(
@@ -158,11 +162,12 @@ beforeEach(() => {
 
 afterEach(() => {
   restoreNativeMocks();
+  setReducedMotion(false);
   jest.restoreAllMocks();
 });
 
 test('根装配保持指定 Provider 顺序且两个 Host 各唯一一份', () => {
-  installReducedMotionMock(false);
+  setReducedMotion(false);
   const mounted = render(<App />);
 
   const gestureRoot = requireHostNode(mounted.toJSON(), 'App root');
@@ -190,7 +195,7 @@ test('根装配保持指定 Provider 顺序且两个 Host 各唯一一份', () =
 });
 
 test('ThemeProvider 将 system 映射为 undefined，并窄化三档主题与四档字号', () => {
-  installReducedMotionMock(false);
+  setReducedMotion(false);
   render(<App />);
   const runtimeCoverage = createShowcaseRuntimeCoverage('app');
 
@@ -246,7 +251,7 @@ test('ThemeProvider 将 system 映射为 undefined，并窄化三档主题与四
 });
 
 test('Home 只挂八个中文 scene 入口，并在前进与返回时互斥挂载 screen', () => {
-  installReducedMotionMock(false);
+  setReducedMotion(false);
   render(<App />);
 
   const sceneButtons = screen
@@ -290,7 +295,7 @@ test('Home 只挂八个中文 scene 入口，并在前进与返回时互斥挂�
 });
 
 test('Android BackHandler 只订阅一次，child consume、Home 不 consume，卸载只 remove 一次', () => {
-  installReducedMotionMock(false);
+  setReducedMotion(false);
   const nativeBack = installAndroidBackHandlerMock();
   const mounted = render(<App />);
 
@@ -315,7 +320,7 @@ test('Android BackHandler 只订阅一次，child consume、Home 不 consume，�
 });
 
 test('根级 Hosts 在进入、重置与离开 Feedback 全程各保持唯一一份', () => {
-  installReducedMotionMock(false);
+  setReducedMotion(false);
   const nativeBack = installAndroidBackHandlerMock();
   render(<App />);
 
@@ -337,7 +342,7 @@ test('根级 Hosts 在进入、重置与离开 Feedback 全程各保持唯一一
 });
 
 test('非 Android 根不建立 BackHandler subscription', () => {
-  installReducedMotionMock(false);
+  setReducedMotion(false);
   const addEventListener = installNonAndroidBackHandlerMock();
 
   render(<App />);
@@ -346,7 +351,7 @@ test('非 Android 根不建立 BackHandler subscription', () => {
 });
 
 test('系统减少动态效果开启时 Home 与 Foundation 均展示真实事实', () => {
-  installReducedMotionMock(true);
+  setReducedMotion(true);
   render(<App />);
 
   expect(screen.getByText('减少动态效果：是')).toBeOnTheScreen();
