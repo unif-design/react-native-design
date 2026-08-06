@@ -40,6 +40,13 @@ jobs:
       - name: Check generated icons
         run: yarn check:icons
 
+      # 根 jest 忽略 scripts/__tests__/，共享 ci.yml 又是组织模板不能动：
+      # 这个 gate 与它的单测只有在这里显式接线才会在 CI 里真的跑。
+      - name: Check jest entries
+        run: |
+          yarn check:jest-entries
+          node --test scripts/__tests__/jest-entries.test.mjs
+
       - name: Verify example showcase contract
         run: yarn verify:example-showcase
 
