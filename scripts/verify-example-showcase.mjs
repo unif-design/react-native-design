@@ -3645,6 +3645,12 @@ function verifyTurboContract(root) {
     '$TURBO_ROOT$/scripts/verify-example-showcase.mjs',
     '$TURBO_ROOT$/example/jest.forbidOnlyReporter.js',
     '$TURBO_ROOT$/example/jest.showcaseGate.js',
+    // example 的 jest 接线现在整份来自仓根 preset(example/jest.config.js 只写
+    // preset 字符串),这三个文件是 example test 的**真实**输入。漏在 inputs 外,
+    // 改接线不会让 turbo 缓存失效 —— 拿旧缓存直接判绿,是最坏的一类假绿。
+    '$TURBO_ROOT$/jest-preset.js',
+    '$TURBO_ROOT$/jest-setup.js',
+    '$TURBO_ROOT$/jest-resolver.js',
   ];
   const androidInputs =
     turbo.tasks['@unif/react-native-design-example#build:android'].inputs;

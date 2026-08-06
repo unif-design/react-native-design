@@ -3899,6 +3899,11 @@ test('Turbo 只定义 package-qualified example tasks 并隔离双端 native inp
     '$TURBO_ROOT$/scripts/verify-example-showcase.mjs',
     '$TURBO_ROOT$/example/jest.forbidOnlyReporter.js',
     '$TURBO_ROOT$/example/jest.showcaseGate.js',
+    // 仓根三个 jest 入口是 example test 的真实输入(example/jest.config.js 只写
+    // preset 字符串,接线整份来自它们),漏了会拿旧 turbo 缓存假绿。
+    '$TURBO_ROOT$/jest-preset.js',
+    '$TURBO_ROOT$/jest-setup.js',
+    '$TURBO_ROOT$/jest-resolver.js',
   ]) {
     assert.ok(
       testInputs.includes(directInput),
@@ -4302,6 +4307,9 @@ test('Turbo mutation gate 拒绝 task、深层 source 与平台隔离漂移', ()
       '$TURBO_ROOT$/scripts/verify-example-showcase.mjs',
       '$TURBO_ROOT$/example/jest.forbidOnlyReporter.js',
       '$TURBO_ROOT$/example/jest.showcaseGate.js',
+      '$TURBO_ROOT$/jest-preset.js',
+      '$TURBO_ROOT$/jest-setup.js',
+      '$TURBO_ROOT$/jest-resolver.js',
     ].map((input) => ({
       label: `test task 删除直接执行 input ${input}`,
       code: 'TURBO_INPUTS',
