@@ -14,12 +14,17 @@
       "default": "./lib/module/index.js"
     },
     "./package.json": "./package.json",
+    "./jest-setup": "./jest-setup.js",
+    "./jest-preset": "./jest-preset.js",
     "./docs-home.css": "./docs-home.css"
   },
   "files": [
     "src",
     "lib",
     "docs-home.css",
+    "jest-setup.js",
+    "jest-preset.js",
+    "jest-resolver.js",
     "android",
     "ios",
     "cpp",
