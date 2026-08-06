@@ -161,13 +161,15 @@ cd ios && bundle exec pod install --repo-update
 
 本库发布 `./jest-preset` 与 `./jest-setup` 两个 Jest 接线入口。下面除第一条与最后两条外,都是**没走入口**时的报错。完整说明见[在宿主工程里测试](/docs/testing);下面是照着报错反查。
 
-### 症状:`Module @unif/react-native-design/jest-preset should have "jest-preset.js" or "jest-preset.json" file at the root` {#jest-missing-rn-preset}
+### 症状:`jest-preset 需要宿主工程自行安装 @react-native/jest-preset` {#jest-missing-rn-preset}
 
-**原因。** 报错文字指向本包,真因通常在别处:`@react-native/jest-preset` 没装。它**不是**本库的 dependency —— 本库的 preset 文件在运行时 `require` 它。jest 加载 preset 时捕获内层的 `Cannot find module '@react-native/jest-preset'`,只看报错文本里有没有 preset 路径,而 Node 的 Require stack 恰好带着 `.../@unif/react-native-design/jest-preset.js`,于是判成「preset 模块本身畸形」,把真因换成了上面这句 Validation Error。
+完整报错是 `Validation Error: An unknown error occurred in @unif/react-native-design/jest-preset:` 后面跟这句话。
 
-**同一句报错有两个成因**,按顺序查:① `@react-native/jest-preset` 没装(绝大多数是这个);② 本包 `exports` 里的 `./jest-preset/jest-preset` 别名缺失 —— 只会在改动本包自身时出现,装 npm 包用碰不到。
+**原因。** `@react-native/jest-preset` 没装。它**不是**本库的 dependency —— 本库的 preset 文件在运行时 `require` 它,并把 `MODULE_NOT_FOUND` 换成了上面这句可执行的报错。(不换的话,jest 加载 preset 时只看报错文本里有没有 preset 路径,而 Node 的 Require stack 恰好带着 `.../@unif/react-native-design/jest-preset.js`,真因会被判成「preset 模块本身畸形」。)
 
 **解法。** 把它连同其余测试侧依赖一起装上,见[测试 → 最小可用配方](/docs/testing#最小可用配方):`jest`、`@react-native/jest-preset`、`@react-native/babel-preset`、`@babel/core`、`@testing-library/react-native`、`react-test-renderer`,一个都不能省。
+
+**另一个成因,报错不一样。** 如果看到的是 `Module @unif/react-native-design/jest-preset should have "jest-preset.js" or "jest-preset.json" file at the root`,那是本包 `exports` 里的 `./jest-preset/jest-preset` 别名缺失 —— 只会在改动本包自身时出现,装 npm 包用碰不到。
 
 ---
 
