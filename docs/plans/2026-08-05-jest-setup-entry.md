@@ -336,6 +336,9 @@ const failures = [];
 const entries = [
   ['./jest-setup', 'jest-setup.js'],
   ['./jest-preset', 'jest-preset.js'],
+  // jest 解析 preset 说明符时会追加 /jest-preset,这条别名没了,消费者的
+  // preset: '@unif/react-native-design/jest-preset' 直接 Validation Error。
+  ['./jest-preset/jest-preset', 'jest-preset.js'],
 ];
 
 for (const [subpath, file] of entries) {
