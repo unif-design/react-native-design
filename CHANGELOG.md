@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.24.1](https://github.com/unif-design/react-native-design/compare/v0.24.0...v0.24.1) (2026-08-07)
+
+
+### Bug Fixes
+
+* **jest-entries:** 收紧漏装误诊,workflow gate 认块标量 run ([#118](https://github.com/unif-design/react-native-design/issues/118)) ([70ae717](https://github.com/unif-design/react-native-design/commit/70ae717a108381b9b3c2802f7fd7e9512bc00a9e))
+
 # [0.24.0](https://github.com/unif-design/react-native-design/compare/v0.23.1...v0.24.0) (2026-08-07)
 
 
