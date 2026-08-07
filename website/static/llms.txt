@@ -10,8 +10,8 @@
 - [快速开始](md/getting-started.md) — 5 分钟上手 @unif/react-native-design：装 peerDeps、根挂 ThemeProvider、用 useColors / useThemedStyles 写第一个主题化组件。面向 RN 0.86 新架构。
 - [升级 / 迁移](md/migration.md) — @unif/react-native-design 迁移指南：旧顶层 colors / shadow 静态导出 → 运行期 useColors() / useThemedStyles() hook（含旧 token → 新 role grep 对照），reanimated 4 升级，以及 BottomSheet / Confirm 的当前迁移状态。
 - [AI Skill](md/skills.md) — design 是一个 Agent Skill,教 AI 编码助手正确调用 @unif/react-native-design 的 API、避免常见幻觉。
-- [在宿主工程里测试](md/testing.md) — @unif/react-native-design 的 Jest 接入：一行 preset 接好全部 peer mock。含 jest.config 一行配方、必须自己装的 devDependencies、入口替你做的每一条与漏掉后的确切报错、按 role + accessible name 断言的写法，以及不用入口时的手工等价物。
-- [常见问题](md/troubleshooting.md) — @unif/react-native-design 排障决策树（症状 → 因 → 解）：Web / 文档站点击无响应与动画崩溃、主题样式不切换 / useThemedStyles 缓存失效、peerDeps 缺失与 iOS 链接错误、Jest 没走 jest-preset 入口时的 transform / RNGH Pressable / useReducedMotion 报错。
+- [在宿主工程里测试](md/testing.md) — @unif/react-native-design 的 Jest 接入：一行 preset 接好全部 peer mock。含 jest.config 一行配方、必须自己装的 devDependencies、入口替你做的每一条与漏掉后的确切报错、入口管不到的那条 babel worklets 插件、按 role + accessible name 断言的写法，以及不用入口时的手工等价物。
+- [常见问题](md/troubleshooting.md) — @unif/react-native-design 排障决策树（症状 → 因 → 解）：Web / 文档站点击无响应与动画崩溃、主题样式不切换 / useThemedStyles 缓存失效、peerDeps 缺失与 iOS 链接错误、Jest 缺 worklets babel 插件与没走 jest-preset 入口时的 transform / RNGH Pressable / useReducedMotion 报错。
 
 ## components
 

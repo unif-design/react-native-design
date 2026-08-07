@@ -2,7 +2,7 @@
 slug: /troubleshooting
 sidebar_position: 10
 title: 常见问题
-description: "@unif/react-native-design 排障决策树（症状 → 因 → 解）：Web / 文档站点击无响应与动画崩溃、主题样式不切换 / useThemedStyles 缓存失效、peerDeps 缺失与 iOS 链接错误、Jest 没走 jest-preset 入口时的 transform / RNGH Pressable / useReducedMotion 报错。"
+description: "@unif/react-native-design 排障决策树（症状 → 因 → 解）：Web / 文档站点击无响应与动画崩溃、主题样式不切换 / useThemedStyles 缓存失效、peerDeps 缺失与 iOS 链接错误、Jest 缺 worklets babel 插件与没走 jest-preset 入口时的 transform / RNGH Pressable / useReducedMotion 报错。"
 ---
 
 # 常见问题
@@ -159,7 +159,7 @@ cd ios && bundle exec pod install --repo-update
 
 ## Jest / 单元测试 {#jest--单元测试}
 
-本库发布 `./jest-preset` 与 `./jest-setup` 两个 Jest 接线入口。下面除第一条与最后两条外,都是**没走入口**时的报错。完整说明见[在宿主工程里测试](testing.md);下面是照着报错反查。
+本库发布 `./jest-preset` 与 `./jest-setup` 两个 Jest 接线入口。下面除**前两条**与最后两条外,都是**没走入口**时的报错。完整说明见[在宿主工程里测试](testing.md);下面是照着报错反查。
 
 ### 症状:`jest-preset 需要宿主工程自行安装 @react-native/jest-preset` {#jest-missing-rn-preset}
 
@@ -170,6 +170,14 @@ cd ios && bundle exec pod install --repo-update
 **解法。** 把它连同其余测试侧依赖一起装上,见[测试 → 最小可用配方](testing.md#最小可用配方):`jest`、`@react-native/jest-preset`、`@react-native/babel-preset`、`@babel/core`、`@testing-library/react-native`、`react-test-renderer`,一个都不能省。
 
 **另一个成因,报错不一样。** 如果看到的是 `Module @unif/react-native-design/jest-preset should have "jest-preset.js" or "jest-preset.json" file at the root`,那是本包 `exports` 里的 `./jest-preset/jest-preset` 别名缺失 —— 只会在改动本包自身时出现,装 npm 包用碰不到。
+
+---
+
+### 症状:render 任意含动画的组件抛 `useAnimatedStyle was used without a dependency array or Babel plugin` {#jest-babel-worklets-plugin}
+
+**原因。** 真正转译 `node_modules/@unif/react-native-design/**` 的那份 babel 配置里没有 `react-native-worklets/plugin`。本库发布产物里有不带依赖数组的 `useAnimatedStyle`,靠这个插件在编译期补齐;缺了它 reanimated 4 在 **render 阶段**才抛,所以 suite 起得来、用例一条条红(某消费仓迁移时实测 106 条同型红)。**用了本库的 `jest-preset` 也不会好** —— 插件是宿主 babel 的事,jest 的 preset 够不着。
+
+**解法。** 确认 jest 实际用的那份 babel 配置带这个插件,且排在 `plugins` **最后**。RN app 的标准 `babel.config.js` 本来就带,会缺的是 jest 走了另一份配置(`BABEL_ENV` 分支 / `babel.config.test.js` / 自定义 `transform`),或给 `node_modules` 单开了一份带独立 `configFile` 的 babel-jest。逐条见[测试 → 入口管不到的一条](testing.md#babel-worklets-插件)。
 
 ---
 

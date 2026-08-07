@@ -6979,6 +6979,38 @@ RNGH 3 的 `GestureDetector` 会检查祖先,直接 render `<Carousel>` 本来�
 `<GestureHandlerRootView>`;手工接线时仍然要包。
 :::
 
+### 入口管不到的一条:babel 的 worklets 插件 {#babel-worklets-插件}
+
+上面那张表全是入口替你做掉的。还有一条它**做不到** —— 因为它不在 jest config 层,而在你的
+babel 配置里:
+
+> 真正转译 `node_modules/@unif/react-native-design/**` 的那份 babel 配置,必须带
+> `react-native-worklets/plugin`。
+
+本库发布产物里有**不带依赖数组**的 `useAnimatedStyle`,靠这个插件在编译期补齐。缺插件时
+reanimated 4 在 **render 阶段**抛(不是 import 阶段,所以 suite 起得来、用例一个个红):
+
+```text
+useAnimatedStyle was used without a dependency array or Babel plugin.
+```
+
+一个消费仓迁移时实测是 **106 条同型红**,全部指向 design 组件的 render。
+
+RN app 的标准 `babel.config.js`(见[快速开始 → 安装依赖](md/getting-started.md#安装依赖)第 3 步)
+本来就带这个插件,所以多数工程照着[最小可用配方](#最小可用配方)接完就没事。会缺的是这两类:
+
+- **jest 走的不是 app 那份 `babel.config.js`** —— `BABEL_ENV` / `NODE_ENV=test` 分支、单独的
+  `babel.config.test.js`、或 jest `transform` 直接指到自定义 babel;这些分支常常只抄了
+  `presets`,`plugins` 掉了。
+- **只给 `node_modules` 单开了一份 babel 配置** —— 比如 jest `transform` 里给
+  `node_modules/**` 指一个带独立 `configFile`(或 `babelrc: false`)的 babel-jest。
+  `transformIgnorePatterns` 放行本库之后,`lib/module` 就是由**那份**配置转译的,判据只看
+  它有没有这个插件。
+
+本仓自己测不到这条:根 Jest 是 **node 环境**、不 render 组件;`example/` 虽然 render,但它直读根
+`src/`,且自己那份 `babel.config.js` 显式列着这个插件。两条路都碰不到「消费仓 babel × 已发布
+`lib/module`」这个组合 —— 所以它在这里单列一节,而不是靠本仓的 gate 兜住。
+
 ## 怎么写断言 {#怎么写断言}
 
 优先按 **role + accessible name** 查询。这样写出来的断言顺带复核了组件的 a11y 契约 ——
@@ -7297,7 +7329,7 @@ cd ios && bundle exec pod install --repo-update
 
 ## Jest / 单元测试 {#jest--单元测试}
 
-本库发布 `./jest-preset` 与 `./jest-setup` 两个 Jest 接线入口。下面除第一条与最后两条外,都是**没走入口**时的报错。完整说明见[在宿主工程里测试](md/testing.md);下面是照着报错反查。
+本库发布 `./jest-preset` 与 `./jest-setup` 两个 Jest 接线入口。下面除**前两条**与最后两条外,都是**没走入口**时的报错。完整说明见[在宿主工程里测试](md/testing.md);下面是照着报错反查。
 
 ### 症状:`jest-preset 需要宿主工程自行安装 @react-native/jest-preset` {#jest-missing-rn-preset}
 
@@ -7308,6 +7340,14 @@ cd ios && bundle exec pod install --repo-update
 **解法。** 把它连同其余测试侧依赖一起装上,见[测试 → 最小可用配方](md/testing.md#最小可用配方):`jest`、`@react-native/jest-preset`、`@react-native/babel-preset`、`@babel/core`、`@testing-library/react-native`、`react-test-renderer`,一个都不能省。
 
 **另一个成因,报错不一样。** 如果看到的是 `Module @unif/react-native-design/jest-preset should have "jest-preset.js" or "jest-preset.json" file at the root`,那是本包 `exports` 里的 `./jest-preset/jest-preset` 别名缺失 —— 只会在改动本包自身时出现,装 npm 包用碰不到。
+
+---
+
+### 症状:render 任意含动画的组件抛 `useAnimatedStyle was used without a dependency array or Babel plugin` {#jest-babel-worklets-plugin}
+
+**原因。** 真正转译 `node_modules/@unif/react-native-design/**` 的那份 babel 配置里没有 `react-native-worklets/plugin`。本库发布产物里有不带依赖数组的 `useAnimatedStyle`,靠这个插件在编译期补齐;缺了它 reanimated 4 在 **render 阶段**才抛,所以 suite 起得来、用例一条条红(某消费仓迁移时实测 106 条同型红)。**用了本库的 `jest-preset` 也不会好** —— 插件是宿主 babel 的事,jest 的 preset 够不着。
+
+**解法。** 确认 jest 实际用的那份 babel 配置带这个插件,且排在 `plugins` **最后**。RN app 的标准 `babel.config.js` 本来就带,会缺的是 jest 走了另一份配置(`BABEL_ENV` 分支 / `babel.config.test.js` / 自定义 `transform`),或给 `node_modules` 单开了一份带独立 `configFile` 的 babel-jest。逐条见[测试 → 入口管不到的一条](md/testing.md#babel-worklets-插件)。
 
 ---
 

@@ -2,7 +2,7 @@
 slug: /testing
 sidebar_position: 9
 title: 在宿主工程里测试
-description: "@unif/react-native-design 的 Jest 接入：一行 preset 接好全部 peer mock。含 jest.config 一行配方、必须自己装的 devDependencies、入口替你做的每一条与漏掉后的确切报错、按 role + accessible name 断言的写法，以及不用入口时的手工等价物。"
+description: "@unif/react-native-design 的 Jest 接入：一行 preset 接好全部 peer mock。含 jest.config 一行配方、必须自己装的 devDependencies、入口替你做的每一条与漏掉后的确切报错、入口管不到的那条 babel worklets 插件、按 role + accessible name 断言的写法，以及不用入口时的手工等价物。"
 ---
 
 # 在宿主工程里测试
@@ -129,6 +129,38 @@ RNGH 3 的 `GestureDetector` 会检查祖先,直接 render `<Carousel>` 本来�
 `GestureDetector` 换成了透传壳,所以用了 preset 就不必逐个用例包
 `<GestureHandlerRootView>`;手工接线时仍然要包。
 :::
+
+### 入口管不到的一条:babel 的 worklets 插件 {#babel-worklets-插件}
+
+上面那张表全是入口替你做掉的。还有一条它**做不到** —— 因为它不在 jest config 层,而在你的
+babel 配置里:
+
+> 真正转译 `node_modules/@unif/react-native-design/**` 的那份 babel 配置,必须带
+> `react-native-worklets/plugin`。
+
+本库发布产物里有**不带依赖数组**的 `useAnimatedStyle`,靠这个插件在编译期补齐。缺插件时
+reanimated 4 在 **render 阶段**抛(不是 import 阶段,所以 suite 起得来、用例一个个红):
+
+```text
+useAnimatedStyle was used without a dependency array or Babel plugin.
+```
+
+一个消费仓迁移时实测是 **106 条同型红**,全部指向 design 组件的 render。
+
+RN app 的标准 `babel.config.js`(见[快速开始 → 安装依赖](getting-started.md#安装依赖)第 3 步)
+本来就带这个插件,所以多数工程照着[最小可用配方](#最小可用配方)接完就没事。会缺的是这两类:
+
+- **jest 走的不是 app 那份 `babel.config.js`** —— `BABEL_ENV` / `NODE_ENV=test` 分支、单独的
+  `babel.config.test.js`、或 jest `transform` 直接指到自定义 babel;这些分支常常只抄了
+  `presets`,`plugins` 掉了。
+- **只给 `node_modules` 单开了一份 babel 配置** —— 比如 jest `transform` 里给
+  `node_modules/**` 指一个带独立 `configFile`(或 `babelrc: false`)的 babel-jest。
+  `transformIgnorePatterns` 放行本库之后,`lib/module` 就是由**那份**配置转译的,判据只看
+  它有没有这个插件。
+
+本仓自己测不到这条:根 Jest 是 **node 环境**、不 render 组件;`example/` 虽然 render,但它直读根
+`src/`,且自己那份 `babel.config.js` 显式列着这个插件。两条路都碰不到「消费仓 babel × 已发布
+`lib/module`」这个组合 —— 所以它在这里单列一节,而不是靠本仓的 gate 兜住。
 
 ## 怎么写断言 {#怎么写断言}
 
