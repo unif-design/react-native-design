@@ -29,7 +29,15 @@ let reactNativePreset;
 try {
   reactNativePreset = require('@react-native/jest-preset');
 } catch (error) {
-  if (error && error.code === 'MODULE_NOT_FOUND') {
+  // 只认「@react-native/jest-preset 自己没装」这一种 MODULE_NOT_FOUND:它装了但内部
+  // 依赖断裂时抛的也是这个 code,那时报「需要自行安装」是误诊,会把人引向装了又装。
+  // Node 的 MODULE_NOT_FOUND 正文首行是 `Cannot find module '<说明符>'`,带引号的模块名
+  // 就是判据 —— 后面的 Require stack 只有裸路径,不会误命中。
+  if (
+    error &&
+    error.code === 'MODULE_NOT_FOUND' &&
+    String(error.message).includes("'@react-native/jest-preset'")
+  ) {
     throw new Error(
       '@unif/react-native-design/jest-preset 需要宿主工程自行安装 @react-native/jest-preset' +
         '(它不是本包的依赖):yarn add -D @react-native/jest-preset'

@@ -2,7 +2,7 @@
 'use strict';
 
 // 发布面 gate:两个 Jest 入口必须同时出现在 exports 与 files,且 preset 可 require、
-// 形状正确。漏任一项都会让消费者拿到一个 "Cannot find module" 的包。
+// 形状正确。漏任一项消费者的 preset 解析都会失败,各条目的具体报错见 jest-preset.js 头注释。
 
 const path = require('node:path');
 const fs = require('node:fs');

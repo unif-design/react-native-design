@@ -3858,7 +3858,9 @@ test('repo-specific workflow 使用强并集 gate 且共享 CI digest 不漂移'
   ]) {
     assert.ok(workflow.includes(`run: ${command}`), `workflow 缺少 ${command}`);
   }
-  // jest 入口 step 是块标量,没有 `run: <command>` 字面串,所以单独断言。
+  // jest 入口 step 是块标量,原文里没有 `run: <command>` 字面串,所以这里单独断言。
+  // (verifier 侧已改成聚合 run 正文后再查,两种写法都认;本测试仍按原文断言,免得
+  // 把「命令在不在 workflow 里」和「verifier 怎么解析」两件事绑死。)
   for (const command of [
     'yarn check:jest-entries',
     'node --test "scripts/__tests__/jest-*.test.mjs"',
@@ -3869,6 +3871,34 @@ test('repo-specific workflow 使用强并集 gate 且共享 CI digest 不漂移'
     workflow,
     /yarn example (?:build:android|build:ios|android|ios)|pod install/u
   );
+});
+
+test('workflow gate 认得块标量 run 里的命令', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    assert.doesNotThrow(() => showcaseVerifier.verifyExampleShowcase(fixture));
+    // 把一条单行 run 改写成等价的块标量:命令没少,gate 就不该红。
+    // 旧实现只查 `run: <command>` 字面串,这一步会直接 WORKFLOW_GATES。
+    mutateFixtureFile(
+      fixture,
+      '.github/workflows/example-showcase.yml',
+      (source) =>
+        source.replace(
+          '        run: yarn example lint\n',
+          '        run: |\n          yarn example lint\n'
+        ),
+      '块标量化 example lint'
+    );
+    assert.doesNotThrow(() => showcaseVerifier.verifyExampleShowcase(fixture));
+
+    // 反向:块标量里删掉命令仍要红,证明上面的绿不是因为解析退化成「全放行」。
+    mutateFixtureFile(
+      fixture,
+      '.github/workflows/example-showcase.yml',
+      (source) => source.replace('          yarn example lint\n', ''),
+      '块标量里删掉 example lint'
+    );
+    assertVerifierCode(fixture, 'WORKFLOW_GATES', '块标量里删掉 example lint');
+  });
 });
 
 test('Turbo 只定义 package-qualified example tasks 并隔离双端 native inputs', () => {

@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { readFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -54,6 +62,80 @@ test('preset 可 require 且形状正确', () => {
       `transformIgnorePatterns 少了 ${fragment}`
     );
   }
+});
+
+// 在临时目录里放一份 jest-preset.js 的副本 + 自建 node_modules,再从那份副本 require:
+// Node 从文件自身位置向上找 node_modules,所以本仓装着的 @react-native/jest-preset 不会
+// 参与解析 —— 不用改环境变量、不用子进程,也就没有 flaky 面。
+function withPresetSandbox(populate, run) {
+  const sandbox = mkdtempSync(
+    path.join(os.tmpdir(), 'react-native-design-jest-preset-')
+  );
+  try {
+    copyFileSync(
+      path.join(repositoryRoot, 'jest-preset.js'),
+      path.join(sandbox, 'jest-preset.js')
+    );
+    mkdirSync(path.join(sandbox, 'node_modules'), { recursive: true });
+    populate(sandbox);
+    const requireFromSandbox = createRequire(
+      path.join(sandbox, 'noop-require-base.js')
+    );
+    return run(() => requireFromSandbox(path.join(sandbox, 'jest-preset.js')));
+  } finally {
+    rmSync(sandbox, { recursive: true, force: true });
+  }
+}
+
+test('漏装 @react-native/jest-preset 时抛可执行的自有报错', () => {
+  withPresetSandbox(
+    () => {},
+    (requirePreset) => {
+      assert.throws(requirePreset, (error) => {
+        assert.ok(
+          error.message.includes('需要宿主工程自行安装'),
+          `实际报错:${error.message}`
+        );
+        // 必须不带 MODULE_NOT_FOUND —— 带着就会被 jest-config 归进
+        // 「preset 模块畸形」的 Validation Error,自有报错原文永远露不出来。
+        assert.notEqual(error.code, 'MODULE_NOT_FOUND');
+        return true;
+      });
+    }
+  );
+});
+
+test('@react-native/jest-preset 内部依赖断裂时原样 rethrow,不误诊成漏装', () => {
+  withPresetSandbox(
+    (sandbox) => {
+      const fake = path.join(sandbox, 'node_modules/@react-native/jest-preset');
+      mkdirSync(fake, { recursive: true });
+      writeFileSync(
+        path.join(fake, 'package.json'),
+        JSON.stringify({
+          name: '@react-native/jest-preset',
+          version: '0.0.0-fixture',
+          main: 'index.js',
+        })
+      );
+      // 装是装了,只是它自己的某个依赖不在 —— 同样是 MODULE_NOT_FOUND。
+      writeFileSync(
+        path.join(fake, 'index.js'),
+        "require('broken-internal-dep-fixture');\n"
+      );
+    },
+    (requirePreset) => {
+      assert.throws(requirePreset, (error) => {
+        assert.equal(error.code, 'MODULE_NOT_FOUND');
+        assert.ok(error.message.includes('broken-internal-dep-fixture'));
+        assert.ok(
+          !error.message.includes('需要宿主工程自行安装'),
+          '装了但内部依赖断裂不得被报成漏装'
+        );
+        return true;
+      });
+    }
+  );
 });
 
 test('resolver 组合了 RN 与 worklets 两个上游', () => {

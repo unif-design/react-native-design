@@ -3523,6 +3523,40 @@ function verifyDocumentation(root) {
   }
 }
 
+// GitHub Actions 的 `run:` 有两种写法:单行标量与 `run: |` 块标量。对 workflow 原文做
+// `includes('run: <command>')` 只认得前者,块标量 step 的命令在后续更深缩进的行上,永远
+// 匹配不到 —— 那正是 jest 入口两条命令当初只能逐条显式补断言的原因。这里手写一个最小
+// 聚合(不引 YAML 依赖):把两种写法的命令正文都抽出来,gate 一律查这份聚合文本。
+// 只收 run 正文的另一个好处:step `name:`、注释里出现同名命令不会假绿。
+function collectWorkflowRunCommands(workflow) {
+  const lines = workflow.split('\n');
+  const commands = [];
+  let index = 0;
+  while (index < lines.length) {
+    const line = lines[index];
+    index += 1;
+    const match = /^(\s*)(?:-\s+)?run:(.*)$/u.exec(line);
+    if (!match) continue;
+    const runIndent = match[1].length;
+    const inline = match[2].trim();
+    // `run: <command>`:正文就在本行。`|`/`>` 及其 chomping 后缀是块标量指示符,不是命令。
+    if (inline && !/^[|>][-+]?\d*$/u.test(inline)) {
+      commands.push(inline);
+      continue;
+    }
+    // `run: |`:正文是后续缩进更深的行,缩进退回 step 层级即结束。
+    while (index < lines.length) {
+      const body = lines[index];
+      if (body.trim() !== '') {
+        if (body.length - body.trimStart().length <= runIndent) break;
+        commands.push(body.trim());
+      }
+      index += 1;
+    }
+  }
+  return commands.join('\n');
+}
+
 function verifyWorkflowContract(root) {
   const sharedCi = readText(root, '.github/workflows/ci.yml');
   const digest = createHash('sha256').update(sharedCi).digest('hex');
@@ -3575,8 +3609,9 @@ function verifyWorkflowContract(root) {
     'yarn test --maxWorkers=2',
     'yarn prepare',
   ];
+  const workflowCommands = collectWorkflowRunCommands(workflow);
   const missingCommands = requiredCommands.filter(
-    (command) => !workflow.includes(`run: ${command}`)
+    (command) => !workflowCommands.includes(command)
   );
   if (missingCommands.length) {
     failVerification(
@@ -3584,14 +3619,13 @@ function verifyWorkflowContract(root) {
       `example workflow 缺少 gates: ${missingCommands.join(', ')}`
     );
   }
-  // jest 入口那个 step 是块标量(`run: |` + 两行命令),匹配不到上面那种
-  // `run: <command>` 字面串,所以单独断言。根 jest 忽略 scripts/__tests__/、
-  // 共享 ci.yml 又不能动 —— 这两条命令是它们唯一进 CI 的路径,漏了就是
-  // 「文件在、gate 永远不跑」。
+  // 单列一组只为报错能指名道姓:根 jest 忽略 scripts/__tests__/、共享 ci.yml 又是组织
+  // 模板不能动 —— 这两条命令是那批 gate 唯一进 CI 的路径,漏了就是「文件在、gate 永远
+  // 不跑」,值得和普通 gate 分开提示。
   const missingJestEntryGates = [
     'yarn check:jest-entries',
     'node --test "scripts/__tests__/jest-*.test.mjs"',
-  ].filter((command) => !workflow.includes(command));
+  ].filter((command) => !workflowCommands.includes(command));
   if (missingJestEntryGates.length) {
     failVerification(
       'WORKFLOW_GATES',
