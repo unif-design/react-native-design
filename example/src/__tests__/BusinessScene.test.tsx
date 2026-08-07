@@ -10,10 +10,7 @@ import {
 } from '@unif/react-native-design';
 import * as DesignRuntime from '@unif/react-native-design';
 import App from '../App';
-import {
-  installReducedMotionMock,
-  restoreNativeMocks,
-} from './helpers/nativeMocks';
+import { restoreNativeMocks } from './helpers/nativeMocks';
 import { createShowcaseRuntimeCoverage } from './helpers/showcaseRuntimeCoverage';
 import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
 
@@ -71,7 +68,6 @@ function componentByTestID<T extends React.ComponentType<never>>(
 
 beforeEach(() => {
   jest.clearAllMocks();
-  installReducedMotionMock(false);
 });
 
 afterEach(() => {

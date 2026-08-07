@@ -101,10 +101,10 @@ function createFixtureJestConfig(fixture, overrides = {}) {
     ...baseConfig,
     rootDir: fixtureExampleRoot,
     cacheDirectory: path.join(fixture, '.jest-cache'),
-    preset: path.join(
-      repositoryRoot,
-      'example/node_modules/@react-native/jest-preset'
-    ),
+    // preset 不覆写 —— 继承 production 的 '@unif/react-native-design/jest-preset',
+    // fixture 的 example/node_modules 是指向真实 workspace 的 symlink,同一条
+    // exports 子路径在这里也能解析到仓根 jest-preset.js。写死成别的值就等于让
+    // fixture 跑一套 production 不存在的接线。
     setupFilesAfterEnv: [path.join(repositoryRoot, 'example/jest.setup.ts')],
     moduleNameMapper: {
       ...baseConfig.moduleNameMapper,
@@ -114,17 +114,33 @@ function createFixtureJestConfig(fixture, overrides = {}) {
         repositoryRoot,
         'example/node_modules/react/$1'
       ),
+      // RN 与 RNGH 子路径同样按绝对路径覆写:fixture 的每一条钉住都要指向真实
+      // workspace 拷贝,漏一条就会从 baseConfig 继承 <rootDir> 相对值。
+      '^react-native($|/.*)': path.join(
+        repositoryRoot,
+        'example/node_modules/react-native/$1'
+      ),
       '^react-native-gesture-handler$': path.join(
         repositoryRoot,
         'example/node_modules/react-native-gesture-handler/src/index.ts'
       ),
+      '^react-native-gesture-handler/(.*)$': path.join(
+        repositoryRoot,
+        'example/node_modules/react-native-gesture-handler/$1'
+      ),
+      // reanimated / worklets 指向真实包根做身份钉住(mock 职责在 preset 的
+      // jest-setup),safe-area-context 同理 —— 与 production config 逐项一致。
       '^react-native-reanimated$': path.join(
         repositoryRoot,
-        'example/node_modules/react-native-reanimated/mock.js'
+        'example/node_modules/react-native-reanimated'
       ),
       '^react-native-worklets$': path.join(
         repositoryRoot,
-        'example/node_modules/react-native-worklets/src/mock.ts'
+        'example/node_modules/react-native-worklets'
+      ),
+      '^react-native-safe-area-context$': path.join(
+        repositoryRoot,
+        'example/node_modules/react-native-safe-area-context'
       ),
     },
     ...overrides,
@@ -989,7 +1005,9 @@ test('Babel/Metro/Jest 使用 RN 0.86 workspace source contract', () => {
     metroConfig.resolver.extraNodeModules['@unif/react-native-design'],
     root
   );
-  assert.equal(jestConfig.preset, '@react-native/jest-preset');
+  assert.equal(jestConfig.preset, '@unif/react-native-design/jest-preset');
+  // 读的是 raw config 文件:preset 自带的 setupFilesAfterEnv 由 jest 在运行时前置
+  // 拼接,原文件里仍然只有 example 自己这一项。
   assert.deepEqual(jestConfig.setupFilesAfterEnv, ['<rootDir>/jest.setup.ts']);
   assert.match(
     read('example/tsconfig.json'),
@@ -3840,6 +3858,13 @@ test('repo-specific workflow 使用强并集 gate 且共享 CI digest 不漂移'
   ]) {
     assert.ok(workflow.includes(`run: ${command}`), `workflow 缺少 ${command}`);
   }
+  // jest 入口 step 是块标量,没有 `run: <command>` 字面串,所以单独断言。
+  for (const command of [
+    'yarn check:jest-entries',
+    'node --test "scripts/__tests__/jest-*.test.mjs"',
+  ]) {
+    assert.ok(workflow.includes(command), `workflow 缺少 ${command}`);
+  }
   assert.doesNotMatch(
     workflow,
     /yarn example (?:build:android|build:ios|android|ios)|pod install/u
@@ -3881,6 +3906,11 @@ test('Turbo 只定义 package-qualified example tasks 并隔离双端 native inp
     '$TURBO_ROOT$/scripts/verify-example-showcase.mjs',
     '$TURBO_ROOT$/example/jest.forbidOnlyReporter.js',
     '$TURBO_ROOT$/example/jest.showcaseGate.js',
+    // 仓根三个 jest 入口是 example test 的真实输入(example/jest.config.js 只写
+    // preset 字符串,接线整份来自它们),漏了会拿旧 turbo 缓存假绿。
+    '$TURBO_ROOT$/jest-preset.js',
+    '$TURBO_ROOT$/jest-setup.js',
+    '$TURBO_ROOT$/jest-resolver.js',
   ]) {
     assert.ok(
       testInputs.includes(directInput),
@@ -4220,6 +4250,25 @@ test('workflow 与 shared CI mutation gate 返回稳定 typed code', () => {
         source.replace('        run: yarn example lint\n', ''),
     },
     {
+      // 这一条锚定块标量里那行独有的 glob:上面 requiredCommands 的
+      // `run: <command>` 匹配对它无效,删掉整个 step 只会静默失去 gate。
+      label: 'workflow 漏 jest 入口 gate',
+      file: '.github/workflows/example-showcase.yml',
+      code: 'WORKFLOW_GATES',
+      mutate: (source) =>
+        source.replace(
+          '          node --test "scripts/__tests__/jest-*.test.mjs"\n',
+          ''
+        ),
+    },
+    {
+      label: 'workflow 漏 check:jest-entries',
+      file: '.github/workflows/example-showcase.yml',
+      code: 'WORKFLOW_GATES',
+      mutate: (source) =>
+        source.replace('          yarn check:jest-entries\n', ''),
+    },
+    {
       label: 'workflow 加入 paths filter',
       file: '.github/workflows/example-showcase.yml',
       code: 'WORKFLOW_TRIGGER',
@@ -4284,6 +4333,9 @@ test('Turbo mutation gate 拒绝 task、深层 source 与平台隔离漂移', ()
       '$TURBO_ROOT$/scripts/verify-example-showcase.mjs',
       '$TURBO_ROOT$/example/jest.forbidOnlyReporter.js',
       '$TURBO_ROOT$/example/jest.showcaseGate.js',
+      '$TURBO_ROOT$/jest-preset.js',
+      '$TURBO_ROOT$/jest-setup.js',
+      '$TURBO_ROOT$/jest-resolver.js',
     ].map((input) => ({
       label: `test task 删除直接执行 input ${input}`,
       code: 'TURBO_INPUTS',

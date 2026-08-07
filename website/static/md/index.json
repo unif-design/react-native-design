@@ -371,10 +371,17 @@
     "description": "design 是一个 Agent Skill,教 AI 编码助手正确调用 @unif/react-native-design 的 API、避免常见幻觉。"
   },
   {
+    "title": "在宿主工程里测试",
+    "mdPath": "md/testing.md",
+    "slug": "/testing",
+    "section": "概览",
+    "description": "@unif/react-native-design 的 Jest 接入：一行 preset 接好全部 peer mock。含 jest.config 一行配方、必须自己装的 devDependencies、入口替你做的每一条与漏掉后的确切报错、按 role + accessible name 断言的写法，以及不用入口时的手工等价物。"
+  },
+  {
     "title": "常见问题",
     "mdPath": "md/troubleshooting.md",
     "slug": "/troubleshooting",
     "section": "概览",
-    "description": "@unif/react-native-design 排障决策树（症状 → 因 → 解）：Web / 文档站点击无响应与动画崩溃、主题样式不切换 / useThemedStyles 缓存失效、peerDeps 缺失与 iOS 链接错误。"
+    "description": "@unif/react-native-design 排障决策树（症状 → 因 → 解）：Web / 文档站点击无响应与动画崩溃、主题样式不切换 / useThemedStyles 缓存失效、peerDeps 缺失与 iOS 链接错误、Jest 没走 jest-preset 入口时的 transform / RNGH Pressable / useReducedMotion 报错。"
   }
 ]

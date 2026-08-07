@@ -28,10 +28,7 @@ import {
 } from '@unif/react-native-design';
 import * as DesignRuntime from '@unif/react-native-design';
 import App from '../App';
-import {
-  installReducedMotionMock,
-  restoreNativeMocks,
-} from './helpers/nativeMocks';
+import { restoreNativeMocks } from './helpers/nativeMocks';
 import { createShowcaseRuntimeCoverage } from './helpers/showcaseRuntimeCoverage';
 import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
 
@@ -144,7 +141,6 @@ afterEach(() => {
 });
 
 test('Foundation 展示真实 theme、token、palette、scale、blur 与 Icon 事实', () => {
-  installReducedMotionMock(false);
   render(<App />);
   const iconAccessLog = (
     ICONS as typeof ICONS & { [mockIconAccessLogKey]: string[] }
@@ -416,7 +412,6 @@ test('Foundation 展示真实 theme、token、palette、scale、blur 与 Icon �
 });
 
 test('Icon catalog 初始 24 个、每次多 24 个，并由大小写不敏感搜索与 Empty 驱动', () => {
-  installReducedMotionMock(false);
   render(<App />);
   enterFoundation();
   const stateCoverage = createShowcaseStateCoverage('Icon');
@@ -479,7 +474,6 @@ test('Icon catalog 初始 24 个、每次多 24 个，并由大小写不敏感�
 });
 
 test('Icon query 与 loadedCount 跨路由保留，scene reset 只重置 Foundation draft', () => {
-  installReducedMotionMock(false);
   render(<App />);
   enterFoundation();
 
@@ -500,7 +494,6 @@ test('Icon query 与 loadedCount 跨路由保留，scene reset 只重置 Foundat
 });
 
 test('logger action 通过真实 transport 进入最新结果，历史默认不展开且按需限制详情', () => {
-  installReducedMotionMock(false);
   render(<App />);
   enterFoundation();
   DesignRuntime.setLogLevel('error');

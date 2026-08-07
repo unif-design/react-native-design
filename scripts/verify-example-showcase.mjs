@@ -1749,7 +1749,9 @@ function verifyRuntimeAndNativeContract(root) {
     );
   }
   if (
-    !jest.includes("preset: '@react-native/jest-preset'") ||
+    // example 吃本包发布的 preset(狗粮):走与消费者相同的 exports 子路径解析,
+    // 接线一改就被 example 的 15 个 suite 回归覆盖。
+    !jest.includes("preset: '@unif/react-native-design/jest-preset'") ||
     !jest.includes(
       "'^@unif/react-native-design$': '<rootDir>/../src/index.tsx'"
     ) ||
@@ -3582,6 +3584,20 @@ function verifyWorkflowContract(root) {
       `example workflow 缺少 gates: ${missingCommands.join(', ')}`
     );
   }
+  // jest 入口那个 step 是块标量(`run: |` + 两行命令),匹配不到上面那种
+  // `run: <command>` 字面串,所以单独断言。根 jest 忽略 scripts/__tests__/、
+  // 共享 ci.yml 又不能动 —— 这两条命令是它们唯一进 CI 的路径,漏了就是
+  // 「文件在、gate 永远不跑」。
+  const missingJestEntryGates = [
+    'yarn check:jest-entries',
+    'node --test "scripts/__tests__/jest-*.test.mjs"',
+  ].filter((command) => !workflow.includes(command));
+  if (missingJestEntryGates.length) {
+    failVerification(
+      'WORKFLOW_GATES',
+      `example workflow 缺少 jest 入口 gates: ${missingJestEntryGates.join(', ')}`
+    );
+  }
   if (
     /yarn example (?:build:android|build:ios|android|ios)|pod install/u.test(
       workflow
@@ -3643,6 +3659,12 @@ function verifyTurboContract(root) {
     '$TURBO_ROOT$/scripts/verify-example-showcase.mjs',
     '$TURBO_ROOT$/example/jest.forbidOnlyReporter.js',
     '$TURBO_ROOT$/example/jest.showcaseGate.js',
+    // example 的 jest 接线现在整份来自仓根 preset(example/jest.config.js 只写
+    // preset 字符串),这三个文件是 example test 的**真实**输入。漏在 inputs 外,
+    // 改接线不会让 turbo 缓存失效 —— 拿旧缓存直接判绿,是最坏的一类假绿。
+    '$TURBO_ROOT$/jest-preset.js',
+    '$TURBO_ROOT$/jest-setup.js',
+    '$TURBO_ROOT$/jest-resolver.js',
   ];
   const androidInputs =
     turbo.tasks['@unif/react-native-design-example#build:android'].inputs;

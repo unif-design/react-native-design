@@ -56,6 +56,7 @@ yarn install --immutable
 yarn check:config
 yarn check:runtime-peers
 yarn check:icons
+yarn check:jest-entries
 yarn verify:example-showcase
 
 yarn typecheck
@@ -97,6 +98,12 @@ src/components/ui
 src/components/business
 ```
 
+除 barrel 外，`package.json#exports` 还发布 `./jest-setup` 与 `./jest-preset` 两个
+Jest 接线入口（仓根手写 CJS，不过 bob、不 import `src/`）。改动它们要同步
+`yarn check:jest-entries`、`scripts/__tests__/jest-*.test.mjs`、`example/jest.config.js`、
+`.github/workflows/example-showcase.yml`（根 jest 不扫 `scripts/__tests__/`，那个
+workflow 是这两条 gate 唯一进 CI 的路径）、Website 测试页与 `design` Skill。
+
 - library 内部使用相对 import；example 只从 `@unif/react-native-design` package root
   导入，禁止 `src/`、`lib/`、`dist/` deep import。
 - `ui/` 是无业务上下文的原子组件；`business/` 是通用复合组件。navigation、store、业务
@@ -128,7 +135,9 @@ src/components/business
 - Cell 使用 static/action/control 严格分支；Carousel 使用 display/action 严格分支。
   action Carousel 必须同时给 `onPressItem` 与 `getAccessibilityLabel`，reduced motion 下停止
   autoplay，单页不渲染 Pagination。
-- Checkbox/Radio/Switch 使用 `checked`；Tabs/TabBar/Segmented 使用 `selected`。
+- Checkbox/Radio/Switch 报告 `accessibilityState.checked`；Tabs/TabBar/Segmented 报告
+  `accessibilityState.selected`。这是 a11y 状态名，不是受控 prop 名：prop 只有 Checkbox 叫
+  `checked`，Radio/Switch/Tabs/Segmented 用 `value`，TabBar 用 `active`。
   装饰 View/Image/SVG 隐藏完整 a11y 子树，状态反馈避免重复播报。
 - `ConfirmStore` 单 owner/单 active、identity-guarded settle；`ToastStore` 使用
   latest-wins pending/delivery、owner token 与 lease/CAS。Store 内部类型不进入 public barrel。

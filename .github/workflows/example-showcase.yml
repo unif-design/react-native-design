@@ -40,6 +40,17 @@ jobs:
       - name: Check generated icons
         run: yarn check:icons
 
+      # 根 jest 忽略 scripts/__tests__/，共享 ci.yml 又是组织模板不能动：
+      # 这个 gate 与它的单测只有在这里显式接线才会在 CI 里真的跑。
+      # 用 glob 而不是列文件名：后续新增的 jest-*.test.mjs 会自动进 CI，不必回头改
+      # 这个 workflow（漏改的后果正是上面那条注释警告的「文件在、CI 永远不跑」）。
+      # 引号必须留着 —— 让 node 自己展开 glob。也不能退化成裸目录：那会把几十分钟的
+      # example-showcase 套件一起扫进来。
+      - name: Check jest entries
+        run: |
+          yarn check:jest-entries
+          node --test "scripts/__tests__/jest-*.test.mjs"
+
       - name: Verify example showcase contract
         run: yarn verify:example-showcase
 

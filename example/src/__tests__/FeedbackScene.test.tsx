@@ -23,10 +23,8 @@ import {
   usePulse,
 } from '@unif/react-native-design';
 import App from '../App';
-import {
-  installReducedMotionMock,
-  restoreNativeMocks,
-} from './helpers/nativeMocks';
+import { restoreNativeMocks } from './helpers/nativeMocks';
+import { setReducedMotion } from './helpers/reducedMotion';
 import { createShowcaseRuntimeCoverage } from './helpers/showcaseRuntimeCoverage';
 import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
 
@@ -76,21 +74,9 @@ jest.mock('@unif/react-native-design', () => {
   };
 });
 
-jest.mock('react-native-reanimated', () => {
-  const ReactModule = jest.requireActual<typeof import('react')>('react');
-  const reanimatedMock = jest.requireActual<
-    typeof import('react-native-reanimated')
-  >('react-native-reanimated');
-  return {
-    ...reanimatedMock,
-    useReducedMotion: () => reanimatedMock.useReducedMotion?.() ?? false,
-    useSharedValue: <Value,>(initialValue: Value) => {
-      const ref = ReactModule.useRef<{ value: Value } | null>(null);
-      if (ref.current === null) ref.current = { value: initialValue };
-      return ref.current;
-    },
-  };
-});
+jest.mock('react-native-reanimated', () =>
+  require('./helpers/reducedMotion').reanimatedWithReducedMotion()
+);
 
 const toastCases = [
   ['信息', '顶部'],
@@ -133,12 +119,13 @@ function componentByTestID<T extends React.ComponentType<never>>(
 
 beforeEach(() => {
   jest.clearAllMocks();
-  installReducedMotionMock(false);
+  setReducedMotion(false);
 });
 
 afterEach(() => {
   jest.useRealTimers();
   restoreNativeMocks();
+  setReducedMotion(false);
   jest.restoreAllMocks();
 });
 
@@ -359,8 +346,7 @@ test('Pulse、PulseDot、usePulse 与 Reveal 使用合法 options，并保留子
   expect(componentByTestID(Reveal, 'feedback-reveal').props.duration).toBe(500);
 
   unmount();
-  restoreNativeMocks();
-  installReducedMotionMock(true);
+  setReducedMotion(true);
   render(<App />);
   enterFeedback();
   for (const testID of ['feedback-pulse-default', 'feedback-pulse'] as const) {
@@ -399,8 +385,7 @@ test('Pulse、PulseDot、usePulse 与 Reveal 使用合法 options，并保留子
 });
 
 test('系统减少动态效果开启时 Pulse、PulseDot 与 Reveal 真实停用非必要动画', () => {
-  restoreNativeMocks();
-  installReducedMotionMock(true);
+  setReducedMotion(true);
   render(<App />);
   enterFeedback();
 

@@ -2,12 +2,12 @@
 slug: /troubleshooting
 sidebar_position: 10
 title: 常见问题
-description: "@unif/react-native-design 排障决策树（症状 → 因 → 解）：Web / 文档站点击无响应与动画崩溃、主题样式不切换 / useThemedStyles 缓存失效、peerDeps 缺失与 iOS 链接错误。"
+description: "@unif/react-native-design 排障决策树（症状 → 因 → 解）：Web / 文档站点击无响应与动画崩溃、主题样式不切换 / useThemedStyles 缓存失效、peerDeps 缺失与 iOS 链接错误、Jest 没走 jest-preset 入口时的 transform / RNGH Pressable / useReducedMotion 报错。"
 ---
 
 # 常见问题
 
-按**症状 → 原因 → 解法**排查。多数问题集中在「peer 缺失」「颜色没走 token / 主题不切」「web 环境特性」三类。
+按**症状 → 原因 → 解法**排查。多数问题集中在「peer 缺失」「颜色没走 token / 主题不切」「web 环境特性」「Jest 没走本库的接线入口」四类。
 
 ---
 
@@ -154,6 +154,86 @@ yarn add -D @babel/core @react-native/babel-preset@0.86.2 @react-native/metro-co
 cd ios && bundle exec pod install --repo-update
 # 再 Xcode → Product → Clean Build Folder 后重新构建
 ```
+
+---
+
+## Jest / 单元测试 {#jest--单元测试}
+
+本库发布 `./jest-preset` 与 `./jest-setup` 两个 Jest 接线入口。下面除第一条与最后两条外,都是**没走入口**时的报错。完整说明见[在宿主工程里测试](/docs/testing);下面是照着报错反查。
+
+### 症状:`jest-preset 需要宿主工程自行安装 @react-native/jest-preset` {#jest-missing-rn-preset}
+
+完整报错是 `Validation Error: An unknown error occurred in @unif/react-native-design/jest-preset:` 后面跟这句话。
+
+**原因。** `@react-native/jest-preset` 没装。它**不是**本库的 dependency —— 本库的 preset 文件在运行时 `require` 它,并把 `MODULE_NOT_FOUND` 换成了上面这句可执行的报错。(不换的话,jest 加载 preset 时只看报错文本里有没有 preset 路径,而 Node 的 Require stack 恰好带着 `.../@unif/react-native-design/jest-preset.js`,真因会被判成「preset 模块本身畸形」。)
+
+**解法。** 把它连同其余测试侧依赖一起装上,见[测试 → 最小可用配方](/docs/testing#最小可用配方):`jest`、`@react-native/jest-preset`、`@react-native/babel-preset`、`@babel/core`、`@testing-library/react-native`、`react-test-renderer`,一个都不能省。
+
+**另一个成因,报错不一样。** 如果看到的是 `Module @unif/react-native-design/jest-preset should have "jest-preset.js" or "jest-preset.json" file at the root`,那是本包 `exports` 里的 `./jest-preset/jest-preset` 别名缺失 —— 只会在改动本包自身时出现,装 npm 包用碰不到。
+
+---
+
+### 症状:`SyntaxError: Unexpected token 'export'` 或 `Cannot use import statement outside a module` {#jest-transform}
+
+**原因。** 本库发布 ESM(`lib/module/*.js`),而 `@react-native/jest-preset` 默认的 `transformIgnorePatterns` 只放行 `react-native` / `@react-native` / `@react-native-community` 三个前缀,`node_modules` 里其余包一律不转译。
+
+**解法。** 用 `preset: '@unif/react-native-design/jest-preset'`,放行清单在入口里。手工接线时:把 `@unif/react-native-design` 和它的 RN 生态 peer 一起加进白名单,见[测试 → 手工等价物](/docs/testing#不使用入口时的手工等价物)。只加 `@unif/react-native-design` 不够 —— 那几个 peer 同样发 ESM / TS 源码。
+
+---
+
+### 症状:render 任意 design 组件就抛 `useComposedEventHandler is not a function` {#jest-rngh-pressable}
+
+**原因。** design 的交互组件内部用 RNGH 的 `Pressable`;RNGH 3 的 `Pressable` 在 Jest 里会走到 reanimated 的组合事件路径。**这是 render 阶段的硬崩溃**,不是「点了没反应」。
+
+**解法。** 用 `preset: '@unif/react-native-design/jest-preset'`,入口已经把 RNGH 的 `Pressable` 换成 RN 的。手工接线时:在 setup 文件里自己覆盖(保留 `...actual`,`GestureHandlerRootView` 仍要是真的),见[测试 → 手工等价物](/docs/testing#不使用入口时的手工等价物)。
+
+---
+
+### 症状:render Switch / Carousel / Spinner / Skeleton / Reveal 抛 `useReducedMotion is not a function` {#jest-reduced-motion}
+
+**原因。** 把 `react-native-reanimated` 映射到了它自带的 `mock.js` —— `react-native-reanimated@4.5.3` 的 mock 里 `useReducedMotion` 那行是注释掉的(`// useReducedMotion: ADD ME IF NEEDED`),而这些组件都经 `usePrefersReducedMotion` 读它。
+
+**解法。** 用 `preset: '@unif/react-native-design/jest-preset'`,入口用的是**真实 reanimated** + 官方 `setUpTests()`,并删掉你自己那条 reanimated 的 `moduleNameMapper`。手工接线时:同样别映射 reanimated,只把 `react-native-worklets` 换成官方 mock;实在要用那份 mock 就自己补上 `useReducedMotion`,见[测试 → 每一条为什么必需](/docs/testing#每一条为什么必需)。
+
+---
+
+### 症状:`Cannot read properties of undefined (reading 'loadUnpackersWithCode')` {#jest-worklets}
+
+**原因。** `react-native-worklets` 的 native 侧在 Jest 里不存在,import 阶段就崩,整个 suite 起不来。
+
+**解法。** 用 `preset: '@unif/react-native-design/jest-preset'`,入口已经把它换成官方 mock,并附带 worklets 的 `.native.*` extension 过滤。手工接线时:在 setup 里 `jest.mock('react-native-worklets', () => require('react-native-worklets/lib/module/mock'))`。
+
+---
+
+### 症状:`SafeAreaProvider` 里的内容一个都查不到 {#jest-safe-area}
+
+**原因。** 真实 `SafeAreaProvider` 要等 native 量出 inset 才渲染子树,Jest 里等不到,于是整棵子树不渲染。
+
+**解法。** 用 `preset: '@unif/react-native-design/jest-preset'`,入口已经接上 safe-area-context 自带的 `jest/mock`。手工接线时:自己 `jest.mock` 上去。只有被测树里含 `SafeAreaProvider`(以及根装配里的 `ToastHost` / `ConfirmHost`)时才需要,单独测一个 Button 不需要。
+
+---
+
+### 症状:测 Carousel 抛 `GestureDetector must be used as a descendant of GestureHandlerRootView` {#jest-carousel-root}
+
+**原因。** RNGH 3 的 `GestureDetector` 会检查祖先里有没有根视图。
+
+**解法。** 用 `preset: '@unif/react-native-design/jest-preset'`,入口把 `GestureDetector` 换成了透传壳,用例不必再包根视图。手工接线时:把用例包进 `<GestureHandlerRootView>` 再 render。
+
+---
+
+### 症状:`getByTestId` 查不到 Icon / Spinner / Skeleton {#jest-hidden-elements}
+
+**原因。** 这类纯视觉组件按本库的 a11y 契约整棵子树对读屏隐藏,而 RNTL 的查询默认跳过隐藏元素。
+
+**解法。** 查询时显式打开:`screen.getByTestId('save-icon', { includeHiddenElements: true })`,见[测试 → 纯视觉组件要开 includeHiddenElements](/docs/testing#纯视觉组件要开-includehiddenelements)。
+
+---
+
+### 症状:控制台刷 `An update to ItemRenderer inside a test was not wrapped in act(...)` {#jest-carousel-act}
+
+**原因。** `react-native-reanimated-carousel` 5 自己的 item 渲染在 worklets mock 的回调里 setState,这条 `console.error` 来自上游,不来自本库。
+
+**解法。** 不用处理 —— 它不是错误,不影响任何断言,用例照常绿。
 
 ---
 

@@ -12,7 +12,6 @@ import {
 import App from '../App';
 import {
   installAndroidBackHandlerMock,
-  installReducedMotionMock,
   restoreNativeMocks,
 } from './helpers/nativeMocks';
 import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
@@ -54,10 +53,6 @@ function componentByTestID<T extends React.ComponentType<never>>(
   if (!found) throw new Error(`未找到组件：${testID}`);
   return found;
 }
-
-beforeEach(() => {
-  installReducedMotionMock(false);
-});
 
 afterEach(() => {
   restoreNativeMocks();
@@ -427,7 +422,6 @@ test('specimen 选择跨路由保留，重置 Navigation 不改变 Forms draft �
 
 test('Android hardware back 仍只有 App 一次订阅，specimen 不消费 typed route', () => {
   restoreNativeMocks();
-  installReducedMotionMock(false);
   const nativeBack = installAndroidBackHandlerMock();
   render(<App />);
 
