@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.24.0](https://github.com/unif-design/react-native-design/compare/v0.23.1...v0.24.0) (2026-08-07)
+
+
+### Features
+
+* 发布受支持的 jest 接线入口 ([#116](https://github.com/unif-design/react-native-design/issues/116)) ([2678ca8](https://github.com/unif-design/react-native-design/commit/2678ca814c270dd3a07ee6de4f6ac3bafe6eeb30)), closes [example#test](https://github.com/example/issues/test) [#jest-missing-rn-preset](https://github.com/unif-design/react-native-design/issues/jest-missing-rn-preset)
+
 ## [0.23.1](https://github.com/unif-design/react-native-design/compare/v0.23.0...v0.23.1) (2026-08-05)
 
 
