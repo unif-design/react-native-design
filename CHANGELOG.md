@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.25.0](https://github.com/unif-design/react-native-design/compare/v0.24.1...v0.25.0) (2026-08-09)
+
+
+### Features
+
+* 改 Toast/Confirm Host 为栈式 lease,Modal 内自挂成为合法用法 ([#119](https://github.com/unif-design/react-native-design/issues/119)) ([835139d](https://github.com/unif-design/react-native-design/commit/835139d6bed7c93fc0b595f15703a254d0299e3b))
+
 ## [0.24.1](https://github.com/unif-design/react-native-design/compare/v0.24.0...v0.24.1) (2026-08-07)
 
 
