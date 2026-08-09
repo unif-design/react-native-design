@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: Toast 轻提示
-description: "命令式全局轻提示 —— toast(msg) / toast.success / .error / .info,或 {message,kind,duration};配根部挂一次 <ToastHost />,inverseSurface 底胶囊 + 可选状态点,默认 3000ms 后 fade+slide 自动消失,同时最多 1 条。"
+description: "命令式全局轻提示 —— toast(msg) / toast.success / .error / .info,或 {message,kind,duration};配根部挂一个 <ToastHost />(Modal 内可再挂一个、栈式接管),inverseSurface 底胶囊 + 可选状态点,默认 3000ms 后 fade+slide 自动消失,同时最多 1 条。"
 ---
 
 # Toast 轻提示
@@ -87,13 +87,13 @@ toast({ message: '正在同步…', duration: 5000 });
 | `duration` | `number?` | `3000` | 自动消失毫秒数 |
 | `position` | `'top' \| 'bottom' \| 'center'` | `'bottom'` | 显示位置(top/center 自动避让 safe-area) |
 
-`<ToastHost />` 组件 props（`ToastHostProps`，在 app 根附近挂一次）：
+`<ToastHost />` 组件 props（`ToastHostProps`，在 app 根附近挂一个）：
 
 | Prop | 类型 | 默认 | 说明 |
 |---|---|---|---|
 | `testID` | `string?` | — | 容器 testID；文本节点派生 `${testID}-text` |
 
-> 全局只需一个 `<ToastHost />`；同一时间只显示一条，新调用替换旧的。
+> 全局挂一个 `<ToastHost />` 即可；同一时间只显示一条，新调用替换旧的。要在 `Modal` 里显示 toast 时，可在 Modal 内再挂一个——它会接管，关闭后自动归还（见下方[投递语义](#投递语义)）。
 
 ## 投递语义 {#投递语义}
 
@@ -104,12 +104,19 @@ toast({ message: '正在同步…', duration: 5000 });
 | 未挂 `<ToastHost />` 时调用 | 消息**保留**为 pending(不是丢弃、不告警);Host 挂上后立即补投 |
 | 未挂 Host 时连续调用多次 | **latest-wins** —— 只保留最新一条,不排队补投历史消息 |
 | 已挂 Host 时连续调用 | 立即投递,后者替换前者;旧的那条的定时器 / 动画不再影响 UI |
-| 挂了多个 `<ToastHost />` | 只有第一个生效,其余永久惰性(不渲染、不接收投递),第一个卸载后**也不会**自动接管 |
-| Host 卸载时消息还没显示完 | 未完成的投递退回 pending,下一个 Host 会重新投递;若期间已有更新的消息,更新的优先 |
+| 挂了多个 `<ToastHost />` | **栈式接管**:最后挂载的收投递,前任入栈挂起并立刻收起自己那条 toast;接管者卸载后自动归还(乱序卸载也安全) |
+| owner 切换瞬间的在途 toast | **丢弃**。toast 是瞬态反馈,接管发生在 Modal 开 / 关那一刻,搬到另一个 owner 上重放没有意义 |
+| Host 卸载时消息还没显示完(栈里没有前任) | 未完成的投递退回 pending,下一个 Host 会重新投递;若期间已有更新的消息,更新的优先 |
 | Host 渲染 / 订阅回调抛错 | 作废该 Host,消息退回 pending 等待新 Host |
 
 :::danger 启动早期的 toast 不会丢
 这是与旧版本的**行为变更**:此前未挂 Host 时 `toast()` 会告警并丢弃消息。现在消息会保留并在 Host 挂载后补投 —— 如果你依赖「没有 Host 就静默丢弃」,需要改为条件调用。
+:::
+
+:::tip 在自己的 `Modal` 里挂第二个 —— 这是受支持的用法
+RN `Modal` 是**独立的 native window**,根 Host 渲染的 toast 会被它整块盖住(双端都看不见)。所以在 Modal 的内容树里再挂一个 `<ToastHost />` 是**正解**:它接管 owner,toast 渲染进 Modal 自己的 window;Modal 关闭、内层 Host 卸载后 owner 自动归还给根 Host。
+
+这是与 `0.24.x` 及更早版本的**行为变更**:此前重复挂载的 `<ToastHost />` 永久惰性(还会 dev warn),Modal 内自挂是死码。现在多 Host 是合法用法,告警已删除。
 :::
 
 ### 竞态守卫
@@ -134,5 +141,5 @@ toast({ message: '正在同步…', duration: 5000 });
 - ❌ 不要在 Toast 里放按钮——需要交互的反馈用内联 Confirmation 或模态对话框
 - ❌ 不要堆叠多个 Toast——同一时间最多 1 条，新的把旧的替换
 - ❌ 不要超过 50 字——超过就用模态对话框承载
-- ❌ 不要挂多个 `<ToastHost />` —— 多余的实例惰性，且第一个卸载后不会自动接管
+- ❌ 不要为「提高可用性」乱挂多个 `<ToastHost />` —— 只有最后挂载的那个在收投递;多挂只在 `Modal` 内有意义（见上方 tip）
 - ❌ 不要依赖 `ToastEntry.id` 的具体取值 —— 它是内部竞态守卫,不是稳定公共契约

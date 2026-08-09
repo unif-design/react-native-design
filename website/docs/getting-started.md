@@ -132,7 +132,7 @@ export function App() {
 ```
 
 - `ThemeProvider` —— 读取 `useColorScheme()`,自动跟随系统亮暗。
-- `ToastHost` / `ConfirmHost` —— 都会读取安全区 context；各挂一次，且必须位于 `SafeAreaProvider` 内。
+- `ToastHost` / `ConfirmHost` —— 都会读取安全区 context；各挂一个，且必须位于 `SafeAreaProvider` 内。要在 RN `Modal` 里显示 toast / confirm 时，可在 Modal 的内容树里再挂一份：后挂载的接管、卸载自动归还（`Modal` 是独立 native window，根上那份会被它盖住）。
 
 :::tip 完整 Provider 栈
 若宿主还使用键盘或导航 Provider，可在不破坏上述相对顺序的前提下加入，例如 `GestureHandlerRootView → KeyboardProvider → SafeAreaProvider → ThemeProvider → NavigationContainer + Hosts`。骨架见[完整规范 → Quickstart](/docs/unif-design)。`ThemeProvider` 接受 `forceScheme?: 'light' | 'dark'` 强制某主题(用于测试 / 设置项接入)。

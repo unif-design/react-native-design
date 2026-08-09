@@ -526,7 +526,7 @@ export function MyCard({ title }: { title: string }) {
 字面量颜色(`'#fff'` / `rgba(...)`)在组件层禁止,必须经 token。inline 取色用 `useColors()`。
 
 ### 命令式 toast
-根附近挂一次 `<ToastHost />`,然后任意位置调用:
+根附近挂一个 `<ToastHost />`,然后任意位置调用:
 ```tsx
 import { toast } from '@unif/react-native-design';
 
@@ -598,7 +598,7 @@ const source = require('@/assets/logo.png');
 - 本文 —— 单一权威文本参考。
 
 ### Provider 栈
-`GestureHandlerRootView → KeyboardProvider → SafeAreaProvider → ThemeProvider → NavigationContainer → RootNavigator` + `<ToastHost />`(挂一次,任意位置可 `toast(...)`)。worklets babel 插件 `react-native-worklets/plugin` 注册在最后。
+`GestureHandlerRootView → KeyboardProvider → SafeAreaProvider → ThemeProvider → NavigationContainer → RootNavigator` + `<ToastHost />`(挂一个,任意位置可 `toast(...)`;RN `Modal` 内可再挂一个,栈式接管)。worklets babel 插件 `react-native-worklets/plugin` 注册在最后。
 
 ### 任何 UI 改动的流程
 1. 读 §1(voice)与 §2(原则)—— 不可妥协。

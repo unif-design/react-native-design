@@ -284,7 +284,7 @@
     "mdPath": "md/components/toast.md",
     "slug": "/components/toast",
     "section": "components",
-    "description": "命令式全局轻提示 —— toast(msg) / toast.success / .error / .info,或 {message,kind,duration};配根部挂一次 <ToastHost />,inverseSurface 底胶囊 + 可选状态点,默认 3000ms 后 fade+slide 自动消失,同时最多 1 条。"
+    "description": "命令式全局轻提示 —— toast(msg) / toast.success / .error / .info,或 {message,kind,duration};配根部挂一个 <ToastHost />(Modal 内可再挂一个、栈式接管),inverseSurface 底胶囊 + 可选状态点,默认 3000ms 后 fade+slide 自动消失,同时最多 1 条。"
   },
   {
     "title": "VersionPill 版本号药丸",

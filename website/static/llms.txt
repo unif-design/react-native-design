@@ -54,7 +54,7 @@
 - [TextField 输入共享内核（internal）](md/components/text-field.md) — Input、Textarea、Search 与 PasswordInput 的严格 value、slot、44pt frame 与错误播报内核；不作为公共组件导入。
 - [Textarea 多行输入](md/components/textarea.md) — 严格多行输入：一次性 defaultValue、44pt 最小高度、slot/a11y 与窄 ref。
 - [Thumbnail 缩略图](md/components/thumbnail.md) — 列表 / 卡片 / chat 通用 16:9.5 小图 —— size='sm'(64×40)/'md'(113×67,默认)/'lg'(160×96),uri 或 source 严格二选一,稳定 placeholder 与 2pt selected ring,layout / image style 分层。
-- [Toast 轻提示](md/components/toast.md) — 命令式全局轻提示 —— toast(msg) / toast.success / .error / .info,或 {message,kind,duration};配根部挂一次 <ToastHost />,inverseSurface 底胶囊 + 可选状态点,默认 3000ms 后 fade+slide 自动消失,同时最多 1 条。
+- [Toast 轻提示](md/components/toast.md) — 命令式全局轻提示 —— toast(msg) / toast.success / .error / .info,或 {message,kind,duration};配根部挂一个 <ToastHost />(Modal 内可再挂一个、栈式接管),inverseSurface 底胶囊 + 可选状态点,默认 3000ms 后 fade+slide 自动消失,同时最多 1 条。
 - [VersionPill 版本号药丸](md/components/version-pill.md) — 版本徽章胶囊 —— 可见状态 + 「版本 {version}」+ 可选「· build {build}」mono 后缀；默认状态为 success 色的“正常”。
 
 ## design
