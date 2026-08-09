@@ -8,10 +8,10 @@ description: "命令式 await confirm() → Promise<boolean> —— 高风险操
 
 命令式 `await confirm(...)` 返回 `Promise<boolean>`,跟 Toast 同款 imperative API,
 不需要 caller 维护 `useState / open / onClose`。背后是 `<ConfirmHost />`(裸 RN
-`Modal` + 单 owner 状态机,**不依赖 @gorhom**),App 根挂**一次**。
+`Modal` + 栈式 owner 状态机,**不依赖 @gorhom**),App 根挂**一个**。
 
 :::tip Promise 必然 settle
-`confirm()` 在任何路径下都会 resolve,不会悬挂 —— 包括没挂 Host、重入、Host 渲染抛错和 Host 卸载。详见下方[生命周期契约](#生命周期契约)。
+`confirm()` 在任何路径下都会 resolve,不会悬挂 —— 包括没挂 Host、重入、Host 渲染抛错、Host 卸载和被后挂载的 Host 接管。详见下方[生命周期契约](#生命周期契约)。
 :::
 
 ## 用法
@@ -65,21 +65,30 @@ await confirm({ title: '确认注销账号?', confirmLabel: '确认注销', dest
 ## 生命周期契约 {#生命周期契约}
 
 `confirm()` 由一个纯状态机驱动(`src/components/ui/Confirm/store.ts`),两条不变量:
-**同一时间只有一个 Host owner**、**同一时间只有一个未决对话框**。所有关闭路径汇聚到同一个
-identity-guarded、幂等的 `settle`。
+**同一时间只有一个 Host 在收事件(后挂载者接管、卸载归还)**、**同一时间只有一个未决对话框**。
+所有关闭路径汇聚到同一个 identity-guarded、幂等的 `settle`。
 
 | 场景 | 结果 | 说明 |
 |---|---|---|
 | 未挂 `<ConfirmHost />` | 立即 `false` + dev warn | 不占单例锁 —— 之后挂上 Host 仍能正常弹出 |
 | 已有对话框在显示时再调用 | 立即 `false` + dev warn | 拒绝重入,已显示的那个**不受影响** |
-| 挂了多个 `<ConfirmHost />` | 只有第一个生效 | 重复挂载的实例拿不到 owner,永久惰性、不渲染、不接收事件 |
+| 挂了多个 `<ConfirmHost />` | 最后挂载的生效 | 栈式接管:新 Host 接手事件,前任入栈挂起;前任手里未决的对话框立即 `false` 并关闭 |
+| 接管者卸载 | — | 自动归还给挂起的前任(乱序卸载也安全:挂起者先卸载只是从栈里摘掉) |
 | Host 渲染 / 订阅回调抛错 | `false` | 只作废该 owner;新 Host 挂上后可正常接管 |
 | Host 卸载时对话框仍未决 | `false` | 由 Store 结算,Promise 不会永久悬挂 |
 | 同一次对话框被 settle 两次 | 第二次无效 | 幂等,结果以第一次为准 |
 | 旧对话框的迟到回调 | 无效 | identity guard:旧 entry 引用永远匹配不上新的 active,不会误关新对话框 |
 
-:::danger 只挂一次
-`<ConfirmHost />` 在 App 根挂**一次**。多挂的实例不会「都渲染一遍」,而是静默惰性 —— 但这意味着如果你把唯一那次挂在了会被卸载的子树里,卸载瞬间未决的对话框会被结算为 `false`。
+:::danger 根上挂一个,别挂在会被条件卸载的子树里
+`<ConfirmHost />` 在 App 根挂**一个**就够。多挂的实例不会「都渲染一遍」——后挂载的接管、前任挂起,卸载再归还。所以把它挂在会被条件卸载的子树里仍然危险:卸载瞬间该 Host 手里未决的对话框会被结算为 `false`。
+:::
+
+:::tip 在自己的 `Modal` 里挂第二个 —— 这是受支持的用法
+RN `Modal` 是**独立的 native window**,根 Host 渲染的对话框会被它整块盖住(iOS 上兄弟 Modal 更是不叠放,根本看不见)。所以在 Modal 的内容树里再挂一个 `<ConfirmHost />` 是**正解**:它接管 owner,`confirm()` 渲染进 Modal 自己的 window(成为嵌套 present,iOS 支持);Modal 关闭、内层 Host 卸载后 owner 自动归还给根 Host。
+
+接管瞬间前任手里那个未决对话框会立即 `resolve(false)` 并关闭 —— 这是刻意的:Promise 不悬挂、单例槽不被带走,新 Host 一上来就能弹。归还(Modal 关闭)方向同样结算成 `false`:confirm 的上下文随 Modal 一起消失了,当作取消处理。这一点和 Toast 不同 —— toast 归还时会把没播完的那条交回上一层重播,详见 [Toast → 投递语义](toast.md#投递语义)。
+
+**接管以挂载顺序为准,不看层级。** 谁最后挂载谁就是 owner —— 如果根子树被 re-key(切主题 / 切语言 / ErrorBoundary 重置)导致根 `<ConfirmHost />` 重新挂载,它会从 Modal 内那个手里**夺回** owner,并把当时未决的对话框结算成 `false`。别在 Modal 开着的时候 re-key 根。
 :::
 
 `ConfirmEntry` / `ConfirmEvent` / lease 等标识类型是 Host 与 Store 之间的**内部协议**,不从包根导出,也不保证跨版本稳定。
@@ -138,8 +147,8 @@ const handleLogout = async () => {
 
 - ❌ 不要嵌套 confirm(同一时间只允许 1 个,新请求被拒绝 + dev warn)
 - ❌ 不要把"信息提示"用 confirm(用 `toast()`),confirm 只用于"用户决策"
-- ❌ 不要挂多个 `<ConfirmHost />` —— 多余的实例惰性,并不会提高可用性
-- ❌ 不要把 `<ConfirmHost />` 挂在会被条件卸载的子树里 —— 卸载会把未决对话框结算为 `false`
+- ❌ 不要为「提高可用性」乱挂多个 `<ConfirmHost />` —— 只有最后挂载的那个在收事件;多挂只在 `Modal` 内有意义(见上方 tip)
+- ❌ 不要把 `<ConfirmHost />` 挂在会被条件卸载的子树里 —— 卸载会把它手里未决的对话框结算为 `false`
 
 ## 关联组件
 

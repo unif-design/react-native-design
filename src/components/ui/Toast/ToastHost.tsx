@@ -27,8 +27,12 @@ type DeliveryIdentity = {
 };
 
 /**
- * 在根附近挂**一次**。监听 toast() 调用并渲染当前 toast。
+ * 在根附近挂一个。监听 toast() 调用并渲染当前 toast。
  * 同一时间只显示一条 —— 新的会替换旧的(latest-wins)。
+ *
+ * 栈式 owner:后挂载的实例接管投递,前任挂起并收起当前 toast;接管者卸载后自动归还。
+ * 因此**允许**在自己的 `Modal` 里再挂一个 —— RN `Modal` 是独立 native window,根 Host
+ * 的 toast 会被它物理盖住,内层自挂才看得见。
  *
  * 位置由 `entry.position`('top' / 'bottom' / 'center')决定,top/bottom 自动避让
  * safe-area;进入动画方向随位置(top 从上滑、bottom/center 从下滑)。
@@ -66,7 +70,21 @@ export function ToastHost({
       };
       setDelivery(next);
     };
-    const lease = registerToastHost(subscriber);
+    // 被后挂载的 Host 接管:立刻收起当前 toast。store 已丢弃这次投递,自身的退场
+    // timer 从此过不了 CAS —— 不主动清,这条 toast 会冻在屏幕上直到本 Host 卸载。
+    const clearOnSuspend = () => {
+      currentDeliveryRef.current = null;
+      if (dismissTimer.current) {
+        clearTimeout(dismissTimer.current);
+        dismissTimer.current = null;
+      }
+      cancelAnimation(op);
+      cancelAnimation(ty);
+      setDelivery(null);
+    };
+    const lease = registerToastHost(subscriber, clearOnSuspend);
+    // null lease 只剩一种成因:补投 pending 时 subscriber 抛错,本 owner 当场被作废
+    //(不再是「重复挂载」—— 那条现在走接管)。惰性到卸载为止。
     if (!lease) {
       setInert(true);
       return;

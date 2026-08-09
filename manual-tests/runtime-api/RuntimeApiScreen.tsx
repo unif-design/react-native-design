@@ -429,7 +429,7 @@ export function RuntimeApiScreen(): React.JSX.Element {
             </ScrollView>
           </SafeAreaView>
 
-          {/* ConfirmHost 全屏只挂一次 —— 多挂的实例会惰性,不会重复渲染。 */}
+          {/* ConfirmHost 全屏挂一个 —— owner 是栈式的,再挂会接管而非惰性。 */}
           <ConfirmHost />
           {toastHostOn ? (
             <ToastHost key={toastHostKey} testID="toast-host" />

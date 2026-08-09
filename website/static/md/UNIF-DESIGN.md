@@ -357,7 +357,7 @@ function。native-only 代码需要自定义缓动时从 `react-native-reanimate
   release 可观测的人工验收入口；真实平台未运行前仍记 BLOCKED。
 - **Tag** —— 状态徽章,5 语义 × 2 尺寸(`md` / `lg`)。
 - **Chip** —— 胶囊形可选中 pill;`selected` 切主色边框 / 文本;可带 leading / trailing。Suggestion 底层。
-- **Confirm** —— 命令式 `confirm(): Promise<boolean>` + `<ConfirmHost />`,高风险二次确认(纯 single-owner Store 保证同一时间只 1 个 Host / active entry；裸 RN Modal,不依赖 @gorhom)。自定义确认/取消文案先 trim，空白值回退“确认”/“取消”。
+- **Confirm** —— 命令式 `confirm(): Promise<boolean>` + `<ConfirmHost />`,高风险二次确认(单 active owner + 栈式接管:后挂载的 Host 接管、卸载自动归还,同一时间只有 1 个 Host 在收事件、1 个未决 active entry；裸 RN Modal,不依赖 @gorhom)。自定义确认/取消文案先 trim，空白值回退“确认”/“取消”。
 - **Thumbnail** —— 16:9.5 缩略图,`sm 64×40 / md 113×67 / lg 160×96`。
 - **Loading** —— `Spinner`；native 用 Reanimated 4 线性旋转，Web 用静态 CSS
   keyframes。
@@ -526,7 +526,7 @@ export function MyCard({ title }: { title: string }) {
 字面量颜色(`'#fff'` / `rgba(...)`)在组件层禁止,必须经 token。inline 取色用 `useColors()`。
 
 ### 命令式 toast
-根附近挂一次 `<ToastHost />`,然后任意位置调用:
+根附近挂一个 `<ToastHost />`,然后任意位置调用:
 ```tsx
 import { toast } from '@unif/react-native-design';
 
@@ -598,7 +598,7 @@ const source = require('@/assets/logo.png');
 - 本文 —— 单一权威文本参考。
 
 ### Provider 栈
-`GestureHandlerRootView → KeyboardProvider → SafeAreaProvider → ThemeProvider → NavigationContainer → RootNavigator` + `<ToastHost />`(挂一次,任意位置可 `toast(...)`)。worklets babel 插件 `react-native-worklets/plugin` 注册在最后。
+`GestureHandlerRootView → KeyboardProvider → SafeAreaProvider → ThemeProvider → NavigationContainer → RootNavigator` + `<ToastHost />`(挂一个,任意位置可 `toast(...)`;RN `Modal` 内可再挂一个,栈式接管)。worklets babel 插件 `react-native-worklets/plugin` 注册在最后。
 
 ### 任何 UI 改动的流程
 1. 读 §1(voice)与 §2(原则)—— 不可妥协。

@@ -106,7 +106,7 @@ import { space, radius, type as t, fw, fontMono, motion } from '@unif/react-nati
 0.6.0 曾同时移除 `BottomSheet` 与旧 Confirm 实现，并去掉
 `@gorhom/bottom-sheet` 依赖。**当前版本仍不提供 `BottomSheet`，但已经重新公开
 `confirm()`、`<ConfirmHost />` 与 `ConfirmOptions`**；新的 Confirm 使用裸 RN
-`Modal` + 单 owner Store，不依赖 `@gorhom`。
+`Modal` + 栈式 owner Store，不依赖 `@gorhom`。
 
 ```tsx
 // ❌ BottomSheet 当前仍未从包根导出
@@ -115,7 +115,7 @@ import { BottomSheet } from '@unif/react-native-design';
 // ✅ 当前命令式确认 API
 import { ConfirmHost, confirm } from '@unif/react-native-design';
 
-// App 根附近挂一次
+// App 根附近挂一个
 function AppOverlays() {
   return <ConfirmHost />;
 }

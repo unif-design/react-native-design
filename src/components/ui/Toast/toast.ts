@@ -56,7 +56,8 @@ function emit(input: ToastInput, kind: ToastKind = 'info') {
 }
 
 /**
- * 命令式 toast API。在 app 根附近挂一次 `<ToastHost />` 即可。
+ * 命令式 toast API。在 app 根附近挂一个 `<ToastHost />` 即可;需要在 `Modal` 里显示
+ * 时可在 Modal 内再挂一个,它会接管、关闭后自动归还。
  *
  * toast('已切换到日报');
  * toast.success('订单提交成功');
@@ -69,7 +70,7 @@ export const toast = Object.assign((input: ToastInput) => emit(input, 'info'), {
   error: (input: ToastInput) => emit(input, 'error'),
 });
 
-/** 内部:ToastHost 挂载时注册唯一 owner;重复挂载得到 null。 */
+/** 内部:ToastHost 挂载时接管 owner;前任入栈挂起,本 lease 释放时归还。 */
 export const registerToastHost = store.registerHost;
 
 /** 内部:三重身份 CAS —— owner token + leaseId + entry id 全对才算完成。 */

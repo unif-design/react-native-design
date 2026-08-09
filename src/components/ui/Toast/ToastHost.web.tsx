@@ -34,6 +34,7 @@ type DeliveryIdentity = {
  * - opacity 0→1 + translateY 8→0 入场(motion.base ms)
  * - 停留 entry.duration ms
  * - opacity 1→0 + translateY 0→8 退场后 unmount
+ * - 栈式 owner:后挂载者接管、前任挂起并收起 toast,接管者卸载后自动归还
  *
  * 竞态纪律与 native 版一致:timer / RAF 在改 UI 或上报完成前,都要同时通过同步 ref
  * 与 `isCurrentToastDelivery(delivery)` 两道校验。
@@ -79,7 +80,16 @@ export function ToastHost({
       };
       setDelivery(next);
     };
-    const lease = registerToastHost(subscriber);
+    // 被后挂载的 Host 接管:立刻收起当前 toast。store 已丢弃这次投递,自身的退场
+    // timer/RAF 从此过不了 CAS —— 不主动清,这条 toast 会冻在屏幕上直到本 Host 卸载。
+    const clearOnSuspend = () => {
+      currentDeliveryRef.current = null;
+      cancelCallbacks();
+      setDelivery(null);
+    };
+    const lease = registerToastHost(subscriber, clearOnSuspend);
+    // null lease 只剩一种成因:补投 pending 时 subscriber 抛错,本 owner 当场被作废
+    //(不再是「重复挂载」—— 那条现在走接管)。惰性到卸载为止。
     if (!lease) {
       setInert(true);
       return;

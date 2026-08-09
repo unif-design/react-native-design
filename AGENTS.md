@@ -139,8 +139,11 @@ workflow 是这两条 gate 唯一进 CI 的路径）、Website 测试页与 `des
   `accessibilityState.selected`。这是 a11y 状态名，不是受控 prop 名：prop 只有 Checkbox 叫
   `checked`，Radio/Switch/Tabs/Segmented 用 `value`，TabBar 用 `active`。
   装饰 View/Image/SVG 隐藏完整 a11y 子树，状态反馈避免重复播报。
-- `ConfirmStore` 单 owner/单 active、identity-guarded settle；`ToastStore` 使用
-  latest-wins pending/delivery、owner token 与 lease/CAS。Store 内部类型不进入 public barrel。
+- `ConfirmStore` 栈式 owner（后挂载接管、卸载归还）+ 单 active、identity-guarded settle；
+  `ToastStore` 同构栈式 owner + latest-wins pending/delivery、owner token 与 lease/CAS。
+  owner 切换时前任收 clear：Confirm 两个方向都把 active 结算为 `false`；Toast 分方向 ——
+  被接管丢弃在途投递，归还则整条交回前任重投（Modal 内 toast 后立刻关窗那条不能丢）。
+  多 Host 是合法用法（RN `Modal` 内自挂），不再告警。Store 内部类型不进入 public barrel。
 - Pulse 由公共 normalization 层调用 native/Web driver；`usePrefersReducedMotion` 读取真实
   平台设置，不能用本地假 override 代替系统事实。
 
