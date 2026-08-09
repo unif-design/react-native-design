@@ -307,6 +307,44 @@ describe('ConfirmStore — 栈式 lease(后挂载者接管)', () => {
     expect(seen).toEqual(['L3:A', 'L2:B', 'L1:C']);
   });
 
+  test('前任的 clear 回调抛错 → 就地作废,不入栈也不会被恢复', async () => {
+    const store = createConfirmStore(testLog);
+    const outer: ConfirmEvent[] = [];
+    store.registerHost((event) => {
+      outer.push(event);
+      if (event.type === 'clear') throw new Error('clear failed');
+    });
+
+    const first = store.request({ title: 'a' });
+    const inner = store.registerHost(() => {});
+    // 接管排空 active 时前任的 clear 抛错 —— settle 已把它作废,不能再入栈
+    await expect(first).resolves.toBe(false);
+
+    inner.release(null);
+    // 归还时栈是空的:回到「无 Host」语义,而不是恢复出一个死订阅
+    await expect(store.request({ title: 'b' })).resolves.toBe(false);
+    expect(showEvents(outer)).toHaveLength(1);
+  }, 2000);
+
+  test('归还时把残留 active 排空 —— 前任不会继承没见过的槽位', async () => {
+    const store = createConfirmStore(testLog);
+    const outer: ConfirmEvent[] = [];
+    store.registerHost((event) => outer.push(event));
+    const inner = store.registerHost(() => {});
+
+    const held = store.request({ title: 'a' });
+    // Host 卸载时没把手里那个 entry 交回来(传 null),槽位本来会一直被占着
+    inner.release(null);
+    await expect(held).resolves.toBe(false);
+    expect(store.activeEntry()).toBeNull();
+
+    // 恢复的前任能立刻正常弹 —— 槽位没被上一层的残留锁死
+    const next = store.request({ title: 'b' });
+    expect(showEvents(outer)).toHaveLength(1);
+    store.settle(firstEntry(outer), true);
+    await expect(next).resolves.toBe(true);
+  }, 2000);
+
   test('栈空时 confirm() 仍 warn + resolve(false)', async () => {
     const warns: string[] = [];
     const store = createConfirmStore({

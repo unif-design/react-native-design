@@ -21,8 +21,14 @@ import type { ToastEntry } from './types';
  * **栈式 owner**(与 Confirm 同构):后挂载的 Host 接管投递,前任入栈挂起并收到 clear,
  * 接管者卸载后自动归还。RN `Modal` 是独立 native window,根 Host 渲染的 toast 会被
  * Modal 物理盖住,只有「Modal 内自挂一个 Host」能显示 —— 旧的 first-wins 把这条唯一
- * 正解判成恒惰性死码。切换瞬间**在途 toast 直接丢弃**:toast 是瞬态反馈,接管发生在
- * Modal 开 / 关那一刻,把它搬到另一个 owner 上重放没有意义。
+ * 正解判成恒惰性死码。
+ *
+ * 两个方向对在途 toast 的处理**刻意不同**:
+ * - **接管**(有人挂到我上面)→ 在途 toast **丢弃**。它属于「已经被盖住的过去」,
+ *   搬到接管者身上重放没有意义。
+ * - **归还**(接管者卸载、我恢复)→ 在途 toast **整条交回、立即重投**。
+ *   「Modal 内操作成功 → toast → 关窗」是最常见的一条路径,那条 toast 刚发出、用户
+ *   一眼都还没看到;丢掉的话比不挂内层 Host 还糟。不追剩余时长,重投 = 完整重播一遍。
  */
 
 export type ToastDelivery = {
@@ -138,6 +144,12 @@ export function createToastStore(log: Logger): ToastStore {
     return null;
   }
 
+  /** 刚上任的 owner 在首投里抛错被作废:继续往下弹,别把栈里剩下的人一起埋掉。 */
+  function resumeAfterFailedInstall(): void {
+    const fallback = popSuspended();
+    if (fallback) owner = fallback;
+  }
+
   function registerHost(
     subscriber: ToastSubscriber,
     onClear?: ToastClearSubscriber
@@ -158,8 +170,7 @@ export function createToastStore(log: Logger): ToastStore {
     // 首投期间 subscriber 抛错会把 owner 作废 —— 此时不能发出可用的 lease,
     // 并且要立刻把刚挂起的前任放回 owner,否则栈里的人再也醒不过来。
     if (owner?.token !== token) {
-      const fallback = popSuspended();
-      if (fallback) owner = fallback;
+      resumeAfterFailedInstall();
       return null;
     }
     return {
@@ -180,11 +191,20 @@ export function createToastStore(log: Logger): ToastStore {
         owner = null;
         const mine = delivered?.ownerToken === token ? delivered : null;
         if (mine) delivered = null;
+        // 归还方向**不丢**在途 toast —— 与接管方向相反,这条区分是有实证的:
+        // 「Modal 内操作成功 → toast → setVisible(false)」是最常见的一条路径,
+        // 内层 Host 跟着 Modal 一起卸载,这条 toast 刚发出、用户一眼都没看到。
+        // 接管方向丢弃是因为前任那条属于「已经被盖住的过去」;归还方向是把刚发生的
+        // 事情**交回上一层**,不是跨 owner 重放。整条交回、不追剩余时长 —— 这正是
+        // 既有的「owner A 卸载后 B 拿到同一 entry、新 leaseId」形态。
+        if (mine && !pending) pending = mine.entry;
         const successor = popSuspended();
-        // 有前任接手 → 在途 toast 丢弃(与接管同一条切换语义);无人接手 → 退回
-        // pending,让下一个挂上来的 Host 补投(Host 重挂 / 热重载);更新的 pending 优先。
-        if (mine && !successor && !pending) pending = mine.entry;
-        if (successor) owner = successor;
+        if (!successor) return;
+        owner = successor;
+        // 有人接手就当场重投(新 ownerToken + 新 leaseId,前任的迟到回调仍认不出它);
+        // 没人接手时它就停在 pending,等下一个挂上来的 Host 补投 —— 既有语义不变。
+        if (pending) beginDelivery(pending, successor);
+        if (owner?.token !== successor.token) resumeAfterFailedInstall();
       },
     };
   }

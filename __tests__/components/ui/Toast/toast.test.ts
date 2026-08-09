@@ -177,7 +177,42 @@ describe('ToastStore — 栈式 lease(后挂载者接管)', () => {
     expect(outer.map((d) => d.entry.message)).toEqual(['A']);
   });
 
-  test('归还时在途投递丢弃,不重放给恢复的 owner', () => {
+  test('归还时在途投递交回前任重新投递(Modal 内 toast 后立刻关窗)', () => {
+    const store = createToastStore(testLog);
+    const outer: ToastDelivery[] = [];
+    const innerSeen: ToastDelivery[] = [];
+    store.registerHost((d) => outer.push(d));
+    const inner = store.registerHost((d) => innerSeen.push(d));
+    const a = entry(1, 'A');
+    store.publish(a);
+    expect(innerSeen[0]?.entry).toBe(a);
+
+    inner?.release();
+    // 「Modal 内操作成功 → toast → setVisible(false)」是最常见路径:这条 toast 刚发出、
+    // 用户一眼都还没看到,归还时必须整条交回上一层,不能跟着 Modal 一起消失。
+    expect(outer.map((d) => d.entry.message)).toEqual(['A']);
+    expect(outer[0]?.entry).toBe(a);
+    // 重新投递 = 新 lease:前任的迟到回调仍然认不出它
+    expect(outer[0]?.leaseId).toBeGreaterThan(innerSeen[0]?.leaseId ?? 0);
+    expect(outer[0]?.ownerToken).not.toBe(innerSeen[0]?.ownerToken);
+    expect(store.currentDelivery()?.entry).toBe(a);
+    expect(store.pendingEntry()).toBeNull();
+  });
+
+  test('接管方向仍丢弃 —— 接管者不会收到前任的在途 toast', () => {
+    const store = createToastStore(testLog);
+    store.registerHost(() => {});
+    store.publish(entry(1, 'A'));
+
+    const inner: ToastDelivery[] = [];
+    store.registerHost((d) => inner.push(d));
+    // 接管 = 前任被盖住,它那条属于「过去」;只有归还方向才交回重投
+    expect(inner).toHaveLength(0);
+    expect(store.currentDelivery()).toBeNull();
+    expect(store.pendingEntry()).toBeNull();
+  });
+
+  test('归还重投后 latest-wins 依旧 —— 后来的 toast 正常替换', () => {
     const store = createToastStore(testLog);
     const outer: ToastDelivery[] = [];
     store.registerHost((d) => outer.push(d));
@@ -185,9 +220,10 @@ describe('ToastStore — 栈式 lease(后挂载者接管)', () => {
     store.publish(entry(1, 'A'));
 
     inner?.release();
-    expect(outer).toHaveLength(0);
+    store.publish(entry(2, 'B'));
+    expect(outer.map((d) => d.entry.message)).toEqual(['A', 'B']);
+    expect(store.currentDelivery()?.entry.message).toBe('B');
     expect(store.pendingEntry()).toBeNull();
-    expect(store.currentDelivery()).toBeNull();
   });
 
   test('乱序卸载:挂起中的先挂载者先走,当前 owner 不受影响', () => {
@@ -225,16 +261,85 @@ describe('ToastStore — 栈式 lease(后挂载者接管)', () => {
     expect(outer.map((d) => d.entry.message)).toEqual(['A']);
   });
 
+  test('接管者补投 pending 时抛错 → null lease,且把挂起的前任放回 owner', () => {
+    const store = createToastStore(testLog);
+    const outer: ToastDelivery[] = [];
+    store.registerHost((d) => outer.push(d));
+    // 中间这个 Host 接管后在投递时抛错:owner 被作废、消息退回 pending,
+    // 但前任还挂在栈上 —— 这就是「有 pending + 有挂起者」的局面
+    store.registerHost(() => {
+      throw new Error('middle host failed');
+    });
+    store.publish(entry(1, 'A'));
+    expect(store.pendingEntry()?.message).toBe('A');
+
+    // 再来一个也在补投时抛错:它自己拿 null lease,但不能把栈里的前任一起埋掉
+    expect(
+      store.registerHost(() => {
+        throw new Error('next host failed');
+      })
+    ).toBeNull();
+
+    store.publish(entry(2, 'B'));
+    expect(outer.map((d) => d.entry.message)).toEqual(['B']);
+  });
+
+  test('前任的 clear 回调抛错 → 就地作废,不入栈也不会被恢复', () => {
+    const store = createToastStore(testLog);
+    const outer: ToastDelivery[] = [];
+    store.registerHost(
+      (d) => outer.push(d),
+      () => {
+        throw new Error('clear failed');
+      }
+    );
+    const inner = store.registerHost(() => {});
+
+    inner?.release();
+    store.publish(entry(1, 'A'));
+    // 坏掉的前任没有回到 owner —— 回到「无 Host」语义,消息留在 pending
+    expect(outer).toHaveLength(0);
+    expect(store.pendingEntry()?.message).toBe('A');
+  });
+
+  test('归还重投时前任抛错 → 继续往下弹,不把更外层的 Host 埋掉', () => {
+    const store = createToastStore(testLog);
+    const l1: ToastDelivery[] = [];
+    store.registerHost((d) => l1.push(d));
+    store.registerHost(() => {
+      throw new Error('l2 failed');
+    });
+    const l3 = store.registerHost(() => {});
+    store.publish(entry(1, 'A'));
+
+    l3?.release();
+    store.publish(entry(2, 'B'));
+    expect(l1.map((d) => d.entry.message)).toEqual(['B']);
+  });
+
   test('三层嵌套按栈序逐级归还', () => {
     const store = createToastStore(testLog);
     const seen: string[] = [];
-    store.registerHost((d) => seen.push(`L1:${d.entry.message}`));
-    const l2 = store.registerHost((d) => seen.push(`L2:${d.entry.message}`));
-    const l3 = store.registerHost((d) => seen.push(`L3:${d.entry.message}`));
+    const captured: ToastDelivery[] = [];
+    const track = (tag: string) => (d: ToastDelivery) => {
+      seen.push(`${tag}:${d.entry.message}`);
+      captured.push(d);
+    };
+    /** 让当前这条播完 —— 归还时没有在途投递要交回,只剩纯粹的栈序。 */
+    const finishLatest = () => {
+      const last = captured[captured.length - 1];
+      if (last) store.complete(last.ownerToken, last.leaseId, last.entry.id);
+    };
+
+    store.registerHost(track('L1'));
+    const l2 = store.registerHost(track('L2'));
+    const l3 = store.registerHost(track('L3'));
 
     store.publish(entry(1, 'A'));
+    finishLatest();
     l3?.release();
     store.publish(entry(2, 'B'));
+    finishLatest();
     l2?.release();
     store.publish(entry(3, 'C'));
 
