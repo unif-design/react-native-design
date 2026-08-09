@@ -106,30 +106,139 @@ describe('ToastStore — 有 Host 时的 latest-wins 投递', () => {
   });
 });
 
-describe('ToastStore — owner 唯一性', () => {
-  test('重复注册的 Host 拿到 null lease,永不接收投递', () => {
+describe('ToastStore — 栈式 lease(后挂载者接管)', () => {
+  test('后挂载的 Host 接管投递,先挂载者不再收到', () => {
     const store = createToastStore(testLog);
-    const first: ToastDelivery[] = [];
-    const second: ToastDelivery[] = [];
-    expect(store.registerHost((d) => first.push(d))).not.toBeNull();
-    expect(store.registerHost((d) => second.push(d))).toBeNull();
+    const outer: ToastDelivery[] = [];
+    const inner: ToastDelivery[] = [];
+    expect(store.registerHost((d) => outer.push(d))).not.toBeNull();
+    expect(store.registerHost((d) => inner.push(d))).not.toBeNull();
 
     store.publish(entry(1, 'A'));
-    expect(first).toHaveLength(1);
-    expect(second).toHaveLength(0);
+    expect(inner.map((d) => d.entry.message)).toEqual(['A']);
+    expect(outer).toHaveLength(0);
   });
 
-  test('重复 Host 不会在第一个 release 后自动接管', () => {
+  test('接管时原 owner 收到 clear,在途投递被丢弃', () => {
     const store = createToastStore(testLog);
-    const first = store.registerHost(() => {});
-    const second: ToastDelivery[] = [];
-    expect(store.registerHost((d) => second.push(d))).toBeNull();
-
-    first?.release();
+    let outerCleared = 0;
+    const outer: ToastDelivery[] = [];
+    store.registerHost(
+      (d) => outer.push(d),
+      () => {
+        outerCleared += 1;
+      }
+    );
     store.publish(entry(1, 'A'));
-    // 被拒绝的 Host 没有订阅,消息只能留在 pending 等新 Host
-    expect(second).toHaveLength(0);
+    expect(store.currentDelivery()).not.toBeNull();
+
+    store.registerHost(() => {});
+    expect(outerCleared).toBe(1);
+    // 在途 toast 是瞬态消息:接管瞬间丢弃,不回 pending、不跨 owner 重放
+    expect(store.currentDelivery()).toBeNull();
+    expect(store.pendingEntry()).toBeNull();
+  });
+
+  test('前任 clear 回调里同步 publish,投给接管者而不是正在退场的自己', () => {
+    const store = createToastStore(testLog);
+    const outer: ToastDelivery[] = [];
+    const inner: ToastDelivery[] = [];
+    store.registerHost(
+      (d) => outer.push(d),
+      () => store.publish(entry(2, 'B'))
+    );
+    store.publish(entry(1, 'A'));
+
+    store.registerHost((d) => inner.push(d));
+    expect(outer.map((d) => d.entry.message)).toEqual(['A']);
+    expect(inner.map((d) => d.entry.message)).toEqual(['B']);
+    expect(store.currentDelivery()?.entry.message).toBe('B');
+  });
+
+  test('接管不再告警 —— 多 Host 已是合法用法', () => {
+    const warns: string[] = [];
+    const store = createToastStore({
+      ...testLog,
+      warn: (...args) => warns.push(String(args[0])),
+    });
+    store.registerHost(() => {});
+    store.registerHost(() => {});
+    expect(warns).toHaveLength(0);
+  });
+
+  test('后挂载者卸载 → 投递回到先挂载者', () => {
+    const store = createToastStore(testLog);
+    const outer: ToastDelivery[] = [];
+    store.registerHost((d) => outer.push(d));
+    const inner = store.registerHost(() => {});
+
+    inner?.release();
+    store.publish(entry(1, 'A'));
+    expect(outer.map((d) => d.entry.message)).toEqual(['A']);
+  });
+
+  test('归还时在途投递丢弃,不重放给恢复的 owner', () => {
+    const store = createToastStore(testLog);
+    const outer: ToastDelivery[] = [];
+    store.registerHost((d) => outer.push(d));
+    const inner = store.registerHost(() => {});
+    store.publish(entry(1, 'A'));
+
+    inner?.release();
+    expect(outer).toHaveLength(0);
+    expect(store.pendingEntry()).toBeNull();
+    expect(store.currentDelivery()).toBeNull();
+  });
+
+  test('乱序卸载:挂起中的先挂载者先走,当前 owner 不受影响', () => {
+    const store = createToastStore(testLog);
+    const outerLease = store.registerHost(() => {});
+    const inner: ToastDelivery[] = [];
+    store.registerHost((d) => inner.push(d));
+
+    // 父 Modal 先卸载、子 Host 后卸载的顺序:挂起者只是从栈里摘掉
+    outerLease?.release();
+    store.publish(entry(1, 'A'));
+    expect(inner.map((d) => d.entry.message)).toEqual(['A']);
+  });
+
+  test('乱序卸载后当前 owner 再卸载,栈空回到 pending', () => {
+    const store = createToastStore(testLog);
+    const outerLease = store.registerHost(() => {});
+    const innerLease = store.registerHost(() => {});
+
+    outerLease?.release();
+    innerLease?.release();
+    store.publish(entry(1, 'A'));
     expect(store.pendingEntry()?.message).toBe('A');
+  });
+
+  test('release 幂等 —— 重复调用不会误摘新 owner', () => {
+    const store = createToastStore(testLog);
+    const outer: ToastDelivery[] = [];
+    store.registerHost((d) => outer.push(d));
+    const inner = store.registerHost(() => {});
+
+    inner?.release();
+    inner?.release();
+    store.publish(entry(1, 'A'));
+    expect(outer.map((d) => d.entry.message)).toEqual(['A']);
+  });
+
+  test('三层嵌套按栈序逐级归还', () => {
+    const store = createToastStore(testLog);
+    const seen: string[] = [];
+    store.registerHost((d) => seen.push(`L1:${d.entry.message}`));
+    const l2 = store.registerHost((d) => seen.push(`L2:${d.entry.message}`));
+    const l3 = store.registerHost((d) => seen.push(`L3:${d.entry.message}`));
+
+    store.publish(entry(1, 'A'));
+    l3?.release();
+    store.publish(entry(2, 'B'));
+    l2?.release();
+    store.publish(entry(3, 'C'));
+
+    expect(seen).toEqual(['L3:A', 'L2:B', 'L1:C']);
   });
 });
 

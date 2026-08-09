@@ -21,16 +21,18 @@ const SCRIM_IN_MS = 220;
 const SCRIM_OUT_MS = 260;
 
 /**
- * Confirm 对话框宿主 —— App 根挂**一次**,监听 `confirm()` 调用并渲染。
+ * Confirm 对话框宿主 —— App 根挂一个,监听 `confirm()` 调用并渲染。
  *
  * 原生 RN `Modal`(transparent + animationType slide)从底部滑入,backdrop 点击
  * 取消、内层 sheet 拦截点击不冒泡。**不依赖 @gorhom**。
  *
- * 唯一 owner:重复挂载的实例拿到 `null` lease,永久惰性、不渲染 —— 不会出现两个
- * Host 争抢同一个对话框。所有关闭路径统一走 `settleConfirm(entry, result)`,
- * 组件内不直接调用 entry 的 resolver。
+ * 栈式 owner:后挂载的实例接管事件,前任入栈挂起并收到 `clear`(对话框就地关闭、
+ * Promise resolve(false));接管者卸载后自动归还。因此**允许**在自己的 `Modal` 里再挂
+ * 一个 —— RN `Modal` 是独立 native window,根 Host 的对话框会被它物理盖住,内层
+ * 自挂才能显示。所有关闭路径统一走 `settleConfirm(entry, result)`,组件内不直接调用
+ * entry 的 resolver。
  */
-export function ConfirmHost(): React.JSX.Element | null {
+export function ConfirmHost(): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
   const insets = useSafeAreaInsets();
   const { height: screenH } = useWindowDimensions();
@@ -38,9 +40,6 @@ export function ConfirmHost(): React.JSX.Element | null {
 
   // 同步权威副本:effect cleanup 与迟到回调都读它,不受 React state 批处理延迟影响。
   const pendingRef = useRef<ConfirmEntry | null>(null);
-
-  // 注册失败(已有 owner)时保持惰性:不订阅、不渲染。
-  const [inert, setInert] = useState(false);
 
   // 保留最后一次显示的 entry:关闭时 entry 立即置 null,但 slide 退场动画期 Modal 仍可见,
   // 渲染 lastEntry 才不会滑出一个只剩 padding 的空 sheet([M-17])。
@@ -66,13 +65,10 @@ export function ConfirmHost(): React.JSX.Element | null {
       }
     };
     const lease = registerConfirmHost(subscriber);
-    if (!lease) {
-      setInert(true);
-      return;
-    }
     return () => {
       // 卸载时若对话框仍未决(error boundary 重置 / 根 re-key 切语言主题等),
       // Store 把它 settle(false) —— 否则 confirm() 的 Promise 永久悬挂并锁死单例([H-5])。
+      // 若本实例是接管者,release 顺带把 owner 归还给挂起中的前任。
       const held = pendingRef.current;
       pendingRef.current = null;
       lease.release(held);
@@ -98,8 +94,6 @@ export function ConfirmHost(): React.JSX.Element | null {
       useNativeDriver: true,
     }).start();
   }, [entry, scrimOpacity]);
-
-  if (inert) return null;
 
   return (
     <Modal

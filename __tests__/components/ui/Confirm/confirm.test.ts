@@ -133,26 +133,6 @@ describe('ConfirmStore — 单 active entry', () => {
 });
 
 describe('ConfirmStore — owner 生命周期', () => {
-  test('重复注册的 Host 拿到 null lease,且完全不接收事件', async () => {
-    const store = createConfirmStore(testLog);
-    const first: ConfirmEvent[] = [];
-    const second: ConfirmEvent[] = [];
-    expect(store.registerHost((event) => first.push(event))).not.toBeNull();
-    expect(store.registerHost((event) => second.push(event))).toBeNull();
-
-    const promise = store.request({ title: 'a' });
-    expect(showEvents(first)).toHaveLength(1);
-    expect(second).toHaveLength(0);
-    store.settle(firstEntry(first), true);
-    await expect(promise).resolves.toBe(true);
-  }, 2000);
-
-  test('被拒绝的重复 lease 是 null —— 没有可用来误伤 owner 的 release', () => {
-    const store = createConfirmStore(testLog);
-    store.registerHost(() => {});
-    expect(store.registerHost(() => {})).toBeNull();
-  });
-
   test('owner release 会 settle 自己持有的 entry 为 false', async () => {
     const store = createConfirmStore(testLog);
     const events: ConfirmEvent[] = [];
@@ -196,6 +176,149 @@ describe('ConfirmStore — owner 生命周期', () => {
     expect(store.activeEntry()).toBe(entryB);
     store.settle(entryB, true);
     await expect(second).resolves.toBe(true);
+  }, 2000);
+});
+
+describe('ConfirmStore — 栈式 lease(后挂载者接管)', () => {
+  test('后挂载的 Host 接管事件,先挂载者不再收到', async () => {
+    const store = createConfirmStore(testLog);
+    const outer: ConfirmEvent[] = [];
+    const inner: ConfirmEvent[] = [];
+    store.registerHost((event) => outer.push(event));
+    store.registerHost((event) => inner.push(event));
+
+    const promise = store.request({ title: 'a' });
+    expect(showEvents(inner)).toHaveLength(1);
+    expect(outer).toHaveLength(0);
+    store.settle(firstEntry(inner), true);
+    await expect(promise).resolves.toBe(true);
+  }, 2000);
+
+  test('接管时原 owner 的 active 立即 resolve(false) 并收到 clear', async () => {
+    const store = createConfirmStore(testLog);
+    const outer: ConfirmEvent[] = [];
+    store.registerHost((event) => outer.push(event));
+
+    const promise = store.request({ title: 'a' });
+    const entry = firstEntry(outer);
+    expect(store.activeEntry()).toBe(entry);
+
+    store.registerHost(() => {});
+    // Promise 不悬挂、单例槽立即释放 —— 否则旧确认框会一直占着槽位
+    await expect(promise).resolves.toBe(false);
+    expect(store.activeEntry()).toBeNull();
+    expect(outer).toEqual([
+      { type: 'show', entry },
+      { type: 'clear', id: entry.id },
+    ]);
+  }, 2000);
+
+  test('接管后新 owner 能立刻拿到新请求(槽位已释放)', async () => {
+    const store = createConfirmStore(testLog);
+    store.registerHost(() => {});
+    store.request({ title: 'a' });
+
+    const inner: ConfirmEvent[] = [];
+    store.registerHost((event) => inner.push(event));
+    const promise = store.request({ title: 'b' });
+    store.settle(firstEntry(inner), true);
+    await expect(promise).resolves.toBe(true);
+  }, 2000);
+
+  test('接管不再告警 —— 多 Host 已是合法用法', () => {
+    const warns: string[] = [];
+    const store = createConfirmStore({
+      ...testLog,
+      warn: (...args) => warns.push(String(args[0])),
+    });
+    store.registerHost(() => {});
+    store.registerHost(() => {});
+    expect(warns).toHaveLength(0);
+  });
+
+  test('后挂载者卸载 → 事件回到先挂载者', async () => {
+    const store = createConfirmStore(testLog);
+    const outer: ConfirmEvent[] = [];
+    store.registerHost((event) => outer.push(event));
+    const inner = store.registerHost(() => {});
+
+    inner.release(null);
+    const promise = store.request({ title: 'a' });
+    expect(showEvents(outer)).toHaveLength(1);
+    store.settle(firstEntry(outer), true);
+    await expect(promise).resolves.toBe(true);
+  }, 2000);
+
+  test('乱序卸载:挂起中的先挂载者先走,当前 owner 不受影响', async () => {
+    const store = createConfirmStore(testLog);
+    const outerLease = store.registerHost(() => {});
+    const inner: ConfirmEvent[] = [];
+    store.registerHost((event) => inner.push(event));
+
+    // 父 Modal 先卸载、子 Host 后卸载的顺序:挂起者只是从栈里摘掉
+    outerLease.release(null);
+    const promise = store.request({ title: 'a' });
+    expect(showEvents(inner)).toHaveLength(1);
+    store.settle(firstEntry(inner), false);
+    await expect(promise).resolves.toBe(false);
+  }, 2000);
+
+  test('乱序卸载后当前 owner 再卸载 → 栈空,回到无 Host 语义', async () => {
+    const store = createConfirmStore(testLog);
+    const outerLease = store.registerHost(() => {});
+    const innerLease = store.registerHost(() => {});
+
+    outerLease.release(null);
+    innerLease.release(null);
+    await expect(store.request({ title: 'a' })).resolves.toBe(false);
+  }, 2000);
+
+  test('release 幂等 —— 重复调用不会误摘新 owner', async () => {
+    const store = createConfirmStore(testLog);
+    const outer: ConfirmEvent[] = [];
+    store.registerHost((event) => outer.push(event));
+    const inner = store.registerHost(() => {});
+
+    inner.release(null);
+    inner.release(null);
+    const promise = store.request({ title: 'a' });
+    expect(showEvents(outer)).toHaveLength(1);
+    store.settle(firstEntry(outer), true);
+    await expect(promise).resolves.toBe(true);
+  }, 2000);
+
+  test('三层嵌套按栈序逐级归还', () => {
+    const store = createConfirmStore(testLog);
+    const seen: string[] = [];
+    const track = (tag: string) => (event: ConfirmEvent) => {
+      if (event.type === 'show')
+        seen.push(`${tag}:${event.entry.options.title}`);
+    };
+    store.registerHost(track('L1'));
+    const l2 = store.registerHost(track('L2'));
+    const l3 = store.registerHost(track('L3'));
+
+    store.request({ title: 'A' });
+    l3.release(null);
+    store.request({ title: 'B' });
+    l2.release(null);
+    store.request({ title: 'C' });
+
+    expect(seen).toEqual(['L3:A', 'L2:B', 'L1:C']);
+  });
+
+  test('栈空时 confirm() 仍 warn + resolve(false)', async () => {
+    const warns: string[] = [];
+    const store = createConfirmStore({
+      ...testLog,
+      warn: (...args) => warns.push(String(args[0])),
+    });
+    const lease = store.registerHost(() => {});
+    lease.release(null);
+
+    await expect(store.request({ title: 'a' })).resolves.toBe(false);
+    expect(warns).toHaveLength(1);
+    expect(warns[0]).toContain('<ConfirmHost />');
   }, 2000);
 });
 

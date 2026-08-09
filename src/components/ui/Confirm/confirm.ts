@@ -19,7 +19,8 @@ const store = createConfirmStore(log);
  * 弹出确认对话框,返回 Promise<boolean>。
  * - 用户点确认 → resolve(true)
  * - 用户点取消 / 点 backdrop / 系统返回 → resolve(false)
- * - 未挂 `<ConfirmHost />`、已有对话框在显示、Host 渲染抛错、Host 卸载 → resolve(false)
+ * - 未挂 `<ConfirmHost />`、已有对话框在显示、Host 渲染抛错、Host 卸载、
+ *   被后挂载的 Host 接管 → resolve(false)
  *
  * 任何路径都必然 settle,不会悬挂。
  *
@@ -37,7 +38,7 @@ const store = createConfirmStore(log);
 export const confirm = (options: ConfirmOptions): Promise<boolean> =>
   store.request(options);
 
-/** 内部:ConfirmHost 挂载时注册唯一 owner;重复挂载得到 null。 */
+/** 内部:ConfirmHost 挂载时接管 owner;前任入栈挂起,本 lease 释放时归还。 */
 export const registerConfirmHost = store.registerHost;
 
 /** 内部:所有关闭路径的唯一出口(identity-guarded + 幂等)。 */
