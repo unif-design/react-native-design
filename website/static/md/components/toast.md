@@ -105,7 +105,8 @@ toast({ message: '正在同步…', duration: 5000 });
 | 未挂 Host 时连续调用多次 | **latest-wins** —— 只保留最新一条,不排队补投历史消息 |
 | 已挂 Host 时连续调用 | 立即投递,后者替换前者;旧的那条的定时器 / 动画不再影响 UI |
 | 挂了多个 `<ToastHost />` | **栈式接管**:最后挂载的收投递,前任入栈挂起并立刻收起自己那条 toast;接管者卸载后自动归还(乱序卸载也安全) |
-| owner 切换瞬间的在途 toast | **丢弃**。toast 是瞬态反馈,接管发生在 Modal 开 / 关那一刻,搬到另一个 owner 上重放没有意义 |
+| **接管**瞬间的在途 toast(有人挂到我上面) | **丢弃**。它属于「已经被盖住的过去」,搬到接管者身上重放没有意义 |
+| **归还**瞬间的在途 toast(接管者卸载、我恢复) | **整条交回并立即重投**。「Modal 内操作成功 → toast → 关窗」是最常见的路径,那条 toast 刚发出、用户一眼都还没看到 |
 | Host 卸载时消息还没显示完(栈里没有前任) | 未完成的投递退回 pending,下一个 Host 会重新投递;若期间已有更新的消息,更新的优先 |
 | Host 渲染 / 订阅回调抛错 | 作废该 Host,消息退回 pending 等待新 Host |
 
@@ -114,7 +115,9 @@ toast({ message: '正在同步…', duration: 5000 });
 :::
 
 :::tip 在自己的 `Modal` 里挂第二个 —— 这是受支持的用法
-RN `Modal` 是**独立的 native window**,根 Host 渲染的 toast 会被它整块盖住(双端都看不见)。所以在 Modal 的内容树里再挂一个 `<ToastHost />` 是**正解**:它接管 owner,toast 渲染进 Modal 自己的 window;Modal 关闭、内层 Host 卸载后 owner 自动归还给根 Host。
+RN `Modal` 是**独立的 native window**,根 Host 渲染的 toast 会被它整块盖住(双端都看不见)。所以在 Modal 的内容树里再挂一个 `<ToastHost />` 是**正解**:它接管 owner,toast 渲染进 Modal 自己的 window;Modal 关闭、内层 Host 卸载后 owner 自动归还给根 Host,**此时还没播完的那条会整条交回根 Host 重新播一遍**(不追剩余时长)——所以「Modal 里点确定 → toast → 关窗」看到的是完整的 3 秒,不是被截断的尾巴。
+
+**接管以挂载顺序为准,不看层级。** 谁最后挂载谁就是 owner —— 如果根子树被 re-key(切主题 / 切语言 / ErrorBoundary 重置)导致根 `<ToastHost />` 重新挂载,它会从 Modal 内那个手里**夺回** owner,直到 Modal 关闭为止 toast 又看不见了。别在 Modal 开着的时候 re-key 根。
 
 这是与 `0.24.x` 及更早版本的**行为变更**:此前重复挂载的 `<ToastHost />` 永久惰性(还会 dev warn),Modal 内自挂是死码。现在多 Host 是合法用法,告警已删除。
 :::

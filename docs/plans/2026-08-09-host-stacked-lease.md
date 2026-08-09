@@ -25,6 +25,9 @@
 3. **owner 切换时的 in-flight 语义**:
    - **Confirm:切换(接管或归还)时,原 owner 的 active entry 一律 `resolve(false)` + 通知原 owner clear**——promise 不悬挂、单例 active 槽释放。这同时修掉消费方已知的「旧确认框占槽,新会话点确认静默无效」窄残留。
    - **Toast:切换时原 owner 收 clear,在途 toast 丢弃**(瞬态消息,接管发生在 Modal 开/关瞬间,丢弃合理;不做跨 owner 重放——过度设计)。
+     > **【实施中修正 · 2026-08-09 · 任务评审后 controller 拍板】** 这条只对**接管**方向成立,**归还**方向是错的。评审实证:「Modal 内操作成功 → toast → `setVisible(false)`」是最常见的一条路径,内层 Host 随 Modal 卸载 → 归还 → 在途 toast 被丢弃且根 Host 不补投,**用户什么都看不到**,比 0.24(被盖住、但关窗后还能看见)更糟。
+     > 修正定稿:**接管方向保持丢弃**(旧消息属于被盖住的过去);**归还方向把在途 toast 整条交给 successor 重新投递**(它是刚发生的、用户该看到)。取「整条交回、新 lease」的最简形态,不做剩余时长追踪——既有回归钉「owner A 卸载后 B 拿到同一 entry、新 leaseId」正是此形态,且这不算被禁止的跨 owner 重放,而是**交回上一层**。「无前任 → 退回 pending」不变。Confirm 两个方向仍一律 `resolve(false)`(归还 = Modal 关闭,confirm 上下文消失,取消合理)。
+     > 新增红灯:「内层 Host 显示 toast 中卸载(有前任)→ 前任收到该 entry 投递」;「接管方向仍丢弃」作回归钉。
 4. **null-owner 语义保持**:`confirm()` 调用时栈空(无任何 Host)仍按现状 warn + `resolve(false)`;toast 同。
 5. **ConfirmHost/ToastHost 组件侧**:null lease 分支(inert)随「恒返 lease」死码化——同步简化组件(删 inert 态)或保留防御(签名仍容 null)——**取实现面最小且类型诚实的一种**,报告说明;组件卸载 cleanup 调 release 的既有链路保持。
 6. **类型/公共面**:优先不破坏既有签名;若 lease 类型从 `X | null` 收窄为 `X`,对消费方是放宽(非 breaking),可做但在报告注明。

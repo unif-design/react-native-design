@@ -86,7 +86,9 @@ await confirm({ title: '确认注销账号?', confirmLabel: '确认注销', dest
 :::tip 在自己的 `Modal` 里挂第二个 —— 这是受支持的用法
 RN `Modal` 是**独立的 native window**,根 Host 渲染的对话框会被它整块盖住(iOS 上兄弟 Modal 更是不叠放,根本看不见)。所以在 Modal 的内容树里再挂一个 `<ConfirmHost />` 是**正解**:它接管 owner,`confirm()` 渲染进 Modal 自己的 window(成为嵌套 present,iOS 支持);Modal 关闭、内层 Host 卸载后 owner 自动归还给根 Host。
 
-接管瞬间前任手里那个未决对话框会立即 `resolve(false)` 并关闭 —— 这是刻意的:Promise 不悬挂、单例槽不被带走,新 Host 一上来就能弹。
+接管瞬间前任手里那个未决对话框会立即 `resolve(false)` 并关闭 —— 这是刻意的:Promise 不悬挂、单例槽不被带走,新 Host 一上来就能弹。归还(Modal 关闭)方向同样结算成 `false`:confirm 的上下文随 Modal 一起消失了,当作取消处理。这一点和 Toast 不同 —— toast 归还时会把没播完的那条交回上一层重播,详见 [Toast → 投递语义](/docs/components/toast#投递语义)。
+
+**接管以挂载顺序为准,不看层级。** 谁最后挂载谁就是 owner —— 如果根子树被 re-key(切主题 / 切语言 / ErrorBoundary 重置)导致根 `<ConfirmHost />` 重新挂载,它会从 Modal 内那个手里**夺回** owner,并把当时未决的对话框结算成 `false`。别在 Modal 开着的时候 re-key 根。
 :::
 
 `ConfirmEntry` / `ConfirmEvent` / lease 等标识类型是 Host 与 Store 之间的**内部协议**,不从包根导出,也不保证跨版本稳定。
