@@ -357,7 +357,7 @@ function。native-only 代码需要自定义缓动时从 `react-native-reanimate
   release 可观测的人工验收入口；真实平台未运行前仍记 BLOCKED。
 - **Tag** —— 状态徽章,5 语义 × 2 尺寸(`md` / `lg`)。
 - **Chip** —— 胶囊形可选中 pill;`selected` 切主色边框 / 文本;可带 leading / trailing。Suggestion 底层。
-- **Confirm** —— 命令式 `confirm(): Promise<boolean>` + `<ConfirmHost />`,高风险二次确认(纯 single-owner Store 保证同一时间只 1 个 Host / active entry；裸 RN Modal,不依赖 @gorhom)。自定义确认/取消文案先 trim，空白值回退“确认”/“取消”。
+- **Confirm** —— 命令式 `confirm(): Promise<boolean>` + `<ConfirmHost />`,高风险二次确认(单 active owner + 栈式接管:后挂载的 Host 接管、卸载自动归还,同一时间只有 1 个 Host 在收事件、1 个未决 active entry；裸 RN Modal,不依赖 @gorhom)。自定义确认/取消文案先 trim，空白值回退“确认”/“取消”。
 - **Thumbnail** —— 16:9.5 缩略图,`sm 64×40 / md 113×67 / lg 160×96`。
 - **Loading** —— `Spinner`；native 用 Reanimated 4 线性旋转，Web 用静态 CSS
   keyframes。
