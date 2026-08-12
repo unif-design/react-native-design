@@ -101,6 +101,7 @@ const MANUAL_CATEGORIES: ReadonlyArray<IconCategory> = [
       'pause',
       'sound',
       'maximize',
+      'minimize',
     ],
   },
   {
