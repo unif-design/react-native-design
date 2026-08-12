@@ -76,6 +76,7 @@ export type IconName =
   | 'menu'
   | 'mic-on'
   | 'mic'
+  | 'minimize'
   | 'more-h'
   | 'more-v'
   | 'order'
@@ -1509,6 +1510,15 @@ export const ICONS: Record<IconName, IconDef> = {
       },
     ],
   },
+  'minimize': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7',
+      },
+    ],
+  },
   'more-h': {
     strokeWidth: 1.75,
     elements: [
@@ -2566,6 +2576,7 @@ export const ICON_NAMES: IconName[] = [
   'menu',
   'mic-on',
   'mic',
+  'minimize',
   'more-h',
   'more-v',
   'order',
