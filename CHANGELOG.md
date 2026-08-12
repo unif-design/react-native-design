@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.26.0](https://github.com/unif-design/react-native-design/compare/v0.25.0...v0.26.0) (2026-08-12)
+
+
+### Features
+
+* **icons:** add minimize icon ([#121](https://github.com/unif-design/react-native-design/issues/121)) ([f941865](https://github.com/unif-design/react-native-design/commit/f9418652df15a874957bc3414de05de7cd04a2fc))
+
 # [0.25.0](https://github.com/unif-design/react-native-design/compare/v0.24.1...v0.25.0) (2026-08-09)
 
 
