@@ -42,7 +42,7 @@ const rootManifest = {
   peerDependencies: {
     '@sbaiahmed1/react-native-blur': '>=4',
     'react': '>=19.2.3 <20.0.0',
-    'react-native': '>=0.86.0 <0.87.0',
+    'react-native': '>=0.86.0',
     'react-native-gesture-handler': '>=3.0.0 <4.0.0',
     'react-native-reanimated': '>=4.5.2 <4.6.0',
     'react-native-reanimated-carousel': '>=5.0.0 <6.0.0',

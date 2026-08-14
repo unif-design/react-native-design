@@ -177,7 +177,7 @@ harness 不继承本仓 `check:runtime-peers` 的 workspace 精确 allowlist；�
 
 | 依赖                               | 支持范围           | 本仓验证版本 |
 | ---------------------------------- | ------------------ | ------------ |
-| `react-native`                     | `>=0.86.0 <0.87.0` | `0.86.2`     |
+| `react-native`                     | `>=0.86.0`         | `0.86.2`     |
 | `react`                            | `>=19.2.3 <20.0.0` | `19.2.3`     |
 | `react-native-gesture-handler`     | `>=3.0.0 <4.0.0`   | `3.1.0`      |
 | `react-native-reanimated`          | `>=4.5.2 <4.6.0`   | `4.5.3`      |
@@ -187,7 +187,8 @@ harness 不继承本仓 `check:runtime-peers` 的 workspace 精确 allowlist；�
 | `react-native-svg`                 | `>=15`             | `15.15.5`    |
 | `@sbaiahmed1/react-native-blur`    | `>=4`              | `4.6.2`      |
 
-- 新架构(Fabric + TurboModule)必须开启;旧架构 Bridge、RN `0.85` 及更低版本、RN `0.87+` 都不在支持范围。
+- 新架构(Fabric + TurboModule)必须开启;旧架构 Bridge、RN `0.85` 及更低版本不在支持范围。
+- `react-native` peer 不封顶,RN `0.87+` 能装上;但本仓只在 `0.86.2` 上验证,更高版本未经验证。
 - Node.js `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`(`package.json#engines`;本仓 `.nvmrc` 固定 `v24.13.0`)
 - TypeScript 6、Yarn 4
 

@@ -3526,7 +3526,7 @@ test('exhaustive verifier 为 runtime、peer、toolchain、plugin 与 native dri
       code: 'ROOT_PEER_DEPENDENCIES',
       mutate(source) {
         const manifest = JSON.parse(source);
-        manifest.peerDependencies['react-native'] = '>=0.85.0 <0.87.0';
+        manifest.peerDependencies['react-native'] = '>=0.85.0';
         return `${JSON.stringify(manifest, null, 2)}\n`;
       },
     },
