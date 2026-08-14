@@ -15,7 +15,7 @@ description: "5 分钟上手 @unif/react-native-design：装 peerDeps、根挂 T
 
 | 依赖 | 支持范围 | 本仓验证版本 |
 | --- | --- | --- |
-| `react-native` | `>=0.86.0 <0.87.0` | `0.86.2` |
+| `react-native` | `>=0.86.0` | `0.86.2` |
 | `react` | `>=19.2.3 <20.0.0` | `19.2.3` |
 | `react-native-gesture-handler` | `>=3.0.0 <4.0.0` | `3.1.0` |
 | `react-native-reanimated` | `>=4.5.2 <4.6.0` | `4.5.3` |
@@ -28,8 +28,8 @@ description: "5 分钟上手 @unif/react-native-design：装 peerDeps、根挂 T
 - Node.js `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`(与 `package.json#engines` 逐字一致;本仓 `.nvmrc` 固定 `v24.13.0`)、Yarn 4
 - TypeScript 6
 
-:::info 仅支持新架构与 RN 0.86.x
-本库面向 RN 0.86 新架构(Fabric + TurboModules),依赖 `react-native-reanimated@4.5` + `react-native-worklets@0.11`。旧架构(Bridge)、RN `0.85` 及更低版本、RN `0.87+` 都不在支持范围 —— 发布 contract 是闭区间 `>=0.86.0 <0.87.0`,不做向前兼容承诺。
+:::info 仅支持新架构,RN 下限 0.86
+本库面向 RN 0.86 新架构(Fabric + TurboModules),依赖 `react-native-reanimated@4.5` + `react-native-worklets@0.11`。旧架构(Bridge)与 RN `0.85` 及更低版本不在支持范围 —— 发布 contract 是 `>=0.86.0`,不封顶。上限去掉后 RN `0.87+` 能装上,但本仓只在 `0.86.2` 上验证,更高版本请自行回归。
 :::
 
 ## 安装依赖 {#安装依赖}
