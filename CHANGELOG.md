@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.27.0](https://github.com/unif-design/react-native-design/compare/v0.26.0...v0.27.0) (2026-08-14)
+
+
+### Features
+
+* 放开 react-native peer 上限 ([#122](https://github.com/unif-design/react-native-design/issues/122)) ([7250686](https://github.com/unif-design/react-native-design/commit/7250686d18aa9560a4170a2932797d81efe615f7))
+
 # [0.26.0](https://github.com/unif-design/react-native-design/compare/v0.25.0...v0.26.0) (2026-08-12)
 
 
