@@ -94,3 +94,9 @@ nitrogen/
 # codegraph: 提交 .codegraph/.gitignore 规则,daemon 运行时(pid/sock)不入库
 .codegraph/*.pid
 .codegraph/*.sock
+
+# design-sync:同步到 claude.ai/design 的工作目录与产物。
+# 适配层由 unif-design/design-ops 的 design-sync skill 提供,不入库。
+.ds-sync/
+ds-bundle/
+.design-sync/
