@@ -1,7 +1,7 @@
 # 参与贡献
 
 欢迎提交任何规模的改进。交流与代码评审请遵守项目的
-[Code of Conduct](./CODE_OF_CONDUCT.md)。组织级 CI、发版、Dependabot、PR review 和
+[Code of Conduct](./CODE_OF_CONDUCT.md)。组织级 CI、发版、人工依赖升级、PR review 和
 branch protection 说明见
 [AUTOMATION.md](https://github.com/unif-design/.github/blob/main/AUTOMATION.md)。
 
