@@ -3562,7 +3562,7 @@ function verifyWorkflowContract(root) {
   const digest = createHash('sha256').update(sharedCi).digest('hex');
   if (
     digest !==
-    'd2ac60869b254ee49490126e5a31a803a31be5e52f9c4de4343ef9de1b99552b'
+    '83e9a350da8f7e89d5c196001fe1ce686fb6ae9d9f4fc582a8fbcfc723cf75fa'
   ) {
     failVerification(
       'SHARED_CI_DIGEST',

@@ -3826,7 +3826,7 @@ test('repo-specific workflow 使用强并集 gate 且共享 CI digest 不漂移'
   const sharedCi = read('.github/workflows/ci.yml');
   assert.equal(
     createHash('sha256').update(sharedCi).digest('hex'),
-    'd2ac60869b254ee49490126e5a31a803a31be5e52f9c4de4343ef9de1b99552b'
+    '83e9a350da8f7e89d5c196001fe1ce686fb6ae9d9f4fc582a8fbcfc723cf75fa'
   );
 
   const workflow = read('.github/workflows/example-showcase.yml');
