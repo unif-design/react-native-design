@@ -1,5 +1,5 @@
-/** Stepper 尺寸：sm=28px / md=32px */
-export type StepperSize = 'sm' | 'md';
+/** Stepper 尺寸：xs=24px / sm=28px / md=32px */
+export type StepperSize = 'xs' | 'sm' | 'md';
 
 export type StepperProps = {
   /** 当前值（受控） */
@@ -16,6 +16,8 @@ export type StepperProps = {
   step?: number;
   /** 尺寸，默认 'md' */
   size?: StepperSize;
+  /** 自定义中央值的可见文案；数值运算与 adjustable 语义仍使用归一化后的 number */
+  formatValue?: (value: number) => string;
   /** 整体禁用（三个操作节点都不暴露 action） */
   disabled?: boolean;
   /** E2E / 测试定位 */

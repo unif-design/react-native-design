@@ -388,6 +388,16 @@ export function FormsScene(): React.JSX.Element {
               testID="forms-stepper-small"
             />
             <Stepper
+              value={4}
+              onChange={() => {}}
+              min={0}
+              max={10}
+              size="xs"
+              formatValue={(value) => `${value} 箱`}
+              accessibilityLabel="整箱数量"
+              testID="forms-stepper-compact"
+            />
+            <Stepper
               value={10}
               onChange={() => {}}
               min={0}

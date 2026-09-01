@@ -203,6 +203,13 @@
     "description": "内容入/出场淡入淡出容器 —— native 走 reanimated FadeIn/FadeOut，Web 用单一 RN View + CSS opacity transition；保留 caller flex/opacity，并显式尊重 reduced motion。"
   },
   {
+    "title": "Ribbon 缎带",
+    "mdPath": "md/components/ribbon.md",
+    "slug": "/components/ribbon",
+    "section": "components",
+    "description": "包裹任意内容的右上语义缎带；Design 持有绝对定位、条带、折角、主题 token 与装饰 a11y 隐藏，业务只传 label / tone。"
+  },
+  {
     "title": "Search 搜索框",
     "mdPath": "md/components/search.md",
     "slug": "/components/search",
@@ -228,7 +235,7 @@
     "mdPath": "md/components/stepper.md",
     "slug": "/components/stepper",
     "section": "components",
-    "description": "数字步进器 [−][N][+] —— 三个真实至少 44pt 的交互 frame；accessibilityLabel 必填，范围和值统一归一化，边界过滤 custom action 并让无效标准方向 no-op。"
+    "description": "数字步进器 [−][N][+] —— md/sm 保持真实 44pt frame，xs 是横向触控小于 44pt 的 dense 紧凑档；formatValue 只格式化可见安全值，数值语义不变。"
   },
   {
     "title": "Switch 开关",

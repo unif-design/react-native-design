@@ -52,7 +52,8 @@ export const makeStyles = (c: ColorTokens) =>
     },
   });
 
-/** Stepper 尺寸推导:sm(control.sm=`r(28)` 高 / `r(28)` 按钮 / r(40) 值宽 / xs 字)/
+/** Stepper 尺寸推导:xs(r(24) 高 / r(24) 按钮 / r(40) 值宽 / micro 字)/
+ *  sm(control.sm=`r(28)` 高 / `r(28)` 按钮 / r(40) 值宽 / xs 字)/
  *  md(r(32) 高 / r(32) 按钮 / r(48) 值宽 / sm 字)。
  *  新增 size 在 types.ts 加 union + 这里加 case。 */
 export function sizingFor(size: StepperSize): {
@@ -62,6 +63,8 @@ export function sizingFor(size: StepperSize): {
   fs: number;
 } {
   switch (size) {
+    case 'xs':
+      return { h: r(24), btn: r(24), w: r(40), fs: t.micro };
     case 'sm':
       return { h: control.sm, btn: control.sm, w: r(40), fs: t.xs };
     case 'md':

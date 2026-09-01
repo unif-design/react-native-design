@@ -686,10 +686,22 @@ test('Stepper 覆盖尺寸、步长、边界、零范围与禁用语义，只保
   expect(componentByTestID(Stepper, 'forms-stepper-small').props.size).toBe(
     'sm'
   );
+  const compactStepper = componentByTestID(Stepper, 'forms-stepper-compact');
+  expect(compactStepper.props.size).toBe('xs');
+  expect(compactStepper.props.formatValue?.(4)).toBe('4 箱');
+  expect(
+    screen.getByText('4 箱', { includeHiddenElements: true })
+  ).toBeOnTheScreen();
   stateCoverage.prove('stepper.sizes', () => {
-    expect(componentByTestID(Stepper, 'forms-stepper-small').props.size).toBe(
-      'sm'
-    );
+    expect([
+      componentByTestID(Stepper, 'forms-stepper-small').props.size,
+      componentByTestID(Stepper, 'forms-stepper-compact').props.size,
+    ]).toEqual(['sm', 'xs']);
+  });
+  stateCoverage.prove('stepper.format-value', () => {
+    expect(
+      componentByTestID(Stepper, 'forms-stepper-compact').props.formatValue?.(4)
+    ).toBe('4 箱');
   });
   expect(
     screen.getByRole('button', { name: '最大值，增加' }).props

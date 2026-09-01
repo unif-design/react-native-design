@@ -32,6 +32,7 @@ const expectedComponentIds = [
   'PulseDot',
   'Radio',
   'Reveal',
+  'Ribbon',
   'Search',
   'Segmented',
   'Skeleton',
@@ -128,7 +129,15 @@ const expectedComponentsByScene = {
     'FormRow',
   ],
   navigation: ['NavBar', 'DrawerHeader', 'Tabs', 'Segmented', 'TabBar'],
-  collections: ['Card', 'Cell', 'List', 'Grid', 'EntryCard', 'Carousel'],
+  collections: [
+    'Card',
+    'Ribbon',
+    'Cell',
+    'List',
+    'Grid',
+    'EntryCard',
+    'Carousel',
+  ],
   media: ['Avatar', 'Thumbnail', 'Logo'],
   business: [
     'GradientWash',
@@ -140,12 +149,12 @@ const expectedComponentsByScene = {
   ],
 } as const;
 
-test('catalog 精确覆盖 46 个公开组件且每项只有一个非空主场景', () => {
+test('catalog 精确覆盖 47 个公开组件且每项只有一个非空主场景', () => {
   expect(componentCatalog.map((entry) => entry.id).sort()).toEqual(
     [...expectedComponentIds].sort()
   );
-  expect(new Set(componentCatalog.map((entry) => entry.id)).size).toBe(46);
-  expect(componentCatalog).toHaveLength(46);
+  expect(new Set(componentCatalog.map((entry) => entry.id)).size).toBe(47);
+  expect(componentCatalog).toHaveLength(47);
   expect(componentCatalog.every((entry) => entry.states.length > 0)).toBe(true);
 });
 

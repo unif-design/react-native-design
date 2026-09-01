@@ -328,7 +328,7 @@ function。native-only 代码需要自定义缓动时从 `react-native-reanimate
 
 ## 10. 组件库 {#组件库}
 
-按设计系统分组。**本包(`@unif/react-native-design`)实现 38 个 ui 原子 + 4 个通用业务复合组件**;聊天 / IM 组件(Message / PromptInput 等)是同一套设计语言,但代码在 portal 仓库,这里只描述其视觉契约。
+按设计系统分组。**本包(`@unif/react-native-design`)实现 39 个 ui 原子 + 4 个通用业务复合组件**;聊天 / IM 组件(Message / PromptInput 等)是同一套设计语言,但代码在 portal 仓库,这里只描述其视觉契约。
 
 ### 品牌
 - **Logo** —— `<Image>` 包装容器,接 `source` prop(母版 mark 由消费者提供)；缺省 /
@@ -375,9 +375,10 @@ function。native-only 代码需要自定义缓动时从 `react-native-reanimate
 - **Checkbox / Radio / Switch** —— required string 仍会在运行时 trim；空白名称
   移除有效 action 并在 effect 诊断。Checkbox/Radio 的显式空白覆盖会回退可见
   label，Radio.Group 的组名也会 trim。
-- **Stepper** —— 三个真实至少 44pt frame；单一 normalizer 驱动显示、
-  native/Web handler 与 a11y state。非 number / 非有限值不会进入运算，
-  空白业务名称会移除全部有效 action。
+- **Stepper** —— `md` / `sm` 三个真实至少 44pt frame；`xs` 是左右
+  `r(24)×44`、中央 `r(40)×44` 且无 hitSlop 的 dense 紧凑档；单一
+  normalizer 驱动显示、native/Web handler 与 a11y state。非 number / 非有限值
+  不会进入运算，空白业务名称会移除全部有效 action。
 - **Form** —— Form / FormGroup / FormRow(行间 hairline)。
 
 ### 导航
@@ -402,6 +403,8 @@ function。native-only 代码需要自定义缓动时从 `react-native-reanimate
   外层 button、handler 或 arrow。两种布局:**grouped**(默认,白卡 + 8px gap)/
   **flush**(`<List flush />`,透明底 + cell 间 hairline)。
 - **Card** —— 内容卡。variant `default`(白底 + card shadow + 边框)/ `plain`(仅白底,无阴影无边框);`flat` 已 deprecated 等价 `plain`。
+- **Ribbon** —— 包裹任意内容的固定右上缎带；业务只传 label 与 brand/danger
+  语义色，可选读屏文案，overlay 不拦截内部交互。
 - **Grid** —— 九宫格图标网格；只有函数 `onPress` 且 item 最终名称非空时该格
   才是 button。空白显式名称回退 label + badge；display-only 空名称不创建
   unnamed merged a11y node。
@@ -471,7 +474,7 @@ src/
 │   ├── useThemedStyles.ts   ← useThemedStyles(maker),含 useMemo([colors, shadow, fontScale, maker]) 缓存;出口按 fontScale 缩放 fontSize / lineHeight / letterSpacing(=1 恒等)
 │   └── index.ts             ← barrel
 │
-├── components/ui/           ← 38 个原子组件(Avatar / Button / Card / Cell / Icon / Input / NavBar / Toast / ...)
+├── components/ui/           ← 39 个原子组件(Avatar / Button / Card / Cell / Icon / Input / NavBar / Ribbon / Toast / ...)
 │   └── index.ts             ← barrel(从 @unif/react-native-design 包根导出)
 │
 └── components/business/     ← 4 个通用业务复合(AvatarWithRing / Decorations / GlassStats / VersionPill)

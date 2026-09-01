@@ -1,7 +1,7 @@
 ---
 sidebar_position: 6
 title: Stepper 步进器
-description: "数字步进器 [−][N][+] —— 三个真实至少 44pt 的交互 frame；accessibilityLabel 必填，范围和值统一归一化，边界过滤 custom action 并让无效标准方向 no-op。"
+description: "数字步进器 [−][N][+] —— md/sm 保持真实 44pt frame，xs 是横向触控小于 44pt 的 dense 紧凑档；formatValue 只格式化可见安全值，数值语义不变。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -21,6 +21,7 @@ export const StepperDemo = () => {
   const [a, setA] = useState(12);
   const [b, setB] = useState(0);
   const [c, setC] = useState(50);
+  const [compact, setCompact] = useState(4);
   const total = a + b + c;
   const amount = a * 120 + b * 96 + c * 48;
   return (
@@ -31,6 +32,18 @@ export const StepperDemo = () => {
           <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
             <Stepper value={a} onChange={setA} min={1} max={99} accessibilityLabel="独立商品数量" />
             <Text style={{ fontSize: 13, color: 'var(--ifm-color-emphasis-600)' }}>min=1, max=99</Text>
+          </View>
+          <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+            <Stepper
+              value={compact}
+              onChange={setCompact}
+              min={0}
+              max={99}
+              size="xs"
+              formatValue={(value) => `${value} 箱`}
+              accessibilityLabel="紧凑整箱数量"
+            />
+            <Text style={{ fontSize: 13, color: 'var(--ifm-color-emphasis-600)' }}>xs + formatValue</Text>
           </View>
           <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
             <Stepper
@@ -83,15 +96,15 @@ export const StepperDemo = () => {
 
 | 元素 | 规则 |
 |---|---|
-| 实际交互 frame | 三个 outer 均至少 `fixed.hitTarget`，不经过 `r()` 或 fontScale：side outer = max(44, visual button width) × max(44, visual height)；value outer = max(44, visual value width) × max(44, visual height)。不加 padding、`hitSlop`、overflow 或 visual cap |
-| visual 高度 | md 为 `r(32)`；sm 为 `r(28)`。只有 Web / 402pt RN harness 得到 28/32/40/48 的基准值，其他 native window 按实际 `r()` 结果 |
+| 实际交互 frame | md/sm 三个 outer 均至少 `fixed.hitTarget`，不加 hitSlop；xs 是明确的 dense 例外：左右 outer 为 `r(24) × 44`，中央 adjustable 为 `r(40) × 44`，三块相邻且互不重叠，不加 hitSlop 或根 padding，Web / 402pt RN harness 总宽 88pt |
+| visual 高度 | xs `r(24)`、sm `r(28)`、md `r(32)`；只有 Web / 402pt RN harness 得到 24/28/32/40/48 的基准值，其他 native window 按实际 `r()` 结果 |
 | 圆角 | 8px（`radius.md`，外层左右两角），中间数字框无独立圆角 |
-| 按钮 visual | md `r(32) × r(32)` / sm `r(28) × r(28)`，嵌在 side outer 内并朝中央贴边；`±` 基准字号 18px（`type.h1`），按 fontScale 缩放一次 |
-| 数字 visual | md `r(48) × r(32)` / sm `r(40) × r(28)`，在中央 outer 内居中；1px 上下边线、无左右边线，基准字号 md 14 / sm 13，按 fontScale 缩放一次 |
+| 按钮 visual | md `r(32)²` / sm `r(28)²` / xs `r(24)²`，嵌在 side outer 内并朝中央贴边；`±` 基准字号 18px（`type.h1`），按 fontScale 缩放一次 |
+| 数值 visual | md `r(48) × r(32)` / sm `r(40) × r(28)` / xs `r(40) × r(24)`；1px 上下边线、无左右边线，基准字号 md 14 / sm 13 / xs 11，按 fontScale 缩放一次；`formatValue` 只替换可见文案 |
 | 背景 / 描边 | `c.surface` 底 + 1px `c.outline`（亮色 `#EDEDED`）边 |
 | 禁用 | 按钮 `opacity: 0.4`（达到 min/max 或整体 `disabled` 时；按下 0.7） |
 
-`ThemeProvider fontScale` 只改变 `±` 与中央数值的文字 metric。三个 visual wrapper、至少 44pt 的 outer frame、边框、圆角和点击布局都不缩放；动态中央字号不会再经过 `useThemedStyles` 二次处理。
+`ThemeProvider fontScale` 只改变 `±` 与中央数值的文字 metric。三个 visual wrapper、md/sm 至少 44pt 的 outer frame、xs 高 44pt 且横向小于 44pt 的 dense outer、边框、圆角和点击布局都不缩放；动态中央字号不会再经过 `useThemedStyles` 二次处理。
 
 ## 用法
 
@@ -128,6 +141,17 @@ const [qty, setQty] = useState(12);
   accessibilityLabel="套餐数量"
 />
 
+{/* 紧凑视觉 + 单位文案；不需要覆盖中央值样式 */}
+<Stepper
+  size="xs"
+  value={packs}
+  onChange={setPacks}
+  min={0}
+  max={99}
+  formatValue={(value) => `${value} 箱`}
+  accessibilityLabel="整箱数量"
+/>
+
 {/* 原始 min > max 会折叠为零范围：显示 10，三个操作节点全部禁用 */}
 <Stepper
   value={5}
@@ -150,11 +174,12 @@ const [qty, setQty] = useState(12);
 | `min` | `number?` | `0` | 下限（达到时 `−` 禁用） |
 | `max` | `number?` | `99` | 上限（达到时 `+` 禁用） |
 | `step` | `number?` | `1` | 步长（非正数 / 非有限数回退为 1） |
-| `size` | `'sm' \| 'md'` | `'md'` | visual 高度 `r(28)` / `r(32)`；三个 outer 都至少 44pt，并随 visual 增长 |
+| `size` | `'xs' \| 'sm' \| 'md'` | `'md'` | visual 高度 `r(24)` / `r(28)` / `r(32)`；xs 是横向触控小于 44pt 的 dense 紧凑档（类似 Segmented sm），sm/md 行为不变 |
+| `formatValue` | `(value: number) => string` | — | 格式化中央可见文案；入参是归一化后的安全值，运算与 adjustable `now` 仍为 number |
 | `disabled` | `boolean?` | `false` | 整体禁用（三个操作节点都不暴露 action） |
 | `testID` | `string?` | — | 根定位；派生三个 outer `-decrement` / `-value` / `-increment` 与对应 `-*-visual` |
 
-> 归一化边界：缺省仍是 `min=0`、`max=99`、`step=1`。只有 `typeof === 'number' && Number.isFinite(...)` 的输入参与运算；字符串、对象、NaN、Infinity 等未类型化值不会产生 NaN。非法 `min` 回退 0，非法 `max` 或 `max < safeMin` 折叠到 `safeMin`，非法/非正 `step` 回退 1，非法 `value` 回退 `safeMin`。零范围、外部 `disabled` 与空白业务名称都不会暴露任何 action。无 `style` prop。
+> 归一化边界：缺省仍是 `min=0`、`max=99`、`step=1`。只有 `typeof === 'number' && Number.isFinite(...)` 的输入参与运算；字符串、对象、NaN、Infinity 等未类型化值不会产生 NaN。非法 `min` 回退 0，非法 `max` 或 `max < safeMin` 折叠到 `safeMin`，非法/非正 `step` 回退 1，非法 `value` 回退 `safeMin`。`formatValue` 在归一化后调用。零范围、外部 `disabled` 与空白业务名称都不会暴露任何 action。无 `style`、`valueStyle` 或 `buttonStyle` prop。
 
 ## 无障碍（a11y）
 
@@ -184,15 +209,16 @@ const [qty, setQty] = useState(12);
 
 | 节点 | testID | 预期布局 |
 |---|---|---|
-| 左右 outer platform Pressable | `stepper-middle-decrement` / `stepper-middle-increment` | native 为 RNGH、Web 为 RN core；side outer = max(44, visual button width) × max(44, visual height)，透明、无 `hitSlop`；visual 朝中央贴边 |
-| 中央 adjustable outer | `stepper-middle-value` | value outer = max(44, visual value width) × max(44, visual height) |
+| md/sm 左右 outer platform Pressable | `stepper-middle-decrement` / `stepper-middle-increment` | native 为 RNGH、Web 为 RN core；side outer = max(44, visual button width) × max(44, visual height)，透明、无 `hitSlop`；visual 朝中央贴边 |
+| md/sm 中央 adjustable outer | `stepper-middle-value` | value outer = max(44, visual value width) × max(44, visual height) |
+| xs 三个 outer | `stepper-compact-decrement` / `stepper-compact-value` / `stepper-compact-increment` | `r(24)×44 / r(40)×44 / r(24)×44`；无 `hitSlop`、无根 padding，三块互不重叠；Web / 402pt RN harness 总宽 88pt，横向触控小于 44pt |
 | md visual wrappers | 对应 `-decrement-visual` / `-value-visual` / `-increment-visual` | 实现为 `r(32)×r(32)` / `r(48)×r(32)` / `r(32)×r(32)`；Web 与 402pt RN harness 是 32×32 / 48×32 / 32×32，其他 native window 按实际 `r()` 结果 |
-| sm visual wrappers | `stepper-zero-range-*-visual` | `r(28)×r(28) / r(40)×r(28) / r(28)×r(28)`；outer 按上述公式至少 44pt |
+| sm visual wrappers | `stepper-zero-range-*-visual` | `r(28)×r(28) / r(40)×r(28) / r(28)×r(28)`；outer 按 md/sm 公式至少 44pt |
 
 Web Inspector 检查中央 `role=slider`、`aria-valuemin/max/now`、disabled 与 tab order；键盘逐一验证 ArrowUp/Right、ArrowDown/Left、Home、End。iOS 需要分别检查过滤后的 custom action 列表与标准 adjustable 手势：无效标准方向可能派发，但业务值和 unexpected 计数必须不变。RN 宽屏 Inspector 还要确认动态 outer 包住完整 scaled visual。`stepper-zero-range-value` 必须上报 disabled 且没有 handler。这些人工行只有真实执行后才能记为 PASS。
 
 ## 不要
 
-- ❌ 不要在 Stepper 中间放可输入的 TextInput——下单场景请用专门的 InputNumber 控件（待规划）
+- ❌ 不要用覆盖层替换 Stepper 中央值；单位文案用 `formatValue`，数值行为仍由 Stepper 持有
 - ❌ 不要省略或复用无上下文的 `accessibilityLabel`——名称应说明正在调整哪个业务值
 - ❌ 不要去掉描边或圆角——Stepper 必须看起来"可点击"

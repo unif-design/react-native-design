@@ -1061,6 +1061,19 @@ export const showcaseStateContract = [
       specimens: [
         { testID: 'forms-stepper-main', props: { size: 'md' } },
         { testID: 'forms-stepper-small', props: { size: 'sm' } },
+        { testID: 'forms-stepper-compact', props: { size: 'xs' } },
+      ],
+    },
+  },
+  {
+    id: 'stepper.format-value',
+    component: 'Stepper',
+    scene: 'forms',
+    label: '格式化值',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        { testID: 'forms-stepper-compact', props: { formatValue: true } },
       ],
     },
   },
@@ -1157,6 +1170,55 @@ export const showcaseStateContract = [
       kind: 'jsx-props',
       specimens: [
         { testID: 'collections-card-default', props: { variant: 'default' } },
+      ],
+    },
+  },
+  {
+    id: 'ribbon.brand',
+    component: 'Ribbon',
+    scene: 'collections',
+    label: 'brand',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        { testID: 'collections-ribbon-brand', props: { tone: 'brand' } },
+      ],
+    },
+  },
+  {
+    id: 'ribbon.danger',
+    component: 'Ribbon',
+    scene: 'collections',
+    label: 'danger',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        { testID: 'collections-ribbon-danger', props: { tone: 'danger' } },
+      ],
+    },
+  },
+  {
+    id: 'ribbon.top-right',
+    component: 'Ribbon',
+    scene: 'collections',
+    label: '右上定位',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [{ testID: 'collections-ribbon-brand', props: {} }],
+    },
+  },
+  {
+    id: 'ribbon.a11y',
+    component: 'Ribbon',
+    scene: 'collections',
+    label: '可选读屏文案',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'collections-ribbon-danger',
+          props: { accessibilityLabel: '该商品未匹配' },
+        },
       ],
     },
   },

@@ -39,6 +39,7 @@ export const publicComponentIds = [
   'PulseDot',
   'Radio',
   'Reveal',
+  'Ribbon',
   'Search',
   'Segmented',
   'Skeleton',
@@ -178,7 +179,16 @@ export const componentCatalog = [
   {
     id: 'Stepper',
     scene: 'forms',
-    states: ['最小值', '中间值', '最大值', '步长', '零范围', '禁用', '尺寸'],
+    states: [
+      '最小值',
+      '中间值',
+      '最大值',
+      '步长',
+      '零范围',
+      '禁用',
+      '尺寸',
+      '格式化值',
+    ],
   },
   { id: 'Form', scene: 'forms', states: ['单分组', '多分组'] },
   { id: 'FormGroup', scene: 'forms', states: ['有标题', '无标题'] },
@@ -224,6 +234,11 @@ export const componentCatalog = [
     id: 'Card',
     scene: 'collections',
     states: ['default', 'plain', 'bare', 'fill'],
+  },
+  {
+    id: 'Ribbon',
+    scene: 'collections',
+    states: ['brand', 'danger', '右上定位', '可选读屏文案'],
   },
   {
     id: 'Cell',

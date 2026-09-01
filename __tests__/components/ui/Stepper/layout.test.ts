@@ -2,6 +2,25 @@ import { describe, expect, test } from '@jest/globals';
 import { resolveStepperLayout } from '../../../../src/components/ui/Stepper/layout';
 
 describe('resolveStepperLayout', () => {
+  test('xs 使用三块互不重叠的 dense frame，不注入 hitSlop 或根 padding', () => {
+    const layout = resolveStepperLayout(
+      { h: 24, btn: 24, w: 40 },
+      { compact: true }
+    );
+
+    expect(layout).toEqual({
+      decrementFrame: { width: 24, height: 44, alignItems: 'flex-end' },
+      valueFrame: { width: 40, height: 44 },
+      incrementFrame: { width: 24, height: 44, alignItems: 'flex-start' },
+    });
+    expect(
+      layout.decrementFrame.width +
+        layout.valueFrame.width +
+        layout.incrementFrame.width
+    ).toBe(88);
+    expect(JSON.stringify(layout)).not.toMatch(/hitSlop|padding/u);
+  });
+
   test('narrow visual 使用真实 44pt outer', () => {
     expect(resolveStepperLayout({ h: 28, btn: 28, w: 40 })).toEqual({
       decrementFrame: { width: 44, height: 44, alignItems: 'flex-end' },
