@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.29.0](https://github.com/unif-design/react-native-design/compare/v0.28.0...v0.29.0) (2026-09-01)
+
+
+### Features
+
+* 新增圆形进度组件 ([#128](https://github.com/unif-design/react-native-design/issues/128)) ([ac1017d](https://github.com/unif-design/react-native-design/commit/ac1017dad1c80fee2708f5d584a4b54b2f98fcbd))
+
 # [0.28.0](https://github.com/unif-design/react-native-design/compare/v0.27.1...v0.28.0) (2026-09-01)
 
 
