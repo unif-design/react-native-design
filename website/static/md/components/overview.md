@@ -33,7 +33,7 @@ description: "@unif/react-native-design 组件索引（40+ 组件，按场景分
 | [Chip](chip.md) | 胶囊形可选中 pill(Suggestion 底层) |
 | [Confirm](confirm.md) | 命令式 `confirm()` + `<ConfirmHost />` 高风险二次确认 |
 | [Thumbnail](thumbnail.md) | 16:9.5 缩略图,sm / md / lg 三档 |
-| [Loading](loading.md) | `Spinner`：native Reanimated 旋转 / Web CSS keyframes |
+| [Loading](loading.md) | `Spinner` 未知时长加载；`CircularProgress` 确定进度与可选百分比 |
 | [Pulse](pulse.md) | `usePulse` + `<Pulse>` + `<PulseDot>`,通用脉冲底座 |
 | [Reveal](reveal.md) | 淡入容器：native Reanimated 入/退场 / Web CSS 入场 |
 | [StatusDot](status-dot.md) | `done`/`error`/`active`/`pending` 圆点,`flat`/`soft` 双 tone |
@@ -69,6 +69,7 @@ description: "@unif/react-native-design 组件索引（40+ 组件，按场景分
 | [Toast](toast.md) | 命令式 `toast()` + `<ToastHost />` 全局轻提示 |
 | [Empty](empty.md) | 空状态 |
 | [Skeleton](skeleton.md) | 骨架占位,`shape='line'/'rect'/'circle'`(走 `usePulse`) |
+| [CircularProgress](loading.md) | `0..1` 确定圆形进度，可选中央百分比文字 |
 
 ## 数据展示 {#数据展示}
 

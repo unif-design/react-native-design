@@ -4,6 +4,7 @@ import Animated from 'react-native-reanimated';
 import {
   BlurLayer,
   Button,
+  CircularProgress,
   Empty,
   Pulse,
   PulseDot,
@@ -247,6 +248,19 @@ export function FeedbackScene(): React.JSX.Element {
               testID="feedback-spinner"
             />
             <Text style={styles.fact}>加载中</Text>
+          </View>
+          <View style={styles.row}>
+            <CircularProgress
+              value={0.42}
+              accessibilityLabel="文件上传进度"
+              testID="feedback-circular-progress-ring"
+            />
+            <CircularProgress
+              value={0.68}
+              showLabel
+              accessibilityLabel="含百分比的文件上传进度"
+              testID="feedback-circular-progress-label"
+            />
           </View>
         </SectionCard>
 

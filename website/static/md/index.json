@@ -151,7 +151,7 @@
     "mdPath": "md/components/loading.md",
     "slug": "/components/loading",
     "section": "components",
-    "description": "旋转加载指示器 Spinner —— outer 承载 caller layout/transform，inner 固定视觉环独立旋转；900ms 线性一圈，native 走 reanimated 4、Web 走静态 CSS keyframes。"
+    "description": "加载反馈组件：Spinner 表示未知时长，CircularProgress 表示 0..100% 的确定进度并可选显示中央百分比。"
   },
   {
     "title": "Logo 主标",

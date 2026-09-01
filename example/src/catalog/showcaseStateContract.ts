@@ -2499,6 +2499,51 @@ export const showcaseStateContract = [
     },
   },
   {
+    id: 'circular-progress.determinate',
+    component: 'CircularProgress',
+    scene: 'feedback',
+    label: '确定进度',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'feedback-circular-progress-ring',
+          props: { value: 0.42 },
+        },
+      ],
+    },
+  },
+  {
+    id: 'circular-progress.label',
+    component: 'CircularProgress',
+    scene: 'feedback',
+    label: '中央百分比',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'feedback-circular-progress-label',
+          props: { value: 0.68, showLabel: true },
+        },
+      ],
+    },
+  },
+  {
+    id: 'circular-progress.a11y-value',
+    component: 'CircularProgress',
+    scene: 'feedback',
+    label: '无障碍值',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'feedback-circular-progress-ring',
+          props: { accessibilityLabel: '文件上传进度' },
+        },
+      ],
+    },
+  },
+  {
     id: 'spinner.sizes',
     component: 'Spinner',
     scene: 'feedback',

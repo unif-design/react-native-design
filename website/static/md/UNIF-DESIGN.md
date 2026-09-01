@@ -474,7 +474,7 @@ src/
 │   ├── useThemedStyles.ts   ← useThemedStyles(maker),含 useMemo([colors, shadow, fontScale, maker]) 缓存;出口按 fontScale 缩放 fontSize / lineHeight / letterSpacing(=1 恒等)
 │   └── index.ts             ← barrel
 │
-├── components/ui/           ← 39 个原子组件(Avatar / Button / Card / Cell / Icon / Input / NavBar / Ribbon / Toast / ...)
+├── components/ui/           ← 40 个原子组件(Avatar / Button / Card / Cell / CircularProgress / Icon / Input / NavBar / Ribbon / Toast / ...)
 │   └── index.ts             ← barrel(从 @unif/react-native-design 包根导出)
 │
 └── components/business/     ← 4 个通用业务复合(AvatarWithRing / Decorations / GlassStats / VersionPill)
