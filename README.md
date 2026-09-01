@@ -10,7 +10,7 @@ Unif 设计系统 —— theme(设计令牌)+ 组件 + 图标 + utils,面向 Rea
 ## 特性
 
 - **运行时主题**:`useColors()` 角色 token 跟随系统 light/dark 自动切换;`useThemedStyles` + 模块顶层 `makeStyles` 缓存样式,绝不内联 hex。
-- **40+ 组件**:Button、Card、Cell、NavBar、Toast 等原子组件 + AvatarWithRing、GlassStats 等通用复合组件,全部从包根 barrel 导出,无需深路径。
+- **40+ 组件**:Button、Card、Ribbon、Cell、NavBar、Toast 等原子组件 + AvatarWithRing、GlassStats 等通用复合组件,全部从包根 barrel 导出,无需深路径。
 - **a11y 内建**:交互组件预设 `accessibilityRole`;`IconButton` 的 `accessibilityLabel` 为类型必填。
 - **图标集 + 严格 TS**:`IconName` 闭集类型、`<Icon>` 自动继承主题色;`strict` + `noUncheckedIndexedAccess`,类型随包发布。
 
@@ -93,9 +93,9 @@ React Native `0.86.2`、React `19.2.3`、New Architecture 和 Hermes，并通过
 | `foundation`  | 基础能力与图标 | Theme、token、Icon、logger、testID            |
 | `actions`     | 操作与状态     | Button、IconButton、Chip、Tag、StatusDot      |
 | `feedback`    | 反馈与浮层     | Empty、动效、Blur、Toast、Confirm             |
-| `forms`       | 表单与输入     | 文本输入、选择控件、Stepper、Form             |
+| `forms`       | 表单与输入     | 文本输入、选择控件、Stepper（xs 为横向触控 < 44pt 的紧凑档）、Form |
 | `navigation`  | 导航组件       | NavBar、DrawerHeader、Tabs、Segmented、TabBar |
-| `collections` | 容器与集合     | Card、Cell、List、Grid、EntryCard、Carousel   |
+| `collections` | 容器与集合     | Card、Ribbon、Cell、List、Grid、EntryCard、Carousel |
 | `media`       | 媒体展示       | Avatar、Thumbnail、Logo 与图片失败边界        |
 | `business`    | 业务复合组件   | 渐变、背景、统计、头像环、版本状态            |
 

@@ -11,6 +11,7 @@ import { childTestID } from '../../../utils/testID';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { normalizeNonBlankText } from '../shared/accessibilityName';
 import { getStepperValueAccessibilityProps } from './accessibility';
+import { resolveStepperDisplayValue } from './displayValue';
 import { resolveStepperLayout } from './layout';
 import { nextStepperValue, normalizeStepper } from './normalizeStepper';
 import { StepperPressable } from './StepperPressable';
@@ -37,6 +38,7 @@ export function Stepper({
   max,
   step,
   size = 'md',
+  formatValue,
   disabled = false,
   testID,
 }: StepperProps): React.JSX.Element {
@@ -44,7 +46,7 @@ export function Stepper({
   const fontScale = useFontScale();
   const dims = sizingFor(size);
   const valueFontSize = scaleFontMetric(dims.fs, fontScale);
-  const layout = resolveStepperLayout(dims);
+  const layout = resolveStepperLayout(dims, { compact: size === 'xs' });
   const accessibleName = normalizeNonBlankText(accessibilityLabel);
   const hasBlankLabel = accessibleName === undefined;
   const normalized = normalizeStepper({
@@ -56,6 +58,7 @@ export function Stepper({
   });
   const { safeMin, safeStep, safeValue, canDecrement, canIncrement } =
     normalized;
+  const displayValue = resolveStepperDisplayValue(safeValue, formatValue);
   const decrementValue = nextStepperValue(normalized, 'decrement');
   const incrementValue = nextStepperValue(normalized, 'increment');
   const valueAccessibilityProps = getStepperValueAccessibilityProps({
@@ -161,8 +164,17 @@ export function Stepper({
           style={[styles.cell, { width: dims.w, height: dims.h }]}
           testID={childTestID(testID, 'value-visual')}
         >
-          <Text style={[styles.valueText, { fontSize: valueFontSize }]}>
-            {safeValue}
+          <Text
+            {...(formatValue === undefined
+              ? {}
+              : {
+                  adjustsFontSizeToFit: true,
+                  minimumFontScale: 0.75,
+                  numberOfLines: 1,
+                })}
+            style={[styles.valueText, { fontSize: valueFontSize }]}
+          >
+            {displayValue}
           </Text>
         </View>
       </View>

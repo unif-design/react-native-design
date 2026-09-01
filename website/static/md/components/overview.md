@@ -50,7 +50,7 @@ description: "@unif/react-native-design 组件索引（40+ 组件，按场景分
 | [Checkbox](checkbox.md) | 复选 |
 | [Radio](radio.md) | 单选 + RadioGroup |
 | [Switch](switch.md) | 开关：native Reanimated / Web CSS transition |
-| [Stepper](stepper.md) | `[−] N [+]` 步进 |
+| [Stepper](stepper.md) | `[−] N [+]` 步进；`xs` 是横向触控 < 44pt 的紧凑档，支持 `formatValue` 文案格式化 |
 | [Form](form.md) | Form / FormGroup / FormRow(行间 hairline) |
 
 ## 导航 {#导航}
@@ -76,6 +76,7 @@ description: "@unif/react-native-design 组件索引（40+ 组件，按场景分
 |---|---|
 | [Cell · List](cell.md) | 列表行 + List 容器,grouped(白卡 + gap)/ flush(hairline)两模式 |
 | [Card](card.md) | 内容卡,`default` / `plain`(`flat` 已 deprecated 等价 `plain`) |
+| [Ribbon](ribbon.md) | 包裹内容的右上缎带,`brand`/`danger` 语义色与可选读屏文案 |
 | [Grid](grid.md) | 九宫格图标网格 |
 | [Carousel](carousel.md) | 轮播(包装 reanimated-carousel v5) |
 

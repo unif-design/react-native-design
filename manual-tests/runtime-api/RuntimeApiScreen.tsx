@@ -456,7 +456,8 @@ export function RuntimeApiScreen(): React.JSX.Element {
  *
  * Inspector 对比 normal / valid-1.5 / invalid-NaN / large-3：合法值原样保留，
  * 非法值回退 1。Button 内 Icon 和独立 20pt Icon、Avatar/AvatarWithRing 直径、
- * Segmented track、Stepper visual/44pt outer、Tag 高度及 ruler 都保持原几何。
+ * Segmented track、Stepper visual/outer（md/sm 三块至少 44pt；xs 为
+ * 24×44 / 40×44 / 24×44）、Tag 高度及 ruler 都保持原几何。
  */
 function FontScaleSection({
   onOpenMissingProvider,
@@ -470,9 +471,9 @@ function FontScaleSection({
         large-3：invalid 必须回退 1，large 必须保留
         3（不设上限）。Button、Avatar、 Segmented、Stepper、Tag、AvatarWithRing
         的文字按归一化值放大且只放大一次。Button 内 Icon 与 standalone Icon
-        均不得放大；所有容器、padding 和圆角保持原值，Stepper 44pt outer /
-        visual frame、Tag 高度和 ruler 几何不变。真实 native/Web 测量前不得记为
-        PASS。
+        均不得放大；所有容器、padding 和圆角保持原值。Stepper md/sm 三块 outer
+        至少 44pt，xs 保持 24×44 / 40×44 / 24×44，visual frame、Tag 高度和 ruler
+        几何不变。真实 native/Web 测量前不得记为 PASS。
       </Text>
       <FontScaleSample id="normal" fontScale={1} expectedScale={1} />
       <FontScaleSample id="valid-1-5" fontScale={1.5} expectedScale={1.5} />
@@ -1518,7 +1519,8 @@ function SelectionControlsSection(): React.JSX.Element {
 }
 
 /**
- * Stepper:三个真实至少 44pt outer frame、归一化零范围与边界 action。
+ * Stepper:md/sm 三个真实至少 44pt outer frame；xs 是 24×44 / 40×44 /
+ * 24×44 且无 hitSlop 的 dense 例外；归一化零范围与边界 action。
  *
  * Inspector 应验证 side outer = max(44, visual button width) × max(44, visual height)，
  * value outer = max(44, visual value width) × max(44, visual height)。sm visual 是
@@ -1527,19 +1529,23 @@ function SelectionControlsSection(): React.JSX.Element {
  */
 function StepperSection(): React.JSX.Element {
   const [middleValue, setMiddleValue] = useState(1);
+  const [compactValue, setCompactValue] = useState(4);
   const [minActions, setMinActions] = useState(0);
   const [maxActions, setMaxActions] = useState(0);
   const [unexpectedActions, setUnexpectedActions] = useState(0);
 
   return (
-    <Section title="Stepper 44pt / boundary actions">
+    <Section title="Stepper frames / format / boundary actions">
       <Text style={styles.result}>
         用 Inspector 测量：stepper-middle-decrement/value/increment 的三个 outer
         均至少 44pt：side outer = max(44, visual button width) × max(44, visual
         height)，value outer = max(44, visual value width) × max(44, visual
-        height)。 md visual 是 r(32)×r(32) / r(48)×r(32) / r(32)×r(32)，仅 Web
-        与 402pt RN harness 对应 32×32 / 48×32 / 32×32。stepper-zero-range 使用
-        sm；visual 是 r(28)×r(28) / r(40)×r(28) / r(28)×r(28)。
+        height)。md visual 是 r(32)×r(32) / r(48)×r(32) / r(32)×r(32)，仅 Web 与
+        402pt RN harness 对应 32×32 / 48×32 / 32×32。stepper-compact 是明确的
+        dense 例外，三个相邻且不重叠的 outer 必须为 24×44 / 40×44 / 24×44，
+        不得出现 hitSlop，中央可见文案为“4 箱”但 slider now 仍是数字 4。
+        stepper-zero-range 使用 sm；visual 是 r(28)×r(28) / r(40)×r(28) /
+        r(28)×r(28)。
       </Text>
       <Text style={styles.result}>
         Web Inspector 检查中央 role=slider、aria-valuemin/max/now、disabled 与
@@ -1576,6 +1582,18 @@ function StepperSection(): React.JSX.Element {
           max={2}
           accessibilityLabel="最低库存数量"
           testID="stepper-min"
+        />
+      </Row>
+      <Row label="紧凑格式化（xs）">
+        <Stepper
+          value={compactValue}
+          onChange={setCompactValue}
+          min={0}
+          max={99}
+          size="xs"
+          formatValue={(value) => `${value} 箱`}
+          accessibilityLabel="紧凑整箱数量"
+          testID="stepper-compact"
         />
       </Row>
       <Row label="到 max（只允许减少）">
@@ -1616,6 +1634,7 @@ function StepperSection(): React.JSX.Element {
         />
       </Row>
       <Result label="Stepper middle value" value={String(middleValue)} />
+      <Result label="Stepper compact value" value={String(compactValue)} />
       <Result label="Stepper min valid actions" value={String(minActions)} />
       <Result label="Stepper max valid actions" value={String(maxActions)} />
       <Result

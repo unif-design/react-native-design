@@ -14,15 +14,34 @@ export type ResolvedStepperLayout = {
   };
 };
 
-export function resolveStepperLayout({
-  h,
-  btn,
-  w,
-}: {
-  h: number;
-  btn: number;
-  w: number;
-}): ResolvedStepperLayout {
+export function resolveStepperLayout(
+  {
+    h,
+    btn,
+    w,
+  }: {
+    h: number;
+    btn: number;
+    w: number;
+  },
+  options?: { compact?: boolean }
+): ResolvedStepperLayout {
+  if (options?.compact === true) {
+    return {
+      decrementFrame: {
+        width: btn,
+        height: fixed.hitTarget,
+        alignItems: 'flex-end',
+      },
+      valueFrame: { width: w, height: fixed.hitTarget },
+      incrementFrame: {
+        width: btn,
+        height: fixed.hitTarget,
+        alignItems: 'flex-start',
+      },
+    };
+  }
+
   const sideWidth = Math.max(fixed.hitTarget, btn);
   const outerHeight = Math.max(fixed.hitTarget, h);
   return {

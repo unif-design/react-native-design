@@ -43,10 +43,11 @@
 - [Pulse · PulseDot · usePulse](md/components/pulse.md) — 跨平台脉冲原语 —— usePulse(opacity 循环 hook) + <Pulse>(包装组件) + <PulseDot>(默认 6×6 主橙圆点)；统一归一化后由 native Reanimated / Web CSS driver 执行，纯视觉对屏幕阅读器隐藏。
 - [Radio 单选](md/components/radio.md) — 单选控件 —— Radio.Group 必须命名；每个 Radio 用可见 label 或 accessibilityLabel 命名，同组只能选一个。
 - [Reveal](md/components/reveal.md) — 内容入/出场淡入淡出容器 —— native 走 reanimated FadeIn/FadeOut，Web 用单一 RN View + CSS opacity transition；保留 caller flex/opacity，并显式尊重 reduced motion。
+- [Ribbon 缎带](md/components/ribbon.md) — 包裹任意内容的右上语义缎带；Design 持有绝对定位、条带、折角、主题 token 与装饰 a11y 隐藏，业务只传 label / tone。
 - [Search 搜索框](md/components/search.md) — 严格受控/非受控 Search：单一 current value、库自管 action、44pt root 与 36pt surface。
 - [Skeleton 骨架屏](md/components/skeleton.md) — 页面级加载占位骨架 —— shape='line'/'rect'/'circle' 三形态(默认 rect),width/height/size/radius 可覆盖；共享 usePulse opacity 脉冲(0.5↔1,半周期 700ms),对 SR 隐藏。
 - [StatusDot 状态点](md/components/status-dot.md) — status='pending'/'active'/'done'/'error' 状态圆点 —— done=success 底+白勾、error=error 底+白叉、active=primary 边框+内嵌 PulseDot、pending=outline 描边；tone='flat'(默认,透明底)/'soft'(柔色底),size 默认 r(16)。
-- [Stepper 步进器](md/components/stepper.md) — 数字步进器 [−][N][+] —— 三个真实至少 44pt 的交互 frame；accessibilityLabel 必填，范围和值统一归一化，边界过滤 custom action 并让无效标准方向 no-op。
+- [Stepper 步进器](md/components/stepper.md) — 数字步进器 [−][N][+] —— md/sm 保持真实 44pt frame，xs 是横向触控小于 44pt 的 dense 紧凑档；formatValue 只格式化可见安全值，数值语义不变。
 - [Switch 开关](md/components/switch.md) — 布尔开关 —— 真实 44×44 Pressable 内居中 32×20 轨道；accessibilityLabel 必填，disabled 移除 handler，reduced motion 停在终值。
 - [TabBar 底部 tab 栏](md/components/tabbar.md) — 固定底部主导航 tab 栏 —— 50px 高 + 顶部 hairline,各 tab icon+文字垂直居中,激活 c.primary;受控 active/onChange,items 含 id/icon/label/可选 badge,role='tab' + selected。
 - [Tabs 标签页](md/components/tabs.md) — 页面内分类切换 —— 下划线 Tabs(页面级,44px 高 + 2px 主色下划线)与分段控件 Segmented(局部灰底胶囊,size sm/md;md 默认 44px 触控达标 / sm 28px 紧凑);均受控 value/onChange + items(id/label),role='tab' + selected。

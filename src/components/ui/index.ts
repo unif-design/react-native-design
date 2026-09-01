@@ -55,6 +55,8 @@ export { Radio } from './Radio';
 export type { GroupProps as RadioGroupProps, RadioProps } from './Radio';
 export { Reveal } from './Reveal';
 export type { RevealProps } from './Reveal';
+export { Ribbon } from './Ribbon';
+export type { RibbonProps, RibbonTone } from './Ribbon';
 export { Search } from './Search';
 export type { SearchProps } from './Search';
 export { Skeleton } from './Skeleton';

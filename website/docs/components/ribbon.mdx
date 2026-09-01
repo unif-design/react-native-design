@@ -1,0 +1,93 @@
+---
+sidebar_position: 12
+title: Ribbon 缎带
+description: "包裹任意内容的右上语义缎带；Design 持有绝对定位、条带、折角、主题 token 与装饰 a11y 隐藏，业务只传 label / tone。"
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { Card, Ribbon, useColors } from '@unif/react-native-design';
+import { Text, View } from 'react-native';
+
+# Ribbon 缎带
+
+`Ribbon` 给任意内容添加固定右上条带与折角。它不理解订单、匹配等业务状态；消费端把状态映射为 `label` 和 `tone` 即可。
+
+## 实时预览
+
+export const RibbonDemo = () => {
+  const colors = useColors();
+  return (
+    <LiveDemo>
+      <View style={{ width: 260, gap: 14 }}>
+        <Ribbon label="数量待补充" tone="brand">
+          <Card variant="plain">
+            <Text style={{ color: colors.foreground }}>待补充数量的商品</Text>
+          </Card>
+        </Ribbon>
+        <Ribbon
+          label="未匹配"
+          tone="danger"
+          accessibilityLabel="该商品未匹配"
+        >
+          <Card variant="plain">
+            <Text style={{ color: colors.foreground }}>等待人工匹配的商品</Text>
+          </Card>
+        </Ribbon>
+      </View>
+    </LiveDemo>
+  );
+};
+
+<RibbonDemo />
+
+## 用法
+
+```tsx
+import { Card, Ribbon } from '@unif/react-native-design';
+
+<Ribbon label="未匹配" tone="danger" accessibilityLabel="该商品未匹配">
+  <Card>{content}</Card>
+</Ribbon>
+```
+
+组件固定右上定位，不开放 `placement`。如果内容需要宽度、外边距或 flex 约束，把它们传给 `Ribbon.style`；Card 的视觉配置仍传给 Card。
+
+## API
+
+来源：`src/components/ui/Ribbon/types.ts`、`Ribbon.tsx`。
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `label` | `string` | — | 缎带可见文案（必填） |
+| `tone` | `'brand' \| 'danger'` | `'brand'` | 品牌提醒 / 危险语义色 |
+| `children` | `ReactNode` | — | 被标记的内容（必填） |
+| `accessibilityLabel` | `string?` | — | 可选读屏文案；不传时缎带纯装饰，避免与 child 重复播报 |
+| `style` | `StyleProp<ViewStyle>?` | — | 外层布局样式 |
+| `testID` | `string?` | — | 根定位；派生 `-overlay` / `-visual` / `-bar` / `-fold` / `-accessibility-label` |
+
+## 布局与 Tokens
+
+来源：`src/components/ui/Ribbon/layout.ts`、`styles.ts`。
+
+| 元素 | 规则 |
+|---|---|
+| 外层 | `position: relative`，保留 child 的交互与 a11y 子树 |
+| overlay | `position: absolute`，`top: space[3]`、`right: 0`、`zIndex: 1`、`pointerEvents="none"` |
+| 条带 | 高 `r(20)`、水平 padding `space[3]`、左侧 `radius.xs` 圆角 |
+| 折角 | `r(3)` 三角形，独立于条带渲染 |
+| `brand` | `c.primary` / `c.onPrimary` / `c.primaryPressed` |
+| `danger` | `c.error` / `c.onError` / `c.error` |
+
+颜色全部来自运行时角色 token，亮暗主题自动切换；label 基准字号为 `type.micro`，只随 `ThemeProvider fontScale` 缩放一次。
+
+## 无障碍（a11y）
+
+可见条带和折角是装饰子树，完整应用 `accessible=false`、`accessibilityElementsHidden`、`importantForAccessibility="no-hide-descendants"` 与 `aria-hidden`。因此它们不会和 Card 内容重复播报。
+
+只有显式传入非空 `accessibilityLabel` 时，组件才增加一份视觉隐藏但可读的文本；不从 `label` 自动派生。overlay 不接收触控事件，child 内的按钮、链接和其他交互保持原行为。
+
+## 不要
+
+- ❌ 不要把订单状态、匹配逻辑或状态机放进 Ribbon
+- ❌ 不要在消费端重写绝对定位、折角或主题色
+- ❌ 不要传 `placement`；当前公共能力只负责右上缎带

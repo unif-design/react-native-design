@@ -21,6 +21,7 @@ import {
   NavBar,
   PasswordInput,
   Radio,
+  Ribbon,
   Search,
   Stepper,
   Switch,
@@ -35,6 +36,9 @@ import {
   type InputProps,
   type NavBarAction,
   type NavBarSlot,
+  type RibbonProps,
+  type RibbonTone,
+  type StepperSize,
   type TextFieldContainerStyle,
   type TextFieldHandle,
   type TextFieldSlot,
@@ -70,6 +74,14 @@ const thumbnailContainerStyle = {
 } as const;
 const legacyThumbnailStyle = { opacity: 0.5 };
 const invalidThumbnailImageStyle = { width: 999 };
+const invalidStepperValueStyle = { color: 'red' };
+const compactStepperSize: StepperSize = 'xs';
+const dangerRibbonTone: RibbonTone = 'danger';
+const publicRibbonProps: RibbonProps = {
+  label: '未匹配',
+  tone: dangerRibbonTone,
+  children: <Text>商品卡片</Text>,
+};
 
 // --- Button / IconButton / NavBar:所有操作必须显式可达 --------------------
 
@@ -143,6 +155,48 @@ const navBarDisplaySlot: NavBarSlot = <Text>只读</Text>;
 // @ts-expect-error adjustable 必须有上下文名称
 <Stepper value={1} onChange={noop} />;
 <Stepper value={1} onChange={noop} accessibilityLabel="商品数量" />;
+<Stepper
+  value={4}
+  onChange={noop}
+  accessibilityLabel="整箱数量"
+  size={compactStepperSize}
+  formatValue={(value) => `${value} 箱`}
+/>;
+<Stepper
+  value={1}
+  onChange={noop}
+  accessibilityLabel="数量"
+  // @ts-expect-error formatValue 必须返回可见文本
+  formatValue={(value) => value}
+/>;
+<Stepper
+  value={1}
+  onChange={noop}
+  accessibilityLabel="数量"
+  // @ts-expect-error Stepper 不开放内部 value 样式覆盖
+  valueStyle={invalidStepperValueStyle}
+/>;
+
+// --- Ribbon:业务只传文案 / tone，位置与折角由 Design 持有 -----------
+
+<Ribbon {...publicRibbonProps} />;
+<Ribbon label="数量待补充" tone="brand" accessibilityLabel="数量待补充">
+  <Text>商品卡片</Text>
+</Ribbon>;
+// @ts-expect-error Ribbon label 必填
+<Ribbon>
+  <Text>商品卡片</Text>
+</Ribbon>;
+// @ts-expect-error Ribbon children 必填
+<Ribbon label="未匹配" />;
+// @ts-expect-error Ribbon 不暴露未实现的 placement
+<Ribbon label="未匹配" placement="topLeft">
+  <Text>商品卡片</Text>
+</Ribbon>;
+// @ts-expect-error Ribbon tone 只接受当前语义色
+<Ribbon label="未匹配" tone="error">
+  <Text>商品卡片</Text>
+</Ribbon>;
 
 // --- Logo / VersionPill:展示内容显式命名 ---------------------------------
 

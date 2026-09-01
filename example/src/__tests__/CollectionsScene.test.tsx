@@ -9,6 +9,7 @@ import {
   Grid,
   Icon,
   List,
+  Ribbon,
   type CarouselRef,
 } from '@unif/react-native-design';
 import App from '../App';
@@ -138,10 +139,11 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-test('Collections 覆盖 Card、Cell/List、Grid 与 EntryCard 的公开分支', () => {
+test('Collections 覆盖 Card、Ribbon、Cell/List、Grid 与 EntryCard 的公开分支', () => {
   render(<App />);
   enterCollections();
   const cardCoverage = createShowcaseStateCoverage('Card');
+  const ribbonCoverage = createShowcaseStateCoverage('Ribbon');
   const cellCoverage = createShowcaseStateCoverage('Cell');
   const listCoverage = createShowcaseStateCoverage('List');
   const gridCoverage = createShowcaseStateCoverage('Grid');
@@ -184,6 +186,30 @@ test('Collections 覆盖 Card、Cell/List、Grid 与 EntryCard 的公开分支',
     );
   });
   cardCoverage.expectComplete();
+
+  expect(
+    componentByTestID(Ribbon, 'collections-ribbon-brand').props
+  ).toMatchObject({ label: '数量待补充', tone: 'brand' });
+  expect(
+    componentByTestID(Ribbon, 'collections-ribbon-danger').props
+  ).toMatchObject({
+    label: '未匹配',
+    tone: 'danger',
+    accessibilityLabel: '该商品未匹配',
+  });
+  expect(screen.getByLabelText('该商品未匹配')).toBeOnTheScreen();
+  ribbonCoverage.prove(
+    'ribbon.brand',
+    'ribbon.danger',
+    'ribbon.top-right',
+    'ribbon.a11y',
+    () => {
+      expect(
+        componentByTestID(Ribbon, 'collections-ribbon-danger').props.tone
+      ).toBe('danger');
+    }
+  );
+  ribbonCoverage.expectComplete();
 
   expect(
     screen.queryByRole('button', { name: '静态信息' })

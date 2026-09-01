@@ -9,6 +9,7 @@ import {
   EntryCard,
   Grid,
   List,
+  Ribbon,
   Segmented,
   Switch,
   type CarouselRef,
@@ -67,6 +68,9 @@ const makeStyles = (colors: ColorTokens) =>
       gap: space['5'],
     },
     specimenStack: {
+      gap: space['5'],
+    },
+    ribbonStack: {
       gap: space['5'],
     },
     cardText: {
@@ -185,6 +189,33 @@ export function CollectionsScene(): React.JSX.Element {
             <Card fill testID="collections-card-fill">
               <Text style={styles.cardText}>撑满卡片</Text>
             </Card>
+          </View>
+        </SectionCard>
+
+        <SectionCard
+          title="Ribbon"
+          description="业务只提供文案与 tone；Design 固定右上条带、折角和主题色。"
+        >
+          <View style={styles.ribbonStack}>
+            <Ribbon
+              label="数量待补充"
+              tone="brand"
+              testID="collections-ribbon-brand"
+            >
+              <Card variant="plain">
+                <Text style={styles.cardText}>待补充数量的商品</Text>
+              </Card>
+            </Ribbon>
+            <Ribbon
+              label="未匹配"
+              tone="danger"
+              accessibilityLabel="该商品未匹配"
+              testID="collections-ribbon-danger"
+            >
+              <Card variant="plain">
+                <Text style={styles.cardText}>等待人工匹配的商品</Text>
+              </Card>
+            </Ribbon>
           </View>
         </SectionCard>
 
