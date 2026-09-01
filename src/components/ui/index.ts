@@ -20,6 +20,8 @@ export { Checkbox } from './Checkbox';
 export type { CheckboxProps } from './Checkbox';
 export { Chip } from './Chip';
 export type { ChipProps } from './Chip';
+export { CircularProgress } from './CircularProgress';
+export type { CircularProgressProps } from './CircularProgress';
 export { confirm, ConfirmHost } from './Confirm';
 export type { ConfirmOptions } from './Confirm';
 export { DrawerHeader } from './DrawerHeader';

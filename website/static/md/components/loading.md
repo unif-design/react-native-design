@@ -1,12 +1,12 @@
 ---
 sidebar_position: 4
 title: Loading 加载
-description: "旋转加载指示器 Spinner —— outer 承载 caller layout/transform，inner 固定视觉环独立旋转；900ms 线性一圈，native 走 reanimated 4、Web 走静态 CSS keyframes。"
+description: '加载反馈组件：Spinner 表示未知时长，CircularProgress 表示 0..100% 的确定进度并可选显示中央百分比。'
 ---
 
 # Loading 加载
 
-旋转加载指示器。`size` 调直径（默认 18，`< 8` 会被钳到 8），`thickness` 调描边粗细（默认 2），`color` 默认主橙 `c.primary`。
+`Spinner` 表示无法量化的等待；`CircularProgress` 表示已知的 `0..1` 确定进度。圆形进度默认只显示圆环，通过 `showLabel` 才在中央显示取整百分比。
 
 ## 实时预览
 
@@ -14,6 +14,22 @@ description: "旋转加载指示器 Spinner —— outer 承载 caller layout/tr
 
 ```tsx
   <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">确定进度</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <CircularProgress value={0.18} accessibilityLabel="上传进度 18%" />
+        <CircularProgress
+          value={0.48}
+          showLabel
+          accessibilityLabel="上传进度 48%"
+        />
+        <CircularProgress
+          value={0.82}
+          showLabel
+          accessibilityLabel="上传进度 82%"
+        />
+      </div>
+    </div>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span className="demo-label">尺寸</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -46,21 +62,28 @@ description: "旋转加载指示器 Spinner —— outer 承载 caller layout/tr
 ## 用法
 
 ```tsx
-import { Spinner } from '@unif/react-native-design';
+import { CircularProgress, Spinner } from '@unif/react-native-design';
 import { useColors } from '@unif/react-native-design';
 
 function Demo() {
   const c = useColors();
   return (
     <>
-      <Spinner />                                       {/* 默认 18px 主橙 */}
-      <Spinner size={24} />                             {/* 24px */}
-      <Spinner color={c.success} />                     {/* 绿色 */}
-      <Spinner color={c.foregroundSubtle} thickness={1.5} />  {/* 细线灰 */}
+      <CircularProgress value={0.42} />
+      <CircularProgress
+        value={0.68}
+        showLabel
+        accessibilityLabel="图片上传进度"
+      />
+      <Spinner /> {/* 默认 18px 主橙 */}
+      <Spinner size={24} /> {/* 24px */}
+      <Spinner color={c.success} /> {/* 绿色 */}
+      <Spinner color={c.foregroundSubtle} thickness={1.5} /> {/* 细线灰 */}
       <Spinner
         size={24}
         style={{ width: 72, height: 48, transform: [{ scale: 1.2 }] }}
-      /> {/* outer 可扩容/变换，24pt ring 仍居中旋转 */}
+      />{' '}
+      {/* outer 可扩容/变换，24pt ring 仍居中旋转 */}
     </>
   );
 }
@@ -68,17 +91,36 @@ function Demo() {
 
 ## API
 
-| Prop | Type | 默认 | 说明 |
-|---|---|---|---|
-| `size` | `number?` | `18` | 直径（含 stroke）；非有限或 `< 8` 钳到 8（打 warn） |
-| `color` | `string?` | `c.primary`（运行期 hook 取） | 旋转弧颜色（轨道色固定 `c.outline`） |
-| `thickness` | `number?` | `2` | 描边粗细；`≤ 0` fallback 到 2 |
-| `style` | `StyleProp<ViewStyle>?` | — | outer layout 样式；可扩容并使用 margin/flex/position/transform，不能改变 inner ring 居中 |
-| `testID` | `string?` | — | E2E / 测试定位 |
+### CircularProgress
+
+| Prop                 | Type                    | 默认           | 说明                                               |
+| -------------------- | ----------------------- | -------------- | -------------------------------------------------- |
+| `value`              | `number`                | 必填           | `0..1` 的确定进度；越界值收敛到边界，非有限值按 0  |
+| `size`               | `number?`               | `32`           | 圆环直径；非有限或 `< 16` 钳到 16                  |
+| `thickness`          | `number?`               | `2`            | 描边宽度；无效值 fallback 到 2，最大不超过直径一半 |
+| `color`              | `string?`               | `c.primary`    | 已完成圆弧颜色                                     |
+| `trackColor`         | `string?`               | `c.outline`    | 未完成轨道颜色                                     |
+| `showLabel`          | `boolean?`              | `false`        | 是否在中央显示取整后的百分比                       |
+| `labelColor`         | `string?`               | `c.foreground` | 中央百分比文字颜色                                 |
+| `accessibilityLabel` | `string?`               | `进度`         | progressbar 的可访问性名称                         |
+| `style`              | `StyleProp<ViewStyle>?` | —              | 外层布局样式                                       |
+| `testID`             | `string?`               | —              | E2E / 测试定位                                     |
+
+### Spinner
+
+| Prop        | Type                    | 默认                          | 说明                                                                                     |
+| ----------- | ----------------------- | ----------------------------- | ---------------------------------------------------------------------------------------- |
+| `size`      | `number?`               | `18`                          | 直径（含 stroke）；非有限或 `< 8` 钳到 8（打 warn）                                      |
+| `color`     | `string?`               | `c.primary`（运行期 hook 取） | 旋转弧颜色（轨道色固定 `c.outline`）                                                     |
+| `thickness` | `number?`               | `2`                           | 描边粗细；`≤ 0` fallback 到 2                                                            |
+| `style`     | `StyleProp<ViewStyle>?` | —                             | outer layout 样式；可扩容并使用 margin/flex/position/transform，不能改变 inner ring 居中 |
+| `testID`    | `string?`               | —                             | E2E / 测试定位                                                                           |
 
 ## 无障碍（a11y）
 
-来源：`src/components/ui/Spinner/Spinner.tsx`、`Spinner.web.tsx`、`types.ts`。
+`CircularProgress` 自身暴露 `progressbar`、`min=0`、`max=100`、当前整数百分比与文字值；内部 SVG 和可选中央文字对辅助技术隐藏，避免重复朗读。业务侧应传入能描述对象的 `accessibilityLabel`，例如“图片上传进度”。
+
+来源：`src/components/ui/CircularProgress/`、`src/components/ui/Spinner/`。
 
 Spinner 是纯视觉旋转指示器，**源码刻意把自己对 SR 隐藏**：两端 outer View 统一展开完整隐藏属性（`accessible={false}`、`accessibilityElementsHidden`、`importantForAccessibility="no-hide-descendants"`、`aria-hidden`）。它**不**设 `accessibilityRole='progressbar'`、也不设 `accessibilityState={{ busy }}` 或 `accessibilityLabel`。
 

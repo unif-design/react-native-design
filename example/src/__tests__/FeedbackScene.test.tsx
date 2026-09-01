@@ -10,6 +10,7 @@ import {
 } from '@testing-library/react-native';
 import {
   BlurLayer,
+  CircularProgress,
   Empty,
   Pulse,
   PulseDot,
@@ -129,11 +130,13 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-test('Feedback 展示 Empty、三种 Skeleton 与具备外层加载语义的 Spinner', () => {
+test('Feedback 展示 Empty、Skeleton、确定进度与具备外层加载语义的 Spinner', () => {
   render(<App />);
   enterFeedback();
   const emptyCoverage = createShowcaseStateCoverage('Empty');
   const skeletonCoverage = createShowcaseStateCoverage('Skeleton');
+  const circularProgressCoverage =
+    createShowcaseStateCoverage('CircularProgress');
   const spinnerCoverage = createShowcaseStateCoverage('Spinner');
 
   expect(screen.getByTestId('feedback-screen')).toBeOnTheScreen();
@@ -192,6 +195,32 @@ test('Feedback 展示 Empty、三种 Skeleton 与具备外层加载语义的 Spi
     });
   }
   skeletonCoverage.expectComplete();
+  expect(
+    componentByTestID(CircularProgress, 'feedback-circular-progress-ring').props
+  ).toMatchObject({
+    value: 0.42,
+    accessibilityLabel: '文件上传进度',
+  });
+  expect(
+    componentByTestID(CircularProgress, 'feedback-circular-progress-label')
+      .props
+  ).toMatchObject({ value: 0.68, showLabel: true });
+  expect(
+    screen.getByRole('progressbar', { name: '文件上传进度' }).props
+      .accessibilityValue
+  ).toMatchObject({ min: 0, max: 100, now: 42, text: '42%' });
+  circularProgressCoverage.prove(
+    'circular-progress.determinate',
+    'circular-progress.label',
+    'circular-progress.a11y-value',
+    () => {
+      expect(
+        componentByTestID(CircularProgress, 'feedback-circular-progress-label')
+          .props.showLabel
+      ).toBe(true);
+    }
+  );
+  circularProgressCoverage.expectComplete();
   expect(componentByTestID(Spinner, 'feedback-spinner').props).toMatchObject({
     size: 24,
     color: expect.any(String),

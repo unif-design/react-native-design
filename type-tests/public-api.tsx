@@ -15,6 +15,7 @@ import {
   Carousel,
   Cell,
   Checkbox,
+  CircularProgress,
   IconButton,
   Input,
   Logo,
@@ -197,6 +198,13 @@ const navBarDisplaySlot: NavBarSlot = <Text>只读</Text>;
 <Ribbon label="未匹配" tone="error">
   <Text>商品卡片</Text>
 </Ribbon>;
+
+<CircularProgress value={0.42} />;
+<CircularProgress value={0.68} showLabel accessibilityLabel="上传进度" />;
+// @ts-expect-error CircularProgress 必须显式提供 value
+<CircularProgress />;
+// @ts-expect-error showLabel 只接受 boolean
+<CircularProgress value={0.5} showLabel="yes" />;
 
 // --- Logo / VersionPill:展示内容显式命名 ---------------------------------
 

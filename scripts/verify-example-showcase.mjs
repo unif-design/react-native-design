@@ -56,6 +56,7 @@ const expectedUiComponents = [
   'List',
   'Checkbox',
   'Chip',
+  'CircularProgress',
   'ConfirmHost',
   'DrawerHeader',
   'Empty',
@@ -103,6 +104,7 @@ const expectedComponentsByScene = {
   foundation: ['Icon'],
   actions: ['Button', 'IconButton', 'Chip', 'Tag', 'StatusDot'],
   feedback: [
+    'CircularProgress',
     'Empty',
     'Skeleton',
     'Spinner',
@@ -197,6 +199,11 @@ const expectedStateIdsByComponent = {
     'empty.data-boundary',
   ],
   Skeleton: ['skeleton.line', 'skeleton.rect', 'skeleton.circle'],
+  CircularProgress: [
+    'circular-progress.determinate',
+    'circular-progress.label',
+    'circular-progress.a11y-value',
+  ],
   Spinner: ['spinner.sizes', 'spinner.color', 'spinner.stroke-width'],
   Pulse: [
     'pulse.default',

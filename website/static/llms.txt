@@ -35,7 +35,7 @@
 - [IconButton 图标按钮](md/components/icon-button.md) — icon-only 方形按钮 —— size sm/md/lg（28/36/44）、variant 走 Button 同套 palette（默认 ghost）、accessibilityLabel TypeScript 强制必填。
 - [图标](md/components/icons.md) — 手绘 24×24 描边 SVG 图标系统 —— 统一绘制规则、IconName 字面量联合类型自动补全；<Icon> 刻意对屏幕阅读器隐藏，语义由承载它的可交互父组件提供。
 - [Input 输入框](md/components/input.md) — 严格单行输入：受控/非受控 mode、44pt 最小 frame、可验证 slot 与窄 ref。
-- [Loading 加载](md/components/loading.md) — 旋转加载指示器 Spinner —— outer 承载 caller layout/transform，inner 固定视觉环独立旋转；900ms 线性一圈，native 走 reanimated 4、Web 走静态 CSS keyframes。
+- [Loading 加载](md/components/loading.md) — 加载反馈组件：Spinner 表示未知时长，CircularProgress 表示 0..100% 的确定进度并可选显示中央百分比。
 - [Logo 主标](md/components/logo.md) — 品牌主标容器组件 —— 标准化尺寸（默认 64）/ 圆角（默认 size/4 squircle）；source 由 consumer 必传，非空 accessibilityLabel 决定有意义图片语义。
 - [NavBar 导航栏](md/components/navbar.md) — 顶部导航栏 —— 44px 高、居中标题 + 可选副标题、左右槽（传 config 自动用 IconButton 渲染）；3 variant default（白底 hairline）/ brand（橙底白字）/ transparent（透明 + 深字，浮在浅色 hero 上）。
 - [组件概览](md/components/overview.md) — @unif/react-native-design 组件索引（40+ 组件，按场景分组：品牌 / 通用 / 表单 / 导航 / 反馈 / 数据展示 / 业务复合）。每个组件一页，逐组件 API 见各页与远程 llms.txt。

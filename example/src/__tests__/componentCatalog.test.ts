@@ -14,6 +14,7 @@ const expectedComponentIds = [
   'List',
   'Checkbox',
   'Chip',
+  'CircularProgress',
   'ConfirmHost',
   'DrawerHeader',
   'Empty',
@@ -105,6 +106,7 @@ const expectedComponentsByScene = {
   foundation: ['Icon'],
   actions: ['Button', 'IconButton', 'Chip', 'Tag', 'StatusDot'],
   feedback: [
+    'CircularProgress',
     'Empty',
     'Skeleton',
     'Spinner',
@@ -149,12 +151,12 @@ const expectedComponentsByScene = {
   ],
 } as const;
 
-test('catalog 精确覆盖 47 个公开组件且每项只有一个非空主场景', () => {
+test('catalog 精确覆盖 48 个公开组件且每项只有一个非空主场景', () => {
   expect(componentCatalog.map((entry) => entry.id).sort()).toEqual(
     [...expectedComponentIds].sort()
   );
-  expect(new Set(componentCatalog.map((entry) => entry.id)).size).toBe(47);
-  expect(componentCatalog).toHaveLength(47);
+  expect(new Set(componentCatalog.map((entry) => entry.id)).size).toBe(48);
+  expect(componentCatalog).toHaveLength(48);
   expect(componentCatalog.every((entry) => entry.states.length > 0)).toBe(true);
 });
 
