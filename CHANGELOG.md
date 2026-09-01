@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.28.0](https://github.com/unif-design/react-native-design/compare/v0.27.1...v0.28.0) (2026-09-01)
+
+
+### Features
+
+* 新增 Ribbon 并扩展 Stepper ([#127](https://github.com/unif-design/react-native-design/issues/127)) ([530f0dd](https://github.com/unif-design/react-native-design/commit/530f0dd10d62d5ba597d23445bfde4543493dfb0))
+
 ## [0.27.1](https://github.com/unif-design/react-native-design/compare/v0.27.0...v0.27.1) (2026-08-26)
 
 # [0.27.0](https://github.com/unif-design/react-native-design/compare/v0.26.0...v0.27.0) (2026-08-14)
