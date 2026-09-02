@@ -48,6 +48,7 @@ const expectedMediaDeployment = Object.freeze({
 
 const expectedUiComponents = [
   'Avatar',
+  'AvatarGroup',
   'BlurLayer',
   'Button',
   'Card',
@@ -138,7 +139,7 @@ const expectedComponentsByScene = {
     'EntryCard',
     'Carousel',
   ],
-  media: ['Avatar', 'Thumbnail', 'Logo'],
+  media: ['Avatar', 'AvatarGroup', 'Thumbnail', 'Logo'],
   business: expectedBusinessComponents,
 };
 
@@ -373,8 +374,14 @@ const expectedStateIdsByComponent = {
   Avatar: [
     'avatar.variants',
     'avatar.sizes',
+    'avatar.shapes',
     'avatar.image',
     'avatar.initial-fallback',
+  ],
+  AvatarGroup: [
+    'avatar-group.shapes',
+    'avatar-group.overflow',
+    'avatar-group.action',
   ],
   Thumbnail: [
     'thumbnail.sizes',

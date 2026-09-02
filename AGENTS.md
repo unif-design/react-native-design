@@ -29,7 +29,7 @@ npx skills add unif-design/skills --skill rn-library --skill design --global --a
 
 ## 仓库定位
 
-`@unif/react-native-design` 是 React Native 设计系统，公开 theme、Icon、utils、41 个 UI
+`@unif/react-native-design` 是 React Native 设计系统，公开 theme、Icon、utils、43 个 UI
 runtime/host 和 6 个 business component。当前根验证基线与持久 example 的版本事实：
 
 - RN `0.86.2`。
@@ -122,7 +122,8 @@ workflow 是这两条 gate 唯一进 CI 的路径）、Website 测试页与 `des
   token；渐变序列走 palettes；shadow 走 `useShadow()`。
 - example 源码禁止内联 hex/rgba、`console.*`、RN `Pressable`/Touchable。可点区域优先使用
   Design 组件；确需自定义时使用 RNGH Pressable 并补全 a11y。
-- Avatar、Thumbnail、Logo 走公开 source contract。Thumbnail 的 `uri` / `source` 严格
+- Avatar、Thumbnail、Logo 走公开 source contract；AvatarGroup 只编排 Avatar 与溢出 action。
+  Thumbnail 的 `uri` / `source` 严格
   二选一；结果日志不得保存输入值、图片 URI 或环境路径。
 
 ## 交互与 a11y 当前契约

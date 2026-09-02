@@ -28,7 +28,12 @@ export type InteractionStateWitness = Readonly<{
   kind: 'interaction';
   targetComponent: PublicComponentId;
   testID: string;
-  handler: 'onPress' | 'onChange' | 'onChangeText' | 'onValueChange';
+  handler:
+    | 'onPress'
+    | 'onOverflowPress'
+    | 'onChange'
+    | 'onChangeText'
+    | 'onValueChange';
   calls: readonly string[];
   rootHost?: 'ConfirmHost' | 'ToastHost';
 }>;
@@ -1643,6 +1648,25 @@ export const showcaseStateContract = [
     },
   },
   {
+    id: 'avatar.shapes',
+    component: 'Avatar',
+    scene: 'media',
+    label: 'circle/square',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'media-avatar-shape-circle',
+          props: { shape: 'circle' },
+        },
+        {
+          testID: 'media-avatar-shape-square',
+          props: { shape: 'square' },
+        },
+      ],
+    },
+  },
+  {
     id: 'avatar.image',
     component: 'Avatar',
     scene: 'media',
@@ -1677,6 +1701,57 @@ export const showcaseStateContract = [
           presentProps: ['source'],
         },
       ],
+    },
+  },
+  {
+    id: 'avatar-group.shapes',
+    component: 'AvatarGroup',
+    scene: 'media',
+    label: 'circle/square',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'media-avatar-group-circle',
+          props: { shape: 'circle' },
+        },
+        {
+          testID: 'media-avatar-group-square',
+          props: { shape: 'square' },
+        },
+      ],
+    },
+  },
+  {
+    id: 'avatar-group.overflow',
+    component: 'AvatarGroup',
+    scene: 'media',
+    label: '未溢出/溢出',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'media-avatar-group-circle',
+          props: { max: 5 },
+        },
+        {
+          testID: 'media-avatar-group-square',
+          props: { max: 5 },
+        },
+      ],
+    },
+  },
+  {
+    id: 'avatar-group.action',
+    component: 'AvatarGroup',
+    scene: 'media',
+    label: '静态/可点击',
+    witness: {
+      kind: 'interaction',
+      targetComponent: 'AvatarGroup',
+      testID: 'media-avatar-group-square',
+      handler: 'onOverflowPress',
+      calls: [],
     },
   },
   {

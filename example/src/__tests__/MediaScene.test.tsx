@@ -1,7 +1,12 @@
 import React from 'react';
 import { Image } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { Avatar, Logo, Thumbnail } from '@unif/react-native-design';
+import {
+  Avatar,
+  AvatarGroup,
+  Logo,
+  Thumbnail,
+} from '@unif/react-native-design';
 import App from '../App';
 import { restoreNativeMocks } from './helpers/nativeMocks';
 import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
@@ -77,6 +82,15 @@ test('Avatar 覆盖五档尺寸、四种 variant、monogram、本地/HTTPS 与�
         .map((node) => node.props.size)
     ).toEqual(['xs', 'sm', 'md', 'lg', 'xl']);
   });
+  stateCoverage.prove('avatar.shapes', () => {
+    expect(
+      avatars
+        .filter((node) =>
+          String(node.props.testID).startsWith('media-avatar-shape')
+        )
+        .map((node) => node.props.shape)
+    ).toEqual(['circle', 'square']);
+  });
   expect(
     avatars
       .filter((node) =>
@@ -119,6 +133,37 @@ test('Avatar 覆盖五档尺寸、四种 variant、monogram、本地/HTTPS 与�
   expect(screen.getByLabelText('失效头像')).toBeOnTheScreen();
   stateCoverage.prove('avatar.initial-fallback', () => {
     expect(screen.getByLabelText('失效头像')).toBeOnTheScreen();
+  });
+  stateCoverage.expectComplete();
+});
+
+test('AvatarGroup 覆盖 circle/square、未溢出/溢出与静态/action 分支', () => {
+  render(<App />);
+  enterMedia();
+  const stateCoverage = createShowcaseStateCoverage('AvatarGroup');
+  const groups = screen.UNSAFE_getAllByType(AvatarGroup);
+  const circle = componentByTestID(AvatarGroup, 'media-avatar-group-circle');
+  const square = componentByTestID(AvatarGroup, 'media-avatar-group-square');
+
+  stateCoverage.prove('avatar-group.shapes', () => {
+    expect(groups.map((node) => node.props.shape)).toEqual([
+      'circle',
+      'square',
+    ]);
+  });
+  stateCoverage.prove('avatar-group.overflow', () => {
+    expect(circle.props).toMatchObject({ max: 5, shape: 'circle' });
+    expect(circle.props.items).toHaveLength(3);
+    expect(circle.props.onOverflowPress).toBeUndefined();
+    expect(square.props).toMatchObject({ max: 5, shape: 'square' });
+    expect(square.props.items).toHaveLength(7);
+    expect(screen.getByText('+3')).toBeOnTheScreen();
+  });
+  stateCoverage.prove('avatar-group.action', () => {
+    fireEvent.press(screen.getByRole('button', { name: '查看其余 3 位成员' }));
+    expect(
+      screen.getByText('最新结果：AvatarGroup · 查看成员 · 展示其余 3 位成员')
+    ).toBeOnTheScreen();
   });
   stateCoverage.expectComplete();
 });
