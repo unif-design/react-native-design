@@ -101,6 +101,11 @@ module.exports = function reactNativeWebPlugin(context) {
             // 双份 RN 库强制收敛到 website/node_modules 的那一份(见上方 dedupeAlias 注释)。
             // 放在最前:后面的 'react-native$' 是精确匹配,两者不会互相遮蔽。
             ...dedupeAlias,
+            // react-native-svg 15 仍引用 RN <=0.86 的旧 asset registry 包名；RN 0.87
+            // 将同一能力迁到 `react-native/asset-registry`。仅在文档站 Web bundle
+            // 做入口兼容，native 消费端继续由 Metro 按各自 RN 版本解析。
+            '@react-native/assets-registry/registry$':
+              'react-native/asset-registry',
             // 把 RN 内置入口换成 RNW；$ 表示精确匹配，不影响 react-native-* 的子包。
             'react-native$': 'react-native-web',
             // RN 一些深路径（fabric / codegen / TurboModule specs）只有 native runtime 才执行；
