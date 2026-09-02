@@ -43,7 +43,9 @@ jest.mock('react-native-gesture-handler', () => ({
 // Reanimated 4.6 的官方 mock 已覆盖本库使用的 hooks；真实 native 组件链会在
 // React 19 test renderer 中尝试查 host instance / native style handle，不能用于 Jest。
 // 上游 mock 的 useSharedValue 每次 render 都返回新 Proxy，会让把 shared value 放进
-// effect 依赖数组的组件(本库 ToastHost)反复执行，所以只把这个 hook 稳定化。
+// effect 依赖数组的组件(本库 ToastHost)反复执行，所以把这个 hook 稳定化。
+// 4.6 的 makeMutable 却只是 identity；RNGH 3 会把它当 shared value 并在 cleanup 里
+// 访问 `.value.delete(...)`，因此也要用官方 mock 的 shared value 形状补齐。
 jest.mock('react-native-reanimated', () => {
   const React = require('react');
   const reanimatedMock = require('react-native-reanimated/mock');
@@ -56,8 +58,13 @@ jest.mock('react-native-reanimated', () => {
     return sharedValueRef.current;
   }
 
+  function makeMutable(initialValue) {
+    return reanimatedMock.useSharedValue(initialValue);
+  }
+
   return {
     ...reanimatedMock,
+    makeMutable,
     useSharedValue: useStableSharedValue,
   };
 });

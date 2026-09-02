@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
@@ -87,4 +88,32 @@ test('需要编译才能 require 的 peer 入口都在 transform 放行面内', 
       `${specifier} 被 transformIgnorePatterns 挡在转译外:${resolved}`
     );
   }
+});
+
+test('preset 为 RNGH 3 提供带 value 的 makeMutable', () => {
+  const configPath = path.join(
+    repositoryRoot,
+    'scripts/fixtures/jest-preset-consumer/jest.config.cjs'
+  );
+  const jestBin = path.join(
+    path.dirname(
+      require.resolve('jest/package.json', { paths: [repositoryRoot] })
+    ),
+    'bin/jest.js'
+  );
+  const result = spawnSync(
+    process.execPath,
+    [jestBin, '--runInBand', '--no-watchman', '--config', configPath],
+    {
+      cwd: repositoryRoot,
+      encoding: 'utf8',
+      env: { ...process.env, CI: 'true' },
+    }
+  );
+
+  assert.equal(
+    result.status,
+    0,
+    ['Jest 消费者回归测试失败', result.stdout, result.stderr].join('\n')
+  );
 });
