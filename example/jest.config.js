@@ -13,6 +13,11 @@ module.exports = {
     // 经过本 mapper)。独立消费者只有一份 node_modules,不需要这些。
     '^react$': '<rootDir>/node_modules/react',
     '^react/(.*)$': '<rootDir>/node_modules/react/$1',
+    // RN 0.87 将 `react-native/setup-env` 的实体移动到 `src/`，但官方 Jest
+    // preset 仍通过 package exports 使用该公共子路径。下面的广义 mapper 会绕过
+    // exports，因此必须先把这个子路径钉到新实体，避免落到已不存在的包根文件。
+    '^react-native/setup-env$':
+      '<rootDir>/node_modules/react-native/src/setup-env.js',
     // RN 自己也要按同一原则钉回来:@react-native/jest-preset 的
     // `^react-native($|/.*)` 值是 require 位置算出来的,preset 现在从**仓根**加载,
     // 那条就指向仓根拷贝 —— 而 `yarn example ios/android` 构建的是 example 拷贝,
