@@ -185,7 +185,7 @@ harness 不继承本仓 `check:runtime-peers` 的 workspace 精确 allowlist；�
 | `react-native-reanimated-carousel` | `>=5.0.0 <6.0.0`   | `5.0.0`      |
 | `react-native-safe-area-context`   | `>=5`              | `5.8.0`      |
 | `react-native-svg`                 | `>=15`             | `15.15.5`    |
-| `@sbaiahmed1/react-native-blur`    | `>=4`              | `4.6.2`      |
+| `@sbaiahmed1/react-native-blur`    | `>=4`              | `6.0.1`      |
 
 - 新架构(Fabric + TurboModule)必须开启;旧架构 Bridge、RN `0.85` 及更低版本不在支持范围。
 - `react-native` peer 不封顶；当前验证基线是 RN `0.87.1`，同时保留对 Portal 所用 RN `0.86.3` 的安装兼容。

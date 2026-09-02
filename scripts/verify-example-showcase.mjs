@@ -534,7 +534,7 @@ const expectedSceneTitles = {
 };
 
 const expectedRuntimeDependencies = {
-  '@sbaiahmed1/react-native-blur': '4.6.2',
+  '@sbaiahmed1/react-native-blur': '6.0.1',
   '@unif/react-native-design': 'workspace:*',
   'react': '19.2.3',
   'react-native': '0.87.1',

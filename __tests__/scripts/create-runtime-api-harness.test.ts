@@ -29,7 +29,7 @@ const rootManifest = {
   devDependencies: {
     '@babel/core': '^7.29.7',
     '@react-native/metro-config': '0.87.1',
-    '@sbaiahmed1/react-native-blur': '^4.6.2',
+    '@sbaiahmed1/react-native-blur': '^6.0.1',
     'react': '19.2.3',
     'react-native': '0.87.1',
     'react-native-gesture-handler': '^3.1.0',
@@ -56,7 +56,7 @@ const rootManifest = {
 const resolved: Record<string, string> = {
   '@babel/core': '7.29.7',
   '@react-native/metro-config': '0.87.1',
-  '@sbaiahmed1/react-native-blur': '4.6.2',
+  '@sbaiahmed1/react-native-blur': '6.0.1',
   'react': '19.2.3',
   'react-native': '0.87.1',
   'react-native-gesture-handler': '3.1.0',

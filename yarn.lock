@@ -5567,13 +5567,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sbaiahmed1/react-native-blur@npm:4.6.2, @sbaiahmed1/react-native-blur@npm:^4.6.2":
-  version: 4.6.2
-  resolution: "@sbaiahmed1/react-native-blur@npm:4.6.2"
+"@sbaiahmed1/react-native-blur@npm:6.0.1, @sbaiahmed1/react-native-blur@npm:^6.0.1":
+  version: 6.0.1
+  resolution: "@sbaiahmed1/react-native-blur@npm:6.0.1"
   peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 10c0/e749fdf0d034cce8612c28745542cbbe8d717e9d09205ed344fc90c024eba7aea9be85af7842dfdc55f91d1a8211791451ec01e46c39cfea29e1d8ee9e93d7d8
+    react: ">=18.2.0"
+    react-native: ">=0.80.0"
+  checksum: 10c0/78ba3923589ffa26aab7dfdc1159b94260e5d3f2d1ae6a65635aa568276a66cab236343dd881a5b893ebaf9934c0e1ce77971147b0f4795274c7b3f7bab1a7d7
   languageName: node
   linkType: hard
 
@@ -6685,7 +6685,7 @@ __metadata:
     "@react-native/jest-preset": "npm:0.87.1"
     "@react-native/metro-config": "npm:0.87.1"
     "@react-native/typescript-config": "npm:0.87.1"
-    "@sbaiahmed1/react-native-blur": "npm:4.6.2"
+    "@sbaiahmed1/react-native-blur": "npm:6.0.1"
     "@testing-library/react-native": "npm:^13.3.3"
     "@types/jest": "npm:^29.5.13"
     "@types/react": "npm:^19.2.0"
@@ -6722,7 +6722,7 @@ __metadata:
     "@gorhom/bottom-sheet": "npm:^5.2.14"
     "@mdx-js/react": "npm:^3.0.0"
     "@react-native/metro-config": "npm:0.87.1"
-    "@sbaiahmed1/react-native-blur": "npm:^4.6.2"
+    "@sbaiahmed1/react-native-blur": "npm:^6.0.1"
     "@types/react": "npm:^19.2.0"
     "@unif/react-native-design": "workspace:*"
     clsx: "npm:^2.0.0"
@@ -6758,7 +6758,7 @@ __metadata:
     "@react-native/jest-preset": "npm:0.87.1"
     "@react-native/metro-config": "npm:0.87.1"
     "@release-it/conventional-changelog": "npm:^11.0.0"
-    "@sbaiahmed1/react-native-blur": "npm:^4.6.2"
+    "@sbaiahmed1/react-native-blur": "npm:^6.0.1"
     "@types/react": "npm:^19.2.0"
     commitlint: "npm:^21.0.1"
     del-cli: "npm:^7.0.0"

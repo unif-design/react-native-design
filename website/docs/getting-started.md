@@ -23,7 +23,7 @@ description: "5 分钟上手 @unif/react-native-design：装 peerDeps、根挂 T
 | `react-native-reanimated-carousel` | `>=5.0.0 <6.0.0` | `5.0.0` |
 | `react-native-safe-area-context` | `>=5` | `5.7.x` |
 | `react-native-svg` | `>=15` | `15.15.x` |
-| `@sbaiahmed1/react-native-blur` | `>=4` | `4.6.x` |
+| `@sbaiahmed1/react-native-blur` | `>=4` | `6.0.x` |
 
 - Node.js `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`(与 `package.json#engines` 逐字一致;本仓 `.nvmrc` 固定 `v24.13.0`)、Yarn 4
 - TypeScript 6
