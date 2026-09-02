@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.30.0](https://github.com/unif-design/react-native-design/compare/v0.29.0...v0.30.0) (2026-09-02)
+
+
+### Features
+
+* 新增 AvatarGroup 并兼容 Reanimated 4.6 ([#129](https://github.com/unif-design/react-native-design/issues/129)) ([b815c88](https://github.com/unif-design/react-native-design/commit/b815c88179850386f1401ddc6a8c267c76d7d445))
+
 # [0.29.0](https://github.com/unif-design/react-native-design/compare/v0.28.0...v0.29.0) (2026-09-01)
 
 
