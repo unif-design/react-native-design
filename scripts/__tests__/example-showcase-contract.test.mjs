@@ -683,6 +683,7 @@ const sourceContractFiles = [
   'example/android/build.gradle',
   'example/android/settings.gradle',
   'example/android/gradle.properties',
+  'example/android/gradle/wrapper/gradle-wrapper.properties',
   'example/android/app/src/main/AndroidManifest.xml',
   'example/android/app/src/main/java/unif/reactnativedesign/example/MainActivity.kt',
   'example/android/app/src/main/java/unif/reactnativedesign/example/MainApplication.kt',
@@ -1280,6 +1281,7 @@ test('mutation gate 拒绝 Android namespace 的 identity 漂移', () => {
     'example/android/build.gradle',
     'example/android/settings.gradle',
     'example/android/gradle.properties',
+    'example/android/gradle/wrapper/gradle-wrapper.properties',
     'example/android/app/src/main/java/unif/reactnativedesign/example/MainActivity.kt',
     'example/android/app/src/main/java/unif/reactnativedesign/example/MainApplication.kt',
   ];
