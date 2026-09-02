@@ -537,24 +537,24 @@ const expectedRuntimeDependencies = {
   '@sbaiahmed1/react-native-blur': '4.6.2',
   '@unif/react-native-design': 'workspace:*',
   'react': '19.2.3',
-  'react-native': '0.86.2',
+  'react-native': '0.87.1',
   'react-native-gesture-handler': '3.1.0',
-  'react-native-reanimated': '4.5.3',
+  'react-native-reanimated': '4.6.0',
   'react-native-reanimated-carousel': '5.0.0',
   'react-native-safe-area-context': '5.8.0',
   'react-native-svg': '15.15.5',
-  'react-native-worklets': '0.11.3',
+  'react-native-worklets': '0.12.1',
 };
 
 const expectedTemplateDevDependencies = {
-  '@react-native-community/cli': '20.1.0',
-  '@react-native-community/cli-platform-android': '20.1.0',
-  '@react-native-community/cli-platform-ios': '20.1.0',
-  '@react-native/babel-preset': '0.86.2',
-  '@react-native/eslint-config': '0.86.2',
-  '@react-native/jest-preset': '0.86.2',
-  '@react-native/metro-config': '0.86.2',
-  '@react-native/typescript-config': '0.86.2',
+  '@react-native-community/cli': '20.2.0',
+  '@react-native-community/cli-platform-android': '20.2.0',
+  '@react-native-community/cli-platform-ios': '20.2.0',
+  '@react-native/babel-preset': '0.87.1',
+  '@react-native/eslint-config': '0.87.1',
+  '@react-native/jest-preset': '0.87.1',
+  '@react-native/metro-config': '0.87.1',
+  '@react-native/typescript-config': '0.87.1',
 };
 
 const expectedRootPeerDependencies = {
@@ -562,11 +562,11 @@ const expectedRootPeerDependencies = {
   'react': '>=19.2.3 <20.0.0',
   'react-native': '>=0.86.0',
   'react-native-gesture-handler': '>=3.0.0 <4.0.0',
-  'react-native-reanimated': '>=4.5.2 <4.6.0',
+  'react-native-reanimated': '>=4.5.2 <4.7.0',
   'react-native-reanimated-carousel': '>=5.0.0 <6.0.0',
   'react-native-safe-area-context': '>=5',
   'react-native-svg': '>=15',
-  'react-native-worklets': '>=0.11.0 <0.12.0',
+  'react-native-worklets': '>=0.11.0 <0.13.0',
 };
 
 const expectedVerifyScript =
@@ -1789,6 +1789,10 @@ function verifyRuntimeAndNativeContract(root) {
   const rootGradle = readText(root, 'example/android/build.gradle');
   const settings = readText(root, 'example/android/settings.gradle');
   const properties = readText(root, 'example/android/gradle.properties');
+  const wrapper = readText(
+    root,
+    'example/android/gradle/wrapper/gradle-wrapper.properties'
+  );
   const activity = readText(
     root,
     'example/android/app/src/main/java/unif/reactnativedesign/example/MainActivity.kt'
@@ -1819,13 +1823,22 @@ function verifyRuntimeAndNativeContract(root) {
     /namespace "unif\.reactnativedesign\.example"/u.test(appGradle) &&
     /applicationId "unif\.reactnativedesign\.example"/u.test(appGradle) &&
     /autolinkLibrariesWithApp\(\)/u.test(appGradle) &&
+    /getDefaultProguardFile\("proguard-android-optimize\.txt"\)/u.test(
+      appGradle
+    ) &&
+    /buildToolsVersion = "37\.0\.0"/u.test(rootGradle) &&
     /minSdkVersion = 24/u.test(rootGradle) &&
-    /compileSdkVersion = 36/u.test(rootGradle) &&
+    /compileSdkVersion = 37/u.test(rootGradle) &&
     /targetSdkVersion = 36/u.test(rootGradle) &&
+    /kotlinVersion = "2\.2\.0"/u.test(rootGradle) &&
+    /gradle-9\.4\.1-bin\.zip/u.test(wrapper) &&
     /rootProject\.name = 'ReactNativeDesignExample'/u.test(settings) &&
     /autolinkLibrariesFromCommand\(\)/u.test(settings) &&
     /^newArchEnabled=true$/mu.test(properties) &&
     /^hermesEnabled=true$/mu.test(properties) &&
+    /^edgeToEdgeEnabled=true$/mu.test(properties) &&
+    /^android\.builtInKotlin=false$/mu.test(properties) &&
+    /^android\.newDsl=false$/mu.test(properties) &&
     /^package unif\.reactnativedesign\.example$/mu.test(activity) &&
     /getMainComponentName\(\): String = "ReactNativeDesignExample"/u.test(
       activity
@@ -3364,7 +3377,7 @@ function verifyDocumentation(root) {
     }
   }
 
-  verifyDocumentSceneTable('root README', rootReadme, '## RN 0.86.2 组件展厅');
+  verifyDocumentSceneTable('root README', rootReadme, '## RN 0.87.1 组件展厅');
   verifyDocumentSceneTable('example README', exampleReadme, '## 5. 八个场景');
 
   assertDocumentContainsAll(
@@ -3521,7 +3534,7 @@ function verifyDocumentation(root) {
       [
         '@unif/react-native-design-example',
         'ReactNativeDesignExample',
-        '0.86.2',
+        '0.87.1',
         'yarn install --immutable',
         'yarn verify:example-showcase',
       ],

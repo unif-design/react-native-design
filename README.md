@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/npm/l/@unif/react-native-design.svg?color=blue)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-unif--design.github.io-orange.svg)](https://unif-design.github.io/react-native-design/)
 
-Unif 设计系统 —— theme(设计令牌)+ 组件 + 图标 + utils,面向 React Native 0.86 新架构(Fabric + TurboModule)。所有 Unif 应用与端能力包的 UI 基座。
+Unif 设计系统 —— theme(设计令牌)+ 组件 + 图标 + utils,面向 React Native 0.86+ 新架构(Fabric + TurboModule)。所有 Unif 应用与端能力包的 UI 基座。
 
 ## 特性
 
@@ -34,7 +34,7 @@ yarn add react-native-svg \
 
 iOS 另需在 `ios/` 执行 `bundle exec pod install`。完整步骤见[文档站 · 快速开始](https://unif-design.github.io/react-native-design/docs/getting-started)。
 
-`react-native-worklets` 的 Babel 插件与 Metro transformer 由宿主工程提供,不随本库分发 —— 宿主需自备与 RN `0.86.2` 匹配的 `@babel/core`、`@react-native/babel-preset@0.86.x`、`@react-native/metro-config@0.86.x`。
+`react-native-worklets` 的 Babel 插件与 Metro transformer 由宿主工程提供,不随本库分发 —— 宿主需自备与自身 RN 版本匹配的 `@babel/core`、`@react-native/babel-preset`、`@react-native/metro-config`；本仓验证组合为 RN `0.87.1` 与对应的 `0.87.1` 工具链。
 
 `react-native-reanimated-carousel@5.0.0` 发布的 RNGH peer 是 `>=2.9.0 <3.0.0`,与本包要求的 `>=3.0.0 <4.0.0` 无交集;该组合已实测适配。消费端只能**接受这条警告**或加**只作用于 Carousel 的窄 override**(npm `overrides`、pnpm `peerDependencyRules.allowedVersions`、Yarn scoped `logFilters`),不要用全局 peer 忽略、`--force` 或 `--legacy-peer-deps`。本仓不使用全局 `logFilters`；`yarn check:runtime-peers` 只接受 root、example、website 三条精确的 RNRC 5 / RNGH 3 例外。
 
@@ -82,10 +82,10 @@ export const App = () => (
 );
 ```
 
-## RN 0.86.2 组件展厅
+## RN 0.87.1 组件展厅
 
 仓库内的持久 `example/` 是 `@unif/react-native-design-example` workspace：它精确使用
-React Native `0.86.2`、React `19.2.3`、New Architecture 和 Hermes，并通过 Metro
+React Native `0.87.1`、React `19.2.3`、New Architecture 和 Hermes，并通过 Metro
 直接消费本仓 public package root。展厅只挂载当前路由，共有以下 8 个 scene：
 
 | Scene ID      | 标题           | 主要覆盖                                      |
@@ -144,12 +144,12 @@ decode 仍按 `example/README.md` 的 Android/iOS 手工矩阵标记为待执行
 yarn create:runtime-harness
 ```
 
-该命令**现场生成**一个一次性的 RN `0.86.2` app,用于人工验证 Jest 覆盖不到的部分:真实 native / Web 结构、44pt 命中框、a11y tree、reduced motion 与命令式 API 的竞态。
+该命令**现场生成**一个一次性的 RN `0.87.1` app,用于人工验证 Jest 覆盖不到的部分:真实 native / Web 结构、44pt 命中框、a11y tree、reduced motion 与命令式 API 的竞态。
 
 它做的事:
 
 1. `yarn prepare` + `yarn pack` 打包**当前源码**,harness 装的是 `file:` tarball,不是 registry 上的版本;
-2. 用 `yarn.lock` 里钉死的官方 `@react-native-community/cli@20.1.0` + `@react-native-community/template@0.86.2` 生成脚手架 —— 两者的版本、template 自带的 React / RN / CLI 版本、以及锁文件里的 `checksum` 都会先校验,任一不符立即失败;
+2. 用 `yarn.lock` 里钉死的官方 `@react-native-community/cli@20.2.0` + `@react-native-community/template@0.87.1` 生成脚手架 —— 两者的版本、template 自带的 React / RN / CLI 版本、以及锁文件里的 `checksum` 都会先校验,任一不符立即失败;
 3. 枚举根 `peerDependencies` 的**每一个**非 optional 项,从根 direct range 精确匹配 `yarn.lock` locator,并交叉验证 installed version 与 peer range;`@babel/core` / `@react-native/metro-config` 也走同一链路,在首次安装前写成精确版本;
 4. 配好 Babel(`react-native-worklets/plugin` 排最后)、Metro、RNGH root import,拷入 `manual-tests/runtime-api/RuntimeApiScreen.tsx`,并逐文件核对生成的 Podfile / Android Gradle 文件与 installed template 捕获的摘要;
 5. 首次 `yarn install` 只在脚本自持的临时 app 内生成 `yarn.lock`,随后立即以同一 manifest / lock 执行 `yarn install --immutable` 最终复验,再执行 `bundle install` + `bundle exec pod install`;完整流程成功后才保留并打印绝对路径与全部 provider 版本。
@@ -158,7 +158,7 @@ yarn create:runtime-harness
 
 - app 只建在**脚本自持的系统临时目录**里(`fs.mkdtempSync`),**不接受调用方传目录**;脚手架之后的任一步失败也会递归删除自己那一个临时路径,只有完整成功才保留。
 - **完全不读、不写、不复制持久 `example/`** —— 两者职责不同：`example/` 提供公共面
-  coverage 与可运行 RN `0.86.2` native shell；临时 runtime harness 专门验证 packed
+  coverage 与可运行 RN `0.87.1` native shell；临时 runtime harness 专门验证 packed
   tarball、负向路径与竞态，不替代展厅。
 - 生成物不入库。
 
@@ -173,22 +173,22 @@ harness 不继承本仓 `check:runtime-peers` 的 workspace 精确 allowlist；�
 
 ## 兼容性
 
-支持范围严格来自 `package.json#peerDependencies`;本仓直接验证的版本是 RN `0.86.2` + React `19.2.3`。
+支持范围严格来自 `package.json#peerDependencies`;本仓直接验证的版本是 RN `0.87.1` + React `19.2.3`。
 
 | 依赖                               | 支持范围           | 本仓验证版本 |
 | ---------------------------------- | ------------------ | ------------ |
-| `react-native`                     | `>=0.86.0`         | `0.86.2`     |
+| `react-native`                     | `>=0.86.0`         | `0.87.1`     |
 | `react`                            | `>=19.2.3 <20.0.0` | `19.2.3`     |
 | `react-native-gesture-handler`     | `>=3.0.0 <4.0.0`   | `3.1.0`      |
-| `react-native-reanimated`          | `>=4.5.2 <4.6.0`   | `4.5.3`      |
-| `react-native-worklets`            | `>=0.11.0 <0.12.0` | `0.11.3`     |
+| `react-native-reanimated`          | `>=4.5.2 <4.7.0`   | `4.6.0`      |
+| `react-native-worklets`            | `>=0.11.0 <0.13.0` | `0.12.1`     |
 | `react-native-reanimated-carousel` | `>=5.0.0 <6.0.0`   | `5.0.0`      |
 | `react-native-safe-area-context`   | `>=5`              | `5.8.0`      |
 | `react-native-svg`                 | `>=15`             | `15.15.5`    |
 | `@sbaiahmed1/react-native-blur`    | `>=4`              | `4.6.2`      |
 
 - 新架构(Fabric + TurboModule)必须开启;旧架构 Bridge、RN `0.85` 及更低版本不在支持范围。
-- `react-native` peer 不封顶,RN `0.87+` 能装上;但本仓只在 `0.86.2` 上验证,更高版本未经验证。
+- `react-native` peer 不封顶；当前验证基线是 RN `0.87.1`，同时保留对 Portal 所用 RN `0.86.3` 的安装兼容。
 - Node.js `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`(`package.json#engines`;本仓 `.nvmrc` 固定 `v24.13.0`)
 - TypeScript 6、Yarn 4
 

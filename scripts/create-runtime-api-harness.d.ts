@@ -1,9 +1,9 @@
 /** 全部钉死的版本基线 —— 任一漂移都让脚本失败。 */
 export declare const EXPECTED: {
-  cli: '20.1.0';
-  template: '0.86.2';
+  cli: '20.2.0';
+  template: '0.87.1';
   react: '19.2.3';
-  reactNative: '0.86.2';
+  reactNative: '0.87.1';
 };
 
 /** yarn.lock 中一个待校验校验和的包。 */

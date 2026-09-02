@@ -18,7 +18,7 @@ description: "@unif/react-native-design 的 Jest 接入：一行 preset 接好�
 
 本库是**纯 JS**(没有 android / ios / cpp,也没有自己的 TurboModule),所以入口里换掉的从来不是 design 本身,而是它依赖的那几个 peer —— 用的都是各家**官方**的 mock。
 
-下面这份配方在 RN `0.86.2` + React `19.2.3` 基线上,用 `yarn pack` 打出的真实 tarball 装进一个干净宿主工程验证过:一行 preset,不加任何 mapper / transform / setup,11 个组件(Button / Cell / IconButton / Switch / Segmented / Carousel / Icon / Spinner / Skeleton / Reveal / ToastHost)的用例全绿。本仓 `example/` 的 15 个 suite 吃的也是同一个 preset。
+下面这份配方在 RN `0.87.1` + React `19.2.3` 基线上,用 `yarn pack` 打出的真实 tarball 装进一个干净宿主工程验证过:一行 preset,不加任何 mapper / transform / setup,11 个组件(Button / Cell / IconButton / Switch / Segmented / Carousel / Icon / Spinner / Skeleton / Reveal / ToastHost)的用例全绿。本仓 `example/` 的 15 个 suite 吃的也是同一个 preset。
 
 ## 最小可用配方 {#最小可用配方}
 
@@ -106,7 +106,7 @@ Validation Error: Module @unif/react-native-design/jest-preset should have "jest
 指回 `src/**` 的 TypeScript 行号,那是 source map 的效果,不是 Jest 在编译源码。
 
 :::caution reanimated 不要映射到它自己的 mock
-很多 RN 模板会顺手加一条 `'^react-native-reanimated$': 'react-native-reanimated/mock.js'`。**加了反而会崩** —— `react-native-reanimated@4.5.3` 的 mock 是上游刻意残缺的便利 mock(`src/mock.ts` 里 19 处 `ADD ME IF NEEDED`),其中 `useReducedMotion` 那行是注释掉的,而 design 的 Switch / Carousel / Spinner / Skeleton / Reveal / Pulse 都经 `usePrefersReducedMotion` 读它,渲染时直接 `TypeError: (0 , _reactNativeReanimated.useReducedMotion) is not a function`。同一份 mock 还缺 RNGH 3 `Pressable` 要用的 `useComposedEventHandler`。
+很多 RN 模板会顺手加一条 `'^react-native-reanimated$': 'react-native-reanimated/mock.js'`。**加了反而会崩** —— Reanimated 4.x 的便利 mock 不提供本库所需的完整运行时行为,其中 `useReducedMotion` 缺失会让 design 的 Switch / Carousel / Spinner / Skeleton / Reveal / Pulse 经 `usePrefersReducedMotion` 读取时报错。同一份 mock 还缺 RNGH 3 `Pressable` 要用的 `useComposedEventHandler`。
 
 **入口用的是真实 reanimated + 官方 `setUpTests()`**,只把 `react-native-worklets` 换成它的官方 mock —— 这样 `useReducedMotion` 是真的。
 

@@ -361,7 +361,7 @@
     "mdPath": "md/getting-started.md",
     "slug": "/getting-started",
     "section": "概览",
-    "description": "5 分钟上手 @unif/react-native-design：装 peerDeps、根挂 ThemeProvider、用 useColors / useThemedStyles 写第一个主题化组件。面向 RN 0.86 新架构。"
+    "description": "5 分钟上手 @unif/react-native-design：装 peerDeps、根挂 ThemeProvider、用 useColors / useThemedStyles 写第一个主题化组件。面向 RN 0.86+ 新架构。"
   },
   {
     "title": "升级 / 迁移",

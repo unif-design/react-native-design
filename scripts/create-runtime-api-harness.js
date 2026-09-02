@@ -2,11 +2,11 @@
 'use strict';
 
 /**
- * 生成一次性的 RN 0.86.2 原生验证宿主(RuntimeApiHarness)。
+ * 生成一次性的 RN 0.87.1 原生验证宿主(RuntimeApiHarness)。
  *
- * 为什么不用 `example/`:它是启用新架构的 RN 0.85.3 现有版本 shell,拿它验证 0.86 的
- * 原生行为等于自欺。本脚本改为从**锁文件里钉死的官方 CLI + template** 现场生成一个
- * 干净 app,装上当前源码打出的 tarball,再由人工在真机 / 模拟器上跑验收矩阵。
+ * 为什么不复用 `example/`:它是持久展示宿主,而这里需要独立验证 packed 发布物与
+ * 负向路径。本脚本从**锁文件里钉死的官方 CLI + template** 现场生成一个干净 app,
+ * 装上当前源码打出的 tarball,再由人工在真机 / 模拟器上跑验收矩阵。
  *
  * 纪律:
  * - 目标目录由脚本用 `fs.mkdtempSync` 自持,**不接受调用方传目录** —— 否则一个手滑的
@@ -29,10 +29,10 @@ const TEMP_PREFIX = 'unif-runtime-api-';
 
 /** 全部钉死的版本基线 —— 任一漂移都必须让脚本失败,而不是静默生成别的版本。 */
 const EXPECTED = {
-  cli: '20.1.0',
-  template: '0.86.2',
+  cli: '20.2.0',
+  template: '0.87.1',
   react: '19.2.3',
-  reactNative: '0.86.2',
+  reactNative: '0.87.1',
 };
 
 const TOOLCHAIN_PACKAGES = ['@babel/core', '@react-native/metro-config'];

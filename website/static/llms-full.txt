@@ -654,7 +654,7 @@ const source = require('@/assets/logo.png');
 
 接手项目时它有:
 
-- RN `0.86.2` / React `19.2.3`,新架构(Fabric + TurboModules)默认开启。发布 contract 为 `react-native >=0.86.0`(不封顶,验证基线仍是 `0.86.2`)、`react >=19.2.3 <20.0.0`;Node engine 为 `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`。运行时四件套固定在 RNGH `>=3.0.0 <4.0.0`、Reanimated `>=4.5.2 <4.6.0`、Worklets `>=0.11.0 <0.12.0`、RNRC `>=5.0.0 <6.0.0`。
+- RN `0.87.1` / React `19.2.3`,新架构(Fabric + TurboModules)默认开启。发布 contract 为 `react-native >=0.86.0`(不封顶,验证基线为 `0.87.1`)、`react >=19.2.3 <20.0.0`;Node engine 为 `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`。运行时四件套固定在 RNGH `>=3.0.0 <4.0.0`、Reanimated `>=4.5.2 <4.7.0`、Worklets `>=0.11.0 <0.13.0`、RNRC `>=5.0.0 <6.0.0`。
 - 完整设计系统:38 ui + 4 业务复合组件,全套 token(`colors / shadow / type / fw / space / radius / avatar / icon / control / dim / fixed / motion / blur / fontMono`)在 `src/theme/`,亮 / 暗双套经 `ThemeProvider` + `useThemedStyles`;SVG 图标目录在 `src/icons/svg/` + 生成的 `src/icons/data.ts`(只读)。
 - 单元 / 集成测试在 `__tests__/`(Jest + `@testing-library/react-native`)。
 - Docusaurus 文档站在 `website/`。
@@ -6642,15 +6642,15 @@ function DynamicLabel({ size }: { size: number }) {
 
 ## 环境要求 {#环境要求}
 
-支持矩阵严格来自 `package.json#peerDependencies`,本仓直接验证的版本是 React Native `0.86.2` + React `19.2.3`:
+支持矩阵严格来自 `package.json#peerDependencies`,本仓直接验证的版本是 React Native `0.87.1` + React `19.2.3`:
 
 | 依赖 | 支持范围 | 本仓验证版本 |
 | --- | --- | --- |
-| `react-native` | `>=0.86.0` | `0.86.2` |
+| `react-native` | `>=0.86.0` | `0.87.1` |
 | `react` | `>=19.2.3 <20.0.0` | `19.2.3` |
 | `react-native-gesture-handler` | `>=3.0.0 <4.0.0` | `3.1.0` |
-| `react-native-reanimated` | `>=4.5.2 <4.6.0` | `4.5.3` |
-| `react-native-worklets` | `>=0.11.0 <0.12.0` | `0.11.3` |
+| `react-native-reanimated` | `>=4.5.2 <4.7.0` | `4.6.0` |
+| `react-native-worklets` | `>=0.11.0 <0.13.0` | `0.12.1` |
 | `react-native-reanimated-carousel` | `>=5.0.0 <6.0.0` | `5.0.0` |
 | `react-native-safe-area-context` | `>=5` | `5.7.x` |
 | `react-native-svg` | `>=15` | `15.15.x` |
@@ -6660,7 +6660,7 @@ function DynamicLabel({ size }: { size: number }) {
 - TypeScript 6
 
 :::info 仅支持新架构,RN 下限 0.86
-本库面向 RN 0.86 新架构(Fabric + TurboModules),依赖 `react-native-reanimated@4.5` + `react-native-worklets@0.11`。旧架构(Bridge)与 RN `0.85` 及更低版本不在支持范围 —— 发布 contract 是 `>=0.86.0`,不封顶。上限去掉后 RN `0.87+` 能装上,但本仓只在 `0.86.2` 上验证,更高版本请自行回归。
+本库面向 RN 0.86+ 新架构(Fabric + TurboModules),支持 `react-native-reanimated@4.5/4.6` + `react-native-worklets@0.11/0.12`。旧架构(Bridge)与 RN `0.85` 及更低版本不在支持范围 —— 发布 contract 是 `>=0.86.0`,不封顶；当前验证基线为 RN `0.87.1`。
 :::
 
 ## 安装依赖 {#安装依赖}
@@ -6692,7 +6692,7 @@ iOS 装完原生包后,在 `ios/` 目录执行 `bundle exec pod install`。
 > 版本范围见上方[环境要求](#环境要求)表格,唯一事实来源是 `package.json#peerDependencies`。
 
 :::caution Worklets 需要宿主自备 Babel / Metro
-`react-native-worklets@0.11` 的 Babel 插件与 Metro transformer 由**宿主工程**提供,不随本库分发。宿主必须装上与 RN `0.86.2` 匹配的 `@babel/core`、`@react-native/babel-preset@0.86.x` 和 `@react-native/metro-config@0.86.x`,否则 worklet 编译会静默降级或直接报错。
+`react-native-worklets` 的 Babel 插件与 Metro transformer 由**宿主工程**提供,不随本库分发。宿主必须装上与自身 RN 版本匹配的 `@babel/core`、`@react-native/babel-preset` 和 `@react-native/metro-config`；本仓验证的是 RN `0.87.1` 与对应 `0.87.1` 工具链，否则 worklet 编译会静默降级或直接报错。
 :::
 
 :::caution RNRC 5.0.0 与 Gesture Handler 3 的 peer 冲突
@@ -7048,7 +7048,7 @@ skills 全部开源,发布在插件市场仓库 `unif-design/skills`。本 skill
 
 本库是**纯 JS**(没有 android / ios / cpp,也没有自己的 TurboModule),所以入口里换掉的从来不是 design 本身,而是它依赖的那几个 peer —— 用的都是各家**官方**的 mock。
 
-下面这份配方在 RN `0.86.2` + React `19.2.3` 基线上,用 `yarn pack` 打出的真实 tarball 装进一个干净宿主工程验证过:一行 preset,不加任何 mapper / transform / setup,11 个组件(Button / Cell / IconButton / Switch / Segmented / Carousel / Icon / Spinner / Skeleton / Reveal / ToastHost)的用例全绿。本仓 `example/` 的 15 个 suite 吃的也是同一个 preset。
+下面这份配方在 RN `0.87.1` + React `19.2.3` 基线上,用 `yarn pack` 打出的真实 tarball 装进一个干净宿主工程验证过:一行 preset,不加任何 mapper / transform / setup,11 个组件(Button / Cell / IconButton / Switch / Segmented / Carousel / Icon / Spinner / Skeleton / Reveal / ToastHost)的用例全绿。本仓 `example/` 的 15 个 suite 吃的也是同一个 preset。
 
 ## 最小可用配方 {#最小可用配方}
 
@@ -7136,7 +7136,7 @@ Validation Error: Module @unif/react-native-design/jest-preset should have "jest
 指回 `src/**` 的 TypeScript 行号,那是 source map 的效果,不是 Jest 在编译源码。
 
 :::caution reanimated 不要映射到它自己的 mock
-很多 RN 模板会顺手加一条 `'^react-native-reanimated$': 'react-native-reanimated/mock.js'`。**加了反而会崩** —— `react-native-reanimated@4.5.3` 的 mock 是上游刻意残缺的便利 mock(`src/mock.ts` 里 19 处 `ADD ME IF NEEDED`),其中 `useReducedMotion` 那行是注释掉的,而 design 的 Switch / Carousel / Spinner / Skeleton / Reveal / Pulse 都经 `usePrefersReducedMotion` 读它,渲染时直接 `TypeError: (0 , _reactNativeReanimated.useReducedMotion) is not a function`。同一份 mock 还缺 RNGH 3 `Pressable` 要用的 `useComposedEventHandler`。
+很多 RN 模板会顺手加一条 `'^react-native-reanimated$': 'react-native-reanimated/mock.js'`。**加了反而会崩** —— Reanimated 4.x 的便利 mock 不提供本库所需的完整运行时行为,其中 `useReducedMotion` 缺失会让 design 的 Switch / Carousel / Spinner / Skeleton / Reveal / Pulse 经 `usePrefersReducedMotion` 读取时报错。同一份 mock 还缺 RNGH 3 `Pressable` 要用的 `useComposedEventHandler`。
 
 **入口用的是真实 reanimated + 官方 `setUpTests()`**,只把 `react-native-worklets` 换成它的官方 mock —— 这样 `useReducedMotion` 是真的。
 
@@ -7463,18 +7463,18 @@ yarn add react-native-svg \
 
 iOS 装完还需 `cd ios && bundle exec pod install`。
 
-版本范围见[快速开始 → 环境要求](md/getting-started.md#环境要求)。本库要求 `react-native >=0.86.0` + `react >=19.2.3 <20.0.0`;RN `0.85.x` 会因 peer 不满足而失败,不要用忽略 peer 的方式绕过。RN peer 不封顶,`0.87+` 装得上但本仓只验证到 `0.86.2`。
+版本范围见[快速开始 → 环境要求](md/getting-started.md#环境要求)。本库要求 `react-native >=0.86.0` + `react >=19.2.3 <20.0.0`;RN `0.85.x` 会因 peer 不满足而失败,不要用忽略 peer 的方式绕过。RN peer 不封顶,当前验证基线为 `0.87.1`。
 
 ---
 
 ### 症状:worklet 不生效 / Metro 报 worklets 插件相关错误 {#worklets-babel-metro}
 
-**原因。** `react-native-worklets@0.11` 的 Babel 插件与 Metro transformer 由**宿主工程**提供,本库不分发它们。宿主的 `@babel/core`、`@react-native/babel-preset`、`@react-native/metro-config` 版本与 RN `0.86.2` 不匹配时,worklet 编译会静默降级或直接报错。
+**原因。** `react-native-worklets` 的 Babel 插件与 Metro transformer 由**宿主工程**提供,本库不分发它们。宿主的 `@babel/core`、`@react-native/babel-preset`、`@react-native/metro-config` 版本与 RN 不匹配时,worklet 编译会静默降级或直接报错。
 
 **解法。** 宿主自备并对齐版本,且 `react-native-worklets/plugin` 必须排在 `plugins` 数组**最后**:
 
 ```sh
-yarn add -D @babel/core @react-native/babel-preset@0.86.2 @react-native/metro-config@0.86.2
+yarn add -D @babel/core @react-native/babel-preset@0.87.1 @react-native/metro-config@0.87.1
 ```
 
 ---
@@ -7550,7 +7550,7 @@ cd ios && bundle exec pod install --repo-update
 
 ### 症状:render Switch / Carousel / Spinner / Skeleton / Reveal 抛 `useReducedMotion is not a function` {#jest-reduced-motion}
 
-**原因。** 把 `react-native-reanimated` 映射到了它自带的 `mock.js` —— `react-native-reanimated@4.5.3` 的 mock 里 `useReducedMotion` 那行是注释掉的(`// useReducedMotion: ADD ME IF NEEDED`),而这些组件都经 `usePrefersReducedMotion` 读它。
+**原因。** 把 `react-native-reanimated` 映射到了它自带的 `mock.js` —— Reanimated 4.x 的便利 mock 不提供本库所需的完整运行时行为,而这些组件都经 `usePrefersReducedMotion` 读它。
 
 **解法。** 用 `preset: '@unif/react-native-design/jest-preset'`,入口用的是**真实 reanimated** + 官方 `setUpTests()`,并删掉你自己那条 reanimated 的 `moduleNameMapper`。手工接线时:同样别映射 reanimated,只把 `react-native-worklets` 换成官方 mock;实在要用那份 mock 就自己补上 `useReducedMotion`,见[测试 → 每一条为什么必需](md/testing.md#每一条为什么必需)。
 
