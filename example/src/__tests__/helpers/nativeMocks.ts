@@ -1,5 +1,4 @@
 import { BackHandler, Platform } from 'react-native';
-import type { BackPressEventName, HardwareBackPressEvent } from 'react-native';
 
 const originalPlatformOS = Platform.OS;
 
@@ -18,21 +17,14 @@ export function installAndroidBackHandlerMock(): AndroidBackHandlerMock {
   let handler: (() => boolean) | undefined;
   const addEventListener = jest
     .spyOn(BackHandler, 'addEventListener')
-    .mockImplementation(
-      (
-        _eventName: BackPressEventName,
-        nextHandler: (
-          event: HardwareBackPressEvent
-        ) => boolean | null | undefined
-      ) => {
-        handler = () =>
-          nextHandler({
-            type: 'hardwareBackPress',
-            timeStamp: 0,
-          }) === true;
-        return { remove };
-      }
-    );
+    .mockImplementation((_eventName, nextHandler) => {
+      handler = () =>
+        nextHandler({
+          type: 'hardwareBackPress',
+          timeStamp: 0,
+        }) === true;
+      return { remove };
+    });
 
   return {
     addEventListener,

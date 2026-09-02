@@ -138,13 +138,18 @@ test('@react-native/jest-preset 内部依赖断裂时原样 rethrow,不误诊成
   );
 });
 
-test('resolver 组合了 RN 与 worklets 两个上游', () => {
+test('resolver 组合 RN，并让 Worklets / Reanimated 4.6 Jest 避开不兼容 native 实现', () => {
   const source = readFileSync(
     path.join(repositoryRoot, 'jest-resolver.js'),
     'utf8'
   );
   assert.ok(source.includes('@react-native/jest-preset/jest/resolver'));
   assert.ok(source.includes('react-native-worklets'));
+  assert.ok(source.includes('react-native-reanimated'));
+  assert.ok(source.includes("request === './initializers'"));
+  assert.ok(source.includes("request.endsWith('/mappers')"));
+  assert.ok(source.includes("request.endsWith('/mutables')"));
+  assert.ok(source.includes("!ext.includes('native')"));
 });
 
 test('setup 是 CJS 且只接线 design 自己的 peer', () => {
@@ -162,6 +167,14 @@ test('setup 是 CJS 且只接线 design 自己的 peer', () => {
   ]) {
     assert.ok(source.includes(peer), `setup 少了 ${peer}`);
   }
+  assert.ok(
+    source.includes('react-native-reanimated/mock'),
+    'Reanimated 4.6 必须使用官方 Jest mock'
+  );
+  assert.ok(
+    source.includes('useStableSharedValue'),
+    '官方 useSharedValue mock 必须保持跨 render 引用稳定'
+  );
   for (const foreign of [
     'react-native-keyboard-controller',
     'react-native-device-info',

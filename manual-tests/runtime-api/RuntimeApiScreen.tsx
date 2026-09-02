@@ -58,7 +58,7 @@ const INPUT_ERROR_STATES = [
 
 /**
  * Runtime API 人工验证屏 —— 由 `yarn create:runtime-harness` 拷进临时的
- * RN 0.86.2 app 里跑,**不属于任何自动化测试**。
+ * RN 0.86.3 app 里跑,**不属于任何自动化测试**。
  *
  * 它只 import 包根 barrel(与真实消费者一致),用来验证 Jest 覆盖不到的部分:
  * 真实 native / Web 结构、44pt 命中框、a11y tree、reduced motion 和竞态。

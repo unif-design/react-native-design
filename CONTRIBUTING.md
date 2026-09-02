@@ -10,7 +10,7 @@ branch protection 说明见
 本仓使用 Yarn 4 workspaces：
 
 - 根 workspace：`@unif/react-native-design`。
-- example workspace：`@unif/react-native-design-example`，RN `0.86.2` + React
+- example workspace：`@unif/react-native-design-example`，RN `0.86.3` + React
   `19.2.3`，native app 名为 `ReactNativeDesignExample`。
 - Website workspace：`@unif/react-native-design-website`。
 

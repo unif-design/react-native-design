@@ -1,6 +1,6 @@
 # Design 组件展厅
 
-这是 `@unif/react-native-design-example` 的持久 RN `0.86.2` 新架构宿主。它从
+这是 `@unif/react-native-design-example` 的持久 RN `0.86.3` 新架构宿主。它从
 `@unif/react-native-design` public package root 消费当前工作区源码，用 8 个按路由挂载的
 scene 展示全部公开组件及主要状态。
 

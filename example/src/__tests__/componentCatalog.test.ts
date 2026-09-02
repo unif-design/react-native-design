@@ -6,6 +6,7 @@ import {
 
 const expectedComponentIds = [
   'Avatar',
+  'AvatarGroup',
   'BlurLayer',
   'Button',
   'Card',
@@ -140,7 +141,7 @@ const expectedComponentsByScene = {
     'EntryCard',
     'Carousel',
   ],
-  media: ['Avatar', 'Thumbnail', 'Logo'],
+  media: ['Avatar', 'AvatarGroup', 'Thumbnail', 'Logo'],
   business: [
     'GradientWash',
     'RadialHalo',
@@ -151,12 +152,12 @@ const expectedComponentsByScene = {
   ],
 } as const;
 
-test('catalog 精确覆盖 48 个公开组件且每项只有一个非空主场景', () => {
+test('catalog 精确覆盖 49 个公开组件且每项只有一个非空主场景', () => {
   expect(componentCatalog.map((entry) => entry.id).sort()).toEqual(
     [...expectedComponentIds].sort()
   );
-  expect(new Set(componentCatalog.map((entry) => entry.id)).size).toBe(48);
-  expect(componentCatalog).toHaveLength(48);
+  expect(new Set(componentCatalog.map((entry) => entry.id)).size).toBe(49);
+  expect(componentCatalog).toHaveLength(49);
   expect(componentCatalog.every((entry) => entry.states.length > 0)).toBe(true);
 });
 

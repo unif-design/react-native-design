@@ -28,54 +28,54 @@ const rootManifest = {
   name: '@unif/react-native-design',
   devDependencies: {
     '@babel/core': '^7.29.7',
-    '@react-native/metro-config': '0.86.2',
-    '@sbaiahmed1/react-native-blur': '^4.6.2',
+    '@react-native/metro-config': '0.86.3',
+    '@sbaiahmed1/react-native-blur': '6.0.1',
     'react': '19.2.3',
-    'react-native': '0.86.2',
+    'react-native': '0.86.3',
     'react-native-gesture-handler': '^3.1.0',
-    'react-native-reanimated': '~4.5.3',
+    'react-native-reanimated': '~4.6.0',
     'react-native-reanimated-carousel': '^5.0.0',
     'react-native-safe-area-context': '^5.7.0',
     'react-native-svg': '^15.15.5',
-    'react-native-worklets': '^0.11.3',
+    'react-native-worklets': '^0.12.1',
   },
   peerDependencies: {
     '@sbaiahmed1/react-native-blur': '>=4',
     'react': '>=19.2.3 <20.0.0',
     'react-native': '>=0.86.0',
     'react-native-gesture-handler': '>=3.0.0 <4.0.0',
-    'react-native-reanimated': '>=4.5.2 <4.6.0',
+    'react-native-reanimated': '>=4.5.2 <4.7.0',
     'react-native-reanimated-carousel': '>=5.0.0 <6.0.0',
     'react-native-safe-area-context': '>=5',
     'react-native-svg': '>=15',
-    'react-native-worklets': '>=0.11.0 <0.12.0',
+    'react-native-worklets': '>=0.11.0 <0.13.0',
   },
 };
 
 /** 当前 install 解析出的精确 provider 版本 —— 每个非 optional peer 都必须在场。 */
 const resolved: Record<string, string> = {
   '@babel/core': '7.29.7',
-  '@react-native/metro-config': '0.86.2',
-  '@sbaiahmed1/react-native-blur': '4.6.2',
+  '@react-native/metro-config': '0.86.3',
+  '@sbaiahmed1/react-native-blur': '6.0.1',
   'react': '19.2.3',
-  'react-native': '0.86.2',
+  'react-native': '0.86.3',
   'react-native-gesture-handler': '3.1.0',
-  'react-native-reanimated': '4.5.3',
+  'react-native-reanimated': '4.6.0',
   'react-native-reanimated-carousel': '5.0.0',
   'react-native-safe-area-context': '5.8.0',
   'react-native-svg': '15.15.5',
-  'react-native-worklets': '0.11.3',
+  'react-native-worklets': '0.12.1',
 };
 
 const templateManifest = {
-  dependencies: { 'react': '19.2.3', 'react-native': '0.86.2' },
+  dependencies: { 'react': '19.2.3', 'react-native': '0.86.3' },
   devDependencies: { '@react-native-community/cli': '20.1.0' },
 };
 
 const LOCK = [
-  '"@react-native-community/template@npm:0.86.2":',
-  '  version: 0.86.2',
-  '  resolution: "@react-native-community/template@npm:0.86.2"',
+  '"@react-native-community/template@npm:0.86.3":',
+  '  version: 0.86.3',
+  '  resolution: "@react-native-community/template@npm:0.86.3"',
   '  checksum: 10c0/7f6d577c49a98f116d002c39fc246656b1718f36c',
   '  languageName: node',
   '  linkType: hard',
@@ -110,9 +110,9 @@ describe('EXPECTED — 固定版本基线', () => {
   test('CLI / template / React / RN 全部钉死', () => {
     expect(EXPECTED).toEqual({
       cli: '20.1.0',
-      template: '0.86.2',
+      template: '0.86.3',
       react: '19.2.3',
-      reactNative: '0.86.2',
+      reactNative: '0.86.3',
     });
   });
 });
@@ -125,7 +125,7 @@ describe('buildScaffoldArgs', () => {
       'init',
       'RuntimeApiHarness',
       '--version',
-      '0.86.2',
+      '0.86.3',
       '--template',
       '/installed/template',
       '--pm',
@@ -154,15 +154,15 @@ describe('buildHarnessManifest', () => {
     expect(manifest.dependencies).toMatchObject({
       '@unif/react-native-design': 'file:/tmp/design.tgz',
       'react': '19.2.3',
-      'react-native': '0.86.2',
+      'react-native': '0.86.3',
       'react-native-gesture-handler': '3.1.0',
       'react-native-reanimated-carousel': '5.0.0',
-      'react-native-reanimated': '4.5.3',
-      'react-native-worklets': '0.11.3',
+      'react-native-reanimated': '4.6.0',
+      'react-native-worklets': '0.12.1',
     });
     expect(manifest.devDependencies).toMatchObject({
       '@babel/core': '7.29.7',
-      '@react-native/metro-config': '0.86.2',
+      '@react-native/metro-config': '0.86.3',
     });
   });
 
@@ -459,8 +459,8 @@ describe('assertExactVersion — CLI / template 漂移', () => {
   });
 
   test.each([
-    ['@react-native-community/cli', '20.1.3', EXPECTED.cli],
-    ['@react-native-community/template', '0.86.3', EXPECTED.template],
+    ['@react-native-community/cli', '20.1.1', EXPECTED.cli],
+    ['@react-native-community/template', '0.86.2', EXPECTED.template],
   ])('%s 漂移到 %s 时抛错', (name, actual, expectedVersion) => {
     expect(() => assertExactVersion(name, actual, expectedVersion)).toThrow(
       name
@@ -488,7 +488,7 @@ describe('assertTemplateManifest — template 的 React / RN 漂移', () => {
         ...templateManifest,
         dependencies: {
           ...templateManifest.dependencies,
-          'react-native': '0.87.0',
+          'react-native': '0.86.2',
         },
       })
     ).toThrow('react-native');
@@ -498,7 +498,7 @@ describe('assertTemplateManifest — template 的 React / RN 漂移', () => {
     expect(() =>
       assertTemplateManifest({
         ...templateManifest,
-        devDependencies: { '@react-native-community/cli': '20.1.3' },
+        devDependencies: { '@react-native-community/cli': '20.1.1' },
       })
     ).toThrow('@react-native-community/cli');
   });
@@ -508,7 +508,7 @@ describe('assertLockChecksums — 锁文件完整性', () => {
   test('两个包都有非空 checksum 时通过', () => {
     expect(() =>
       assertLockChecksums(LOCK, [
-        { name: '@react-native-community/template', version: '0.86.2' },
+        { name: '@react-native-community/template', version: '0.86.3' },
         { name: '@react-native-community/cli', version: '20.1.0' },
       ])
     ).not.toThrow();
@@ -517,7 +517,7 @@ describe('assertLockChecksums — 锁文件完整性', () => {
   test('锁文件里找不到条目时抛错', () => {
     expect(() =>
       assertLockChecksums(LOCK, [
-        { name: '@react-native-community/template', version: '0.86.3' },
+        { name: '@react-native-community/template', version: '0.86.2' },
       ])
     ).toThrow('@react-native-community/template');
   });
@@ -529,7 +529,7 @@ describe('assertLockChecksums — 锁文件完整性', () => {
     );
     expect(() =>
       assertLockChecksums(broken, [
-        { name: '@react-native-community/template', version: '0.86.2' },
+        { name: '@react-native-community/template', version: '0.86.3' },
       ])
     ).toThrow('@react-native-community/template');
   });

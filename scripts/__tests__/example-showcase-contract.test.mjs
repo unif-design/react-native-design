@@ -604,27 +604,27 @@ function withJestGlobalConfigProbeFixture(run) {
 }
 
 const expectedRuntimeDependencies = {
-  '@sbaiahmed1/react-native-blur': '4.6.2',
+  '@sbaiahmed1/react-native-blur': '6.0.1',
   '@unif/react-native-design': 'workspace:*',
   'react': '19.2.3',
-  'react-native': '0.86.2',
+  'react-native': '0.86.3',
   'react-native-gesture-handler': '3.1.0',
-  'react-native-reanimated': '4.5.3',
+  'react-native-reanimated': '4.6.0',
   'react-native-reanimated-carousel': '5.0.0',
   'react-native-safe-area-context': '5.8.0',
   'react-native-svg': '15.15.5',
-  'react-native-worklets': '0.11.3',
+  'react-native-worklets': '0.12.1',
 };
 
 const expectedTemplateDevDependencies = {
   '@react-native-community/cli': '20.1.0',
   '@react-native-community/cli-platform-android': '20.1.0',
   '@react-native-community/cli-platform-ios': '20.1.0',
-  '@react-native/babel-preset': '0.86.2',
-  '@react-native/eslint-config': '0.86.2',
-  '@react-native/jest-preset': '0.86.2',
-  '@react-native/metro-config': '0.86.2',
-  '@react-native/typescript-config': '0.86.2',
+  '@react-native/babel-preset': '0.86.3',
+  '@react-native/eslint-config': '0.86.3',
+  '@react-native/jest-preset': '0.86.3',
+  '@react-native/metro-config': '0.86.3',
+  '@react-native/typescript-config': '0.86.3',
 };
 
 const catalogContractFiles = [
@@ -683,6 +683,7 @@ const sourceContractFiles = [
   'example/android/build.gradle',
   'example/android/settings.gradle',
   'example/android/gradle.properties',
+  'example/android/gradle/wrapper/gradle-wrapper.properties',
   'example/android/app/src/main/AndroidManifest.xml',
   'example/android/app/src/main/java/unif/reactnativedesign/example/MainActivity.kt',
   'example/android/app/src/main/java/unif/reactnativedesign/example/MainApplication.kt',
@@ -834,7 +835,7 @@ function plistArray(plist, key) {
   );
 }
 
-test('example workspace 提供 Design 的完整 RN 0.86.2 runtime graph', () => {
+test('example workspace 提供 Design 的完整 RN 0.86.3 runtime graph', () => {
   const examplePackage = readJson('example/package.json');
 
   assert.equal(examplePackage.name, '@unif/react-native-design-example');
@@ -1020,6 +1021,9 @@ test('app registry 与 Android identity 原子同步并保留 New Architecture',
   const index = read('example/index.js');
   const appGradle = read('example/android/app/build.gradle');
   const rootGradle = read('example/android/build.gradle');
+  const wrapper = read(
+    'example/android/gradle/wrapper/gradle-wrapper.properties'
+  );
   const settings = read('example/android/settings.gradle');
   const properties = read('example/android/gradle.properties');
   assert.ok(
@@ -1049,13 +1053,23 @@ test('app registry 与 Android identity 原子同步并保留 New Architecture',
   assert.match(appGradle, /namespace "unif\.reactnativedesign\.example"/u);
   assert.match(appGradle, /applicationId "unif\.reactnativedesign\.example"/u);
   assert.match(appGradle, /autolinkLibrariesWithApp\(\)/u);
+  assert.match(
+    appGradle,
+    /getDefaultProguardFile\("proguard-android\.txt"\)/u
+  );
+  assert.match(rootGradle, /buildToolsVersion = "36\.0\.0"/u);
   assert.match(rootGradle, /minSdkVersion = 24/u);
   assert.match(rootGradle, /compileSdkVersion = 36/u);
   assert.match(rootGradle, /targetSdkVersion = 36/u);
+  assert.match(rootGradle, /kotlinVersion = "2\.1\.20"/u);
+  assert.match(wrapper, /gradle-9\.3\.1-bin\.zip/u);
   assert.match(settings, /autolinkLibrariesFromCommand\(\)/u);
   assert.match(settings, /rootProject\.name = 'ReactNativeDesignExample'/u);
   assert.match(properties, /^newArchEnabled=true$/mu);
   assert.match(properties, /^hermesEnabled=true$/mu);
+  assert.match(properties, /^edgeToEdgeEnabled=false$/mu);
+  assert.doesNotMatch(properties, /^android\.builtInKotlin=/mu);
+  assert.doesNotMatch(properties, /^android\.newDsl=/mu);
   assert.match(activity, /^package unif\.reactnativedesign\.example$/mu);
   assert.match(
     activity,
@@ -1166,7 +1180,7 @@ test('catalog mutation gate 拒绝缺项、重复 id 与错误 scene', () => {
       expectedCode: 'CATALOG_COMPONENT_SET',
       mutate(source) {
         return source.replace(
-          "  {\n    id: 'Avatar',\n    scene: 'media',\n    states: ['brand/info/soft/neutral', 'xs/sm/md/lg/xl', '图片', '回退文字'],\n  },\n",
+          "  {\n    id: 'AvatarGroup',\n    scene: 'media',\n    states: ['circle/square', '未溢出/溢出', '静态/可点击'],\n  },\n",
           ''
         );
       },
@@ -1249,7 +1263,7 @@ test('mutation gate 拒绝 runtime manifest 的精确版本漂移', () => {
 
     const result = runContractMutation(
       fixture,
-      'example workspace 提供 Design 的完整 RN 0.86.2 runtime graph'
+      'example workspace 提供 Design 的完整 RN 0.86.3 runtime graph'
     );
     const output = `${result.stdout}\n${result.stderr}`;
     assert.equal(result.status, 1, output);
@@ -1267,6 +1281,7 @@ test('mutation gate 拒绝 Android namespace 的 identity 漂移', () => {
     'example/android/build.gradle',
     'example/android/settings.gradle',
     'example/android/gradle.properties',
+    'example/android/gradle/wrapper/gradle-wrapper.properties',
     'example/android/app/src/main/java/unif/reactnativedesign/example/MainActivity.kt',
     'example/android/app/src/main/java/unif/reactnativedesign/example/MainApplication.kt',
   ];
@@ -3682,13 +3697,13 @@ test('example README 按运行顺序记录 Pods、主题与未冒充 PASS 的人
   );
 });
 
-test('AGENTS 与 CONTRIBUTING 使用 RN 0.86.2 showcase 的真实 workspace 和 gates', () => {
+test('AGENTS 与 CONTRIBUTING 使用 RN 0.86.3 showcase 的真实 workspace 和 gates', () => {
   const agents = read('AGENTS.md');
   const contributing = read('CONTRIBUTING.md');
   for (const source of [agents, contributing]) {
     assert.match(source, /@unif\/react-native-design-example/u);
     assert.match(source, /ReactNativeDesignExample/u);
-    assert.match(source, /RN `?0\.86\.2/u);
+    assert.match(source, /RN `?0\.86\.3/u);
     assert.match(source, /yarn install --immutable/u);
     assert.match(source, /yarn verify:example-showcase/u);
     assert.match(source, /^\(cd example && bundle install\)$/mu);
@@ -4209,7 +4224,7 @@ test('Media fixture deployment mutation gate 拒绝部署配置与资产漂移',
         source
           .replace('  Avatar,', '  Avatar as DesignAvatar,')
           .replace('  Thumbnail,', '  Thumbnail as DesignThumbnail,')
-          .replaceAll('<Avatar', '<DesignAvatar')
+          .replaceAll('<Avatar\n', '<DesignAvatar\n')
           .replaceAll('<Thumbnail', '<DesignThumbnail')
           .replace(
             'const LOCAL_IMAGE:',

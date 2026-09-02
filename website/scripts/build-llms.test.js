@@ -1843,12 +1843,12 @@ test('missing internal routes report source file and original target', () => {
   );
 });
 
-test('all 56 website sources produce one canonical mirror and resolvable links', () => {
+test('all 57 website sources produce one canonical mirror and resolvable links', () => {
   const routeMap = buildRouteMap(loadWebsiteDocuments());
-  assert.strictEqual(routeMap.documents.length, 56);
+  assert.strictEqual(routeMap.documents.length, 57);
   assert.strictEqual(
     new Set(routeMap.documents.map((item) => item.outputPath)).size,
-    56
+    57
   );
   assert.strictEqual(
     routeMap.resolve('/docs/components').outputPath,
@@ -1880,11 +1880,11 @@ test('index and full metadata use one deployment-relative canonical entry per so
   const entries = routeMap.documents.map((item) => b.createIndexEntry(item));
   const index = b.buildLlmsIndex('Unif Design', entries);
 
-  assert.strictEqual(entries.length, 56);
-  assert.strictEqual(new Set(entries.map((item) => item.mdPath)).size, 56);
+  assert.strictEqual(entries.length, 57);
+  assert.strictEqual(new Set(entries.map((item) => item.mdPath)).size, 57);
   assert(entries.every((item) => item.mdPath.startsWith('md/')));
   assert(entries.every((item) => !item.mdPath.startsWith('/')));
-  assert.strictEqual(count(index, '](md/'), 56);
+  assert.strictEqual(count(index, '](md/'), 57);
   assert.strictEqual(count(index, '](llms-full.txt)'), 1);
   assert(!index.includes('](/md/'));
   assert(!index.includes('](/llms-full.txt)'));

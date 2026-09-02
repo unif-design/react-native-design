@@ -11,6 +11,8 @@
 import { createRef } from 'react';
 import { Pressable, Text } from 'react-native';
 import {
+  Avatar,
+  AvatarGroup,
   Button,
   Carousel,
   Cell,
@@ -29,6 +31,9 @@ import {
   Textarea,
   Thumbnail,
   VersionPill,
+  type AvatarShape,
+  type AvatarGroupItem,
+  type AvatarGroupProps,
   type CellExtra,
   type CellLeading,
   type CellProps,
@@ -78,11 +83,43 @@ const invalidThumbnailImageStyle = { width: 999 };
 const invalidStepperValueStyle = { color: 'red' };
 const compactStepperSize: StepperSize = 'xs';
 const dangerRibbonTone: RibbonTone = 'danger';
+const squareAvatarShape: AvatarShape = 'square';
+const avatarGroupItems = [
+  { key: 'owner', label: '王', variant: 'brand' },
+  { key: 'reviewer', label: '李', variant: 'info' },
+] as const satisfies readonly AvatarGroupItem[];
+const staticAvatarGroupProps: AvatarGroupProps = {
+  items: avatarGroupItems,
+  max: 4,
+};
 const publicRibbonProps: RibbonProps = {
   label: '未匹配',
   tone: dangerRibbonTone,
   children: <Text>商品卡片</Text>,
 };
+
+// --- Avatar:circle / square 双形态 --------------------------------------
+
+<Avatar label="王" />;
+<Avatar label="王" shape={squareAvatarShape} />;
+// @ts-expect-error Avatar 只接受 circle/square
+<Avatar label="王" shape="rounded" />;
+
+<AvatarGroup {...staticAvatarGroupProps} />;
+<AvatarGroup items={avatarGroupItems} shape="square" />;
+<AvatarGroup
+  items={avatarGroupItems}
+  max={4}
+  onOverflowPress={noop}
+  overflowAccessibilityHint="打开成员列表"
+/>;
+// @ts-expect-error overflow name 只能与 onOverflowPress 同时使用
+<AvatarGroup items={avatarGroupItems} overflowAccessibilityLabel="其余成员" />;
+// @ts-expect-error overflow hint 只能与 onOverflowPress 同时使用
+<AvatarGroup
+  items={avatarGroupItems}
+  overflowAccessibilityHint="打开成员列表"
+/>;
 
 // --- Button / IconButton / NavBar:所有操作必须显式可达 --------------------
 

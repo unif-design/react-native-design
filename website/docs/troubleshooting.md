@@ -112,18 +112,18 @@ yarn add react-native-svg \
 
 iOS 装完还需 `cd ios && bundle exec pod install`。
 
-版本范围见[快速开始 → 环境要求](/docs/getting-started#环境要求)。本库要求 `react-native >=0.86.0` + `react >=19.2.3 <20.0.0`;RN `0.85.x` 会因 peer 不满足而失败,不要用忽略 peer 的方式绕过。RN peer 不封顶,`0.87+` 装得上但本仓只验证到 `0.86.2`。
+版本范围见[快速开始 → 环境要求](/docs/getting-started#环境要求)。本库要求 `react-native >=0.86.0` + `react >=19.2.3 <20.0.0`;RN `0.85.x` 会因 peer 不满足而失败,不要用忽略 peer 的方式绕过。RN peer 不封顶,当前验证基线为 `0.86.3`。
 
 ---
 
 ### 症状:worklet 不生效 / Metro 报 worklets 插件相关错误 {#worklets-babel-metro}
 
-**原因。** `react-native-worklets@0.11` 的 Babel 插件与 Metro transformer 由**宿主工程**提供,本库不分发它们。宿主的 `@babel/core`、`@react-native/babel-preset`、`@react-native/metro-config` 版本与 RN `0.86.2` 不匹配时,worklet 编译会静默降级或直接报错。
+**原因。** `react-native-worklets` 的 Babel 插件与 Metro transformer 由**宿主工程**提供,本库不分发它们。宿主的 `@babel/core`、`@react-native/babel-preset`、`@react-native/metro-config` 版本与 RN 不匹配时,worklet 编译会静默降级或直接报错。
 
 **解法。** 宿主自备并对齐版本,且 `react-native-worklets/plugin` 必须排在 `plugins` 数组**最后**:
 
 ```sh
-yarn add -D @babel/core @react-native/babel-preset@0.86.2 @react-native/metro-config@0.86.2
+yarn add -D @babel/core @react-native/babel-preset@0.86.3 @react-native/metro-config@0.86.3
 ```
 
 ---
@@ -199,7 +199,7 @@ cd ios && bundle exec pod install --repo-update
 
 ### 症状:render Switch / Carousel / Spinner / Skeleton / Reveal 抛 `useReducedMotion is not a function` {#jest-reduced-motion}
 
-**原因。** 把 `react-native-reanimated` 映射到了它自带的 `mock.js` —— `react-native-reanimated@4.5.3` 的 mock 里 `useReducedMotion` 那行是注释掉的(`// useReducedMotion: ADD ME IF NEEDED`),而这些组件都经 `usePrefersReducedMotion` 读它。
+**原因。** 把 `react-native-reanimated` 映射到了它自带的 `mock.js` —— Reanimated 4.x 的便利 mock 不提供本库所需的完整运行时行为,而这些组件都经 `usePrefersReducedMotion` 读它。
 
 **解法。** 用 `preset: '@unif/react-native-design/jest-preset'`,入口用的是**真实 reanimated** + 官方 `setUpTests()`,并删掉你自己那条 reanimated 的 `moduleNameMapper`。手工接线时:同样别映射 reanimated,只把 `react-native-worklets` 换成官方 mock;实在要用那份 mock 就自己补上 `useReducedMotion`,见[测试 → 每一条为什么必需](/docs/testing#每一条为什么必需)。
 

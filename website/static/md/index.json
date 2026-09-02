@@ -7,6 +7,13 @@
     "description": "Unif Design 单文件设计宪法：品牌 / voice / 5 原则 / role-based token（颜色·字体·间距·圆角·阴影·动效）/ 图标 / 组件库 / Don'ts / RN 落地图。所有 token 值取自 src/theme，是 llms-full 的全量锚点。"
   },
   {
+    "title": "AvatarGroup 头像组",
+    "mdPath": "md/components/avatar-group.md",
+    "slug": "/components/avatar-group",
+    "section": "components",
+    "description": "有序重叠头像组 —— 统一 circle/square、五档尺寸与 max 溢出；+N 可保持静态，也可由消费端接管点击结果。"
+  },
+  {
     "title": "AvatarWithRing 圆环头像",
     "mdPath": "md/components/avatar-with-ring.md",
     "slug": "/components/avatar-with-ring",
@@ -18,7 +25,7 @@
     "mdPath": "md/components/avatar.md",
     "slug": "/components/avatar",
     "section": "components",
-    "description": "圆形 monogram 头像 —— brand / info / soft / neutral 四配色 × xs/sm/md/lg/xl 五档(18/28/32/40/56),支持图片 source 与加载失败回退 label。"
+    "description": "circle/square 双形态 monogram 头像 —— brand / info / soft / neutral 四配色 × xs/sm/md/lg/xl 五档,支持图片 source 与加载失败回退 label。"
   },
   {
     "title": "BlurLayer 玻璃模糊层",
@@ -361,7 +368,7 @@
     "mdPath": "md/getting-started.md",
     "slug": "/getting-started",
     "section": "概览",
-    "description": "5 分钟上手 @unif/react-native-design：装 peerDeps、根挂 ThemeProvider、用 useColors / useThemedStyles 写第一个主题化组件。面向 RN 0.86 新架构。"
+    "description": "5 分钟上手 @unif/react-native-design：装 peerDeps、根挂 ThemeProvider、用 useColors / useThemedStyles 写第一个主题化组件。面向 RN 0.86+ 新架构。"
   },
   {
     "title": "升级 / 迁移",
