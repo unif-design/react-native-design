@@ -1,4 +1,4 @@
-import { StyleSheet, type ViewStyle } from 'react-native';
+import { StyleSheet, type TextStyle, type ViewStyle } from 'react-native';
 import { fw, r, scaleFontMetric, type ColorTokens } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 
@@ -30,7 +30,19 @@ export const makeAvatarStyles = (
   shadowStyle: ViewStyle,
   c: ColorTokens,
   fontScale: number
-) => {
+): {
+  ringWidth: number;
+  dim: number;
+  inner: number;
+  styles: {
+    shell: ViewStyle;
+    avatarCore: ViewStyle;
+    label: TextStyle & {
+      fontSize: number;
+      letterSpacing: number;
+    };
+  };
+} => {
   // 防御非法 size:NaN / 负数 / 0 会导致 inner 为负传入 SVG。
   // 最小合理值 = ringWidth*2 + 1(至少 1pt 圆心可见)。
   // ringWidth 下限为 2(见下方 Math.max),所以 size 至少要大于 4pt。
