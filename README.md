@@ -96,7 +96,7 @@ React Native `0.86.3`、React `19.2.3`、New Architecture 和 Hermes，并通过
 | `forms`       | 表单与输入     | 文本输入、选择控件、Stepper（xs 为横向触控 < 44pt 的紧凑档）、Form |
 | `navigation`  | 导航组件       | NavBar、DrawerHeader、Tabs、Segmented、TabBar |
 | `collections` | 容器与集合     | Card、Ribbon、Cell、List、Grid、EntryCard、Carousel |
-| `media`       | 媒体展示       | Avatar、Thumbnail、Logo 与图片失败边界        |
+| `media`       | 媒体展示       | Avatar、AvatarGroup、Thumbnail、Logo 与图片失败边界 |
 | `business`    | 业务复合组件   | 渐变、背景、统计、头像环、版本状态            |
 
 从仓库根目录执行：

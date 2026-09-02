@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
 import {
   Avatar,
+  AvatarGroup,
   Button,
   Empty,
   Input,
@@ -10,6 +11,7 @@ import {
   Switch,
   Thumbnail,
   type AvatarSize,
+  type AvatarGroupItem,
   type AvatarVariant,
   type ColorTokens,
   type ThumbnailSize,
@@ -32,6 +34,15 @@ const avatarVariants: readonly AvatarVariant[] = [
   'info',
   'soft',
   'neutral',
+];
+const avatarGroupItems: readonly AvatarGroupItem[] = [
+  { key: 'lin', label: '林', variant: 'brand' },
+  { key: 'wang', label: '王', variant: 'info' },
+  { key: 'li', label: '李', variant: 'soft' },
+  { key: 'zhao', label: '赵', variant: 'neutral' },
+  { key: 'chen', label: '陈', variant: 'brand' },
+  { key: 'zhou', label: '周', variant: 'info' },
+  { key: 'wu', label: '吴', variant: 'soft' },
 ];
 const thumbnailSizes: readonly ThumbnailSize[] = ['sm', 'md', 'lg'];
 const avatarSizeLabels: Readonly<Record<AvatarSize, string>> = {
@@ -211,6 +222,22 @@ export function MediaScene(): React.JSX.Element {
           </View>
           <View style={styles.row}>
             <Avatar
+              label="圆"
+              shape="circle"
+              size="lg"
+              variant="info"
+              testID="media-avatar-shape-circle"
+            />
+            <Avatar
+              label="方"
+              shape="square"
+              size="lg"
+              variant="soft"
+              testID="media-avatar-shape-square"
+            />
+          </View>
+          <View style={styles.row}>
+            <Avatar
               label="本地头像"
               source={LOCAL_IMAGE}
               variant="brand"
@@ -227,6 +254,32 @@ export function MediaScene(): React.JSX.Element {
               source={{ uri: MEDIA_DECODE_FAILURE_URI }}
               variant="soft"
               testID="media-avatar-failure"
+            />
+          </View>
+        </SectionCard>
+
+        <SectionCard
+          title="AvatarGroup 头像组"
+          description="max 包含 +N 溢出位；组件只回调操作，成员列表由消费端决定如何展示。"
+        >
+          <View style={styles.row}>
+            <AvatarGroup
+              items={avatarGroupItems.slice(0, 3)}
+              max={5}
+              size="lg"
+              shape="circle"
+              testID="media-avatar-group-circle"
+            />
+            <AvatarGroup
+              items={avatarGroupItems}
+              max={5}
+              size="lg"
+              shape="square"
+              onOverflowPress={() => {
+                record('AvatarGroup', '查看成员', '展示其余 3 位成员');
+              }}
+              overflowAccessibilityHint="在消费端打开完整成员列表"
+              testID="media-avatar-group-square"
             />
           </View>
         </SectionCard>

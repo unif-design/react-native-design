@@ -13,6 +13,7 @@ export type SceneId = (typeof sceneIds)[number];
 
 export const publicComponentIds = [
   'Avatar',
+  'AvatarGroup',
   'BlurLayer',
   'Button',
   'Card',
@@ -282,7 +283,18 @@ export const componentCatalog = [
   {
     id: 'Avatar',
     scene: 'media',
-    states: ['brand/info/soft/neutral', 'xs/sm/md/lg/xl', '图片', '回退文字'],
+    states: [
+      'brand/info/soft/neutral',
+      'xs/sm/md/lg/xl',
+      'circle/square',
+      '图片',
+      '回退文字',
+    ],
+  },
+  {
+    id: 'AvatarGroup',
+    scene: 'media',
+    states: ['circle/square', '未溢出/溢出', '静态/可点击'],
   },
   {
     id: 'Thumbnail',

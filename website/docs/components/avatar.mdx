@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: Avatar 头像
-description: "圆形 monogram 头像 —— brand / info / soft / neutral 四配色 × xs/sm/md/lg/xl 五档(18/28/32/40/56),支持图片 source 与加载失败回退 label。"
+description: "circle/square 双形态 monogram 头像 —— brand / info / soft / neutral 四配色 × xs/sm/md/lg/xl 五档,支持图片 source 与加载失败回退 label。"
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -9,7 +9,7 @@ import { Avatar } from '@unif/react-native-design';
 
 # Avatar 头像
 
-圆形 monogram 头像(建议 1–2 字符)。`brand` / `info` / `soft` / `neutral` · `xs` 18 / `sm` 28 / `md` 32 / `lg` 40 / `xl` 56。可传合法 `source` 渲染真实头像图片,加载失败或运行时 source 非法时自动回退到 `label` 文字。
+monogram 头像(建议 1–2 字符),支持 `circle` / `square` 两种形态。`square` 使用随尺寸变化的 token 圆角,不是直角矩形；默认仍是 `circle`,现有调用视觉不变。配色为 `brand` / `info` / `soft` / `neutral`,尺寸为 `xs` 18 / `sm` 28 / `md` 32 / `lg` 40 / `xl` 56。可传合法 `source` 渲染真实头像图片,加载失败或运行时 source 非法时自动回退到 `label` 文字。
 
 :::warning 蓝色规则
 `info` 变体（蓝底 `#3775F6`）**专用于用户头像**。其它头像用 `brand` / `soft` / `neutral`。
@@ -28,6 +28,13 @@ import { Avatar } from '@unif/react-native-design';
         <Avatar label="我" variant="info" size="lg" />
         <Avatar label="王" variant="soft" size="lg" />
         <Avatar label="P" variant="neutral" size="lg" />
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">形态</span>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+        <Avatar label="圆" variant="info" size="lg" shape="circle" />
+        <Avatar label="方" variant="soft" size="lg" shape="square" />
       </div>
     </div>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -58,7 +65,7 @@ import { Avatar } from '@unif/react-native-design';
 
 <Avatar label="AI" variant="brand" size="lg" />
 <Avatar label="我" variant="info" size="md" />
-<Avatar label="王" variant="soft" />
+<Avatar label="王" variant="soft" shape="square" />
 <Avatar label="P" variant="neutral" size="sm" />
 ```
 
@@ -68,6 +75,7 @@ import { Avatar } from '@unif/react-native-design';
 |---|---|---|---|
 | `label` | `string` | — | 显示文字(建议 1–2 字符);同时作为 a11y label,图片加载失败时回退展示 |
 | `size` | `('xs' \| 'sm' \| 'md' \| 'lg' \| 'xl')?` | `'md'` | 18 / 28 / 32 / 40 / 56 |
+| `shape` | `('circle' \| 'square')?` | `'circle'` | 圆形或带 token 圆角的方形 |
 | `variant` | `('brand' \| 'info' \| 'soft' \| 'neutral')?` | `'neutral'` | 配色变体(仅在显示 label 时生效,有 `source` 时被图片覆盖) |
 | `source` | `ImageSourcePropType?` | — | 真实头像图片(`{ uri }`、URI source 数组或 `require(...)`);合法时优先渲染,`onError` 后回退 label |
 | `style` | `StyleProp<ViewStyle>?` | — | 容器附加样式（margin / position 等布局微调） |
@@ -75,7 +83,7 @@ import { Avatar } from '@unif/react-native-design';
 
 `xs`（18px）专为内联序号 / 脚注引用使用 —— 例如 Sources 列表里的来源编号 badge。
 
-`ThemeProvider fontScale` 只缩放 fallback label 的字号，且只缩放一次。`avatar.xs … avatar.xl` 对应的圆形容器直径、圆角和图片尺寸不随 fontScale 改变；有 `source` 时图片本身也不会缩放。
+`ThemeProvider fontScale` 只缩放 fallback label 的字号，且只缩放一次。`avatar.xs … avatar.xl` 对应的容器直径、形态圆角和图片尺寸不随 fontScale 改变；有 `source` 时图片本身也不会缩放。
 
 ### 图片 source identity 与失败隔离
 
@@ -94,6 +102,7 @@ import { Avatar } from '@unif/react-native-design';
 | `c.primaryContainer` / `c.primary` | `useColors()` | `soft` 变体底色 / 文字 |
 | `c.surfaceContainerHighest` / `c.foreground` | `useColors()` | `neutral` 变体底色 / 文字 |
 | `avatar.xs … avatar.xl` | `@unif/react-native-design` | 五档容器直径(18 / 28 / 32 / 40 / 56) |
+| `radius.xs / sm / md` | `@unif/react-native-design` | square 的小 / 中 / 大尺寸圆角 |
 | `fw.semi` | `@unif/react-native-design` | label 字重 |
 
 ## 无障碍（a11y）

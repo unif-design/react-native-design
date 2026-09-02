@@ -1180,7 +1180,7 @@ test('catalog mutation gate 拒绝缺项、重复 id 与错误 scene', () => {
       expectedCode: 'CATALOG_COMPONENT_SET',
       mutate(source) {
         return source.replace(
-          "  {\n    id: 'Avatar',\n    scene: 'media',\n    states: ['brand/info/soft/neutral', 'xs/sm/md/lg/xl', '图片', '回退文字'],\n  },\n",
+          "  {\n    id: 'AvatarGroup',\n    scene: 'media',\n    states: ['circle/square', '未溢出/溢出', '静态/可点击'],\n  },\n",
           ''
         );
       },
@@ -4224,7 +4224,7 @@ test('Media fixture deployment mutation gate 拒绝部署配置与资产漂移',
         source
           .replace('  Avatar,', '  Avatar as DesignAvatar,')
           .replace('  Thumbnail,', '  Thumbnail as DesignThumbnail,')
-          .replaceAll('<Avatar', '<DesignAvatar')
+          .replaceAll('<Avatar\n', '<DesignAvatar\n')
           .replaceAll('<Thumbnail', '<DesignThumbnail')
           .replace(
             'const LOCAL_IMAGE:',

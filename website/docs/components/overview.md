@@ -28,7 +28,8 @@ description: "@unif/react-native-design 组件索引（40+ 组件，按场景分
 |---|---|
 | [Button](/docs/components/button) | 主操作按钮,7 variant × 3 size,可 block |
 | [IconButton](/docs/components/icon-button) | 纯图标按钮,`accessibilityLabel` 类型必填 |
-| [Avatar](/docs/components/avatar) | 单字符 monogram 头像,variant `brand`/`info`/`soft`/`neutral` |
+| [Avatar](/docs/components/avatar) | circle/square monogram 头像,variant `brand`/`info`/`soft`/`neutral` |
+| [AvatarGroup](/docs/components/avatar-group) | 重叠头像组,统一形态与尺寸,支持 `max` 溢出及可选 action |
 | [Tag](/docs/components/tag) | 状态徽章,5 语义 × 2 尺寸 |
 | [Chip](/docs/components/chip) | 胶囊形可选中 pill(Suggestion 底层) |
 | [Confirm](/docs/components/confirm) | 命令式 `confirm()` + `<ConfirmHost />` 高风险二次确认 |
