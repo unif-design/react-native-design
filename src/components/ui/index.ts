@@ -5,6 +5,8 @@ export type {
   AvatarSize,
   AvatarVariant,
 } from './Avatar';
+export { AvatarGroup } from './AvatarGroup';
+export type { AvatarGroupItem, AvatarGroupProps } from './AvatarGroup';
 export { BlurLayer } from './BlurLayer';
 export type { BlurLayerProps } from './BlurLayer';
 export { Button } from './Button';
