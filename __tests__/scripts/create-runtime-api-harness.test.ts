@@ -28,10 +28,10 @@ const rootManifest = {
   name: '@unif/react-native-design',
   devDependencies: {
     '@babel/core': '^7.29.7',
-    '@react-native/metro-config': '0.87.1',
+    '@react-native/metro-config': '0.86.3',
     '@sbaiahmed1/react-native-blur': '6.0.1',
     'react': '19.2.3',
-    'react-native': '0.87.1',
+    'react-native': '0.86.3',
     'react-native-gesture-handler': '^3.1.0',
     'react-native-reanimated': '~4.6.0',
     'react-native-reanimated-carousel': '^5.0.0',
@@ -55,10 +55,10 @@ const rootManifest = {
 /** 当前 install 解析出的精确 provider 版本 —— 每个非 optional peer 都必须在场。 */
 const resolved: Record<string, string> = {
   '@babel/core': '7.29.7',
-  '@react-native/metro-config': '0.87.1',
+  '@react-native/metro-config': '0.86.3',
   '@sbaiahmed1/react-native-blur': '6.0.1',
   'react': '19.2.3',
-  'react-native': '0.87.1',
+  'react-native': '0.86.3',
   'react-native-gesture-handler': '3.1.0',
   'react-native-reanimated': '4.6.0',
   'react-native-reanimated-carousel': '5.0.0',
@@ -68,21 +68,21 @@ const resolved: Record<string, string> = {
 };
 
 const templateManifest = {
-  dependencies: { 'react': '19.2.3', 'react-native': '0.87.1' },
-  devDependencies: { '@react-native-community/cli': '20.2.0' },
+  dependencies: { 'react': '19.2.3', 'react-native': '0.86.3' },
+  devDependencies: { '@react-native-community/cli': '20.1.0' },
 };
 
 const LOCK = [
-  '"@react-native-community/template@npm:0.87.1":',
-  '  version: 0.87.1',
-  '  resolution: "@react-native-community/template@npm:0.87.1"',
+  '"@react-native-community/template@npm:0.86.3":',
+  '  version: 0.86.3',
+  '  resolution: "@react-native-community/template@npm:0.86.3"',
   '  checksum: 10c0/7f6d577c49a98f116d002c39fc246656b1718f36c',
   '  languageName: node',
   '  linkType: hard',
   '',
-  '"@react-native-community/cli@npm:20.2.0":',
-  '  version: 20.2.0',
-  '  resolution: "@react-native-community/cli@npm:20.2.0"',
+  '"@react-native-community/cli@npm:20.1.0":',
+  '  version: 20.1.0',
+  '  resolution: "@react-native-community/cli@npm:20.1.0"',
   '  checksum: 10c0/aaaabbbbccccdddd',
   '  languageName: node',
   '  linkType: hard',
@@ -109,10 +109,10 @@ const PROVIDER_LOCK = [
 describe('EXPECTED — 固定版本基线', () => {
   test('CLI / template / React / RN 全部钉死', () => {
     expect(EXPECTED).toEqual({
-      cli: '20.2.0',
-      template: '0.87.1',
+      cli: '20.1.0',
+      template: '0.86.3',
       react: '19.2.3',
-      reactNative: '0.87.1',
+      reactNative: '0.86.3',
     });
   });
 });
@@ -125,7 +125,7 @@ describe('buildScaffoldArgs', () => {
       'init',
       'RuntimeApiHarness',
       '--version',
-      '0.87.1',
+      '0.86.3',
       '--template',
       '/installed/template',
       '--pm',
@@ -154,7 +154,7 @@ describe('buildHarnessManifest', () => {
     expect(manifest.dependencies).toMatchObject({
       '@unif/react-native-design': 'file:/tmp/design.tgz',
       'react': '19.2.3',
-      'react-native': '0.87.1',
+      'react-native': '0.86.3',
       'react-native-gesture-handler': '3.1.0',
       'react-native-reanimated-carousel': '5.0.0',
       'react-native-reanimated': '4.6.0',
@@ -162,7 +162,7 @@ describe('buildHarnessManifest', () => {
     });
     expect(manifest.devDependencies).toMatchObject({
       '@babel/core': '7.29.7',
-      '@react-native/metro-config': '0.87.1',
+      '@react-native/metro-config': '0.86.3',
     });
   });
 
@@ -359,7 +359,7 @@ describe('native template snapshot — 从 installed template 捕获版本特征
     'android/settings.gradle':
       "plugins { id('com.facebook.react.settings') }\nrootProject.name = 'HelloWorld'\n",
     'android/build.gradle':
-      'ext { compileSdkVersion = 37 }\napply plugin: "com.facebook.react.rootproject"\n',
+      'ext { compileSdkVersion = 36 }\napply plugin: "com.facebook.react.rootproject"\n',
     'android/app/build.gradle':
       'namespace "com.helloworld"\ntargetSdkVersion rootProject.ext.targetSdkVersion\n',
   };
@@ -373,7 +373,7 @@ describe('native template snapshot — 从 installed template 捕获版本特征
         'android/settings.gradle':
           "plugins { id('com.facebook.react.settings') }\nrootProject.name = 'RuntimeApiHarness'\n",
         'android/build.gradle':
-          'ext { compileSdkVersion = 37 }\napply plugin: "com.facebook.react.rootproject"\n',
+          'ext { compileSdkVersion = 36 }\napply plugin: "com.facebook.react.rootproject"\n',
         'android/app/build.gradle':
           'namespace "com.runtimeapiharness"\ntargetSdkVersion rootProject.ext.targetSdkVersion\n',
       })
@@ -454,12 +454,12 @@ describe('runWithOwnedTempCleanup', () => {
 describe('assertExactVersion — CLI / template 漂移', () => {
   test('版本一致时通过', () => {
     expect(() =>
-      assertExactVersion('@react-native-community/cli', '20.2.0', EXPECTED.cli)
+      assertExactVersion('@react-native-community/cli', '20.1.0', EXPECTED.cli)
     ).not.toThrow();
   });
 
   test.each([
-    ['@react-native-community/cli', '20.1.0', EXPECTED.cli],
+    ['@react-native-community/cli', '20.1.1', EXPECTED.cli],
     ['@react-native-community/template', '0.86.2', EXPECTED.template],
   ])('%s 漂移到 %s 时抛错', (name, actual, expectedVersion) => {
     expect(() => assertExactVersion(name, actual, expectedVersion)).toThrow(
@@ -498,7 +498,7 @@ describe('assertTemplateManifest — template 的 React / RN 漂移', () => {
     expect(() =>
       assertTemplateManifest({
         ...templateManifest,
-        devDependencies: { '@react-native-community/cli': '20.1.0' },
+        devDependencies: { '@react-native-community/cli': '20.1.1' },
       })
     ).toThrow('@react-native-community/cli');
   });
@@ -508,8 +508,8 @@ describe('assertLockChecksums — 锁文件完整性', () => {
   test('两个包都有非空 checksum 时通过', () => {
     expect(() =>
       assertLockChecksums(LOCK, [
-        { name: '@react-native-community/template', version: '0.87.1' },
-        { name: '@react-native-community/cli', version: '20.2.0' },
+        { name: '@react-native-community/template', version: '0.86.3' },
+        { name: '@react-native-community/cli', version: '20.1.0' },
       ])
     ).not.toThrow();
   });
@@ -529,14 +529,14 @@ describe('assertLockChecksums — 锁文件完整性', () => {
     );
     expect(() =>
       assertLockChecksums(broken, [
-        { name: '@react-native-community/template', version: '0.87.1' },
+        { name: '@react-native-community/template', version: '0.86.3' },
       ])
     ).toThrow('@react-native-community/template');
   });
 
   test('findLockChecksum 只在对应条目块内查找,不串块', () => {
     expect(
-      findLockChecksum(LOCK, '@react-native-community/cli', '20.2.0')
+      findLockChecksum(LOCK, '@react-native-community/cli', '20.1.0')
     ).toBe('10c0/aaaabbbbccccdddd');
     expect(findLockChecksum(LOCK, 'not-installed', '1.0.0')).toBeNull();
   });

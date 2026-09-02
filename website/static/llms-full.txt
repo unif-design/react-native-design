@@ -654,7 +654,7 @@ const source = require('@/assets/logo.png');
 
 接手项目时它有:
 
-- RN `0.87.1` / React `19.2.3`,新架构(Fabric + TurboModules)默认开启。发布 contract 为 `react-native >=0.86.0`(不封顶,验证基线为 `0.87.1`)、`react >=19.2.3 <20.0.0`;Node engine 为 `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`。运行时四件套固定在 RNGH `>=3.0.0 <4.0.0`、Reanimated `>=4.5.2 <4.7.0`、Worklets `>=0.11.0 <0.13.0`、RNRC `>=5.0.0 <6.0.0`。
+- RN `0.86.3` / React `19.2.3`,新架构(Fabric + TurboModules)默认开启。发布 contract 为 `react-native >=0.86.0`(不封顶,验证基线为 `0.86.3`)、`react >=19.2.3 <20.0.0`;Node engine 为 `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`。运行时四件套固定在 RNGH `>=3.0.0 <4.0.0`、Reanimated `>=4.5.2 <4.7.0`、Worklets `>=0.11.0 <0.13.0`、RNRC `>=5.0.0 <6.0.0`。
 - 完整设计系统:38 ui + 4 业务复合组件,全套 token(`colors / shadow / type / fw / space / radius / avatar / icon / control / dim / fixed / motion / blur / fontMono`)在 `src/theme/`,亮 / 暗双套经 `ThemeProvider` + `useThemedStyles`;SVG 图标目录在 `src/icons/svg/` + 生成的 `src/icons/data.ts`(只读)。
 - 单元 / 集成测试在 `__tests__/`(Jest + `@testing-library/react-native`)。
 - Docusaurus 文档站在 `website/`。
@@ -6642,11 +6642,11 @@ function DynamicLabel({ size }: { size: number }) {
 
 ## 环境要求 {#环境要求}
 
-支持矩阵严格来自 `package.json#peerDependencies`,本仓直接验证的版本是 React Native `0.87.1` + React `19.2.3`:
+支持矩阵严格来自 `package.json#peerDependencies`,本仓直接验证的版本是 React Native `0.86.3` + React `19.2.3`:
 
 | 依赖 | 支持范围 | 本仓验证版本 |
 | --- | --- | --- |
-| `react-native` | `>=0.86.0` | `0.87.1` |
+| `react-native` | `>=0.86.0` | `0.86.3` |
 | `react` | `>=19.2.3 <20.0.0` | `19.2.3` |
 | `react-native-gesture-handler` | `>=3.0.0 <4.0.0` | `3.1.0` |
 | `react-native-reanimated` | `>=4.5.2 <4.7.0` | `4.6.0` |
@@ -6660,7 +6660,7 @@ function DynamicLabel({ size }: { size: number }) {
 - TypeScript 6
 
 :::info 仅支持新架构,RN 下限 0.86
-本库面向 RN 0.86+ 新架构(Fabric + TurboModules),支持 `react-native-reanimated@4.5/4.6` + `react-native-worklets@0.11/0.12`。旧架构(Bridge)与 RN `0.85` 及更低版本不在支持范围 —— 发布 contract 是 `>=0.86.0`,不封顶；当前验证基线为 RN `0.87.1`。
+本库面向 RN 0.86+ 新架构(Fabric + TurboModules),支持 `react-native-reanimated@4.5/4.6` + `react-native-worklets@0.11/0.12`。旧架构(Bridge)与 RN `0.85` 及更低版本不在支持范围 —— 发布 contract 是 `>=0.86.0`,不封顶；当前验证基线为 RN `0.86.3`。
 :::
 
 ## 安装依赖 {#安装依赖}
@@ -6692,7 +6692,7 @@ iOS 装完原生包后,在 `ios/` 目录执行 `bundle exec pod install`。
 > 版本范围见上方[环境要求](#环境要求)表格,唯一事实来源是 `package.json#peerDependencies`。
 
 :::caution Worklets 需要宿主自备 Babel / Metro
-`react-native-worklets` 的 Babel 插件与 Metro transformer 由**宿主工程**提供,不随本库分发。宿主必须装上与自身 RN 版本匹配的 `@babel/core`、`@react-native/babel-preset` 和 `@react-native/metro-config`；本仓验证的是 RN `0.87.1` 与对应 `0.87.1` 工具链，否则 worklet 编译会静默降级或直接报错。
+`react-native-worklets` 的 Babel 插件与 Metro transformer 由**宿主工程**提供,不随本库分发。宿主必须装上与自身 RN 版本匹配的 `@babel/core`、`@react-native/babel-preset` 和 `@react-native/metro-config`；本仓验证的是 RN `0.86.3` 与对应 `0.86.3` 工具链，否则 worklet 编译会静默降级或直接报错。
 :::
 
 :::caution RNRC 5.0.0 与 Gesture Handler 3 的 peer 冲突
@@ -7048,7 +7048,7 @@ skills 全部开源,发布在插件市场仓库 `unif-design/skills`。本 skill
 
 本库是**纯 JS**(没有 android / ios / cpp,也没有自己的 TurboModule),所以入口里换掉的从来不是 design 本身,而是它依赖的那几个 peer —— 用的都是各家**官方**的 mock。
 
-下面这份配方在 RN `0.87.1` + React `19.2.3` 基线上,用 `yarn pack` 打出的真实 tarball 装进一个干净宿主工程验证过:一行 preset,不加任何 mapper / transform / setup,11 个组件(Button / Cell / IconButton / Switch / Segmented / Carousel / Icon / Spinner / Skeleton / Reveal / ToastHost)的用例全绿。本仓 `example/` 的 15 个 suite 吃的也是同一个 preset。
+下面这份配方在 RN `0.86.3` + React `19.2.3` 基线上,用 `yarn pack` 打出的真实 tarball 装进一个干净宿主工程验证过:一行 preset,不加任何 mapper / transform / setup,11 个组件(Button / Cell / IconButton / Switch / Segmented / Carousel / Icon / Spinner / Skeleton / Reveal / ToastHost)的用例全绿。本仓 `example/` 的 15 个 suite 吃的也是同一个 preset。
 
 ## 最小可用配方 {#最小可用配方}
 
@@ -7463,7 +7463,7 @@ yarn add react-native-svg \
 
 iOS 装完还需 `cd ios && bundle exec pod install`。
 
-版本范围见[快速开始 → 环境要求](md/getting-started.md#环境要求)。本库要求 `react-native >=0.86.0` + `react >=19.2.3 <20.0.0`;RN `0.85.x` 会因 peer 不满足而失败,不要用忽略 peer 的方式绕过。RN peer 不封顶,当前验证基线为 `0.87.1`。
+版本范围见[快速开始 → 环境要求](md/getting-started.md#环境要求)。本库要求 `react-native >=0.86.0` + `react >=19.2.3 <20.0.0`;RN `0.85.x` 会因 peer 不满足而失败,不要用忽略 peer 的方式绕过。RN peer 不封顶,当前验证基线为 `0.86.3`。
 
 ---
 
@@ -7474,7 +7474,7 @@ iOS 装完还需 `cd ios && bundle exec pod install`。
 **解法。** 宿主自备并对齐版本,且 `react-native-worklets/plugin` 必须排在 `plugins` 数组**最后**:
 
 ```sh
-yarn add -D @babel/core @react-native/babel-preset@0.87.1 @react-native/metro-config@0.87.1
+yarn add -D @babel/core @react-native/babel-preset@0.86.3 @react-native/metro-config@0.86.3
 ```
 
 ---

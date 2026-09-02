@@ -607,7 +607,7 @@ const expectedRuntimeDependencies = {
   '@sbaiahmed1/react-native-blur': '6.0.1',
   '@unif/react-native-design': 'workspace:*',
   'react': '19.2.3',
-  'react-native': '0.87.1',
+  'react-native': '0.86.3',
   'react-native-gesture-handler': '3.1.0',
   'react-native-reanimated': '4.6.0',
   'react-native-reanimated-carousel': '5.0.0',
@@ -617,14 +617,14 @@ const expectedRuntimeDependencies = {
 };
 
 const expectedTemplateDevDependencies = {
-  '@react-native-community/cli': '20.2.0',
-  '@react-native-community/cli-platform-android': '20.2.0',
-  '@react-native-community/cli-platform-ios': '20.2.0',
-  '@react-native/babel-preset': '0.87.1',
-  '@react-native/eslint-config': '0.87.1',
-  '@react-native/jest-preset': '0.87.1',
-  '@react-native/metro-config': '0.87.1',
-  '@react-native/typescript-config': '0.87.1',
+  '@react-native-community/cli': '20.1.0',
+  '@react-native-community/cli-platform-android': '20.1.0',
+  '@react-native-community/cli-platform-ios': '20.1.0',
+  '@react-native/babel-preset': '0.86.3',
+  '@react-native/eslint-config': '0.86.3',
+  '@react-native/jest-preset': '0.86.3',
+  '@react-native/metro-config': '0.86.3',
+  '@react-native/typescript-config': '0.86.3',
 };
 
 const catalogContractFiles = [
@@ -835,7 +835,7 @@ function plistArray(plist, key) {
   );
 }
 
-test('example workspace 提供 Design 的完整 RN 0.87.1 runtime graph', () => {
+test('example workspace 提供 Design 的完整 RN 0.86.3 runtime graph', () => {
   const examplePackage = readJson('example/package.json');
 
   assert.equal(examplePackage.name, '@unif/react-native-design-example');
@@ -979,7 +979,7 @@ test('Yarn 不全局丢弃 peer warning', () => {
   );
 });
 
-test('Babel/Metro/Jest 使用 RN 0.87 workspace source contract', () => {
+test('Babel/Metro/Jest 使用 RN 0.86 workspace source contract', () => {
   const babelConfig = require(path.join(exampleRoot, 'babel.config.js'));
   const metroConfig = require(path.join(exampleRoot, 'metro.config.js'));
   const jestConfig = require(path.join(exampleRoot, 'jest.config.js'));
@@ -1055,21 +1055,21 @@ test('app registry 与 Android identity 原子同步并保留 New Architecture',
   assert.match(appGradle, /autolinkLibrariesWithApp\(\)/u);
   assert.match(
     appGradle,
-    /getDefaultProguardFile\("proguard-android-optimize\.txt"\)/u
+    /getDefaultProguardFile\("proguard-android\.txt"\)/u
   );
-  assert.match(rootGradle, /buildToolsVersion = "37\.0\.0"/u);
+  assert.match(rootGradle, /buildToolsVersion = "36\.0\.0"/u);
   assert.match(rootGradle, /minSdkVersion = 24/u);
-  assert.match(rootGradle, /compileSdkVersion = 37/u);
+  assert.match(rootGradle, /compileSdkVersion = 36/u);
   assert.match(rootGradle, /targetSdkVersion = 36/u);
-  assert.match(rootGradle, /kotlinVersion = "2\.2\.0"/u);
-  assert.match(wrapper, /gradle-9\.4\.1-bin\.zip/u);
+  assert.match(rootGradle, /kotlinVersion = "2\.1\.20"/u);
+  assert.match(wrapper, /gradle-9\.3\.1-bin\.zip/u);
   assert.match(settings, /autolinkLibrariesFromCommand\(\)/u);
   assert.match(settings, /rootProject\.name = 'ReactNativeDesignExample'/u);
   assert.match(properties, /^newArchEnabled=true$/mu);
   assert.match(properties, /^hermesEnabled=true$/mu);
-  assert.match(properties, /^edgeToEdgeEnabled=true$/mu);
-  assert.match(properties, /^android\.builtInKotlin=false$/mu);
-  assert.match(properties, /^android\.newDsl=false$/mu);
+  assert.match(properties, /^edgeToEdgeEnabled=false$/mu);
+  assert.doesNotMatch(properties, /^android\.builtInKotlin=/mu);
+  assert.doesNotMatch(properties, /^android\.newDsl=/mu);
   assert.match(activity, /^package unif\.reactnativedesign\.example$/mu);
   assert.match(
     activity,
@@ -1263,7 +1263,7 @@ test('mutation gate 拒绝 runtime manifest 的精确版本漂移', () => {
 
     const result = runContractMutation(
       fixture,
-      'example workspace 提供 Design 的完整 RN 0.87.1 runtime graph'
+      'example workspace 提供 Design 的完整 RN 0.86.3 runtime graph'
     );
     const output = `${result.stdout}\n${result.stderr}`;
     assert.equal(result.status, 1, output);
@@ -3697,13 +3697,13 @@ test('example README 按运行顺序记录 Pods、主题与未冒充 PASS 的人
   );
 });
 
-test('AGENTS 与 CONTRIBUTING 使用 RN 0.87.1 showcase 的真实 workspace 和 gates', () => {
+test('AGENTS 与 CONTRIBUTING 使用 RN 0.86.3 showcase 的真实 workspace 和 gates', () => {
   const agents = read('AGENTS.md');
   const contributing = read('CONTRIBUTING.md');
   for (const source of [agents, contributing]) {
     assert.match(source, /@unif\/react-native-design-example/u);
     assert.match(source, /ReactNativeDesignExample/u);
-    assert.match(source, /RN `?0\.87\.1/u);
+    assert.match(source, /RN `?0\.86\.3/u);
     assert.match(source, /yarn install --immutable/u);
     assert.match(source, /yarn verify:example-showcase/u);
     assert.match(source, /^\(cd example && bundle install\)$/mu);

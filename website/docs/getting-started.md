@@ -11,11 +11,11 @@ description: "5 分钟上手 @unif/react-native-design：装 peerDeps、根挂 T
 
 ## 环境要求 {#环境要求}
 
-支持矩阵严格来自 `package.json#peerDependencies`,本仓直接验证的版本是 React Native `0.87.1` + React `19.2.3`:
+支持矩阵严格来自 `package.json#peerDependencies`,本仓直接验证的版本是 React Native `0.86.3` + React `19.2.3`:
 
 | 依赖 | 支持范围 | 本仓验证版本 |
 | --- | --- | --- |
-| `react-native` | `>=0.86.0` | `0.87.1` |
+| `react-native` | `>=0.86.0` | `0.86.3` |
 | `react` | `>=19.2.3 <20.0.0` | `19.2.3` |
 | `react-native-gesture-handler` | `>=3.0.0 <4.0.0` | `3.1.0` |
 | `react-native-reanimated` | `>=4.5.2 <4.7.0` | `4.6.0` |
@@ -29,7 +29,7 @@ description: "5 分钟上手 @unif/react-native-design：装 peerDeps、根挂 T
 - TypeScript 6
 
 :::info 仅支持新架构,RN 下限 0.86
-本库面向 RN 0.86+ 新架构(Fabric + TurboModules),支持 `react-native-reanimated@4.5/4.6` + `react-native-worklets@0.11/0.12`。旧架构(Bridge)与 RN `0.85` 及更低版本不在支持范围 —— 发布 contract 是 `>=0.86.0`,不封顶；当前验证基线为 RN `0.87.1`。
+本库面向 RN 0.86+ 新架构(Fabric + TurboModules),支持 `react-native-reanimated@4.5/4.6` + `react-native-worklets@0.11/0.12`。旧架构(Bridge)与 RN `0.85` 及更低版本不在支持范围 —— 发布 contract 是 `>=0.86.0`,不封顶；当前验证基线为 RN `0.86.3`。
 :::
 
 ## 安装依赖 {#安装依赖}
@@ -61,7 +61,7 @@ iOS 装完原生包后,在 `ios/` 目录执行 `bundle exec pod install`。
 > 版本范围见上方[环境要求](#环境要求)表格,唯一事实来源是 `package.json#peerDependencies`。
 
 :::caution Worklets 需要宿主自备 Babel / Metro
-`react-native-worklets` 的 Babel 插件与 Metro transformer 由**宿主工程**提供,不随本库分发。宿主必须装上与自身 RN 版本匹配的 `@babel/core`、`@react-native/babel-preset` 和 `@react-native/metro-config`；本仓验证的是 RN `0.87.1` 与对应 `0.87.1` 工具链，否则 worklet 编译会静默降级或直接报错。
+`react-native-worklets` 的 Babel 插件与 Metro transformer 由**宿主工程**提供,不随本库分发。宿主必须装上与自身 RN 版本匹配的 `@babel/core`、`@react-native/babel-preset` 和 `@react-native/metro-config`；本仓验证的是 RN `0.86.3` 与对应 `0.86.3` 工具链，否则 worklet 编译会静默降级或直接报错。
 :::
 
 :::caution RNRC 5.0.0 与 Gesture Handler 3 的 peer 冲突

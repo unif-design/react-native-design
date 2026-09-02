@@ -537,7 +537,7 @@ const expectedRuntimeDependencies = {
   '@sbaiahmed1/react-native-blur': '6.0.1',
   '@unif/react-native-design': 'workspace:*',
   'react': '19.2.3',
-  'react-native': '0.87.1',
+  'react-native': '0.86.3',
   'react-native-gesture-handler': '3.1.0',
   'react-native-reanimated': '4.6.0',
   'react-native-reanimated-carousel': '5.0.0',
@@ -547,14 +547,14 @@ const expectedRuntimeDependencies = {
 };
 
 const expectedTemplateDevDependencies = {
-  '@react-native-community/cli': '20.2.0',
-  '@react-native-community/cli-platform-android': '20.2.0',
-  '@react-native-community/cli-platform-ios': '20.2.0',
-  '@react-native/babel-preset': '0.87.1',
-  '@react-native/eslint-config': '0.87.1',
-  '@react-native/jest-preset': '0.87.1',
-  '@react-native/metro-config': '0.87.1',
-  '@react-native/typescript-config': '0.87.1',
+  '@react-native-community/cli': '20.1.0',
+  '@react-native-community/cli-platform-android': '20.1.0',
+  '@react-native-community/cli-platform-ios': '20.1.0',
+  '@react-native/babel-preset': '0.86.3',
+  '@react-native/eslint-config': '0.86.3',
+  '@react-native/jest-preset': '0.86.3',
+  '@react-native/metro-config': '0.86.3',
+  '@react-native/typescript-config': '0.86.3',
 };
 
 const expectedRootPeerDependencies = {
@@ -1823,22 +1823,22 @@ function verifyRuntimeAndNativeContract(root) {
     /namespace "unif\.reactnativedesign\.example"/u.test(appGradle) &&
     /applicationId "unif\.reactnativedesign\.example"/u.test(appGradle) &&
     /autolinkLibrariesWithApp\(\)/u.test(appGradle) &&
-    /getDefaultProguardFile\("proguard-android-optimize\.txt"\)/u.test(
+    /getDefaultProguardFile\("proguard-android\.txt"\)/u.test(
       appGradle
     ) &&
-    /buildToolsVersion = "37\.0\.0"/u.test(rootGradle) &&
+    /buildToolsVersion = "36\.0\.0"/u.test(rootGradle) &&
     /minSdkVersion = 24/u.test(rootGradle) &&
-    /compileSdkVersion = 37/u.test(rootGradle) &&
+    /compileSdkVersion = 36/u.test(rootGradle) &&
     /targetSdkVersion = 36/u.test(rootGradle) &&
-    /kotlinVersion = "2\.2\.0"/u.test(rootGradle) &&
-    /gradle-9\.4\.1-bin\.zip/u.test(wrapper) &&
+    /kotlinVersion = "2\.1\.20"/u.test(rootGradle) &&
+    /gradle-9\.3\.1-bin\.zip/u.test(wrapper) &&
     /rootProject\.name = 'ReactNativeDesignExample'/u.test(settings) &&
     /autolinkLibrariesFromCommand\(\)/u.test(settings) &&
     /^newArchEnabled=true$/mu.test(properties) &&
     /^hermesEnabled=true$/mu.test(properties) &&
-    /^edgeToEdgeEnabled=true$/mu.test(properties) &&
-    /^android\.builtInKotlin=false$/mu.test(properties) &&
-    /^android\.newDsl=false$/mu.test(properties) &&
+    /^edgeToEdgeEnabled=false$/mu.test(properties) &&
+    !/^android\.builtInKotlin=/mu.test(properties) &&
+    !/^android\.newDsl=/mu.test(properties) &&
     /^package unif\.reactnativedesign\.example$/mu.test(activity) &&
     /getMainComponentName\(\): String = "ReactNativeDesignExample"/u.test(
       activity
@@ -3377,7 +3377,7 @@ function verifyDocumentation(root) {
     }
   }
 
-  verifyDocumentSceneTable('root README', rootReadme, '## RN 0.87.1 组件展厅');
+  verifyDocumentSceneTable('root README', rootReadme, '## RN 0.86.3 组件展厅');
   verifyDocumentSceneTable('example README', exampleReadme, '## 5. 八个场景');
 
   assertDocumentContainsAll(
@@ -3534,7 +3534,7 @@ function verifyDocumentation(root) {
       [
         '@unif/react-native-design-example',
         'ReactNativeDesignExample',
-        '0.87.1',
+        '0.86.3',
         'yarn install --immutable',
         'yarn verify:example-showcase',
       ],

@@ -32,7 +32,7 @@ npx skills add unif-design/skills --skill rn-library --skill design --global --a
 `@unif/react-native-design` 是 React Native 设计系统，公开 theme、Icon、utils、41 个 UI
 runtime/host 和 6 个 business component。当前根验证基线与持久 example 的版本事实：
 
-- RN `0.87.1`。
+- RN `0.86.3`。
 - React `19.2.3`。
 - 发布 contract 以 `package.json#peerDependencies` 为准。
 

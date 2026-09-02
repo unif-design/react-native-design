@@ -18,7 +18,7 @@ description: "@unif/react-native-design 的 Jest 接入：一行 preset 接好�
 
 本库是**纯 JS**(没有 android / ios / cpp,也没有自己的 TurboModule),所以入口里换掉的从来不是 design 本身,而是它依赖的那几个 peer —— 用的都是各家**官方**的 mock。
 
-下面这份配方在 RN `0.87.1` + React `19.2.3` 基线上,用 `yarn pack` 打出的真实 tarball 装进一个干净宿主工程验证过:一行 preset,不加任何 mapper / transform / setup,11 个组件(Button / Cell / IconButton / Switch / Segmented / Carousel / Icon / Spinner / Skeleton / Reveal / ToastHost)的用例全绿。本仓 `example/` 的 15 个 suite 吃的也是同一个 preset。
+下面这份配方在 RN `0.86.3` + React `19.2.3` 基线上,用 `yarn pack` 打出的真实 tarball 装进一个干净宿主工程验证过:一行 preset,不加任何 mapper / transform / setup,11 个组件(Button / Cell / IconButton / Switch / Segmented / Carousel / Icon / Spinner / Skeleton / Reveal / ToastHost)的用例全绿。本仓 `example/` 的 15 个 suite 吃的也是同一个 preset。
 
 ## 最小可用配方 {#最小可用配方}
 

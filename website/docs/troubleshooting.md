@@ -112,7 +112,7 @@ yarn add react-native-svg \
 
 iOS 装完还需 `cd ios && bundle exec pod install`。
 
-版本范围见[快速开始 → 环境要求](/docs/getting-started#环境要求)。本库要求 `react-native >=0.86.0` + `react >=19.2.3 <20.0.0`;RN `0.85.x` 会因 peer 不满足而失败,不要用忽略 peer 的方式绕过。RN peer 不封顶,当前验证基线为 `0.87.1`。
+版本范围见[快速开始 → 环境要求](/docs/getting-started#环境要求)。本库要求 `react-native >=0.86.0` + `react >=19.2.3 <20.0.0`;RN `0.85.x` 会因 peer 不满足而失败,不要用忽略 peer 的方式绕过。RN peer 不封顶,当前验证基线为 `0.86.3`。
 
 ---
 
@@ -123,7 +123,7 @@ iOS 装完还需 `cd ios && bundle exec pod install`。
 **解法。** 宿主自备并对齐版本,且 `react-native-worklets/plugin` 必须排在 `plugins` 数组**最后**:
 
 ```sh
-yarn add -D @babel/core @react-native/babel-preset@0.87.1 @react-native/metro-config@0.87.1
+yarn add -D @babel/core @react-native/babel-preset@0.86.3 @react-native/metro-config@0.86.3
 ```
 
 ---
