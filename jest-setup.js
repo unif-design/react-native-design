@@ -5,7 +5,7 @@
 /**
  * `@unif/react-native-design/jest-setup` —— 把本库 9 个 runtime peer 里在 Jest 中
  * 需要接线的那 4 个接上各自的**官方**桩 / mock / setup。放进消费者的
- * `setupFilesAfterEnv`。(4 个里只有 3 个换了替身,reanimated 走真实模块。)
+ * `setupFilesAfterEnv`。
  *
  * 为什么由库提供:这份接线完全由本库的 peer 集决定,peer range 一变它就得变。
  * 让每个消费仓自己推导的结果是 5 个仓 5 种写法、3 个仓各自踩同一个坑
@@ -40,10 +40,28 @@ jest.mock('react-native-gesture-handler', () => ({
   GestureDetector: ({ children }) => children,
 }));
 
-// reanimated 走**真实模块** + 官方 setUpTests。
-// 不要映射到 `react-native-reanimated/mock`:那是上游刻意残缺的便利 mock
-// (src/mock.ts 里 19 处 `ADD ME IF NEEDED`),缺 useReducedMotion(本库
-// usePrefersReducedMotion 直接调)与 useComposedEventHandler(RNGH 3 Pressable 要用),
-// 且它的 useSharedValue 每次 render 返回新 Proxy,会让把 shared value 放进 effect
-// 依赖数组的组件(本库 ToastHost)在 fake timers 下堆内存耗尽。
-require('react-native-reanimated').setUpTests();
+// Reanimated 4.6 的官方 mock 已覆盖本库使用的 hooks；真实 native 组件链会在
+// React 19 test renderer 中尝试查 host instance / native style handle，不能用于 Jest。
+// 上游 mock 的 useSharedValue 每次 render 都返回新 Proxy，会让把 shared value 放进
+// effect 依赖数组的组件(本库 ToastHost)反复执行，所以只把这个 hook 稳定化。
+jest.mock('react-native-reanimated', () => {
+  const React = require('react');
+  const reanimatedMock = require('react-native-reanimated/mock');
+
+  function useStableSharedValue(initialValue) {
+    const sharedValueRef = React.useRef();
+    if (sharedValueRef.current === undefined) {
+      sharedValueRef.current = reanimatedMock.useSharedValue(initialValue);
+    }
+    return sharedValueRef.current;
+  }
+
+  return {
+    ...reanimatedMock,
+    useSharedValue: useStableSharedValue,
+  };
+});
+
+// 用 actual 只安装官方 matcher / timer；不要提前 require 已注册的模块 mock，
+// 否则消费仓在单测内追加的 jest.mock('react-native-reanimated', ...) 无法覆盖它。
+jest.requireActual('react-native-reanimated').setUpTests();
