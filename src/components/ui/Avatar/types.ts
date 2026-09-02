@@ -3,6 +3,9 @@ import type { ImageSourcePropType, StyleProp, ViewStyle } from 'react-native';
 /** 头像尺寸（对应 avatar.xs..xl）：xs=18 / sm=28 / md=32 / lg=40 / xl=56 */
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
+/** 头像形态：circle 为圆形，square 为带 token 圆角的方形。 */
+export type AvatarShape = 'circle' | 'square';
+
 /**
  * 头像配色变体（仅在显示 letter / fallback 时生效，showImage 时被覆盖）：
  * - `brand` 品牌橙底（AI 头像专用）
@@ -20,6 +23,8 @@ export type AvatarProps = {
   label: string;
   /** 尺寸，默认 'md' */
   size?: AvatarSize;
+  /** 形态，默认 'circle' */
+  shape?: AvatarShape;
   /** 配色变体，默认 'neutral' */
   variant?: AvatarVariant;
   /**

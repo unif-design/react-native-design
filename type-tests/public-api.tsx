@@ -11,6 +11,7 @@
 import { createRef } from 'react';
 import { Pressable, Text } from 'react-native';
 import {
+  Avatar,
   Button,
   Carousel,
   Cell,
@@ -29,6 +30,7 @@ import {
   Textarea,
   Thumbnail,
   VersionPill,
+  type AvatarShape,
   type CellExtra,
   type CellLeading,
   type CellProps,
@@ -78,11 +80,19 @@ const invalidThumbnailImageStyle = { width: 999 };
 const invalidStepperValueStyle = { color: 'red' };
 const compactStepperSize: StepperSize = 'xs';
 const dangerRibbonTone: RibbonTone = 'danger';
+const squareAvatarShape: AvatarShape = 'square';
 const publicRibbonProps: RibbonProps = {
   label: '未匹配',
   tone: dangerRibbonTone,
   children: <Text>商品卡片</Text>,
 };
+
+// --- Avatar:circle / square 双形态 --------------------------------------
+
+<Avatar label="王" />;
+<Avatar label="王" shape={squareAvatarShape} />;
+// @ts-expect-error Avatar 只接受 circle/square
+<Avatar label="王" shape="rounded" />;
 
 // --- Button / IconButton / NavBar:所有操作必须显式可达 --------------------
 

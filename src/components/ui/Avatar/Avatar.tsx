@@ -3,11 +3,16 @@ import { Text, View } from 'react-native';
 import { scaleFontMetric, useColors, useFontScale } from '../../../theme';
 import { resolveImageSource } from '../../../utils/imageSource';
 import { ImageAttempt } from '../shared/ImageAttempt';
-import { paletteFor, sizingFor, styles } from './styles';
+import {
+  paletteFor,
+  resolveAvatarBorderRadius,
+  sizingFor,
+  styles,
+} from './styles';
 import type { AvatarProps } from './types';
 
 /**
- * 圆形头像 —— 5 档尺寸 × 4 种配色 × 可选图片 source。
+ * 头像 —— 2 种形态 × 5 档尺寸 × 4 种配色 × 可选图片 source。
  *
  * 合法 source 由 keyed ImageAttempt 独立持有失败状态；非法 source 或加载失败
  * 时渲染 label + variant 背景色。
@@ -15,6 +20,7 @@ import type { AvatarProps } from './types';
 export function Avatar({
   label,
   size = 'md',
+  shape = 'circle',
   variant = 'neutral',
   source,
   style,
@@ -42,7 +48,7 @@ export function Avatar({
         {
           width: dims.box,
           height: dims.box,
-          borderRadius: dims.box / 2,
+          borderRadius: resolveAvatarBorderRadius(size, shape),
           backgroundColor: palette.bg,
         },
         style,

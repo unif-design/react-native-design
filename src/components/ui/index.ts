@@ -1,5 +1,10 @@
 export { Avatar } from './Avatar';
-export type { AvatarProps, AvatarSize, AvatarVariant } from './Avatar';
+export type {
+  AvatarProps,
+  AvatarShape,
+  AvatarSize,
+  AvatarVariant,
+} from './Avatar';
 export { BlurLayer } from './BlurLayer';
 export type { BlurLayerProps } from './BlurLayer';
 export { Button } from './Button';

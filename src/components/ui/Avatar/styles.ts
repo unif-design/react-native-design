@@ -1,8 +1,8 @@
 import { StyleSheet } from 'react-native';
-import { avatar, fw, rf, type ColorTokens } from '../../../theme';
-import type { AvatarSize, AvatarVariant } from './types';
+import { avatar, fw, radius, rf, type ColorTokens } from '../../../theme';
+import type { AvatarShape, AvatarSize, AvatarVariant } from './types';
 
-/** Avatar 静态 base —— 圆形容器(borderRadius / 尺寸由 sizingFor 派生)。 */
+/** Avatar 静态 base —— 容器圆角 / 尺寸由 resolver 派生。 */
 export const styles = StyleSheet.create({
   base: {
     alignItems: 'center',
@@ -34,6 +34,17 @@ export function sizingFor(size: AvatarSize): { box: number; fs: number } {
     case 'xl':
       return { box: avatar.xl, fs: rf(20) };
   }
+}
+
+/** circle 保留直径一半的现有视觉；square 按尺寸使用既有圆角 token。 */
+export function resolveAvatarBorderRadius(
+  size: AvatarSize,
+  shape: AvatarShape
+): number {
+  if (shape === 'circle') return sizingFor(size).box / 2;
+  if (size === 'xs' || size === 'sm') return radius.xs;
+  if (size === 'xl') return radius.md;
+  return radius.sm;
 }
 
 /** Avatar 配色推导:4 种 variant → { bg, fg }。签名与 Tag/Button 的 paletteFor 一致。 */
