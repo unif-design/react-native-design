@@ -15,8 +15,9 @@
 
 ## components
 
+- [AvatarGroup 头像组](md/components/avatar-group.md) — 有序重叠头像组 —— 统一 circle/square、五档尺寸与 max 溢出；+N 可保持静态，也可由消费端接管点击结果。
 - [AvatarWithRing 圆环头像](md/components/avatar-with-ring.md) — 个人名片 hero 头像 —— 品牌橙渐变底 + 外圈 ring + 品牌橙 shadow，默认 64 直径，size / ringColor 可调。
-- [Avatar 头像](md/components/avatar.md) — 圆形 monogram 头像 —— brand / info / soft / neutral 四配色 × xs/sm/md/lg/xl 五档(18/28/32/40/56),支持图片 source 与加载失败回退 label。
+- [Avatar 头像](md/components/avatar.md) — circle/square 双形态 monogram 头像 —— brand / info / soft / neutral 四配色 × xs/sm/md/lg/xl 五档,支持图片 source 与加载失败回退 label。
 - [BlurLayer 玻璃模糊层](md/components/blur-layer.md) — BlurView + 颜色 tint 双层玻璃层 —— intensity soft(blur 10)/ strong(blur 40)，blurType 随亮 / 暗主题自动切换，纯装饰 pointerEvents='none'。
 - [Button 按钮](md/components/button.md) — 文本按钮 —— 7 variant(primary/secondary/ghost/neutral/outline/danger/text)× 3 size(sm/md/lg，高 28/36/44)，支持 block 块级、loading、leftIcon / rightIcon。
 - [Card 卡片](md/components/card.md) — 通用内容卡片 —— default(白底 + 卡片阴影)/ plain(仅圆角无阴影)，12px 圆角、14px padding，可加状态彩边 borderColor，bare 抑制内边距，fill 撑满 flex 父。

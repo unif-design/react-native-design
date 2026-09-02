@@ -1,0 +1,130 @@
+---
+sidebar_position: 3
+title: AvatarGroup 头像组
+description: "有序重叠头像组 —— 统一 circle/square、五档尺寸与 max 溢出；+N 可保持静态，也可由消费端接管点击结果。"
+---
+
+import { LiveDemo } from '@site/src/components/LiveDemo';
+import { AvatarGroup } from '@unif/react-native-design';
+
+export const teamMembers = [
+  { key: 'lin', label: '林', variant: 'brand' },
+  { key: 'wang', label: '王', variant: 'info' },
+  { key: 'li', label: '李', variant: 'soft' },
+  { key: 'zhao', label: '赵', variant: 'neutral' },
+  { key: 'chen', label: '陈', variant: 'brand' },
+  { key: 'zhou', label: '周', variant: 'info' },
+  { key: 'wu', label: '吴', variant: 'soft' },
+];
+
+# AvatarGroup 头像组
+
+按 `items` 输入顺序重叠展示多个 `Avatar`。所有成员共用同一 `size` 与 `shape`;超过 `max` 时,最后一个视觉位替换为 `+N`。组件只负责布局、计数、主题与可访问语义,打开弹层、抽屉或成员页面由消费端处理。
+
+## 实时预览
+
+<LiveDemo>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">circle · 未溢出</span>
+      <AvatarGroup items={teamMembers.slice(0, 3)} size="lg" shape="circle" max={5} />
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span className="demo-label">square · 7 人 / max=5 → 4 个头像 +3</span>
+      <AvatarGroup
+        items={teamMembers}
+        size="lg"
+        shape="square"
+        max={5}
+        onOverflowPress={() => {}}
+        overflowAccessibilityHint="由消费端打开完整成员列表"
+      />
+    </div>
+  </div>
+</LiveDemo>
+
+## 用法
+
+```tsx
+import {
+  AvatarGroup,
+  type AvatarGroupItem,
+} from '@unif/react-native-design';
+
+const members: readonly AvatarGroupItem[] = [
+  { key: 'owner', label: '王', variant: 'brand' },
+  { key: 'reviewer', label: '李', variant: 'info' },
+  { key: 'designer', label: '林', source: { uri: avatarUri } },
+  { key: 'qa', label: '赵', variant: 'soft' },
+  { key: 'ops', label: '陈', variant: 'neutral' },
+  { key: 'guest', label: '周', variant: 'info' },
+];
+
+<AvatarGroup items={members} max={5} />;
+
+<AvatarGroup
+  items={members}
+  size="lg"
+  shape="square"
+  max={5}
+  onOverflowPress={openMemberList}
+  overflowAccessibilityHint="打开全部项目成员"
+/>;
+```
+
+## 溢出规则
+
+`max` 是**最大视觉位数量**,包含 `+N` 本身:
+
+| 输入 | 输出 |
+|---|---|
+| 未传 `max` | 展示全部成员 |
+| `items.length <= max` | 展示全部成员,没有 `+N` |
+| 7 人且 `max={5}` | 前 4 个真实头像 + `+3` |
+| 空 `items` | 渲染 `null` |
+| `max` 小于 2、非整数或非有限数 | 开发环境去重诊断,并安全展示全部成员 |
+
+## API
+
+### AvatarGroupItem
+
+| 字段 | Type | 必填 | 说明 |
+|---|---|---|---|
+| `key` | `string` | 是 | 列表内唯一且稳定的身份键 |
+| `label` | `string` | 是 | Avatar 回退文字与 accessible name |
+| `source` | `ImageSourcePropType?` | 否 | 直接交给 Avatar 的图片 source |
+| `variant` | `AvatarVariant?` | 否 | 回退文字的配色变体 |
+
+### AvatarGroupProps
+
+| Prop | Type | 默认 | 说明 |
+|---|---|---|---|
+| `items` | `readonly AvatarGroupItem[]` | — | 有序成员列表 |
+| `size` | `AvatarSize?` | `'md'` | 全部头像与 `+N` 共用的尺寸 |
+| `shape` | `AvatarShape?` | `'circle'` | 全部头像与 `+N` 共用的形态 |
+| `max` | `number?` | — | 最大视觉位数量,包含 `+N` |
+| `style` | `StyleProp<ViewStyle>?` | — | 根容器附加样式 |
+| `testID` | `string?` | — | 根容器测试定位；溢出节点派生 `-overflow` |
+| `onOverflowPress` | `(() => void)?` | — | 提供后把真实溢出节点升级为 button |
+| `overflowAccessibilityLabel` | `string?` | 自动生成 | 只能与 `onOverflowPress` 同时使用；空白值回退默认名称 |
+| `overflowAccessibilityHint` | `string?` | — | 只能与 `onOverflowPress` 同时使用；描述消费端点击结果 |
+
+`AvatarGroupProps` 是严格联合：静态分支不能只传 `overflowAccessibilityLabel` 或 `overflowAccessibilityHint`;action 分支必须有 `onOverflowPress`。不提供 `children`、每成员独立尺寸/形态/点击、可调 overlap 或内置弹层。
+
+## 主题键（Tokens）
+
+| Token | 作用 |
+|---|---|
+| `avatar.xs … avatar.xl` | 五档头像和溢出位尺寸 |
+| `space.1 / 2 / 3 / 4 / 6` | 五档负向重叠距离 |
+| `radius.xs / sm / md` | square 圆角 |
+| `c.surface` | 重叠头像之间的主题分隔边 |
+| `c.primaryContainer / c.primary` | `+N` 背景与文字 |
+
+## 无障碍（a11y）
+
+- 根容器不合并为单一 accessible 节点；真实头像继续按 `items` 顺序朗读各自 `label`。
+- 静态 `+N` 没有 button role,名称为“还有 N 位成员”。
+- 提供 `onOverflowPress` 后,`+N` 使用 RNGH Pressable,role 为 button,默认名称为“查看其余 N 位成员”。
+- 小于 44pt 的可点击溢出位用 hitSlop 补足命中区,不改变头像组视觉宽度。
+- 组件不描述弹层、抽屉或跳转结果；消费端通过 `overflowAccessibilityHint` 持有该语义。

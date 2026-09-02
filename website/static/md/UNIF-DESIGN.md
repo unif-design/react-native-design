@@ -328,7 +328,7 @@ function。native-only 代码需要自定义缓动时从 `react-native-reanimate
 
 ## 10. 组件库 {#组件库}
 
-按设计系统分组。**本包(`@unif/react-native-design`)实现 39 个 ui 原子 + 4 个通用业务复合组件**;聊天 / IM 组件(Message / PromptInput 等)是同一套设计语言,但代码在 portal 仓库,这里只描述其视觉契约。
+按设计系统分组。**本包(`@unif/react-native-design`)实现 43 个 ui runtime/host + 6 个 business runtime**;聊天 / IM 组件(Message / PromptInput 等)是同一套设计语言,但代码在 portal 仓库,这里只描述其视觉契约。
 
 ### 品牌
 - **Logo** —— `<Image>` 包装容器,接 `source` prop(母版 mark 由消费者提供)；缺省 /
@@ -342,7 +342,7 @@ function。native-only 代码需要自定义缓动时从 `react-native-reanimate
   `loading` 额外上报 busy；空白 `label` 在 effect 诊断并失败关闭 action。
 - **IconButton** —— 纯图标按钮，`onPress` 与 `accessibilityLabel` 类型必填；
   空白名称在 effect 诊断并失败关闭，disabled/loading 语义与 Button 相同。
-- **Avatar** —— 单字符 monogram。variant:`brand` / `info` / `soft` /
+- **Avatar** —— circle/square 单字符 monogram。variant:`brand` / `info` / `soft` /
   `neutral`;size:`xs`(18)/ `sm`(28)/ `md`(32)/ `lg`(40)/ `xl`(56)。
   图片只接受有限正整数 asset、trim 后非空 URI object，或非空且逐项合法的 URI
   source 数组；nested cycle/function/symbol/bigint/非有限数等 invalid source
@@ -355,6 +355,9 @@ function。native-only 代码需要自定义缓动时从 `react-native-reanimate
   `A₁ → B → A₂` 后迟到的 A₁ error 不能污染 A₂。仓内
   `yarn runtime:image-fixture` + RuntimeApiScreen 提供 request / abort /
   release 可观测的人工验收入口；真实平台未运行前仍记 BLOCKED。
+- **AvatarGroup** —— 按 items 顺序重叠 Avatar,统一 circle/square 与五档 size；
+  `max` 包含 `+N` 溢出位。静态 `+N` 只展示计数；提供 `onOverflowPress` 后升级
+  为具名 button,弹层 / 抽屉 / 跳转仍由消费端持有。
 - **Tag** —— 状态徽章,5 语义 × 2 尺寸(`md` / `lg`)。
 - **Chip** —— 胶囊形可选中 pill;`selected` 切主色边框 / 文本;可带 leading / trailing。Suggestion 底层。
 - **Confirm** —— 命令式 `confirm(): Promise<boolean>` + `<ConfirmHost />`,高风险二次确认(单 active owner + 栈式接管:后挂载的 Host 接管、卸载自动归还,同一时间只有 1 个 Host 在收事件、1 个未决 active entry；裸 RN Modal,不依赖 @gorhom)。自定义确认/取消文案先 trim，空白值回退“确认”/“取消”。
@@ -474,10 +477,10 @@ src/
 │   ├── useThemedStyles.ts   ← useThemedStyles(maker),含 useMemo([colors, shadow, fontScale, maker]) 缓存;出口按 fontScale 缩放 fontSize / lineHeight / letterSpacing(=1 恒等)
 │   └── index.ts             ← barrel
 │
-├── components/ui/           ← 40 个原子组件(Avatar / Button / Card / Cell / CircularProgress / Icon / Input / NavBar / Ribbon / Toast / ...)
+├── components/ui/           ← 43 个 public runtime/host(Avatar / AvatarGroup / Button / Card / Cell / CircularProgress / Icon / Input / NavBar / Ribbon / Toast / ...)
 │   └── index.ts             ← barrel(从 @unif/react-native-design 包根导出)
 │
-└── components/business/     ← 4 个通用业务复合(AvatarWithRing / Decorations / GlassStats / VersionPill)
+└── components/business/     ← 6 个 public runtime(AvatarWithRing / 三个 Decorations / GlassStats / VersionPill)
     ├── useSvgId.ts          ← SVG ID sanitizer/builder + public useSvgId hook
     └── index.ts             ← barrel(仅公开 useSvgId，不公开 pure test seam)
 ```
