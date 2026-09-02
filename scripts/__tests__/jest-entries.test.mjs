@@ -138,13 +138,15 @@ test('@react-native/jest-preset 内部依赖断裂时原样 rethrow,不误诊成
   );
 });
 
-test('resolver 组合了 RN 与 worklets 两个上游', () => {
+test('resolver 组合 RN / worklets，并让 Reanimated 4.6 Jest 避开 native 初始化器', () => {
   const source = readFileSync(
     path.join(repositoryRoot, 'jest-resolver.js'),
     'utf8'
   );
   assert.ok(source.includes('@react-native/jest-preset/jest/resolver'));
   assert.ok(source.includes('react-native-worklets'));
+  assert.ok(source.includes('react-native-reanimated'));
+  assert.ok(source.includes("request === './initializers'"));
 });
 
 test('setup 是 CJS 且只接线 design 自己的 peer', () => {
