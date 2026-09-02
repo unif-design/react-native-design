@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.30.1](https://github.com/unif-design/react-native-design/compare/v0.30.0...v0.30.1) (2026-09-02)
+
+
+### Bug Fixes
+
+* 修复 Reanimated 4.6 Jest 接线 ([#130](https://github.com/unif-design/react-native-design/issues/130)) ([0146f74](https://github.com/unif-design/react-native-design/commit/0146f74950472b37cdf6cda228f30bf77acb8084))
+
 # [0.30.0](https://github.com/unif-design/react-native-design/compare/v0.29.0...v0.30.0) (2026-09-02)
 
 
