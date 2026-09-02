@@ -91,7 +91,7 @@
     "@react-native/jest-preset": "0.87.1",
     "@react-native/metro-config": "0.87.1",
     "@release-it/conventional-changelog": "^11.0.0",
-    "@sbaiahmed1/react-native-blur": "^6.0.1",
+    "@sbaiahmed1/react-native-blur": "6.0.1",
     "@types/react": "^19.2.0",
     "commitlint": "^21.0.1",
     "del-cli": "^7.0.0",

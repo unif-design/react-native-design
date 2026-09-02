@@ -5567,7 +5567,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sbaiahmed1/react-native-blur@npm:6.0.1, @sbaiahmed1/react-native-blur@npm:^6.0.1":
+"@sbaiahmed1/react-native-blur@npm:6.0.1":
   version: 6.0.1
   resolution: "@sbaiahmed1/react-native-blur@npm:6.0.1"
   peerDependencies:
@@ -6722,7 +6722,7 @@ __metadata:
     "@gorhom/bottom-sheet": "npm:^5.2.14"
     "@mdx-js/react": "npm:^3.0.0"
     "@react-native/metro-config": "npm:0.87.1"
-    "@sbaiahmed1/react-native-blur": "npm:^6.0.1"
+    "@sbaiahmed1/react-native-blur": "npm:6.0.1"
     "@types/react": "npm:^19.2.0"
     "@unif/react-native-design": "workspace:*"
     clsx: "npm:^2.0.0"
@@ -6758,7 +6758,7 @@ __metadata:
     "@react-native/jest-preset": "npm:0.87.1"
     "@react-native/metro-config": "npm:0.87.1"
     "@release-it/conventional-changelog": "npm:^11.0.0"
-    "@sbaiahmed1/react-native-blur": "npm:^6.0.1"
+    "@sbaiahmed1/react-native-blur": "npm:6.0.1"
     "@types/react": "npm:^19.2.0"
     commitlint: "npm:^21.0.1"
     del-cli: "npm:^7.0.0"
