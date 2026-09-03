@@ -27,7 +27,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
-      # setup action 命中 node_modules cache 时会跳过安装；这里仍要验证当前 yarn config 与 lock。
+      # setup action 已始终执行 immutable install；这里保留显式检查，作为 showcase workflow 自身的配置契约。
       - name: Verify immutable install
         run: yarn install --immutable
 

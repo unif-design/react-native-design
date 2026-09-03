@@ -3610,7 +3610,7 @@ function verifyWorkflowContract(root) {
   const digest = createHash('sha256').update(sharedCi).digest('hex');
   if (
     digest !==
-    '83e9a350da8f7e89d5c196001fe1ce686fb6ae9d9f4fc582a8fbcfc723cf75fa'
+    '4ba9f4d7b1fd4b2c00bdfaba0f46dd35db4b62226d56704a943431433321def9'
   ) {
     failVerification(
       'SHARED_CI_DIGEST',
@@ -3752,6 +3752,16 @@ function verifyTurboContract(root) {
     turbo.tasks['@unif/react-native-design-example#build:android'].inputs;
   const iosInputs =
     turbo.tasks['@unif/react-native-design-example#build:ios'].inputs;
+  const requiredNativeExclusions = [
+    '!$TURBO_ROOT$/src/__tests__/**',
+    '!$TURBO_ROOT$/src/**/__tests__/**',
+    '!$TURBO_ROOT$/src/*.test.*',
+    '!$TURBO_ROOT$/src/**/*.test.*',
+    '!$TURBO_ROOT$/example/src/__tests__/**',
+    '!$TURBO_ROOT$/example/src/**/__tests__/**',
+    '!$TURBO_ROOT$/example/src/*.test.*',
+    '!$TURBO_ROOT$/example/src/**/*.test.*',
+  ];
   const missingTestInputs = requiredTestInputs.filter(
     (input) => !testInputs.includes(input)
   );
@@ -3760,6 +3770,20 @@ function verifyTurboContract(root) {
       'TURBO_INPUTS',
       `example test task 缺少直接 gate inputs: ${missingTestInputs.join(', ')}`
     );
+  }
+  for (const [taskName, inputs] of [
+    ['build:android', androidInputs],
+    ['build:ios', iosInputs],
+  ]) {
+    const missingExclusions = requiredNativeExclusions.filter(
+      (input) => !inputs.includes(input)
+    );
+    if (missingExclusions.length > 0) {
+      failVerification(
+        'TURBO_INPUTS',
+        `${taskName} 缺少 test-only 排除 inputs: ${missingExclusions.join(', ')}`
+      );
+    }
   }
   const androidValid =
     androidInputs.includes('$TURBO_ROOT$/example/android/**') &&

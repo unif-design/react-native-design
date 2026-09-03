@@ -3841,7 +3841,7 @@ test('repo-specific workflow 使用强并集 gate 且共享 CI digest 不漂移'
   const sharedCi = read('.github/workflows/ci.yml');
   assert.equal(
     createHash('sha256').update(sharedCi).digest('hex'),
-    '83e9a350da8f7e89d5c196001fe1ce686fb6ae9d9f4fc582a8fbcfc723cf75fa'
+    '4ba9f4d7b1fd4b2c00bdfaba0f46dd35db4b62226d56704a943431433321def9'
   );
 
   const workflow = read('.github/workflows/example-showcase.yml');
@@ -3946,6 +3946,16 @@ test('Turbo 只定义 package-qualified example tasks 并隔离双端 native inp
   const ios = turbo.tasks['@unif/react-native-design-example#build:ios'].inputs;
   const testInputs =
     turbo.tasks['@unif/react-native-design-example#test'].inputs;
+  const requiredNativeExclusions = [
+    '!$TURBO_ROOT$/src/__tests__/**',
+    '!$TURBO_ROOT$/src/**/__tests__/**',
+    '!$TURBO_ROOT$/src/*.test.*',
+    '!$TURBO_ROOT$/src/**/*.test.*',
+    '!$TURBO_ROOT$/example/src/__tests__/**',
+    '!$TURBO_ROOT$/example/src/**/__tests__/**',
+    '!$TURBO_ROOT$/example/src/*.test.*',
+    '!$TURBO_ROOT$/example/src/**/*.test.*',
+  ];
   for (const directInput of [
     '$TURBO_ROOT$/scripts/run-example-jest.mjs',
     '$TURBO_ROOT$/scripts/verify-example-showcase.mjs',
@@ -3974,6 +3984,17 @@ test('Turbo 只定义 package-qualified example tasks 并隔离双端 native inp
   assert.ok(ios.includes('!$TURBO_ROOT$/example/ios/**/DerivedData/**'));
   assert.ok(ios.includes('!$TURBO_ROOT$/example/ios/.xcode.env.local'));
   assert.ok(!ios.some((input) => input.includes('/example/android')));
+  for (const [taskName, inputs] of [
+    ['build:android', android],
+    ['build:ios', ios],
+  ]) {
+    for (const exclusion of requiredNativeExclusions) {
+      assert.ok(
+        inputs.includes(exclusion),
+        `${taskName} 缺少 test-only 排除 input ${exclusion}`
+      );
+    }
+  }
 });
 
 test('README mutation gate 拒绝缺少安装、Pods、Metro、build、scene、theme 与 a11y', () => {
@@ -4371,6 +4392,15 @@ test('Turbo mutation gate 拒绝 task、深层 source 与平台隔离漂移', ()
         source.replace(
           '        "$TURBO_ROOT$/example/android/**",',
           '        "$TURBO_ROOT$/example/android/**",\n        "$TURBO_ROOT$/example/ios/**",'
+        ),
+    },
+    {
+      label: 'Android task 漏 test-only 排除',
+      code: 'TURBO_INPUTS',
+      mutate: (source) =>
+        source.replace(
+          '        "!$TURBO_ROOT$/example/src/__tests__/**",\n',
+          ''
         ),
     },
     ...[
