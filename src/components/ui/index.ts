@@ -9,6 +9,8 @@ export { AvatarGroup } from './AvatarGroup';
 export type { AvatarGroupItem, AvatarGroupProps } from './AvatarGroup';
 export { BlurLayer } from './BlurLayer';
 export type { BlurLayerProps } from './BlurLayer';
+export { BorderBeam } from './BorderBeam';
+export type { BorderBeamProps } from './BorderBeam';
 export { Button } from './Button';
 export type { ButtonProps, ButtonSize, ButtonVariant } from './Button';
 export { Card } from './Card';

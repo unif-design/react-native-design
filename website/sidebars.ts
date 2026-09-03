@@ -43,6 +43,7 @@ const sidebars: SidebarsConfig = {
         'components/tag',
         'components/thumbnail',
         'components/loading',
+        'components/border-beam',
         'components/pulse',
         'components/reveal',
         'components/status-dot',

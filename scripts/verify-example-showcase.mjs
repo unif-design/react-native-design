@@ -50,6 +50,7 @@ const expectedUiComponents = [
   'Avatar',
   'AvatarGroup',
   'BlurLayer',
+  'BorderBeam',
   'Button',
   'Card',
   'Carousel',
@@ -105,6 +106,7 @@ const expectedComponentsByScene = {
   foundation: ['Icon'],
   actions: ['Button', 'IconButton', 'Chip', 'Tag', 'StatusDot'],
   feedback: [
+    'BorderBeam',
     'CircularProgress',
     'Empty',
     'Skeleton',
@@ -206,6 +208,16 @@ const expectedStateIdsByComponent = {
     'circular-progress.a11y-value',
   ],
   Spinner: ['spinner.sizes', 'spinner.color', 'spinner.stroke-width'],
+  BorderBeam: [
+    'border-beam.default',
+    'border-beam.inactive',
+    'border-beam.color',
+    'border-beam.duration',
+    'border-beam.line-width',
+    'border-beam.size',
+    'border-beam.radius',
+    'border-beam.reduced-motion',
+  ],
   Pulse: [
     'pulse.default',
     'pulse.opacity-range',
@@ -1830,9 +1842,7 @@ function verifyRuntimeAndNativeContract(root) {
     /namespace "unif\.reactnativedesign\.example"/u.test(appGradle) &&
     /applicationId "unif\.reactnativedesign\.example"/u.test(appGradle) &&
     /autolinkLibrariesWithApp\(\)/u.test(appGradle) &&
-    /getDefaultProguardFile\("proguard-android\.txt"\)/u.test(
-      appGradle
-    ) &&
+    /getDefaultProguardFile\("proguard-android\.txt"\)/u.test(appGradle) &&
     /buildToolsVersion = "36\.0\.0"/u.test(rootGradle) &&
     /minSdkVersion = 24/u.test(rootGradle) &&
     /compileSdkVersion = 36/u.test(rootGradle) &&

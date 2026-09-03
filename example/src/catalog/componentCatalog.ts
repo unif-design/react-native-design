@@ -15,6 +15,7 @@ export const publicComponentIds = [
   'Avatar',
   'AvatarGroup',
   'BlurLayer',
+  'BorderBeam',
   'Button',
   'Card',
   'Carousel',
@@ -110,6 +111,20 @@ export const componentCatalog = [
     states: ['确定进度', '中央百分比', '无障碍值'],
   },
   { id: 'Spinner', scene: 'feedback', states: ['尺寸', '颜色', '描边宽度'] },
+  {
+    id: 'BorderBeam',
+    scene: 'feedback',
+    states: [
+      '默认',
+      '停用',
+      '颜色',
+      '时长',
+      '线宽',
+      '流光长度',
+      '圆角',
+      '减少动态效果',
+    ],
+  },
   {
     id: 'Pulse',
     scene: 'feedback',

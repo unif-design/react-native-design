@@ -2655,6 +2655,118 @@ export const showcaseStateContract = [
     },
   },
   {
+    id: 'border-beam.default',
+    component: 'BorderBeam',
+    scene: 'feedback',
+    label: '默认',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [{ testID: 'feedback-border-beam-default', props: {} }],
+    },
+  },
+  {
+    id: 'border-beam.inactive',
+    component: 'BorderBeam',
+    scene: 'feedback',
+    label: '停用',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'feedback-border-beam-inactive',
+          props: { active: false },
+        },
+      ],
+    },
+  },
+  {
+    id: 'border-beam.color',
+    component: 'BorderBeam',
+    scene: 'feedback',
+    label: '颜色',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'feedback-border-beam-custom',
+          props: {},
+          presentProps: ['color'],
+        },
+      ],
+    },
+  },
+  {
+    id: 'border-beam.duration',
+    component: 'BorderBeam',
+    scene: 'feedback',
+    label: '时长',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'feedback-border-beam-custom',
+          props: { duration: 2400 },
+        },
+      ],
+    },
+  },
+  {
+    id: 'border-beam.line-width',
+    component: 'BorderBeam',
+    scene: 'feedback',
+    label: '线宽',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'feedback-border-beam-custom',
+          props: { lineWidth: 2 },
+        },
+      ],
+    },
+  },
+  {
+    id: 'border-beam.size',
+    component: 'BorderBeam',
+    scene: 'feedback',
+    label: '流光长度',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'feedback-border-beam-custom',
+          props: { size: 36 },
+        },
+      ],
+    },
+  },
+  {
+    id: 'border-beam.radius',
+    component: 'BorderBeam',
+    scene: 'feedback',
+    label: '圆角',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'feedback-border-beam-custom',
+          props: {},
+          presentProps: ['borderRadius'],
+        },
+      ],
+    },
+  },
+  {
+    id: 'border-beam.reduced-motion',
+    component: 'BorderBeam',
+    scene: 'feedback',
+    label: '减少动态效果',
+    witness: {
+      kind: 'runtime-api',
+      calls: ['usePrefersReducedMotion'],
+    },
+  },
+  {
     id: 'pulse.default',
     component: 'Pulse',
     scene: 'feedback',

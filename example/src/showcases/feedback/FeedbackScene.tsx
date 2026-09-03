@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import {
+  BorderBeam,
   BlurLayer,
   Button,
   CircularProgress,
@@ -96,6 +97,18 @@ const makeStyles = (colors: ColorTokens) =>
       alignItems: 'center',
       flexDirection: 'row',
       gap: space['4'],
+    },
+    borderBeamSpecimen: {
+      backgroundColor: colors.surfaceContainer,
+      borderRadius: radius.md,
+      minWidth: 112,
+      paddingHorizontal: space['4'],
+      paddingVertical: space['5'],
+    },
+    borderBeamText: {
+      color: colors.foreground,
+      fontSize: type.sm,
+      textAlign: 'center',
     },
     blurContainer: {
       alignItems: 'center',
@@ -262,6 +275,40 @@ export function FeedbackScene(): React.JSX.Element {
               testID="feedback-circular-progress-label"
             />
           </View>
+          <View style={styles.row}>
+            <BorderBeam
+              style={styles.borderBeamSpecimen}
+              testID="feedback-border-beam-default"
+            >
+              <Text style={styles.borderBeamText}>默认流光</Text>
+            </BorderBeam>
+            <BorderBeam
+              active={false}
+              style={styles.borderBeamSpecimen}
+              testID="feedback-border-beam-inactive"
+            >
+              <Text style={styles.borderBeamText}>已停用</Text>
+            </BorderBeam>
+            <View
+              accessible
+              accessibilityRole="progressbar"
+              accessibilityLabel="图片处理示例"
+              accessibilityState={{ busy: true }}
+            >
+              <BorderBeam
+                color={colors.success}
+                duration={2400}
+                lineWidth={2}
+                size={36}
+                borderRadius={radius.md}
+                style={styles.borderBeamSpecimen}
+                testID="feedback-border-beam-custom"
+              >
+                <Text style={styles.borderBeamText}>图片处理中</Text>
+              </BorderBeam>
+            </View>
+          </View>
+          <Text style={styles.fact}>流光遵循系统减少动态效果设置。</Text>
         </SectionCard>
 
         <SectionCard title="动态效果">
@@ -269,7 +316,7 @@ export function FeedbackScene(): React.JSX.Element {
             减少动态效果：{reducedMotion ? '是' : '否'}
           </Text>
           <Text style={styles.fact}>
-            脉冲与淡入遵循系统设置；加载指示仍保持旋转。
+            脉冲、流光与淡入遵循系统设置；加载指示仍保持旋转。
           </Text>
           <View style={styles.row}>
             <Pulse testID="feedback-pulse-default">
