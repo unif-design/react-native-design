@@ -1120,7 +1120,7 @@ CSS `saturate(N%)` 部分 RN BlurView 无对应 prop,在我们项目暂不实现
 
 # BorderBeam 边框流光
 
-`BorderBeam` 在既有内容外围叠加一段沿边缘循环移动的流光。它只负责视觉反馈，不改变内容布局，也不承载加载、错误、焦点或选中语义。
+`BorderBeam` 在既有内容外围叠加一段沿边缘循环移动的渐变尾迹流光。流光由同相位、不同长度与透明度的描边叠加而成，前端更亮、尾部渐隐。它只负责视觉反馈，不改变内容布局，也不承载加载、错误、焦点或选中语义。
 
 ## 实时预览
 
@@ -1198,6 +1198,7 @@ function ProcessingImage() {
 
 - native 由 Reanimated worklet 在 UI 线程持续更新 SVG `strokeDashoffset`。
 - Web 由静态 CSS keyframes 驱动，JS 只在布局或 props 变化时更新路径长度和时长。
+- 两端使用相同的四层渐变尾迹，不额外占用内容布局空间。
 - 系统开启“减少动态效果”时，流光会隐藏，原内容保持显示。
 
 ## 无障碍与使用边界

@@ -11,16 +11,16 @@ type Effect = () => void | (() => void);
 
 function loadWebBorderBeam() {
   const effects: Effect[] = [];
-  const style = {
+  const styles = Array.from({ length: 4 }, () => ({
     animation: '',
     setProperty: jest.fn(),
-  };
-  const rectRef = { current: { style } };
+  }));
+  const rectRefs = { current: styles.map((style) => ({ style })) };
   const actualReact = jest.requireActual<typeof import('react')>('react');
   jest.doMock('react', () => ({
     ...actualReact,
     useEffect: (effect: Effect) => effects.push(effect),
-    useRef: () => rectRef,
+    useRef: () => rectRefs,
     useState: () => [{ width: 76, height: 76 }, jest.fn()],
   }));
   jest.doMock('react-native', () => ({
@@ -44,7 +44,7 @@ function loadWebBorderBeam() {
   const BorderBeam =
     require('../../../../src/components/ui/BorderBeam/BorderBeam.web')
       .BorderBeam as typeof import('../../../../src/components/ui/BorderBeam/BorderBeam.web').BorderBeam;
-  return { BorderBeam, effects, style };
+  return { BorderBeam, effects, styles };
 }
 
 beforeEach(() => {
@@ -61,17 +61,19 @@ afterEach(() => {
 
 describe('BorderBeam web', () => {
   test('用 CSS keyframes 驱动流光，不在 JS 帧循环中更新', () => {
-    const { BorderBeam, effects, style } = loadWebBorderBeam();
+    const { BorderBeam, effects, styles } = loadWebBorderBeam();
 
     BorderBeam({ children: '内容', duration: 2400 });
     effects.forEach((effect) => effect());
 
-    expect(style.setProperty).toHaveBeenCalledWith(
-      '--unif-border-beam-path',
-      expect.stringMatching(/px$/)
-    );
-    expect(style.animation).toBe(
-      'unif-border-beam-flow 2400ms linear infinite'
-    );
+    styles.forEach((style) => {
+      expect(style.setProperty).toHaveBeenCalledWith(
+        '--unif-border-beam-path',
+        expect.stringMatching(/px$/)
+      );
+      expect(style.animation).toBe(
+        'unif-border-beam-flow 2400ms linear infinite'
+      );
+    });
   });
 });

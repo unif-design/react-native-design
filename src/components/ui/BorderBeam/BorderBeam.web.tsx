@@ -6,7 +6,11 @@ import Svg, { Rect } from 'react-native-svg';
 import { radius, useColors, usePrefersReducedMotion } from '../../../theme';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { normalizeBorderBeam } from './normalizeBorderBeam';
-import { borderBeamGeometry, EMPTY_BORDER_BEAM_LAYOUT } from './shared';
+import {
+  borderBeamGeometry,
+  borderBeamTrail,
+  EMPTY_BORDER_BEAM_LAYOUT,
+} from './shared';
 import { styles } from './styles';
 import type { BorderBeamProps } from './types';
 
@@ -38,7 +42,7 @@ export function BorderBeam({
   const colors = useColors();
   const reducedMotion = usePrefersReducedMotion();
   const [layout, setLayout] = useState(EMPTY_BORDER_BEAM_LAYOUT);
-  const rectRef = useRef<any>(null);
+  const rectRefs = useRef<any[]>([]);
   const normalized = normalizeBorderBeam({
     duration,
     lineWidth,
@@ -46,20 +50,25 @@ export function BorderBeam({
     borderRadius,
   });
   const geometry = borderBeamGeometry({ layout, ...normalized });
+  const trail = borderBeamTrail(geometry.beamLength);
   const showVisual = active && !reducedMotion && geometry.perimeter > 0;
 
   useEffect(() => {
     if (!showVisual) return;
     ensureKeyframes();
-    const node = rectRef.current;
-    if (!node?.style) return;
-    node.style.setProperty(
-      '--unif-border-beam-path',
-      `${geometry.perimeter}px`
-    );
-    node.style.animation = `unif-border-beam-flow ${normalized.duration}ms linear infinite`;
+    const nodes = rectRefs.current.filter((node) => node?.style);
+    if (nodes.length === 0) return;
+    nodes.forEach((node) => {
+      node.style.setProperty(
+        '--unif-border-beam-path',
+        `${geometry.perimeter}px`
+      );
+      node.style.animation = `unif-border-beam-flow ${normalized.duration}ms linear infinite`;
+    });
     return () => {
-      node.style.animation = '';
+      nodes.forEach((node) => {
+        node.style.animation = '';
+      });
     };
   }, [geometry.perimeter, normalized.duration, showVisual]);
 
@@ -87,23 +96,29 @@ export function BorderBeam({
       {showVisual ? (
         <View pointerEvents="none" style={styles.visual} {...A11Y_HIDDEN_PROPS}>
           <Svg width={layout.width} height={layout.height}>
-            <Rect
-              ref={rectRef}
-              x={normalized.lineWidth / 2}
-              y={normalized.lineWidth / 2}
-              width={geometry.rectWidth}
-              height={geometry.rectHeight}
-              rx={geometry.radius}
-              ry={geometry.radius}
-              fill="none"
-              stroke={color ?? colors.primary}
-              strokeWidth={normalized.lineWidth}
-              strokeLinecap="round"
-              strokeDasharray={[
-                geometry.beamLength,
-                Math.max(0, geometry.perimeter - geometry.beamLength),
-              ]}
-            />
+            {trail.map((layer, index) => (
+              <Rect
+                key={`${layer.length}-${layer.opacity}`}
+                ref={(node) => {
+                  rectRefs.current[index] = node;
+                }}
+                x={normalized.lineWidth / 2}
+                y={normalized.lineWidth / 2}
+                width={geometry.rectWidth}
+                height={geometry.rectHeight}
+                rx={geometry.radius}
+                ry={geometry.radius}
+                fill="none"
+                stroke={color ?? colors.primary}
+                strokeOpacity={layer.opacity}
+                strokeWidth={normalized.lineWidth}
+                strokeLinecap="round"
+                strokeDasharray={[
+                  layer.length,
+                  Math.max(0, geometry.perimeter - layer.length),
+                ]}
+              />
+            ))}
           </Svg>
         </View>
       ) : null}

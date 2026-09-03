@@ -15,7 +15,11 @@ import Svg, { Rect } from 'react-native-svg';
 import { radius, useColors, usePrefersReducedMotion } from '../../../theme';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { normalizeBorderBeam } from './normalizeBorderBeam';
-import { borderBeamGeometry, EMPTY_BORDER_BEAM_LAYOUT } from './shared';
+import {
+  borderBeamGeometry,
+  borderBeamTrail,
+  EMPTY_BORDER_BEAM_LAYOUT,
+} from './shared';
 import { styles } from './styles';
 import type { BorderBeamProps } from './types';
 
@@ -48,6 +52,7 @@ export function BorderBeam({
     borderRadius,
   });
   const geometry = borderBeamGeometry({ layout, ...normalized });
+  const trail = borderBeamTrail(geometry.beamLength);
   const dashOffset = useSharedValue(0);
   const showVisual = active && !reducedMotion && geometry.perimeter > 0;
 
@@ -96,23 +101,27 @@ export function BorderBeam({
       {showVisual ? (
         <View pointerEvents="none" style={styles.visual} {...A11Y_HIDDEN_PROPS}>
           <Svg width={layout.width} height={layout.height}>
-            <AnimatedRect
-              animatedProps={animatedProps}
-              x={normalized.lineWidth / 2}
-              y={normalized.lineWidth / 2}
-              width={geometry.rectWidth}
-              height={geometry.rectHeight}
-              rx={geometry.radius}
-              ry={geometry.radius}
-              fill="none"
-              stroke={color ?? colors.primary}
-              strokeWidth={normalized.lineWidth}
-              strokeLinecap="round"
-              strokeDasharray={[
-                geometry.beamLength,
-                Math.max(0, geometry.perimeter - geometry.beamLength),
-              ]}
-            />
+            {trail.map((layer) => (
+              <AnimatedRect
+                key={`${layer.length}-${layer.opacity}`}
+                animatedProps={animatedProps}
+                x={normalized.lineWidth / 2}
+                y={normalized.lineWidth / 2}
+                width={geometry.rectWidth}
+                height={geometry.rectHeight}
+                rx={geometry.radius}
+                ry={geometry.radius}
+                fill="none"
+                stroke={color ?? colors.primary}
+                strokeOpacity={layer.opacity}
+                strokeWidth={normalized.lineWidth}
+                strokeLinecap="round"
+                strokeDasharray={[
+                  layer.length,
+                  Math.max(0, geometry.perimeter - layer.length),
+                ]}
+              />
+            ))}
           </Svg>
         </View>
       ) : null}
