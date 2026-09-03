@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.31.0](https://github.com/unif-design/react-native-design/compare/v0.30.1...v0.31.0) (2026-09-03)
+
+
+### Features
+
+* 新增 BorderBeam 边框流光组件 ([#131](https://github.com/unif-design/react-native-design/issues/131)) ([b56d5fc](https://github.com/unif-design/react-native-design/commit/b56d5fc6cf849f2630ecced6c763bedf02c248cb))
+
 ## [0.30.1](https://github.com/unif-design/react-native-design/compare/v0.30.0...v0.30.1) (2026-09-02)
 
 
