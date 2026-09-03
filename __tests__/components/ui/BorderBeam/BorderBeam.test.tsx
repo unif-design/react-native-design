@@ -95,6 +95,19 @@ describe('BorderBeam', () => {
       'importantForAccessibility': 'no-hide-descendants',
       'aria-hidden': true,
     });
+
+    const [svg] = childrenOf(visual) as [ReactElement<ElementProps>];
+    const layers = childrenOf(svg) as ReactElement<{
+      strokeDasharray: [number, number];
+      strokeOpacity: number;
+    }>[];
+    expect(layers).toHaveLength(4);
+    expect(layers.map((layer) => layer.props.strokeOpacity)).toEqual([
+      0.12, 0.24, 0.42, 0.88,
+    ]);
+    expect(layers.map((layer) => layer.props.strokeDasharray[0])).toEqual([
+      40, 30, 20, 10,
+    ]);
   });
 
   test('active=false 时不渲染装饰层', () => {

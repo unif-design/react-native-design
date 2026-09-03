@@ -39,7 +39,7 @@
     "mdPath": "md/components/border-beam.md",
     "slug": "/components/border-beam",
     "section": "components",
-    "description": "沿内容边缘循环移动的装饰性流光，可用于图片处理等短时忙碌状态；native 使用 Reanimated，Web 使用 CSS keyframes。"
+    "description": "沿内容边缘循环移动的渐变尾迹流光，可用于图片处理等短时忙碌状态；native 使用 Reanimated，Web 使用 CSS keyframes。"
   },
   {
     "title": "Button 按钮",
