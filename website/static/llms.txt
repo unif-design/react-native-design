@@ -19,6 +19,7 @@
 - [AvatarWithRing 圆环头像](md/components/avatar-with-ring.md) — 个人名片 hero 头像 —— 品牌橙渐变底 + 外圈 ring + 品牌橙 shadow，默认 64 直径，size / ringColor 可调。
 - [Avatar 头像](md/components/avatar.md) — circle/square 双形态 monogram 头像 —— brand / info / soft / neutral 四配色 × xs/sm/md/lg/xl 五档,支持图片 source 与加载失败回退 label。
 - [BlurLayer 玻璃模糊层](md/components/blur-layer.md) — BlurView + 颜色 tint 双层玻璃层 —— intensity soft(blur 10)/ strong(blur 40)，blurType 随亮 / 暗主题自动切换，纯装饰 pointerEvents='none'。
+- [BorderBeam 边框流光](md/components/border-beam.md) — 沿内容边缘循环移动的装饰性流光，可用于图片处理等短时忙碌状态；native 使用 Reanimated，Web 使用 CSS keyframes。
 - [Button 按钮](md/components/button.md) — 文本按钮 —— 7 variant(primary/secondary/ghost/neutral/outline/danger/text)× 3 size(sm/md/lg，高 28/36/44)，支持 block 块级、loading、leftIcon / rightIcon。
 - [Card 卡片](md/components/card.md) — 通用内容卡片 —— default(白底 + 卡片阴影)/ plain(仅圆角无阴影)，12px 圆角、14px padding，可加状态彩边 borderColor，bare 抑制内边距，fill 撑满 flex 父。
 - [Carousel 轮播](md/components/carousel.md) — 包装 react-native-reanimated-carousel 的薄壳轮播 —— 泛型 data、严格 display/action slide、reduced-motion autoplay、内置 dot indicator。

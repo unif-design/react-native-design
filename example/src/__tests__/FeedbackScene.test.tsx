@@ -9,6 +9,7 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 import {
+  BorderBeam,
   BlurLayer,
   CircularProgress,
   Empty,
@@ -246,6 +247,55 @@ test('Feedback 展示 Empty、Skeleton、确定进度与具备外层加载语义
   spinnerCoverage.expectComplete();
 });
 
+test('BorderBeam 展示默认、停用和自定义边框流光，业务加载语义由外层承载', () => {
+  render(<App />);
+  enterFeedback();
+  const coverage = createShowcaseStateCoverage('BorderBeam');
+
+  expect(
+    componentByTestID(BorderBeam, 'feedback-border-beam-default').props
+  ).toMatchObject({});
+  coverage.prove('border-beam.default', () => {
+    expect(screen.getByText('默认流光')).toBeOnTheScreen();
+  });
+
+  expect(
+    componentByTestID(BorderBeam, 'feedback-border-beam-inactive').props
+  ).toMatchObject({ active: false });
+  coverage.prove('border-beam.inactive', () => {
+    expect(screen.getByText('已停用')).toBeOnTheScreen();
+  });
+
+  expect(
+    componentByTestID(BorderBeam, 'feedback-border-beam-custom').props
+  ).toMatchObject({
+    color: expect.any(String),
+    duration: 2400,
+    lineWidth: 2,
+    size: 36,
+    borderRadius: expect.any(Number),
+  });
+  coverage.prove(
+    'border-beam.color',
+    'border-beam.duration',
+    'border-beam.line-width',
+    'border-beam.size',
+    'border-beam.radius',
+    () => {
+      expect(screen.getByText('图片处理中')).toBeOnTheScreen();
+    }
+  );
+  expect(
+    screen.getByRole('progressbar', { name: '图片处理示例' }).props
+  ).toMatchObject({ accessibilityState: { busy: true } });
+  coverage.prove('border-beam.reduced-motion', () => {
+    expect(
+      screen.getByText('流光遵循系统减少动态效果设置。')
+    ).toBeOnTheScreen();
+  });
+  coverage.expectComplete();
+});
+
 test('Pulse、PulseDot、usePulse 与 Reveal 使用合法 options，并保留子内容语义', () => {
   const pulseCoverage = createShowcaseStateCoverage('Pulse');
   const pulseDotCoverage = createShowcaseStateCoverage('PulseDot');
@@ -420,7 +470,7 @@ test('系统减少动态效果开启时 Pulse、PulseDot 与 Reveal 真实停用
 
   expect(screen.getByText('减少动态效果：是')).toBeOnTheScreen();
   expect(
-    screen.getByText('脉冲与淡入遵循系统设置；加载指示仍保持旋转。')
+    screen.getByText('脉冲、流光与淡入遵循系统设置；加载指示仍保持旋转。')
   ).toBeOnTheScreen();
   for (const [testID, opacity] of [
     ['feedback-pulse-default', 1],

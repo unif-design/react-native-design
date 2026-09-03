@@ -35,6 +35,13 @@
     "description": "BlurView + 颜色 tint 双层玻璃层 —— intensity soft(blur 10)/ strong(blur 40)，blurType 随亮 / 暗主题自动切换，纯装饰 pointerEvents='none'。"
   },
   {
+    "title": "BorderBeam 边框流光",
+    "mdPath": "md/components/border-beam.md",
+    "slug": "/components/border-beam",
+    "section": "components",
+    "description": "沿内容边缘循环移动的装饰性流光，可用于图片处理等短时忙碌状态；native 使用 Reanimated，Web 使用 CSS keyframes。"
+  },
+  {
     "title": "Button 按钮",
     "mdPath": "md/components/button.md",
     "slug": "/components/button",
