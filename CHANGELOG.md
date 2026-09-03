@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.31.2](https://github.com/unif-design/react-native-design/compare/v0.31.1...v0.31.2) (2026-09-03)
+
+
+### Bug Fixes
+
+* **BorderBeam:** 优化渐变流光尾迹 ([#134](https://github.com/unif-design/react-native-design/issues/134)) ([f0d372a](https://github.com/unif-design/react-native-design/commit/f0d372a829e3eacfcbe0ff47caf300af13acaea1))
+
 ## [0.31.1](https://github.com/unif-design/react-native-design/compare/v0.31.0...v0.31.1) (2026-09-03)
 
 # [0.31.0](https://github.com/unif-design/react-native-design/compare/v0.30.1...v0.31.0) (2026-09-03)
