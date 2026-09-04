@@ -6,8 +6,8 @@ export type NormalizedBorderBeam = {
 };
 
 export const BORDER_BEAM_DEFAULTS: NormalizedBorderBeam = {
-  duration: 6000,
-  lineWidth: 1,
+  duration: 2400,
+  lineWidth: 2,
   size: 40,
   borderRadius: 12,
 };

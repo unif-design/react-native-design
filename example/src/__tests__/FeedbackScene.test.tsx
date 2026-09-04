@@ -270,9 +270,9 @@ test('BorderBeam 展示默认、停用和自定义边框流光，业务加载语
     componentByTestID(BorderBeam, 'feedback-border-beam-custom').props
   ).toMatchObject({
     color: expect.any(String),
-    duration: 2400,
-    lineWidth: 2,
-    size: 36,
+    duration: 1800,
+    lineWidth: 3,
+    size: 56,
     borderRadius: expect.any(Number),
   });
   coverage.prove(

@@ -60,10 +60,10 @@ afterEach(() => {
 });
 
 describe('BorderBeam web', () => {
-  test('用 CSS keyframes 驱动流光，不在 JS 帧循环中更新', () => {
+  test('用默认节奏的 CSS keyframes 驱动流光，不在 JS 帧循环中更新', () => {
     const { BorderBeam, effects, styles } = loadWebBorderBeam();
 
-    BorderBeam({ children: '内容', duration: 2400 });
+    BorderBeam({ children: '内容' });
     effects.forEach((effect) => effect());
 
     styles.forEach((style) => {
@@ -73,6 +73,19 @@ describe('BorderBeam web', () => {
       );
       expect(style.animation).toBe(
         'unif-border-beam-flow 2400ms linear infinite'
+      );
+    });
+  });
+
+  test('调用方可以覆盖流光时长', () => {
+    const { BorderBeam, effects, styles } = loadWebBorderBeam();
+
+    BorderBeam({ children: '内容', duration: 1800 });
+    effects.forEach((effect) => effect());
+
+    styles.forEach((style) => {
+      expect(style.animation).toBe(
+        'unif-border-beam-flow 1800ms linear infinite'
       );
     });
   });

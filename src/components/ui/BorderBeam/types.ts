@@ -8,9 +8,9 @@ export type BorderBeamProps = {
   active?: boolean;
   /** 流光颜色，默认主题 primary。 */
   color?: string;
-  /** 绕边一周的时长（毫秒），默认 6000。 */
+  /** 绕边一周的时长（毫秒），默认 2400。 */
   duration?: number;
-  /** 描边宽度，默认 1。 */
+  /** 描边宽度，默认 2。 */
   lineWidth?: number;
   /** 流光段长度（布局单位），默认 40。 */
   size?: number;

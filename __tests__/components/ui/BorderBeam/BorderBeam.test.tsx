@@ -98,10 +98,16 @@ describe('BorderBeam', () => {
 
     const [svg] = childrenOf(visual) as [ReactElement<ElementProps>];
     const layers = childrenOf(svg) as ReactElement<{
+      stroke: string;
       strokeDasharray: [number, number];
       strokeOpacity: number;
+      strokeWidth: number;
     }>[];
     expect(layers).toHaveLength(4);
+    expect(layers.every((layer) => layer.props.stroke === 'primary')).toBe(
+      true
+    );
+    expect(layers.every((layer) => layer.props.strokeWidth === 2)).toBe(true);
     expect(layers.map((layer) => layer.props.strokeOpacity)).toEqual([
       0.12, 0.24, 0.42, 0.88,
     ]);

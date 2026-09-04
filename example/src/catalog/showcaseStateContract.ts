@@ -2705,7 +2705,7 @@ export const showcaseStateContract = [
       specimens: [
         {
           testID: 'feedback-border-beam-custom',
-          props: { duration: 2400 },
+          props: { duration: 1800 },
         },
       ],
     },
@@ -2720,7 +2720,7 @@ export const showcaseStateContract = [
       specimens: [
         {
           testID: 'feedback-border-beam-custom',
-          props: { lineWidth: 2 },
+          props: { lineWidth: 3 },
         },
       ],
     },
@@ -2735,7 +2735,7 @@ export const showcaseStateContract = [
       specimens: [
         {
           testID: 'feedback-border-beam-custom',
-          props: { size: 36 },
+          props: { size: 56 },
         },
       ],
     },

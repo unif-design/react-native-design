@@ -1133,11 +1133,11 @@ CSS `saturate(N%)` 部分 RN BlurView 无对应 prop,在我们项目暂不实现
     </BorderBeam>
     <BorderBeam
       color="#52C41A"
-      duration={2400}
-      lineWidth={2}
-      size={36}
-      borderRadius={12}
-      style={{ padding: 18, borderRadius: 12, backgroundColor: '#F5F5F5' }}
+      duration={1800}
+      lineWidth={3}
+      size={56}
+      borderRadius={16}
+      style={{ padding: 18, borderRadius: 16, backgroundColor: '#F5F5F5' }}
     >
       <span>图片处理中</span>
     </BorderBeam>
@@ -1168,10 +1168,10 @@ function ProcessingImage() {
       <BorderBeam
         active
         color={c.primary}
-        duration={2400}
-        lineWidth={2}
-        size={36}
-        borderRadius={radius.md}
+        duration={1800}
+        lineWidth={3}
+        size={56}
+        borderRadius={radius.lg}
       >
         <Text>图片识别中</Text>
       </BorderBeam>
@@ -1187,8 +1187,8 @@ function ProcessingImage() {
 | `children`     | `ReactNode`             | 必填        | 被流光包围的原内容                               |
 | `active`       | `boolean?`              | `true`      | 是否显示并运行流光                               |
 | `color`        | `string?`               | `c.primary` | 流光颜色                                         |
-| `duration`     | `number?`               | `6000`      | 绕边一周时长，单位毫秒；收敛到 `300..60000`      |
-| `lineWidth`    | `number?`               | `1`         | 描边宽度；收敛到 `0.5..8`                        |
+| `duration`     | `number?`               | `2400`      | 绕边一周时长，单位毫秒；收敛到 `300..60000`      |
+| `lineWidth`    | `number?`               | `2`         | 描边宽度；收敛到 `0.5..8`                        |
 | `size`         | `number?`               | `40`        | 流光段长度；收敛到 `8..1000`，且不会超过实际周长 |
 | `borderRadius` | `number?`               | `radius.md` | 流光路径圆角；收敛到 `0..1000` 并受当前布局约束  |
 | `style`        | `StyleProp<ViewStyle>?` | —           | 外层布局样式                                     |
