@@ -297,9 +297,9 @@ export function FeedbackScene(): React.JSX.Element {
             >
               <BorderBeam
                 color={colors.success}
-                duration={2400}
-                lineWidth={2}
-                size={36}
+                duration={1800}
+                lineWidth={3}
+                size={56}
                 borderRadius={radius.md}
                 style={styles.borderBeamSpecimen}
                 testID="feedback-border-beam-custom"
