@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.31.3](https://github.com/unif-design/react-native-design/compare/v0.31.2...v0.31.3) (2026-09-04)
+
+
+### Bug Fixes
+
+* **BorderBeam:** 优化主题流光默认效果 ([0f7fdfc](https://github.com/unif-design/react-native-design/commit/0f7fdfc5df77d55715f45b615c25b94e75c9ab65))
+
 ## [0.31.2](https://github.com/unif-design/react-native-design/compare/v0.31.1...v0.31.2) (2026-09-03)
 
 
