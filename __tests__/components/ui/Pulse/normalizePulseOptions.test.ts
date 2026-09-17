@@ -2,11 +2,9 @@ import { describe, expect, test } from '@jest/globals';
 import {
   normalizePulseOptions,
   shouldAnimatePulse,
-} from '../../../../src/components/ui/Pulse/normalizePulseOptions';
-import type {
-  PulseDefaults,
-  PulseOptions,
-} from '../../../../src/components/ui/Pulse/normalizePulseOptions';
+} from '../../../../src/components/ui/shared/pulse/normalizePulseOptions';
+import type { PulseDefaults } from '../../../../src/components/ui/shared/pulse/types';
+import type { PulseOptions } from '../../../../src/components/ui/Pulse/types';
 
 /** Pulse / <Pulse> 的默认值。 */
 const BASE: PulseDefaults = { duration: 700, delay: 0, from: 0.6, to: 1 };

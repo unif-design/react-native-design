@@ -25,7 +25,11 @@ type ElementProps = {
 };
 
 function loadCircularProgress() {
-  jest.doMock('react-native', () => ({ Text: 'Text', View: 'View' }));
+  jest.doMock('react-native', () => ({
+    Text: 'Text',
+    View: 'View',
+    StyleSheet: { create: (styles: object) => styles },
+  }));
   jest.doMock('react-native-svg', () => ({
     __esModule: true,
     default: 'Svg',
@@ -34,6 +38,8 @@ function loadCircularProgress() {
   jest.doMock('../../../../src/theme', () => ({
     r: (value: number) => value,
     type: { nano: 10 },
+    useFontScale: () => 1,
+    scaleFontMetric: (value: number) => value,
     useColors: () => ({
       foreground: 'foreground',
       outline: 'outline',
@@ -66,6 +72,30 @@ afterEach(() => {
 });
 
 describe('CircularProgress', () => {
+  test('无标签保留固定占用，文字分支使用自然尺寸而非父容器拉伸', () => {
+    const CircularProgress = loadCircularProgress();
+    const plain = CircularProgress({
+      value: 0.42,
+      size: 16,
+    }) as ReactElement<ElementProps>;
+    expect(Object.assign({}, ...(plain.props.style as object[]))).toMatchObject(
+      { width: 16, height: 16 }
+    );
+    const labeled = CircularProgress({
+      value: 1,
+      size: 16,
+      showLabel: true,
+    }) as ReactElement<ElementProps>;
+    expect(
+      Object.assign({}, ...(labeled.props.style as object[]).flat())
+    ).toMatchObject({
+      width: 'max-content',
+      height: 'max-content',
+      minWidth: 16,
+      minHeight: 16,
+    });
+  });
+
   test('默认只显示确定进度圆环并暴露 progressbar 语义', () => {
     const CircularProgress = loadCircularProgress();
     const outer = CircularProgress({

@@ -50,6 +50,7 @@ export function FormsScene(): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
   const draft = state.scenes.forms;
   const refInput = useRef<TextFieldHandle>(null);
+  const textareaRef = useRef<TextFieldHandle>(null);
   const [refStatus, setRefStatus] = useState('等待操作');
   const [localSpecimenRevision, setLocalSpecimenRevision] = useState(0);
   const record = (component: string, action: string, summary: string) => {
@@ -118,6 +119,53 @@ export function FormsScene(): React.JSX.Element {
               maxLength={TEXTAREA_MAX_LENGTH}
               testID="forms-textarea-uncontrolled"
             />
+          </View>
+        </SectionCard>
+
+        <SectionCard
+          title="多行输入消费"
+          description="仅验证 Textarea 的受控值、高度和焦点；页面负责键盘避让。切换全局字号或屏幕宽度后继续编辑。"
+        >
+          <View style={styles.controls}>
+            <Textarea
+              ref={textareaRef}
+              value={draft.textareaValue}
+              onChangeText={(textareaValue) =>
+                updateScene('forms', (current) => ({
+                  ...current,
+                  textareaValue,
+                }))
+              }
+              minHeight={44}
+              maxHeight={120}
+              submitBehavior="newline"
+              accessibilityLabel="消息输入样例"
+              testID="forms-textarea-consumer"
+            />
+            <View style={styles.row}>
+              <Button
+                label="填入多行"
+                onPress={() =>
+                  updateScene('forms', (current) => ({
+                    ...current,
+                    textareaValue: '多行文字与内容测量。\n'.repeat(12),
+                  }))
+                }
+              />
+              <Button
+                label="聚焦多行输入"
+                onPress={() => textareaRef.current?.focus()}
+              />
+              <Button
+                label="外部清空"
+                onPress={() =>
+                  updateScene('forms', (current) => ({
+                    ...current,
+                    textareaValue: '',
+                  }))
+                }
+              />
+            </View>
           </View>
         </SectionCard>
 

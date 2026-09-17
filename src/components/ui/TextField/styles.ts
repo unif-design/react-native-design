@@ -1,6 +1,10 @@
 import { StyleSheet } from 'react-native';
 import { fw, radius, space, type as t } from '../../../theme';
 import type { ColorTokens } from '../../../theme';
+import {
+  TEXTAREA_VERTICAL_PADDING,
+  TEXT_FIELD_BORDER_WIDTH,
+} from './constants';
 
 /** TextField primitive styles —— Input + Textarea 共享。 */
 export const makeStyles = (c: ColorTokens) =>
@@ -11,10 +15,10 @@ export const makeStyles = (c: ColorTokens) =>
       gap: space[3],
       paddingHorizontal: space[5],
       borderRadius: radius.md,
-      borderWidth: 1,
+      borderWidth: TEXT_FIELD_BORDER_WIDTH,
     },
     wrapMultiline: {
-      paddingVertical: space[4],
+      paddingVertical: TEXTAREA_VERTICAL_PADDING,
       alignItems: 'flex-start',
     },
     /** Search 的可见底色/边框绝不承载命中区域。 */
@@ -59,6 +63,8 @@ export const makeStyles = (c: ColorTokens) =>
     inputMultiline: {
       textAlignVertical: 'top' as const,
     },
+    inputScrolling: { overflow: 'scroll' },
+    inputClipped: { overflow: 'hidden' },
     slotDisplay: {
       alignItems: 'center',
       justifyContent: 'center',

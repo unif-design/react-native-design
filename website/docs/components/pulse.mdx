@@ -9,9 +9,9 @@ import { Pulse, PulseDot, Icon } from '@unif/react-native-design';
 
 # Pulse · PulseDot · usePulse
 
-通用脉冲原语：公共 `usePulse.ts` 先统一完成参数归一化、诊断、静态与 reduced-motion 判定，再把归一化结果交给平台 driver。native 使用 `react-native-reanimated@4` worklet，Web 使用 CSS transition + timer。三个 API：
+通用脉冲原语：`shared/pulse` 内部统一完成参数归一化与平台驱动；Pulse、PulseDot、Skeleton 分别提供自己的默认值和诊断入口，公共 usePulse 接口保持不变。native 使用 `react-native-reanimated@4` worklet，Web 使用 CSS transition + timer。三个 API：
 
-- **`usePulse(options)`** — 钩子，返回 `useAnimatedStyle`，可直接拼到 `Animated.View` 上
+- **`usePulse(options)`** — 钩子，返回可直接拼到 `Animated.View` 上的 style
 - **`<Pulse>{children}</Pulse>`** — 把 children 包进一个 opacity 循环动画
 - **`<PulseDot />`** — 一个固定的圆点（默认 6×6 主橙），用于"思考中"等指示器
 
@@ -111,7 +111,7 @@ import { PulseDot } from '@unif/react-native-design';
 
 #### 参数校验规则 {#参数校验规则}
 
-四个参数都由**唯一一层归一化**处理（native 与 web 共用），规则是**整体回退,不做 clamp、不做取整**：
+四个参数都由**唯一一层归一化**处理（native 与 web 共用），规则是**非法字段回退到所属组件默认值，不做 clamp、不做取整**：
 
 - 超出合法域、`NaN`、`Infinity` 或非 `number` → **整个字段回退到默认值**，并在 `__DEV__` 下打一条 warn 说明收到了什么、回退成了什么。
 - 合法值**原样保留** —— `duration: 700.5` 不会被取整,`duration: 0` 也不会被悄悄夹成 `1`（那样调用方永远发现不了自己传错了）。
@@ -154,7 +154,7 @@ native 走 Reanimated 4 worklet（UI 线程）；**web 走 CSS transition + `set
 
 | 消费者 | 做什么 |
 |---|---|
-| [Skeleton](./skeleton) Line/Rect/Circle | 复用 `from: 0.5` 的内部默认值驱动 opacity 闪烁 |
+| [Skeleton](./skeleton) Line/Rect/Circle | 采用自身 `from: 0.5` 默认值，复用共享 opacity 驱动 |
 | Shimmer ShimmerLine / Dot | 同上，参数定制 |
 | Reasoning | `<Pulse from={0.4} duration={motion.pulse / 2}>` 包裹 spark 图标 |
 | Task / ChainOfThought | 通过 `<StatusDot>` 间接 —— active 状态内嵌 `<PulseDot>` |
@@ -162,8 +162,8 @@ native 走 Reanimated 4 worklet（UI 线程）；**web 走 CSS transition + `set
 
 ## 不要
 
-- ❌ 不要自己 `new Animated.Value` + `Animated.loop` 实现脉冲 —— 老 RN Animated API 在 RN 0.86 + 新架构下被迫走 JS 桥；用 `usePulse`。
+- 需要脉冲时使用 `usePulse`，复用参数校验、系统动效偏好和资源释放，避免在消费方重复实现。
 - ❌ 不要在 `useAnimatedStyle` 里引用 React state（worklet 闭包只能读 SharedValue）。
-- ❌ 不要传非 primitive 的 options 对象（每次 render 都新身份会触发 effect 重启）—— 直接传 `from`/`to`/`duration`/`delay`。
-- ❌ 不要指望库会替你把非法值夹到合法域 —— 非法值整体回退到默认值并 dev warn，不做 clamp。
+- options 对象可以内联：归一化按 `from`/`to`/`duration`/`delay` 的实际值缓存，不因对象引用变化重启动效。
+- ❌ 不要指望库会替你把非法值夹到合法域 —— 非法字段回退到默认值并 dev warn，不做 clamp。
 - ❌ 不要假设 web 端跑的是 worklet —— web 是 CSS transition + `setInterval`。

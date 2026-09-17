@@ -5,8 +5,11 @@ import { resolveImageSource } from '../../../utils/imageSource';
 import { createLogger } from '../../../utils/logger';
 import { ImageAttempt } from '../shared/ImageAttempt';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
-import { sanitizeThumbnailImageStyle } from './normalize';
-import { makeStyles, sizingFor } from './styles';
+import {
+  normalizeThumbnailDimensions,
+  sanitizeThumbnailImageStyle,
+} from './normalize';
+import { makeStyles } from './styles';
 import type { ThumbnailProps } from './types';
 
 const log = createLogger('Thumbnail');
@@ -22,6 +25,7 @@ export function Thumbnail(props: ThumbnailProps): React.JSX.Element {
     uri,
     source,
     size = 'md',
+    fallback,
     selected,
     containerStyle,
     imageStyle,
@@ -31,7 +35,8 @@ export function Thumbnail(props: ThumbnailProps): React.JSX.Element {
   } = props;
   const colors = useColors();
   const styles = useThemedStyles(makeStyles);
-  const dim = sizingFor(size);
+  const normalizedDimensions = normalizeThumbnailDimensions(size);
+  const dim = normalizedDimensions.dimensions;
   const hasUri = hasOwn(props, 'uri');
   const hasSource = hasOwn(props, 'source');
   const sourceCandidate =
@@ -43,6 +48,7 @@ export function Thumbnail(props: ThumbnailProps): React.JSX.Element {
   const resolvedSource = resolveImageSource(sourceCandidate);
   const sanitizedImageStyle = sanitizeThumbnailImageStyle(imageStyle);
   const diagnostics = [
+    ...normalizedDimensions.diagnostics,
     ...(resolvedSource === undefined ? ['source'] : []),
     ...sanitizedImageStyle.diagnostics.map((field) =>
       field === 'style' ? 'imageStyle' : `imageStyle.${field}`
@@ -72,16 +78,24 @@ export function Thumbnail(props: ThumbnailProps): React.JSX.Element {
     borderRadius: dim.borderRadius,
     borderColor: selected ? colors.primary : 'transparent',
   };
+  const fallbackContent =
+    fallback === undefined ? null : (
+      <View {...imageAccessibilityProps} style={styles.fallback}>
+        {fallback}
+      </View>
+    );
 
   return (
     <View style={containerStyle} testID={testID}>
       <View style={[styles.visualFrame, dim]}>
-        {resolvedSource === undefined ? null : (
+        {resolvedSource === undefined ? (
+          fallbackContent
+        ) : (
           <ImageAttempt
             {...imageAccessibilityProps}
             key={resolvedSource.key}
             source={resolvedSource.source}
-            fallback={null}
+            fallback={fallbackContent}
             style={[sanitizedImageStyle.style, StyleSheet.absoluteFill]}
             resizeMode={resizeMode}
           />

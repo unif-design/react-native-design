@@ -1,6 +1,6 @@
 // design 的接线由包自己提供(见仓根 jest-preset.js / jest-setup.js);example 吃
 // 自己的狗粮,走与消费者相同的 preset 字符串解析路径(经 package.json#exports),
-// 每次改接线都被本仓 15 个 suite 回归覆盖。
+// 每次改接线都被example 完整 suite 回归覆盖。
 module.exports = {
   preset: '@unif/react-native-design/jest-preset',
   testMatch: ['**/*.test.[jt]s?(x)'],

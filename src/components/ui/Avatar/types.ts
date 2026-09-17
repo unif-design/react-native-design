@@ -15,7 +15,7 @@ export type AvatarShape = 'circle' | 'square';
  */
 export type AvatarVariant = 'brand' | 'info' | 'soft' | 'neutral';
 
-export type AvatarProps = {
+export interface AvatarProps {
   /**
    * 头像里显示的文字（建议 1-2 字符）。
    * 同时作为 a11y label（screen reader 朗读）；source 加载失败时回退展示。
@@ -40,4 +40,10 @@ export type AvatarProps = {
   style?: StyleProp<ViewStyle>;
   /** E2E / 测试定位 */
   testID?: string;
-};
+}
+
+/** 头像族内部几何，不进入公共 barrel。 */
+export interface AvatarGeometry {
+  box: number;
+  fs: number;
+}

@@ -5,15 +5,17 @@ description: '严格多行输入：一次性 defaultValue、44pt 最小高度、
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
-import { Textarea } from '@unif/react-native-design';
-import { useState } from 'react';
+import { Button, Textarea, ThemeProvider } from '@unif/react-native-design';
+import { View } from 'react-native';
+import { useState, useRef } from 'react';
+
 
 # Textarea 多行输入
 
 Textarea 固定 `multiline` 并顶对齐；单行请用 [Input](./input)。它与 Input 使用相同严格受控/非受控 union、slot、错误和 ref 契约。
 
 export const TextareaDemo = () => {
-  const [note, setNote] = useState('');
+  const [note, setNote] = useState('首次布局按实际宽度测量，多行文字不需要业务层计算高度。\n'.repeat(5));
   return (
     <LiveDemo>
       <Textarea
@@ -27,6 +29,56 @@ export const TextareaDemo = () => {
 };
 
 <TextareaDemo />
+
+## 内容布局与消费交接
+
+export const TextareaLayoutDemo = () => {
+  const [value, setValue] = useState('');
+  const [fontScale, setFontScale] = useState(1);
+  const [narrow, setNarrow] = useState(false);
+  const [limited, setLimited] = useState(true);
+  const ref = useRef(null);
+  return (
+    <LiveDemo>
+      <View style={{ gap: 16 }}>
+        <ThemeProvider fontScale={fontScale}>
+          <View style={{ width: narrow ? 180 : '100%' }}>
+            <Textarea
+              ref={ref}
+              value={value}
+              onChangeText={setValue}
+              minHeight={44}
+              maxHeight={limited ? 120 : undefined}
+              accessibilityLabel="多行布局验证"
+              placeholder="输入多行文字"
+              submitBehavior="newline"
+              testID="textarea-layout-demo"
+            />
+          </View>
+        </ThemeProvider>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <Button label="填入长文" onPress={() => setValue('中文输入保持原文，依据实际宽度测量高度。\n'.repeat(12))} />
+            <Button label="缩为短文" onPress={() => setValue('一行短文')} />
+            <Button label="外部清空" onPress={() => setValue('')} />
+            <Button label="切换宽度" onPress={() => setNarrow(!narrow)} />
+            <Button
+              label="切换字号"
+              onPress={() => setFontScale(fontScale === 1 ? 2 : 1)}
+            />
+            <Button label="切换高度上限" onPress={() => setLimited(!limited)} />
+            <Button label="聚焦输入" onPress={() => ref.current?.focus()} />
+            <Button label="失焦输入" onPress={() => ref.current?.blur()} />
+          </View>
+      </View>
+    </LiveDemo>
+  );
+};
+
+<TextareaLayoutDemo />
+
+输入表面（包括内部 padding 和边框）在 minHeight / maxHeight 范围内增长与缩短；错误说明在表面外，不占上限。首次长文、外部 value 更新、宽度与应用字号变化后，按真实内容重新测量；超过上限默认内部滚动，不截断文字。省略 maxHeight 可持续增长。
+
+受控清空通过外部 value 更新，ref 仍仅有 focus / blur。onFocus / onBlur 与 onContentSizeChange 原样交付；contentSize 是文字测量，组合区的总高度应由消费者自己的 onLayout 测量。页面负责键盘避让，回车可显式设置 submitBehavior="newline"，发送与语音采集留在消费者。
 
 ## 用法
 

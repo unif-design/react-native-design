@@ -298,7 +298,7 @@
     "mdPath": "md/components/thumbnail.md",
     "slug": "/components/thumbnail",
     "section": "components",
-    "description": "列表 / 卡片 / chat 通用 16:9.5 小图 —— size='sm'(64×40)/'md'(113×67,默认)/'lg'(160×96),uri 或 source 严格二选一,稳定 placeholder 与 2pt selected ring,layout / image style 分层。"
+    "description": "缩略图保留 sm/md/lg 与默认 md，支持 ThumbnailDimensions 实际尺寸和失败 fallback；uri/source 互斥，图片实例与选择环独立于外层布局。"
   },
   {
     "title": "Toast 轻提示",

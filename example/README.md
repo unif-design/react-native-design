@@ -96,6 +96,8 @@ load/error event 后的组件状态，不代表真实网络、缓存或 native d
 - reduced motion：只展示 `usePrefersReducedMotion()` 读取到的系统事实，没有本地伪造
   override。请在系统设置中切换后重新验证 Pulse、Reveal 与 Carousel autoplay。
 
+表单场景的“多行输入消费”使用包根 Textarea，提供填入多行、外部清空和 focus；媒体场景包含 76×76 与 96×56 实际尺寸及 Icon fallback，反馈场景包含 16pt 圆环的完整百分比。上述样例用于基础能力验收，没有实现 Composer 或附件业务流程。
+
 ## 7. 自动化
 
 以下命令全部从 repo root 执行：

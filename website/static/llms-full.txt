@@ -812,6 +812,8 @@ const members: readonly AvatarGroupItem[] = [
 - 小于 44pt 的可点击溢出位用 hitSlop 补足命中区,不改变头像组视觉宽度。
 - 组件不描述弹层、抽屉或跳转结果；消费端通过 `overflowAccessibilityHint` 持有该语义。
 
+AvatarGroup 与 Avatar 通过头像族内部 geometry 单元复用尺寸与圆角，不依赖 Avatar 的私有 styles。成员顺序、重叠及溢出操作仍归 AvatarGroup；内部几何不进入包根导出。
+
 ## AvatarWithRing 圆环头像
 
 *Source: `docs/components/avatar-with-ring.mdx` · Mirror: `md/components/avatar-with-ring.md`*
@@ -3672,6 +3674,46 @@ function Demo() {
 
 ### CircularProgress
 
+```tsx
+const ProgressFontDemo = () => {
+  const [fontScale, setFontScale] = useState(1);
+  return (
+    <>
+      <View style={{ gap: 16 }}>
+        <ThemeProvider fontScale={fontScale}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            {[0, 0.42, 1].map((value) => (
+              <CircularProgress
+                key={value}
+                value={value}
+                size={16}
+                thickness={2}
+                showLabel
+                accessibilityLabel={`百分比 ${value}`}
+                testID={`progress-${value}`}
+              />
+            ))}
+            <CircularProgress
+              value={0.42}
+              size={16}
+              testID="progress-no-label"
+            />
+          </View>
+        </ThemeProvider>
+          <Button
+            label="切换进度字号"
+            onPress={() => setFontScale(fontScale === 1 ? 3 : 1)}
+          />
+      </View>
+    </>
+  );
+};
+```
+
+中央百分比按 ThemeProvider.fontScale 缩放一次，系统字号沿 RN 原生行为处理。文字自然布局，圆环与描边保持 size / thickness 指定的实际尺寸。小圆环配大字号时外层占用可以增大；不会缩小字号、截掉百分号或自动关闭标签。showLabel=false 时保持 size × size 的固定占用；显示标签时采用平台固有尺寸，纵向容器的 stretch 不会把圆环拉成整行宽。外部显式设置裁切的容器仍由调用方负责。
+
+未知上传比例应使用 Spinner 或 BorderBeam 配合实际状态说明，不传 NaN 或伪造 0%；100% 也不代表业务成功。
+
 | Prop                 | Type                    | 默认           | 说明                                               |
 | -------------------- | ----------------------- | -------------- | -------------------------------------------------- |
 | `value`              | `number`                | 必填           | `0..1` 的确定进度；越界值收敛到边界，非有限值按 0  |
@@ -4140,9 +4182,9 @@ PasswordInput 不接受 `defaultValue`、`leading`、`trailing` 或 caller `secu
 
 # Pulse · PulseDot · usePulse
 
-通用脉冲原语：公共 `usePulse.ts` 先统一完成参数归一化、诊断、静态与 reduced-motion 判定，再把归一化结果交给平台 driver。native 使用 `react-native-reanimated@4` worklet，Web 使用 CSS transition + timer。三个 API：
+通用脉冲原语：`shared/pulse` 内部统一完成参数归一化与平台驱动；Pulse、PulseDot、Skeleton 分别提供自己的默认值和诊断入口，公共 usePulse 接口保持不变。native 使用 `react-native-reanimated@4` worklet，Web 使用 CSS transition + timer。三个 API：
 
-- **`usePulse(options)`** — 钩子，返回 `useAnimatedStyle`，可直接拼到 `Animated.View` 上
+- **`usePulse(options)`** — 钩子，返回可直接拼到 `Animated.View` 上的 style
 - **`<Pulse>{children}</Pulse>`** — 把 children 包进一个 opacity 循环动画
 - **`<PulseDot />`** — 一个固定的圆点（默认 6×6 主橙），用于"思考中"等指示器
 
@@ -4242,7 +4284,7 @@ import { PulseDot } from '@unif/react-native-design';
 
 #### 参数校验规则 {#参数校验规则}
 
-四个参数都由**唯一一层归一化**处理（native 与 web 共用），规则是**整体回退,不做 clamp、不做取整**：
+四个参数都由**唯一一层归一化**处理（native 与 web 共用），规则是**非法字段回退到所属组件默认值，不做 clamp、不做取整**：
 
 - 超出合法域、`NaN`、`Infinity` 或非 `number` → **整个字段回退到默认值**，并在 `__DEV__` 下打一条 warn 说明收到了什么、回退成了什么。
 - 合法值**原样保留** —— `duration: 700.5` 不会被取整,`duration: 0` 也不会被悄悄夹成 `1`（那样调用方永远发现不了自己传错了）。
@@ -4285,7 +4327,7 @@ native 走 Reanimated 4 worklet（UI 线程）；**web 走 CSS transition + `set
 
 | 消费者 | 做什么 |
 |---|---|
-| [Skeleton](md/components/skeleton.md) Line/Rect/Circle | 复用 `from: 0.5` 的内部默认值驱动 opacity 闪烁 |
+| [Skeleton](md/components/skeleton.md) Line/Rect/Circle | 采用自身 `from: 0.5` 默认值，复用共享 opacity 驱动 |
 | Shimmer ShimmerLine / Dot | 同上，参数定制 |
 | Reasoning | `<Pulse from={0.4} duration={motion.pulse / 2}>` 包裹 spark 图标 |
 | Task / ChainOfThought | 通过 `<StatusDot>` 间接 —— active 状态内嵌 `<PulseDot>` |
@@ -4293,10 +4335,10 @@ native 走 Reanimated 4 worklet（UI 线程）；**web 走 CSS transition + `set
 
 ## 不要
 
-- ❌ 不要自己 `new Animated.Value` + `Animated.loop` 实现脉冲 —— 老 RN Animated API 在 RN 0.86 + 新架构下被迫走 JS 桥；用 `usePulse`。
+- 需要脉冲时使用 `usePulse`，复用参数校验、系统动效偏好和资源释放，避免在消费方重复实现。
 - ❌ 不要在 `useAnimatedStyle` 里引用 React state（worklet 闭包只能读 SharedValue）。
-- ❌ 不要传非 primitive 的 options 对象（每次 render 都新身份会触发 effect 重启）—— 直接传 `from`/`to`/`duration`/`delay`。
-- ❌ 不要指望库会替你把非法值夹到合法域 —— 非法值整体回退到默认值并 dev warn，不做 clamp。
+- options 对象可以内联：归一化按 `from`/`to`/`duration`/`delay` 的实际值缓存，不因对象引用变化重启动效。
+- ❌ 不要指望库会替你把非法值夹到合法域 —— 非法字段回退到默认值并 dev warn，不做 clamp。
 - ❌ 不要假设 web 端跑的是 worklet —— web 是 CSS transition + `setInterval`。
 
 ## Radio 单选
@@ -5646,7 +5688,7 @@ Textarea 固定 `multiline` 并顶对齐；单行请用 [Input](md/components/in
 
 ```tsx
 const TextareaDemo = () => {
-  const [note, setNote] = useState('');
+  const [note, setNote] = useState('首次布局按实际宽度测量，多行文字不需要业务层计算高度。\n'.repeat(5));
   return (
     <>
       <Textarea
@@ -5659,6 +5701,56 @@ const TextareaDemo = () => {
   );
 };
 ```
+
+## 内容布局与消费交接
+
+```tsx
+const TextareaLayoutDemo = () => {
+  const [value, setValue] = useState('');
+  const [fontScale, setFontScale] = useState(1);
+  const [narrow, setNarrow] = useState(false);
+  const [limited, setLimited] = useState(true);
+  const ref = useRef(null);
+  return (
+    <>
+      <View style={{ gap: 16 }}>
+        <ThemeProvider fontScale={fontScale}>
+          <View style={{ width: narrow ? 180 : '100%' }}>
+            <Textarea
+              ref={ref}
+              value={value}
+              onChangeText={setValue}
+              minHeight={44}
+              maxHeight={limited ? 120 : undefined}
+              accessibilityLabel="多行布局验证"
+              placeholder="输入多行文字"
+              submitBehavior="newline"
+              testID="textarea-layout-demo"
+            />
+          </View>
+        </ThemeProvider>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <Button label="填入长文" onPress={() => setValue('中文输入保持原文，依据实际宽度测量高度。\n'.repeat(12))} />
+            <Button label="缩为短文" onPress={() => setValue('一行短文')} />
+            <Button label="外部清空" onPress={() => setValue('')} />
+            <Button label="切换宽度" onPress={() => setNarrow(!narrow)} />
+            <Button
+              label="切换字号"
+              onPress={() => setFontScale(fontScale === 1 ? 2 : 1)}
+            />
+            <Button label="切换高度上限" onPress={() => setLimited(!limited)} />
+            <Button label="聚焦输入" onPress={() => ref.current?.focus()} />
+            <Button label="失焦输入" onPress={() => ref.current?.blur()} />
+          </View>
+      </View>
+    </>
+  );
+};
+```
+
+输入表面（包括内部 padding 和边框）在 minHeight / maxHeight 范围内增长与缩短；错误说明在表面外，不占上限。首次长文、外部 value 更新、宽度与应用字号变化后，按真实内容重新测量；超过上限默认内部滚动，不截断文字。省略 maxHeight 可持续增长。
+
+受控清空通过外部 value 更新，ref 仍仅有 focus / blur。onFocus / onBlur 与 onContentSizeChange 原样交付；contentSize 是文字测量，组合区的总高度应由消费者自己的 onLayout 测量。页面负责键盘避让，回车可显式设置 submitBehavior="newline"，发送与语音采集留在消费者。
 
 ## 用法
 
@@ -5685,7 +5777,7 @@ const TextareaDemo = () => {
 
 # Thumbnail 缩略图
 
-列表 / 卡片右侧、chat 行内、Detail 头图通用的小型预览图。固定 16:9.5 视频比,提供 `sm / md / lg` 三档尺寸。visual frame 始终存在并使用 `c.surfaceContainer` 占位；source 非法、图片 pending 或加载失败都不会让布局消失。
+列表 / 卡片右侧、chat 行内、Detail 头图通用的小型预览图。保留 `sm / md / lg` 三档尺寸，也支持显式矩形尺寸。visual frame 始终存在并使用 `c.surfaceContainer` 占位；source 非法、图片 pending 或加载失败都不会让布局消失。
 
 | Size | 尺寸 | 用法 |
 |---|---|---|
@@ -5701,6 +5793,18 @@ const TextareaDemo = () => {
 
 ```tsx
 const IMG = 'https://picsum.photos/id/1067/320/200';
+
+const IMAGE_A =
+  'data:image/svg+xml,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="76" height="76"><rect width="76" height="76" fill="steelblue"/><text x="28" y="45" fill="white">A</text></svg>'
+  );
+
+const IMAGE_B =
+  'data:image/svg+xml,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="76" height="76"><rect width="76" height="76" fill="seagreen"/><text x="28" y="45" fill="white">B</text></svg>'
+  );
 
   <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -5719,6 +5823,48 @@ const IMG = 'https://picsum.photos/id/1067/320/200';
     </div>
   </div>
 ```
+
+## 显式尺寸与失败占位
+
+```tsx
+const ThumbnailDimensionsDemo = () => {
+  const [uri, setUri] = useState(IMAGE_A);
+  const [large, setLarge] = useState(false);
+  return (
+    <>
+      <View style={{ gap: 16 }}>
+        <Thumbnail
+          uri={uri}
+          size={{ width: large ? 120 : 76, height: 76, borderRadius: 8 }}
+          selected
+          fallback={<Icon name="file" />}
+          accessibilityLabel="附件图像框"
+          testID="thumbnail-dimensions-demo"
+        />
+        <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <Button label="图片 A" onPress={() => setUri(IMAGE_A)} />
+          <Button label="图片 B" onPress={() => setUri(IMAGE_B)} />
+          <Button
+            label="图片失败"
+            onPress={() => setUri('data:image/png;base64,invalid')}
+          />
+          <Button label="切换图像框" onPress={() => setLarge(!large)} />
+        </View>
+      </View>
+    </>
+  );
+};
+```
+
+```tsx
+import { Thumbnail, Icon, type ThumbnailDimensions } from '@unif/react-native-design';
+const dimensions: Readonly<ThumbnailDimensions> = { width: 76, height: 76, borderRadius: 8 };
+<Thumbnail source={{ uri: imageUri }} size={dimensions} fallback={<Icon name="file" />} />;
+```
+
+width / height 必须为有限正数，borderRadius 可省略（沿用 md 圆角）或为有限非负数。对象值按实际 RN 布局单位使用，库内不再调用 r；需要设备缩放时由调用方提前计算。非法对象整体回退 md，并仅诊断字段名，不输出对象或图片地址。
+
+fallback 是可选 ReactNode，在无有效 source 或当前图片失败时居中显示并裁切于图像框，选中环保持在上方；未提供时保持原占位表面，加载中不显示失败内容。改变尺寸或 fallback 不重建同一 source 的图片尝试。Thumbnail 不改变附件上传状态、不触发预览或移除操作。
 
 ## 用法
 
@@ -5751,7 +5897,8 @@ import { Thumbnail } from '@unif/react-native-design';
 |---|---|---|---|
 | `uri` | `string` | 与 `source` 严格二选一 | 远程 URL；运行时 trim 后必须非空 |
 | `source` | `ImageSourcePropType` | 与 `uri` 严格二选一 | 本地 asset、URI object 或 URI candidate 数组；Web 明确使用数组首项 |
-| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | 尺寸阶梯 |
+| `size` | `ThumbnailSize \| Readonly<ThumbnailDimensions>` | `'md'` | 三档或显式图像框 |
+| `fallback` | `ReactNode` | — | 无有效 source 或当前图片失败时的内容 |
 | `selected` | `boolean` | `false` | frame 内始终存在的 ring 是否切为 2pt 品牌色 |
 | `resizeMode` | RN `ImageProps['resizeMode']` | `'cover'` | `cover / contain / stretch / center / repeat / none` |
 | `containerStyle` | `StyleProp<ViewStyle>` | — | 完整 caller layout，只落到外层 View；可用 margin/flex/position/size/transform |
@@ -5775,7 +5922,7 @@ Thumbnail 的公开结构是 outer layout View + inner visual frame；图片与 
 
 - 非空 `accessibilityLabel` 让图片以 image role 暴露；缺省或空白时，完整隐藏属性只落到本地 Image，不让装饰图打扰 screen reader。
 - ring 始终使用本地 View，并通过完整隐藏属性移出 a11y tree；`selected` 只表达视觉，不上报 selected state。选中语义仍由可交互父级（如 picker 单元）提供。
-- source 非法或加载失败时只显示非 accessible placeholder frame，不产生无名图片节点。
+- 未传 fallback 时，source 非法或加载失败只显示非 accessible placeholder frame；自定义 fallback 遵循图片的可选名称与装饰隐藏语义。
 
 ```tsx
 // 内容图：给 accessibilityLabel 才会被 SR 读到
@@ -5790,7 +5937,7 @@ Thumbnail 的公开结构是 outer layout View + inner visual frame；图片与 
 
 ## 设计原则
 
-新增"列表 / 卡片右侧缩略图 / chat 内嵌图片预览"场景请直接用 `Thumbnail`,不要自画 `<Image style={{width, height, borderRadius, bg}}>`。尺寸阶梯不够覆盖时来这里加 size,不要 inline 写死。
+新增"列表 / 卡片右侧缩略图 / chat 内嵌图片预览"场景请直接用 `Thumbnail`,不要自画 `<Image style={{width, height, borderRadius, bg}}>`。尺寸阶梯不够覆盖时使用 size 对象，不通过 containerStyle 或 imageStyle 改写图像框。使用 ThumbnailProps['size'] 派生旧枚举的消费者需先缩窄对象分支，三档名称仍可使用 ThumbnailSize。
 
 ## Toast 轻提示
 

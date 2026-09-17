@@ -1,25 +1,44 @@
 import { StyleSheet } from 'react-native';
 import type { StyleProp } from 'react-native';
-import type { ThumbnailImageStyle } from './types';
+import type {
+  NormalizedThumbnailDimensions,
+  SanitizedThumbnailImageStyle,
+  ThumbnailImageStyle,
+} from './types';
+import { RESERVED_IMAGE_STYLE_KEYS, THUMBNAIL_DIMENSIONS } from './constants';
 
-const RESERVED_IMAGE_STYLE_KEYS = [
-  'position',
-  'top',
-  'right',
-  'bottom',
-  'left',
-  'width',
-  'height',
-  'minWidth',
-  'minHeight',
-  'maxWidth',
-  'maxHeight',
-] as const;
-
-type SanitizedThumbnailImageStyle = {
-  style: ThumbnailImageStyle;
-  diagnostics: readonly string[];
-};
+export function normalizeThumbnailDimensions(
+  size: unknown
+): NormalizedThumbnailDimensions {
+  if (size === undefined || size === 'sm' || size === 'md' || size === 'lg') {
+    return { dimensions: THUMBNAIL_DIMENSIONS[size ?? 'md'], diagnostics: [] };
+  }
+  if (typeof size === 'object' && size !== null && !Array.isArray(size)) {
+    const { width, height, borderRadius } = size as Record<string, unknown>;
+    if (
+      typeof width === 'number' &&
+      Number.isFinite(width) &&
+      width > 0 &&
+      typeof height === 'number' &&
+      Number.isFinite(height) &&
+      height > 0 &&
+      (borderRadius === undefined ||
+        (typeof borderRadius === 'number' &&
+          Number.isFinite(borderRadius) &&
+          borderRadius >= 0))
+    ) {
+      return {
+        dimensions: {
+          width,
+          height,
+          borderRadius: borderRadius ?? THUMBNAIL_DIMENSIONS.md.borderRadius,
+        },
+        diagnostics: [],
+      };
+    }
+  }
+  return { dimensions: THUMBNAIL_DIMENSIONS.md, diagnostics: ['size'] };
+}
 
 function invalidStyle(): SanitizedThumbnailImageStyle {
   return { style: {}, diagnostics: ['style'] };

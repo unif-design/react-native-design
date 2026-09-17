@@ -1,12 +1,12 @@
 ---
 sidebar_position: 24
 title: Thumbnail 缩略图
-description: "列表 / 卡片 / chat 通用 16:9.5 小图 —— size='sm'(64×40)/'md'(113×67,默认)/'lg'(160×96),uri 或 source 严格二选一,稳定 placeholder 与 2pt selected ring,layout / image style 分层。"
+description: "缩略图保留 sm/md/lg 与默认 md，支持 ThumbnailDimensions 实际尺寸和失败 fallback；uri/source 互斥，图片实例与选择环独立于外层布局。"
 ---
 
 # Thumbnail 缩略图
 
-列表 / 卡片右侧、chat 行内、Detail 头图通用的小型预览图。固定 16:9.5 视频比,提供 `sm / md / lg` 三档尺寸。visual frame 始终存在并使用 `c.surfaceContainer` 占位；source 非法、图片 pending 或加载失败都不会让布局消失。
+列表 / 卡片右侧、chat 行内、Detail 头图通用的小型预览图。保留 `sm / md / lg` 三档尺寸，也支持显式矩形尺寸。visual frame 始终存在并使用 `c.surfaceContainer` 占位；source 非法、图片 pending 或加载失败都不会让布局消失。
 
 | Size | 尺寸 | 用法 |
 |---|---|---|
@@ -22,6 +22,18 @@ description: "列表 / 卡片 / chat 通用 16:9.5 小图 —— size='sm'(64×4
 
 ```tsx
 const IMG = 'https://picsum.photos/id/1067/320/200';
+
+const IMAGE_A =
+  'data:image/svg+xml,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="76" height="76"><rect width="76" height="76" fill="steelblue"/><text x="28" y="45" fill="white">A</text></svg>'
+  );
+
+const IMAGE_B =
+  'data:image/svg+xml,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="76" height="76"><rect width="76" height="76" fill="seagreen"/><text x="28" y="45" fill="white">B</text></svg>'
+  );
 
   <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -40,6 +52,48 @@ const IMG = 'https://picsum.photos/id/1067/320/200';
     </div>
   </div>
 ```
+
+## 显式尺寸与失败占位
+
+```tsx
+const ThumbnailDimensionsDemo = () => {
+  const [uri, setUri] = useState(IMAGE_A);
+  const [large, setLarge] = useState(false);
+  return (
+    <>
+      <View style={{ gap: 16 }}>
+        <Thumbnail
+          uri={uri}
+          size={{ width: large ? 120 : 76, height: 76, borderRadius: 8 }}
+          selected
+          fallback={<Icon name="file" />}
+          accessibilityLabel="附件图像框"
+          testID="thumbnail-dimensions-demo"
+        />
+        <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <Button label="图片 A" onPress={() => setUri(IMAGE_A)} />
+          <Button label="图片 B" onPress={() => setUri(IMAGE_B)} />
+          <Button
+            label="图片失败"
+            onPress={() => setUri('data:image/png;base64,invalid')}
+          />
+          <Button label="切换图像框" onPress={() => setLarge(!large)} />
+        </View>
+      </View>
+    </>
+  );
+};
+```
+
+```tsx
+import { Thumbnail, Icon, type ThumbnailDimensions } from '@unif/react-native-design';
+const dimensions: Readonly<ThumbnailDimensions> = { width: 76, height: 76, borderRadius: 8 };
+<Thumbnail source={{ uri: imageUri }} size={dimensions} fallback={<Icon name="file" />} />;
+```
+
+width / height 必须为有限正数，borderRadius 可省略（沿用 md 圆角）或为有限非负数。对象值按实际 RN 布局单位使用，库内不再调用 r；需要设备缩放时由调用方提前计算。非法对象整体回退 md，并仅诊断字段名，不输出对象或图片地址。
+
+fallback 是可选 ReactNode，在无有效 source 或当前图片失败时居中显示并裁切于图像框，选中环保持在上方；未提供时保持原占位表面，加载中不显示失败内容。改变尺寸或 fallback 不重建同一 source 的图片尝试。Thumbnail 不改变附件上传状态、不触发预览或移除操作。
 
 ## 用法
 
@@ -72,7 +126,8 @@ import { Thumbnail } from '@unif/react-native-design';
 |---|---|---|---|
 | `uri` | `string` | 与 `source` 严格二选一 | 远程 URL；运行时 trim 后必须非空 |
 | `source` | `ImageSourcePropType` | 与 `uri` 严格二选一 | 本地 asset、URI object 或 URI candidate 数组；Web 明确使用数组首项 |
-| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | 尺寸阶梯 |
+| `size` | `ThumbnailSize \| Readonly<ThumbnailDimensions>` | `'md'` | 三档或显式图像框 |
+| `fallback` | `ReactNode` | — | 无有效 source 或当前图片失败时的内容 |
 | `selected` | `boolean` | `false` | frame 内始终存在的 ring 是否切为 2pt 品牌色 |
 | `resizeMode` | RN `ImageProps['resizeMode']` | `'cover'` | `cover / contain / stretch / center / repeat / none` |
 | `containerStyle` | `StyleProp<ViewStyle>` | — | 完整 caller layout，只落到外层 View；可用 margin/flex/position/size/transform |
@@ -96,7 +151,7 @@ Thumbnail 的公开结构是 outer layout View + inner visual frame；图片与 
 
 - 非空 `accessibilityLabel` 让图片以 image role 暴露；缺省或空白时，完整隐藏属性只落到本地 Image，不让装饰图打扰 screen reader。
 - ring 始终使用本地 View，并通过完整隐藏属性移出 a11y tree；`selected` 只表达视觉，不上报 selected state。选中语义仍由可交互父级（如 picker 单元）提供。
-- source 非法或加载失败时只显示非 accessible placeholder frame，不产生无名图片节点。
+- 未传 fallback 时，source 非法或加载失败只显示非 accessible placeholder frame；自定义 fallback 遵循图片的可选名称与装饰隐藏语义。
 
 ```tsx
 // 内容图：给 accessibilityLabel 才会被 SR 读到
@@ -111,4 +166,4 @@ Thumbnail 的公开结构是 outer layout View + inner visual frame；图片与 
 
 ## 设计原则
 
-新增"列表 / 卡片右侧缩略图 / chat 内嵌图片预览"场景请直接用 `Thumbnail`,不要自画 `<Image style={{width, height, borderRadius, bg}}>`。尺寸阶梯不够覆盖时来这里加 size,不要 inline 写死。
+新增"列表 / 卡片右侧缩略图 / chat 内嵌图片预览"场景请直接用 `Thumbnail`,不要自画 `<Image style={{width, height, borderRadius, bg}}>`。尺寸阶梯不够覆盖时使用 size 对象，不通过 containerStyle 或 imageStyle 改写图像框。使用 ThumbnailProps['size'] 派生旧枚举的消费者需先缩窄对象分支，三档名称仍可使用 ThumbnailSize。

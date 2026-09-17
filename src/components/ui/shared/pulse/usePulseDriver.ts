@@ -8,9 +8,9 @@ import {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { usePrefersReducedMotion } from '../../../theme';
+import { usePrefersReducedMotion } from '../../../../theme';
 import { shouldAnimatePulse } from './normalizePulseOptions';
-import type { NormalizedPulseOptions } from './normalizePulseOptions';
+import type { NormalizedPulseOptions } from './types';
 
 /**
  * native Pulse driver —— reanimated 4 worklet,整个动画在 UI 线程跑、不占 JS 桥。

@@ -128,3 +128,5 @@ const members: readonly AvatarGroupItem[] = [
 - 提供 `onOverflowPress` 后,`+N` 使用 RNGH Pressable,role 为 button,默认名称为“查看其余 N 位成员”。
 - 小于 44pt 的可点击溢出位用 hitSlop 补足命中区,不改变头像组视觉宽度。
 - 组件不描述弹层、抽屉或跳转结果；消费端通过 `overflowAccessibilityHint` 持有该语义。
+
+AvatarGroup 与 Avatar 通过头像族内部 geometry 单元复用尺寸与圆角，不依赖 Avatar 的私有 styles。成员顺序、重叠及溢出操作仍归 AvatarGroup；内部几何不进入包根导出。
