@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.32.0](https://github.com/unif-design/react-native-design/compare/v0.31.3...v0.32.0) (2026-09-17)
+
+
+### Features
+
+* 落实 Design 新架构组件契约 ([#136](https://github.com/unif-design/react-native-design/issues/136)) ([60a925c](https://github.com/unif-design/react-native-design/commit/60a925c90d51e1704bf7be102e584f2c8afb1130))
+
 ## [0.31.3](https://github.com/unif-design/react-native-design/compare/v0.31.2...v0.31.3) (2026-09-04)
 
 
