@@ -1,6 +1,11 @@
 import type { ComponentRef, RefObject } from 'react';
 import type { TextInput } from 'react-native';
-import type { StyleProp, TextInputProps, ViewStyle } from 'react-native';
+import type {
+  StyleProp,
+  TextInputProps,
+  TextStyle,
+  ViewStyle,
+} from 'react-native';
 import type { IconName } from '../Icon';
 
 /**
@@ -141,9 +146,8 @@ export interface MultilineLayoutInput {
 }
 
 export interface MultilineLayout {
-  height: number;
+  inputStyle: Pick<TextStyle, 'height' | 'minHeight' | 'maxHeight'>;
   scrollEnabled: boolean;
-  onContentSizeChange: NonNullable<TextInputProps['onContentSizeChange']>;
   onLayout?: TextInputProps['onLayout'];
 }
 

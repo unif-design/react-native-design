@@ -206,10 +206,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
             onChangeText={controller.onChangeText}
             editable={effectiveEditable}
             multiline={multiline}
-            onContentSizeChange={(event) => {
-              if (multiline) multilineLayout.onContentSizeChange(event);
-              onContentSizeChange?.(event);
-            }}
+            onContentSizeChange={onContentSizeChange}
             onLayout={(event) => {
               if (multiline) multilineLayout.onLayout?.(event);
               onLayout?.(event);
@@ -233,9 +230,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
                 (multilineLayout.scrollEnabled
                   ? styles.inputScrolling
                   : styles.inputClipped),
-              multiline && {
-                height: multilineLayout.height,
-              },
+              multiline && multilineLayout.inputStyle,
               searchLayout !== undefined && {
                 minHeight: searchLayout.interactiveHeight,
               },

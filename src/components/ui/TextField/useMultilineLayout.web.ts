@@ -49,14 +49,11 @@ export function useMultilineLayout({
     (event) => setWidth(event.nativeEvent.layout.width),
     []
   );
-  // RNW 在 ref/输入事件中交付的是受当前 frame 影响的尺寸，不能用它覆盖上面的实际测量。
-  const onContentSizeChange = useCallback<
-    MultilineLayout['onContentSizeChange']
-  >(() => {}, []);
   return {
-    height: Math.min(maximum, Math.max(minimum, contentHeight)),
+    inputStyle: {
+      height: Math.min(maximum, Math.max(minimum, contentHeight)),
+    },
     scrollEnabled: contentHeight > maximum,
-    onContentSizeChange,
     onLayout,
   };
 }

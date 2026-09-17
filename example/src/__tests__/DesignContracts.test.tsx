@@ -11,12 +11,14 @@ import {
 } from '@unif/react-native-design';
 
 describe('Design 独立消费契约', () => {
-  test('空值也采用当前原生文字测量，保留大字号的输入行空间', () => {
-    render(
+  test('Textarea 保留原生自然测量约束，内容尺寸事件原样交付', () => {
+    const onContentSizeChange = jest.fn();
+    const view = render(
       <ThemeProvider fontScale={2}>
         <Textarea
           value=""
           onChangeText={() => {}}
+          onContentSizeChange={onContentSizeChange}
           minHeight={44}
           maxHeight={120}
           accessibilityLabel="大字号输入"
@@ -24,13 +26,38 @@ describe('Design 独立消费契约', () => {
       </ThemeProvider>
     );
     const input = screen.getByLabelText('大字号输入');
-    fireEvent(input, 'contentSizeChange', {
+    const style = StyleSheet.flatten(input.props.style);
+    // 固定 height 会让 iOS Fabric 的布局尺寸不再变化，阻断后续内容尺寸通知。
+    expect(style.height).toBeUndefined();
+    expect(style.minHeight).toBeGreaterThan(0);
+    expect(style.minHeight).toBeLessThan(44);
+    expect(style.maxHeight - style.minHeight).toBe(120 - 44);
+    expect(style.fontSize).toBe(typography.body * 2);
+    const event = {
       nativeEvent: { contentSize: { width: 200, height: 60 } },
-    });
-    expect(StyleSheet.flatten(input.props.style).height).toBe(60);
+    };
+    fireEvent(input, 'contentSizeChange', event);
+    expect(onContentSizeChange).toHaveBeenCalledWith(event);
+    expect(StyleSheet.flatten(input.props.style).height).toBeUndefined();
+
+    view.rerender(
+      <ThemeProvider fontScale={2}>
+        <Textarea
+          value="长文\n第二行\n第三行"
+          onChangeText={() => {}}
+          minHeight={44}
+          maxHeight={44}
+          accessibilityLabel="大字号输入"
+        />
+      </ThemeProvider>
+    );
+    // min=max 时也不能依赖框高变化才开启滚动；是否有溢出由原生输入处理。
+    expect(input.props.scrollEnabled).toBe(true);
+    const fixedStyle = StyleSheet.flatten(input.props.style);
+    expect(fixedStyle.maxHeight).toBe(fixedStyle.minHeight);
   });
 
-  test('Textarea 交付原文，按内容尺寸增高、封顶、缩短及外部清空', () => {
+  test('Textarea 原文、外部替换和清空保持同一输入实例及滚动能力', () => {
     function Consumer() {
       const [value, setValue] = useState('');
       return (
@@ -44,6 +71,7 @@ describe('Design 独立消费契约', () => {
             submitBehavior="newline"
           />
           <Text>{`草稿：${value}`}</Text>
+          <Button label="替换短文" onPress={() => setValue('短文')} />
           <Button label="清空草稿" onPress={() => setValue('')} />
         </>
       );
@@ -56,27 +84,14 @@ describe('Design 独立消费契约', () => {
     const input = screen.getByLabelText('消息输入框');
     fireEvent.changeText(input, ' 保留原文\n第二行 ');
     expect(screen.getByText('草稿： 保留原文\n第二行 ')).toBeTruthy();
-    fireEvent(input, 'contentSizeChange', {
-      nativeEvent: { contentSize: { width: 200, height: 80 } },
-    });
-    const grown = StyleSheet.flatten(input.props.style).height;
-    expect(grown).toBe(80);
-    fireEvent(input, 'contentSizeChange', {
-      nativeEvent: { contentSize: { width: 200, height: 400 } },
-    });
-    expect(StyleSheet.flatten(input.props.style).height).toBeLessThan(120);
-    expect(input.props.scrollEnabled).toBe(true);
-    fireEvent(input, 'contentSizeChange', {
-      nativeEvent: { contentSize: { width: 200, height: 25 } },
-    });
-    expect(StyleSheet.flatten(input.props.style).height).toBeLessThan(grown);
-    expect(input.props.scrollEnabled).toBe(false);
-    fireEvent(input, 'contentSizeChange', {
-      nativeEvent: { contentSize: { width: 200, height: 400 } },
-    });
+    fireEvent.press(screen.getByRole('button', { name: '替换短文' }));
+    expect(input.props.value).toBe('短文');
+    expect(screen.getByLabelText('消息输入框')).toBe(input);
     fireEvent.press(screen.getByRole('button', { name: '清空草稿' }));
     expect(input.props.value).toBe('');
-    expect(input.props.scrollEnabled).toBe(false);
+    expect(screen.getByLabelText('消息输入框')).toBe(input);
+    expect(StyleSheet.flatten(input.props.style).height).toBeUndefined();
+    expect(input.props.scrollEnabled).toBe(true);
     expect(input.props.submitBehavior).toBe('newline');
   });
 

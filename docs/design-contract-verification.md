@@ -6,7 +6,7 @@
 
 | 单元 | 实现及主要依据 | 公开契约 |
 | --- | --- | --- |
-| Textarea / TextField | 原生内容尺寸事件与 Web 平台测量分别处理高度；表面高度包含 padding、边框，错误说明在外；支持增长、缩短、外部清空、上限滚动、宽度和字号变化。见 `src/components/ui/TextField/useMultilineLayout(.web).ts` | minHeight 默认 96、maxHeight 默认无限制；模式锁定、原值交付、原生事件、focus / blur 保留。显式 scrollEnabled 仍沿原生参数传入 |
+| Textarea / TextField | 原生使用 Yoga 文本测量及 min/maxHeight 约束，Web 独立实测高度；表面高度包含 padding、边框，错误说明在外；支持增长、缩短、外部清空、上限滚动、宽度和字号变化。见 `src/components/ui/TextField/useMultilineLayout(.web).ts` | minHeight 默认 96、maxHeight 默认无限制；模式锁定、原值交付、原生事件、focus / blur 保留。原生保留内部滚动能力，仅溢出时实际滚动；显式 scrollEnabled 仍优先 |
 | Thumbnail | `ThumbnailDimensions` 包根类型、size 对象、fallback；对象宽高为有限正数，圆角有限非负，非法对象整体回退 md；复用 keyed ImageAttempt | sm/md/lg、默认 md、source/uri 互斥、原图片生命周期保留。对象尺寸不二次缩放；使用 `ThumbnailProps['size']` 推导三档枚举的消费者须缩窄对象分支，或继续使用 ThumbnailSize |
 | CircularProgress | useFontScale + scaleFontMetric 接入百分比一次；自然文字布局、居中的显式 SVG 圆环 | 参数与比例归一化不变。小圆环配大字号时外层占用可增大；不截百分号、不缩字体、不关闭标签。showLabel=false 无文字空间 |
 | Avatar / AvatarGroup | Avatar/geometry.ts 提供实际共享尺寸、文字基准和圆角，styles.ts 只管样式 | 五档尺寸、形态、重叠、溢出及公开类型语义不变；不新增公共几何 API |
@@ -14,6 +14,8 @@
 | 其余公开单元 | 对照架构 units.md 的 50 个组件与现有 catalog；确认/Toast/选择控件/通用组合保留所属职责，完整原测试继续执行 | 继续一个 Design 包；无新增业务流程、上传服务、表单引擎或宿主队列 |
 
 对 Design 源码、example、Website 及本机 Portal / ai-app-portal 的只读引用检索，没有发现现存 `ThumbnailProps['size']` 枚举派生消费者；新增类型样本明确验证对象缩窄。未登记 Chat 工程与其他未检索工程不在此结论内。
+
+RN 0.86.3 的 iOS Fabric 在布局尺寸变化时交付内容尺寸事件，因此原生输入不以该事件回写固定 height。两端 Yoga 文本测量直接处理值、宽度与字体变化，min/max 仅约束结果；原始事件仍交给调用者。即使 min=max，也不依赖框高变化才开启滚动。这是源码及接线依据，实际设备布局仍按下方矩阵验收。
 
 实质修改的对象结构采用 interface，联合及 SDK 派生使用 type；仅整理实际触及单元。运行期相对导入图按 native、Web 两种解析检查：253 / 265 个 TS/TSX 文件，未发现循环。该静态检查不证明所有动态加载或原生链接。ESLint 新规则的负例会拒绝 AvatarGroup 读取 Avatar/styles，正例允许 Avatar/geometry；Git 已忽略的 `ds-bundle/` 生成预览也从 lint 排除，未排除库源码。
 
@@ -26,8 +28,8 @@
 | 当前检查 | 实际结果与限制 |
 | --- | --- |
 | 根 / example / Website typecheck | 三者通过；公开尺寸分支、派生 size 缩窄、输入 ref 与非法调用反例均纳入检查。三处采用同一当前 SDK 类型入口，固有尺寸直接使用 SDK 类型，不保留强转或旧类型入口适配 |
-| 根定向 Jest（--runInBand） | 单元实现验证覆盖 12 suites / 150 tests；类型入口与 Pulse 清理后的增量验证为 Pulse、CircularProgress 2 suites / 20 tests，通过 |
-| example 定向 Jest（test:focused、--runInBand） | 场景验证覆盖 5 suites / 49 tests；清理后的 Feedback、DesignContracts、PulseContracts 3 suites / 30 tests，通过，含相同参数重渲染不重启动效 |
+| 根定向 Jest（--runInBand） | TextField 归一化与值状态 2 suites / 73 tests，以及 Pulse / CircularProgress 2 suites / 20 tests 通过；其余触及单元已有定向回归 |
+| example 定向 Jest（test:focused、--runInBand） | DesignContracts / FormsScene 2 suites / 20 tests 通过，覆盖原生自然测量约束、原文与外部替换、清空和事件交付；另有 Feedback / PulseContracts 定向回归，含相同参数重渲染不重启动效 |
 | 临时消费者 Pulse 定向测试 | 在没有相邻库实现文件的目录中，通过包根定位真实库模块；2 tests 通过，覆盖默认、参数更新、reduced motion 与释放 |
 | Lint / 格式 / diff | 根及 example Lint 与 git diff --check 通过；既有 warning 保留，未为通过检查修改业务代码 |
 | showcase 静态契约 | 直接调用现有 verifyExampleShowcase() 通过：50 个公开组件、真实消费、场景/Host、资料、CI/Turbo 配置。此入口不执行 Jest，不能代表完整门禁通过 |
@@ -36,7 +38,7 @@
 | Website/llms | 从 MDX 源重新生成，生成器测试通过；最新完整 Website 构建留 CI |
 | 全量 Jest、库/原生构建与 JS bundle | 本地不执行；完整结果须核对对应提交的 CI，不以定向通过代替完整结果 |
 
-关键回归覆盖 Textarea 测量与空值大字号、Thumbnail 对象尺寸与占位，以及真实 Provider 下的进度字号。RNTL 合成 contentSize / error / focus 只证明组件交接；PulseContracts 测真实 Web timer driver，并仅替代平台 reduced-motion 事实，不证明 native worklet。
+关键回归覆盖 Textarea 自然布局约束与大字号、Thumbnail 对象尺寸与占位，以及真实 Provider 下的进度字号。Textarea 测试检查不锁定原生 height、min=max 仍可滚动、外部替换与清空保留实例；RNTL 合成 contentSize / error / focus 只证明事件交接，不模拟原生布局通过。PulseContracts 测真实 Web timer driver，并仅替代平台 reduced-motion 事实，不证明 native worklet。
 
 ## 真实 Web 布局
 
