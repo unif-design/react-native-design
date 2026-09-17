@@ -1,6 +1,6 @@
 import type { StyleProp, ViewStyle } from 'react-native';
 
-export type PulseOptions = {
+export interface PulseOptions {
   /** 透明度下界（默认 0.6） */
   from?: number;
   /** 透明度上界（默认 1） */
@@ -9,20 +9,20 @@ export type PulseOptions = {
   duration?: number;
   /** 首次周期之前的延迟（默认 0） */
   delay?: number;
-};
+}
 
-export type PulseDotProps = PulseOptions & {
+export interface PulseDotProps extends PulseOptions {
   size?: number;
   color?: string;
   /** 容器附加样式(margin / position 等布局微调)。 */
   style?: StyleProp<ViewStyle>;
   /** E2E / 测试定位 */
   testID?: string;
-};
+}
 
-export type PulseProps = PulseOptions & {
+export interface PulseProps extends PulseOptions {
   /** 容器附加样式(margin / position 等布局微调)。 */
   style?: StyleProp<ViewStyle>;
   /** E2E / 测试定位 */
   testID?: string;
-};
+}

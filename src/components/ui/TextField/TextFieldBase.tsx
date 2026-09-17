@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { Platform, Text, TextInput, View } from 'react-native';
 import type { TextInputProps } from 'react-native';
-import { fixed, space, useColors, useThemedStyles } from '../../../theme';
+import { fixed, useColors, useThemedStyles } from '../../../theme';
 import { childTestID } from '../../../utils/testID';
 import { createLogger } from '../../../utils/logger';
 import {
@@ -20,6 +20,7 @@ import { TextFieldSlot } from './TextFieldSlot';
 import type { TextFieldBaseProps, TextFieldHandle } from './types';
 import { useErrorAnnouncement } from './useErrorAnnouncement';
 import { useTextFieldValue } from './useTextFieldValue';
+import { useMultilineLayout } from './useMultilineLayout';
 
 const log = createLogger('TextField');
 
@@ -49,6 +50,9 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
       placeholderTextColor: callerPlaceholder,
       onFocus,
       onBlur,
+      onContentSizeChange,
+      onLayout,
+      scrollEnabled,
       testID,
       style: _style,
       numberOfLines: _numberOfLines,
@@ -94,6 +98,15 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
       minHeight,
       maxHeight
     );
+    const multilineLayout = useMultilineLayout({
+      enabled: multiline,
+      value: controller.value,
+      minHeight: normalizedTextareaHeights.minHeight,
+      maxHeight: normalizedTextareaHeights.maxHeight,
+      fontSize: styles.input.fontSize,
+      placeholder: allowedNativeProps.placeholder as string | undefined,
+      inputRef: nativeRef,
+    });
     const sanitizedContainer = sanitizeTextFieldContainerStyle(containerStyle);
     const effectiveEditable = disabled !== true && editable !== false;
     const mergedAccessibilityState = {
@@ -193,6 +206,15 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
             onChangeText={controller.onChangeText}
             editable={effectiveEditable}
             multiline={multiline}
+            onContentSizeChange={onContentSizeChange}
+            onLayout={(event) => {
+              if (multiline) multilineLayout.onLayout?.(event);
+              onLayout?.(event);
+            }}
+            scrollEnabled={
+              scrollEnabled ??
+              (multiline ? multilineLayout.scrollEnabled : undefined)
+            }
             onFocus={(event) => {
               setFocused(true);
               onFocus?.(event);
@@ -204,9 +226,11 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
             style={[
               styles.input,
               multiline && styles.inputMultiline,
-              multiline && {
-                minHeight: Math.max(0, normalizedHeight - space[4] * 2),
-              },
+              multiline &&
+                (multilineLayout.scrollEnabled
+                  ? styles.inputScrolling
+                  : styles.inputClipped),
+              multiline && multilineLayout.inputStyle,
               searchLayout !== undefined && {
                 minHeight: searchLayout.interactiveHeight,
               },

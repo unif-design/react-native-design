@@ -2,7 +2,7 @@ import type { DimensionValue, StyleProp, ViewStyle } from 'react-native';
 
 export type SkeletonShape = 'line' | 'rect' | 'circle';
 
-export type SkeletonProps = {
+export interface SkeletonProps {
   /** 形状,默认 'rect'。
    *  - 'line' → width 100% / height 11 / radius 3(文本占位)
    *  - 'rect' → width 100% / height 80 / radius 8(图片或卡片占位)
@@ -19,4 +19,4 @@ export type SkeletonProps = {
   style?: StyleProp<ViewStyle>;
   /** E2E / 测试定位 */
   testID?: string;
-};
+}

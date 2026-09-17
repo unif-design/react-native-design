@@ -128,6 +128,12 @@ invalid-image fixture
 Jest 只证明 source wiring 以及合成 load/error event 后的组件状态；真实 HTTPS、缓存和 native
 decode 仍按 `example/README.md` 的 Android/iOS 手工矩阵标记为待执行。
 
+## 多行输入与媒体消费
+
+Textarea 的 `minHeight` / `maxHeight` 约束完整输入表面，随内容、宽度和应用字号测量，支持缩短及外部清空；键盘避让与发送由消费者负责。Thumbnail 保留原三档默认，新增 `Readonly<ThumbnailDimensions>` 实际尺寸与失败 `fallback`。CircularProgress 百分比随应用字号缩放一次，小环配大字时外层自然增大，环与描边不变。
+
+详细契约和可操作样例见 Website 的 Textarea、Thumbnail、Loading 页面；本地验证依据见 [Design 契约验证](docs/design-contract-verification.md)。
+
 ## 文档
 
 - **文档站**(快速开始 · 组件 API · 设计令牌 · 设计原则):https://unif-design.github.io/react-native-design/

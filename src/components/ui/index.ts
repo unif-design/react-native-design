@@ -97,6 +97,7 @@ export type { TextareaProps } from './Textarea';
 export { Thumbnail } from './Thumbnail';
 export type {
   ThumbnailImageStyle,
+  ThumbnailDimensions,
   ThumbnailProps,
   ThumbnailSize,
 } from './Thumbnail';

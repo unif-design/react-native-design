@@ -11,7 +11,7 @@ import {
 import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
 import { Avatar } from '../Avatar';
-import { resolveAvatarBorderRadius, sizingFor } from '../Avatar/styles';
+import { resolveAvatarBorderRadius, sizingFor } from '../Avatar/geometry';
 import { normalizeNonBlankText } from '../shared/accessibilityName';
 import { resolveAvatarGroupLayout } from './layout';
 import { normalizeAvatarGroup } from './normalize';

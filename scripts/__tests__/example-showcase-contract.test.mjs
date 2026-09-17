@@ -2193,7 +2193,7 @@ test('production Jest discovery 不信任 --listTests role 的 executable config
         });
         const output = `${mutation.label}\n${result.stdout}\n${result.stderr}`;
         assert.equal(result.status, 0, output);
-        assert.match(output, /JEST_EXECUTION_SET_COMPLETED count=15/u);
+        assert.match(output, /JEST_EXECUTION_SET_COMPLETED count=17/u);
         assert.match(output, /JEST_GOVERNED_SUITES_COMPLETED count=9/u);
       }
     );
@@ -2251,7 +2251,7 @@ test('production Jest actual execution binds discovered paths with runTestsByPat
       });
       const output = `${result.stdout}\n${result.stderr}`;
       assert.equal(result.status, 0, output);
-      assert.match(output, /JEST_EXECUTION_SET_COMPLETED count=15/u);
+      assert.match(output, /JEST_EXECUTION_SET_COMPLETED count=17/u);
       assert.match(output, /JEST_GOVERNED_SUITES_COMPLETED count=9/u);
       assert.doesNotMatch(output, /Test Suites:\s+1 passed, 1 total/u);
     }

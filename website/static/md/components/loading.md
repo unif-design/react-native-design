@@ -93,6 +93,46 @@ function Demo() {
 
 ### CircularProgress
 
+```tsx
+const ProgressFontDemo = () => {
+  const [fontScale, setFontScale] = useState(1);
+  return (
+    <>
+      <View style={{ gap: 16 }}>
+        <ThemeProvider fontScale={fontScale}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            {[0, 0.42, 1].map((value) => (
+              <CircularProgress
+                key={value}
+                value={value}
+                size={16}
+                thickness={2}
+                showLabel
+                accessibilityLabel={`百分比 ${value}`}
+                testID={`progress-${value}`}
+              />
+            ))}
+            <CircularProgress
+              value={0.42}
+              size={16}
+              testID="progress-no-label"
+            />
+          </View>
+        </ThemeProvider>
+          <Button
+            label="切换进度字号"
+            onPress={() => setFontScale(fontScale === 1 ? 3 : 1)}
+          />
+      </View>
+    </>
+  );
+};
+```
+
+中央百分比按 ThemeProvider.fontScale 缩放一次，系统字号沿 RN 原生行为处理。文字自然布局，圆环与描边保持 size / thickness 指定的实际尺寸。小圆环配大字号时外层占用可以增大；不会缩小字号、截掉百分号或自动关闭标签。showLabel=false 时保持 size × size 的固定占用；显示标签时采用平台固有尺寸，纵向容器的 stretch 不会把圆环拉成整行宽。外部显式设置裁切的容器仍由调用方负责。
+
+未知上传比例应使用 Spinner 或 BorderBeam 配合实际状态说明，不传 NaN 或伪造 0%；100% 也不代表业务成功。
+
 | Prop                 | Type                    | 默认           | 说明                                               |
 | -------------------- | ----------------------- | -------------- | -------------------------------------------------- |
 | `value`              | `number`                | 必填           | `0..1` 的确定进度；越界值收敛到边界，非有限值按 0  |

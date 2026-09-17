@@ -1,8 +1,12 @@
 import React from 'react';
 import Animated from 'react-native-reanimated';
-import { DOT_DEFAULTS, usePulseWithDefaults } from '../Pulse/usePulse';
+import { createLogger } from '../../../utils/logger';
+import { usePulseAnimation } from '../shared/pulse/usePulseAnimation';
+import { SKELETON_DEFAULTS } from './constants';
 import { r, useColors } from '../../../theme';
 import type { SkeletonProps } from './types';
+
+const log = createLogger('Skeleton');
 
 /**
  * 页面级加载占位骨架。3 个形状由 `shape` 切换。
@@ -26,11 +30,7 @@ export function Skeleton({
   testID,
 }: SkeletonProps): React.JSX.Element {
   const c = useColors();
-  const animatedStyle = usePulseWithDefaults(
-    undefined,
-    DOT_DEFAULTS,
-    'Skeleton'
-  );
+  const animatedStyle = usePulseAnimation(undefined, SKELETON_DEFAULTS, log);
 
   // 按形状推默认尺寸 + 圆角;caller 显式传 width / height / radius 时 override
   const dim = (() => {

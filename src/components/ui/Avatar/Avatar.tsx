@@ -3,12 +3,8 @@ import { Text, View } from 'react-native';
 import { scaleFontMetric, useColors, useFontScale } from '../../../theme';
 import { resolveImageSource } from '../../../utils/imageSource';
 import { ImageAttempt } from '../shared/ImageAttempt';
-import {
-  paletteFor,
-  resolveAvatarBorderRadius,
-  sizingFor,
-  styles,
-} from './styles';
+import { paletteFor, styles } from './styles';
+import { resolveAvatarBorderRadius, sizingFor } from './geometry';
 import type { AvatarProps } from './types';
 
 /**

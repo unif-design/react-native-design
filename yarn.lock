@@ -6211,7 +6211,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*":
+"@types/node@npm:*, @types/node@npm:25.9.1":
   version: 25.9.1
   resolution: "@types/node@npm:25.9.1"
   dependencies:
@@ -6682,6 +6682,7 @@ __metadata:
     "@sbaiahmed1/react-native-blur": "npm:6.0.1"
     "@testing-library/react-native": "npm:^13.3.3"
     "@types/jest": "npm:^29.5.13"
+    "@types/node": "npm:25.9.1"
     "@types/react": "npm:^19.2.0"
     "@types/react-test-renderer": "npm:^19.1.0"
     "@unif/react-native-design": "workspace:*"

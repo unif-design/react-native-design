@@ -6,6 +6,7 @@ import {
   Button,
   Empty,
   Input,
+  Icon,
   Logo,
   Segmented,
   Switch,
@@ -347,6 +348,22 @@ export function MediaScene(): React.JSX.Element {
               source={LOCAL_IMAGE}
               size="lg"
               testID="media-thumbnail-source-lg"
+            />
+          </View>
+          <View style={styles.row}>
+            <Thumbnail
+              source={LOCAL_IMAGE}
+              size={{ width: 76, height: 76, borderRadius: 8 }}
+              fallback={<Icon name="file" />}
+              selected
+              accessibilityLabel="附件尺寸样例"
+            />
+            <Thumbnail
+              uri={MEDIA_DECODE_FAILURE_URI}
+              size={{ width: 96, height: 56, borderRadius: 0 }}
+              fallback={<Icon name="file" />}
+              selected
+              accessibilityLabel="附件失败占位样例"
             />
           </View>
           <Text style={styles.fact}>失败后保留固定缩略图框</Text>

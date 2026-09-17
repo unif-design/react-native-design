@@ -30,6 +30,9 @@ import {
   Switch,
   Textarea,
   Thumbnail,
+  type ThumbnailDimensions,
+  type ThumbnailProps,
+  type ThumbnailSize,
   VersionPill,
   type AvatarShape,
   type AvatarGroupItem,
@@ -477,3 +480,32 @@ const carouselRenderItem: CarouselProps<CarouselItem>['renderItem'] = ({
   height={120}
   getAccessibilityLabel={() => 'x'}
 />;
+
+// Thumbnail 三档名称与显式尺寸保持独立，可安全缩窄派生 size。
+const attachmentDimensions: Readonly<ThumbnailDimensions> = {
+  width: 76,
+  height: 76,
+  borderRadius: 8,
+};
+<Thumbnail
+  uri="https://example.test/image.png"
+  size={attachmentDimensions}
+  fallback={<Text>文件</Text>}
+/>;
+const namedThumbnailSize: ThumbnailSize = 'sm';
+<Thumbnail source={1} size={namedThumbnailSize} />;
+function thumbnailSizeConsumer(
+  size: ThumbnailProps['size']
+): number | ThumbnailSize | undefined {
+  return typeof size === 'object' ? size.width : size;
+}
+thumbnailSizeConsumer(attachmentDimensions);
+// @ts-expect-error 显式尺寸必须提供高度
+<Thumbnail uri="image" size={{ width: 76 }} />;
+// @ts-expect-error 不接受 CSS 字符串尺寸
+<Thumbnail uri="image" size={{ width: '76px', height: 76 }} />;
+// @ts-expect-error ThumbnailSize 仍然是原三档名称
+const invalidThumbnailSize: ThumbnailSize = attachmentDimensions;
+thumbnailSizeConsumer(invalidThumbnailSize);
+// @ts-expect-error fallback 不放开 source/uri 互斥
+<Thumbnail uri="image" source={1} fallback={<Text>文件</Text>} />;

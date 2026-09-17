@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 import { avatar, radius } from '../../../../src/theme';
-import { resolveAvatarBorderRadius } from '../../../../src/components/ui/Avatar/styles';
+import { resolveAvatarBorderRadius } from '../../../../src/components/ui/Avatar/geometry';
 
 describe('resolveAvatarBorderRadius', () => {
   test('circle 始终按头像直径的一半取圆角', () => {

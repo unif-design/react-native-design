@@ -3,6 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "ignoreDeprecations": "6.0",
+    "customConditions": ["react-native-strict-api"],
     "paths": {
       "@unif/react-native-design": ["../src/index"],
       "@site/*": ["./*"]

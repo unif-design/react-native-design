@@ -274,6 +274,13 @@ export function FeedbackScene(): React.JSX.Element {
               accessibilityLabel="含百分比的文件上传进度"
               testID="feedback-circular-progress-label"
             />
+            <CircularProgress
+              value={1}
+              size={16}
+              thickness={2}
+              showLabel
+              accessibilityLabel="小圆环大字号样例"
+            />
           </View>
           <View style={styles.row}>
             <BorderBeam

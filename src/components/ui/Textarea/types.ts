@@ -13,9 +13,12 @@ import type {
  */
 export type TextareaProps = Omit<TextInputProps, RemovedTextInputProps> &
   TextFieldCommonProps &
-  TextFieldValueProps & {
-    /** 最小高度，默认 96（约 5 行） */
-    minHeight?: number;
-    /** 最大高度（超过后内部滚动），默认不限制 */
-    maxHeight?: number;
-  };
+  TextFieldValueProps &
+  TextareaHeightProps;
+
+interface TextareaHeightProps {
+  /** 最小高度，默认 96（约 5 行） */
+  minHeight?: number;
+  /** 最大高度（超过后内部滚动），默认不限制 */
+  maxHeight?: number;
+}

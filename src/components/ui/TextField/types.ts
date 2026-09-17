@@ -1,4 +1,11 @@
-import type { StyleProp, TextInputProps, ViewStyle } from 'react-native';
+import type { ComponentRef, RefObject } from 'react';
+import type { TextInput } from 'react-native';
+import type {
+  StyleProp,
+  TextInputProps,
+  TextStyle,
+  ViewStyle,
+} from 'react-native';
 import type { IconName } from '../Icon';
 
 /**
@@ -7,18 +14,18 @@ import type { IconName } from '../Icon';
  * `defaultValue?: never` 让「同时传 value 和 defaultValue」在类型层就报错 ——
  * 那是最常见的受控/非受控混用写法,运行时表现为「defaultValue 被静默忽略」。
  */
-export type ControlledTextValueProps = {
+export interface ControlledTextValueProps {
   value: string;
   onChangeText: (value: string) => void;
   defaultValue?: never;
-};
+}
 
 /** 非受控:内部持值,`defaultValue` 只在首次 render 读一次。 */
-export type UncontrolledTextValueProps = {
+export interface UncontrolledTextValueProps {
   value?: never;
   defaultValue?: string;
   onChangeText?: (value: string) => void;
-};
+}
 
 /** internal —— 由 InputProps / TextareaProps / SearchProps 组合进公共类型。 */
 export type TextFieldValueProps =
@@ -31,10 +38,10 @@ export type TextFieldValueProps =
  * 为什么不暴露原生 TextInput —— `clear()` 会绕过值状态机(受控下把 UI 清空但调用方
  * state 不变),`setNativeProps()` 能直接改任意原生属性,两者都会让公共契约失效。
  */
-export type TextFieldHandle = {
+export interface TextFieldHandle {
   focus: () => void;
   blur: () => void;
-};
+}
 
 /**
  * 左右 slot 的可验证配置。**不接受任意 ReactNode** ——
@@ -67,14 +74,14 @@ export type TextFieldContainerStyle = Omit<
 >;
 
 /** internal:Search 把真实交互行与仅作视觉的 surface 明确分层。 */
-export type SearchFieldLayout = {
+export interface SearchFieldLayout {
   interactiveHeight: number;
   visibleHeight: number;
   verticalInset: number;
-};
+}
 
 /** TextField 家族共享的非值 props(内部)。 */
-export type TextFieldCommonProps = {
+export interface TextFieldCommonProps {
   /** 左侧 slot —— 图标 / 文本 / 带 handler 与名称的操作 */
   leading?: TextFieldSlot;
   /** 右侧 slot —— 图标 / 文本 / 带 handler 与名称的操作 */
@@ -85,7 +92,7 @@ export type TextFieldCommonProps = {
   disabled?: boolean;
   /** 外层容器样式;不接受会破坏最小 frame 的尺寸字段 */
   containerStyle?: StyleProp<TextFieldContainerStyle>;
-};
+}
 
 /**
  * 这些原生 TextInput props 从公共类型删除:
@@ -127,3 +134,26 @@ export type TextFieldBaseProps = Omit<TextInputProps, RemovedTextInputProps> &
     /** internal:Search 的 44pt interactive row + 36pt decorative surface。 */
     searchLayout?: SearchFieldLayout;
   };
+
+export interface MultilineLayoutInput {
+  enabled: boolean;
+  value: string;
+  minHeight: number;
+  maxHeight: number | undefined;
+  fontSize: number | undefined;
+  placeholder: string | undefined;
+  inputRef: RefObject<ComponentRef<typeof TextInput> | null>;
+}
+
+export interface MultilineLayout {
+  inputStyle: Pick<TextStyle, 'height' | 'minHeight' | 'maxHeight'>;
+  scrollEnabled: boolean;
+  onLayout?: TextInputProps['onLayout'];
+}
+
+/** RN Web 的公开 host ref 仅在平台实现内使用这两个 DOM 测量属性。 */
+export interface WebTextInputMeasurement {
+  scrollHeight: number;
+  scrollTop: number;
+  style: { height: string; minHeight: string };
+}

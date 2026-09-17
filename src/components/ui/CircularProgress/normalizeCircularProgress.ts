@@ -1,17 +1,11 @@
+import type {
+  CircularProgressInput,
+  NormalizedCircularProgress,
+} from './types';
 import { createLogger } from '../../../utils/logger';
 
 const log = createLogger('CircularProgress');
 const warnedKeys = new Set<string>();
-
-export type NormalizedCircularProgress = Readonly<{
-  safeValue: number;
-  percentage: number;
-  safeSize: number;
-  safeThickness: number;
-  radius: number;
-  circumference: number;
-  dashOffset: number;
-}>;
 
 function warnOnce(key: string, message: string): void {
   if (warnedKeys.has(key)) return;
@@ -19,11 +13,9 @@ function warnOnce(key: string, message: string): void {
   log.warn(message);
 }
 
-export function normalizeCircularProgress(input: {
-  value: number;
-  size: number;
-  thickness: number;
-}): NormalizedCircularProgress {
+export function normalizeCircularProgress(
+  input: CircularProgressInput
+): NormalizedCircularProgress {
   const { value, size, thickness } = input;
 
   if (!Number.isFinite(value) || value < 0 || value > 1) {

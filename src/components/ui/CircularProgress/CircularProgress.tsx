@@ -1,27 +1,17 @@
 import { Text, View } from 'react-native';
-import type { TextStyle, ViewStyle } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { r, type, useColors } from '../../../theme';
+import {
+  r,
+  type,
+  useColors,
+  useFontScale,
+  scaleFontMetric,
+} from '../../../theme';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { normalizeCircularProgress } from './normalizeCircularProgress';
 import type { CircularProgressProps } from './types';
 
-const OUTER_CENTER_STYLE = {
-  alignItems: 'center',
-  justifyContent: 'center',
-} as const satisfies ViewStyle;
-
-const VISUAL_CONTAINER_STYLE = {
-  position: 'relative',
-} as const satisfies ViewStyle;
-
-const LABEL_CENTER_STYLE = {
-  fontWeight: '600',
-  left: 0,
-  position: 'absolute',
-  textAlign: 'center',
-  top: 0,
-} as const satisfies TextStyle;
+import { styles } from './styles';
 
 export function CircularProgress({
   value,
@@ -36,6 +26,7 @@ export function CircularProgress({
   testID,
 }: CircularProgressProps): React.JSX.Element {
   const colors = useColors();
+  const fontScale = useFontScale();
   const normalized = normalizeCircularProgress({ value, size, thickness });
   const {
     circumference,
@@ -58,14 +49,20 @@ export function CircularProgress({
         now: percentage,
         text: `${percentage}%`,
       }}
-      style={[{ height: safeSize, width: safeSize }, style, OUTER_CENTER_STYLE]}
+      style={[
+        showLabel
+          ? [styles.contentSize, { minHeight: safeSize, minWidth: safeSize }]
+          : { height: safeSize, width: safeSize },
+        style,
+        styles.center,
+      ]}
       testID={testID}
     >
       <View
-        style={[{ height: safeSize, width: safeSize }, VISUAL_CONTAINER_STYLE]}
+        style={[{ minHeight: safeSize, minWidth: safeSize }, styles.center]}
         {...A11Y_HIDDEN_PROPS}
       >
-        <Svg height={safeSize} width={safeSize}>
+        <Svg height={safeSize} width={safeSize} style={styles.ring}>
           <Circle
             cx={center}
             cy={center}
@@ -94,12 +91,9 @@ export function CircularProgress({
             style={[
               {
                 color: labelColor ?? colors.foreground,
-                fontSize: type.nano,
-                height: safeSize,
-                lineHeight: safeSize,
-                width: safeSize,
+                fontSize: scaleFontMetric(type.nano, fontScale),
               },
-              LABEL_CENTER_STYLE,
+              styles.label,
             ]}
           >
             {`${percentage}%`}

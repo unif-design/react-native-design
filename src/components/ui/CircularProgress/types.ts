@@ -1,6 +1,6 @@
 import type { StyleProp, ViewStyle } from 'react-native';
 
-export type CircularProgressProps = {
+export interface CircularProgressProps {
   /** 当前进度，使用 0..1；越界值会收敛到边界，非有限值按 0 处理。 */
   value: number;
   /** 圆环直径，默认 32，最小 16。 */
@@ -21,4 +21,21 @@ export type CircularProgressProps = {
   style?: StyleProp<ViewStyle>;
   /** E2E / 测试定位。 */
   testID?: string;
-};
+}
+
+/** 内部计算参数，不进入公共 barrel。 */
+export interface CircularProgressInput {
+  value: number;
+  size: number;
+  thickness: number;
+}
+
+export interface NormalizedCircularProgress {
+  safeValue: number;
+  percentage: number;
+  safeSize: number;
+  safeThickness: number;
+  radius: number;
+  circumference: number;
+  dashOffset: number;
+}
