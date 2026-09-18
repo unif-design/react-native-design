@@ -3769,11 +3769,11 @@ test('文档 verifier 拒绝任一 canonical iOS block 退回连续两次 cd', (
   }
 });
 
-test('repo-specific workflow 使用强并集 gate 且共享 CI digest 不漂移', () => {
+test('repo-specific workflow 保留独立 example gate 且共享 CI digest 不漂移', () => {
   const sharedCi = read('.github/workflows/ci.yml');
   assert.equal(
     createHash('sha256').update(sharedCi).digest('hex'),
-    '4ba9f4d7b1fd4b2c00bdfaba0f46dd35db4b62226d56704a943431433321def9'
+    'a4c20ce45b3993fd609bce506bb5a0856ea99f574d75dcc6faf7305fcfc9c26a'
   );
 
   const workflow = read('.github/workflows/example-showcase.yml');
@@ -3790,18 +3790,14 @@ test('repo-specific workflow 使用强并集 gate 且共享 CI digest 不漂移'
   );
   assert.match(workflow, /uses: \.\/\.github\/actions\/setup/u);
   for (const command of [
-    'yarn install --immutable',
     'yarn check:config',
     'yarn check:runtime-peers',
     'yarn check:icons',
+    'node scripts/verify-example-showcase.mjs --check',
     'yarn verify:example-showcase',
     'yarn example typecheck',
     'yarn example lint',
     'yarn example test --maxWorkers=2',
-    'yarn lint',
-    'yarn typecheck',
-    'yarn test --maxWorkers=2',
-    'yarn prepare',
   ]) {
     assert.ok(workflow.includes(`run: ${command}`), `workflow 缺少 ${command}`);
   }

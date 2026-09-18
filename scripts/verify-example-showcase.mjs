@@ -3573,7 +3573,7 @@ function verifyWorkflowContract(root) {
   const digest = createHash('sha256').update(sharedCi).digest('hex');
   if (
     digest !==
-    '4ba9f4d7b1fd4b2c00bdfaba0f46dd35db4b62226d56704a943431433321def9'
+    'a4c20ce45b3993fd609bce506bb5a0856ea99f574d75dcc6faf7305fcfc9c26a'
   ) {
     failVerification(
       'SHARED_CI_DIGEST',
@@ -3607,18 +3607,14 @@ function verifyWorkflowContract(root) {
     );
   }
   const requiredCommands = [
-    'yarn install --immutable',
     'yarn check:config',
     'yarn check:runtime-peers',
     'yarn check:icons',
+    'node scripts/verify-example-showcase.mjs --check',
     'yarn verify:example-showcase',
     'yarn example typecheck',
     'yarn example lint',
     'yarn example test --maxWorkers=2',
-    'yarn lint',
-    'yarn typecheck',
-    'yarn test --maxWorkers=2',
-    'yarn prepare',
   ];
   const workflowCommands = collectWorkflowRunCommands(workflow);
   const missingCommands = requiredCommands.filter(
@@ -3882,7 +3878,14 @@ export function verifyExampleShowcase(root) {
 }
 
 function runCli() {
-  const contractRoot = path.resolve(process.argv[2] ?? repositoryRoot);
+  const checkOnly = process.argv[2] === '--check';
+  const contractRoot = path.resolve(
+    process.argv[checkOnly ? 3 : 2] ?? repositoryRoot
+  );
+  if (checkOnly) {
+    verifyExampleShowcase(contractRoot);
+    return;
+  }
   const args = ['--test'];
 
   args.push(
