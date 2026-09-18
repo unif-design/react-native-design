@@ -1,14 +1,16 @@
 ---
 sidebar_position: 5
 title: BorderBeam 边框流光
-description: '沿内容边缘循环移动的渐变尾迹流光，可用于图片处理等短时忙碌状态；native 使用 Reanimated，Web 使用 CSS keyframes。'
+description: '在内容边缘展示循环流光，不接管布局和业务状态。'
 ---
+
+<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
 
 # BorderBeam 边框流光
 
 `BorderBeam` 在既有内容外围叠加一段沿边缘循环移动的渐变尾迹流光。流光由同相位、不同长度与透明度的描边叠加而成，前端更亮、尾部渐隐。它只负责视觉反馈，不改变内容布局，也不承载加载、错误、焦点或选中语义。
 
-## 实时预览
+## 代码演示 {#实时预览}
 
 ```tsx
   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
@@ -68,7 +70,7 @@ function ProcessingImage() {
 
 ## API
 
-| Prop           | Type                    | 默认        | 说明                                             |
+| 参数           | 类型                    | 默认值      | 说明                                             |
 | -------------- | ----------------------- | ----------- | ------------------------------------------------ |
 | `children`     | `ReactNode`             | 必填        | 被流光包围的原内容                               |
 | `active`       | `boolean?`              | `true`      | 是否显示并运行流光                               |

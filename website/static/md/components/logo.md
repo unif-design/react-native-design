@@ -1,14 +1,16 @@
 ---
 sidebar_position: 1
 title: Logo 主标
-description: "品牌主标容器组件 —— 标准化尺寸（默认 64）/ 圆角（默认 size/4 squircle）；source 由 consumer 必传，非空 accessibilityLabel 决定有意义图片语义。"
+description: '展示调用方提供的标识图片。'
 ---
+
+<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
 
 # Logo 主标
 
-Unif 品牌主标——白色简化飞鸟剪影 + 底部"健康快乐"中文标语，整体置于主橙 `#EB6E00` 背景上。
+展示调用方提供的标识图片。本页使用 Unif 标识演示，应用通过 `source` 提供自己的内容。
 
-## 实时预览
+## 代码演示 {#实时预览}
 
 下方渲染的就是 `src/components/ui/Logo/Logo.tsx` 本体,通过 `react-native-web` 翻译成浏览器节点。`source` 由 consumer 自传(品牌资产由消费者持有),文档站这里通过本地包装传入 `static/img/logo.png`。
 
@@ -43,17 +45,19 @@ const Logo = (props) => {
         <Logo size={64} />
         <Logo size={64} borderRadius={32} />
       </div>
-      <span style={{ fontSize: 12, color: '#999' }}>0 直角 · 默认 squircle · 32 满圆</span>
+      <span style={{ fontSize: 12, color: '#999' }}>
+        0 直角 · 默认 squircle · 32 满圆
+      </span>
     </div>
   </div>
 ```
 
 ## 资源位置
 
-| 用途 | 路径 | 说明 |
-|---|---|---|
-| RN App | 消费端自有资源（例如 `@/assets/logo.png`） | `Logo` 只接收 `source`，npm 包不携带品牌图片 |
-| 文档站 navbar / OG image / Favicon | `website/static/img/logo.png` | 同源镜像，`docusaurus.config.ts` 内三处都引用同一份 |
+| 用途                               | 路径                                       | 说明                                                |
+| ---------------------------------- | ------------------------------------------ | --------------------------------------------------- |
+| RN App                             | 消费端自有资源（例如 `@/assets/logo.png`） | `Logo` 只接收 `source`，npm 包不携带品牌图片        |
+| 文档站 navbar / OG image / Favicon | `website/static/img/logo.png`              | 同源镜像，`docusaurus.config.ts` 内三处都引用同一份 |
 
 ## 用法
 
@@ -76,37 +80,32 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 function BrandImage() {
   return (
-    <img
-      src={useBaseUrl('/img/logo.png')}
-      alt="Unif"
-      width="64"
-      height="64"
-    />
+    <img src={useBaseUrl('/img/logo.png')} alt="Unif" width="64" height="64" />
   );
 }
 ```
 
 ### App Icon 预设尺寸
 
-| 平台 | 输出尺寸 |
-|---|---|
-| iOS App icon | 1024×1024（源文件即用） |
-| iOS @1x/@2x/@3x | 60 / 120 / 180 |
+| 平台                     | 输出尺寸                 |
+| ------------------------ | ------------------------ |
+| iOS App icon             | 1024×1024（源文件即用）  |
+| iOS @1x/@2x/@3x          | 60 / 120 / 180           |
 | Android `mdpi → xxxhdpi` | 48 / 72 / 96 / 144 / 192 |
-| 浏览器 favicon | 32 / 48 / 64 |
+| 浏览器 favicon           | 32 / 48 / 64             |
 
 消费端若持有 1024×1024 主标源文件，可按需下采样；组件本身不负责生成或分发这些尺寸。
 
 ## API
 
-| Prop | Type | 默认 | 说明 |
-|---|---|---|---|
-| `source` | `ImageSourcePropType` | — | **必填** —— 品牌 logo 图片源（`require('./logo.png')` / `{ uri: '...' }`）；组件不持有任何资产 |
-| `size` | `number?` | `64` | 渲染正方形边长 |
-| `borderRadius` | `number?` | `size / 4` | 圆角；不传走柔和的 squircle |
-| `accessibilityLabel` | `string?` | — | trim 后非空时设为图片名称，并启用 `role="image"`；缺省/空白时按装饰图片处理 |
-| `style` | `StyleProp<ImageStyle>?` | — | 附加样式 |
-| `testID` | `string?` | — | E2E 定位 |
+| 参数                 | 类型                     | 默认值     | 说明                                                                                           |
+| -------------------- | ------------------------ | ---------- | ---------------------------------------------------------------------------------------------- |
+| `source`             | `ImageSourcePropType`    | —          | **必填** —— 品牌 logo 图片源（`require('./logo.png')` / `{ uri: '...' }`）；组件不持有任何资产 |
+| `size`               | `number?`                | `64`       | 渲染正方形边长                                                                                 |
+| `borderRadius`       | `number?`                | `size / 4` | 圆角；不传走柔和的 squircle                                                                    |
+| `accessibilityLabel` | `string?`                | —          | trim 后非空时设为图片名称，并启用 `role="image"`；缺省/空白时按装饰图片处理                    |
+| `style`              | `StyleProp<ImageStyle>?` | —          | 附加样式                                                                                       |
+| `testID`             | `string?`                | —          | E2E 定位                                                                                       |
 
 > 底层渲染为单个 `<Image>`，`resizeMode="cover"`。
 

@@ -1,8 +1,10 @@
 ---
 sidebar_position: 1
 title: TextField 输入共享内核（internal）
-description: 'Input、Textarea、Search 与 PasswordInput 的严格 value、slot、44pt frame 与错误播报内核；不作为公共组件导入。'
+description: '为输入内容组合标签、说明与错误展示。'
 ---
+
+<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
 
 # TextField 输入共享内核（internal）
 

@@ -1,23 +1,37 @@
 ---
 sidebar_position: 5
 title: Skeleton 骨架屏
-description: "页面级加载占位骨架 —— shape='line'/'rect'/'circle' 三形态(默认 rect),width/height/size/radius 可覆盖；共享 usePulse opacity 脉冲(0.5↔1,半周期 700ms),对 SR 隐藏。"
+description: '内容加载前的骨架占位。'
 ---
+
+<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
 
 # Skeleton 骨架屏
 
-页面加载占位，呈现内容大致结构。区别于 Shimmer（聊天专属流式占位）——Skeleton 是页面级。
+内容加载前的骨架占位，支持不同形状和脉冲效果。
 
-## 实时预览
+## 代码演示 {#实时预览}
 
 下方渲染的就是 `src/components/ui/Skeleton/*` 本体（native 走 reanimated 4 worklet、web 走 CSS transition 驱动 opacity 脉冲），通过 `react-native-web` 翻译成浏览器节点。
 
 ```tsx
   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
     <span className="demo-label">列表项骨架</span>
-    <View style={{ backgroundColor: 'var(--ifm-background-surface-color)', borderRadius: 12, padding: 12, borderWidth: 1, borderColor: 'var(--ifm-color-emphasis-200)', gap: 14 }}>
+    <View
+      style={{
+        backgroundColor: 'var(--ifm-background-surface-color)',
+        borderRadius: 12,
+        padding: 12,
+        borderWidth: 1,
+        borderColor: 'var(--ifm-color-emphasis-200)',
+        gap: 14,
+      }}
+    >
       {[0, 1, 2].map((i) => (
-        <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <View
+          key={i}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}
+        >
           <Skeleton shape="circle" size={40} />
           <View style={{ flex: 1, gap: 8 }}>
             <Skeleton shape="line" width="60%" height={14} />
@@ -35,50 +49,54 @@ description: "页面级加载占位骨架 —— shape='line'/'rect'/'circle' �
 
 来源：`src/components/ui/Skeleton/Skeleton.tsx`、`types.ts`、共享 [`usePulse`](pulse.md)。
 
-| 元素 | 规则 |
-|---|---|
-| 颜色 | `c.surfaceContainerHigh`（亮色 `#F0F0F0`） |
-| 圆角 | line：3px / rect：8px / circle：`size/2`（均可用 `radius` 覆盖） |
+| 元素 | 规则                                                                                                                                                               |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 颜色 | `c.surfaceContainerHigh`（亮色 `#F0F0F0`）                                                                                                                         |
+| 圆角 | line：3px / rect：8px / circle：`size/2`（均可用 `radius` 覆盖）                                                                                                   |
 | 动画 | opacity 脉冲（与 [`usePulse`](pulse.md) 同一条归一化 + driver 链路，内部默认 `from: 0.5`），半周期 700ms、全周期 1.4s，`0.5 ↔ 1` 循环；系统开启减弱动效时静止在 `1` |
 
 ## 形状
 
-| `shape` | 默认值 | 用途 |
-|---|---|---|
-| `'line'` | width 100% / height 11 / radius 3 | 文本占位 |
+| `shape`        | 默认值                            | 用途            |
+| -------------- | --------------------------------- | --------------- |
+| `'line'`       | width 100% / height 11 / radius 3 | 文本占位        |
 | `'rect'`(默认) | width 100% / height 80 / radius 8 | 图片 / 卡片占位 |
-| `'circle'` | size 40 / radius = size/2 | 头像占位 |
+| `'circle'`     | size 40 / radius = size/2         | 头像占位        |
 
 ## API
 
 来源：`src/components/ui/Skeleton/types.ts`、`Skeleton.tsx`。
 
-| Prop | 类型 | 默认 | 说明 |
-|---|---|---|---|
-| `shape` | `'line' \| 'rect' \| 'circle'` | `'rect'` | 形状，决定默认尺寸与圆角 |
-| `width` | `DimensionValue?` | 形状相关 | 宽度（line / rect）；circle 忽略，走 `size` |
-| `height` | `number?` | 形状相关 | 高度（line / rect）；circle 忽略，走 `size` |
-| `size` | `number?` | `40` | 直径（circle）；line / rect 忽略 |
-| `radius` | `number?` | 形状相关 | 覆盖圆角（line 3 / rect 8 / circle `size/2`） |
-| `style` | `StyleProp<ViewStyle>?` | — | 额外样式覆盖 |
-| `testID` | `string?` | — | E2E / 测试定位 |
+| 参数     | 类型                           | 默认值   | 说明                                          |
+| -------- | ------------------------------ | -------- | --------------------------------------------- |
+| `shape`  | `'line' \| 'rect' \| 'circle'` | `'rect'` | 形状，决定默认尺寸与圆角                      |
+| `width`  | `DimensionValue?`              | 形状相关 | 宽度（line / rect）；circle 忽略，走 `size`   |
+| `height` | `number?`                      | 形状相关 | 高度（line / rect）；circle 忽略，走 `size`   |
+| `size`   | `number?`                      | `40`     | 直径（circle）；line / rect 忽略              |
+| `radius` | `number?`                      | 形状相关 | 覆盖圆角（line 3 / rect 8 / circle `size/2`） |
+| `style`  | `StyleProp<ViewStyle>?`        | —        | 额外样式覆盖                                  |
+| `testID` | `string?`                      | —        | E2E / 测试定位                                |
 
 ## 用法
 
 ```tsx
 import { Skeleton } from '@unif/react-native-design';
 
-{/* 列表项骨架 */}
+{
+  /* 列表项骨架 */
+}
 <View>
   <Skeleton shape="circle" size={40} />
   <View style={{ flex: 1, gap: 8 }}>
     <Skeleton shape="line" width="60%" height={14} />
     <Skeleton shape="line" width="80%" height={11} />
   </View>
-</View>
+</View>;
 
-{/* 卡片骨架 */}
-<Skeleton shape="rect" width="100%" height={120} radius={12} />
+{
+  /* 卡片骨架 */
+}
+<Skeleton shape="rect" width="100%" height={120} radius={12} />;
 ```
 
 > 单一组件 + `shape` prop(MUI Skeleton 同款 variant 模式),旧的
@@ -92,8 +110,8 @@ import { Skeleton } from '@unif/react-native-design';
 
 ## 与 Shimmer 的区别
 
-| Skeleton | Shimmer (chat) |
-|---|---|
-| 页面级，初次加载 | 单个气泡里，AI 思考中 |
-| 整体块状（卡片、行）| 几行不等宽 + 头像 |
-| 加载完成后整体替换 | 气泡内文字流式填充 |
+| Skeleton             | Shimmer (chat)        |
+| -------------------- | --------------------- |
+| 页面级，初次加载     | 单个气泡里，AI 思考中 |
+| 整体块状（卡片、行） | 几行不等宽 + 头像     |
+| 加载完成后整体替换   | 气泡内文字流式填充    |

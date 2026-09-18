@@ -1,7 +1,10 @@
+// 共用生成规则源：unif-design/.github/templates/llms。
 'use strict';
+const { Buffer } = require('node:buffer');
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { buildLlmsIndex, formatIndexLine, packageLabel } = require('./index');
 const {
   assembleMarkdown,
   convertMdxBody,
@@ -74,42 +77,10 @@ function formatFullMetadata(document) {
   return `*Source: \`docs/${document.sourcePath}\` · Mirror: \`${document.outputPath}\`*`;
 }
 
-function formatIndexLine(entry) {
-  return entry.description
-    ? `- [${entry.title}](${entry.mdPath}) — ${entry.description}`
-    : `- [${entry.title}](${entry.mdPath})`;
-}
-
 function sortSections(keys) {
   return [...keys].sort((left, right) =>
     left === '概览' ? -1 : right === '概览' ? 1 : left.localeCompare(right)
   );
-}
-
-function buildLlmsIndex(siteName, entries) {
-  const bySection = new Map();
-  for (const entry of entries) {
-    const sectionEntries = bySection.get(entry.section) || [];
-    sectionEntries.push(entry);
-    bySection.set(entry.section, sectionEntries);
-  }
-
-  const lines = [
-    `# ${siteName}`,
-    '',
-    `> ${siteName} 文档索引。每个链接是该页的纯 Markdown 版(供 LLM 抓取);需要完整全文一次性喂入时用 llms-full.txt。`,
-    '',
-    '- [完整全文](llms-full.txt) — 全站全文聚合，适合一次性加载。',
-    '',
-  ];
-  for (const section of sortSections([...bySection.keys()])) {
-    lines.push(`## ${section}`, '');
-    for (const entry of bySection.get(section)) {
-      lines.push(formatIndexLine(entry));
-    }
-    lines.push('');
-  }
-  return lines.join('\n');
 }
 
 function buildToc(titles) {
@@ -147,6 +118,11 @@ function buildBundle(site) {
     );
   }
   const siteName = site.siteName || site.name || readSiteTitle(root);
+  const packageFile = path.join(root, '..', 'package.json');
+  const packageInfo = JSON.parse(
+    REAL_FILE_OPS.readFileSync(packageFile, 'utf8')
+  );
+  const versionNote = `<!-- Generated from ${packageLabel(packageInfo)}; edit source documentation. -->\n`;
   const sourceDocuments = files.map((file) => {
     const sourcePath = path.relative(docsDir, file).split(path.sep).join('/');
     const sourceName = `docs/${sourcePath}`;
@@ -170,7 +146,9 @@ function buildBundle(site) {
   const pages = {};
 
   for (const document of routeMap.documents) {
-    const convertedBody = convertMdxBody(document.body, document.sourceName);
+    const convertedBody = site.renderDocument
+      ? site.renderDocument(document)
+      : convertMdxBody(document.body, document.sourceName);
     const pageBody = rewriteInternalLinks(convertedBody, document, routeMap);
     const fullBody = rewriteInternalLinks(
       convertedBody,
@@ -184,7 +162,7 @@ function buildBundle(site) {
       );
 
     pages[document.outputPath] = Buffer.from(
-      assembleMarkdown([pageFrontmatter(document.raw), pageBody])
+      assembleMarkdown([pageFrontmatter(document.raw), versionNote, pageBody])
     );
     tocTitles.push(title);
     bodyBlocks.push(
@@ -201,7 +179,8 @@ function buildBundle(site) {
     assembleMarkdown([
       `# ${siteName} — 全文文档聚合`,
       '',
-      '> 单文件聚合版。每段都带源路径与标题，方便整体粘贴给 LLM。',
+      '> 可选全文。普通查询优先通过 llms.txt 定位相关单页。',
+      versionNote,
       '',
       buildToc(tocTitles),
       ...bodyBlocks,
@@ -209,10 +188,17 @@ function buildBundle(site) {
   );
   const entries = routeMap.documents.map(createIndexEntry);
   const bundle = {
-    'llms.txt': Buffer.from(buildLlmsIndex(siteName, entries)),
+    'llms.txt': Buffer.from(buildLlmsIndex(siteName, entries, packageInfo)),
     'llms-full.txt': Buffer.from(llmsFull),
     'md/index.json': Buffer.from(`${JSON.stringify(entries, null, 2)}\n`),
     ...pages,
+    ...(site.publicApi === undefined
+      ? {}
+      : {
+          'md/api.json': Buffer.from(
+            `${JSON.stringify(site.publicApi, null, 2)}\n`
+          ),
+        }),
   };
   attachBundleMeta(bundle, {
     expectedDocumentCount: routeMap.documents.length,
@@ -267,7 +253,10 @@ function validateTargetNames(bundle) {
       target.startsWith('/') ||
       /^[A-Za-z]:/u.test(target) ||
       target.includes('\\') ||
-      /[\u0000-\u001F\u007F]/u.test(target) ||
+      Array.from(target).some(
+        (character) =>
+          character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127
+      ) ||
       target
         .split('/')
         .some(
@@ -293,6 +282,7 @@ function validateTargetNames(bundle) {
       target !== 'llms.txt' &&
       target !== 'llms-full.txt' &&
       target !== 'md/index.json' &&
+      target !== 'md/api.json' &&
       !/^md\/.+\.md$/u.test(target)
     ) {
       throw new Error(`unsafe bundle target ${JSON.stringify(target)}`);
@@ -335,6 +325,17 @@ function validateBundle(bundle, routeMap) {
   }
   validateTargetNames(bundle);
 
+  if (Object.hasOwn(bundle, 'md/api.json')) {
+    const api = JSON.parse(bundle['md/api.json'].toString('utf8'));
+    if (
+      !api ||
+      Array.isArray(api) ||
+      typeof api !== 'object' ||
+      Object.values(api).some((value) => typeof value !== 'string')
+    ) {
+      throw new Error('Invalid public API text');
+    }
+  }
   const pageTargets = Object.keys(bundle).filter(
     (target) => target.startsWith('md/') && target.endsWith('.md')
   );
@@ -409,7 +410,7 @@ function validateBundle(bundle, routeMap) {
 
   const routes = outputRouteMap(bundle);
   for (const [target, content] of Object.entries(bundle)) {
-    if (target === 'md/index.json') continue;
+    if (target === 'md/index.json' || target === 'md/api.json') continue;
     const markdown = content.toString('utf8');
     if (findUnprocessedDemo(markdown) !== null) {
       throw new Error(`${target}: unprocessed Demo markup`);

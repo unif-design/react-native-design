@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { Buffer } from 'node:buffer';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
@@ -670,6 +671,8 @@ const sourceContractFiles = [
   '.github/workflows/example-showcase.yml',
   'example/package.json',
   'example/README.md',
+  'example/GUIDE.md',
+  'docs/DEVELOPMENT.md',
   'example/babel.config.js',
   'example/metro.config.js',
   'example/jest.config.js',
@@ -1053,10 +1056,7 @@ test('app registry 与 Android identity 原子同步并保留 New Architecture',
   assert.match(appGradle, /namespace "unif\.reactnativedesign\.example"/u);
   assert.match(appGradle, /applicationId "unif\.reactnativedesign\.example"/u);
   assert.match(appGradle, /autolinkLibrariesWithApp\(\)/u);
-  assert.match(
-    appGradle,
-    /getDefaultProguardFile\("proguard-android\.txt"\)/u
-  );
+  assert.match(appGradle, /getDefaultProguardFile\("proguard-android\.txt"\)/u);
   assert.match(rootGradle, /buildToolsVersion = "36\.0\.0"/u);
   assert.match(rootGradle, /minSdkVersion = 24/u);
   assert.match(rootGradle, /compileSdkVersion = 36/u);
@@ -3593,59 +3593,28 @@ test('exhaustive verifier 为 runtime、peer、toolchain、plugin 与 native dri
   }
 });
 
-test('根 README 与 example README 提供同一组 8 scene 和可复制命令', () => {
-  const rootReadme = read('README.md');
-  const exampleReadme = read('example/README.md');
-  const expectedTitles = {
-    foundation: '基础能力与图标',
-    actions: '操作与状态',
-    feedback: '反馈与浮层',
-    forms: '表单与输入',
-    navigation: '导航组件',
-    collections: '容器与集合',
-    media: '媒体展示',
-    business: '业务复合组件',
-  };
-  const sceneRows = (source) =>
-    Object.fromEntries(
-      [
-        ...source.matchAll(
-          /^\|[ \t]*`([^`]+)`[ \t]*\|[ \t]*([^|\n]+?)[ \t]*\|/gmu
-        ),
-      ]
-        .map((match) => [match[1], match[2].trim()])
-        .filter(([id]) => Object.hasOwn(expectedTitles, id))
-    );
-
-  assert.deepEqual(sceneRows(rootReadme), expectedTitles);
-  assert.deepEqual(sceneRows(exampleReadme), expectedTitles);
-  assert.doesNotMatch(
-    rootReadme,
-    /RN `?0\.85\.3|旧 0\.85|不能作为 RN `?0\.86/u
-  );
-  assert.match(rootReadme, /持久.*example\//u);
-  assert.match(rootReadme, /临时.*runtime harness/u);
-
-  for (const command of [
-    'yarn install --immutable',
-    'yarn example start',
-    'yarn example android',
-    'yarn example ios',
-    'yarn verify:example-showcase',
-    'yarn example typecheck',
-    'yarn example lint',
-    'yarn example test --maxWorkers=2',
-  ]) {
-    assert.match(rootReadme, new RegExp(command.replaceAll(' ', '\\s+'), 'u'));
-    assert.match(
-      exampleReadme,
-      new RegExp(command.replaceAll(' ', '\\s+'), 'u')
-    );
-  }
+test('README 入口指向独立展厅指南和开发资料', () => {
+  assert.match(read('README.md'), /\]\(example\/README\.md\)/u);
+  assert.match(read('README.md'), /\]\(docs\/DEVELOPMENT\.md\)/u);
+  assert.match(read('example/README.md'), /\]\(GUIDE\.md\)/u);
+  assert.match(read('AGENTS.md'), /unif-portal-dev-skills:code-development/u);
+  assert.match(read('AGENTS.md'), /\]\(docs\/DEVELOPMENT\.md\)/u);
 });
 
-test('example README 按运行顺序记录 Pods、主题与未冒充 PASS 的人工矩阵', () => {
-  const readme = read('example/README.md');
+test('文档入口不能丢失展厅指南链接', () => {
+  withFixture([...new Set(sourceContractFiles)], (fixture) => {
+    mutateFixtureFile(
+      fixture,
+      'example/README.md',
+      (source) => source.replaceAll('](GUIDE.md)', '](missing.md)'),
+      '删除指南链接'
+    );
+    assertVerifierCode(fixture, 'DOCUMENTATION_LINKS', '删除指南链接');
+  });
+});
+
+test('展厅指南 按运行顺序记录 Pods、主题与未冒充 PASS 的人工矩阵', () => {
+  const readme = read('example/GUIDE.md');
   const orderedHeadings = [
     '## 1. 安装',
     '## 2. 安装 iOS Pods',
@@ -3687,7 +3656,7 @@ test('example README 按运行顺序记录 Pods、主题与未冒充 PASS 的人
     'Blur soft/strong/fallback',
     '@unif/react-native-design',
   ]) {
-    assert.ok(readme.includes(required), `example README 缺少 ${required}`);
+    assert.ok(readme.includes(required), `展厅指南 缺少 ${required}`);
   }
   assert.doesNotMatch(readme, /^\|[^\n]*\|\s*PASS\s*\|/gmu);
   assert.ok(
@@ -3697,36 +3666,7 @@ test('example README 按运行顺序记录 Pods、主题与未冒充 PASS 的人
   );
 });
 
-test('AGENTS 与 CONTRIBUTING 使用 RN 0.86.3 showcase 的真实 workspace 和 gates', () => {
-  const agents = read('AGENTS.md');
-  const contributing = read('CONTRIBUTING.md');
-  for (const source of [agents, contributing]) {
-    assert.match(source, /@unif\/react-native-design-example/u);
-    assert.match(source, /ReactNativeDesignExample/u);
-    assert.match(source, /RN `?0\.86\.3/u);
-    assert.match(source, /yarn install --immutable/u);
-    assert.match(source, /yarn verify:example-showcase/u);
-    assert.match(source, /^\(cd example && bundle install\)$/mu);
-    assert.match(
-      source,
-      /^\(cd example && bundle exec pod install --project-directory=ios\)$/mu
-    );
-    assert.doesNotMatch(source, /^cd example && bundle (?:install|exec pod)/mu);
-    assert.doesNotMatch(
-      source,
-      /react-native-designdd-example|DesignddExample|RN `?0\.85\.3/u
-    );
-  }
-  assert.match(contributing, /yarn example typecheck/u);
-  assert.match(contributing, /yarn example lint/u);
-  assert.match(contributing, /yarn example test --maxWorkers=2/u);
-  assert.match(
-    contributing,
-    /bundle exec pod install --project-directory=ios/u
-  );
-});
-
-test('三份文档的 canonical iOS 命令可从 repo root 顺序执行', () => {
+test('展厅指南的 canonical iOS 命令可从 repo root 顺序执行', () => {
   const canonicalCommands = [
     '(cd example && bundle install)',
     '(cd example && bundle exec pod install --project-directory=ios)',
@@ -3736,11 +3676,7 @@ test('三份文档的 canonical iOS 命令可从 repo root 顺序执行', () => 
   );
   try {
     mkdirSync(path.join(fixture, 'example'), { recursive: true });
-    for (const relativePath of [
-      'AGENTS.md',
-      'CONTRIBUTING.md',
-      'example/README.md',
-    ]) {
+    for (const relativePath of ['example/GUIDE.md']) {
       const commandLines = read(relativePath)
         .split('\n')
         .filter((line) => canonicalCommands.includes(line.trim()))
@@ -3803,11 +3739,7 @@ test('三份文档的 canonical iOS 命令可从 repo root 顺序执行', () => 
 });
 
 test('文档 verifier 拒绝任一 canonical iOS block 退回连续两次 cd', () => {
-  for (const relativePath of [
-    'AGENTS.md',
-    'CONTRIBUTING.md',
-    'example/README.md',
-  ]) {
+  for (const relativePath of ['example/GUIDE.md']) {
     withFixture([...new Set(sourceContractFiles)], (fixture) => {
       assert.doesNotThrow(
         () => showcaseVerifier.verifyExampleShowcase(fixture),
@@ -4055,7 +3987,7 @@ test('README mutation gate 拒绝缺少安装、Pods、Metro、build、scene、t
       );
       mutateFixtureFile(
         fixture,
-        'example/README.md',
+        'example/GUIDE.md',
         mutation.mutate,
         mutation.label
       );
@@ -4067,8 +3999,8 @@ test('README mutation gate 拒绝缺少安装、Pods、Metro、build、scene、t
 test('README mutation gate 拒绝媒体 fixture 与 runtime peer 事实漂移', () => {
   const mutations = [
     {
-      label: 'example README 缺 decode-failure fixture',
-      file: 'example/README.md',
+      label: '展厅指南 缺 decode-failure fixture',
+      file: 'example/GUIDE.md',
       code: 'README_MEDIA_FIXTURES',
       mutate: (source) =>
         source.replaceAll(
@@ -4077,8 +4009,8 @@ test('README mutation gate 拒绝媒体 fixture 与 runtime peer 事实漂移', 
         ),
     },
     {
-      label: 'root README 误称 yarnrc 存在 logFilters',
-      file: 'README.md',
+      label: '展厅指南 误称 yarnrc 存在 logFilters',
+      file: 'example/GUIDE.md',
       code: 'README_PEER_FACTS',
       mutate: (source) =>
         source.replace(

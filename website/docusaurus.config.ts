@@ -8,7 +8,7 @@ const navbarVersion = pkg.version.split('.').slice(0, 2).join('.');
 
 const config: Config = {
   title: 'Unif Design',
-  tagline: '@unif/react-native-design · 移动优先设计系统',
+  tagline: 'Unif React Native 设计系统：基础组件、主题、字体和图标',
   favicon: 'img/logo.png',
 
   // 部署到 GitHub Pages 默认域名:https://unif-design.github.io/react-native-design/
@@ -120,17 +120,32 @@ const config: Config = {
         {
           title: '资源',
           items: [
-            { label: 'npm', href: 'https://www.npmjs.com/package/@unif/react-native-design' },
-            { label: 'GitHub', href: 'https://github.com/unif-design/react-native-design' },
+            {
+              label: 'npm',
+              href: 'https://www.npmjs.com/package/@unif/react-native-design',
+            },
+            {
+              label: 'GitHub',
+              href: 'https://github.com/unif-design/react-native-design',
+            },
           ],
         },
         {
           title: 'Unif 生态',
           items: [
             { label: '文档总站', href: 'https://unif.design' },
-            { label: '相机 camera', href: 'https://unif-design.github.io/react-native-camera/' },
-            { label: '友盟分享 umeng', href: 'https://unif-design.github.io/react-native-umeng/' },
-            { label: '华为扫码 hms-scan', href: 'https://unif-design.github.io/react-native-hms-scan/' },
+            {
+              label: '相机 camera',
+              href: 'https://unif-design.github.io/react-native-camera/',
+            },
+            {
+              label: '友盟分享 umeng',
+              href: 'https://unif-design.github.io/react-native-umeng/',
+            },
+            {
+              label: '华为扫码 hms-scan',
+              href: 'https://unif-design.github.io/react-native-hms-scan/',
+            },
           ],
         },
       ],

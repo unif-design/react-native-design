@@ -2,27 +2,18 @@
 slug: /testing
 sidebar_position: 9
 title: 在宿主工程里测试
-description: '@unif/react-native-design 的 Jest 接入：一行 preset 接好全部 peer mock。含 jest.config 一行配方、必须自己装的 devDependencies、入口替你做的每一条与漏掉后的确切报错、入口管不到的那条 babel worklets 插件、按 role + accessible name 断言的写法，以及不用入口时的手工等价物。'
+description: '通过公开 Jest preset 测试 Design 组件，并排查常见接入问题。'
 ---
+
+<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
 
 # 在宿主工程里测试
 
-本库发布两个受支持的 Jest 接线入口,消费者不必再自己推导要 mock 哪些 peer:
+Design 提供 Jest preset 和 setup，用于接入 React Native 与相关依赖的测试替身。被测 Design 组件仍使用真实实现。
 
-| 子路径                                  | 内容                                                                                | 什么时候用                                                    |
-| --------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `@unif/react-native-design/jest-preset` | RN 官方 preset + 组合 resolver + `transformIgnorePatterns` + 自动挂上下面那个 setup | **默认用这个**,一行接完                                       |
-| `@unif/react-native-design/jest-setup`  | 只有 peer mock 接线(不含 resolver 与 transform 放行)                                | 工程已有自己的 preset,只想借用接线时放进 `setupFilesAfterEnv` |
+## 最小接入 {#最小可用配方}
 
-之所以由本库提供:这份接线**完全由本库的 peer 集决定** —— RNGH、reanimated、worklets 的版本范围一变,接线就得跟着变。放在各消费仓自己维护,结果是 N 个仓 N 种写法,并且各自独立踩同一批坑。
-
-本库是**纯 JS**(没有 android / ios / cpp,也没有自己的 TurboModule),所以入口里换掉的从来不是 design 本身,而是它依赖的那几个 peer —— 用的都是各家**官方**的 mock。
-
-下面这份配方在 RN `0.86.3` + React `19.2.3` 基线上,用 `yarn pack` 打出的真实 tarball 装进一个干净宿主工程验证过:一行 preset,不加任何 mapper / transform / setup,11 个组件(Button / Cell / IconButton / Switch / Segmented / Carousel / Icon / Spinner / Skeleton / Reveal / ToastHost)的用例全绿。本仓 `example/` 的 15 个 suite 吃的也是同一个 preset。
-
-## 最小可用配方 {#最小可用配方}
-
-装测试侧依赖(版本与[环境要求](getting-started.md#环境要求)对齐):
+安装与项目 React／React Native 版本匹配的测试依赖：
 
 ```sh
 yarn add -D jest @react-native/jest-preset @react-native/babel-preset @babel/core \
@@ -34,299 +25,82 @@ yarn add -D jest @react-native/jest-preset @react-native/babel-preset @babel/cor
 module.exports = { preset: '@unif/react-native-design/jest-preset' };
 ```
 
-一个能直接跑的用例:
-
 ```tsx
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import { Button } from '@unif/react-native-design';
 
-test('点击保存会触发 onPress', () => {
+test('点击保存触发回调', () => {
   const onPress = jest.fn();
   render(<Button label="保存" onPress={onPress} />);
-
   fireEvent.press(screen.getByRole('button', { name: '保存' }));
-
   expect(onPress).toHaveBeenCalledTimes(1);
 });
 ```
 
-:::danger `@react-native/jest-preset` 必须由你自己装
-它**不是**本库的 dependency —— 本库的 preset 文件在运行时 `require` 它。漏装后本库会直接把可执行的那句话报出来:
+## 选择入口 {#入口替你做了什么}
 
-```text
-Validation Error: An unknown error occurred in @unif/react-native-design/jest-preset:
+| 入口                                    | 内容                                      | 适用情况                                          |
+| --------------------------------------- | ----------------------------------------- | ------------------------------------------------- |
+| `@unif/react-native-design/jest-preset` | RN preset、resolver、转换范围与 peer mock | 常规接入                                          |
+| `@unif/react-native-design/jest-setup`  | peer mock                                 | 已有自定义 preset，需自行维护 resolver 和转换范围 |
 
-@unif/react-native-design/jest-preset 需要宿主工程自行安装 @react-native/jest-preset(它不是本包的依赖):yarn add -D @react-native/jest-preset
-```
+实现见 [jest-preset.js](https://github.com/unif-design/react-native-design/blob/main/jest-preset.js)、[jest-resolver.js](https://github.com/unif-design/react-native-design/blob/main/jest-resolver.js) 与 [jest-setup.js](https://github.com/unif-design/react-native-design/blob/main/jest-setup.js)。它们随依赖更新维护，文档不再复制整份实现。
 
-(preset 文件把 `MODULE_NOT_FOUND` 换成了自己的错误。裸 `require` 的话,jest-config 只看报错文本里有没有 preset 路径,而 Node 的 Require stack 恰好带着 `.../@unif/react-native-design/jest-preset.js`,真因会被判成「preset 模块本身畸形」。)
+## 编写断言 {#怎么写断言}
 
-如果看到的是下面这句,那是**另一个成因**:本包 `exports` 里的 `./jest-preset/jest-preset` 别名缺失 —— 只会在改动本包自身时出现,装 npm 包用碰不到。
-
-```text
-Validation Error: Module @unif/react-native-design/jest-preset should have "jest-preset.js" or "jest-preset.json" file at the root.
-```
-
-上面那条 `yarn add -D` 里的六个包一个都不能省:`@react-native/babel-preset` 是你 `babel.config.js` 里的 preset,`react-test-renderer` 是 RNTL 的渲染后端,版本都跟着 `react-native` / `react` 走。
-:::
-
-## 入口替你做了什么 {#入口替你做了什么}
-
-`jest-preset` 在 RN 官方 preset 之上加三样东西:
-
-- **组合 resolver** —— RN 官方 resolver(临时剥掉 `react-native` 的 package exports,jest 才能解析 / mock 它的深路径)+ worklets 的 `.native.*` extension 过滤(让 worklets 走 web 实现,不触发 native init)。jest 的 `resolver` 是标量,两个不能并存,所以本库把它们组合在一个文件里。
-- **`transformIgnorePatterns`** —— 放行本库与 7 个发 ESM / TS 源码的 peer。
-- **`setupFilesAfterEnv`** —— 挂上本库的 `jest-setup`。RN 官方 preset 没有自己的 `setupFilesAfterEnv`(它只有 `setupFiles`),所以这里实际就这一条,preset 源码里的 `?? []` 只是防御。你在 config 里写自己的 `setupFilesAfterEnv` 不会顶掉它,jest 会前置拼接。
-
-`jest-setup` 接的是 9 个 runtime peer 里在 Jest 中需要接线的那 4 个:
-
-- `react-native-gesture-handler/jestSetup`(官方桩)+ 把包根 `Pressable` 换成 RN 的 `Pressable`、`GestureDetector` 换成透传壳;
-- `react-native-worklets` → 官方 mock;
-- `react-native-safe-area-context` → 官方 `jest/mock`;
-- `react-native-reanimated` → 官方 mock,并补齐稳定的 `useSharedValue` 与 RNGH 3 需要的 `makeMutable` shared value 形状;真实模块只用于调用官方 `setUpTests()`。
-
-## 每一条为什么必需 {#每一条为什么必需}
-
-入口替你做的每一条,以及自己写时漏掉的确切症状(都是实测结果,不是推测):
-
-| 入口替你做的这一条                                                                                      | 自己写时漏了会看到                                                                                                                      |
-| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `transformIgnorePatterns` 放行 `@unif/react-native-design`                                              | `SyntaxError: Unexpected token 'export'`,指向 `node_modules/@unif/react-native-design/lib/module/index.js`,整个 suite 起不来            |
-| `transformIgnorePatterns` 放行 RNGH / reanimated / worklets / safe-area-context / svg / carousel / blur | `SyntaxError: Cannot use import statement outside a module` —— 只放行 `@unif/react-native-design` 不够                                  |
-| `react-native-worklets` 换成官方 mock                                                                   | `TypeError: Cannot read properties of undefined (reading 'loadUnpackersWithCode')`,suite 起不来                                         |
-| RNGH `Pressable` 换成 RN `Pressable`                                                                    | `TypeError: _reanimatedWrapper.Reanimated?.useComposedEventHandler is not a function` —— **render 阶段就崩**,不是「点了没反应」         |
-| RNGH `GestureDetector` 换成透传壳                                                                       | 测 Carousel 抛 `GestureDetector must be used as a descendant of GestureHandlerRootView`,每个用例都得自己包一层根视图                    |
-| Reanimated 4.6 mock 的 `makeMutable` 补成 shared value                                                  | RNGH 3 卸载 `GestureDetector` 时访问 `lastUpdateEventMap.value.delete(...)`,报 `Cannot read properties of undefined (reading 'delete')` |
-| safe-area-context 的官方 `jest/mock`                                                                    | 只影响被测树里含 `SafeAreaProvider` 的用例:provider 子树整棵不渲染,查询报 `Unable to find an element with role: ...`                    |
-| 组合 resolver 里 RN 那半                                                                                | `react-native` 深路径(如 `react-native/Libraries/Utilities/Dimensions`)解析不到,`jest.mock` 打不上                                      |
-| 组合 resolver 里 worklets 那半                                                                          | worklets 走到 `.native.*` 实现,报 "Native part not initialized" 或启动明显变慢                                                          |
-
-本库发布的是 ESM(`lib/module/*.js`),而 `@react-native/jest-preset` 默认的
-`transformIgnorePatterns` 白名单只有 `react-native` / `@react-native` / `@react-native-community`
-三个前缀 —— 这就是第一行必须加的原因。tarball 同时带 `src` 与 sourcemap,所以报错栈会
-指回 `src/**` 的 TypeScript 行号,那是 source map 的效果,不是 Jest 在编译源码。
-
-:::caution 不要直接用裸 Reanimated mock
-Reanimated 4.6 的官方 mock 已覆盖本库需要的 API,但有两个上游形状不能直接用于这组依赖:`useSharedValue` 每次 render 都返回新 Proxy,而 `makeMutable` 只是 identity。前者会让把 shared value 放进 effect 依赖数组的组件反复执行,后者会让 RNGH 3 cleanup 访问不到 `.value`。
-
-本库入口在官方 mock 之上只修这两个边界。不要再用 `moduleNameMapper` 把 `react-native-reanimated` 直接映射到 `mock.js`,否则会绕过这层接线。
-:::
-
-:::tip Carousel 的用例不用再包根视图
-RNGH 3 的 `GestureDetector` 会检查祖先,直接 render `<Carousel>` 本来会抛
-`GestureDetector must be used as a descendant of GestureHandlerRootView`。入口把
-`GestureDetector` 换成了透传壳,所以用了 preset 就不必逐个用例包
-`<GestureHandlerRootView>`;手工接线时仍然要包。
-:::
-
-### 入口管不到的一条:babel 的 worklets 插件 {#babel-worklets-插件}
-
-上面那张表全是入口替你做掉的。还有一条它**做不到** —— 因为它不在 jest config 层,而在你的
-babel 配置里:
-
-> 真正转译 `node_modules/@unif/react-native-design/**` 的那份 babel 配置,必须带
-> `react-native-worklets/plugin`。
-
-本库发布产物里有**不带依赖数组**的 `useAnimatedStyle`,靠这个插件在编译期补齐。缺插件时
-reanimated 4 在 **render 阶段**抛(不是 import 阶段,所以 suite 起得来、用例一个个红):
-
-```text
-useAnimatedStyle was used without a dependency array or Babel plugin.
-```
-
-一个消费仓迁移时实测是 **106 条同型红**,全部指向 design 组件的 render。
-
-RN app 的标准 `babel.config.js`(见[快速开始 → 安装依赖](getting-started.md#安装依赖)第 3 步)
-本来就带这个插件,所以多数工程照着[最小可用配方](#最小可用配方)接完就没事。会缺的是这两类:
-
-- **jest 走的不是 app 那份 `babel.config.js`** —— `BABEL_ENV` / `NODE_ENV=test` 分支、单独的
-  `babel.config.test.js`、或 jest `transform` 直接指到自定义 babel;这些分支常常只抄了
-  `presets`,`plugins` 掉了。
-- **只给 `node_modules` 单开了一份 babel 配置** —— 比如 jest `transform` 里给
-  `node_modules/**` 指一个带独立 `configFile`(或 `babelrc: false`)的 babel-jest。
-  `transformIgnorePatterns` 放行本库之后,`lib/module` 就是由**那份**配置转译的,判据只看
-  它有没有这个插件。
-
-本仓自己测不到这条:根 Jest 是 **node 环境**、不 render 组件;`example/` 虽然 render,但它直读根
-`src/`,且自己那份 `babel.config.js` 显式列着这个插件。两条路都碰不到「消费仓 babel × 已发布
-`lib/module`」这个组合 —— 所以它在这里单列一节,而不是靠本仓的 gate 兜住。
-
-## 怎么写断言 {#怎么写断言}
-
-优先按 **role + accessible name** 查询。这样写出来的断言顺带复核了组件的 a11y 契约 ——
-名称播报错了、role 掉了,测试会直接红:
-
-```tsx
-screen.getByRole('button', { name: '扫码' }); // Button / IconButton / actionable Cell
-screen.getByRole('switch', { name: '接收通知' }); // Switch
-screen.getByRole('tab', { name: '全部' }); // Tabs / Segmented / TabBar
-```
-
-状态断言直接读 `accessibilityState`:Checkbox / Radio / Switch 用 `checked`,
-Tabs / TabBar / Segmented 用 `selected`。
+优先按角色和可访问名称查询，核对事件与状态：
 
 ```tsx
 const node = screen.getByRole('switch', { name: '接收通知' });
 expect(node.props.accessibilityState).toMatchObject({ checked: false });
 ```
 
-### 纯视觉组件要开 includeHiddenElements {#纯视觉组件要开-includehiddenelements}
+Checkbox／Radio／Switch 使用 `checked`；Tabs／TabBar／Segmented 使用 `selected`。命令式 Toast／Confirm 需要在测试树中挂载对应 Host 和 SafeAreaProvider；涉及定时器时使用 fake timers。
 
-`Icon` / `Spinner` / `Skeleton` 这类纯装饰组件按本库的 a11y 契约**整棵子树对读屏隐藏**
-(`accessibilityElementsHidden` + `importantForAccessibility="no-hide-descendants"`)。
-RNTL 默认跳过隐藏元素,所以拿 `testID` 查它们要显式打开:
+## FAQ
+
+### 找不到 RN preset，该安装哪个包？
+
+`@react-native/jest-preset` 由宿主作为开发依赖安装。确认包存在且版本与当前 React Native 对齐；缺少依赖与本库 preset 导出错误分别排查。
+
+### 为什么报 Unexpected token 或原生模块未初始化？ {#每一条为什么必需}
+
+| 现象                                                                        | 检查项                                                 |
+| --------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `Unexpected token 'export'`／`Cannot use import statement outside a module` | 实际 Jest 配置是否采用 preset 的转换范围               |
+| `loadUnpackersWithCode`／`Native part not initialized`                      | Worklets mock 与 resolver 是否被覆盖                   |
+| RNGH／Reanimated 接口缺失或 cleanup 访问 `.value` 失败                      | 是否绕过了本库 setup，直接替换成另一份 Reanimated mock |
+| SafeAreaProvider 子树未渲染                                                 | 是否接入 safe-area-context 的测试替身                  |
+| RN 深路径无法解析                                                           | 是否覆盖了 preset 的组合 resolver                      |
+
+### 已用了 preset，为什么仍报 useAnimatedStyle 错误？ {#babel-worklets-插件}
+
+如果错误为 `useAnimatedStyle was used without a dependency array or Babel plugin`，检查实际转译 Design 的 Babel 配置是否包含 `react-native-worklets/plugin`。独立测试配置、测试环境分支和 node_modules 专用转换配置都需要核对；Jest preset 不替应用配置 Babel。
+
+### 为什么 testID 查询不到装饰组件？ {#纯视觉组件要开-includehiddenelements}
+
+Icon、Spinner、Skeleton 等装饰内容对读屏隐藏。确实需要查询其测试节点时显式包含隐藏元素：
 
 ```tsx
 screen.getByTestId('save-icon', { includeHiddenElements: true });
 ```
 
-查不到时别急着怀疑组件没渲染 —— 先确认是不是这条。
+### 需要挂 ThemeProvider 吗？ {#要不要包-themeprovider}
 
-### 要不要包 ThemeProvider {#要不要包-themeprovider}
+测试树宜与应用宿主保持一致。验证暗色或字号时显式传入 ThemeProvider；省略时库使用亮色 fallback 并给出开发诊断，这不代表应用主题接入已经完成。
 
-**默认不用。** 缺 `ThemeProvider` 时 `useTheme()` 返回稳定的亮色 fallback,组件照常渲染,
-只会在 dev 下打一条诊断:
+### 如何测试 Toast 和 Confirm？ {#测-toast--confirm}
 
-```text
-[useTheme] 缺少 ThemeProvider，已使用稳定 light fallback
-```
+挂载对应 Host，并通过 SafeAreaProvider 提供安全区。触发、点击和定时推进放在 `act` 中，断言可见内容与实际结果；不要用真实等待代替定时器控制。
 
-只有验证暗色或字号档位时才包,并且用 `forceScheme` 锁死主题、不依赖测试机的系统设置:
+### 已有自己的 preset，如何接入？ {#不使用入口时的手工等价物}
 
-```tsx
-render(
-  <ThemeProvider forceScheme="dark">
-    <Demo />
-  </ThemeProvider>
-);
-```
+可在 `setupFilesAfterEnv` 加入 `@unif/react-native-design/jest-setup`，再按当前 preset 源码核对 resolver 与转换范围。不要把旧版配置整份复制后长期独立维护。
 
-### 测 toast / confirm {#测-toast--confirm}
+### Carousel 出现 act 警告，可以直接忽略吗？
 
-命令式 API 要求对应 host 在树里,而 `ToastHost` / `ConfirmHost` 都读安全区 context ——
-所以这类用例必须包 `SafeAreaProvider`(入口已经接好了 safe-area-context 的官方 mock)。
-toast 有自动消失定时器,**用 fake timers 推进**,别用真实等待:
+先核对异步更新、计时器及当前 Carousel／Worklets mock 组合，区分测试遗漏和依赖行为。断言通过不代表警告已解决；未处理的问题应与验证结果一起记录。
 
-```tsx
-jest.useFakeTimers();
+## 验证范围 {#边界}
 
-test('保存成功会弹一条 toast,到点自动消失', () => {
-  render(
-    <SafeAreaProvider>
-      <ToastHost />
-    </SafeAreaProvider>
-  );
-
-  act(() => {
-    toast.success('已保存');
-  });
-  expect(screen.getByText('已保存')).toBeTruthy();
-
-  act(() => {
-    jest.advanceTimersByTime(10_000);
-  });
-  expect(screen.queryByText('已保存')).toBeNull();
-});
-```
-
-## 不使用入口时的手工等价物 {#不使用入口时的手工等价物}
-
-只有在你的工程已经有一份不能替换的 preset、又不想用 `jest-setup` 时才需要照抄下面这些。
-**这三段就是本库仓根 `jest-preset.js` / `jest-resolver.js` / `jest-setup.js` 的内容** ——
-接线随 peer range 漂移,以仓根那三个文件为准,本页只是抄写。
-
-```js
-// jest.config.js
-module.exports = {
-  preset: '@react-native/jest-preset',
-  resolver: '<rootDir>/jest-resolver.js',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|@unif/react-native-design|@sbaiahmed1/react-native-blur|react-native-(gesture-handler|reanimated|worklets|safe-area-context|svg|reanimated-carousel))/)',
-  ],
-};
-```
-
-```js
-// jest-resolver.js —— jest 的 resolver 是标量,RN 与 worklets 两家的必须自己合并
-const reactNativeResolver = require('@react-native/jest-preset/jest/resolver.js');
-
-module.exports = (request, options) => {
-  if (
-    options.basedir.includes('react-native-worklets') ||
-    request.includes('react-native-worklets')
-  ) {
-    options = {
-      ...options,
-      extensions: options.extensions?.filter((ext) => !ext.includes('native')),
-    };
-  }
-  return reactNativeResolver(request, options);
-};
-```
-
-```js
-// jest.setup.js
-require('react-native-gesture-handler/jestSetup');
-
-jest.mock('react-native-worklets', () =>
-  require('react-native-worklets/lib/module/mock')
-);
-
-jest.mock(
-  'react-native-safe-area-context',
-  () => require('react-native-safe-area-context/jest/mock').default
-);
-
-// design 的交互组件内部用 RNGH 的 Pressable;Jest 里必须换成 RN 的。
-// GestureDetector 换成透传壳,用例才不必逐个包 GestureHandlerRootView。
-jest.mock('react-native-gesture-handler', () => ({
-  ...jest.requireActual('react-native-gesture-handler'),
-  Pressable: require('react-native').Pressable,
-  GestureDetector: ({ children }) => children,
-}));
-
-jest.mock('react-native-reanimated', () => {
-  const React = require('react');
-  const reanimatedMock = require('react-native-reanimated/mock');
-
-  function useStableSharedValue(initialValue) {
-    const sharedValueRef = React.useRef();
-    if (sharedValueRef.current === undefined) {
-      sharedValueRef.current = reanimatedMock.useSharedValue(initialValue);
-    }
-    return sharedValueRef.current;
-  }
-
-  return {
-    ...reanimatedMock,
-    makeMutable: (initialValue) => reanimatedMock.useSharedValue(initialValue),
-    useSharedValue: useStableSharedValue,
-  };
-});
-
-jest.requireActual('react-native-reanimated').setUpTests();
-```
-
-只想借用接线、其余自己配的话,把最后这段换成一行即可:
-
-```js
-// jest.config.js
-setupFilesAfterEnv: ['@unif/react-native-design/jest-setup'],
-```
-
-注意 `jest-setup` **不含** `transformIgnorePatterns` 与 resolver —— 那两样是 config 层的,
-进不了 setup 文件,仍要自己写。
-
-## 边界 {#边界}
-
-`setUpTests()` 不是渲染的必要条件,它是给 reanimated 自己的 jest matcher 用的;入口里留着
-不会有副作用。
-
-跑起来会在 console 看到一条 `An update to ItemRenderer inside a test was not wrapped in
-act(...)`:那是 `react-native-reanimated-carousel` 5 自己的 item 渲染在 worklets mock 的回调里
-setState,属上游行为,不影响断言,可以忽略。
-
-Jest 只能证明 source wiring 与合成事件后的组件状态。真实手势、reduced motion 的系统开关、
-VoiceOver / TalkBack 的实际播报、图片的真实 HTTPS 与 native decode,都不在 Jest 的能力范围内 ——
-这些按[常见问题](troubleshooting.md)排查,或在真机上人工验收。
+Jest 验证调用与合成事件后的状态。真实手势、系统动效偏好、VoiceOver／TalkBack、网络图片与原生解码在相应平台验证。

@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 title: DrawerHeader 抽屉头
-description: 'React Navigation Drawer 顶部品牌面板：名称 + 可选副标题 + 56pt 图片头像，非法 source 或当前图片加载失败时回退姓名首码点。'
+description: '展示抽屉顶部的头像、名称和副标题。'
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -12,7 +12,7 @@ import { DrawerHeader } from '@unif/react-native-design';
 `DrawerHeader` 是 `@react-navigation/drawer` 的展示型顶部面板：品牌橙背景、56pt
 头像、名称与可选副标题。它不持有 navigation、菜单或用户 Store，也没有点击行为。
 
-## 实时预览
+## 代码演示 {#实时预览}
 
 <LiveDemo>
   <div
@@ -54,13 +54,13 @@ function AppDrawerContent(props) {
 
 来源：`src/components/ui/DrawerHeader/types.ts`、`DrawerHeader.tsx`。
 
-| Prop       | Type                    | 默认 | 说明                                                                                                           |
-| ---------- | ----------------------- | ---- | -------------------------------------------------------------------------------------------------------------- |
-| `name`     | `string`                | —    | **必填**名称；显示为单行文字，头像 fallback 取 `name.trim()` 的首个 Unicode 码点，空白时使用 `?`               |
-| `subtitle` | `string?`               | —    | 单行辅助信息；省略或空字符串时不渲染                                                                           |
-| `source`   | `ImageSourcePropType?`  | —    | 真实头像图片（URI object / URI source 数组 / `require(...)`）；非法 source 或当前 attempt 加载失败时回退首字符 |
-| `style`    | `StyleProp<ViewStyle>?` | —    | 根品牌面板的附加样式                                                                                           |
-| `testID`   | `string?`               | —    | 根面板的 E2E / 测试定位                                                                                        |
+| 参数       | 类型                    | 默认值 | 说明                                                                                                           |
+| ---------- | ----------------------- | ------ | -------------------------------------------------------------------------------------------------------------- |
+| `name`     | `string`                | —      | **必填**名称；显示为单行文字，头像 fallback 取 `name.trim()` 的首个 Unicode 码点，空白时使用 `?`               |
+| `subtitle` | `string?`               | —      | 单行辅助信息；省略或空字符串时不渲染                                                                           |
+| `source`   | `ImageSourcePropType?`  | —      | 真实头像图片（URI object / URI source 数组 / `require(...)`）；非法 source 或当前 attempt 加载失败时回退首字符 |
+| `style`    | `StyleProp<ViewStyle>?` | —      | 根品牌面板的附加样式                                                                                           |
+| `testID`   | `string?`               | —      | 根面板的 E2E / 测试定位                                                                                        |
 
 ### 图片 source identity 与失败隔离
 

@@ -2,8 +2,10 @@
 slug: /migration
 sidebar_position: 11
 title: 升级 / 迁移
-description: "@unif/react-native-design 迁移指南：旧顶层 colors / shadow 静态导出 → 运行期 useColors() / useThemedStyles() hook（含旧 token → 新 role grep 对照），reanimated 4 升级，以及 BottomSheet / Confirm 的当前迁移状态。"
+description: '已发布版本的变量、接口与依赖调整。'
 ---
+
+<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
 
 # 升级 / 迁移
 
@@ -23,7 +25,7 @@ import { colors, shadow } from '@unif/react-native-design';
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.surface,   // 静态,不随亮 / 暗切换
+    backgroundColor: colors.surface, // 静态,不随亮 / 暗切换
     ...shadow.brandLg,
   },
 });
@@ -44,7 +46,7 @@ const makeStyles = (c: ColorTokens, s: ShadowTokens) =>
   StyleSheet.create({
     container: {
       backgroundColor: c.surface,
-      ...s.brandLg,                  // 暗色下 shadowOpacity / elevation 自动趋零
+      ...s.brandLg, // 暗色下 shadowOpacity / elevation 自动趋零
     },
   });
 
@@ -59,39 +61,46 @@ function MyComponent() {
 **间距 / 圆角 / 字体 / 动效**:这些是静态 token,继续直接 import:
 
 ```tsx
-import { space, radius, type as t, fw, fontMono, motion } from '@unif/react-native-design';
+import {
+  space,
+  radius,
+  type as t,
+  fw,
+  fontMono,
+  motion,
+} from '@unif/react-native-design';
 ```
 
 ### 对照速查 {#对照速查}
 
-| 旧写法(已删除) | 新写法(正确) |
-|---|---|
-| `import { colors } from '@unif/react-native-design'` | `const c = useColors()` |
-| `import { shadow } from '@unif/react-native-design'` | `const s = useShadow()`,或 maker 第二参 `(c, s) => ...` |
-| `colors.primary` / `colors.surface` / `colors.foreground` | `c.primary` / `c.surface` / `c.foreground` |
-| `shadow.brandLg` | `...s.brandLg`(spread 进 StyleSheet) |
-| 顶层 `StyleSheet.create({ ... colors.x ... })` | `useThemedStyles(maker)` 运行期 |
+| 旧写法(已删除)                                            | 新写法(正确)                                            |
+| --------------------------------------------------------- | ------------------------------------------------------- |
+| `import { colors } from '@unif/react-native-design'`      | `const c = useColors()`                                 |
+| `import { shadow } from '@unif/react-native-design'`      | `const s = useShadow()`,或 maker 第二参 `(c, s) => ...` |
+| `colors.primary` / `colors.surface` / `colors.foreground` | `c.primary` / `c.surface` / `c.foreground`              |
+| `shadow.brandLg`                                          | `...s.brandLg`(spread 进 StyleSheet)                    |
+| 顶层 `StyleSheet.create({ ... colors.x ... })`            | `useThemedStyles(maker)` 运行期                         |
 
 ### 旧 token 名 → 新 role 名 {#旧-token-名--新-role-名}
 
 历史代码里若残留旧的强度档命名,grep 替换为 role 名:
 
-| 旧 | 新 |
-|---|---|
-| `colors.bgPage` | `c.background` |
-| `colors.bgCard` | `c.surface` |
-| `colors.bgInput` | `c.surfaceContainer` |
-| `colors.bgMuted` | `c.surfaceContainerHigh` |
-| `colors.bgPill` | `c.surfaceContainerHighest` |
-| `colors.fg1` / `fg2` / `fg3` | `c.foreground` / `c.foregroundMuted` / `c.foregroundSubtle` |
-| `colors.primary300` / `500` | `c.primary` / `c.primaryPressed` |
-| `colors.primary0` / `50` | `c.primaryContainer` / `c.primaryContainerSubtle` |
-| `colors.success300` / `successBg` | `c.success` / `c.successContainer` |
-| `colors.error300` / `error0` | `c.error` / `c.errorContainer` |
-| `colors.info300` / `infoBg` | `c.info` / `c.infoContainer` |
-| `colors.border` / `borderSoft` / `borderFaint` | `c.outline` / `c.outlineVariant` / `c.outlineFaint` |
+| 旧                                             | 新                                                          |
+| ---------------------------------------------- | ----------------------------------------------------------- |
+| `colors.bgPage`                                | `c.background`                                              |
+| `colors.bgCard`                                | `c.surface`                                                 |
+| `colors.bgInput`                               | `c.surfaceContainer`                                        |
+| `colors.bgMuted`                               | `c.surfaceContainerHigh`                                    |
+| `colors.bgPill`                                | `c.surfaceContainerHighest`                                 |
+| `colors.fg1` / `fg2` / `fg3`                   | `c.foreground` / `c.foregroundMuted` / `c.foregroundSubtle` |
+| `colors.primary300` / `500`                    | `c.primary` / `c.primaryPressed`                            |
+| `colors.primary0` / `50`                       | `c.primaryContainer` / `c.primaryContainerSubtle`           |
+| `colors.success300` / `successBg`              | `c.success` / `c.successContainer`                          |
+| `colors.error300` / `error0`                   | `c.error` / `c.errorContainer`                              |
+| `colors.info300` / `infoBg`                    | `c.info` / `c.infoContainer`                                |
+| `colors.border` / `borderSoft` / `borderFaint` | `c.outline` / `c.outlineVariant` / `c.outlineFaint`         |
 
-> 旧 `brandGradient` / `primary100/200/400/600` 等强度档已随死代码清理移除(0 消费方)。完整迁移表见[完整规范 → Migration map](UNIF-DESIGN.md)。
+> 旧 `brandGradient` / `primary100/200/400/600` 等强度档已随死代码清理移除(0 消费方)。迁移对照见本页的令牌迁移表。
 
 ### 为什么不能继续用静态导出 {#为什么不能继续用静态导出}
 

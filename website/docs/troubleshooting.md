@@ -2,7 +2,7 @@
 slug: /troubleshooting
 sidebar_position: 10
 title: 常见问题
-description: "@unif/react-native-design 排障决策树（症状 → 因 → 解）：Web / 文档站点击无响应与动画崩溃、主题样式不切换 / useThemedStyles 缓存失效、peerDeps 缺失与 iOS 链接错误、Jest 缺 worklets babel 插件与没走 jest-preset 入口时的 transform / RNGH Pressable / useReducedMotion 报错。"
+description: '排查组件、主题、依赖和 Web 预览问题。'
 ---
 
 # 常见问题
@@ -56,12 +56,18 @@ decorator。详见[动效](/docs/design/tokens/motion#在代码中使用)。
 ```tsx
 // ❌ Incorrect:makeStyles 内联在组件里 —— 每次渲染新引用,缓存失效
 function MyComponent() {
-  const makeStyles = (c: ColorTokens) => StyleSheet.create({ /* ... */ });
+  const makeStyles = (c: ColorTokens) =>
+    StyleSheet.create({
+      /* ... */
+    });
   const styles = useThemedStyles(makeStyles);
 }
 
 // ✅ Correct:makeStyles 在模块顶层
-const makeStyles = (c: ColorTokens) => StyleSheet.create({ /* ... */ });
+const makeStyles = (c: ColorTokens) =>
+  StyleSheet.create({
+    /* ... */
+  });
 
 function MyComponent() {
   const styles = useThemedStyles(makeStyles);
@@ -96,7 +102,7 @@ function MyComponent() {
 
 ### 症状:启动 Metro / 构建报 `Unable to resolve module ...` / `Cannot find module ...` {#peer-缺失}
 
-**原因。** peerDeps **缺一即崩**,本库不打包它们。
+**原因。** 缺少必要的 peer 依赖会导致模块解析或运行失败,本库不打包它们。
 
 **解法。** 按[快速开始 → 安装依赖](/docs/getting-started#安装依赖)逐一装齐:
 

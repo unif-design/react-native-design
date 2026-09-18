@@ -1,8 +1,10 @@
 ---
 sidebar_position: 3
 title: Search 搜索框
-description: '严格受控/非受控 Search：单一 current value、库自管 action、44pt root 与 36pt surface。'
+description: '搜索输入预设，支持文字修改与清空。'
 ---
+
+<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
 
 # Search 搜索框
 

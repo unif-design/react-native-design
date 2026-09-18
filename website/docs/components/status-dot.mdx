@@ -1,7 +1,7 @@
 ---
 sidebar_position: 6
 title: StatusDot 状态点
-description: "status='pending'/'active'/'done'/'error' 状态圆点 —— done=success 底+白勾、error=error 底+白叉、active=primary 边框+内嵌 PulseDot、pending=outline 描边；tone='flat'(默认,透明底)/'soft'(柔色底),size 默认 r(16)。"
+description: '用圆点表达完成、错误、进行中和待处理状态。'
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -9,19 +9,19 @@ import { StatusDot } from '@unif/react-native-design';
 
 # StatusDot 状态点
 
-任务列表 / 推理链通用的状态圆点。四态（done / error / active / pending）× 两风格（flat / soft）。
+用圆点展示完成、错误、进行中或待处理状态；业务状态由调用方映射。
 
-| 状态 | 视觉 | 内部 |
-|---|---|---|
-| `done` | 绿底 + 白勾 | `success` 填充 + `<Icon name="check" />` |
-| `error` | 红底 + 白叉 | `error` 填充 + `<Icon name="close" />` |
-| `active` | 边框 + 内嵌 `<PulseDot>` | `primary` 边框 + 跳动 |
-| `pending` | 仅边框 | `outline` 灰边 |
+| 状态      | 视觉                     | 内部                                     |
+| --------- | ------------------------ | ---------------------------------------- |
+| `done`    | 绿底 + 白勾              | `success` 填充 + `<Icon name="check" />` |
+| `error`   | 红底 + 白叉              | `error` 填充 + `<Icon name="close" />`   |
+| `active`  | 边框 + 内嵌 `<PulseDot>` | `primary` 边框 + 跳动                    |
+| `pending` | 仅边框                   | `outline` 灰边                           |
 
 `tone='flat'`（默认）—— pending/active 底色透明（`'transparent'`），用于 Task。
 `tone='soft'` —— pending = `c.surface`、active = `c.primaryContainer`，用于 ChainOfThought（推理链气氛更柔）。
 
-## 实时预览
+## 代码演示 {#实时预览}
 
 <LiveDemo>
   <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -88,14 +88,14 @@ import { StatusDot } from '@unif/react-native-design';
 
 来源：`src/components/ui/StatusDot/types.ts`、`StatusDot.tsx`、`styles.ts`。
 
-| Prop | 类型 | 默认 | 说明 |
-|---|---|---|---|
-| `status` | `'pending' \| 'active' \| 'done' \| 'error'` | — | 当前状态（必填） |
-| `size` | `number?` | `r(16)` | 圆点直径（done 勾 ≈ `size*0.6`） |
-| `tone` | `('flat' \| 'soft')?` | `'flat'` | flat 透明底；soft 柔色底（pending=`c.surface`、active=`c.primaryContainer`） |
-| `accessibilityLabel` | `string?` | 按 `status` 派生英文名称 | 独立状态点的 SR 名称；显式传 `''` 表示语义已由父容器承载，并关闭自身可访问节点 |
-| `style` | `StyleProp<ViewStyle>?` | — | 容器附加样式（margin / position 等） |
-| `testID` | `string?` | — | E2E / 测试定位 |
+| 参数                 | 类型                                         | 默认值                   | 说明                                                                           |
+| -------------------- | -------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------ |
+| `status`             | `'pending' \| 'active' \| 'done' \| 'error'` | —                        | 当前状态（必填）                                                               |
+| `size`               | `number?`                                    | `r(16)`                  | 圆点直径（done 勾 ≈ `size*0.6`）                                               |
+| `tone`               | `('flat' \| 'soft')?`                        | `'flat'`                 | flat 透明底；soft 柔色底（pending=`c.surface`、active=`c.primaryContainer`）   |
+| `accessibilityLabel` | `string?`                                    | 按 `status` 派生英文名称 | 独立状态点的 SR 名称；显式传 `''` 表示语义已由父容器承载，并关闭自身可访问节点 |
+| `style`              | `StyleProp<ViewStyle>?`                      | —                        | 容器附加样式（margin / position 等）                                           |
+| `testID`             | `string?`                                    | —                        | E2E / 测试定位                                                                 |
 
 > 颜色派生（`paletteFor`）：done = `c.success` 底+边；error = `c.error` 底+边；active = `c.primary` 边框（底 flat 透明 / soft `c.primaryContainer`）；pending = `c.outline` 边框（底 flat 透明 / soft `c.surface`）。圆点带 1.5px 边框。
 
@@ -116,17 +116,18 @@ import { StatusDot } from '@unif/react-native-design';
 稳定的英文状态 key；面向中文用户的独立状态点应传明确的中文业务文案：
 
 ```tsx
-<StatusDot status="done" accessibilityLabel="已完成" />
+<StatusDot status="done" accessibilityLabel="已完成" />;
 
-{/* 父容器已经朗读“资料审核，进行中”时，关闭圆点自己的名称 */}
-<StatusDot status="active" accessibilityLabel="" />
+{
+  /* 父容器已经朗读“资料审核，进行中”时，关闭圆点自己的名称 */
+}
+<StatusDot status="active" accessibilityLabel="" />;
 ```
 
-## 内部使用
+## 组合使用 {#内部使用}
 
-- Task `TaskRow` —— `<StatusDot status={mapped} size={16} />`（todo→pending、running→active、done→done）
-- ChainOfThought `Step` —— `<StatusDot status={step.status} size={18} tone="soft" />`
+调用方将业务状态映射为 `done`、`error`、`active` 或 `pending`。放入步骤、任务或列表时，结合可理解的状态文字使用。
 
 ## 设计原则
 
-设计上的"做完了 / 在做 / 还没做"在 Unif 系统里只有这一种视觉表达，新组件需要状态指示请直接用 `StatusDot`，不要自画。
+需要状态圆点时复用 `StatusDot`，颜色与动效由组件统一处理。

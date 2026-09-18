@@ -1,7 +1,7 @@
 ---
 sidebar_position: 3
 title: 间距 · 圆角 · 阴影
-description: "Unif Design 的 space（4px 网格）/ radius（含气泡非对称圆角）/ shadow（themed，brandLg 等品牌光晕，暗色趋零）token，值取自 src/theme。"
+description: '间距、圆角和主题阴影的公开设计变量。'
 ---
 
 # 间距 · 圆角 · 阴影
@@ -16,19 +16,19 @@ description: "Unif Design 的 space（4px 网格）/ radius（含气泡非对称
 
 4px 基准网格。组件内部多用 `5–6`(12–14),板块之间用 `7–9`(16–24)。
 
-| Token | 基准 px | 常用 |
-|---|---|---|
-| `space.px` | 1 | hairline 级位移 |
-| `space['1']` | 4 | 最紧间隙 |
-| `space['2']` | 6 | 图标-文字间隙 |
-| `space['3']` | 8 | 头像-气泡间隙、列表行间 gap |
-| `space['4']` | 10 | 气泡纵向 padding |
-| `space['5']` | 12 | 气泡横向 padding、栏间距 |
-| `space['6']` | 14 | 卡片 padding |
-| `space['7']` | 16 | 区块栏间距 |
-| `space['8']` | 20 | 较大区块间距 |
-| `space['9']` | 24 | Hero padding |
-| `space['10']` | 32 | 通栏区块间距 |
+| Token         | 基准 px | 常用                        |
+| ------------- | ------- | --------------------------- |
+| `space.px`    | 1       | hairline 级位移             |
+| `space['1']`  | 4       | 最紧间隙                    |
+| `space['2']`  | 6       | 图标-文字间隙               |
+| `space['3']`  | 8       | 头像-气泡间隙、列表行间 gap |
+| `space['4']`  | 10      | 气泡纵向 padding            |
+| `space['5']`  | 12      | 气泡横向 padding、栏间距    |
+| `space['6']`  | 14      | 卡片 padding                |
+| `space['7']`  | 16      | 区块栏间距                  |
+| `space['8']`  | 20      | 较大区块间距                |
+| `space['9']`  | 24      | Hero padding                |
+| `space['10']` | 32      | 通栏区块间距                |
 
 **规则。** 屏幕侧边距 12–16px。气泡 padding `10px 12px`。卡片 `12–14px`。尊重安全区(iOS home indicator 34px)。`space` 的 key 是字符串字面量,取值写 `space['7']` 或 `space[7]`。
 
@@ -36,27 +36,27 @@ description: "Unif Design 的 space（4px 网格）/ radius（含气泡非对称
 
 小集合,明确分工。最重要的是**气泡的非对称圆角** —— 指向头像的内角是直角。
 
-| Token | 基准 px | 用途 |
-|---|---|---|
-| `radius.xs` | 4 | Radio / Checkbox / Tag / Citation 内圈 |
-| `radius.sm` | 6 | 小按钮、徽章 |
-| `radius.md` | 8 | 输入框、默认按钮 |
-| `radius.lg` | 10 | 卡片、列表行 |
-| `radius.xl` | 12 | 大卡片、列表容器 |
-| `radius['2xl']` | 14 | **聊天气泡** |
-| `radius['3xl']` | 18 | 输入框 wrapper |
-| `radius.pill` | 999 | chip、pill(大数哨兵,不缩放) |
+| Token           | 基准 px | 用途                                   |
+| --------------- | ------- | -------------------------------------- |
+| `radius.xs`     | 4       | Radio / Checkbox / Tag / Citation 内圈 |
+| `radius.sm`     | 6       | 小按钮、徽章                           |
+| `radius.md`     | 8       | 输入框、默认按钮                       |
+| `radius.lg`     | 10      | 卡片、列表行                           |
+| `radius.xl`     | 12      | 大卡片、列表容器                       |
+| `radius['2xl']` | 14      | **聊天气泡**                           |
+| `radius['3xl']` | 18      | 输入框 wrapper                         |
+| `radius.pill`   | 999     | chip、pill(大数哨兵,不缩放)            |
 
-### 气泡的非对称圆角(核心) {#气泡非对称圆角}
+### 非对称圆角示例 {#气泡非对称圆角}
 
 - **AI 气泡** —— `borderRadius: 0 14px 14px 14px`(左上角直角,指向 AI 头像)
 - **用户气泡** —— `borderRadius: 14px 0 14px 14px`(右上角直角,指向用户头像)
 
-直角指向头像,是设计系统最辨识度的视觉符号,**不要破坏**(见[设计原则 → 气泡内角方](/docs/design/principles#气泡内角方))。
+以下示例说明非对称圆角的写法。实际聊天气泡由 [Chat](https://github.com/unif-design/react-native-chat) 的公开组件维护，Design 不决定消息角色或业务布局。
 
 ```tsx
 const aiBubble = {
-  borderTopLeftRadius: 0,         // 直角,指向 AI 头像
+  borderTopLeftRadius: 0, // 直角,指向 AI 头像
   borderTopRightRadius: 14,
   borderBottomLeftRadius: 14,
   borderBottomRightRadius: 14,
@@ -64,7 +64,7 @@ const aiBubble = {
 
 const userBubble = {
   borderTopLeftRadius: 14,
-  borderTopRightRadius: 0,        // 直角,指向用户头像
+  borderTopRightRadius: 0, // 直角,指向用户头像
   borderBottomLeftRadius: 14,
   borderBottomRightRadius: 14,
 };
@@ -74,20 +74,20 @@ const userBubble = {
 
 中性卡片阴影 + 品牌橙光晕两类。**无内阴影、无霓虹光晕、无双重边框。** `shadow` 是 **themed token** —— 走 `useShadow()` / `useThemedStyles` 第二参 `s` 拿,**暗色下绝大多数 `shadowOpacity` / `elevation` 自动置 0**(深度靠 surface 5 层明度差表达,见[颜色 → 表面](/docs/design/tokens/colors#表面))。
 
-| Token | 用途 | RN(亮色) |
-|---|---|---|
-| `subtle` | 轻提示浮起(Segmented active 段) | `{0,1}` · opacity 0.06 · radius 2 · elev 1 |
-| `card` | 标准卡片下沉(Card default) | `{0,1}` · opacity 0.08 · radius 4 · elev 2 |
-| `floating` | 中性浮岛(贴底浮起胶囊,大半径柔散) | `{0,16}` · opacity 0.1 · radius 40 · elev 12 |
-| `brandSm` | 品牌光晕 sm(轻量档) | 橙 · `{0,6}` · opacity 0.08 · radius 18 · elev 3 |
-| `brandMd` | 品牌光晕 md(主按钮 / Avatar ring) | 橙 · `{0,12}` · opacity 0.26 · radius 24 · elev 12 |
-| `brandLg` | 品牌光晕 lg(Login Logo halo) | 橙 · `{0,16}` · opacity 0.22 · radius 36 · elev 12 |
-| `brandXl` | 品牌光晕 xl(Splash Logo 最重浮起) | 橙 · `{0,20}` · opacity 0.2 · radius 50 · elev 12 |
-| `brandAbout` | About icon halo(brandLg / brandXl 之间) | 橙 · `{0,18}` · opacity 0.28 · radius 40 · elev 12 |
-| `brandAssistant` | AssistantCard icon tile(hero 入口加权) | 橙 · `{0,8}` · opacity 0.3 · radius 18 · elev 12 |
-| `brandAvatar` | Avatar 品牌橙光晕 | 橙 · `{0,10}` · opacity 0.28 · radius 24 · elev 12 |
-| `glassBar` | GlassStats 数据条专用 | 橙 · `{0,6}` · opacity 0.08 · radius 18 · elev 3 |
-| `none` | 显式去阴影(列表行 / 设置项) | 全 0 |
+| Token            | 用途                                    | RN(亮色)                                           |
+| ---------------- | --------------------------------------- | -------------------------------------------------- |
+| `subtle`         | 轻提示浮起(Segmented active 段)         | `{0,1}` · opacity 0.06 · radius 2 · elev 1         |
+| `card`           | 标准卡片下沉(Card default)              | `{0,1}` · opacity 0.08 · radius 4 · elev 2         |
+| `floating`       | 中性浮岛(贴底浮起胶囊,大半径柔散)       | `{0,16}` · opacity 0.1 · radius 40 · elev 12       |
+| `brandSm`        | 品牌光晕 sm(轻量档)                     | 橙 · `{0,6}` · opacity 0.08 · radius 18 · elev 3   |
+| `brandMd`        | 品牌光晕 md(主按钮 / Avatar ring)       | 橙 · `{0,12}` · opacity 0.26 · radius 24 · elev 12 |
+| `brandLg`        | 品牌光晕 lg(Login Logo halo)            | 橙 · `{0,16}` · opacity 0.22 · radius 36 · elev 12 |
+| `brandXl`        | 品牌光晕 xl(Splash Logo 最重浮起)       | 橙 · `{0,20}` · opacity 0.2 · radius 50 · elev 12  |
+| `brandAbout`     | About icon halo(brandLg / brandXl 之间) | 橙 · `{0,18}` · opacity 0.28 · radius 40 · elev 12 |
+| `brandAssistant` | AssistantCard icon tile(hero 入口加权)  | 橙 · `{0,8}` · opacity 0.3 · radius 18 · elev 12   |
+| `brandAvatar`    | Avatar 品牌橙光晕                       | 橙 · `{0,10}` · opacity 0.28 · radius 24 · elev 12 |
+| `glassBar`       | GlassStats 数据条专用                   | 橙 · `{0,6}` · opacity 0.08 · radius 18 · elev 3   |
+| `none`           | 显式去阴影(列表行 / 设置项)             | 全 0                                               |
 
 > `{w,h}` 是 `shadowOffset`;橙 = `shadowColor: '#EB6E00'`(其余为黑)。完整 5 件套数值见 `src/theme/shadow.ts`。
 
@@ -105,10 +105,10 @@ import { useShadow, space, radius } from '@unif/react-native-design';
 function Demo() {
   const shadow = useShadow();
   const styles = StyleSheet.create({
-    card:  { ...shadow.card },        // 默认卡片阴影(暗色自动趋零)
-    float: { ...shadow.floating },    // 中性浮岛(大半径柔散)
-    brand: { ...shadow.brandMd },     // 品牌橙光晕(主按钮 / Avatar ring)
-    flat:  { ...shadow.none },        // 显式去阴影
+    card: { ...shadow.card }, // 默认卡片阴影(暗色自动趋零)
+    float: { ...shadow.floating }, // 中性浮岛(大半径柔散)
+    brand: { ...shadow.brandMd }, // 品牌橙光晕(主按钮 / Avatar ring)
+    flat: { ...shadow.none }, // 显式去阴影
   });
   // ...
 }
@@ -125,9 +125,9 @@ const makeStyles = (c: ColorTokens, s: ShadowTokens) =>
       backgroundColor: c.surface,
       borderRadius: radius.xl,
       padding: space['6'],
-      ...s.card,                      // 暗色下 shadowOpacity / elevation 自动趋零
+      ...s.card, // 暗色下 shadowOpacity / elevation 自动趋零
     },
   });
 ```
 
-> 完整 token 速查与暗色哲学,见[完整规范](/docs/unif-design)的 Spacing / Radii / Shadows 三节。
+颜色与暗色主题见[颜色](/docs/design/tokens/colors)。

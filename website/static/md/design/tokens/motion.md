@@ -1,8 +1,10 @@
 ---
 sidebar_position: 4
 title: 动效
-description: "Unif Design 的 motion 时长 token（fast/base/slow/pulse）与跨平台动效约定：native 使用 Reanimated，Web 使用 CSS/timer/RAF driver，复用 usePulse / Pulse / Reveal。值取自 src/theme/tokens.ts。"
+description: '动效时长、系统偏好和公开动效组件。'
 ---
+
+<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
 
 # 动效
 
@@ -10,12 +12,12 @@ description: "Unif Design 的 motion 时长 token（fast/base/slow/pulse）与�
 
 ## 时长 / `motion` {#时长}
 
-| Token | 值 | 用途 |
-|---|---|---|
-| `motion.fast` | 150ms | 按压态、hover |
-| `motion.base` | 200ms | 分段控件、布局变化、Modal fade |
-| `motion.slow` | 300ms | Drawer 过渡 |
-| `motion.pulse` | 1600ms | "思考中" spark 脉冲全周期 |
+| Token          | 值     | 用途                           |
+| -------------- | ------ | ------------------------------ |
+| `motion.fast`  | 150ms  | 按压态、hover                  |
+| `motion.base`  | 200ms  | 分段控件、布局变化、Modal fade |
+| `motion.slow`  | 300ms  | Drawer 过渡                    |
+| `motion.pulse` | 1600ms | "思考中" spark 脉冲全周期      |
 
 `motion` 只有这四个时长键 —— **没有 easing token**。native Reanimated 动画通常使用
 `withTiming` 默认曲线（Spinner 显式使用 `Easing.linear`）；Web driver 在各组件内声明
@@ -32,10 +34,10 @@ description: "Unif Design 的 motion 时长 token（fast/base/slow/pulse）与�
 
 `usePrefersReducedMotion(): boolean` 返回**真实的系统偏好**,两端语义一致:
 
-| 平台 | 数据源 |
-|---|---|
+| 平台                  | 数据源                                                                                    |
+| --------------------- | ----------------------------------------------------------------------------------------- |
 | native(iOS / Android) | Reanimated 的系统信号 `useReducedMotion()`,即系统「减弱动态效果 / Remove animations」开关 |
-| web | `matchMedia('(prefers-reduced-motion: reduce)')`,开关变化时自动更新 |
+| web                   | `matchMedia('(prefers-reduced-motion: reduce)')`,开关变化时自动更新                       |
 
 :::danger 动画引擎不会替你处理
 Reanimated 的 `ReduceMotion.System` **只覆盖它自己驱动的动画**(`withTiming` / `withSpring` / layout 装饰器)。组件自己用 `setInterval`、`requestAnimationFrame`、CSS transition、Modal 转场或 autoplay 做的动效完全不在其管辖范围内。
@@ -64,12 +66,12 @@ function Blink() {
 共享代码不假设单一动画引擎。Design 组件先统一公共参数与 reduced-motion 语义，再在平台
 driver 分流：
 
-| 能力 | native | Web |
-|---|---|---|
-| Pulse / Skeleton | Reanimated 4 worklet | CSS opacity transition + `setInterval` 两档翻转 |
-| Reveal | Reanimated `FadeIn` / `FadeOut` | 本地 `View` + CSS opacity transition + 双 RAF；卸载时不做退场 |
-| Spinner | Reanimated 线性旋转 | 静态 CSS keyframes |
-| Switch | Reanimated 颜色 / 位移插值 | CSS background / transform transition |
+| 能力             | native                          | Web                                                           |
+| ---------------- | ------------------------------- | ------------------------------------------------------------- |
+| Pulse / Skeleton | Reanimated 4 worklet            | CSS opacity transition + `setInterval` 两档翻转               |
+| Reveal           | Reanimated `FadeIn` / `FadeOut` | 本地 `View` + CSS opacity transition + 双 RAF；卸载时不做退场 |
+| Spinner          | Reanimated 线性旋转             | 静态 CSS keyframes                                            |
+| Switch           | Reanimated 颜色 / 位移插值      | CSS background / transform transition                         |
 
 常用脉冲 / 渐入应复用 `usePulse` / `<Pulse>` / `<PulseDot>` / `<Reveal>`，不要在共享代码
 里重写 native worklet 或 Web timer。native-only 场景仍可直接使用 Reanimated 4。
@@ -107,7 +109,9 @@ import { Pulse, PulseDot, Icon, motion } from '@unif/react-native-design';
 ```tsx
 import { Reveal } from '@unif/react-native-design';
 
-{open ? <Reveal>{/* children */}</Reveal> : null}
+{
+  open ? <Reveal>{/* children */}</Reveal> : null;
+}
 ```
 
 iOS Fabric 下不依赖 `LayoutAnimation`。共享代码使用 `<Reveal>`：native 解析为 Reanimated

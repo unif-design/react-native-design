@@ -1,8 +1,10 @@
 ---
 sidebar_position: 5
 title: Pulse · PulseDot · usePulse
-description: "跨平台脉冲原语 —— usePulse(opacity 循环 hook) + <Pulse>(包装组件) + <PulseDot>(默认 6×6 主橙圆点)；统一归一化后由 native Reanimated / Web CSS driver 执行，纯视觉对屏幕阅读器隐藏。"
+description: '为内容或状态圆点提供脉冲动效。'
 ---
+
+<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
 
 # Pulse · PulseDot · usePulse
 
@@ -12,7 +14,7 @@ description: "跨平台脉冲原语 —— usePulse(opacity 循环 hook) + <Puls
 - **`<Pulse>{children}</Pulse>`** — 把 children 包进一个 opacity 循环动画
 - **`<PulseDot />`** — 一个固定的圆点（默认 6×6 主橙），用于"思考中"等指示器
 
-## 实时预览
+## 代码演示 {#实时预览}
 
 下方渲染的是 `PulseDot.tsx` 与 `Pulse.tsx` 的 Web 路径：公共 hook 仍执行同一套归一化，平台解析选择 `usePulseDriver.web.ts`，由 CSS transition + timer 驱动；参数和 reduced-motion 语义与 native 一致。
 
@@ -65,10 +67,12 @@ import { usePulse } from '@unif/react-native-design';
 export function MyShimmerLine({ width }) {
   const animatedStyle = usePulse({ from: 0.6, to: 1, duration: 700 });
   return (
-    <Animated.View style={[
-      { width, height: 11, borderRadius: 3, backgroundColor: '#EDEDED' },
-      animatedStyle,
-    ]} />
+    <Animated.View
+      style={[
+        { width, height: 11, borderRadius: 3, backgroundColor: '#EDEDED' },
+        animatedStyle,
+      ]}
+    />
   );
 }
 ```
@@ -80,7 +84,7 @@ import { Pulse, Icon } from '@unif/react-native-design';
 
 <Pulse from={0.4} duration={500}>
   <Icon name="spark" size={14} color="#EB6E00" />
-</Pulse>
+</Pulse>;
 ```
 
 ### `<PulseDot>`
@@ -97,12 +101,12 @@ import { PulseDot } from '@unif/react-native-design';
 
 ### `usePulse(options?)`
 
-| Option | 类型 | 默认 | 合法域 | 说明 |
-|---|---|---|---|---|
-| `from` | `number` | `0.6` | `[0, 1]` | 透明度起点（不必小于 `to`） |
-| `to` | `number` | `1` | `[0, 1]` | 透明度终点 |
-| `duration` | `number` | `700` | `[1, 2³¹)` | 半周期时长（ms），完整一圈 = `2 × duration` |
-| `delay` | `number` | `0` | `[0, 2³¹)` | 首次开始之前的延迟（ms） |
+| Option     | 类型     | 默认值 | 合法域     | 说明                                        |
+| ---------- | -------- | ------ | ---------- | ------------------------------------------- |
+| `from`     | `number` | `0.6`  | `[0, 1]`   | 透明度起点（不必小于 `to`）                 |
+| `to`       | `number` | `1`    | `[0, 1]`   | 透明度终点                                  |
+| `duration` | `number` | `700`  | `[1, 2³¹)` | 半周期时长（ms），完整一圈 = `2 × duration` |
+| `delay`    | `number` | `0`    | `[0, 2³¹)` | 首次开始之前的延迟（ms）                    |
 
 返回可直接传给 `Animated.View` 的 `style`。
 
@@ -130,12 +134,12 @@ native 走 Reanimated 4 worklet（UI 线程）；**web 走 CSS transition + `set
 
 ### `<PulseDot>`
 
-| Prop | 类型 | 默认 | 说明 |
-|---|---|---|---|
-| `size` | `number?` | `6` | 圆点直径（px） |
-| `color` | `string?` | `c.primary`（运行期 hook 取） | 填充色 |
+| 参数                                 | 类型      | 默认值                                   | 说明                                                                                                                 |
+| ------------------------------------ | --------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `size`                               | `number?` | `6`                                      | 圆点直径（px）                                                                                                       |
+| `color`                              | `string?` | `c.primary`（运行期 hook 取）            | 填充色                                                                                                               |
 | `from` / `to` / `duration` / `delay` | `number?` | from=0.5 / to=1 / duration=700 / delay=0 | 与 `usePulse` 同一套[校验规则](#参数校验规则)（注意 `PulseDot` 的 `from` 默认 0.5，`usePulse` / `<Pulse>` 默认 0.6） |
-| `testID` | `string?` | — | E2E / 测试定位 |
+| `testID`                             | `string?` | —                                        | E2E / 测试定位                                                                                                       |
 
 ## 无障碍（a11y）
 
@@ -147,17 +151,11 @@ native 走 Reanimated 4 worklet（UI 线程）；**web 走 CSS transition + `set
 - `<Pulse>` 是透明包装层（仅给 children 套一个 opacity 循环的 `<Animated.View>`），自身**未设置任何 a11y prop**，a11y 语义完全由其 `children` 承载——把语义放在被包裹的内容上（如有意义的图标加 `accessibilityLabel`）。
 - `usePulse` 只返回动画 `style`，不涉及 a11y。
 
-## 内部使用
+## 组合使用 {#内部使用}
 
-| 消费者 | 做什么 |
-|---|---|
-| [Skeleton](skeleton.md) Line/Rect/Circle | 采用自身 `from: 0.5` 默认值，复用共享 opacity 驱动 |
-| Shimmer ShimmerLine / Dot | 同上，参数定制 |
-| Reasoning | `<Pulse from={0.4} duration={motion.pulse / 2}>` 包裹 spark 图标 |
-| Task / ChainOfThought | 通过 `<StatusDot>` 间接 —— active 状态内嵌 `<PulseDot>` |
-| Message BlinkCursor | `usePulse({ from: 0, to: 1, duration: 400 })` |
+[Skeleton](skeleton.md) 与 Pulse 复用基础动效。应用也可将公开的 `Pulse`／`PulseDot` 组合到自己的内容中；状态语义由外层文字与无障碍属性表达。
 
-## 不要
+## 使用注意
 
 - 需要脉冲时使用 `usePulse`，复用参数校验、系统动效偏好和资源释放，避免在消费方重复实现。
 - ❌ 不要在 `useAnimatedStyle` 里引用 React state（worklet 闭包只能读 SharedValue）。
