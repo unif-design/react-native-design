@@ -18,59 +18,96 @@ permissions:
   contents: read
 
 jobs:
-  verify-example-showcase:
+  changes:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      contract: ${{ steps.scope.outputs.code == 'true' || steps.scope.outputs.instructions == 'true' || steps.inputs.outputs.contract == 'true' }}
+      example: ${{ steps.scope.outputs.js == 'true' || steps.scope.outputs.shared == 'true' || steps.scope.outputs.example == 'true' }}
+      tooling: ${{ steps.scope.outputs.tooling == 'true' || steps.scope.outputs.shared == 'true' }}
+      checker: ${{ steps.inputs.outputs.checker == 'true' || steps.scope.outputs.manifest_runtime == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      - name: Select affected checks
+        id: scope
+        uses: ./.github/actions/changes
+      - name: Select showcase contract inputs
+        id: inputs
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: |
+            contract:
+              - 'example/GUIDE.md'
+              - '.pr_agent.toml'
+              - '.gitattributes'
+              - '.github/workflows/example-showcase.yml'
+              - 'website/docusaurus.config.ts'
+              - 'website/static/img/logo.png'
+              - 'website/static/example-fixtures/media-decode-failure-v1.png'
+            checker:
+              - 'scripts/run-example-jest.mjs'
+              - 'scripts/run-example-jest-focused.mjs'
+              - 'example/jest.config.js'
+              - 'example/jest.focused.config.js'
+              - 'example/jest.forbidOnlyReporter.js'
+              - 'example/jest.showcaseGate.js'
+              - 'yarn.lock'
+              - '.yarnrc.yml'
+              - '.yarn/releases/**'
+              - '.nvmrc'
+              - '.github/actions/**'
+              - '.github/workflows/ci.yml'
+              - 'scripts/verify-example-showcase.mjs'
+              - 'scripts/__tests__/verify-example-showcase.test.mjs'
+              - 'scripts/__tests__/example-showcase-contract.test.mjs'
+              - '.github/workflows/example-showcase.yml'
 
+  verify-example-showcase:
+    needs: changes
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require change classification
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+        run: test "$CHANGES_RESULT" = success
+      - name: Checkout
+        if: needs.changes.outputs.contract == 'true' || needs.changes.outputs.example == 'true' || needs.changes.outputs.tooling == 'true'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Setup
+        if: needs.changes.outputs.contract == 'true' || needs.changes.outputs.example == 'true' || needs.changes.outputs.tooling == 'true'
         uses: ./.github/actions/setup
-
-      # setup action 已始终执行 immutable install；这里保留显式检查，作为 showcase workflow 自身的配置契约。
-      - name: Verify immutable install
-        run: yarn install --immutable
-
       - name: Check repository configuration
+        if: needs.changes.outputs.contract == 'true'
         run: yarn check:config
-
       - name: Check runtime peers
+        if: needs.changes.outputs.example == 'true' || needs.changes.outputs.tooling == 'true'
         run: yarn check:runtime-peers
-
       - name: Check generated icons
+        if: needs.changes.outputs.contract == 'true'
         run: yarn check:icons
-
-      # 根 jest 忽略 scripts/__tests__/，共享 ci.yml 又是组织模板不能动：
-      # 这个 gate 与它的单测只有在这里显式接线才会在 CI 里真的跑。
-      # 用 glob 而不是列文件名：后续新增的 jest-*.test.mjs 会自动进 CI，不必回头改
-      # 这个 workflow（漏改的后果正是上面那条注释警告的「文件在、CI 永远不跑」）。
-      # 引号必须留着 —— 让 node 自己展开 glob。也不能退化成裸目录：那会把几十分钟的
-      # example-showcase 套件一起扫进来。
       - name: Check jest entries
+        if: needs.changes.outputs.example == 'true' || needs.changes.outputs.tooling == 'true'
         run: |
           yarn check:jest-entries
           node --test "scripts/__tests__/jest-*.test.mjs"
-
-      - name: Verify example showcase contract
+      - name: Verify current example showcase contract
+        if: needs.changes.outputs.contract == 'true'
+        run: node scripts/verify-example-showcase.mjs --check
+      - name: Test example showcase verifier
+        if: needs.changes.outputs.checker == 'true'
         run: yarn verify:example-showcase
-
       - name: Typecheck example
+        if: needs.changes.outputs.example == 'true'
         run: yarn example typecheck
-
       - name: Lint example
+        if: needs.changes.outputs.example == 'true'
         run: yarn example lint
-
       - name: Test example
+        if: needs.changes.outputs.example == 'true'
         run: yarn example test --maxWorkers=2
-
-      - name: Lint library
-        run: yarn lint
-
-      - name: Typecheck library
-        run: yarn typecheck
-
-      - name: Test library
-        run: yarn test --maxWorkers=2
-
-      - name: Build library
-        run: yarn prepare

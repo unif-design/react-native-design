@@ -26,3 +26,5 @@ iOS Pods、目标设备及构建入口见[运行与验证指南](GUIDE.md)。常
 - [开发资料](../docs/DEVELOPMENT.md)：架构依据和定向验证入口。
 
 自动化、模拟器与真机结果分别记录，展厅不预先声明任何平台已通过验收。
+
+快速核对当前 example 配置与说明可运行 `node scripts/verify-example-showcase.mjs --check`。校验器完整回归及全量测试由 CI 按变更范围执行。
