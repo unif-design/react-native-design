@@ -95,6 +95,11 @@ test('workflow scopes keep docs light and checker changes complete', () => {
     path.join(repositoryRoot, '.github/workflows/example-showcase.yml'),
     'utf8'
   );
+  assert.match(
+    workflow,
+    /verify-example-showcase:\n {4}needs: changes\n {4}if: \$\{\{ !cancelled\(\) \}\}/
+  );
+  assert.match(workflow, /run: test "\$CHANGES_RESULT" = success/);
   const outputs = Object.fromEntries(
     [...workflow.matchAll(/^ {6}([a-z]+): \$\{\{ (.*) \}\}$/gm)].map((m) => [
       m[1],

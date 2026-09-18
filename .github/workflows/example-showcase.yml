@@ -69,7 +69,7 @@ jobs:
 
   verify-example-showcase:
     needs: changes
-    if: always()
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - name: Require change classification
