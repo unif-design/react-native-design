@@ -1,16 +1,16 @@
 ---
 sidebar_position: 1
 title: Cell · List 列表行
-description: '列表行 + List 容器 —— actionable / control / static 三个显式分支，primitive 文本安全渲染，grouped / flush 两种布局。'
+description: '展示列表行信息，通过 List 组合不同分组样式。'
 ---
+
+<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
 
 # Cell · List 列表行
 
-每行独立白卡，行间 8px gap。**不用 border-bottom 分隔**——这是 Unif 列表的核心规则（与 iOS 17 / 微信新版一致）。
+列表中的信息行，可组合文字、图标、操作和附加内容；使用 List 组织分组或紧凑列表。
 
-## 实时预览
-
-下方渲染的就是 `src/components/ui/Cell/Cell.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+## 代码演示 {#实时预览}
 
 ```tsx
 const CellDemo = () => {
@@ -186,33 +186,33 @@ type StaticCellExtra =
 
 ### `<Cell>`
 
-| Prop                 | Type                   | 默认     | 说明                                                                          |
-| -------------------- | ---------------------- | -------- | ----------------------------------------------------------------------------- |
-| `title`              | `CellTextValue`        | —        | 主标题（必填）；始终由库内 `<Text>` + `stringifyCellText` 安全渲染            |
-| `titleLines`         | `number`               | `1`      | 主标题的 `numberOfLines`                                                      |
-| `desc`               | `CellTextValue`        | —        | 副标题 / 描述；始终由库内 `<Text>` 安全渲染，最多 2 行                        |
+| 参数                 | 类型                   | 默认值   | 说明                                                                                        |
+| -------------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------------- |
+| `title`              | `CellTextValue`        | —        | 主标题（必填）；始终由库内 `<Text>` + `stringifyCellText` 安全渲染                          |
+| `titleLines`         | `number`               | `1`      | 主标题的 `numberOfLines`                                                                    |
+| `desc`               | `CellTextValue`        | —        | 副标题 / 描述；始终由库内 `<Text>` 安全渲染，最多 2 行                                      |
 | `extra`              | `CellExtra`            | —        | 三种公开配置；actionable 可用 text/display，static 仅 text/装饰 display，control 仅 control |
-| `arrow`              | `boolean`              | `false`  | 仅 actionable 可用；显示 chevron-right，`danger` 时仍不渲染                   |
-| `leading`            | `CellLeading`          | —        | 图标名，或 `{ kind: 'display', node }` 纯展示节点                             |
-| `onPress`            | `() => void`           | —        | actionable 分支必填；control/static 禁止                                      |
-| `disabled`           | `boolean`              | `false`  | 仅 actionable 可用；禁用时移除 handler、半透明并上报 disabled                 |
-| `danger`             | `boolean`              | `false`  | 危险态：icon 盒子 + 标题用 error 红,且不渲染 arrow（常用于退出登录 / 删除等） |
-| `style`              | `StyleProp<ViewStyle>` | —        | 额外样式覆盖（合并到 cell 容器的 style 数组）                                 |
-| `testID`             | `string`               | —        | E2E / 测试定位                                                                |
-| `accessibilityLabel` | `string`               | 自动组合 | 仅 actionable 可用；覆盖自动名称                                              |
-| `accessibilityHint`  | `string`               | —        | 仅 actionable 可用；说明操作结果                                              |
+| `arrow`              | `boolean`              | `false`  | 仅 actionable 可用；显示 chevron-right，`danger` 时仍不渲染                                 |
+| `leading`            | `CellLeading`          | —        | 图标名，或 `{ kind: 'display', node }` 纯展示节点                                           |
+| `onPress`            | `() => void`           | —        | actionable 分支必填；control/static 禁止                                                    |
+| `disabled`           | `boolean`              | `false`  | 仅 actionable 可用；禁用时移除 handler、半透明并上报 disabled                               |
+| `danger`             | `boolean`              | `false`  | 危险态：icon 盒子 + 标题用 error 红,且不渲染 arrow（常用于退出登录 / 删除等）               |
+| `style`              | `StyleProp<ViewStyle>` | —        | 额外样式覆盖（合并到 cell 容器的 style 数组）                                               |
+| `testID`             | `string`               | —        | E2E / 测试定位                                                                              |
+| `accessibilityLabel` | `string`               | 自动组合 | 仅 actionable 可用；覆盖自动名称                                                            |
+| `accessibilityHint`  | `string`               | —        | 仅 actionable 可用；说明操作结果                                                            |
 
 `CellProps` 是三个互斥分支：
 
-| 分支       | 必要条件                   | 可用 extra         | 外层语义                                                 |
-| ---------- | -------------------------- | ------------------ | -------------------------------------------------------- |
-| actionable | `onPress` 必填             | `text` / `display`                         | RNGH `Pressable` + `button`                              |
-| control    | `extra.kind === 'control'` | `control`                                  | 本地 `View`；control 自己承担交互与名称                  |
+| 分支       | 必要条件                   | 可用 extra                                   | 外层语义                                                 |
+| ---------- | -------------------------- | -------------------------------------------- | -------------------------------------------------------- |
+| actionable | `onPress` 必填             | `text` / `display`                           | RNGH `Pressable` + `button`                              |
+| control    | `extra.kind === 'control'` | `control`                                    | 本地 `View`；control 自己承担交互与名称                  |
 | static     | 无 `onPress`               | `text` / 无 `accessibilityText` 的 `display` | 本地 `View`；禁止 `arrow` / disabled / action a11y props |
 
 ### `<List>`
 
-| Prop       | Type                   | 默认     | 说明                                                              |
+| 参数       | 类型                   | 默认值   | 说明                                                              |
 | ---------- | ---------------------- | -------- | ----------------------------------------------------------------- |
 | `children` | `ReactNode`            | —        | 一组 `<Cell>`                                                     |
 | `flush`    | `boolean`              | `false`  | 透明背景（嵌套用）；省略则白卡 + 8px gap + 浅灰底容器             |

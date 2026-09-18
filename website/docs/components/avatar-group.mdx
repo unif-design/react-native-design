@@ -1,7 +1,7 @@
 ---
 sidebar_position: 3
 title: AvatarGroup 头像组
-description: "有序重叠头像组 —— 统一 circle/square、五档尺寸与 max 溢出；+N 可保持静态，也可由消费端接管点击结果。"
+description: '组合多个头像，支持顺序、数量上限和溢出展示。'
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -21,13 +21,18 @@ export const teamMembers = [
 
 按 `items` 输入顺序重叠展示多个 `Avatar`。所有成员共用同一 `size` 与 `shape`;超过 `max` 时,最后一个视觉位替换为 `+N`。组件只负责布局、计数、主题与可访问语义,打开弹层、抽屉或成员页面由消费端处理。
 
-## 实时预览
+## 代码演示 {#实时预览}
 
 <LiveDemo>
   <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span className="demo-label">circle · 未溢出</span>
-      <AvatarGroup items={teamMembers.slice(0, 3)} size="lg" shape="circle" max={5} />
+      <AvatarGroup
+        items={teamMembers.slice(0, 3)}
+        size="lg"
+        shape="circle"
+        max={5}
+      />
     </div>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span className="demo-label">square · 7 人 / max=5 → 4 个头像 +3</span>
@@ -46,10 +51,7 @@ export const teamMembers = [
 ## 用法
 
 ```tsx
-import {
-  AvatarGroup,
-  type AvatarGroupItem,
-} from '@unif/react-native-design';
+import { AvatarGroup, type AvatarGroupItem } from '@unif/react-native-design';
 
 const members: readonly AvatarGroupItem[] = [
   { key: 'owner', label: '王', variant: 'brand' },
@@ -76,50 +78,50 @@ const members: readonly AvatarGroupItem[] = [
 
 `max` 是**最大视觉位数量**,包含 `+N` 本身:
 
-| 输入 | 输出 |
-|---|---|
-| 未传 `max` | 展示全部成员 |
-| `items.length <= max` | 展示全部成员,没有 `+N` |
-| 7 人且 `max={5}` | 前 4 个真实头像 + `+3` |
-| 空 `items` | 渲染 `null` |
+| 输入                           | 输出                                |
+| ------------------------------ | ----------------------------------- |
+| 未传 `max`                     | 展示全部成员                        |
+| `items.length <= max`          | 展示全部成员,没有 `+N`              |
+| 7 人且 `max={5}`               | 前 4 个真实头像 + `+3`              |
+| 空 `items`                     | 渲染 `null`                         |
 | `max` 小于 2、非整数或非有限数 | 开发环境去重诊断,并安全展示全部成员 |
 
 ## API
 
 ### AvatarGroupItem
 
-| 字段 | Type | 必填 | 说明 |
-|---|---|---|---|
-| `key` | `string` | 是 | 列表内唯一且稳定的身份键 |
-| `label` | `string` | 是 | Avatar 回退文字与 accessible name |
-| `source` | `ImageSourcePropType?` | 否 | 直接交给 Avatar 的图片 source |
-| `variant` | `AvatarVariant?` | 否 | 回退文字的配色变体 |
+| 字段      | 类型                   | 必填 | 说明                              |
+| --------- | ---------------------- | ---- | --------------------------------- |
+| `key`     | `string`               | 是   | 列表内唯一且稳定的身份键          |
+| `label`   | `string`               | 是   | Avatar 回退文字与 accessible name |
+| `source`  | `ImageSourcePropType?` | 否   | 直接交给 Avatar 的图片 source     |
+| `variant` | `AvatarVariant?`       | 否   | 回退文字的配色变体                |
 
 ### AvatarGroupProps
 
-| Prop | Type | 默认 | 说明 |
-|---|---|---|---|
-| `items` | `readonly AvatarGroupItem[]` | — | 有序成员列表 |
-| `size` | `AvatarSize?` | `'md'` | 全部头像与 `+N` 共用的尺寸 |
-| `shape` | `AvatarShape?` | `'circle'` | 全部头像与 `+N` 共用的形态 |
-| `max` | `number?` | — | 最大视觉位数量,包含 `+N` |
-| `style` | `StyleProp<ViewStyle>?` | — | 根容器附加样式 |
-| `testID` | `string?` | — | 根容器测试定位；溢出节点派生 `-overflow` |
-| `onOverflowPress` | `(() => void)?` | — | 提供后把真实溢出节点升级为 button |
-| `overflowAccessibilityLabel` | `string?` | 自动生成 | 只能与 `onOverflowPress` 同时使用；空白值回退默认名称 |
-| `overflowAccessibilityHint` | `string?` | — | 只能与 `onOverflowPress` 同时使用；描述消费端点击结果 |
+| 参数                         | 类型                         | 默认值     | 说明                                                  |
+| ---------------------------- | ---------------------------- | ---------- | ----------------------------------------------------- |
+| `items`                      | `readonly AvatarGroupItem[]` | —          | 有序成员列表                                          |
+| `size`                       | `AvatarSize?`                | `'md'`     | 全部头像与 `+N` 共用的尺寸                            |
+| `shape`                      | `AvatarShape?`               | `'circle'` | 全部头像与 `+N` 共用的形态                            |
+| `max`                        | `number?`                    | —          | 最大视觉位数量,包含 `+N`                              |
+| `style`                      | `StyleProp<ViewStyle>?`      | —          | 根容器附加样式                                        |
+| `testID`                     | `string?`                    | —          | 根容器测试定位；溢出节点派生 `-overflow`              |
+| `onOverflowPress`            | `(() => void)?`              | —          | 提供后把真实溢出节点升级为 button                     |
+| `overflowAccessibilityLabel` | `string?`                    | 自动生成   | 只能与 `onOverflowPress` 同时使用；空白值回退默认名称 |
+| `overflowAccessibilityHint`  | `string?`                    | —          | 只能与 `onOverflowPress` 同时使用；描述消费端点击结果 |
 
 `AvatarGroupProps` 是严格联合：静态分支不能只传 `overflowAccessibilityLabel` 或 `overflowAccessibilityHint`;action 分支必须有 `onOverflowPress`。不提供 `children`、每成员独立尺寸/形态/点击、可调 overlap 或内置弹层。
 
 ## 主题键（Tokens）
 
-| Token | 作用 |
-|---|---|
-| `avatar.xs … avatar.xl` | 五档头像和溢出位尺寸 |
-| `space.1 / 2 / 3 / 4 / 6` | 五档负向重叠距离 |
-| `radius.xs / sm / md` | square 圆角 |
-| `c.surface` | 重叠头像之间的主题分隔边 |
-| `c.primaryContainer / c.primary` | `+N` 背景与文字 |
+| Token                            | 作用                     |
+| -------------------------------- | ------------------------ |
+| `avatar.xs … avatar.xl`          | 五档头像和溢出位尺寸     |
+| `space.1 / 2 / 3 / 4 / 6`        | 五档负向重叠距离         |
+| `radius.xs / sm / md`            | square 圆角              |
+| `c.surface`                      | 重叠头像之间的主题分隔边 |
+| `c.primaryContainer / c.primary` | `+N` 背景与文字          |
 
 ## 无障碍（a11y）
 
@@ -129,4 +131,4 @@ const members: readonly AvatarGroupItem[] = [
 - 小于 44pt 的可点击溢出位用 hitSlop 补足命中区,不改变头像组视觉宽度。
 - 组件不描述弹层、抽屉或跳转结果；消费端通过 `overflowAccessibilityHint` 持有该语义。
 
-AvatarGroup 与 Avatar 通过头像族内部 geometry 单元复用尺寸与圆角，不依赖 Avatar 的私有 styles。成员顺序、重叠及溢出操作仍归 AvatarGroup；内部几何不进入包根导出。
+AvatarGroup 与 Avatar 通过头像族内部 geometry 单元复用尺寸与圆角，不读取 Avatar 未公开的样式实现。成员顺序、重叠及溢出操作仍归 AvatarGroup；内部几何不进入包根导出。

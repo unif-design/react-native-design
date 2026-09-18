@@ -3360,19 +3360,32 @@ function verifyMediaFixtureDeployment(root, bindingAnalysis) {
 
 function verifyDocumentation(root) {
   const rootReadme = readText(root, 'README.md');
-  const exampleReadme = readText(root, 'example/README.md');
+  const exampleReadme = readText(root, 'example/GUIDE.md');
   const agents = readText(root, 'AGENTS.md');
-  const contributing = readText(root, 'CONTRIBUTING.md');
+  assertDocumentContainsAll(
+    rootReadme,
+    ['(example/README.md)', '(docs/DEVELOPMENT.md)'],
+    'DOCUMENTATION_LINKS',
+    'root README'
+  );
+  assertDocumentContainsAll(
+    readText(root, 'example/README.md'),
+    ['(GUIDE.md)'],
+    'DOCUMENTATION_LINKS',
+    'example guide'
+  );
+  assertDocumentContainsAll(
+    agents,
+    ['unif-portal-dev-skills:code-development', '(docs/DEVELOPMENT.md)'],
+    'DOCUMENTATION_LINKS',
+    'AGENTS'
+  );
   const canonicalIosCommands = [
     '(cd example && bundle install)',
     '(cd example && bundle exec pod install --project-directory=ios)',
   ];
 
-  for (const [label, source] of [
-    ['AGENTS', agents],
-    ['CONTRIBUTING', contributing],
-    ['example README', exampleReadme],
-  ]) {
+  for (const [label, source] of [['example guide', exampleReadme]]) {
     const commandLines = source
       .split('\n')
       .map((line) => line.trim())
@@ -3394,24 +3407,8 @@ function verifyDocumentation(root) {
     }
   }
 
-  verifyDocumentSceneTable('root README', rootReadme, '## RN 0.86.3 组件展厅');
-  verifyDocumentSceneTable('example README', exampleReadme, '## 5. 八个场景');
+  verifyDocumentSceneTable('example guide', exampleReadme, '## 5. 八个场景');
 
-  assertDocumentContainsAll(
-    rootReadme,
-    [
-      'yarn install --immutable',
-      'yarn example start',
-      'yarn example android',
-      'yarn example ios',
-      'yarn verify:example-showcase',
-      'yarn example typecheck',
-      'yarn example lint',
-      'yarn example test --maxWorkers=2',
-    ],
-    'README_COMMANDS',
-    'root README commands'
-  );
   assertDocumentContainsAll(
     exampleReadme,
     [
@@ -3435,7 +3432,7 @@ function verifyDocumentation(root) {
       'yarn prepare',
     ],
     'README_COMMANDS',
-    'example README commands'
+    'example guide commands'
   );
 
   const orderedHeadings = [
@@ -3455,7 +3452,7 @@ function verifyDocumentation(root) {
     if (current <= previousHeading) {
       failVerification(
         'README_ORDER',
-        `example README section 顺序错误: ${heading}`
+        `example guide section 顺序错误: ${heading}`
       );
     }
     previousHeading = current;
@@ -3484,38 +3481,32 @@ function verifyDocumentation(root) {
       'package root',
     ],
     'README_MANUAL_MATRIX',
-    'example README manual/public boundary'
+    'example guide manual/public boundary'
   );
   const mediaFixtureUris = [
     'https://unif-design.github.io/react-native-design/img/logo.png',
     'https://unif-design.github.io/react-native-design/example-fixtures/media-decode-failure-v1.png',
   ];
   assertDocumentContainsAll(
-    rootReadme,
-    [...mediaFixtureUris, 'Jest 只证明 source wiring'],
-    'README_MEDIA_FIXTURES',
-    'root README media fixture boundary'
-  );
-  assertDocumentContainsAll(
     exampleReadme,
     [...mediaFixtureUris, 'Jest 只验证 source wiring'],
     'README_MEDIA_FIXTURES',
-    'example README media fixture boundary'
+    'example guide media fixture boundary'
   );
   assertDocumentContainsAll(
-    rootReadme,
+    exampleReadme,
     [
       '本仓不使用全局 `logFilters`',
       '`yarn check:runtime-peers` 只接受 root、example、website 三条精确的 RNRC 5 / RNGH 3 例外',
       'harness 不继承本仓 `check:runtime-peers` 的 workspace 精确 allowlist',
     ],
     'README_PEER_FACTS',
-    'root README runtime peer facts'
+    'example guide runtime peer facts'
   );
-  if (/本仓[^\n]*\.yarnrc\.yml[^\n]*logFilters/u.test(rootReadme)) {
+  if (/本仓[^\n]*\.yarnrc\.yml[^\n]*logFilters/u.test(exampleReadme)) {
     failVerification(
       'README_PEER_FACTS',
-      'root README 不得声称 .yarnrc.yml 存在已删除的 logFilters'
+      'example guide 不得声称 .yarnrc.yml 存在已删除的 logFilters'
     );
   }
   if (/^\|[^\n]*\|\s*PASS\s*\|/gmu.test(exampleReadme)) {
@@ -3540,34 +3531,6 @@ function verifyDocumentation(root) {
       'DOCUMENTATION_FACTS',
       'root README 仍保留旧 RN shell 事实'
     );
-  }
-
-  for (const [label, source] of [
-    ['AGENTS', agents],
-    ['CONTRIBUTING', contributing],
-  ]) {
-    assertDocumentContainsAll(
-      source,
-      [
-        '@unif/react-native-design-example',
-        'ReactNativeDesignExample',
-        '0.86.3',
-        'yarn install --immutable',
-        'yarn verify:example-showcase',
-      ],
-      'DOCUMENTATION_FACTS',
-      label
-    );
-    if (
-      /react-native-designdd-example|DesignddExample|RN `?0\.85\.3/u.test(
-        source
-      )
-    ) {
-      failVerification(
-        'DOCUMENTATION_FACTS',
-        `${label} 仍包含失效 workspace/runtime 事实`
-      );
-    }
   }
 }
 

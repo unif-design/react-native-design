@@ -1,8 +1,10 @@
 ---
 sidebar_position: 2
 title: 字体
-description: "Unif Design 字体 token：type 字号阶梯 + fw 字重 + fontMono 等宽栈；仅系统字体（CJK 走 PingFang SC），不引入 webfont。值取自 src/theme/tokens.ts。"
+description: '字体、字重、字号与应用级 fontScale。'
 ---
+
+<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
 
 # 字体
 
@@ -18,9 +20,8 @@ description: "Unif Design 字体 token：type 字号阶梯 + fw 字重 + fontMon
 
 ```css
 font-family:
-  -apple-system, BlinkMacSystemFont,
-  "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
-  "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
+  'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 ```
 
 等宽栈走 `fontMono` token(iOS `Menlo` / Android `monospace`,用于数字、代码风格元数据):
@@ -32,48 +33,48 @@ import { fontMono } from '@unif/react-native-design';
 
 ## 字号阶梯 / `type` {#字号阶梯}
 
-| Token | 基准 px | 用途 |
-|---|---|---|
-| `display` | 22 | 品牌标题 |
-| `h1` | 18 | 页面标题 |
-| `h2` | 17 | 区块标题 |
-| `h3` | 15 | 卡片标题 / 强调正文 |
-| `body` | 15 | 默认正文 |
-| `sm` | 14 | 次级正文 / 按钮 |
-| `xs` | 13 | 提示、说明 |
-| `xxs` | 12 | meta、caption |
-| `micro` | 11 | 徽章、工具名 |
-| `nano` | 10 | TabBar / Grid / Citation / Sources 角标、最小标签 |
+| Token     | 基准 px | 用途                                              |
+| --------- | ------- | ------------------------------------------------- |
+| `display` | 22      | 品牌标题                                          |
+| `h1`      | 18      | 页面标题                                          |
+| `h2`      | 17      | 区块标题                                          |
+| `h3`      | 15      | 卡片标题 / 强调正文                               |
+| `body`    | 15      | 默认正文                                          |
+| `sm`      | 14      | 次级正文 / 按钮                                   |
+| `xs`      | 13      | 提示、说明                                        |
+| `xxs`     | 12      | meta、caption                                     |
+| `micro`   | 11      | 徽章、工具名                                      |
+| `nano`    | 10      | TabBar / Grid / Citation / Sources 角标、最小标签 |
 
 ### 半档微调 {#半档微调}
 
 为收敛"近似 token + delta"反模式,补了几个 0.5 step 的半档,各有固定语义:
 
-| Token | 基准 px | 用途 |
-|---|---|---|
-| `smPlus` | 14.5 | dashboard card 标题("小一档 semi"惯例) |
-| `xsPlus` | 13.5 | 长文阅读字号(Privacy 正文) |
-| `microPlus` | 11.5 | VersionPill / profileCard / Splash / carousel 副标题 |
+| Token       | 基准 px | 用途                                                 |
+| ----------- | ------- | ---------------------------------------------------- |
+| `smPlus`    | 14.5    | dashboard card 标题("小一档 semi"惯例)               |
+| `xsPlus`    | 13.5    | 长文阅读字号(Privacy 正文)                           |
+| `microPlus` | 11.5    | VersionPill / profileCard / Splash / carousel 副标题 |
 
 ### Hero 档 {#hero-档}
 
 Hero 区主标题的三档(带 Logo / NavBar 的品牌大标题):
 
-| Token | 基准 px | 用途 |
-|---|---|---|
-| `heroLg` | 26 | 一级 brand hero(带 Logo,Login 屏) |
-| `heroMd` | 22 | 二级 hero(独立屏 + NavBar,ForgotPassword) |
-| `heroSm` | 18 | 承接式 hero(Group 选组 / 选角色子区) |
+| Token    | 基准 px | 用途                                      |
+| -------- | ------- | ----------------------------------------- |
+| `heroLg` | 26      | 一级 brand hero(带 Logo,Login 屏)         |
+| `heroMd` | 22      | 二级 hero(独立屏 + NavBar,ForgotPassword) |
+| `heroSm` | 18      | 承接式 hero(Group 选组 / 选角色子区)      |
 
 ## 字重 / `fw` {#字重}
 
-| Token | 值 | 别名 |
-|---|---|---|
+| Token        | 值      | 别名    |
+| ------------ | ------- | ------- |
 | `fw.regular` | `'400'` | regular |
-| `fw.medium` | `'500'` | medium |
-| `fw.semi` | `'600'` | semi |
-| `fw.bold` | `'700'` | bold |
-| `fw.heavy` | `'800'` | heavy |
+| `fw.medium`  | `'500'` | medium  |
+| `fw.semi`    | `'600'` | semi    |
+| `fw.bold`    | `'700'` | bold    |
+| `fw.heavy`   | `'800'` | heavy   |
 
 `fw` 用 `as const` 声明,类型已收窄到字面量字符串,**不需要再写 `as '500'` / `as '600'` 这种 cast**。
 
@@ -83,39 +84,44 @@ Hero 区主标题的三档(带 Logo / NavBar 的品牌大标题):
 设计系统**没有** `lineHeight` token。行高按惯例用字号乘系数算:标题 ×1.25(紧凑)、正文 ×1.45。在 `makeStyles` 里直接写 `lineHeight: t.body * 1.45` 即可,不要去 import 不存在的 `lh` token。
 :::
 
-| 惯例 | 系数 | 用途 |
-|---|---|---|
-| 紧凑 | ×1.25 | 标题 |
+| 惯例 | 系数  | 用途                 |
+| ---- | ----- | -------------------- |
+| 紧凑 | ×1.25 | 标题                 |
 | 正文 | ×1.45 | 正文段落(约 22 / 15) |
 
 ## 在代码中使用 {#在代码中使用}
 
 ```tsx
 import { StyleSheet } from 'react-native';
-import { type as t, fw, fontMono, useThemedStyles } from '@unif/react-native-design';
+import {
+  type as t,
+  fw,
+  fontMono,
+  useThemedStyles,
+} from '@unif/react-native-design';
 import type { ColorTokens } from '@unif/react-native-design';
 
 const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({
     title: {
-      fontSize: t.h2,               // 17
-      lineHeight: t.h2 * 1.25,      // 标题用 ×1.25
-      fontWeight: fw.semi,          // '600'(无需 cast)
+      fontSize: t.h2, // 17
+      lineHeight: t.h2 * 1.25, // 标题用 ×1.25
+      fontWeight: fw.semi, // '600'(无需 cast)
       color: c.foreground,
     },
     body: {
-      fontSize: t.body,             // 15
-      lineHeight: t.body * 1.45,    // 正文用 ×1.45
+      fontSize: t.body, // 15
+      lineHeight: t.body * 1.45, // 正文用 ×1.45
       color: c.foreground,
     },
     meta: {
-      fontSize: t.micro,            // 11
+      fontSize: t.micro, // 11
       fontWeight: fw.semi,
       color: c.foregroundSubtle,
     },
     code: {
       fontFamily: fontMono,
-      fontSize: t.xxs,              // 12
+      fontSize: t.xxs, // 12
     },
   });
 

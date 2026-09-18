@@ -1,16 +1,16 @@
 ---
 sidebar_position: 1
 title: Button 按钮
-description: "文本按钮 —— 7 variant(primary/secondary/ghost/neutral/outline/danger/text)× 3 size(sm/md/lg，高 28/36/44)，支持 block 块级、loading、leftIcon / rightIcon。"
+description: '触发操作的按钮，支持变体、尺寸、图标和交互状态。'
 ---
+
+<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
 
 # Button 按钮
 
-文本按钮,7 视觉变体 × 3 尺寸 · 支持块级 / 内联。变体:`primary` 主操作 · `secondary` 次操作 · `ghost` 透明底品牌橙字 · `neutral` 透明底主文字色(多 icon 场景避免全染主橙)· `outline` 白底灰边 · `danger` 破坏性操作 · `text` 纯文字。
+按钮用于触发操作。通过 `variant` 表达操作层级，支持不同尺寸、图标、加载和禁用状态。
 
-## 实时预览
-
-下方渲染的就是 `src/components/ui/Button/Button.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+## 代码演示 {#实时预览}
 
 ```tsx
 const ButtonDemo = () => {
@@ -19,33 +19,54 @@ const ButtonDemo = () => {
   return (
     <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <span className="demo-label">Button · 变体</span>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-        <Button label="主按钮" variant="primary" onPress={onPress} />
-        <Button label="次按钮" variant="secondary" onPress={onPress} />
-        <Button label="ghost" variant="ghost" onPress={onPress} />
-        <Button label="中性" variant="neutral" onPress={onPress} />
-        <Button label="描边" variant="outline" onPress={onPress} />
-        <Button label="危险" variant="danger" onPress={onPress} />
-        <Button label="文字" variant="text" onPress={onPress} />
-      </div>
-    </div>
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <span className="demo-label">Button · 尺寸</span>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-        <Button label="Small" size="sm" onPress={onPress} />
-        <Button label="Medium" size="md" onPress={onPress} />
-        <Button label="Large" size="lg" onPress={onPress} />
-      </div>
-    </div>
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <span className="demo-label">状态</span>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-        <Button label="禁用" disabled onPress={onPress} />
-        <Button label="加载中" loading onPress={onPress} />
-      </div>
-    </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">Button · 变体</span>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 8,
+              alignItems: 'center',
+            }}
+          >
+            <Button label="主按钮" variant="primary" onPress={onPress} />
+            <Button label="次按钮" variant="secondary" onPress={onPress} />
+            <Button label="ghost" variant="ghost" onPress={onPress} />
+            <Button label="中性" variant="neutral" onPress={onPress} />
+            <Button label="描边" variant="outline" onPress={onPress} />
+            <Button label="危险" variant="danger" onPress={onPress} />
+            <Button label="文字" variant="text" onPress={onPress} />
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">Button · 尺寸</span>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 8,
+              alignItems: 'center',
+            }}
+          >
+            <Button label="Small" size="sm" onPress={onPress} />
+            <Button label="Medium" size="md" onPress={onPress} />
+            <Button label="Large" size="lg" onPress={onPress} />
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="demo-label">状态</span>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 8,
+              alignItems: 'center',
+            }}
+          >
+            <Button label="禁用" disabled onPress={onPress} />
+            <Button label="加载中" loading onPress={onPress} />
+          </div>
+        </div>
         <span className="demo-label">已触发 {count} 次</span>
       </div>
     </>
@@ -67,21 +88,21 @@ import { Button } from '@unif/react-native-design';
 
 ## API
 
-| Prop | Type | 默认 | 说明 |
-|---|---|---|---|
-| `label` | `string` | — | 按钮文字，同时作为业务名称；trim 后空白会失败关闭 action 并在 effect 诊断 |
-| `onPress` | `() => void` | — | **必填**点击回调；`disabled` / `loading` 时组件移除有效 handler |
-| `size` | `('sm' \| 'md' \| 'lg')?` | `'md'` | 高度 28 / 36 / 44 |
-| `variant` | `('primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'danger' \| 'text')?` | `'primary'` | 视觉变体 |
-| `block` | `boolean?` | `false` | 仅撑满父容器交叉轴（`alignSelf: stretch`）；主轴尺寸由父容器或 `style` 决定 |
-| `disabled` | `boolean?` | `false` | 禁用（opacity 0.5 + 不响应 onPress） |
-| `loading` | `boolean?` | `false` | 加载态:用 `ActivityIndicator` 替代 label,自动 disabled |
-| `leftIcon` | `IconName?` | — | 左侧图标,与文本同色；尺寸由 Button size 固定，不随 fontScale 放大 |
-| `rightIcon` | `IconName?` | — | 右侧图标,与文本同色；尺寸由 Button size 固定，不随 fontScale 放大 |
-| `style` | `StyleProp<ViewStyle>?` | — | 额外样式覆盖（merge 到末尾） |
-| `testID` | `string?` | — | E2E / 测试定位 |
-| `accessibilityHint` | `string?` | — | SR 行为说明 hint,仅在「行为不显然」时加 |
-| `accessibilityState` | `Omit<AccessibilityState, 'disabled' \| 'busy'>?` | — | caller 可补充 `selected` / `expanded` 等状态；`disabled` / `busy` 由组件接管，类型上禁止覆盖 |
+| 参数                 | 类型                                                                                     | 默认值      | 说明                                                                                         |
+| -------------------- | ---------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------- |
+| `label`              | `string`                                                                                 | —           | 按钮文字，同时作为业务名称；去除首尾空白后不能为空；空白时不响应点击并提示开发诊断           |
+| `onPress`            | `() => void`                                                                             | —           | **必填**点击回调；`disabled` / `loading` 时组件移除有效 handler                              |
+| `size`               | `('sm' \| 'md' \| 'lg')?`                                                                | `'md'`      | 高度 28 / 36 / 44                                                                            |
+| `variant`            | `('primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'danger' \| 'text')?` | `'primary'` | 视觉变体                                                                                     |
+| `block`              | `boolean?`                                                                               | `false`     | 仅撑满父容器交叉轴（`alignSelf: stretch`）；主轴尺寸由父容器或 `style` 决定                  |
+| `disabled`           | `boolean?`                                                                               | `false`     | 禁用（opacity 0.5 + 不响应 onPress）                                                         |
+| `loading`            | `boolean?`                                                                               | `false`     | 加载态:用 `ActivityIndicator` 替代 label,自动 disabled                                       |
+| `leftIcon`           | `IconName?`                                                                              | —           | 左侧图标,与文本同色；尺寸由 Button size 固定，不随 fontScale 放大                            |
+| `rightIcon`          | `IconName?`                                                                              | —           | 右侧图标,与文本同色；尺寸由 Button size 固定，不随 fontScale 放大                            |
+| `style`              | `StyleProp<ViewStyle>?`                                                                  | —           | 额外样式覆盖（merge 到末尾）                                                                 |
+| `testID`             | `string?`                                                                                | —           | E2E / 测试定位                                                                               |
+| `accessibilityHint`  | `string?`                                                                                | —           | SR 行为说明 hint,仅在「行为不显然」时加                                                      |
+| `accessibilityState` | `Omit<AccessibilityState, 'disabled' \| 'busy'>?`                                        | —           | caller 可补充 `selected` / `expanded` 等状态；`disabled` / `busy` 由组件接管，类型上禁止覆盖 |
 
 ## 无障碍（a11y）
 
@@ -101,23 +122,25 @@ import { Button } from '@unif/react-native-design';
 
 读取来源：`src/components/ui/Button/styles.ts`、`ButtonBase.tsx`。
 
-| Token | 来源 | variant / 说明 |
-|---|---|---|
-| `c.primary` | `useColors()` | `primary` 变体背景色；`ghost` / `text` 变体文字色 |
-| `c.onPrimary` | `useColors()` | `primary` 变体文字/图标色 |
-| `c.surfaceContainerHigh` | `useColors()` | `secondary` 变体背景色 |
-| `c.foreground` | `useColors()` | `secondary` / `neutral` / `outline` 变体文字色 |
-| `c.surface` | `useColors()` | `outline` 变体背景色 |
-| `c.outline` | `useColors()` | `outline` 变体边框色 |
-| `c.error` | `useColors()` | `danger` 变体背景色 |
-| `c.onError` | `useColors()` | `danger` 变体文字色 |
-| `radius.lg` / `radius.md` / `radius.sm` | 静态 token | 按 `size='lg'/'md'/'sm'` 对应圆角 |
-| `control.lg` / `control.md` / `control.sm` | 静态 token（`src/theme`） | 按尺寸对应高度（44 / 36 / 28） |
-| `space['6']` / `space['4']` | 静态 token | `md` / `sm` 水平内边距(`lg` 用 `r(18)`) |
-| `space['2']` / `space['1']` | 静态 token | 内容 gap(`lg`/`md` 用 `'2'`,`sm` 用 `'1'`) |
-| `fw.semi` | 静态 token | 按钮文字字重（`600`） |
-| `type.body` / `type.sm` / `type.xxs` | 静态 token | 按 `size='lg'/'md'/'sm'` 对应字号 |
+| Token                                      | 来源                      | variant / 说明                                    |
+| ------------------------------------------ | ------------------------- | ------------------------------------------------- |
+| `c.primary`                                | `useColors()`             | `primary` 变体背景色；`ghost` / `text` 变体文字色 |
+| `c.onPrimary`                              | `useColors()`             | `primary` 变体文字/图标色                         |
+| `c.surfaceContainerHigh`                   | `useColors()`             | `secondary` 变体背景色                            |
+| `c.foreground`                             | `useColors()`             | `secondary` / `neutral` / `outline` 变体文字色    |
+| `c.surface`                                | `useColors()`             | `outline` 变体背景色                              |
+| `c.outline`                                | `useColors()`             | `outline` 变体边框色                              |
+| `c.error`                                  | `useColors()`             | `danger` 变体背景色                               |
+| `c.onError`                                | `useColors()`             | `danger` 变体文字色                               |
+| `radius.lg` / `radius.md` / `radius.sm`    | 静态 token                | 按 `size='lg'/'md'/'sm'` 对应圆角                 |
+| `control.lg` / `control.md` / `control.sm` | 静态 token（`src/theme`） | 按尺寸对应高度（44 / 36 / 28）                    |
+| `space['6']` / `space['4']`                | 静态 token                | `md` / `sm` 水平内边距(`lg` 用 `r(18)`)           |
+| `space['2']` / `space['1']`                | 静态 token                | 内容 gap(`lg`/`md` 用 `'2'`,`sm` 用 `'1'`)        |
+| `fw.semi`                                  | 静态 token                | 按钮文字字重（`600`）                             |
+| `type.body` / `type.sm` / `type.xxs`       | 静态 token                | 按 `size='lg'/'md'/'sm'` 对应字号                 |
 
-## fontScale
+## FAQ
+
+### 字号变大时，按钮尺寸也会变大吗？ {#fontscale}
 
 `ThemeProvider fontScale` 只把 Button label 字号缩放一次。Button 高度、水平 padding、gap、圆角和左右 Icon 尺寸仍由原始 `size` token 决定，不随字号档位改变。例如 `fontScale={1.5}` 会放大文字，但 `md` 仍保持 `control.md` 的原有几何，Icon 仍使用未缩放的 `type.sm + 2`。

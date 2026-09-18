@@ -1,7 +1,7 @@
 {
   "name": "@unif/react-native-design",
   "version": "0.32.0",
-  "description": "Unif 设计系统:theme + icons + utils + components",
+  "description": "Unif React Native 设计系统：基础组件、主题、字体和图标",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "sideEffects": [

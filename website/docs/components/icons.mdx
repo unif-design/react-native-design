@@ -1,7 +1,7 @@
 ---
 sidebar_position: 5
 title: 图标
-description: '手绘 24×24 描边 SVG 图标系统 —— 统一绘制规则、IconName 字面量联合类型自动补全；<Icon> 刻意对屏幕阅读器隐藏，语义由承载它的可交互父组件提供。'
+description: '按名称查询和使用公开 SVG 图标。'
 ---
 
 import IconCatalog from '@site/src/components/IconCatalog';
@@ -38,7 +38,7 @@ function Demo() {
 
 来源：`src/components/ui/Icon/types.ts`、`Icon.tsx`。
 
-| Prop          | Type                    | 默认                                | 说明                                               |
+| 参数          | 类型                    | 默认值                              | 说明                                               |
 | ------------- | ----------------------- | ----------------------------------- | -------------------------------------------------- |
 | `name`        | `IconName`              | —                                   | 图标语义名（字面量联合类型，自动补全）             |
 | `size`        | `number?`               | `r(18)`（随设备宽度缩放）           | 宽高（正方形）；传入值应已经过 `r()` 缩放          |
@@ -105,6 +105,6 @@ import { ICONS } from '@unif/react-native-design';
 
 ## 头像
 
-头像不是图标，是实体。所有头像都是**单字符 monogram**（`我` / `AI` / 客户首字母）放在彩色圆盘上。**绝不**在头像里放图片或多于 1 个字符。
+头像使用 Avatar，可展示文字或图片；图标使用 Icon。两者的输入和无障碍责任分别由对应组件定义。
 
 详见 [Avatar 组件](/docs/components/avatar)。

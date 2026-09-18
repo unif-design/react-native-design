@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 title: Form 表单
-description: '表单容器三件套 Form / FormGroup / FormRow —— 白卡分组 + 行（label + 控件）+ 行间 hairline 分隔（表单不用 gap 的例外）。'
+description: '组合表单分组、标签与输入控件。'
 ---
 
 import { LiveDemo } from '@site/src/components/LiveDemo';
@@ -16,11 +16,9 @@ import { useState } from 'react';
 
 # Form 表单
 
-表单容器——分组标题 + 行（label + 控件）+ 行间 hairline 分隔。
+组合表单分组、标签和字段的布局组件。
 
-## 实时预览
-
-下方渲染的就是 `src/components/ui/Form/Form.tsx` 本体，通过 `react-native-web` 翻译成浏览器节点。
+## 代码演示 {#实时预览}
 
 export const FormDemo = () => {
   const [name, setName] = useState('');
@@ -74,22 +72,22 @@ export const FormDemo = () => {
 
 ### `<Form>`
 
-| Prop       | Type        | 默认 | 说明                                                                           |
-| ---------- | ----------- | ---- | ------------------------------------------------------------------------------ |
-| `children` | `ReactNode` | —    | 通常是若干 `FormGroup` / `FormRow`；根容器纵向堆叠，组间 `gap: space[7]`（16） |
-| `testID`   | `string?`   | —    | E2E / 测试定位                                                                 |
+| 参数       | 类型        | 默认值 | 说明                                                                           |
+| ---------- | ----------- | ------ | ------------------------------------------------------------------------------ |
+| `children` | `ReactNode` | —      | 通常是若干 `FormGroup` / `FormRow`；根容器纵向堆叠，组间 `gap: space[7]`（16） |
+| `testID`   | `string?`   | —      | E2E / 测试定位                                                                 |
 
 ### `<FormGroup>`
 
-| Prop       | Type        | 默认 | 说明                                                             |
-| ---------- | ----------- | ---- | ---------------------------------------------------------------- |
-| `label`    | `string?`   | —    | 分组标题（uppercase 小标签风格）；不传则不渲染标题行             |
-| `children` | `ReactNode` | —    | 该分组下若干 `FormRow`；行间自动插 1px hairline 分隔（除首行外） |
-| `testID`   | `string?`   | —    | E2E / 测试定位                                                   |
+| 参数       | 类型        | 默认值 | 说明                                                             |
+| ---------- | ----------- | ------ | ---------------------------------------------------------------- |
+| `label`    | `string?`   | —      | 分组标题（uppercase 小标签风格）；不传则不渲染标题行             |
+| `children` | `ReactNode` | —      | 该分组下若干 `FormRow`；行间自动插 1px hairline 分隔（除首行外） |
+| `testID`   | `string?`   | —      | E2E / 测试定位                                                   |
 
 ### `<FormRow>`
 
-| Prop       | Type        | 默认    | 说明                                             |
+| 参数       | 类型        | 默认值  | 说明                                             |
 | ---------- | ----------- | ------- | ------------------------------------------------ |
 | `label`    | `string`    | —       | 字段标题（左侧）                                 |
 | `children` | `ReactNode` | —       | 字段控件（Input / Switch 等，右侧）              |

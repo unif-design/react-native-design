@@ -1,8 +1,10 @@
 ---
 sidebar_position: 2
 title: Textarea 多行输入
-description: '严格多行输入：一次性 defaultValue、44pt 最小高度、slot/a11y 与窄 ref。'
+description: '多行输入，按内容和高度边界调整输入表面。'
 ---
+
+<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
 
 # Textarea 多行输入
 
@@ -10,7 +12,9 @@ Textarea 固定 `multiline` 并顶对齐；单行请用 [Input](input.md)。它�
 
 ```tsx
 const TextareaDemo = () => {
-  const [note, setNote] = useState('首次布局按实际宽度测量，多行文字不需要业务层计算高度。\n'.repeat(5));
+  const [note, setNote] = useState(
+    '首次布局按实际宽度测量，多行文字不需要业务层计算高度。\n'.repeat(5)
+  );
   return (
     <>
       <Textarea
@@ -51,19 +55,31 @@ const TextareaLayoutDemo = () => {
             />
           </View>
         </ThemeProvider>
-          <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-            <Button label="填入长文" onPress={() => setValue('中文输入保持原文，依据实际宽度测量高度。\n'.repeat(12))} />
-            <Button label="缩为短文" onPress={() => setValue('一行短文')} />
-            <Button label="外部清空" onPress={() => setValue('')} />
-            <Button label="切换宽度" onPress={() => setNarrow(!narrow)} />
-            <Button
-              label="切换字号"
-              onPress={() => setFontScale(fontScale === 1 ? 2 : 1)}
-            />
-            <Button label="切换高度上限" onPress={() => setLimited(!limited)} />
-            <Button label="聚焦输入" onPress={() => ref.current?.focus()} />
-            <Button label="失焦输入" onPress={() => ref.current?.blur()} />
-          </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 12,
+          }}
+        >
+          <Button
+            label="填入长文"
+            onPress={() =>
+              setValue('中文输入保持原文，依据实际宽度测量高度。\n'.repeat(12))
+            }
+          />
+          <Button label="缩为短文" onPress={() => setValue('一行短文')} />
+          <Button label="外部清空" onPress={() => setValue('')} />
+          <Button label="切换宽度" onPress={() => setNarrow(!narrow)} />
+          <Button
+            label="切换字号"
+            onPress={() => setFontScale(fontScale === 1 ? 2 : 1)}
+          />
+          <Button label="切换高度上限" onPress={() => setLimited(!limited)} />
+          <Button label="聚焦输入" onPress={() => ref.current?.focus()} />
+          <Button label="失焦输入" onPress={() => ref.current?.blur()} />
+        </View>
       </View>
     </>
   );

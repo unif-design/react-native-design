@@ -5,7 +5,6 @@ import Layout from '@theme/Layout';
 import '../../../docs-home.css';
 
 import {
-  IconLayers,
   IconGrid,
   IconPalette,
   IconType,
@@ -28,11 +27,20 @@ interface CodeWindowProps {
   lines: CodeLine[];
 }
 
-function CodeWindow({ file, tag, hl, lines }: CodeWindowProps): React.JSX.Element {
+function CodeWindow({
+  file,
+  tag,
+  hl,
+  lines,
+}: CodeWindowProps): React.JSX.Element {
   return (
     <div className="hp-code compact">
       <div className="hp-code-bar">
-        <span className="hp-code-dots"><i /><i /><i /></span>
+        <span className="hp-code-dots">
+          <i />
+          <i />
+          <i />
+        </span>
         <span className="hp-code-file">{file}</span>
         <span className="hp-code-tag">{tag}</span>
       </div>
@@ -40,7 +48,8 @@ function CodeWindow({ file, tag, hl, lines }: CodeWindowProps): React.JSX.Elemen
         <pre>
           {lines.map((node, i) => (
             <div key={i} className={'hp-cl' + (hl === i + 1 ? ' hl' : '')}>
-              <span className="ln">{i + 1}</span>{node}
+              <span className="ln">{i + 1}</span>
+              {node}
             </div>
           ))}
         </pre>
@@ -81,15 +90,21 @@ function GalleryScreen(): React.JSX.Element {
         <div className="hp-gal-label">Cells</div>
         <div className="hp-gal-card">
           <div className="hp-gal-cell">
-            <span className="hp-gal-ic"><IconBell s={17} /></span>
+            <span className="hp-gal-ic">
+              <IconBell s={17} />
+            </span>
             <div className="hp-gal-ct">
               <div className="t">推送通知</div>
               <div className="s">实时接收拜访提醒</div>
             </div>
-            <span className="hp-gal-sw on"><span /></span>
+            <span className="hp-gal-sw on">
+              <span />
+            </span>
           </div>
           <div className="hp-gal-cell">
-            <span className="hp-gal-ic"><IconUser s={17} /></span>
+            <span className="hp-gal-ic">
+              <IconUser s={17} />
+            </span>
             <div className="hp-gal-ct">
               <div className="t">账户</div>
               <div className="s">王经理</div>
@@ -115,7 +130,9 @@ function InstallBlock(): React.JSX.Element {
   return (
     <div className="hp-install">
       <span className="dollar">$</span>
-      <span>npm install <span className="pkg">{PKG}</span></span>
+      <span>
+        npm install <span className="pkg">{PKG}</span>
+      </span>
       <button
         className={'hp-install-copy' + (copied ? ' copied' : '')}
         title="复制"
@@ -134,21 +151,59 @@ const FN = (s: string) => <span className="tok-fn">{s}</span>;
 const DIM = (s: string) => <span className="tok-dim">{s}</span>;
 
 const CODE_LINES: CodeLine[] = [
-  <>{K('import')} <span className="tok-id">{'{ useState }'}</span> {K('from')} {ST("'react'")}</>,
-  <>{K('import')} <span className="tok-id">{'{ Button, ThemeProvider }'}</span></>,
-  <>{'  '}{K('from')} {ST("'@unif/react-native-design'")}</>,
+  <>
+    {K('import')} <span className="tok-id">{'{ useState }'}</span> {K('from')}{' '}
+    {ST("'react'")}
+  </>,
+  <>
+    {K('import')} <span className="tok-id">{'{ Button, ThemeProvider }'}</span>
+  </>,
+  <>
+    {'  '}
+    {K('from')} {ST("'@unif/react-native-design'")}
+  </>,
   <>{' '}</>,
-  <>{K('export function')} {FN('App')}() {'{'}</>,
-  <>{'  '}{K('const')} [started, setStarted] = {FN('useState')}({K('false')});</>,
-  <>{'  '}{K('return')} (</>,
-  <>{'    '}{DIM('<')}{FN('ThemeProvider')} forceScheme={ST('"dark"')}{DIM('>')}</>,
-  <>{'      '}{DIM('<')}{FN('Button')}</>,
-  <>{'        '}label={'{'}started ? {ST("'已开始'")} : {ST("'开始使用'")}{'}'}</>,
-  <>{'        '}onPress={'{'}() =&gt; {FN('setStarted')}({K('true')}){'}'}</>,
-  <>{'      '}{DIM('/>')}</>,
-  <>{'    '}{DIM('</')}{FN('ThemeProvider')}{DIM('>')}</>,
+  <>
+    {K('export function')} {FN('App')}() {'{'}
+  </>,
+  <>
+    {'  '}
+    {K('const')} [started, setStarted] = {FN('useState')}({K('false')});
+  </>,
+  <>
+    {'  '}
+    {K('return')} (
+  </>,
+  <>
+    {'    '}
+    {DIM('<')}
+    {FN('ThemeProvider')} forceScheme={ST('"dark"')}
+    {DIM('>')}
+  </>,
+  <>
+    {'      '}
+    {DIM('<')}
+    {FN('Button')}
+  </>,
+  <>
+    {'        '}label={'{'}started ? {ST("'已开始'")} : {ST("'开始使用'")}
+    {'}'}
+  </>,
+  <>
+    {'        '}onPress={'{'}() =&gt; {FN('setStarted')}({K('true')}){'}'}
+  </>,
+  <>
+    {'      '}
+    {DIM('/>')}
+  </>,
+  <>
+    {'    '}
+    {DIM('</')}
+    {FN('ThemeProvider')}
+    {DIM('>')}
+  </>,
   <>{'  '});</>,
-  <>{"}"}</>,
+  <>{'}'}</>,
 ];
 
 /* ─── Feature card data ─── */
@@ -177,7 +232,7 @@ const FEATURES: Feature[] = [
   {
     Icon: IconAccess,
     title: '无障碍',
-    desc: '默认提供语义角色、可达对比度与最小点按区域，符合移动端无障碍规范。',
+    desc: '提供组件语义与无障碍属性；具体命中区域和读屏行为见各组件 API。',
   },
 ];
 
@@ -196,15 +251,23 @@ export default function Home(): React.JSX.Element {
             <div className="hp-hero-copy">
               <span className="hp-eyebrow">{PKG}</span>
               <h1 className="hp-title">
-                统一企业的，<br />
+                Unif 企业设计，
+                <br />
                 <span className="accent">React Native 设计系统</span>
               </h1>
               <p className="hp-tagline">
-                一套设计令牌驱动的 React Native 组件库：Cell / Button / Tag / Card / Switch 等基础组件，内建亮暗双主题与无障碍支持。
+                由 Unif 维护的 React Native
+                组件库，提供基础组件、主题和图标，可供其他项目复用。
               </p>
               <div className="hp-cta-row">
-                <Link to="/docs/getting-started" className="hp-btn hp-btn-primary">
-                  开始使用 <span className="hp-arrow"><IconArrowRight s={18} /></span>
+                <Link
+                  to="/docs/getting-started"
+                  className="hp-btn hp-btn-primary"
+                >
+                  开始使用{' '}
+                  <span className="hp-arrow">
+                    <IconArrowRight s={18} />
+                  </span>
                 </Link>
                 <Link to="/docs/components" className="hp-btn hp-btn-outline">
                   浏览组件
@@ -212,7 +275,10 @@ export default function Home(): React.JSX.Element {
               </div>
               <InstallBlock />
               <div className="hp-meta-row">
-                <span className="hp-chip"><span className="dot" />设计令牌</span>
+                <span className="hp-chip">
+                  <span className="dot" />
+                  设计令牌
+                </span>
                 <span className="hp-chip">亮 / 暗主题</span>
                 <span className="hp-chip">TypeScript</span>
               </div>
@@ -229,10 +295,13 @@ export default function Home(): React.JSX.Element {
                 />
               </div>
               <div className="hp-combo-phone">
-                <Phone><GalleryScreen /></Phone>
+                <Phone>
+                  <GalleryScreen />
+                </Phone>
               </div>
               <span className="hp-combo-badge">
-                <span className="dot" />组件实时预览
+                <span className="dot" />
+                组件实时预览
               </span>
             </div>
           </div>
@@ -241,10 +310,15 @@ export default function Home(): React.JSX.Element {
         {/* ── Features ── */}
         <section className="hp-features">
           <div className="hp-sec-label">核心能力</div>
-          <div className="hp-feature-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+          <div
+            className="hp-feature-grid"
+            style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}
+          >
             {FEATURES.map((f, i) => (
               <div className="hp-feature" key={i}>
-                <div className="hp-feat-icon"><f.Icon s={24} /></div>
+                <div className="hp-feat-icon">
+                  <f.Icon s={24} />
+                </div>
                 <h3 className="hp-feat-title">{f.title}</h3>
                 <p className="hp-feat-desc">{f.desc}</p>
               </div>

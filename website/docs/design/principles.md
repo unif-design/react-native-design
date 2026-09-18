@@ -1,89 +1,33 @@
 ---
 sidebar_position: 2
 title: 设计原则
-description: "Unif Design 5 条不可违背的规则：中文优先、橙色克制、无装饰、列表用 gap 不用 border、气泡内角方。新增组件 / 改样式前必读。"
+description: 'Unif Design 的文案、颜色、布局与组件组合原则。'
 ---
 
 # 设计原则
 
-5 条不可违背的规则。**新增组件、修改样式前必读。** 这些是品牌一致性的底线,违反会破坏识别度。
+这些原则说明 Unif 默认视觉与组件用法。具体参数和行为以组件 API 为准，应用内容和业务规则由调用方维护。
 
-## 1. 中文优先 {#中文优先}
+## 文案清晰 {#中文优先}
 
-所有 UI 文案均为简体中文,正式且简洁。英文仅出现在品牌名和代码标识符中。语气见[语调与文案](/docs/design/voice)。
+文档和内置示例优先使用简洁中文。业务名称、按钮文字等通过组件已有属性传入；组件不判断应用应使用哪种业务术语或语言。示例见[语调与文案](/docs/design/voice)。
 
-```tsx
-// ✅ Correct
-<Text>今日待办</Text>
-<Button label="提交订单" onPress={onSubmit} />
+## 颜色表达用途 {#橙色克制}
 
-// ❌ Incorrect
-<Text>Today's tasks</Text>
-<Button label="Submit" onPress={onSubmit} />
-```
+使用主题颜色表达主操作、内容层级和状态。品牌色用于重点操作和强调；`info`、`error` 等按公开组件的语义使用，不固定绑定某一种业务身份。
 
-## 2. 橙色克制 {#橙色克制}
+颜色通过 `useColors()` 或 `useThemedStyles()` 取得，避免把亮色主题的固定值带入暗色界面。详见[颜色](/docs/design/tokens/colors)。
 
-品牌橙 `c.primary`(`#EB6E00`)**仅用于**:
+## 内容优先 {#无装饰}
 
-- 主按钮(primary CTA)
-- 用户气泡背景
-- 活动标签 / 选中状态
-- 关键强调
+视觉效果服务于内容识别和操作反馈。需要图片头像、渐变或边缘动效时，使用相应组件公开能力，并遵守其无障碍和平台边界；这些能力并不限定某个业务场景。
 
-蓝色 `c.info`(`#3775F6`)**专属于用户头像**(及 Tag 的 `info` variant 历史沿用),其它地方禁用 —— 这是 user / AI 视觉区分的关键。
+## 布局按容器选择 {#列表用-gap-不用-border}
 
-```tsx
-// ✅ Correct
-<Button variant="primary" label="确认" onPress={onOk} />  // 橙底
-<Avatar label="我" variant="info" />                       // 蓝底(用户)
-<Avatar label="AI" variant="brand" />                      // 橙底(AI)
+`List` 的默认 `grouped` 模式用卡片与间距分组；`flush` 适合已有容器内的紧凑列表。选择已有模式，避免自行叠加与模式冲突的分隔线。详见 [Cell · List](/docs/components/cell)。
 
-// ❌ Incorrect
-<Avatar label="王" variant="info" />                       // 蓝色不能给客户
-<View style={{ backgroundColor: '#3775F6' }} />            // 蓝色装饰,禁止
-```
+## 组合保持职责 {#气泡内角方}
 
-> `Avatar` 的 `variant` 取值:`brand` / `info` / `soft` / `neutral`(见 [Avatar 文档](/docs/components/avatar))。颜色一律走 token,不内联 hex(见[颜色 → 取色优先级链](/docs/design/tokens/colors#取色优先级链))。
+Design 提供通用视觉与交互。聊天消息及气泡由 [Chat](https://github.com/unif-design/react-native-chat) 维护；订单、拜访等业务状态由应用维护，不进入基础组件。
 
-## 3. 无装饰 {#无装饰}
-
-- 无插画
-- 无渐变背景(仅允许品牌橙渐变:Logo 圆 / Drawer header)
-- 无装饰性 emoji
-- 无背景图、无 pattern
-
-所有图标都是手绘 24×24 描边 SVG,功能性状态走图标系统(见[图标](/docs/components/icons))。头像是单字符 monogram,不放图片。
-
-## 4. 列表用 gap,不用 border {#列表用-gap-不用-border}
-
-每行独立白卡,行间 8px 空隙形成分组(与 iOS 17 / 微信新版一致),而不是用 `border-bottom` 切分。
-
-```tsx
-// ✅ Correct:用 List(grouped 默认)—— 白卡 + 8px gap + 浅灰底,无 cell 间分隔线
-<List>
-  <Cell title="账号与安全" onPress={goSecurity} />
-  <Cell title="通用" onPress={goGeneral} />
-</List>
-
-// ❌ Incorrect:手画 border-bottom 分隔
-<View>
-  <View style={{ borderBottomWidth: 1 }}>{/* row 1 */}</View>
-  <View style={{ borderBottomWidth: 1 }}>{/* row 2 */}</View>
-</View>
-```
-
-`<List>` 有两种模式:`grouped`(默认,白卡 + gap)与 `flush`(紧凑 + cell 间 hairline,嵌在已有底色区里)。详见 [Cell · List 文档](/docs/components/cell)。
-
-## 5. 气泡内角方 {#气泡内角方}
-
-聊天气泡用 `radius['2xl']`(14px)圆角,但**指向头像的内角是直角** —— 这是 Unif 最辨识度的视觉符号。
-
-- **AI 气泡** —— `borderRadius: 0 14px 14px 14px`(左上角直角,指向 AI 头像)
-- **用户气泡** —— `borderRadius: 14px 0 14px 14px`(右上角直角,指向用户头像)
-
-不要为了对称就把四角都改成 14px —— 这会破坏品牌识别。完整代码见[间距 · 圆角 · 阴影 → 气泡非对称圆角](/docs/design/tokens/spacing-radii-shadows#气泡非对称圆角)。
-
----
-
-> 这 5 条是**硬约束**;更细的"不要做什么"清单见[全局 Don'ts](/docs/design/donts)。token 全量见[设计令牌](/docs/design/tokens/colors)。
+[组件索引](/docs/components) · [使用建议](/docs/design/donts)

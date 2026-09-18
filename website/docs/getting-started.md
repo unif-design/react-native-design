@@ -2,28 +2,28 @@
 slug: /getting-started
 sidebar_position: 2
 title: 快速开始
-description: "5 分钟上手 @unif/react-native-design：装 peerDeps、根挂 ThemeProvider、用 useColors / useThemedStyles 写第一个主题化组件。面向 RN 0.86+ 新架构。"
+description: '安装依赖，配置主题与宿主，开始使用 Design 组件。'
 ---
 
 # 快速开始
 
-5 分钟跑通:装包 → 挂 `ThemeProvider` → 用 `useColors()` / `useThemedStyles()` 写第一个跟随亮暗的组件。
+安装依赖并配置主题宿主后，即可使用组件。以下示例演示亮暗主题的接入。
 
 ## 环境要求 {#环境要求}
 
 支持矩阵严格来自 `package.json#peerDependencies`,本仓直接验证的版本是 React Native `0.86.3` + React `19.2.3`:
 
-| 依赖 | 支持范围 | 本仓验证版本 |
-| --- | --- | --- |
-| `react-native` | `>=0.86.0` | `0.86.3` |
-| `react` | `>=19.2.3 <20.0.0` | `19.2.3` |
-| `react-native-gesture-handler` | `>=3.0.0 <4.0.0` | `3.1.0` |
-| `react-native-reanimated` | `>=4.5.2 <4.7.0` | `4.6.0` |
-| `react-native-worklets` | `>=0.11.0 <0.13.0` | `0.12.1` |
-| `react-native-reanimated-carousel` | `>=5.0.0 <6.0.0` | `5.0.0` |
-| `react-native-safe-area-context` | `>=5` | `5.7.x` |
-| `react-native-svg` | `>=15` | `15.15.x` |
-| `@sbaiahmed1/react-native-blur` | `>=4` | `6.0.x` |
+| 依赖                               | 支持范围           | 本仓验证版本 |
+| ---------------------------------- | ------------------ | ------------ |
+| `react-native`                     | `>=0.86.0`         | `0.86.3`     |
+| `react`                            | `>=19.2.3 <20.0.0` | `19.2.3`     |
+| `react-native-gesture-handler`     | `>=3.0.0 <4.0.0`   | `3.1.0`      |
+| `react-native-reanimated`          | `>=4.5.2 <4.7.0`   | `4.6.0`      |
+| `react-native-worklets`            | `>=0.11.0 <0.13.0` | `0.12.1`     |
+| `react-native-reanimated-carousel` | `>=5.0.0 <6.0.0`   | `5.0.0`      |
+| `react-native-safe-area-context`   | `>=5`              | `5.7.x`      |
+| `react-native-svg`                 | `>=15`             | `15.15.x`    |
+| `@sbaiahmed1/react-native-blur`    | `>=4`              | `6.0.x`      |
 
 - Node.js `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`(与 `package.json#engines` 逐字一致;本仓 `.nvmrc` 固定 `v24.13.0`)、Yarn 4
 - TypeScript 6
@@ -42,7 +42,7 @@ yarn add @unif/react-native-design
 
 ### 2. 装 peer dependencies
 
-:::danger peerDeps 缺一即崩
+:::danger peer 依赖需要完整配置
 本库**不打包**下列依赖,宿主工程必须自行安装并完成原生侧配置。缺任一,Metro 打包或运行时就会报 `Unable to resolve module` / `Cannot find module`。
 
 ```sh
@@ -135,7 +135,7 @@ export function App() {
 - `ToastHost` / `ConfirmHost` —— 都会读取安全区 context；各挂一个，且必须位于 `SafeAreaProvider` 内。要在 RN `Modal` 里显示 toast / confirm 时，可在 Modal 的内容树里再挂一份：后挂载的接管、卸载自动归还（`Modal` 是独立 native window，根上那份会被它盖住）。
 
 :::tip 完整 Provider 栈
-若宿主还使用键盘或导航 Provider，可在不破坏上述相对顺序的前提下加入，例如 `GestureHandlerRootView → KeyboardProvider → SafeAreaProvider → ThemeProvider → NavigationContainer + Hosts`。骨架见[完整规范 → Quickstart](/docs/unif-design)。`ThemeProvider` 接受 `forceScheme?: 'light' | 'dark'` 强制某主题(用于测试 / 设置项接入)。
+若宿主还使用键盘或导航 Provider，可在不破坏上述相对顺序的前提下加入，例如 `GestureHandlerRootView → KeyboardProvider → SafeAreaProvider → ThemeProvider → NavigationContainer + Hosts`。`ThemeProvider` 接受 `forceScheme?: 'light' | 'dark'` 强制某主题(用于测试 / 设置项接入)。
 :::
 
 ## 第一个主题化组件 {#第一个主题化组件}
@@ -175,7 +175,11 @@ import { useColors } from '@unif/react-native-design';
 
 function Banner({ active }: { active: boolean }) {
   const c = useColors(); // 跟随亮暗
-  return <View style={{ backgroundColor: active ? c.primary : c.surfaceContainer }} />;
+  return (
+    <View
+      style={{ backgroundColor: active ? c.primary : c.surfaceContainer }}
+    />
+  );
 }
 ```
 
@@ -191,8 +195,8 @@ toast.success('已保存');
 
 ## 下一步 {#下一步}
 
-- [设计原则](/docs/design/principles) —— 5 条不可违背的设计规则
+- [设计原则](/docs/design/principles) —— 主题、布局与组合原则
 - [颜色 token](/docs/design/tokens/colors) —— role-based 角色 token 与取色优先级链
-- [组件概览](/docs/components) —— 40+ 组件,按场景分组索引
+- [组件概览](/docs/components) —— 组件,按场景分组索引
 - [在宿主工程里测试](/docs/testing) —— Jest 接入:一行 `@unif/react-native-design/jest-preset`
 - [常见问题](/docs/troubleshooting) —— peer 缺失、Web 点击无响应、缓存不生效等排障

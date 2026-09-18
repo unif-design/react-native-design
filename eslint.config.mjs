@@ -24,6 +24,10 @@ export default defineConfig([
     },
   },
   {
+    files: ['**/*.mjs'],
+    languageOptions: { ecmaVersion: 'latest', sourceType: 'module' },
+  },
+  {
     // 与 .gitignore 的预览生成目录一致，避免对打包后的第三方代码重复 lint。
     ignores: ['node_modules/', 'lib/', 'website/', 'ds-bundle/'],
   },

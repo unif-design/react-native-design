@@ -1,14 +1,16 @@
 ---
 sidebar_position: 4
 title: Loading 加载
-description: '加载反馈组件：Spinner 表示未知时长，CircularProgress 表示 0..100% 的确定进度并可选显示中央百分比。'
+description: '展示未知时长的等待或可量化的圆形进度。'
 ---
+
+<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
 
 # Loading 加载
 
 `Spinner` 表示无法量化的等待；`CircularProgress` 表示已知的 `0..1` 确定进度。圆形进度默认只显示圆环，通过 `showLabel` 才在中央显示取整百分比。
 
-## 实时预览
+## 代码演示 {#实时预览}
 
 下方使用公共 `<Spinner>` API；本页由 `Spinner.web.tsx` 的静态 CSS keyframes 驱动，native 则由 `Spinner.tsx` 的 Reanimated worklet 驱动。
 
@@ -100,7 +102,14 @@ const ProgressFontDemo = () => {
     <>
       <View style={{ gap: 16 }}>
         <ThemeProvider fontScale={fontScale}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 12,
+            }}
+          >
             {[0, 0.42, 1].map((value) => (
               <CircularProgress
                 key={value}
@@ -119,10 +128,10 @@ const ProgressFontDemo = () => {
             />
           </View>
         </ThemeProvider>
-          <Button
-            label="切换进度字号"
-            onPress={() => setFontScale(fontScale === 1 ? 3 : 1)}
-          />
+        <Button
+          label="切换进度字号"
+          onPress={() => setFontScale(fontScale === 1 ? 3 : 1)}
+        />
       </View>
     </>
   );
@@ -133,7 +142,7 @@ const ProgressFontDemo = () => {
 
 未知上传比例应使用 Spinner 或 BorderBeam 配合实际状态说明，不传 NaN 或伪造 0%；100% 也不代表业务成功。
 
-| Prop                 | Type                    | 默认           | 说明                                               |
+| 参数                 | 类型                    | 默认值         | 说明                                               |
 | -------------------- | ----------------------- | -------------- | -------------------------------------------------- |
 | `value`              | `number`                | 必填           | `0..1` 的确定进度；越界值收敛到边界，非有限值按 0  |
 | `size`               | `number?`               | `32`           | 圆环直径；非有限或 `< 16` 钳到 16                  |
@@ -148,7 +157,7 @@ const ProgressFontDemo = () => {
 
 ### Spinner
 
-| Prop        | Type                    | 默认                          | 说明                                                                                     |
+| 参数        | 类型                    | 默认值                        | 说明                                                                                     |
 | ----------- | ----------------------- | ----------------------------- | ---------------------------------------------------------------------------------------- |
 | `size`      | `number?`               | `18`                          | 直径（含 stroke）；非有限或 `< 8` 钳到 8（打 warn）                                      |
 | `color`     | `string?`               | `c.primary`（运行期 hook 取） | 旋转弧颜色（轨道色固定 `c.outline`）                                                     |
