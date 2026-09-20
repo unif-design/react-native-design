@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.33.0](https://github.com/unif-design/react-native-design/compare/v0.32.2...v0.33.0) (2026-09-20)
+
+
+### Features
+
+* **textarea:** 支持嵌入复合输入的无表面样式 ([#139](https://github.com/unif-design/react-native-design/issues/139)) ([12d590a](https://github.com/unif-design/react-native-design/commit/12d590a1e34fbd50dc26477218e423cfb7172d92))
+
 ## [0.32.2](https://github.com/unif-design/react-native-design/compare/v0.32.1...v0.32.2) (2026-09-18)
 
 ## [0.32.1](https://github.com/unif-design/react-native-design/compare/v0.32.0...v0.32.1) (2026-09-18)
