@@ -4,7 +4,7 @@ title: GlassStats 玻璃数据条
 description: '以多列数字和标签展示统计摘要。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # GlassStats 玻璃数据条
 

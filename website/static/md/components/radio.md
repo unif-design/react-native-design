@@ -4,7 +4,7 @@ title: Radio 单选
 description: '受控单选控件及单选组。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # Radio 单选
 

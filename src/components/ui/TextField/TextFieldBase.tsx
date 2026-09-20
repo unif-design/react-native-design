@@ -21,6 +21,10 @@ import type { TextFieldBaseProps, TextFieldHandle } from './types';
 import { useErrorAnnouncement } from './useErrorAnnouncement';
 import { useTextFieldValue } from './useTextFieldValue';
 import { useMultilineLayout } from './useMultilineLayout';
+import {
+  TEXTAREA_PLAIN_VERTICAL_INSET,
+  TEXTAREA_VERTICAL_INSET,
+} from './constants';
 
 const log = createLogger('TextField');
 
@@ -36,6 +40,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
       minHeight,
       maxHeight,
       searchLayout,
+      plainSurface,
       leading,
       trailing,
       error,
@@ -48,6 +53,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
       accessibilityState,
       accessibilityRole,
       placeholderTextColor: callerPlaceholder,
+      underlineColorAndroid: callerUnderline,
       onFocus,
       onBlur,
       onContentSizeChange,
@@ -98,11 +104,15 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
       minHeight,
       maxHeight
     );
+    const plain = multiline && plainSurface === true;
     const multilineLayout = useMultilineLayout({
       enabled: multiline,
       value: controller.value,
       minHeight: normalizedTextareaHeights.minHeight,
       maxHeight: normalizedTextareaHeights.maxHeight,
+      verticalInset: plain
+        ? TEXTAREA_PLAIN_VERTICAL_INSET
+        : TEXTAREA_VERTICAL_INSET,
       fontSize: styles.input.fontSize,
       placeholder: allowedNativeProps.placeholder as string | undefined,
       inputRef: nativeRef,
@@ -169,8 +179,9 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
           style={[
             styles.wrap,
             multiline && styles.wrapMultiline,
-            searchLayout === undefined && wrapStateStyles,
+            searchLayout === undefined && !plain && wrapStateStyles,
             searchLayout !== undefined && styles.searchInteractiveRow,
+            plain && styles.wrapPlain,
             multiline
               ? {
                   minHeight: normalizedHeight,
@@ -236,6 +247,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
               },
             ]}
             placeholderTextColor={callerPlaceholder ?? colors.foregroundSubtle}
+            underlineColorAndroid={plain ? 'transparent' : callerUnderline}
             accessibilityRole={accessibilityRole}
             accessibilityState={mergedAccessibilityState}
             testID={childTestID(testID, 'input')}

@@ -4,7 +4,7 @@ title: Search 搜索框
 description: '搜索输入预设，支持文字修改与清空。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # Search 搜索框
 

@@ -4,7 +4,7 @@ title: TabBar 底部 tab 栏
 description: '展示底部导航项目及选中状态。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # TabBar 底部 tab 栏
 

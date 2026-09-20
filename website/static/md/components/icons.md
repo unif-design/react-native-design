@@ -4,7 +4,7 @@ title: 图标
 description: '按名称查询和使用公开 SVG 图标。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # 图标
 

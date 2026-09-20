@@ -38,6 +38,7 @@ export const TextareaLayoutDemo = () => {
   const [fontScale, setFontScale] = useState(1);
   const [narrow, setNarrow] = useState(false);
   const [limited, setLimited] = useState(true);
+  const [plain, setPlain] = useState(false);
   const ref = useRef(null);
   return (
     <LiveDemo>
@@ -45,6 +46,7 @@ export const TextareaLayoutDemo = () => {
         <ThemeProvider fontScale={fontScale}>
           <View style={{ width: narrow ? 180 : '100%' }}>
             <Textarea
+              surface={plain ? 'plain' : 'default'}
               ref={ref}
               value={value}
               onChangeText={setValue}
@@ -79,6 +81,7 @@ export const TextareaLayoutDemo = () => {
             onPress={() => setFontScale(fontScale === 1 ? 2 : 1)}
           />
           <Button label="切换高度上限" onPress={() => setLimited(!limited)} />
+          <Button label="切换输入表面" onPress={() => setPlain(!plain)} />
           <Button label="聚焦输入" onPress={() => ref.current?.focus()} />
           <Button label="失焦输入" onPress={() => ref.current?.blur()} />
         </View>
@@ -98,9 +101,16 @@ export const TextareaLayoutDemo = () => {
 ```tsx
 <Textarea defaultValue="首次草稿" minHeight={120} maxHeight={240} />
 <Textarea value={note} onChangeText={setNote} error={note ? undefined : '请输入备注'} />
+<Textarea value={note} onChangeText={setNote} surface="plain" minHeight={44} maxHeight={120} />
 ```
 
 `defaultValue` 只用于首次初始化；受控模式必须同时传 `value` 和 `onChangeText`，两种 mode 不能中途切换。
+
+## 嵌入复合输入
+
+`surface` 可选 `default`（缺省）或 `plain`。`default` 绘制独立输入的背景、圆角、边框及焦点／错误描边。`plain` 用于外层卡片已经提供表面的复合输入，不绘制这些装饰；文字、焦点事件、错误说明、禁用状态及最小触达区域保持原契约。
+
+两种表面都保留水平 `space[5]` 和垂直 `space[4]` 的文字内边距；消费者不需要再给文字区叠加内边距。`plain` 没有边框，其垂直内边距合计为 `2 * space[4]`。`minHeight`／`maxHeight` 仍包含这些间距；例如消费者按四行文字计算上限时，应将文字高度与这部分垂直间距相加。`containerStyle` 只作用于外层布局，不能用于穿透修改内部输入表面。
 
 ## 高度与 a11y
 

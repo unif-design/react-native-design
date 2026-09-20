@@ -4,7 +4,7 @@ title: Decorations 装饰图元
 description: '可组合到容器中的渐变与背景装饰。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # Decorations 装饰图元
 

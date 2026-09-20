@@ -348,6 +348,21 @@ const actionableDisplayCellProps = {
 <Textarea value="ok" onChangeText={setText} />;
 <Textarea defaultValue="seed" minHeight={120} maxHeight={200} />;
 <Textarea
+  value="嵌入输入"
+  onChangeText={setText}
+  surface="plain"
+  minHeight={44}
+/>;
+<Textarea defaultValue="独立输入" surface="default" />;
+// @ts-expect-error Textarea 只支持明确的表面模式
+<Textarea surface="borderless" />;
+// @ts-expect-error surface 不是普通 Input 的公共参数
+<Input surface="plain" />;
+// @ts-expect-error surface 不是 Search 的公共参数
+<Search surface="plain" />;
+// @ts-expect-error surface 不是 PasswordInput 的公共参数
+<PasswordInput value="" onChangeText={setText} surface="plain" />;
+<Textarea
   value={undefined}
   defaultValue="seed"
   onChangeText={setText}

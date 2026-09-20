@@ -4,7 +4,7 @@ title: Switch 开关
 description: '受控开关，用于切换开启和关闭状态。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # Switch 开关
 

@@ -4,7 +4,7 @@ title: Empty 空态
 description: '展示空内容状态的图标、标题和说明。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # Empty 空态
 

@@ -4,7 +4,7 @@ title: StatusDot 状态点
 description: '用圆点表达完成、错误、进行中和待处理状态。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # StatusDot 状态点
 

@@ -4,7 +4,7 @@ title: 间距 · 圆角 · 阴影
 description: '间距、圆角和主题阴影的公开设计变量。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # 间距 · 圆角 · 阴影
 

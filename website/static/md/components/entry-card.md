@@ -4,7 +4,7 @@ title: EntryCard 入口卡
 description: '用于图标与文字入口的紧凑卡片。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # EntryCard 入口卡
 

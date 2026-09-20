@@ -4,7 +4,7 @@ title: AvatarWithRing 圆环头像
 description: '带装饰环的文字头像。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # AvatarWithRing 圆环头像
 

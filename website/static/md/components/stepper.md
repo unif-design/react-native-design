@@ -4,7 +4,7 @@ title: Stepper 步进器
 description: '通过增减操作调整数值，并控制范围与展示格式。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # Stepper 步进器
 

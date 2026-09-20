@@ -4,7 +4,7 @@ title: NavBar 导航栏
 description: '页面顶部的标题与操作区域。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # NavBar 导航栏
 

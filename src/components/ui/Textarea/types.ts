@@ -14,9 +14,11 @@ import type {
 export type TextareaProps = Omit<TextInputProps, RemovedTextInputProps> &
   TextFieldCommonProps &
   TextFieldValueProps &
-  TextareaHeightProps;
+  TextareaLayoutProps;
 
-interface TextareaHeightProps {
+interface TextareaLayoutProps {
+  /** default 绘制独立输入表面；plain 嵌入复合输入，保留文字内边距但不绘制表面。 */
+  surface?: 'default' | 'plain';
   /** 最小高度，默认 96（约 5 行） */
   minHeight?: number;
   /** 最大高度（超过后内部滚动），默认不限制 */

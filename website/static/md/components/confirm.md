@@ -4,7 +4,7 @@ title: Confirm 确认对话框
 description: '展示确认弹窗，并通过 Promise 返回用户选择。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # Confirm 确认对话框
 

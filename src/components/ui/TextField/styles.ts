@@ -21,6 +21,11 @@ export const makeStyles = (c: ColorTokens) =>
       paddingVertical: TEXTAREA_VERTICAL_PADDING,
       alignItems: 'flex-start',
     },
+    wrapPlain: {
+      backgroundColor: 'transparent',
+      borderWidth: 0,
+      borderRadius: 0,
+    },
     /** Search 的可见底色/边框绝不承载命中区域。 */
     searchInteractiveRow: {
       borderWidth: 0,

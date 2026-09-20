@@ -4,7 +4,7 @@ title: Chip 标签
 description: '用于选择、筛选或简短标签的胶囊控件。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # Chip 标签
 

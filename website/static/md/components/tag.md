@@ -4,7 +4,7 @@ title: Tag 标签
 description: '展示简短的状态或分类标签。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # Tag 标签
 

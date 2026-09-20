@@ -5,7 +5,7 @@ title: 在宿主工程里测试
 description: '通过公开 Jest preset 测试 Design 组件，并排查常见接入问题。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # 在宿主工程里测试
 

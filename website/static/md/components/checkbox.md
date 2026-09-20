@@ -4,7 +4,7 @@ title: Checkbox 复选框
 description: '受控多选控件，支持选中和禁用状态。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # Checkbox 复选框
 

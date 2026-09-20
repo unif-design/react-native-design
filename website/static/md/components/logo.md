@@ -4,7 +4,7 @@ title: Logo 主标
 description: '展示调用方提供的标识图片。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # Logo 主标
 
