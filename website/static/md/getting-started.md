@@ -5,7 +5,7 @@ title: 快速开始
 description: '安装依赖，配置主题与宿主，开始使用 Design 组件。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # 快速开始
 

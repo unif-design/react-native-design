@@ -124,11 +124,12 @@ export function FormsScene(): React.JSX.Element {
 
         <SectionCard
           title="多行输入消费"
-          description="仅验证 Textarea 的受控值、高度和焦点；页面负责键盘避让。切换全局字号或屏幕宽度后继续编辑。"
+          description="输入嵌入卡片，保留文字内边距，由卡片绘制表面。切换全局字号或屏幕宽度后继续编辑。"
         >
           <View style={styles.controls}>
             <Textarea
               ref={textareaRef}
+              surface="plain"
               value={draft.textareaValue}
               onChangeText={(textareaValue) =>
                 updateScene('forms', (current) => ({

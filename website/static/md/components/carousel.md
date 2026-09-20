@@ -4,7 +4,7 @@ title: Carousel 轮播
 description: '轮播展示一组内容，支持切换、指示器和自动播放。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # Carousel 轮播
 

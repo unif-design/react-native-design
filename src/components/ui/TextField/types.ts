@@ -133,6 +133,8 @@ export type TextFieldBaseProps = Omit<TextInputProps, RemovedTextInputProps> &
     maxHeight?: number;
     /** internal:Search 的 44pt interactive row + 36pt decorative surface。 */
     searchLayout?: SearchFieldLayout;
+    /** internal:仅由 Textarea 的公开 surface 选择，无独立表面的多行输入。 */
+    plainSurface?: boolean;
   };
 
 export interface MultilineLayoutInput {
@@ -140,6 +142,7 @@ export interface MultilineLayoutInput {
   value: string;
   minHeight: number;
   maxHeight: number | undefined;
+  verticalInset: number;
   fontSize: number | undefined;
   placeholder: string | undefined;
   inputRef: RefObject<ComponentRef<typeof TextInput> | null>;

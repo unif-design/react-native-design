@@ -4,7 +4,7 @@ title: VersionPill 版本号药丸
 description: '展示版本信息的紧凑标签。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # VersionPill 版本号药丸
 

@@ -4,7 +4,7 @@ title: IconButton 图标按钮
 description: '只包含图标的按钮，需要提供无障碍名称。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # IconButton 图标按钮
 

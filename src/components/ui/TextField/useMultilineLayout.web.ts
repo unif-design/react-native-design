@@ -1,5 +1,4 @@
 import { useCallback, useLayoutEffect, useState } from 'react';
-import { TEXTAREA_VERTICAL_INSET } from './constants';
 import type {
   MultilineLayout,
   MultilineLayoutInput,
@@ -12,17 +11,16 @@ export function useMultilineLayout({
   value,
   minHeight,
   maxHeight,
+  verticalInset,
   fontSize,
   placeholder,
   inputRef,
 }: MultilineLayoutInput): MultilineLayout {
   const [contentHeight, setContentHeight] = useState(0);
   const [width, setWidth] = useState(0);
-  const minimum = Math.max(0, minHeight - TEXTAREA_VERTICAL_INSET);
+  const minimum = Math.max(0, minHeight - verticalInset);
   const maximum =
-    maxHeight === undefined
-      ? Infinity
-      : Math.max(0, maxHeight - TEXTAREA_VERTICAL_INSET);
+    maxHeight === undefined ? Infinity : Math.max(0, maxHeight - verticalInset);
   useLayoutEffect(() => {
     if (!enabled || inputRef.current === null) return;
     const node = inputRef.current as unknown as WebTextInputMeasurement;
@@ -43,6 +41,7 @@ export function useMultilineLayout({
     placeholder,
     minHeight,
     maxHeight,
+    verticalInset,
     inputRef,
   ]);
   const onLayout = useCallback<NonNullable<MultilineLayout['onLayout']>>(

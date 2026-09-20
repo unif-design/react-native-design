@@ -5,7 +5,7 @@ title: 设计系统
 description: 'Unif Design 的主题、组件与组合方式。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # 设计系统
 

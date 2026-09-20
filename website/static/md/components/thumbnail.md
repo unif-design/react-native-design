@@ -4,7 +4,7 @@ title: Thumbnail 缩略图
 description: '展示缩略图，支持尺寸、加载及失败占位。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # Thumbnail 缩略图
 

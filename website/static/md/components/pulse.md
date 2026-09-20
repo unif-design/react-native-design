@@ -4,7 +4,7 @@ title: Pulse · PulseDot · usePulse
 description: '为内容或状态圆点提供脉冲动效。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # Pulse · PulseDot · usePulse
 

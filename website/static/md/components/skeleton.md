@@ -4,7 +4,7 @@ title: Skeleton 骨架屏
 description: '内容加载前的骨架占位。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # Skeleton 骨架屏
 

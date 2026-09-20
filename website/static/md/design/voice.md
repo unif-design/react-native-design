@@ -4,7 +4,7 @@ title: 语调与文案
 description: '默认中文文案的大小写、状态表达与标点建议。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # 语调与文案
 

@@ -4,7 +4,7 @@ title: BorderBeam 边框流光
 description: '在内容边缘展示循环流光，不接管布局和业务状态。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # BorderBeam 边框流光
 

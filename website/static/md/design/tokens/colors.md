@@ -4,7 +4,7 @@ title: 颜色
 description: '主题颜色的语义角色、亮暗切换与取色方法。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
 
 # 颜色
 
