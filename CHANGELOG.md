@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.34.0](https://github.com/unif-design/react-native-design/compare/v0.33.1...v0.34.0) (2026-10-03)
+
+
+### Features
+
+* extract reusable portal content components ([77674cb](https://github.com/unif-design/react-native-design/commit/77674cbf0c3db8e2b31e05ee2473a02c9c8d6eb3))
+
 ## [0.33.1](https://github.com/unif-design/react-native-design/compare/v0.33.0...v0.33.1) (2026-10-03)
 
 
