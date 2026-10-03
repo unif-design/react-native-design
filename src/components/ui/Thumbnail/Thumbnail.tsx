@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useColors, useThemedStyles } from '../../../theme';
-import { resolveImageSource } from '../../../utils/imageSource';
+import { useImageSource } from '../shared/useImageSource';
 import { createLogger } from '../../../utils/logger';
 import { ImageAttempt } from '../shared/ImageAttempt';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
@@ -45,7 +45,7 @@ export function Thumbnail(props: ThumbnailProps): React.JSX.Element {
         ? { uri: uri.trim() }
         : source
       : undefined;
-  const resolvedSource = resolveImageSource(sourceCandidate);
+  const resolvedSource = useImageSource(sourceCandidate);
   const sanitizedImageStyle = sanitizeThumbnailImageStyle(imageStyle);
   const diagnostics = [
     ...normalizedDimensions.diagnostics,
@@ -94,7 +94,7 @@ export function Thumbnail(props: ThumbnailProps): React.JSX.Element {
           <ImageAttempt
             {...imageAccessibilityProps}
             key={resolvedSource.key}
-            source={resolvedSource.source}
+            source={resolvedSource}
             fallback={fallbackContent}
             style={[sanitizedImageStyle.style, StyleSheet.absoluteFill]}
             resizeMode={resizeMode}

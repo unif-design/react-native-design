@@ -7,6 +7,13 @@ import {
   test,
 } from '@jest/globals';
 import type { ReactElement } from 'react';
+import { resolveImageSource } from '../../../../src/utils/imageSource';
+
+const validSource = () => {
+  const resolved = resolveImageSource({ uri: 'https://x/a.png' });
+  if (resolved === undefined) throw new Error('Expected a valid image fixture');
+  return resolved;
+};
 
 type ErrorProps = {
   onError: () => void;
@@ -92,11 +99,11 @@ describe('ImageAttempt', () => {
     hooks.activate('attempt');
     const first = ImageAttempt({
       fallback: null,
-      source: { uri: 'https://x/a.png' },
+      source: validSource(),
     }) as ReactElement<ErrorProps>;
     const second = ImageAttempt({
       fallback: null,
-      source: { uri: 'https://x/a.png' },
+      source: validSource(),
     }) as ReactElement<ErrorProps>;
 
     expect(errorHandler(second)).toBe(errorHandler(first));
@@ -111,7 +118,7 @@ describe('ImageAttempt', () => {
     const a1Handler = errorHandler(
       ImageAttempt({
         fallback: null,
-        source: { uri: 'https://x/a.png' },
+        source: validSource(),
       }) as ReactElement<ErrorProps>
     );
 
@@ -119,7 +126,7 @@ describe('ImageAttempt', () => {
     const a2Handler = errorHandler(
       ImageAttempt({
         fallback: null,
-        source: { uri: 'https://x/a.png' },
+        source: validSource(),
       }) as ReactElement<ErrorProps>
     );
 

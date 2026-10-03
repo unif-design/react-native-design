@@ -1,10 +1,99 @@
 import { describe, expect, test } from '@jest/globals';
 import {
   canonicalSourceValue,
+  createImageSourceResolver,
   imageSourceKey,
   isValidImageSource,
   resolveImageSource,
 } from '../../src/utils/imageSource';
+
+describe('component-scoped image resolver', () => {
+  test('an equivalent ordered source array reuses its frozen input, but order and nested changes do not', () => {
+    const resolve = createImageSourceResolver();
+    const first = resolve([{ uri: 'a', metadata: [null, true] }, { uri: 'b' }]);
+    expect(resolve([{ metadata: [null, true], uri: 'a' }, { uri: 'b' }])).toBe(
+      first
+    );
+    const reordered = resolve([
+      { uri: 'b' },
+      { uri: 'a', metadata: [null, true] },
+    ]);
+    expect(reordered?.source).toEqual([
+      { uri: 'b' },
+      { uri: 'a', metadata: [null, true] },
+    ]);
+    expect(reordered?.key).not.toBe(first?.key);
+    const changed = resolve([
+      { uri: 'b' },
+      { uri: 'a', metadata: [null, false] },
+    ]);
+    expect(changed?.key).not.toBe(reordered?.key);
+    expect(first?.source).toEqual([
+      { uri: 'a', metadata: [null, true] },
+      { uri: 'b' },
+    ]);
+  });
+
+  test('every render observes each Proxy descriptor once, including after a valid cached input', () => {
+    const resolve = createImageSourceResolver();
+    let reads = 0;
+    const source = new Proxy(
+      {},
+      {
+        ownKeys: () => ['uri'],
+        getOwnPropertyDescriptor: () => ({
+          configurable: true,
+          enumerable: true,
+          value: `https://example.test/${++reads}.png`,
+        }),
+      }
+    );
+    const first = resolve(source);
+    const second = resolve(source);
+    expect(reads).toBe(2);
+    expect(first?.source).toEqual({ uri: 'https://example.test/1.png' });
+    expect(second?.source).toEqual({ uri: 'https://example.test/2.png' });
+    expect(first?.key).not.toBe(second?.key);
+  });
+
+  test('cached valid objects do not bypass checks for later cycles, accessors or revoked Proxies', () => {
+    const resolve = createImageSourceResolver();
+    const metadata: Record<string, unknown> = { label: 'a' };
+    const source = { uri: 'a', metadata };
+    expect(resolve(source)?.source).toEqual(source);
+    metadata.loop = source;
+    expect(resolve(source)).toBeUndefined();
+    delete metadata.loop;
+    expect(resolve(source)?.source).toEqual(source);
+    Object.defineProperty(metadata, 'label', {
+      get: () => {
+        throw new Error('Must not execute');
+      },
+    });
+    expect(resolve(source)).toBeUndefined();
+
+    const revocable = Proxy.revocable({ uri: 'a' }, {});
+    expect(resolve(revocable.proxy)?.source).toEqual({ uri: 'a' });
+    revocable.revoke();
+    expect(resolve(revocable.proxy)).toBeUndefined();
+  });
+
+  test('removed unknown properties and sparse array candidates cannot retain old metadata', () => {
+    const resolve = createImageSourceResolver();
+    const source: { uri: string; metadata?: string[] } = {
+      uri: 'a',
+      metadata: ['x'],
+    };
+    const first = resolve(source);
+    delete source.metadata;
+    expect(resolve(source)?.source).toEqual({ uri: 'a' });
+    expect(first?.source).toEqual({ uri: 'a', metadata: ['x'] });
+    const sparse = [{ uri: 'a' }, { uri: 'b' }];
+    expect(resolve(sparse)?.source).toEqual(sparse);
+    delete sparse[0];
+    expect(resolve(sparse)).toBeUndefined();
+  });
+});
 
 describe('canonicalSourceValue / imageSourceKey', () => {
   test('object 与 headers 的 key 顺序不影响 identity', () => {

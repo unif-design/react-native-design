@@ -4,7 +4,7 @@ title: Textarea 多行输入
 description: '多行输入，按内容和高度边界调整输入表面。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.32.2; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.33.0; edit source documentation. -->
 
 # Textarea 多行输入
 
