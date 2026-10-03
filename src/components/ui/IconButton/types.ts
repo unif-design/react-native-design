@@ -12,6 +12,10 @@ export type IconButtonProps = {
   onPress: () => void;
   /** 尺寸,默认 'md'(28 / 36 / 44 方形) */
   size?: ButtonSize;
+  /** 独立图标及加载指示尺寸；默认沿用 size 对应值。 */
+  iconSize?: number;
+  /** 方形表面边长；同时据此补足 44pt 命中区。默认沿用 size。 */
+  surfaceSize?: number;
   /** 视觉变体,默认 'ghost'(透明底,适合 header right-tray 场景)。
    *  不支持 'text'——text variant 撕除高度,与 square 方形布局冲突。 */
   variant?: IconButtonVariant;

@@ -1,0 +1,73 @@
+---
+title: TextEntryContent 文字编辑内容
+description: 受控文字、说明和确认按钮的组合。
+---
+
+<!-- Generated from @unif/react-native-design@0.33.1; edit source documentation. -->
+
+# TextEntryContent 文字编辑内容
+
+组合标题、说明、Textarea 和确认/取消按钮。值由调用方控制，宿主负责弹层、键盘与业务提交。
+
+```tsx
+const TextEntryDemo = () => {
+  const [value, setValue] = useState('欢迎编辑这段中文说明');
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState('确认时原样交付文字');
+  return (
+    <>
+      <View style={{ gap: 12 }}>
+        <TextEntryContent
+          title="编辑说明"
+          message="空格与换行会完整保留。"
+          value={value}
+          onChangeText={setValue}
+          maxLength={120}
+          autoFocus={false}
+          busy={busy}
+          onSubmit={(text) => setResult(`已确认：${text}`)}
+          onCancel={() => setResult('已取消')}
+        />
+        <Button
+          label={busy ? '结束忙碌' : '查看忙碌状态'}
+          variant="outline"
+          onPress={() => setBusy((current) => !current)}
+        />
+        <span className="demo-label">{result}</span>
+      </View>
+    </>
+  );
+};
+```
+
+## 用法
+
+```tsx
+const [value, setValue] = useState(initialValue);
+<TextEntryContent
+  title="重命名"
+  value={value}
+  onChangeText={setValue}
+  onSubmit={submit}
+  onCancel={close}
+  busy={saving}
+/>;
+```
+
+## API
+
+公开类型：`TextEntryContentProps`。
+
+| 参数                           | 类型                              | 默认值              | 说明                                               |
+| ------------------------------ | --------------------------------- | ------------------- | -------------------------------------------------- |
+| `title` / `value`              | `string`                          | 必填                | 标题兼输入读屏名称；受控原文                       |
+| `onChangeText` / `onSubmit`    | `(value: string) => void`         | 必填                | 输入变化、确认原文；不 trim 或自行保存             |
+| `onCancel`                     | `() => void`                      | 必填                | 取消请求                                           |
+| `message`                      | `string`                          | —                   | 可选说明                                           |
+| `busy`                         | `boolean`                         | `false`             | 输入不可编辑，确认显示加载，两个按钮均不可重复操作 |
+| `maxLength`                    | `number`                          | —                   | 交给 Textarea 的长度限制                           |
+| `confirmLabel` / `cancelLabel` | `string`                          | `'确认'` / `'取消'` | 操作文案                                           |
+| `autoFocus`                    | `boolean`                         | `true`              | 原生输入自动聚焦；文档演示关闭                     |
+| `style` / `testID`             | `StyleProp<ViewStyle>` / `string` | —                   | 内容表面样式与定位                                 |
+
+只组合 Design 控件，不依赖 Chat。应用验证提交内容和处理错误；组件不管理提交 Promise。中文、大字号与明暗主题沿现有 ThemeProvider 处理。原生展厅位于「表单与输入」，实际键盘避让需在宿主验证。

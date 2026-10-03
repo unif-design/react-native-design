@@ -15,6 +15,8 @@ export type IconName =
   | 'aspect-4-3'
   | 'attachment'
   | 'bag-check'
+  | 'bank'
+  | 'bed'
   | 'bell'
   | 'bluetooth'
   | 'bot'
@@ -41,8 +43,10 @@ export type IconName =
   | 'clipboard-user'
   | 'clipboard'
   | 'close'
+  | 'coffee'
   | 'coin'
   | 'copy'
+  | 'crosshair'
   | 'dashboard-megaphone'
   | 'dashboard-star'
   | 'download'
@@ -58,6 +62,7 @@ export type IconName =
   | 'flash-auto'
   | 'flash-off'
   | 'flash-on'
+  | 'fuel'
   | 'grid'
   | 'hand'
   | 'heart'
@@ -73,12 +78,15 @@ export type IconName =
   | 'logout'
   | 'mail'
   | 'maximize'
+  | 'medical-cross'
   | 'menu'
   | 'mic-on'
   | 'mic'
   | 'minimize'
+  | 'minus'
   | 'more-h'
   | 'more-v'
+  | 'navigation-pointer'
   | 'order'
   | 'package'
   | 'paperclip'
@@ -100,6 +108,7 @@ export type IconName =
   | 'share'
   | 'shelf-pay'
   | 'shield-check'
+  | 'shopping-bag'
   | 'shutter-recording'
   | 'shutter'
   | 'sidebar'
@@ -107,8 +116,10 @@ export type IconName =
   | 'sound-off'
   | 'sound'
   | 'spark'
+  | 'star-filled'
   | 'star'
   | 'stop'
+  | 'store'
   | 'storefront-ai'
   | 'storefront-arrow'
   | 'storefront-check'
@@ -122,6 +133,7 @@ export type IconName =
   | 'upload'
   | 'user'
   | 'users-search'
+  | 'utensils'
   | 'visit'
   | 'warning';
 
@@ -287,6 +299,24 @@ export const ICONS: Record<IconName, IconDef> = {
       {
         kind: 'path',
         d: 'M9 13l2 2 4-4',
+      },
+    ],
+  },
+  'bank': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M3 9l9-5 9 5 M5 9v8 M9 9v8 M15 9v8 M19 9v8 M3 21h18 M4 17h16',
+      },
+    ],
+  },
+  'bed': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M3 6v12 M3 11h18v7 M21 18v-3 M7 11V9a1 1 0 0 1 1-1h9a3 3 0 0 1 3 3',
       },
     ],
   },
@@ -858,6 +888,15 @@ export const ICONS: Record<IconName, IconDef> = {
       },
     ],
   },
+  'coffee': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M4 8h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8z M17 9h2a2 2 0 0 1 0 6h-2 M8 3v2 M12 3v2',
+      },
+    ],
+  },
   'coin': {
     strokeWidth: 1.75,
     elements: [
@@ -899,6 +938,15 @@ export const ICONS: Record<IconName, IconDef> = {
       {
         kind: 'path',
         d: 'M4 16V5a2 2 0 0 1 2-2h11',
+      },
+    ],
+  },
+  'crosshair': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M16 12a4 4 0 1 1-8 0a4 4 0 1 1 8 0 M12 2v3 M12 19v3 M2 12h3 M19 12h3',
       },
     ],
   },
@@ -1157,6 +1205,15 @@ export const ICONS: Record<IconName, IconDef> = {
         kind: 'path',
         d: 'M13 2L5 13h6l-1 9 8-11h-6z',
         fill: 'currentColor',
+      },
+    ],
+  },
+  'fuel': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M5 21V5a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v16 M4 21h11 M7 9h5 M14 8l3 3v6a2 2 0 0 0 2 2 2 2 0 0 0 2-2v-7l-3-3',
       },
     ],
   },
@@ -1459,6 +1516,15 @@ export const ICONS: Record<IconName, IconDef> = {
       },
     ],
   },
+  'medical-cross': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M7 4h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z M12 8v8 M8 12h8',
+      },
+    ],
+  },
   'menu': {
     strokeWidth: 1.75,
     elements: [
@@ -1519,6 +1585,15 @@ export const ICONS: Record<IconName, IconDef> = {
       },
     ],
   },
+  'minus': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M5 12h14',
+      },
+    ],
+  },
   'more-h': {
     strokeWidth: 1.75,
     elements: [
@@ -1568,6 +1643,15 @@ export const ICONS: Record<IconName, IconDef> = {
         cy: 19,
         r: 1.5,
         fill: 'currentColor',
+      },
+    ],
+  },
+  'navigation-pointer': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M21 4L3 11l7 2 2 7 9-16z',
       },
     ],
   },
@@ -1994,6 +2078,15 @@ export const ICONS: Record<IconName, IconDef> = {
       },
     ],
   },
+  'shopping-bag': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M5 8h14l-1 12H6L5 8z M9 8V6a3 3 0 0 1 6 0v2',
+      },
+    ],
+  },
   'shutter-recording': {
     strokeWidth: 1.75,
     elements: [
@@ -2127,6 +2220,17 @@ export const ICONS: Record<IconName, IconDef> = {
       },
     ],
   },
+  'star-filled': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M12 3.2l2.5 5.1 5.6.8-4.05 3.95.96 5.6L12 16.9 6.99 18.65l.96-5.6L3.9 9.1l5.6-.8L12 3.2z',
+        fill: 'currentColor',
+        stroke: 'none',
+      },
+    ],
+  },
   'star': {
     strokeWidth: 1.75,
     elements: [
@@ -2148,6 +2252,15 @@ export const ICONS: Record<IconName, IconDef> = {
         rx: 1.5,
         fill: 'currentColor',
         stroke: 'none',
+      },
+    ],
+  },
+  'store': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M4 9l1.2-4h13.6L20 9 M5 9.5V20h14V9.5 M4 9c0 1.4 1 2.3 2.2 2.3S8.4 10.4 8.4 9 M8.4 9c0 1.4 1 2.3 2.2 2.3S12.8 10.4 12.8 9 M12.8 9c0 1.4 1 2.3 2.2 2.3S17.2 10.4 17.2 9 M17.2 9c0 1.4 1 2.3 2.2 2.3 M9.5 20v-5h5v5',
       },
     ],
   },
@@ -2461,6 +2574,15 @@ export const ICONS: Record<IconName, IconDef> = {
       },
     ],
   },
+  'utensils': {
+    strokeWidth: 1.75,
+    elements: [
+      {
+        kind: 'path',
+        d: 'M7 3v7 M5 3v4a2 2 0 0 0 2 2 M9 3v4a2 2 0 0 1-2 2 M7 11v10 M16 3c-1.5 0-2.5 2-2.5 5s1 4 2.5 4 M16 3v18',
+      },
+    ],
+  },
   'visit': {
     strokeWidth: 1.75,
     elements: [
@@ -2515,6 +2637,8 @@ export const ICON_NAMES: IconName[] = [
   'aspect-4-3',
   'attachment',
   'bag-check',
+  'bank',
+  'bed',
   'bell',
   'bluetooth',
   'bot',
@@ -2541,8 +2665,10 @@ export const ICON_NAMES: IconName[] = [
   'clipboard-user',
   'clipboard',
   'close',
+  'coffee',
   'coin',
   'copy',
+  'crosshair',
   'dashboard-megaphone',
   'dashboard-star',
   'download',
@@ -2558,6 +2684,7 @@ export const ICON_NAMES: IconName[] = [
   'flash-auto',
   'flash-off',
   'flash-on',
+  'fuel',
   'grid',
   'hand',
   'heart',
@@ -2573,12 +2700,15 @@ export const ICON_NAMES: IconName[] = [
   'logout',
   'mail',
   'maximize',
+  'medical-cross',
   'menu',
   'mic-on',
   'mic',
   'minimize',
+  'minus',
   'more-h',
   'more-v',
+  'navigation-pointer',
   'order',
   'package',
   'paperclip',
@@ -2600,6 +2730,7 @@ export const ICON_NAMES: IconName[] = [
   'share',
   'shelf-pay',
   'shield-check',
+  'shopping-bag',
   'shutter-recording',
   'shutter',
   'sidebar',
@@ -2607,8 +2738,10 @@ export const ICON_NAMES: IconName[] = [
   'sound-off',
   'sound',
   'spark',
+  'star-filled',
   'star',
   'stop',
+  'store',
   'storefront-ai',
   'storefront-arrow',
   'storefront-check',
@@ -2622,6 +2755,7 @@ export const ICON_NAMES: IconName[] = [
   'upload',
   'user',
   'users-search',
+  'utensils',
   'visit',
   'warning',
 ];

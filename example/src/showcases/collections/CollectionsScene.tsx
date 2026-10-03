@@ -1,9 +1,10 @@
 import React, { useRef } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, FlatList } from 'react-native';
 import {
   Button,
   Card,
   Carousel,
+  Sheet,
   Cell,
   Empty,
   EntryCard,
@@ -80,6 +81,9 @@ const makeStyles = (colors: ColorTokens) =>
     fillFrame: {
       height: 104,
     },
+    sheetFrame: {
+      height: 220,
+    },
     carouselSlide: {
       alignItems: 'center',
       backgroundColor: colors.surfaceContainer,
@@ -127,6 +131,53 @@ export function CollectionsScene(): React.JSX.Element {
       testID="collections-screen"
     >
       <View style={styles.stack}>
+        <SectionCard
+          title="有界内容面板"
+          description="固定、内置滚动和外部列表分别展示，头尾始终由宿主提供。"
+        >
+          <View style={styles.sheetFrame}>
+            <Sheet
+              contentMode="fixed"
+              testID="collections-sheet-fixed"
+              header={<Text style={styles.cardText}>固定内容头部</Text>}
+              footer={
+                <Button
+                  label="面板确认"
+                  onPress={() => record('Sheet', '确认', '固定底部已触发')}
+                />
+              }
+            >
+              <Text style={styles.cardText}>固定内容区域</Text>
+            </Sheet>
+          </View>
+          <View style={styles.sheetFrame}>
+            <Sheet
+              contentMode="scroll"
+              testID="collections-sheet-scroll"
+              header={<Text style={styles.cardText}>滚动内容头部</Text>}
+              footer={<Text style={styles.cardText}>固定底部</Text>}
+            >
+              {Array.from({ length: 12 }, (_, index) => (
+                <Text key={index} style={styles.cardText}>
+                  内容 {index + 1}
+                </Text>
+              ))}
+            </Sheet>
+          </View>
+          <View style={styles.sheetFrame}>
+            <Sheet
+              contentMode="external-scroll"
+              testID="collections-sheet-external-scroll"
+            >
+              <FlatList
+                data={['外部列表甲', '外部列表乙']}
+                renderItem={({ item }) => (
+                  <Text style={styles.cardText}>{item}</Text>
+                )}
+              />
+            </Sheet>
+          </View>
+        </SectionCard>
         <SectionCard
           title="Card 配置与状态"
           description="变体、裸壳和撑满配置会在离开场景后保留。"

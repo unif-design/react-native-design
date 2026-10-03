@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
 import {
   Avatar,
@@ -11,6 +11,9 @@ import {
   Segmented,
   Switch,
   Thumbnail,
+  ImagePreview,
+  type ImagePreviewHandle,
+  type ImagePreviewItem,
   type AvatarSize,
   type AvatarGroupItem,
   type AvatarVariant,
@@ -29,6 +32,16 @@ import {
 import { useShowcase } from '../../state/useShowcase';
 
 const LOCAL_IMAGE: ImageSourcePropType = require('../../../android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png');
+const previewItems: readonly ImagePreviewItem[] = [
+  { id: 'first', source: LOCAL_IMAGE, label: '第一张演示图片' },
+  {
+    id: 'second',
+    source: LOCAL_IMAGE,
+    label: '第二张演示图片',
+    canDelete: true,
+  },
+  { id: 'missing', label: '缺失来源示例' },
+];
 const avatarSizes: readonly AvatarSize[] = ['xs', 'sm', 'md', 'lg', 'xl'];
 const avatarVariants: readonly AvatarVariant[] = [
   'brand',
@@ -103,6 +116,8 @@ function isThumbnailSize(value: string): value is ThumbnailSize {
 export function MediaScene(): React.JSX.Element {
   const { appendResult, back, state, updateScene } = useShowcase();
   const draft = state.scenes.media;
+  const previewRef = useRef<ImagePreviewHandle>(null);
+  const [images, setImages] = useState(previewItems);
   const [uriInput, setUriInput] = useState(draft.remoteUri);
   const styles = useThemedStyles(makeStyles);
   const record = (component: string, action: string, summary: string) => {
@@ -118,10 +133,38 @@ export function MediaScene(): React.JSX.Element {
       }}
       onReset={() => {
         setUriInput(DEFAULT_MEDIA_REMOTE_URI);
+        setImages(previewItems);
       }}
       testID="media-screen"
     >
       <View style={styles.stack}>
+        <SectionCard
+          title="图片预览"
+          description="前两项来源相同但身份独立，第三项展示缺图占位。"
+        >
+          <ImagePreview
+            ref={previewRef}
+            items={images}
+            initialId="second"
+            width={240}
+            height={180}
+            testID="media-image-preview"
+            onRequestDelete={(item) => {
+              setImages((current) =>
+                current.filter((image) => image.id !== item.id)
+              );
+              record('ImagePreview', '移除', `已移除 ${item.id}`);
+            }}
+          />
+          <Button
+            label="定位第一张"
+            onPress={() => previewRef.current?.scrollTo('first')}
+          />
+          <Button
+            label="恢复预览图片"
+            onPress={() => setImages(previewItems)}
+          />
+        </SectionCard>
         <SectionCard
           title="Avatar 配置器"
           description="远程来源只持久化通过 HTTPS 校验的地址，结果面板不会记录原文。"

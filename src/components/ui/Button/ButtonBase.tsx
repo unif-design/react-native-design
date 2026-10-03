@@ -29,6 +29,8 @@ export type ButtonBaseProps = {
   block?: boolean;
   /** 方形约束 — width=height=sizing.h,优先级高于 horizontal padding。IconButton 用。 */
   square?: boolean;
+  surfaceSize?: number;
+  loadingSize?: number;
   accessibilityLabel?: string;
   accessibilityRole?: AccessibilityRole;
   /** SR 朗读 label 后的行为说明 hint。仅在"行为不显然"时加。 */
@@ -53,6 +55,8 @@ export function ButtonBase({
   loading,
   block,
   square,
+  surfaceSize,
+  loadingSize,
   accessibilityLabel,
   accessibilityRole = 'button',
   accessibilityHint,
@@ -64,7 +68,12 @@ export function ButtonBase({
   const c = useColors();
   const styles = useThemedStyles(makeStyles);
 
-  const sizing = useMemo(() => sizingFor(size), [size]);
+  const sizing = useMemo(() => {
+    const base = sizingFor(size);
+    return square && surfaceSize !== undefined
+      ? { ...base, h: surfaceSize }
+      : base;
+  }, [size, square, surfaceSize]);
   const palette = useMemo(() => paletteFor(variant, c), [variant, c]);
 
   const isText = variant === 'text';
@@ -128,7 +137,7 @@ export function ButtonBase({
       ]}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={palette.fg} />
+        <ActivityIndicator size={loadingSize ?? 'small'} color={palette.fg} />
       ) : (
         children({ sizing, palette })
       )}

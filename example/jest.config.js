@@ -36,6 +36,8 @@ module.exports = {
       '<rootDir>/node_modules/react-native-gesture-handler/$1',
     '^react-native-reanimated$':
       '<rootDir>/node_modules/react-native-reanimated',
+    '^react-native-reanimated-carousel$':
+      '<rootDir>/node_modules/react-native-reanimated-carousel',
     '^react-native-worklets$': '<rootDir>/node_modules/react-native-worklets',
     '^react-native-safe-area-context$':
       '<rootDir>/node_modules/react-native-safe-area-context',

@@ -7,6 +7,13 @@
     "description": "Unif Design 文档入口：安装、组件、主题变量、测试与贡献。"
   },
   {
+    "title": "ActionMenuContent 操作菜单内容",
+    "mdPath": "md/components/action-menu-content.md",
+    "slug": "/components/action-menu-content",
+    "section": "components",
+    "description": "通用动作、忙碌禁用和可选二次确认。"
+  },
+  {
     "title": "AvatarGroup 头像组",
     "mdPath": "md/components/avatar-group.md",
     "slug": "/components/avatar-group",
@@ -33,13 +40,6 @@
     "slug": "/components/blur-layer",
     "section": "components",
     "description": "提供与主题一致的模糊背景和遮罩层。"
-  },
-  {
-    "title": "BorderBeam 边框流光",
-    "mdPath": "md/components/border-beam.md",
-    "slug": "/components/border-beam",
-    "section": "components",
-    "description": "在内容边缘展示循环流光，不接管布局和业务状态。"
   },
   {
     "title": "Button 按钮",
@@ -154,6 +154,13 @@
     "description": "按名称查询和使用公开 SVG 图标。"
   },
   {
+    "title": "ImagePreview 图片预览",
+    "mdPath": "md/components/image-preview.md",
+    "slug": "/components/image-preview",
+    "section": "components",
+    "description": "按稳定身份预览图片，交付切换和删除请求。"
+  },
+  {
     "title": "Input 输入框",
     "mdPath": "md/components/input.md",
     "slug": "/components/input",
@@ -231,11 +238,25 @@
     "description": "搜索输入预设，支持文字修改与清空。"
   },
   {
+    "title": "Sheet 内容面板",
+    "mdPath": "md/components/sheet.md",
+    "slug": "/components/sheet",
+    "section": "components",
+    "description": "固定头尾与三种有界内容布局。"
+  },
+  {
     "title": "Skeleton 骨架屏",
     "mdPath": "md/components/skeleton.md",
     "slug": "/components/skeleton",
     "section": "components",
     "description": "内容加载前的骨架占位。"
+  },
+  {
+    "title": "SmsField 短信字段",
+    "mdPath": "md/components/sms-field.md",
+    "slug": "/components/sms-field",
+    "section": "components",
+    "description": "受控输入与发送按钮，不内置请求或倒计时。"
   },
   {
     "title": "StatusDot 状态点",
@@ -278,6 +299,13 @@
     "slug": "/components/tag",
     "section": "components",
     "description": "展示简短的状态或分类标签。"
+  },
+  {
+    "title": "TextEntryContent 文字编辑内容",
+    "mdPath": "md/components/text-entry-content.md",
+    "slug": "/components/text-entry-content",
+    "section": "components",
+    "description": "受控文字、说明和确认按钮的组合。"
   },
   {
     "title": "TextField 输入共享内核（internal）",

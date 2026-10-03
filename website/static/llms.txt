@@ -2,7 +2,7 @@
 
 > Unif React Native 设计系统：基础组件、主题、字体和图标
 
-文档构建依据：`@unif/react-native-design@0.33.0`；使用时核对实际安装版本。
+文档构建依据：`@unif/react-native-design@0.33.1`；使用时核对实际安装版本。
 
 先查找当前功能，再读取对应 API、示例或 FAQ。源码链接供查阅，应用从包根公开接口导入。
 迁移、测试和研发技能按任务读取；这些资料不自动加入产品运行时模型上下文。
@@ -15,11 +15,11 @@
 
 ## 组件
 
+- [ActionMenuContent 操作菜单内容](md/components/action-menu-content.md) — 通用动作、忙碌禁用和可选二次确认。
 - [AvatarGroup 头像组](md/components/avatar-group.md) — 组合多个头像，支持顺序、数量上限和溢出展示。
 - [AvatarWithRing 圆环头像](md/components/avatar-with-ring.md) — 带装饰环的文字头像。
 - [Avatar 头像](md/components/avatar.md) — 展示文字或图片头像，支持形状、尺寸和配色。
 - [BlurLayer 玻璃模糊层](md/components/blur-layer.md) — 提供与主题一致的模糊背景和遮罩层。
-- [BorderBeam 边框流光](md/components/border-beam.md) — 在内容边缘展示循环流光，不接管布局和业务状态。
 - [Button 按钮](md/components/button.md) — 触发操作的按钮，支持变体、尺寸、图标和交互状态。
 - [Card 卡片](md/components/card.md) — 组合相关信息和操作的卡片容器。
 - [Carousel 轮播](md/components/carousel.md) — 轮播展示一组内容，支持切换、指示器和自动播放。
@@ -36,6 +36,7 @@
 - [Grid 九宫格](md/components/grid.md) — 以网格排列图标与文字入口。
 - [IconButton 图标按钮](md/components/icon-button.md) — 只包含图标的按钮，需要提供无障碍名称。
 - [图标](md/components/icons.md) — 按名称查询和使用公开 SVG 图标。
+- [ImagePreview 图片预览](md/components/image-preview.md) — 按稳定身份预览图片，交付切换和删除请求。
 - [Input 输入框](md/components/input.md) — 单行文本输入，支持状态、插槽和公开 ref。
 - [Loading 加载](md/components/loading.md) — 展示未知时长的等待或可量化的圆形进度。
 - [Logo 主标](md/components/logo.md) — 展示调用方提供的标识图片。
@@ -47,13 +48,16 @@
 - [Reveal](md/components/reveal.md) — 提供内容入场与退场效果，并说明原生和 Web 差异。
 - [Ribbon 缎带](md/components/ribbon.md) — 为内容添加带文字的右上角条带。
 - [Search 搜索框](md/components/search.md) — 搜索输入预设，支持文字修改与清空。
+- [Sheet 内容面板](md/components/sheet.md) — 固定头尾与三种有界内容布局。
 - [Skeleton 骨架屏](md/components/skeleton.md) — 内容加载前的骨架占位。
+- [SmsField 短信字段](md/components/sms-field.md) — 受控输入与发送按钮，不内置请求或倒计时。
 - [StatusDot 状态点](md/components/status-dot.md) — 用圆点表达完成、错误、进行中和待处理状态。
 - [Stepper 步进器](md/components/stepper.md) — 通过增减操作调整数值，并控制范围与展示格式。
 - [Switch 开关](md/components/switch.md) — 受控开关，用于切换开启和关闭状态。
 - [TabBar 底部 tab 栏](md/components/tabbar.md) — 展示底部导航项目及选中状态。
 - [Tabs 标签页](md/components/tabs.md) — 切换同一层级的内容区域。
 - [Tag 标签](md/components/tag.md) — 展示简短的状态或分类标签。
+- [TextEntryContent 文字编辑内容](md/components/text-entry-content.md) — 受控文字、说明和确认按钮的组合。
 - [TextField 输入共享内核（internal）](md/components/text-field.md) — 为输入内容组合标签、说明与错误展示。
 - [Textarea 多行输入](md/components/textarea.md) — 多行输入，按内容和高度边界调整输入表面。
 - [Thumbnail 缩略图](md/components/thumbnail.md) — 展示缩略图，支持尺寸、加载及失败占位。

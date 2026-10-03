@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
+  ActionMenuContent,
   Button,
   Chip,
   Icon,
@@ -121,6 +122,12 @@ const makeStyles = (_colors: ColorTokens) =>
     stack: {
       gap: space['7'],
     },
+    menuFrame: {
+      height: 260,
+    },
+    circularButton: {
+      borderRadius: 18,
+    },
     row: {
       alignItems: 'center',
       flexDirection: 'row',
@@ -156,6 +163,63 @@ export function ActionsScene(): React.JSX.Element {
       testID="actions-screen"
     >
       <View style={styles.stack}>
+        <SectionCard
+          title="操作菜单内容"
+          description="删除示例先展示确认，应用决定后续操作。"
+        >
+          <View style={styles.menuFrame}>
+            <ActionMenuContent
+              title="演示操作"
+              testID="actions-menu"
+              actions={[
+                {
+                  id: 'copy',
+                  label: '复制示例',
+                  onPress: () =>
+                    record('ActionMenuContent', '复制', '已选择复制'),
+                },
+                {
+                  id: 'busy',
+                  label: '处理中操作',
+                  loading: true,
+                  onPress: () => {},
+                },
+                {
+                  id: 'delete',
+                  label: '删除示例',
+                  tone: 'danger',
+                  confirmation: {
+                    message: '移除这个演示项目？',
+                    confirmLabel: '确认移除',
+                  },
+                  onPress: () =>
+                    record('ActionMenuContent', '删除', '已确认移除'),
+                },
+              ]}
+              onClose={() =>
+                record('ActionMenuContent', '关闭', '已收到关闭请求')
+              }
+            />
+          </View>
+          <View style={styles.row}>
+            <IconButton
+              icon="chevron-left"
+              surfaceSize={36}
+              iconSize={21}
+              accessibilityLabel="圆形返回演示"
+              style={styles.circularButton}
+              onPress={() => record('IconButton', '返回', '已点击返回')}
+            />
+            <IconButton
+              icon="crosshair"
+              surfaceSize={36}
+              iconSize={22}
+              accessibilityLabel="定位加载演示"
+              loading
+              onPress={() => {}}
+            />
+          </View>
+        </SectionCard>
         <SectionCard
           title="按钮配置器"
           description="选择公开变体与尺寸，配置会在场景切换后保留。"

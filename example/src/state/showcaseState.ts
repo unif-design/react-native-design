@@ -36,6 +36,9 @@ export type FeedbackSceneState = Readonly<{
 }>;
 
 export type FormsSceneState = Readonly<{
+  entryText: string;
+  smsValue: string;
+  smsRemaining: number;
   inputValue: string;
   passwordValue: string;
   textareaValue: string;
@@ -132,6 +135,9 @@ const sceneStateFactories: {
     blurIntensity: 'soft',
   }),
   forms: () => ({
+    entryText: '可以编辑这段文字',
+    smsValue: '',
+    smsRemaining: 0,
     inputValue: '',
     passwordValue: '',
     textareaValue: '',

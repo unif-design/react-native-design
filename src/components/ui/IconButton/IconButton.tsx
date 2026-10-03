@@ -20,6 +20,8 @@ export function IconButton({
   icon,
   onPress,
   size = 'md',
+  iconSize,
+  surfaceSize,
   variant = 'ghost',
   color,
   disabled,
@@ -46,6 +48,8 @@ export function IconButton({
       square
       onPress={onPress}
       size={size}
+      surfaceSize={surfaceSize}
+      loadingSize={iconSize}
       variant={variant}
       loading={loading}
       disabled={disabled === true || hasBlankLabel}
@@ -56,7 +60,11 @@ export function IconButton({
       testID={testID}
     >
       {({ sizing, palette }) => (
-        <Icon name={icon} size={sizing.fs + 4} color={color ?? palette.fg} />
+        <Icon
+          name={icon}
+          size={iconSize ?? sizing.fs + 4}
+          color={color ?? palette.fg}
+        />
       )}
     </ButtonBase>
   );

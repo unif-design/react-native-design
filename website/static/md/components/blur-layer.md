@@ -4,7 +4,7 @@ title: BlurLayer 玻璃模糊层
 description: '提供与主题一致的模糊背景和遮罩层。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.33.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.33.1; edit source documentation. -->
 
 # BlurLayer 玻璃模糊层
 

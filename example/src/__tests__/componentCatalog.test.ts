@@ -5,10 +5,15 @@ import {
 } from '../catalog/componentCatalog';
 
 const expectedComponentIds = [
+  'ActionMenuContent',
+  'TextEntryContent',
+  'SmsField',
+  'ImagePreview',
+  'Sheet',
+
   'Avatar',
   'AvatarGroup',
   'BlurLayer',
-  'BorderBeam',
   'Button',
   'Card',
   'Carousel',
@@ -106,9 +111,15 @@ const expectedRuntimeApis = [
 
 const expectedComponentsByScene = {
   foundation: ['Icon'],
-  actions: ['Button', 'IconButton', 'Chip', 'Tag', 'StatusDot'],
+  actions: [
+    'ActionMenuContent',
+    'Button',
+    'IconButton',
+    'Chip',
+    'Tag',
+    'StatusDot',
+  ],
   feedback: [
-    'BorderBeam',
     'CircularProgress',
     'Empty',
     'Skeleton',
@@ -121,6 +132,8 @@ const expectedComponentsByScene = {
     'ToastHost',
   ],
   forms: [
+    'TextEntryContent',
+    'SmsField',
     'Input',
     'PasswordInput',
     'Textarea',
@@ -135,6 +148,7 @@ const expectedComponentsByScene = {
   ],
   navigation: ['NavBar', 'DrawerHeader', 'Tabs', 'Segmented', 'TabBar'],
   collections: [
+    'Sheet',
     'Card',
     'Ribbon',
     'Cell',
@@ -143,7 +157,7 @@ const expectedComponentsByScene = {
     'EntryCard',
     'Carousel',
   ],
-  media: ['Avatar', 'AvatarGroup', 'Thumbnail', 'Logo'],
+  media: ['ImagePreview', 'Avatar', 'AvatarGroup', 'Thumbnail', 'Logo'],
   business: [
     'GradientWash',
     'RadialHalo',
@@ -154,12 +168,12 @@ const expectedComponentsByScene = {
   ],
 } as const;
 
-test('catalog 精确覆盖 50 个公开组件且每项只有一个非空主场景', () => {
+test('catalog 精确覆盖 54 个公开组件且每项只有一个非空主场景', () => {
   expect(componentCatalog.map((entry) => entry.id).sort()).toEqual(
     [...expectedComponentIds].sort()
   );
-  expect(new Set(componentCatalog.map((entry) => entry.id)).size).toBe(50);
-  expect(componentCatalog).toHaveLength(50);
+  expect(new Set(componentCatalog.map((entry) => entry.id)).size).toBe(54);
+  expect(componentCatalog).toHaveLength(54);
   expect(componentCatalog.every((entry) => entry.states.length > 0)).toBe(true);
 });
 

@@ -1,0 +1,101 @@
+---
+title: Sheet 内容面板
+description: 固定头尾与三种有界内容布局。
+---
+
+import { useState } from 'react';
+import { FlatList, Text, View } from 'react-native';
+import {
+  Button,
+  Segmented,
+  Sheet,
+  type,
+  useThemedStyles,
+} from '@unif/react-native-design';
+import { LiveDemo } from '@site/src/components/LiveDemo';
+
+# Sheet 内容面板
+
+组合头部、内容和底部。父容器提供有界高度，弹层、关闭、安全区与键盘交给宿主。
+
+export const sheetDemoStyles = (colors) => ({
+  text: { color: colors.foreground, fontSize: type.body },
+});
+
+export const SheetDemo = () => {
+  const styles = useThemedStyles(sheetDemoStyles);
+  const [mode, setMode] = useState('fixed');
+  const [result, setResult] = useState('底部按钮保持可达');
+  const rows = Array.from({ length: 12 }, (_, i) => `内容第 ${i + 1} 行`);
+  return (
+    <View style={{ gap: 12 }}>
+      <Segmented
+        value={mode}
+        onChange={setMode}
+        items={[
+          { id: 'fixed', label: '固定' },
+          { id: 'scroll', label: '滚动' },
+          { id: 'external-scroll', label: '外部列表' },
+        ]}
+      />
+      <View style={{ height: 300 }}>
+        <Sheet
+          contentMode={mode}
+          header={<Text style={styles.text}>内容面板</Text>}
+          footer={
+            <Button
+              label="确认选择"
+              onPress={() => setResult(`已确认：${mode}`)}
+            />
+          }
+        >
+          {mode === 'external-scroll' ? (
+            <FlatList
+              data={rows}
+              renderItem={({ item }) => <Text style={styles.text}>{item}</Text>}
+            />
+          ) : (
+            (mode === 'fixed' ? rows.slice(0, 3) : rows).map((row) => (
+              <Text key={row} style={styles.text}>
+                {row}
+              </Text>
+            ))
+          )}
+        </Sheet>
+      </View>
+      <span className="demo-label">{result}</span>
+    </View>
+  );
+};
+
+<LiveDemo>
+  <SheetDemo />
+</LiveDemo>
+
+## 用法
+
+```tsx
+<View style={{ height: 360 }}>
+  <Sheet
+    header={<NavBar title="选择内容" />}
+    footer={<Button label="确认" onPress={onConfirm} />}
+    contentMode="scroll"
+  >
+    {content}
+  </Sheet>
+</View>
+```
+
+## API
+
+| 参数                    | 类型                                       | 默认值    | 说明                                              |
+| ----------------------- | ------------------------------------------ | --------- | ------------------------------------------------- |
+| `children`              | `ReactNode`                                | 必填      | 中间内容                                          |
+| `header` / `footer`     | `ReactNode`                                | —         | 固定头尾；无头部显示非交互拖动指示                |
+| `contentMode`           | `'fixed' \| 'scroll' \| 'external-scroll'` | `'fixed'` | 普通布局、内部纵向 ScrollView、外部自带滚动       |
+| `contentContainerStyle` | `StyleProp<ViewStyle>`                     | —         | 内容区域样式；scroll 时作用于 ScrollView 内容容器 |
+| `style` / `testID`      | `StyleProp<ViewStyle>` / `string`          | —         | 根容器样式与定位                                  |
+
+公开类型为 `SheetProps` 和 `SheetContentMode`。内部滚动保留 `keyboardShouldPersistTaps="handled"`；外部列表不再包同方向 ScrollView。头尾不定义业务按钮协议，直接组合 Design 组件。主题变化沿现有 Provider 传递。
+
+原生展厅「容器与集合」提供三种布局。宿主负责 formSheet/Modal、高度、系统返回及键盘避让；关闭本身不表示业务成功或取消。

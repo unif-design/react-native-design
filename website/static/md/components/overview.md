@@ -5,7 +5,7 @@ title: 组件概览
 description: '按场景查找组件、代码示例与 API。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.33.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.33.1; edit source documentation. -->
 
 # 组件概览
 
@@ -33,7 +33,6 @@ description: '按场景查找组件、代码示例与 API。'
 | [Confirm](confirm.md)          | 命令式 `confirm()` + `<ConfirmHost />` 高风险二次确认               |
 | [Thumbnail](thumbnail.md)      | 缩略图，支持尺寸档位、尺寸对象和失败占位                            |
 | [Loading](loading.md)          | `Spinner` 未知时长加载；`CircularProgress` 确定进度与可选百分比     |
-| [BorderBeam](border-beam.md)   | 沿内容边缘循环移动的装饰性流光，支持 native / Web 与减少动态效果    |
 | [Pulse](pulse.md)              | `usePulse` + `<Pulse>` + `<PulseDot>`,通用脉冲底座                  |
 | [Reveal](reveal.md)            | 淡入容器：native Reanimated 入/退场 / Web CSS 入场                  |
 | [StatusDot](status-dot.md)     | `done`/`error`/`active`/`pending` 圆点,`flat`/`soft` 双 tone        |
@@ -70,7 +69,6 @@ description: '按场景查找组件、代码示例与 API。'
 | [Empty](empty.md)              | 空状态                                                 |
 | [Skeleton](skeleton.md)        | 骨架占位,`shape='line'/'rect'/'circle'`(走 `usePulse`) |
 | [CircularProgress](loading.md) | `0..1` 确定圆形进度，可选中央百分比文字                |
-| [BorderBeam](border-beam.md)   | 图片处理等短时忙碌状态的边缘流光；业务语义由外层承载   |
 
 ## 数据展示 {#数据展示}
 
@@ -103,3 +101,13 @@ description: '按场景查找组件、代码示例与 API。'
 ## 基础令牌 {#基础令牌}
 
 颜色 / 字体 / 间距 / 圆角 / 阴影 / 动效 / 图标 → [设计令牌](../design/tokens/colors.md)。
+
+## 内容组合
+
+| 组件                                                      | 说明                                     |
+| --------------------------------------------------------- | ---------------------------------------- |
+| [ImagePreview](image-preview.md)            | 稳定身份、图片翻页与删除请求             |
+| [Sheet](sheet.md)                           | 固定头尾及三种有界内容布局               |
+| [ActionMenuContent](action-menu-content.md) | 操作、禁用加载与可选确认                 |
+| [TextEntryContent](text-entry-content.md)   | 受控编辑、说明和提交事件                 |
+| [SmsField](sms-field.md)                    | 受控短信输入，发送文案和冷却由调用方提供 |

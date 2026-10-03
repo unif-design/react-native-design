@@ -1040,3 +1040,27 @@ test('四个文本与受控状态跨路由保留，重置只恢复 Forms 且不�
     screen.getByRole('tab', { name: '详情' }).props.accessibilityState
   ).toMatchObject({ selected: true });
 });
+
+test('受控编辑和短信字段在实际表单场景交接', () => {
+  render(<App />);
+  enterForms();
+  const entryCoverage = createShowcaseStateCoverage('TextEntryContent');
+  const smsCoverage = createShowcaseStateCoverage('SmsField');
+  fireEvent.changeText(screen.getByLabelText('编辑说明'), ' 更新说明 ');
+  fireEvent.press(screen.getByRole('button', { name: '确认' }));
+  entryCoverage.prove('text-entry-content.controlled', () => {
+    expect(screen.getByLabelText('编辑说明').props.value).toBe(' 更新说明 ');
+    expect(screen.getAllByText(/已提交当前演示文字/).length).toBeGreaterThan(0);
+  });
+  entryCoverage.expectComplete();
+  fireEvent.changeText(screen.getByLabelText('演示短信码'), '1234');
+  fireEvent.press(screen.getByRole('button', { name: '发送短信' }));
+  smsCoverage.prove('sms-field.controlled', () => {
+    expect(screen.getByLabelText('演示短信码').props.value).toBe('1234');
+    expect(
+      screen.getByRole('button', { name: '等待 30 秒' }).props
+        .accessibilityState.disabled
+    ).toBe(true);
+  });
+  smsCoverage.expectComplete();
+});
