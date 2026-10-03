@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.1](https://github.com/unif-design/react-native-design/compare/v0.33.0...v0.33.1) (2026-10-03)
+
+
+### Bug Fixes
+
+* **design:** reuse validated image source snapshots ([234b71d](https://github.com/unif-design/react-native-design/commit/234b71d0498d4d3d2c6a6c9f9f6ef1cade754b08))
+
 # [0.33.0](https://github.com/unif-design/react-native-design/compare/v0.32.2...v0.33.0) (2026-09-20)
 
 
