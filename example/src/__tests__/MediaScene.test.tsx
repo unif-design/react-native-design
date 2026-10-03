@@ -357,3 +357,19 @@ test('远程 URI 只接受 HTTPS，跨路由保留合法值且结果/a11y/testID
     { uri: SUCCESS_FIXTURE_URI }
   );
 });
+
+test('真实图片预览按展示身份移除并允许恢复', () => {
+  render(<App />);
+  enterMedia();
+  const coverage = createShowcaseStateCoverage('ImagePreview');
+  expect(screen.getByText('第2/3张')).toBeTruthy();
+  fireEvent.press(screen.getByRole('button', { name: '删除当前照片' }));
+  coverage.prove('image-preview.identity', () => {
+    expect(screen.getByText('第2/2张')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: '删除当前照片' })).toBeNull();
+    expect(screen.getAllByText(/已移除 second/).length).toBeGreaterThan(0);
+  });
+  coverage.expectComplete();
+  fireEvent.press(screen.getByRole('button', { name: '恢复预览图片' }));
+  expect(screen.getByText('第3/3张')).toBeTruthy();
+});

@@ -13,6 +13,8 @@ import {
   Stepper,
   Switch,
   Textarea,
+  TextEntryContent,
+  SmsField,
   type ColorTokens,
   type TextFieldHandle,
   space,
@@ -71,6 +73,60 @@ export function FormsScene(): React.JSX.Element {
       testID="forms-screen"
     >
       <View style={styles.stack}>
+        <SectionCard
+          title="文字编辑内容"
+          description="宿主控制原文，确认和取消只交付事件。"
+        >
+          <TextEntryContent
+            title="编辑说明"
+            value={draft.entryText}
+            onChangeText={(entryText) =>
+              updateScene('forms', (current) => ({ ...current, entryText }))
+            }
+            onSubmit={() =>
+              record('TextEntryContent', '确认', '已提交当前演示文字')
+            }
+            onCancel={() =>
+              record('TextEntryContent', '取消', '已取消本次操作')
+            }
+            maxLength={100}
+            autoFocus={false}
+            testID="forms-text-entry"
+          />
+        </SectionCard>
+        <SectionCard
+          title="短信字段"
+          description="文案、长度和冷却由当前示例控制。"
+        >
+          <SmsField
+            value={draft.smsValue}
+            onChangeText={(smsValue) =>
+              updateScene('forms', (current) => ({ ...current, smsValue }))
+            }
+            remainingSeconds={draft.smsRemaining}
+            sendLabel={draft.smsRemaining > 0 ? '等待 30 秒' : '发送短信'}
+            onSend={() => {
+              updateScene('forms', (current) => ({
+                ...current,
+                smsRemaining: 30,
+              }));
+              record('SmsField', '发送', '演示进入冷却状态');
+            }}
+            accessibilityLabel="演示短信码"
+            placeholder="输入四位数字"
+            maxLength={4}
+            testID="forms-sms"
+          />
+          <Button
+            label="结束演示冷却"
+            onPress={() =>
+              updateScene('forms', (current) => ({
+                ...current,
+                smsRemaining: 0,
+              }))
+            }
+          />
+        </SectionCard>
         <SectionCard
           title="文本输入"
           description="受控姓名与非受控备注分别保持固定模式，切换场景后恢复草稿。"

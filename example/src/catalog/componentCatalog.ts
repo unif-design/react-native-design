@@ -12,10 +12,15 @@ export const sceneIds = [
 export type SceneId = (typeof sceneIds)[number];
 
 export const publicComponentIds = [
+  'ActionMenuContent',
+  'TextEntryContent',
+  'SmsField',
+  'ImagePreview',
+  'Sheet',
+
   'Avatar',
   'AvatarGroup',
   'BlurLayer',
-  'BorderBeam',
   'Button',
   'Card',
   'Carousel',
@@ -73,6 +78,12 @@ export type ComponentCatalogEntry = Readonly<{
 }>;
 
 export const componentCatalog = [
+  { id: 'ActionMenuContent', scene: 'actions', states: ['操作与确认'] },
+  { id: 'TextEntryContent', scene: 'forms', states: ['受控编辑'] },
+  { id: 'SmsField', scene: 'forms', states: ['受控与冷却'] },
+  { id: 'ImagePreview', scene: 'media', states: ['稳定身份与删除'] },
+  { id: 'Sheet', scene: 'collections', states: ['三种内容模式'] },
+
   {
     id: 'Icon',
     scene: 'foundation',
@@ -111,20 +122,6 @@ export const componentCatalog = [
     states: ['确定进度', '中央百分比', '无障碍值'],
   },
   { id: 'Spinner', scene: 'feedback', states: ['尺寸', '颜色', '描边宽度'] },
-  {
-    id: 'BorderBeam',
-    scene: 'feedback',
-    states: [
-      '默认',
-      '停用',
-      '颜色',
-      '时长',
-      '线宽',
-      '流光长度',
-      '圆角',
-      '减少动态效果',
-    ],
-  },
   {
     id: 'Pulse',
     scene: 'feedback',

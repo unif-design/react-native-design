@@ -59,6 +59,78 @@ export type ShowcaseStateContractEntry = {
 
 export const showcaseStateContract = [
   {
+    id: 'action-menu-content.actions',
+    component: 'ActionMenuContent',
+    scene: 'actions',
+    label: '操作与确认',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [{ props: {}, presentProps: ['actions', 'onClose'] }],
+    },
+  },
+  {
+    id: 'text-entry-content.controlled',
+    component: 'TextEntryContent',
+    scene: 'forms',
+    label: '受控编辑',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          props: {},
+          presentProps: ['value', 'onChangeText', 'onSubmit', 'onCancel'],
+        },
+      ],
+    },
+  },
+  {
+    id: 'sms-field.controlled',
+    component: 'SmsField',
+    scene: 'forms',
+    label: '受控与冷却',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          props: {},
+          presentProps: ['value', 'onChangeText', 'onSend', 'sendLabel'],
+        },
+      ],
+    },
+  },
+  {
+    id: 'image-preview.identity',
+    component: 'ImagePreview',
+    scene: 'media',
+    label: '稳定身份与删除',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        { props: {}, presentProps: ['items', 'onRequestDelete', 'ref'] },
+      ],
+    },
+  },
+  {
+    id: 'sheet.modes',
+    component: 'Sheet',
+    scene: 'collections',
+    label: '三种内容模式',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        { testID: 'collections-sheet-fixed', props: { contentMode: 'fixed' } },
+        {
+          testID: 'collections-sheet-scroll',
+          props: { contentMode: 'scroll' },
+        },
+        {
+          testID: 'collections-sheet-external-scroll',
+          props: { contentMode: 'external-scroll' },
+        },
+      ],
+    },
+  },
+  {
     id: 'icon.all-icons',
     component: 'Icon',
     scene: 'foundation',
@@ -2652,118 +2724,6 @@ export const showcaseStateContract = [
     witness: {
       kind: 'jsx-props',
       specimens: [{ testID: 'feedback-spinner', props: { thickness: 3 } }],
-    },
-  },
-  {
-    id: 'border-beam.default',
-    component: 'BorderBeam',
-    scene: 'feedback',
-    label: '默认',
-    witness: {
-      kind: 'jsx-props',
-      specimens: [{ testID: 'feedback-border-beam-default', props: {} }],
-    },
-  },
-  {
-    id: 'border-beam.inactive',
-    component: 'BorderBeam',
-    scene: 'feedback',
-    label: '停用',
-    witness: {
-      kind: 'jsx-props',
-      specimens: [
-        {
-          testID: 'feedback-border-beam-inactive',
-          props: { active: false },
-        },
-      ],
-    },
-  },
-  {
-    id: 'border-beam.color',
-    component: 'BorderBeam',
-    scene: 'feedback',
-    label: '颜色',
-    witness: {
-      kind: 'jsx-props',
-      specimens: [
-        {
-          testID: 'feedback-border-beam-custom',
-          props: {},
-          presentProps: ['color'],
-        },
-      ],
-    },
-  },
-  {
-    id: 'border-beam.duration',
-    component: 'BorderBeam',
-    scene: 'feedback',
-    label: '时长',
-    witness: {
-      kind: 'jsx-props',
-      specimens: [
-        {
-          testID: 'feedback-border-beam-custom',
-          props: { duration: 1800 },
-        },
-      ],
-    },
-  },
-  {
-    id: 'border-beam.line-width',
-    component: 'BorderBeam',
-    scene: 'feedback',
-    label: '线宽',
-    witness: {
-      kind: 'jsx-props',
-      specimens: [
-        {
-          testID: 'feedback-border-beam-custom',
-          props: { lineWidth: 3 },
-        },
-      ],
-    },
-  },
-  {
-    id: 'border-beam.size',
-    component: 'BorderBeam',
-    scene: 'feedback',
-    label: '流光长度',
-    witness: {
-      kind: 'jsx-props',
-      specimens: [
-        {
-          testID: 'feedback-border-beam-custom',
-          props: { size: 56 },
-        },
-      ],
-    },
-  },
-  {
-    id: 'border-beam.radius',
-    component: 'BorderBeam',
-    scene: 'feedback',
-    label: '圆角',
-    witness: {
-      kind: 'jsx-props',
-      specimens: [
-        {
-          testID: 'feedback-border-beam-custom',
-          props: {},
-          presentProps: ['borderRadius'],
-        },
-      ],
-    },
-  },
-  {
-    id: 'border-beam.reduced-motion',
-    component: 'BorderBeam',
-    scene: 'feedback',
-    label: '减少动态效果',
-    witness: {
-      kind: 'runtime-api',
-      calls: ['usePrefersReducedMotion'],
     },
   },
   {

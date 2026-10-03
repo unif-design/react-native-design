@@ -4,7 +4,7 @@ title: IconButton 图标按钮
 description: '只包含图标的按钮，需要提供无障碍名称。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.33.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.33.1; edit source documentation. -->
 
 # IconButton 图标按钮
 
@@ -127,6 +127,8 @@ import { IconButton } from '@unif/react-native-design';
 | `icon`               | `IconName`                                                                     | —          | 包内生成图标目录中的闭集名称                                                                 |
 | `onPress`            | `() => void`                                                                   | —          | **必填**点击回调；disabled / loading 时组件移除有效 handler                                  |
 | `size`               | `('sm' \| 'md' \| 'lg')?`                                                      | `'md'`     | 方形边长 28 / 36 / 44                                                                        |
+| `iconSize`           | `number?`                                                                      | 随 size    | 图标与加载指示的独立尺寸                                                                     |
+| `surfaceSize`        | `number?`                                                                      | 随 size    | 方形表面边长，并据此计算命中补偿                                                             |
 | `variant`            | `('primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'danger')?` | `'ghost'`  | 与 Button 共用 palette，但精确排除会撕掉方形高度的 `'text'`                                  |
 | `color`              | `string?`                                                                      | variant fg | icon 描色 override(仅 icon 色,bg/border 仍由 variant 决定)                                   |
 | `disabled`           | `boolean?`                                                                     | `false`    | 不响应 + opacity 0.5                                                                         |
@@ -136,6 +138,13 @@ import { IconButton } from '@unif/react-native-design';
 | `accessibilityState` | `Omit<AccessibilityState, 'disabled' \| 'busy'>?`                              | —          | caller 可补充 `selected` / `expanded` 等状态；`disabled` / `busy` 由组件接管，类型上禁止覆盖 |
 | `style`              | `StyleProp<ViewStyle>?`                                                        | —          | 容器附加样式                                                                                 |
 | `testID`             | `string?`                                                                      | —          | E2E / 测试定位                                                                               |
+
+`iconSize` 可独立设置图标和加载指示的尺寸；`surfaceSize` 可指定方形表面边长，同时按该值补足 44pt 命中区。缺省仍使用 `size` 对应的设备缩放尺寸。
+
+```tsx
+<IconButton icon="chevron-left" surfaceSize={36} iconSize={21} style={{ borderRadius: 18 }} accessibilityLabel="返回" onPress={onBack} />
+<IconButton icon="crosshair" surfaceSize={36} iconSize={22} accessibilityLabel="定位" loading={locating} onPress={locate} />
+```
 
 ## 无障碍（a11y）
 

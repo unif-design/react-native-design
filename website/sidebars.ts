@@ -39,11 +39,12 @@ const sidebars: SidebarsConfig = {
       items: [
         'components/button',
         'components/icon-button',
+        'components/action-menu-content',
         'components/avatar',
         'components/tag',
         'components/thumbnail',
+        'components/image-preview',
         'components/loading',
-        'components/border-beam',
         'components/pulse',
         'components/reveal',
         'components/status-dot',
@@ -55,6 +56,8 @@ const sidebars: SidebarsConfig = {
       collapsed: true,
       items: [
         'components/input',
+        'components/sms-field',
+        'components/text-entry-content',
         'components/password-input',
         'components/search',
         'components/checkbox',
@@ -81,11 +84,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: '反馈',
       collapsed: true,
-      items: [
-        'components/toast',
-        'components/empty',
-        'components/skeleton',
-      ],
+      items: ['components/toast', 'components/empty', 'components/skeleton'],
     },
     {
       type: 'category',
@@ -94,6 +93,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'components/cell',
         'components/card',
+        'components/sheet',
         'components/grid',
         'components/carousel',
       ],

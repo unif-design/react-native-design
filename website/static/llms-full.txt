@@ -1,16 +1,16 @@
 # Unif Design — 全文文档聚合
 
 > 可选全文。普通查询优先通过 llms.txt 定位相关单页。
-<!-- Generated from @unif/react-native-design@0.33.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.33.1; edit source documentation. -->
 
 ## 目录
 
 - 文档概览
+- ActionMenuContent 操作菜单内容
 - AvatarGroup 头像组
 - AvatarWithRing 圆环头像
 - Avatar 头像
 - BlurLayer 玻璃模糊层
-- BorderBeam 边框流光
 - Button 按钮
 - Card 卡片
 - Carousel 轮播
@@ -27,6 +27,7 @@
 - Grid 九宫格
 - IconButton 图标按钮
 - 图标
+- ImagePreview 图片预览
 - Input 输入框
 - Loading 加载
 - Logo 主标
@@ -38,13 +39,16 @@
 - Reveal
 - Ribbon 缎带
 - Search 搜索框
+- Sheet 内容面板
 - Skeleton 骨架屏
+- SmsField 短信字段
 - StatusDot 状态点
 - Stepper 步进器
 - Switch 开关
 - TabBar 底部 tab 栏
 - Tabs 标签页
 - Tag 标签
+- TextEntryContent 文字编辑内容
 - TextField 输入共享内核（internal）
 - Textarea 多行输入
 - Thumbnail 缩略图
@@ -106,6 +110,102 @@ Unif 企业设计系统的 React Native 组件库，提供基础组件、主题�
 - [贡献指南](https://github.com/unif-design/react-native-design/blob/main/CONTRIBUTING.md)：参与库维护。
 
 [AI 文档索引](https://unif-design.github.io/react-native-design/llms.txt)提供按页读取入口；全文聚合由这些页面生成。
+
+## ActionMenuContent 操作菜单内容
+
+*Source: `docs/components/action-menu-content.mdx` · Mirror: `md/components/action-menu-content.md`*
+
+# ActionMenuContent 操作菜单内容
+
+展示通用动作与可选确认。应用提供操作含义、确认有效性及 Modal；内容组件独立于 Chat。
+
+```tsx
+const ActionMenuDemo = () => {
+  const [open, setOpen] = useState(true);
+  const [presentation, setPresentation] = useState('dialog');
+  const [result, setResult] = useState('选择动作，删除会先确认');
+  return (
+    <>
+      <View style={{ gap: 12 }}>
+        <Segmented
+          value={presentation}
+          onChange={setPresentation}
+          items={[
+            { id: 'dialog', label: '居中' },
+            { id: 'sheet', label: '底部' },
+          ]}
+        />
+        <View style={{ height: 300 }}>
+          {open ? (
+            <ActionMenuContent
+              title="演示操作"
+              presentation={presentation}
+              onClose={() => setOpen(false)}
+              actions={[
+                {
+                  id: 'copy',
+                  label: '复制',
+                  onPress: () => {
+                    setResult('已选择复制');
+                    setOpen(false);
+                  },
+                },
+                {
+                  id: 'busy',
+                  label: '处理中',
+                  loading: true,
+                  onPress: () => {},
+                },
+                {
+                  id: 'delete',
+                  label: '删除',
+                  tone: 'danger',
+                  confirmation: {
+                    message: '删除这个演示项目？',
+                    confirmLabel: '确认删除',
+                  },
+                  onPress: () => setResult('已确认删除演示项目'),
+                },
+              ]}
+            />
+          ) : (
+            <Button label="打开菜单" onPress={() => setOpen(true)} />
+          )}
+        </View>
+        <span className="demo-label">{result}</span>
+      </View>
+    </>
+  );
+};
+```
+
+## 用法
+
+```tsx
+<ActionMenuContent
+  title="操作"
+  presentation="sheet"
+  actions={actions}
+  onClose={closeModal}
+/>
+```
+
+## API
+
+`ActionMenuAction` 由 Design 定义：`id: string`、`label: string`、`onPress(): void` 必填；`disabled?`、`loading?`、`tone?: 'neutral' | 'danger'` 和 `confirmation?: ActionMenuConfirmation` 可选。确认内容为 `message: string` 与 `confirmLabel: string`。
+
+| 参数               | 类型                              | 默认值              | 说明                             |
+| ------------------ | --------------------------------- | ------------------- | -------------------------------- |
+| `actions`          | `readonly ActionMenuAction[]`     | 必填                | 调用方当前可用动作               |
+| `onClose`          | `() => void`                      | 必填                | 遮罩、普通取消与确认后的关闭请求 |
+| `presentation`     | `'dialog' \| 'sheet'`             | `'dialog'`          | 居中卡片或底部卡片               |
+| `title`            | `string`                          | —                   | 可选单行标题                     |
+| `cancelLabel`      | `string`                          | `'取消'`            | 普通取消与返回菜单文案           |
+| `style` / `testID` | `StyleProp<ViewStyle>` / `string` | — / `'action-menu'` | 根容器样式与定位前缀             |
+
+普通动作只调用 `onPress`。有 confirmation 的动作先展示说明；确认时先 `onClose` 再调用该动作，取消确认仅返回菜单。禁用或加载时不能执行。正在确认的动作消失后回到菜单；业务目标是否仍然有效由应用在回调中复核。
+
+需要 SafeAreaProvider；底部模式将安全区加入底部内边距。组件不挂载 Modal，不创建请求。原生展厅位于「操作与状态」；文字随主题和应用字号变化。
 
 ## AvatarGroup 头像组
 
@@ -612,101 +712,6 @@ CSS `saturate(N%)` 部分 RN BlurView 无对应 prop,在我们项目暂不实现
 
 - ❌ 不要把 `<BlurLayer>` 放到没有相对定位的父容器内 —— `absoluteFill` 会撑到屏顶
 - ❌ 不要传 hardcode blurAmount —— 走 `intensity` token,设计稿更新时单点改 `theme/blur.ts`
-
-## BorderBeam 边框流光
-
-*Source: `docs/components/border-beam.mdx` · Mirror: `md/components/border-beam.md`*
-
-# BorderBeam 边框流光
-
-`BorderBeam` 在既有内容外围叠加一段沿边缘循环移动的渐变尾迹流光。流光由同相位、不同长度与透明度的描边叠加而成，前端更亮、尾部渐隐。它只负责视觉反馈，不改变内容布局，也不承载加载、错误、焦点或选中语义。
-
-## 代码演示 {#实时预览}
-
-```tsx
-  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-    <BorderBeam
-      style={{ padding: 18, borderRadius: 12, backgroundColor: '#F5F5F5' }}
-    >
-      <span>默认流光</span>
-    </BorderBeam>
-    <BorderBeam
-      color="#52C41A"
-      duration={1800}
-      lineWidth={3}
-      size={56}
-      borderRadius={16}
-      style={{ padding: 18, borderRadius: 16, backgroundColor: '#F5F5F5' }}
-    >
-      <span>图片处理中</span>
-    </BorderBeam>
-    <BorderBeam
-      active={false}
-      style={{ padding: 18, borderRadius: 12, backgroundColor: '#F5F5F5' }}
-    >
-      <span>已停用</span>
-    </BorderBeam>
-  </div>
-```
-
-## 用法
-
-```tsx
-import { BorderBeam, radius, useColors } from '@unif/react-native-design';
-import { Text, View } from 'react-native';
-
-function ProcessingImage() {
-  const c = useColors();
-  return (
-    <View
-      accessible
-      accessibilityRole="progressbar"
-      accessibilityLabel="图片识别中"
-      accessibilityState={{ busy: true }}
-    >
-      <BorderBeam
-        active
-        color={c.primary}
-        duration={1800}
-        lineWidth={3}
-        size={56}
-        borderRadius={radius.lg}
-      >
-        <Text>图片识别中</Text>
-      </BorderBeam>
-    </View>
-  );
-}
-```
-
-## API
-
-| 参数           | 类型                    | 默认值      | 说明                                             |
-| -------------- | ----------------------- | ----------- | ------------------------------------------------ |
-| `children`     | `ReactNode`             | 必填        | 被流光包围的原内容                               |
-| `active`       | `boolean?`              | `true`      | 是否显示并运行流光                               |
-| `color`        | `string?`               | `c.primary` | 流光颜色                                         |
-| `duration`     | `number?`               | `2400`      | 绕边一周时长，单位毫秒；收敛到 `300..60000`      |
-| `lineWidth`    | `number?`               | `2`         | 描边宽度；收敛到 `0.5..8`                        |
-| `size`         | `number?`               | `40`        | 流光段长度；收敛到 `8..1000`，且不会超过实际周长 |
-| `borderRadius` | `number?`               | `radius.md` | 流光路径圆角；收敛到 `0..1000` 并受当前布局约束  |
-| `style`        | `StyleProp<ViewStyle>?` | —           | 外层布局样式                                     |
-| `testID`       | `string?`               | —           | E2E / 测试定位                                   |
-
-## 动效与平台
-
-- native 由 Reanimated worklet 在 UI 线程持续更新 SVG `strokeDashoffset`。
-- Web 由静态 CSS keyframes 驱动，JS 只在布局或 props 变化时更新路径长度和时长。
-- 两端使用相同的四层渐变尾迹，不额外占用内容布局空间。
-- 系统开启“减少动态效果”时，流光会隐藏，原内容保持显示。
-
-## 无障碍与使用边界
-
-流光层本身对辅助技术隐藏，且 `pointerEvents="none"`，不会拦截子内容操作。业务必须在外层提供实际状态语义，例如 `accessibilityState={{ busy: true }}` 和可理解的状态文字。
-
-不要用 `BorderBeam` 代替错误红框、焦点描边、选择态或进度百分比；这些状态需要独立、稳定的视觉与无障碍表达。处理完成后应设置 `active={false}` 或移除组件。
-
-来源：`src/components/ui/BorderBeam/`。
 
 ## Button 按钮
 
@@ -3147,6 +3152,8 @@ import { IconButton } from '@unif/react-native-design';
 | `icon`               | `IconName`                                                                     | —          | 包内生成图标目录中的闭集名称                                                                 |
 | `onPress`            | `() => void`                                                                   | —          | **必填**点击回调；disabled / loading 时组件移除有效 handler                                  |
 | `size`               | `('sm' \| 'md' \| 'lg')?`                                                      | `'md'`     | 方形边长 28 / 36 / 44                                                                        |
+| `iconSize`           | `number?`                                                                      | 随 size    | 图标与加载指示的独立尺寸                                                                     |
+| `surfaceSize`        | `number?`                                                                      | 随 size    | 方形表面边长，并据此计算命中补偿                                                             |
 | `variant`            | `('primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'danger')?` | `'ghost'`  | 与 Button 共用 palette，但精确排除会撕掉方形高度的 `'text'`                                  |
 | `color`              | `string?`                                                                      | variant fg | icon 描色 override(仅 icon 色,bg/border 仍由 variant 决定)                                   |
 | `disabled`           | `boolean?`                                                                     | `false`    | 不响应 + opacity 0.5                                                                         |
@@ -3156,6 +3163,13 @@ import { IconButton } from '@unif/react-native-design';
 | `accessibilityState` | `Omit<AccessibilityState, 'disabled' \| 'busy'>?`                              | —          | caller 可补充 `selected` / `expanded` 等状态；`disabled` / `busy` 由组件接管，类型上禁止覆盖 |
 | `style`              | `StyleProp<ViewStyle>?`                                                        | —          | 容器附加样式                                                                                 |
 | `testID`             | `string?`                                                                      | —          | E2E / 测试定位                                                                               |
+
+`iconSize` 可独立设置图标和加载指示的尺寸；`surfaceSize` 可指定方形表面边长，同时按该值补足 44pt 命中区。缺省仍使用 `size` 对应的设备缩放尺寸。
+
+```tsx
+<IconButton icon="chevron-left" surfaceSize={36} iconSize={21} style={{ borderRadius: 18 }} accessibilityLabel="返回" onPress={onBack} />
+<IconButton icon="crosshair" surfaceSize={36} iconSize={22} accessibilityLabel="定位" loading={locating} onPress={locate} />
+```
 
 ## 无障碍（a11y）
 
@@ -3281,6 +3295,110 @@ import { ICONS } from '@unif/react-native-design';
 头像使用 Avatar，可展示文字或图片；图标使用 Icon。两者的输入和无障碍责任分别由对应组件定义。
 
 详见 [Avatar 组件](md/components/avatar.md)。
+
+## ImagePreview 图片预览
+
+*Source: `docs/components/image-preview.mdx` · Mirror: `md/components/image-preview.md`*
+
+# ImagePreview 图片预览
+
+展示图片、序号和可选删除入口。宿主提供有界图片尺寸、图片集合和关闭方式；文件持有、删除确认与真实删除由应用负责。
+
+```tsx
+const ImagePreviewDemo = () => {
+  const original = [
+    {
+      id: 'first',
+      source: { uri: '/react-native-design/img/logo.png' },
+      label: '第一张示例',
+    },
+    {
+      id: 'second',
+      source: { uri: '/react-native-design/img/logo.png' },
+      label: '相同来源的第二张',
+      canDelete: true,
+    },
+    { id: 'missing' },
+  ];
+  const [items, setItems] = useState(original);
+  const [width, setWidth] = useState(240);
+  const [result, setResult] = useState('左右滑动，或按按钮定位');
+  const ref = useRef(null);
+  return (
+    <>
+      <View
+        style={{ gap: 12 }}
+        onLayout={(event) =>
+          setWidth(Math.min(420, event.nativeEvent.layout.width))
+        }
+      >
+        <ImagePreview
+          ref={ref}
+          items={items}
+          width={Math.max(1, width)}
+          height={220}
+          initialId="second"
+          onCurrentChange={(item) => setResult(`当前：${item.id}`)}
+          onRequestDelete={(item) => {
+            setItems((current) =>
+              current.filter((image) => image.id !== item.id)
+            );
+            setResult(`移除请求：${item.id}`);
+          }}
+        />
+        <Button
+          label="定位第一张"
+          onPress={() => ref.current?.scrollTo('first')}
+        />
+        <Button
+          label="恢复示例"
+          variant="outline"
+          onPress={() => setItems(original)}
+        />
+        <span className="demo-label">{result}</span>
+      </View>
+    </>
+  );
+};
+```
+
+## 用法
+
+```tsx
+import { ImagePreview } from '@unif/react-native-design';
+
+<ImagePreview
+  items={images}
+  width={availableWidth}
+  height={280}
+  initialId={selectedId}
+  onCurrentChange={(item) => setSelectedId(item.id)}
+  onRequestDelete={(item) => requestDelete(item)}
+/>;
+```
+
+## API
+
+类型由 `ImagePreviewProps`、`ImagePreviewItem` 和 `ImagePreviewHandle` 导出。
+
+| 参数               | 类型                                         | 默认值 | 说明                                                              |
+| ------------------ | -------------------------------------------- | ------ | ----------------------------------------------------------------- |
+| `items`            | `readonly ImagePreviewItem[]`                | 必填   | 稳定且唯一的 `id`，`source?`、`label?`、`canDelete?`、`deleting?` |
+| `width` / `height` | `number`                                     | 必填   | 宿主实际可用图片区域，正有限布局尺寸                              |
+| `initialId`        | `string`                                     | 第一项 | 首次非空集合中定位，后续按当前 id 保持                            |
+| `onCurrentChange`  | `(item: Readonly<ImagePreviewItem>) => void` | —      | 有效当前身份变化时交付一次                                        |
+| `onRequestDelete`  | `(item: Readonly<ImagePreviewItem>) => void` | —      | 点击时的原项；不改集合                                            |
+| `style` / `testID` | `StyleProp<ViewStyle>` / `string`            | —      | 外层布局与定位                                                    |
+
+`canDelete`、`deleting` 默认 false。提供删除回调且当前项允许删除时显示入口；删除中禁止重复点击。集合为空不显示图片或操作，不合成空项回调。
+
+ref 提供 `scrollTo(id: string, animated = true): void` 和 `getCurrent(): Readonly<ImagePreviewItem> | undefined`。未知 id 不改变当前项；动画完成前仍读取上一已落位项。重入、集合身份变化和卸载后隔离旧动画回调。
+
+同 URL 的不同 id 保持独立。当前项移除后取原位置后继，无后继取前一项。缺少来源或加载失败显示占位；只影响本次显示，不移除记录。图片采用 contain，序号与操作位于图片裁切区外。
+
+## 组合与验证
+
+使用既有 GestureHandlerRootView、ThemeProvider 及轮播运行依赖。主题与应用字号影响文字，图片尺寸保持调用方给定值。实际原生展厅位于 `example` 的「媒体展示」。组件测试覆盖身份、集合变更、ref、旧回调与删除目标；真实手势、设备图片加载与文件生命周期由宿主另验。
 
 ## Input 输入框
 
@@ -3502,7 +3620,7 @@ const ProgressFontDemo = () => {
 
 中央百分比按 ThemeProvider.fontScale 缩放一次，系统字号沿 RN 原生行为处理。文字自然布局，圆环与描边保持 size / thickness 指定的实际尺寸。小圆环配大字号时外层占用可以增大；不会缩小字号、截掉百分号或自动关闭标签。showLabel=false 时保持 size × size 的固定占用；显示标签时采用平台固有尺寸，纵向容器的 stretch 不会把圆环拉成整行宽。外部显式设置裁切的容器仍由调用方负责。
 
-未知上传比例应使用 Spinner 或 BorderBeam 配合实际状态说明，不传 NaN 或伪造 0%；100% 也不代表业务成功。
+未知上传比例应使用 Spinner 配合实际状态说明，不传 NaN 或伪造 0%；100% 也不代表业务成功。
 
 | 参数                 | 类型                    | 默认值         | 说明                                               |
 | -------------------- | ----------------------- | -------------- | -------------------------------------------------- |
@@ -3902,7 +4020,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 | [Confirm](md/components/confirm.md)          | 命令式 `confirm()` + `<ConfirmHost />` 高风险二次确认               |
 | [Thumbnail](md/components/thumbnail.md)      | 缩略图，支持尺寸档位、尺寸对象和失败占位                            |
 | [Loading](md/components/loading.md)          | `Spinner` 未知时长加载；`CircularProgress` 确定进度与可选百分比     |
-| [BorderBeam](md/components/border-beam.md)   | 沿内容边缘循环移动的装饰性流光，支持 native / Web 与减少动态效果    |
 | [Pulse](md/components/pulse.md)              | `usePulse` + `<Pulse>` + `<PulseDot>`,通用脉冲底座                  |
 | [Reveal](md/components/reveal.md)            | 淡入容器：native Reanimated 入/退场 / Web CSS 入场                  |
 | [StatusDot](md/components/status-dot.md)     | `done`/`error`/`active`/`pending` 圆点,`flat`/`soft` 双 tone        |
@@ -3939,7 +4056,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 | [Empty](md/components/empty.md)              | 空状态                                                 |
 | [Skeleton](md/components/skeleton.md)        | 骨架占位,`shape='line'/'rect'/'circle'`(走 `usePulse`) |
 | [CircularProgress](md/components/loading.md) | `0..1` 确定圆形进度，可选中央百分比文字                |
-| [BorderBeam](md/components/border-beam.md)   | 图片处理等短时忙碌状态的边缘流光；业务语义由外层承载   |
 
 ## 数据展示 {#数据展示}
 
@@ -3972,6 +4088,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 ## 基础令牌 {#基础令牌}
 
 颜色 / 字体 / 间距 / 圆角 / 阴影 / 动效 / 图标 → [设计令牌](md/design/tokens/colors.md)。
+
+## 内容组合
+
+| 组件                                                      | 说明                                     |
+| --------------------------------------------------------- | ---------------------------------------- |
+| [ImagePreview](md/components/image-preview.md)            | 稳定身份、图片翻页与删除请求             |
+| [Sheet](md/components/sheet.md)                           | 固定头尾及三种有界内容布局               |
+| [ActionMenuContent](md/components/action-menu-content.md) | 操作、禁用加载与可选确认                 |
+| [TextEntryContent](md/components/text-entry-content.md)   | 受控编辑、说明和提交事件                 |
+| [SmsField](md/components/sms-field.md)                    | 受控短信输入，发送文案和冷却由调用方提供 |
 
 ## PasswordInput 密码输入
 
@@ -4518,6 +4644,50 @@ Search 自管搜索 icon、清除 action、36pt 可视 surface、44pt 根命中�
 
 ref 是 `TextFieldHandle`，只含 `focus()` / `blur()`；没有原生 `clear()`。无可见 label 时提供 `accessibilityLabel`。
 
+## Sheet 内容面板
+
+*Source: `docs/components/sheet.mdx` · Mirror: `md/components/sheet.md`*
+
+# Sheet 内容面板
+
+组合头部、内容和底部。父容器提供有界高度，弹层、关闭、安全区与键盘交给宿主。
+
+```tsx
+const sheetDemoStyles = (colors) => ({
+  text: { color: colors.foreground, fontSize: type.body },
+});
+
+  <SheetDemo />
+```
+
+## 用法
+
+```tsx
+<View style={{ height: 360 }}>
+  <Sheet
+    header={<NavBar title="选择内容" />}
+    footer={<Button label="确认" onPress={onConfirm} />}
+    contentMode="scroll"
+  >
+    {content}
+  </Sheet>
+</View>
+```
+
+## API
+
+| 参数                    | 类型                                       | 默认值    | 说明                                              |
+| ----------------------- | ------------------------------------------ | --------- | ------------------------------------------------- |
+| `children`              | `ReactNode`                                | 必填      | 中间内容                                          |
+| `header` / `footer`     | `ReactNode`                                | —         | 固定头尾；无头部显示非交互拖动指示                |
+| `contentMode`           | `'fixed' \| 'scroll' \| 'external-scroll'` | `'fixed'` | 普通布局、内部纵向 ScrollView、外部自带滚动       |
+| `contentContainerStyle` | `StyleProp<ViewStyle>`                     | —         | 内容区域样式；scroll 时作用于 ScrollView 内容容器 |
+| `style` / `testID`      | `StyleProp<ViewStyle>` / `string`          | —         | 根容器样式与定位                                  |
+
+公开类型为 `SheetProps` 和 `SheetContentMode`。内部滚动保留 `keyboardShouldPersistTaps="handled"`；外部列表不再包同方向 ScrollView。头尾不定义业务按钮协议，直接组合 Design 组件。主题变化沿现有 Provider 传递。
+
+原生展厅「容器与集合」提供三种布局。宿主负责 formSheet/Modal、高度、系统返回及键盘避让；关闭本身不表示业务成功或取消。
+
 ## Skeleton 骨架屏
 
 *Source: `docs/components/skeleton.mdx` · Mirror: `md/components/skeleton.md`*
@@ -4631,6 +4801,83 @@ import { Skeleton } from '@unif/react-native-design';
 | 页面级，初次加载     | 单个气泡里，AI 思考中 |
 | 整体块状（卡片、行） | 几行不等宽 + 头像     |
 | 加载完成后整体替换   | 气泡内文字流式填充    |
+
+## SmsField 短信字段
+
+*Source: `docs/components/sms-field.mdx` · Mirror: `md/components/sms-field.md`*
+
+# SmsField 短信字段
+
+组合 Input 与发送动作。调用方提供输入长度、文案和剩余秒数，并维护发送请求及计时。
+
+```tsx
+const SmsFieldDemo = () => {
+  const [value, setValue] = useState('');
+  const [remaining, setRemaining] = useState(0);
+  return (
+    <>
+      <View style={{ gap: 12 }}>
+        <SmsField
+          value={value}
+          onChangeText={setValue}
+          remainingSeconds={remaining}
+          maxLength={6}
+          placeholder="输入六位数字"
+          accessibilityLabel="演示短信码"
+          sendLabel={remaining ? `${remaining}s` : '获取验证码'}
+          sendAccessibilityLabel={
+            remaining ? `${remaining} 秒后可重新获取验证码` : '获取验证码'
+          }
+          onSend={() => setRemaining(30)}
+        />
+        <Button
+          label="结束演示冷却"
+          variant="outline"
+          onPress={() => setRemaining(0)}
+        />
+        <span className="demo-label">
+          {remaining ? '由示例保持冷却状态，可手动结束' : '可以发送'} · 已输入{' '}
+          {value.length} 位
+        </span>
+      </View>
+    </>
+  );
+};
+```
+
+## 用法
+
+```tsx
+<SmsField
+  value={code}
+  onChangeText={setCode}
+  remainingSeconds={remaining}
+  maxLength={6}
+  placeholder="请输入 6 位验证码"
+  sendLabel={remaining > 0 ? `${remaining}s` : '获取验证码'}
+  sendAccessibilityLabel={
+    remaining > 0 ? `${remaining} 秒后可重新获取验证码` : '获取验证码'
+  }
+  sendDisabled={sending}
+  onSend={requestSms}
+/>
+```
+
+## API
+
+公开类型：`SmsFieldProps`。
+
+| 参数                                         | 类型                                 | 默认值   | 说明                           |
+| -------------------------------------------- | ------------------------------------ | -------- | ------------------------------ |
+| `value` / `onChangeText`                     | `string` / `(value: string) => void` | 必填     | 受控原文                       |
+| `remainingSeconds`                           | `number`                             | 必填     | 大于零时禁用发送；不创建计时器 |
+| `sendLabel` / `onSend`                       | `string` / `() => void`              | 必填     | 发送按钮当前文案与事件         |
+| `sendAccessibilityLabel`                     | `string`                             | 按钮文案 | 可给倒计时提供完整读屏说明     |
+| `sendDisabled`                               | `boolean`                            | `false`  | 调用方控制发送禁用             |
+| `maxLength` / `placeholder`                  | `number` / `string`                  | —        | 长度与提示不预设六位或业务文案 |
+| `editable` / `accessibilityLabel` / `testID` | Input 对应字段                       | 沿 Input | 输入状态、名称与定位           |
+
+使用 `number-pad`、`sms-otp` 和 `oneTimeCode` 原生提示，前缀为 mail 图标。手机号、用途、请求去重、身份和冷却计时均由应用维护。明暗主题、字号与交互沿 Input；原生展厅位于「表单与输入」。
 
 ## StatusDot 状态点
 
@@ -5737,6 +5984,77 @@ import { Tag } from '@unif/react-native-design';
 来源：`src/components/ui/Tag/Tag.tsx`、`types.ts`。
 
 Tag 是**纯展示**标签，源码是 `<View>` + `<Text>`（无 `onPress`、无交互变体），**未设置任何 `accessibilityRole`**，也没有可传的 a11y prop（无 `accessibilityLabel`）。底层 `<Text>` 默认对 screen reader 可读，会朗读必填的 `label`；`variant` 只是配色语义，不会被读出（如需把"成功 / 失败"读给 SR，应在 `label` 文字本身体现，例如 `label="已完成"`）。无受控状态（`checked` / `selected` / `disabled` 均不适用）。
+
+## TextEntryContent 文字编辑内容
+
+*Source: `docs/components/text-entry-content.mdx` · Mirror: `md/components/text-entry-content.md`*
+
+# TextEntryContent 文字编辑内容
+
+组合标题、说明、Textarea 和确认/取消按钮。值由调用方控制，宿主负责弹层、键盘与业务提交。
+
+```tsx
+const TextEntryDemo = () => {
+  const [value, setValue] = useState('欢迎编辑这段中文说明');
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState('确认时原样交付文字');
+  return (
+    <>
+      <View style={{ gap: 12 }}>
+        <TextEntryContent
+          title="编辑说明"
+          message="空格与换行会完整保留。"
+          value={value}
+          onChangeText={setValue}
+          maxLength={120}
+          autoFocus={false}
+          busy={busy}
+          onSubmit={(text) => setResult(`已确认：${text}`)}
+          onCancel={() => setResult('已取消')}
+        />
+        <Button
+          label={busy ? '结束忙碌' : '查看忙碌状态'}
+          variant="outline"
+          onPress={() => setBusy((current) => !current)}
+        />
+        <span className="demo-label">{result}</span>
+      </View>
+    </>
+  );
+};
+```
+
+## 用法
+
+```tsx
+const [value, setValue] = useState(initialValue);
+<TextEntryContent
+  title="重命名"
+  value={value}
+  onChangeText={setValue}
+  onSubmit={submit}
+  onCancel={close}
+  busy={saving}
+/>;
+```
+
+## API
+
+公开类型：`TextEntryContentProps`。
+
+| 参数                           | 类型                              | 默认值              | 说明                                               |
+| ------------------------------ | --------------------------------- | ------------------- | -------------------------------------------------- |
+| `title` / `value`              | `string`                          | 必填                | 标题兼输入读屏名称；受控原文                       |
+| `onChangeText` / `onSubmit`    | `(value: string) => void`         | 必填                | 输入变化、确认原文；不 trim 或自行保存             |
+| `onCancel`                     | `() => void`                      | 必填                | 取消请求                                           |
+| `message`                      | `string`                          | —                   | 可选说明                                           |
+| `busy`                         | `boolean`                         | `false`             | 输入不可编辑，确认显示加载，两个按钮均不可重复操作 |
+| `maxLength`                    | `number`                          | —                   | 交给 Textarea 的长度限制                           |
+| `confirmLabel` / `cancelLabel` | `string`                          | `'确认'` / `'取消'` | 操作文案                                           |
+| `autoFocus`                    | `boolean`                         | `true`              | 原生输入自动聚焦；文档演示关闭                     |
+| `style` / `testID`             | `StyleProp<ViewStyle>` / `string` | —                   | 内容表面样式与定位                                 |
+
+只组合 Design 控件，不依赖 Chat。应用验证提交内容和处理错误；组件不管理提交 Promise。中文、大字号与明暗主题沿现有 ThemeProvider 处理。原生展厅位于「表单与输入」，实际键盘避让需在宿主验证。
 
 ## TextField 输入共享内核（internal）
 

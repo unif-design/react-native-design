@@ -47,10 +47,15 @@ const expectedMediaDeployment = Object.freeze({
 });
 
 const expectedUiComponents = [
+  'ActionMenuContent',
+  'TextEntryContent',
+  'SmsField',
+  'ImagePreview',
+  'Sheet',
+
   'Avatar',
   'AvatarGroup',
   'BlurLayer',
-  'BorderBeam',
   'Button',
   'Card',
   'Carousel',
@@ -104,9 +109,15 @@ const expectedBusinessComponents = [
 
 const expectedComponentsByScene = {
   foundation: ['Icon'],
-  actions: ['Button', 'IconButton', 'Chip', 'Tag', 'StatusDot'],
+  actions: [
+    'ActionMenuContent',
+    'Button',
+    'IconButton',
+    'Chip',
+    'Tag',
+    'StatusDot',
+  ],
   feedback: [
-    'BorderBeam',
     'CircularProgress',
     'Empty',
     'Skeleton',
@@ -119,6 +130,8 @@ const expectedComponentsByScene = {
     'ToastHost',
   ],
   forms: [
+    'TextEntryContent',
+    'SmsField',
     'Input',
     'PasswordInput',
     'Textarea',
@@ -133,6 +146,7 @@ const expectedComponentsByScene = {
   ],
   navigation: ['NavBar', 'DrawerHeader', 'Tabs', 'Segmented', 'TabBar'],
   collections: [
+    'Sheet',
     'Card',
     'Ribbon',
     'Cell',
@@ -141,7 +155,7 @@ const expectedComponentsByScene = {
     'EntryCard',
     'Carousel',
   ],
-  media: ['Avatar', 'AvatarGroup', 'Thumbnail', 'Logo'],
+  media: ['ImagePreview', 'Avatar', 'AvatarGroup', 'Thumbnail', 'Logo'],
   business: expectedBusinessComponents,
 };
 
@@ -157,6 +171,12 @@ const expectedSceneTestFiles = {
 };
 
 const expectedStateIdsByComponent = {
+  ActionMenuContent: ['action-menu-content.actions'],
+  TextEntryContent: ['text-entry-content.controlled'],
+  SmsField: ['sms-field.controlled'],
+  ImagePreview: ['image-preview.identity'],
+  Sheet: ['sheet.modes'],
+
   Icon: [
     'icon.all-icons',
     'icon.name-search',
@@ -208,16 +228,6 @@ const expectedStateIdsByComponent = {
     'circular-progress.a11y-value',
   ],
   Spinner: ['spinner.sizes', 'spinner.color', 'spinner.stroke-width'],
-  BorderBeam: [
-    'border-beam.default',
-    'border-beam.inactive',
-    'border-beam.color',
-    'border-beam.duration',
-    'border-beam.line-width',
-    'border-beam.size',
-    'border-beam.radius',
-    'border-beam.reduced-motion',
-  ],
   Pulse: [
     'pulse.default',
     'pulse.opacity-range',

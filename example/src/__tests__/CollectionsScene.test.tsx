@@ -555,3 +555,20 @@ test('Carousel ref 四个公开方法可执行，reduced motion 停止 upstream 
     expect.arrayContaining([expect.objectContaining({ autoplay: true })])
   );
 });
+
+test('Sheet 三种模式在有界场景展示内容和固定操作', () => {
+  render(<App />);
+  enterCollections();
+  const coverage = createShowcaseStateCoverage('Sheet');
+  fireEvent.press(screen.getByRole('button', { name: '面板确认' }));
+  coverage.prove('sheet.modes', () => {
+    expect(screen.getByTestId('collections-sheet-fixed')).toBeTruthy();
+    expect(screen.getByTestId('collections-sheet-scroll')).toBeTruthy();
+    expect(
+      screen.getByTestId('collections-sheet-external-scroll')
+    ).toBeTruthy();
+    expect(screen.getByText('外部列表甲')).toBeTruthy();
+    expect(screen.getAllByText(/固定底部已触发/).length).toBeGreaterThan(0);
+  });
+  coverage.expectComplete();
+});

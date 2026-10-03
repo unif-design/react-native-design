@@ -9,8 +9,6 @@ export { AvatarGroup } from './AvatarGroup';
 export type { AvatarGroupItem, AvatarGroupProps } from './AvatarGroup';
 export { BlurLayer } from './BlurLayer';
 export type { BlurLayerProps } from './BlurLayer';
-export { BorderBeam } from './BorderBeam';
-export type { BorderBeamProps } from './BorderBeam';
 export { Button } from './Button';
 export type { ButtonProps, ButtonSize, ButtonVariant } from './Button';
 export { Card } from './Card';
@@ -109,3 +107,21 @@ export type {
   ToastKind,
   ToastPosition,
 } from './Toast';
+export { ActionMenuContent } from './ActionMenuContent';
+export type {
+  ActionMenuAction,
+  ActionMenuConfirmation,
+  ActionMenuContentProps,
+} from './ActionMenuContent';
+export { ImagePreview } from './ImagePreview';
+export type {
+  ImagePreviewItem,
+  ImagePreviewProps,
+  ImagePreviewHandle,
+} from './ImagePreview';
+export { Sheet } from './Sheet';
+export type { SheetContentMode, SheetProps } from './Sheet';
+export { SmsField } from './SmsField';
+export type { SmsFieldProps } from './SmsField';
+export { TextEntryContent } from './TextEntryContent';
+export type { TextEntryContentProps } from './TextEntryContent';

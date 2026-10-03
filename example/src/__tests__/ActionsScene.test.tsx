@@ -347,3 +347,16 @@ test('Tag 展示 6×2 纯展示矩阵，StatusDot 展示 4×2 且只使用中文
   });
   statusStateCoverage.expectComplete();
 });
+
+test('动作内容真实交付选择和二次确认', () => {
+  render(<App />);
+  enterActions();
+  const coverage = createShowcaseStateCoverage('ActionMenuContent');
+  fireEvent.press(screen.getByRole('button', { name: '删除示例' }));
+  expect(screen.getByText('移除这个演示项目？')).toBeTruthy();
+  fireEvent.press(screen.getByRole('button', { name: '确认移除' }));
+  coverage.prove('action-menu-content.actions', () => {
+    expect(screen.getAllByText(/已确认移除/).length).toBeGreaterThan(0);
+  });
+  coverage.expectComplete();
+});
