@@ -1,10 +1,11 @@
 import React, { useCallback, useState } from 'react';
 import { Image } from 'react-native';
-import type { ImageProps, ImageSourcePropType } from 'react-native';
+import type { ImageProps } from 'react-native';
+import type { ResolvedImageSource } from '../../../utils/imageSource';
 import { selectImageAttemptSource } from './selectImageAttemptSource';
 
 type ImageAttemptProps = Omit<ImageProps, 'onError' | 'source'> & {
-  source: ImageSourcePropType;
+  source: ResolvedImageSource;
   fallback: React.ReactNode;
 };
 

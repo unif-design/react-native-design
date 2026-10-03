@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { useThemedStyles } from '../../../theme';
-import { resolveImageSource } from '../../../utils/imageSource';
+import { useImageSource } from '../shared/useImageSource';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { ImageAttempt } from '../shared/ImageAttempt';
 import { makeStyles } from './styles';
@@ -21,7 +21,7 @@ export function DrawerHeader({
   const styles = useThemedStyles(makeStyles);
   // [L-51] 码点级取首字,防 emoji / 代理对被截断为乱码。
   const initial = [...name.trim()][0] ?? '?';
-  const resolvedSource = resolveImageSource(source);
+  const resolvedSource = useImageSource(source);
   const fallback = <Text style={styles.avatarText}>{initial}</Text>;
 
   return (
@@ -38,7 +38,7 @@ export function DrawerHeader({
         ) : (
           <ImageAttempt
             key={resolvedSource.key}
-            source={resolvedSource.source}
+            source={resolvedSource}
             fallback={fallback}
             style={styles.avatarImage}
             resizeMode="cover"

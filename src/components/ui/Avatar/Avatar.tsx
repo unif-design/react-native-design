@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { scaleFontMetric, useColors, useFontScale } from '../../../theme';
-import { resolveImageSource } from '../../../utils/imageSource';
+import { useImageSource } from '../shared/useImageSource';
 import { ImageAttempt } from '../shared/ImageAttempt';
 import { paletteFor, styles } from './styles';
 import { resolveAvatarBorderRadius, sizingFor } from './geometry';
@@ -27,7 +27,7 @@ export function Avatar({
   const dims = sizingFor(size);
   const palette = paletteFor(variant, c);
   const labelFontSize = scaleFontMetric(dims.fs, fontScale);
-  const resolvedSource = resolveImageSource(source);
+  const resolvedSource = useImageSource(source);
   const fallback = (
     <Text
       style={[styles.label, { fontSize: labelFontSize, color: palette.fg }]}
@@ -58,7 +58,7 @@ export function Avatar({
       ) : (
         <ImageAttempt
           key={resolvedSource.key}
-          source={resolvedSource.source}
+          source={resolvedSource}
           fallback={fallback}
           style={styles.image}
           resizeMode="cover"
