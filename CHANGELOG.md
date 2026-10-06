@@ -1,5 +1,21 @@
 # Changelog
 
+# [0.35.0](https://github.com/unif-design/react-native-design/compare/v0.34.0...v0.35.0) (2026-10-06)
+
+
+### Features
+
+* **glass:** replace blur surfaces with liquid glass ([#142](https://github.com/unif-design/react-native-design/issues/142)) ([eb88c6a](https://github.com/unif-design/react-native-design/commit/eb88c6a9cf2f0ce0113f7358bb6605f7019b3807))
+
+
+### BREAKING CHANGES
+
+* **glass:** replace BlurLayer/intensity/tint with GlassLayer/effect/tintColor,
+remove the public blur tokens and require @callstack/liquid-glass instead of the
+previous native blur dependency.
+
+* refactor(glass): type web styles and clarify demo tint
+
 # [0.34.0](https://github.com/unif-design/react-native-design/compare/v0.33.1...v0.34.0) (2026-10-03)
 
 
