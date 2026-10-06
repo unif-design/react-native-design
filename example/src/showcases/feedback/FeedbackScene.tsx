@@ -347,7 +347,7 @@ export function FeedbackScene(): React.JSX.Element {
 
         <SectionCard
           title="玻璃材质"
-          description="仅在用户明确操作后挂载 GlassLayer 组件。"
+          description="按需挂载玻璃层，在相同主题染色下比较两种材质。"
         >
           <Text style={styles.fact}>
             iOS 26+ 使用原生玻璃；旧 iOS 和 Android 使用半透明背景，Web 使用 CSS

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type ViewStyle } from 'react-native';
 import { useColors, useTheme } from '../../../theme';
 import { webGlassBlur } from './constants';
 import type { GlassLayerProps } from './types';
@@ -16,12 +16,13 @@ export function GlassLayer({
   const resolvedTint =
     tintColor ?? (effect === 'clear' ? c.glassTintLight : c.sheetBackdrop);
   // RN 类型不含 CSS backdrop-filter。保留原有饱和度和暗色透明度近似值。
-  const webGlassStyle = {
+  const webGlassStyle: ViewStyle &
+    Pick<React.CSSProperties, 'backdropFilter' | 'WebkitBackdropFilter'> = {
     backdropFilter: `blur(${webGlassBlur[effect]}px) saturate(180%)`,
     WebkitBackdropFilter: `blur(${webGlassBlur[effect]}px) saturate(180%)`,
     backgroundColor: resolvedTint,
     opacity: scheme === 'dark' ? 0.96 : 1,
-  } as unknown as StyleProp<ViewStyle>;
+  };
 
   return (
     <View
