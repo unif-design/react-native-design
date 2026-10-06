@@ -4,7 +4,7 @@ title: Loading 加载
 description: '展示未知时长的等待或可量化的圆形进度。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.33.1; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.34.0; edit source documentation. -->
 
 # Loading 加载
 

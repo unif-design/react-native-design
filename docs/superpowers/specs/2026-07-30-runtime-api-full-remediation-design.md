@@ -1,3 +1,5 @@
+> 历史记录：玻璃实现与依赖已由 [2026-10-05 迁移记录](../../migrations/2026-10-05-liquid-glass.md)取代；以下只保留当时依据，不用于当前接入。
+
 # React Native Design 全量整改总览
 
 > 日期：2026-07-30
@@ -104,7 +106,7 @@
 需要真实 iOS/Android 宿主的 case 使用 `manual-tests/runtime-api/` 中受根 `tsc` 覆盖的验收 screen/fixture，以及 `scripts/create-runtime-api-harness.js`：
 
 - 根命令 `yarn create:runtime-harness` 以 `fs.mkdtemp` 创建唯一系统临时父目录，再调用根仓库锁定的本地 `rnc-cli@20.1.0`，以 `--version 0.86.2`、指向已安装 `@react-native-community/template@0.86.2` 的绝对本地路径、`--skip-install` 和 `--skip-git-init` 在其下展开干净 app。脚本先校验 CLI/template package 版本、template 中 React/RN 精确版本及 lockfile checksum，再允许 scaffold；不能从 registry 的浮动 `latest` 获取工具，也不能接受或递归清理 caller 路径，更不能读取/复制 `example/`。
-- 脚本先要求当前库 `yarn prepare` 成功，再把 pack 产物写入临时父目录并叠加验收 screen。依赖映射以当前根 `peerDependencies` 的全部 non-optional key 为单一来源：脚本若发现任何 peer 没有 concrete harness provider 就 fail-fast。React/RN 固定为 `19.2.3` / `0.86.2`；其余 provider 从根 workspace 的 direct range 与当前 `yarn.lock` 解析出**精确 locator version**并写入临时 manifest，当前映射覆盖 `@sbaiahmed1/react-native-blur`、RNGH、RNRC、Reanimated、Worklets、safe-area-context 和 SVG，另直接提供 Worklets 所需 Babel/Metro provider。写回后再次断言生成 manifest、Babel/Metro 配置、iOS Podfile 与 Android Gradle 文件都来自 RN `0.86.2` template，再在临时目录安装。这样开发依赖仍采用总览中的 range，而每次验收记录的是同一 lockfile 的确切版本。临时 Babel config 启用匹配的 Worklets plugin，App 入口按 RNGH 要求初始化并使用 `GestureHandlerRootView`；任一 scaffold、版本断言、build、install 或 pod 准备失败都退出非零，不能产出“可用”结论。
+- 脚本先要求当前库 `yarn prepare` 成功，再把 pack 产物写入临时父目录并叠加验收 screen。依赖映射以当前根 `peerDependencies` 的全部 non-optional key 为单一来源：脚本若发现任何 peer 没有 concrete harness provider 就 fail-fast。React/RN 固定为 `19.2.3` / `0.86.2`；其余 provider 从根 workspace 的 direct range 与当前 `yarn.lock` 解析出**精确 locator version**并写入临时 manifest，当前映射覆盖 `历史原生模糊依赖`、RNGH、RNRC、Reanimated、Worklets、safe-area-context 和 SVG，另直接提供 Worklets 所需 Babel/Metro provider。写回后再次断言生成 manifest、Babel/Metro 配置、iOS Podfile 与 Android Gradle 文件都来自 RN `0.86.2` template，再在临时目录安装。这样开发依赖仍采用总览中的 range，而每次验收记录的是同一 lockfile 的确切版本。临时 Babel config 启用匹配的 Worklets plugin，App 入口按 RNGH 要求初始化并使用 `GestureHandlerRootView`；任一 scaffold、版本断言、build、install 或 pod 准备失败都退出非零，不能产出“可用”结论。
 - fixture 提供错误播报、44pt frame、reduced motion、a11y tree、Carousel、Reveal、Spinner、Thumbnail 和图片 `A₁ → B → A₂` 的可操作场景与稳定 testID。脚本输出临时路径和实际 `yarn ios` / `yarn android` 复现命令；Web case 使用 Website 对应组件页与浏览器 accessibility/layout inspector。
 - 临时 app 和运行日志不提交；命令、设备/OS、结果及截图或 inspector 证据写入 checked-in 验收矩阵。`example/` 前后 hash/status 必须一致。
 

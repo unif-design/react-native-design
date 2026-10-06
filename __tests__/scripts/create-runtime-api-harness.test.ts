@@ -29,7 +29,7 @@ const rootManifest = {
   devDependencies: {
     '@babel/core': '^7.29.7',
     '@react-native/metro-config': '0.86.3',
-    '@sbaiahmed1/react-native-blur': '6.0.1',
+    '@callstack/liquid-glass': '0.8.2',
     'react': '19.2.3',
     'react-native': '0.86.3',
     'react-native-gesture-handler': '^3.1.0',
@@ -40,7 +40,7 @@ const rootManifest = {
     'react-native-worklets': '^0.12.1',
   },
   peerDependencies: {
-    '@sbaiahmed1/react-native-blur': '>=4',
+    '@callstack/liquid-glass': '>=0.8.2 <0.9.0',
     'react': '>=19.2.3 <20.0.0',
     'react-native': '>=0.86.0',
     'react-native-gesture-handler': '>=3.0.0 <4.0.0',
@@ -56,7 +56,7 @@ const rootManifest = {
 const resolved: Record<string, string> = {
   '@babel/core': '7.29.7',
   '@react-native/metro-config': '0.86.3',
-  '@sbaiahmed1/react-native-blur': '6.0.1',
+  '@callstack/liquid-glass': '0.8.2',
   'react': '19.2.3',
   'react-native': '0.86.3',
   'react-native-gesture-handler': '3.1.0',

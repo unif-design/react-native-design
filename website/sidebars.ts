@@ -114,7 +114,7 @@ const sidebars: SidebarsConfig = {
       label: '其他',
       collapsed: true,
       items: [
-        'components/blur-layer',
+            'components/glass-layer',
         'components/entry-card',
         'components/chip',
         'components/confirm',

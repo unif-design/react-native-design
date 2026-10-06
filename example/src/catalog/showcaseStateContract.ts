@@ -2897,56 +2897,56 @@ export const showcaseStateContract = [
     },
   },
   {
-    id: 'blur-layer.soft',
-    component: 'BlurLayer',
+    id: 'glass-layer.clear',
+    component: 'GlassLayer',
     scene: 'feedback',
-    label: 'soft',
+    label: 'clear',
     witness: {
       kind: 'jsx-props',
       specimens: [
         {
-          testID: 'feedback-blur-layer',
+          testID: 'feedback-glass-layer',
           props: {},
-          presentProps: ['intensity'],
+          presentProps: ['effect'],
         },
       ],
     },
   },
   {
-    id: 'blur-layer.strong',
-    component: 'BlurLayer',
+    id: 'glass-layer.regular',
+    component: 'GlassLayer',
     scene: 'feedback',
-    label: 'strong',
+    label: 'regular',
     witness: {
       kind: 'jsx-props',
       specimens: [
         {
-          testID: 'feedback-blur-layer',
+          testID: 'feedback-glass-layer',
           props: {},
-          presentProps: ['intensity'],
+          presentProps: ['effect'],
         },
       ],
     },
   },
   {
-    id: 'blur-layer.custom-tint',
-    component: 'BlurLayer',
+    id: 'glass-layer.custom-tint-color',
+    component: 'GlassLayer',
     scene: 'feedback',
-    label: '自定义 tint',
+    label: '自定义 tintColor',
     witness: {
       kind: 'jsx-props',
       specimens: [
         {
-          testID: 'feedback-blur-layer',
+          testID: 'feedback-glass-layer',
           props: {},
-          presentProps: ['tint'],
+          presentProps: ['tintColor'],
         },
       ],
     },
   },
   {
-    id: 'blur-layer.theme',
-    component: 'BlurLayer',
+    id: 'glass-layer.theme',
+    component: 'GlassLayer',
     scene: 'feedback',
     label: '亮暗主题',
     witness: {

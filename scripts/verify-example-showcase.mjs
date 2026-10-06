@@ -55,7 +55,7 @@ const expectedUiComponents = [
 
   'Avatar',
   'AvatarGroup',
-  'BlurLayer',
+  'GlassLayer',
   'Button',
   'Card',
   'Carousel',
@@ -125,7 +125,7 @@ const expectedComponentsByScene = {
     'Pulse',
     'PulseDot',
     'Reveal',
-    'BlurLayer',
+    'GlassLayer',
     'ConfirmHost',
     'ToastHost',
   ],
@@ -248,11 +248,11 @@ const expectedStateIdsByComponent = {
     'reveal.container-style',
     'reveal.reduced-motion',
   ],
-  BlurLayer: [
-    'blur-layer.soft',
-    'blur-layer.strong',
-    'blur-layer.custom-tint',
-    'blur-layer.theme',
+  GlassLayer: [
+    'glass-layer.clear',
+    'glass-layer.regular',
+    'glass-layer.custom-tint-color',
+    'glass-layer.theme',
   ],
   ConfirmHost: [
     'confirm-host.confirm',
@@ -480,7 +480,6 @@ const expectedRuntimeApis = [
   'fixed',
   'motion',
   'pressedOpacity',
-  'blur',
   'ICONS',
   'ICON_NAMES',
   'childTestID',
@@ -529,7 +528,6 @@ const expectedRuntimeProofIdsByOwner = {
     'fixed',
     'motion',
     'pressedOpacity',
-    'blur',
     'ICONS',
     'ICON_NAMES',
     'childTestID',
@@ -563,7 +561,7 @@ const expectedSceneTitles = {
 };
 
 const expectedRuntimeDependencies = {
-  '@sbaiahmed1/react-native-blur': '6.0.1',
+  '@callstack/liquid-glass': '0.8.2',
   '@unif/react-native-design': 'workspace:*',
   'react': '19.2.3',
   'react-native': '0.86.3',
@@ -587,7 +585,7 @@ const expectedTemplateDevDependencies = {
 };
 
 const expectedRootPeerDependencies = {
-  '@sbaiahmed1/react-native-blur': '>=4',
+  '@callstack/liquid-glass': '>=0.8.2 <0.9.0',
   'react': '>=19.2.3 <20.0.0',
   'react-native': '>=0.86.0',
   'react-native-gesture-handler': '>=3.0.0 <4.0.0',
@@ -2749,7 +2747,7 @@ function verifySceneContract(root, entries, bindingAnalysis) {
             (specifier) => specifier.propertyName?.text ?? specifier.name.text
           )
           .filter((name) =>
-            ['Carousel', 'BlurLayer', 'ICONS', 'ICON_NAMES'].includes(name)
+            ['Carousel', 'GlassLayer', 'ICONS', 'ICON_NAMES'].includes(name)
           );
         if (importedHeavy.length) {
           failVerification(
@@ -2762,7 +2760,7 @@ function verifySceneContract(root, entries, bindingAnalysis) {
   }
   const heavyNames = new Set([
     'Carousel',
-    'BlurLayer',
+    'GlassLayer',
     'ICONS',
     'ICON_NAMES',
     'IconCatalog',

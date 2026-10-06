@@ -41,6 +41,8 @@ module.exports = {
     '^react-native-worklets$': '<rootDir>/node_modules/react-native-worklets',
     '^react-native-safe-area-context$':
       '<rootDir>/node_modules/react-native-safe-area-context',
+    '^@callstack/liquid-glass$':
+      '<rootDir>/node_modules/@callstack/liquid-glass',
   },
   // preset 的 setupFilesAfterEnv(jest-setup.js)由 jest 前置拼接,这里只列 example 自己的
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],

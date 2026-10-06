@@ -1,15 +1,13 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import { BlurLayer } from '../../ui/BlurLayer';
+import { GlassLayer } from '../../ui/GlassLayer';
 import { useThemedStyles } from '../../../theme';
 import { makeGlassStatsStyles } from './styles';
 import type { GlassStatsProps } from './types';
 
 /**
- * 玻璃数据条 —— BlurLayer 真 backdrop blur + 内部 N 列数据。
- *
- * BlurLayer 接管 backdrop 双层结构(BlurView soft + glassTintLight tint),
- * blurType 跟 scheme 自动切。
+ * 玻璃数据条 —— GlassLayer 通透材质 + 内部 N 列数据。
+ * 材质、主题和平台降级由 GlassLayer 接管。
  */
 export function GlassStats({
   items,
@@ -23,7 +21,7 @@ export function GlassStats({
     // 单层 overflow + shadow 在 iOS 上 shadow 完全不可见。
     <View style={[styles.glassShell, style]} testID={testID}>
       <View style={styles.glass}>
-        <BlurLayer intensity="soft" />
+        <GlassLayer effect="clear" style={styles.glassLayer} />
         {/* 顶部 1px inset 白高光,让数据条顶部"凸起" */}
         <View style={styles.topHighlight} pointerEvents="none" />
         <View style={styles.inner}>

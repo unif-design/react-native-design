@@ -61,12 +61,9 @@ export const lightColors = {
   glassTintLight: 'rgba(255,255,255,0.55)',
   /** 玻璃容器内部分隔线 —— 暗色翻成对应低透白,保证暗底可见。 */
   glassSeparator: 'rgba(0,0,0,0.08)',
-  /** 浮动玻璃胶囊外区 tint(TabBar 滚动玻璃门)。
-   *  数值配合 blur.strong(blurAmount=40) 让"玻璃门外区滚动内容透过模糊显示"达成。
-   *  跟 glassTintLight 区分:此 token 给"玻璃门外区"语义。 */
+  /** 玻璃容器的半透明背景，与轻薄染色 glassTintLight 分别表达表面与覆盖层。 */
   glassSurface: 'rgba(255,255,255,0.20)',
-  /** TabBar 玻璃门 tint —— 跟 glassSurface 区分,真机实测 0.20 太厚看不清滚动内容,
-   *  TabBar 场景配合 blur.soft(blurAmount=10) 主导,语义不同不可复用同一个 alpha。 */
+  /** TabBar 的轻薄主题背景；只表达颜色，不定义原生玻璃材质或模糊半径。 */
   tabBarGlassTint: 'rgba(255,255,255,0.10)',
   /** 玻璃胶囊边框(亮 0.18 / 暗 0.14 白透)。 */
   glassBorder: 'rgba(255,255,255,0.18)',
@@ -170,9 +167,9 @@ export const darkColors: ColorTokens = {
   // 暗色 0.06 白透,凸起感由 glassBar 暗色黑 0.35 shadow 补
   glassTintLight: 'rgba(255,255,255,0.06)',
   glassSeparator: 'rgba(255,255,255,0.10)',
-  // 深灰半透 0.30,配合 blur.strong(blurAmount=40) 让"玻璃门"语义达成
+  // 暗色玻璃容器沿用深灰半透明背景。
   glassSurface: 'rgba(28,28,30,0.30)',
-  // 配合 blur.soft(blurAmount=10) 让内容透过模糊带 alpha 染色
+  // TabBar 沿用独立的轻薄染色。
   tabBarGlassTint: 'rgba(28,28,30,0.18)',
   glassBorder: 'rgba(255,255,255,0.14)',
   glassHighlight: 'rgba(255,255,255,0.24)',

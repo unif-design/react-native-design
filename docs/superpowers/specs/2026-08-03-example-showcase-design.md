@@ -1,3 +1,5 @@
+> 历史记录：玻璃实现与依赖已由 [2026-10-05 迁移记录](../../migrations/2026-10-05-liquid-glass.md)取代；以下只保留当时依据，不用于当前接入。
+
 # Design Example Showcase 设计规格
 
 ## 1. 背景
@@ -51,7 +53,7 @@
   - `react-native-reanimated-carousel@5.0.0`
   - `react-native-safe-area-context@5.8.0`
   - `react-native-svg@15.15.5`
-  - `@sbaiahmed1/react-native-blur@4.6.2`
+  - `历史原生模糊依赖@4.6.2`
 - RN toolchain 与 template 对齐为 `0.86.2`；CLI 精确 `20.1.0`。
 - 根 `peerDependencies` 保持当前值，不因 example 升级而扩大或收紧。
 - `check:runtime-peers` 只允许 root、example、website 三个

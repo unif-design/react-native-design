@@ -49,7 +49,7 @@ test('preset 可 require 且形状正确', () => {
   // 字面出现,不要断言完整包名。
   for (const fragment of [
     '@unif/react-native-design',
-    '@sbaiahmed1/react-native-blur',
+    '@callstack/liquid-glass',
     'gesture-handler',
     'reanimated',
     'worklets',
@@ -160,6 +160,7 @@ test('setup 是 CJS 且只接线 design 自己的 peer', () => {
   assert.ok(!/^\s*import\s/mu.test(source), 'setup 必须是 CJS');
   assert.ok(!source.includes('../src'), 'setup 不得依赖库运行时代码');
   for (const peer of [
+    '@callstack/liquid-glass',
     'react-native-gesture-handler/jestSetup',
     'react-native-worklets',
     'react-native-safe-area-context/jest/mock',

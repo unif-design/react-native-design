@@ -4,7 +4,7 @@ title: 动效
 description: '动效时长、系统偏好和公开动效组件。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.33.1; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.34.0; edit source documentation. -->
 
 # 动效
 

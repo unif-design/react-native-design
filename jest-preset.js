@@ -57,6 +57,6 @@ module.exports = {
   // 本库与这些 peer 都发 ESM / TS 源码,RN preset 默认只放行
   // react-native / @react-native / @react-native-community 三个前缀。
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|@unif/react-native-design|@sbaiahmed1/react-native-blur|react-native-(gesture-handler|reanimated|worklets|safe-area-context|svg|reanimated-carousel))/)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|@unif/react-native-design|@callstack/liquid-glass|react-native-(gesture-handler|reanimated|worklets|safe-area-context|svg|reanimated-carousel))/)',
   ],
 };

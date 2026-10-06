@@ -85,16 +85,16 @@ description: '按场景查找组件、代码示例与 API。'
 | 组件                                                | 说明                                                                                    |
 | --------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | [AvatarWithRing](/docs/components/avatar-with-ring) | 圆形头像 + ring + 品牌 shadow                                                           |
-| [GlassStats](/docs/components/glass-stats)          | 玻璃数据条(BlurView + N 列)                                                             |
+| [GlassStats](/docs/components/glass-stats)          | 玻璃数据条(GlassLayer + N 列)                                                           |
 | [Decorations](/docs/components/decorations)         | `GradientWash` + `RadialHalo` + `ScreenBackdrop`(整屏沉浸渐变,暖橙 preset + 暗色自适配) |
 | [VersionPill](/docs/components/version-pill)        | 版本号药丸                                                                              |
 
 ## 其他 {#其他}
 
-| 组件                                     | 说明                                                    |
-| ---------------------------------------- | ------------------------------------------------------- |
-| [BlurLayer](/docs/components/blur-layer) | BlurView + tint 双层,intensity `soft`(10)/ `strong`(40) |
-| [EntryCard](/docs/components/entry-card) | 横向小卡入口(Me 屏"设置 / 关于"双列)                    |
+| 组件                                       | 说明                                           |
+| ------------------------------------------ | ---------------------------------------------- |
+| [GlassLayer](/docs/components/glass-layer) | 主题玻璃层，`clear` / `regular` 材质与平台降级 |
+| [EntryCard](/docs/components/entry-card)   | 横向小卡入口(Me 屏"设置 / 关于"双列)           |
 
 ## 基础令牌 {#基础令牌}
 

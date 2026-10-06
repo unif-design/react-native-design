@@ -1,3 +1,5 @@
+> 历史记录：玻璃实现与依赖已由 [2026-10-05 迁移记录](../migrations/2026-10-05-liquid-glass.md)取代；以下只保留当时依据，不用于当前接入。
+
 # 发布受支持的 Jest 接线入口(设计)
 
 > 日期:2026-08-05 · 状态:待维护者审核 · 执行计划见 `docs/plans/2026-08-05-jest-setup-entry.md`
@@ -116,7 +118,7 @@ module.exports = {
     require.resolve('./jest-setup.js'),
   ],
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|@unif/react-native-design|@sbaiahmed1/react-native-blur|react-native-(gesture-handler|reanimated|worklets|safe-area-context|svg|reanimated-carousel))/)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|@unif/react-native-design|历史原生模糊依赖|react-native-(gesture-handler|reanimated|worklets|safe-area-context|svg|reanimated-carousel))/)',
   ],
 };
 ```

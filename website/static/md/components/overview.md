@@ -5,7 +5,7 @@ title: 组件概览
 description: '按场景查找组件、代码示例与 API。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.33.1; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.34.0; edit source documentation. -->
 
 # 组件概览
 
@@ -87,16 +87,16 @@ description: '按场景查找组件、代码示例与 API。'
 | 组件                                                | 说明                                                                                    |
 | --------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | [AvatarWithRing](avatar-with-ring.md) | 圆形头像 + ring + 品牌 shadow                                                           |
-| [GlassStats](glass-stats.md)          | 玻璃数据条(BlurView + N 列)                                                             |
+| [GlassStats](glass-stats.md)          | 玻璃数据条(GlassLayer + N 列)                                                           |
 | [Decorations](decorations.md)         | `GradientWash` + `RadialHalo` + `ScreenBackdrop`(整屏沉浸渐变,暖橙 preset + 暗色自适配) |
 | [VersionPill](version-pill.md)        | 版本号药丸                                                                              |
 
 ## 其他 {#其他}
 
-| 组件                                     | 说明                                                    |
-| ---------------------------------------- | ------------------------------------------------------- |
-| [BlurLayer](blur-layer.md) | BlurView + tint 双层,intensity `soft`(10)/ `strong`(40) |
-| [EntryCard](entry-card.md) | 横向小卡入口(Me 屏"设置 / 关于"双列)                    |
+| 组件                                       | 说明                                           |
+| ------------------------------------------ | ---------------------------------------------- |
+| [GlassLayer](glass-layer.md) | 主题玻璃层，`clear` / `regular` 材质与平台降级 |
+| [EntryCard](entry-card.md)   | 横向小卡入口(Me 屏"设置 / 关于"双列)           |
 
 ## 基础令牌 {#基础令牌}
 

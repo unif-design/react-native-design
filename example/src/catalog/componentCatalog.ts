@@ -20,7 +20,7 @@ export const publicComponentIds = [
 
   'Avatar',
   'AvatarGroup',
-  'BlurLayer',
+  'GlassLayer',
   'Button',
   'Card',
   'Carousel',
@@ -138,9 +138,9 @@ export const componentCatalog = [
     states: ['入场', '时长', '容器样式', '减少动态效果'],
   },
   {
-    id: 'BlurLayer',
+    id: 'GlassLayer',
     scene: 'feedback',
-    states: ['soft', 'strong', '自定义 tint', '亮暗主题'],
+    states: ['clear', 'regular', '自定义 tintColor', '亮暗主题'],
   },
   {
     id: 'ConfirmHost',
@@ -381,7 +381,6 @@ export const requiredRuntimeApis = [
   'fixed',
   'motion',
   'pressedOpacity',
-  'blur',
   'ICONS',
   'ICON_NAMES',
   'childTestID',
