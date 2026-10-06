@@ -31,8 +31,9 @@ const JEST_MODULE_FILE_EXTENSIONS = [
   'node',
 ];
 
-/** jest-setup.js 里 require / jest.mock 到的 4 个 peer 入口,与该文件逐条对应。 */
+/** jest-setup.js 里 require / jest.mock 到的 5 个 peer 入口,与该文件逐条对应。 */
 const SETUP_PEER_SPECIFIERS = [
+  '@callstack/liquid-glass',
   'react-native-gesture-handler/jestSetup',
   'react-native-worklets/lib/module/mock',
   'react-native-safe-area-context/jest/mock',

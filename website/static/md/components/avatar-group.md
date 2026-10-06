@@ -4,7 +4,7 @@ title: AvatarGroup 头像组
 description: '组合多个头像，支持顺序、数量上限和溢出展示。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.33.1; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.34.0; edit source documentation. -->
 
 # AvatarGroup 头像组
 

@@ -35,7 +35,4 @@ export {
   pressedOpacity,
 } from './tokens';
 
-export { blur } from './blur';
-export type { BlurIntensity } from './blur';
-
 export { r, rf } from './scale';

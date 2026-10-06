@@ -30,17 +30,6 @@ jest.mock('../../../node_modules/react-native-safe-area-context', () => {
   ).default;
 });
 
-jest.mock('@sbaiahmed1/react-native-blur', () => {
-  const ReactModule = jest.requireActual<typeof import('react')>('react');
-  const { View } =
-    jest.requireActual<typeof import('react-native')>('react-native');
-  return {
-    BlurView: function MockBlurView(props: React.ComponentProps<typeof View>) {
-      return ReactModule.createElement(View, props);
-    },
-  };
-});
-
 jest.mock('@unif/react-native-design', () => {
   const actual = jest.requireActual<typeof DesignRuntime>(
     '@unif/react-native-design'

@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import {
-  BlurLayer,
+  GlassLayer,
   Button,
   CircularProgress,
   Empty,
@@ -14,6 +14,7 @@ import {
   Spinner,
   confirm,
   type ColorTokens,
+  type GlassEffect,
   type ToastKind,
   type ToastPosition,
   radius,
@@ -39,9 +40,9 @@ const revealDurationValues = {
   '200': 200,
   '500': 500,
 } as const;
-const blurIntensityItems = [
-  { id: 'soft', label: '柔和模糊' },
-  { id: 'strong', label: '强模糊' },
+const glassEffectItems = [
+  { id: 'clear', label: '通透玻璃' },
+  { id: 'regular', label: '标准玻璃' },
 ];
 const toastKinds: readonly Readonly<{
   kind: ToastKind;
@@ -97,7 +98,8 @@ const makeStyles = (colors: ColorTokens) =>
       flexDirection: 'row',
       gap: space['4'],
     },
-    blurContainer: {
+    glassLayer: { borderRadius: radius.lg },
+    glassContainer: {
       alignItems: 'center',
       backgroundColor: colors.primaryContainer,
       borderRadius: radius.lg,
@@ -106,7 +108,7 @@ const makeStyles = (colors: ColorTokens) =>
       overflow: 'hidden',
       position: 'relative',
     },
-    blurContent: {
+    glassContent: {
       color: colors.foreground,
       fontSize: type.sm,
     },
@@ -116,8 +118,8 @@ function isRevealDuration(value: string): value is '0' | '200' | '500' {
   return value === '0' || value === '200' || value === '500';
 }
 
-function isBlurIntensity(value: string): value is 'soft' | 'strong' {
-  return value === 'soft' || value === 'strong';
+function isGlassEffect(value: string): value is GlassEffect {
+  return value === 'clear' || value === 'regular';
 }
 
 function showToast(
@@ -344,49 +346,51 @@ export function FeedbackScene(): React.JSX.Element {
         </SectionCard>
 
         <SectionCard
-          title="原生模糊"
-          description="仅在用户明确操作后挂载 BlurLayer 组件。"
+          title="玻璃材质"
+          description="仅在用户明确操作后挂载 GlassLayer 组件。"
         >
           <Text style={styles.fact}>
-            自动化只证明组件是否已挂载；实际模糊效果需在已链接原生模块的真机或模拟器验证。
+            iOS 26+ 使用原生玻璃；旧 iOS 和 Android 使用半透明背景，Web 使用 CSS
+            近似效果。原生视觉效果需在设备上验证。
           </Text>
           <Segmented
-            value={draft.blurIntensity}
-            items={blurIntensityItems}
+            value={draft.glassEffect}
+            items={glassEffectItems}
             onChange={(value) => {
-              if (!isBlurIntensity(value)) return;
+              if (!isGlassEffect(value)) return;
               updateScene('feedback', (current) => ({
                 ...current,
-                blurIntensity: value,
+                glassEffect: value,
               }));
             }}
           />
           <Button
             label={
-              draft.blurDemoEnabled
-                ? '卸载 BlurLayer 演示'
-                : '挂载 BlurLayer 演示'
+              draft.glassDemoEnabled
+                ? '卸载 GlassLayer 演示'
+                : '挂载 GlassLayer 演示'
             }
             variant="secondary"
             onPress={() =>
               updateScene('feedback', (current) => ({
                 ...current,
-                blurDemoEnabled: !current.blurDemoEnabled,
+                glassDemoEnabled: !current.glassDemoEnabled,
               }))
             }
           />
-          <View style={styles.blurContainer} testID="feedback-blur-container">
-            {draft.blurDemoEnabled ? (
-              <BlurLayer
-                intensity={draft.blurIntensity}
-                tint={colors.primary}
-                testID="feedback-blur-layer"
+          <View style={styles.glassContainer} testID="feedback-glass-container">
+            {draft.glassDemoEnabled ? (
+              <GlassLayer
+                effect={draft.glassEffect}
+                tintColor={colors.glassTintLight}
+                style={styles.glassLayer}
+                testID="feedback-glass-layer"
               />
             ) : null}
-            <Text style={styles.blurContent}>
-              {draft.blurDemoEnabled
-                ? 'BlurLayer 组件已挂载'
-                : 'BlurLayer 组件未挂载'}
+            <Text style={styles.glassContent}>
+              {draft.glassDemoEnabled
+                ? 'GlassLayer 组件已挂载'
+                : 'GlassLayer 组件未挂载'}
             </Text>
           </View>
         </SectionCard>

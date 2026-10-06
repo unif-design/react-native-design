@@ -33,7 +33,6 @@ const runtimeProofIdsByOwner = {
     'fixed',
     'motion',
     'pressedOpacity',
-    'blur',
     'ICONS',
     'ICON_NAMES',
     'childTestID',

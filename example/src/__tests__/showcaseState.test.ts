@@ -105,8 +105,8 @@ test('scene draft 提供跨路由复现与按需挂载所需的最小字段', ()
   expect(state.scenes.foundation.iconLoadedCount).toBe(24);
   expect(state.scenes.feedback).toMatchObject({
     revealVisible: true,
-    blurDemoEnabled: false,
-    blurIntensity: 'soft',
+    glassDemoEnabled: false,
+    glassEffect: 'clear',
   });
   expect(state.scenes.collections).toMatchObject({
     cardVariant: 'default',
@@ -138,19 +138,19 @@ test('Collections Cell control 可更新，reset 只重建目标 draft', () => {
   expect(reset.scenes.media).toBe(initialMedia);
 });
 
-test('Feedback blurIntensity 初始化与 reset 都回到 soft', () => {
+test('Feedback glassEffect 初始化与 reset 都回到 clear', () => {
   const initial = createInitialShowcaseState();
-  expect(initial.scenes.feedback.blurIntensity).toBe('soft');
+  expect(initial.scenes.feedback.glassEffect).toBe('clear');
 
   const strong = updateShowcaseScene(initial, 'feedback', (current) => ({
     ...current,
-    blurIntensity: 'strong',
+    glassEffect: 'regular',
   }));
-  expect(strong.scenes.feedback.blurIntensity).toBe('strong');
+  expect(strong.scenes.feedback.glassEffect).toBe('regular');
 
   const reset = resetShowcaseScene(strong, 'feedback');
-  expect(reset.scenes.feedback.blurIntensity).toBe('soft');
-  expect(reset.scenes.feedback.blurDemoEnabled).toBe(false);
+  expect(reset.scenes.feedback.glassEffect).toBe('clear');
+  expect(reset.scenes.feedback.glassDemoEnabled).toBe(false);
 });
 
 test('Media 只持久化稳定 HTTPS fixture，Business reset 回到暖橙预设', () => {

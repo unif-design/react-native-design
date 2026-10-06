@@ -2,7 +2,7 @@
 
 > Unif React Native 设计系统：基础组件、主题、字体和图标
 
-文档构建依据：`@unif/react-native-design@0.33.1`；使用时核对实际安装版本。
+文档构建依据：`@unif/react-native-design@0.34.0`；使用时核对实际安装版本。
 
 先查找当前功能，再读取对应 API、示例或 FAQ。源码链接供查阅，应用从包根公开接口导入。
 迁移、测试和研发技能按任务读取；这些资料不自动加入产品运行时模型上下文。
@@ -19,7 +19,6 @@
 - [AvatarGroup 头像组](md/components/avatar-group.md) — 组合多个头像，支持顺序、数量上限和溢出展示。
 - [AvatarWithRing 圆环头像](md/components/avatar-with-ring.md) — 带装饰环的文字头像。
 - [Avatar 头像](md/components/avatar.md) — 展示文字或图片头像，支持形状、尺寸和配色。
-- [BlurLayer 玻璃模糊层](md/components/blur-layer.md) — 提供与主题一致的模糊背景和遮罩层。
 - [Button 按钮](md/components/button.md) — 触发操作的按钮，支持变体、尺寸、图标和交互状态。
 - [Card 卡片](md/components/card.md) — 组合相关信息和操作的卡片容器。
 - [Carousel 轮播](md/components/carousel.md) — 轮播展示一组内容，支持切换、指示器和自动播放。
@@ -32,6 +31,7 @@
 - [Empty 空态](md/components/empty.md) — 展示空内容状态的图标、标题和说明。
 - [EntryCard 入口卡](md/components/entry-card.md) — 用于图标与文字入口的紧凑卡片。
 - [Form 表单](md/components/form.md) — 组合表单分组、标签与输入控件。
+- [GlassLayer 玻璃层](md/components/glass-layer.md) — 随主题渲染玻璃材质，并提供明确的平台降级。
 - [GlassStats 玻璃数据条](md/components/glass-stats.md) — 以多列数字和标签展示统计摘要。
 - [Grid 九宫格](md/components/grid.md) — 以网格排列图标与文字入口。
 - [IconButton 图标按钮](md/components/icon-button.md) — 只包含图标的按钮，需要提供无障碍名称。

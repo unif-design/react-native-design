@@ -1,3 +1,5 @@
+> 历史记录：玻璃实现与依赖已由 [2026-10-05 迁移记录](../../migrations/2026-10-05-liquid-glass.md)取代；以下只保留当时依据，不用于当前接入。
+
 # Dependency and Runtime State Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
@@ -1138,7 +1140,7 @@ test('manifest 使用本地 tarball并完整提供 runtime peers', () => {
 
 Add failures for CLI/template version drift, template React/RN drift, missing lock checksum, caller-supplied directory, and any path under `example/`.
 Add a provider-map fixture containing every current non-optional root peer:
-`@sbaiahmed1/react-native-blur`, React, RN, RNGH, RNRC, Reanimated,
+`历史原生模糊依赖`, React, RN, RNGH, RNRC, Reanimated,
 safe-area-context, SVG, and Worklets. Removing any one concrete provider must
 make the helper throw with that peer name.
 
@@ -1167,7 +1169,7 @@ The script must:
 9. enumerate every non-optional key in root `peerDependencies`, resolve its
    exact locator version from the current install/`yarn.lock`, fail on any
    missing provider, and write all of them to the harness manifest; this
-   includes `@sbaiahmed1/react-native-blur`, safe-area-context and SVG in
+   includes `历史原生模糊依赖`, safe-area-context and SVG in
    addition to React/RN and the four runtime packages;
 10. copy the root Yarn 4.11 release into the app, write `nodeLinker: node-modules`, and install immutable dependencies;
 11. configure `react-native-worklets/plugin` last in Babel, RNGH root import/provider, Metro config, and copy the checked-in screen;

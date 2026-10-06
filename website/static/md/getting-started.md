@@ -5,7 +5,7 @@ title: 快速开始
 description: '安装依赖，配置主题与宿主，开始使用 Design 组件。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.33.1; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.34.0; edit source documentation. -->
 
 # 快速开始
 
@@ -25,7 +25,7 @@ description: '安装依赖，配置主题与宿主，开始使用 Design 组件�
 | `react-native-reanimated-carousel` | `>=5.0.0 <6.0.0`   | `5.0.0`      |
 | `react-native-safe-area-context`   | `>=5`              | `5.7.x`      |
 | `react-native-svg`                 | `>=15`             | `15.15.x`    |
-| `@sbaiahmed1/react-native-blur`    | `>=4`              | `6.0.x`      |
+| `@callstack/liquid-glass`          | `>=0.8.2 <0.9.0`   | `0.8.2`      |
 
 - Node.js `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`(与 `package.json#engines` 逐字一致;本仓 `.nvmrc` 固定 `v24.13.0`)、Yarn 4
 - TypeScript 6
@@ -54,10 +54,10 @@ yarn add react-native-svg \
   react-native-worklets \
   react-native-safe-area-context \
   react-native-reanimated-carousel \
-  @sbaiahmed1/react-native-blur
+  @callstack/liquid-glass
 ```
 
-iOS 装完原生包后,在 `ios/` 目录执行 `bundle exec pod install`。
+iOS 装完原生包后,在 `ios/` 目录执行 `bundle exec pod install` 并重新构建。Liquid Glass 需 Xcode 26+；iOS 26+ 使用原生玻璃，旧 iOS / Android 降级为半透明主题背景，Web 保留 CSS 近似效果。Expo Go 不支持此原生模块，Expo 工程需开发构建。组件契约见 [GlassLayer](components/glass-layer.md)。
 :::
 
 > 版本范围见上方[环境要求](#环境要求)表格,唯一事实来源是 `package.json#peerDependencies`。

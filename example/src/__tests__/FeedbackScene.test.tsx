@@ -1,5 +1,4 @@
 import React from 'react';
-import type { ReactTestInstance } from 'react-test-renderer';
 import { StyleSheet } from 'react-native';
 import {
   act,
@@ -9,7 +8,7 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 import {
-  BlurLayer,
+  GlassLayer,
   CircularProgress,
   Empty,
   Pulse,
@@ -43,19 +42,6 @@ jest.mock('../../../node_modules/react-native-safe-area-context', () => {
   return jest.requireActual(
     '../../../node_modules/react-native-safe-area-context/jest/mock'
   ).default;
-});
-
-jest.mock('@sbaiahmed1/react-native-blur', () => {
-  const ReactModule = jest.requireActual<typeof import('react')>('react');
-  const { View: NativeView } =
-    jest.requireActual<typeof import('react-native')>('react-native');
-  return {
-    BlurView: function MockBlurView(
-      props: React.ComponentProps<typeof NativeView>
-    ) {
-      return ReactModule.createElement(NativeView, props);
-    },
-  };
 });
 
 jest.mock('@unif/react-native-design', () => {
@@ -97,14 +83,6 @@ function enterFeedback(): void {
 
 function enterFoundation(): void {
   fireEvent.press(screen.getByRole('button', { name: /基础能力与图标/ }));
-}
-
-function hostChild(node: ReactTestInstance, index: number): ReactTestInstance {
-  const child = node.children[index];
-  if (!child || typeof child === 'string') {
-    throw new Error(`未找到第 ${index + 1} 个 host child`);
-  }
-  return child;
 }
 
 function componentByTestID<T extends React.ComponentType<never>>(
@@ -439,73 +417,86 @@ test('系统减少动态效果开启时 Pulse、PulseDot 与 Reveal 真实停用
   expect(reducedReveal.props.exiting).toBeUndefined();
 });
 
-test('BlurLayer 初始不挂载，用户开启后只在有限容器中切换 soft/strong', () => {
+test('GlassLayer 初始不挂载，用户开启后只在有限容器中切换 clear/regular', () => {
   render(<App />);
   enterFeedback();
 
-  expect(screen.queryByTestId('feedback-blur-layer')).not.toBeOnTheScreen();
-  expect(screen.getByText('BlurLayer 组件未挂载')).toBeOnTheScreen();
+  expect(
+    screen.queryByTestId('feedback-glass-layer', {
+      includeHiddenElements: true,
+    })
+  ).not.toBeOnTheScreen();
+  expect(screen.getByText('GlassLayer 组件未挂载')).toBeOnTheScreen();
   expect(
     screen.getByText(
-      '自动化只证明组件是否已挂载；实际模糊效果需在已链接原生模块的真机或模拟器验证。'
+      'iOS 26+ 使用原生玻璃；旧 iOS 和 Android 使用半透明背景，Web 使用 CSS 近似效果。原生视觉效果需在设备上验证。'
     )
   ).toBeOnTheScreen();
-  fireEvent.press(screen.getByRole('button', { name: '挂载 BlurLayer 演示' }));
-  expect(screen.getByTestId('feedback-blur-container')).toHaveStyle({
+  fireEvent.press(screen.getByRole('button', { name: '挂载 GlassLayer 演示' }));
+  expect(screen.getByTestId('feedback-glass-container')).toHaveStyle({
     position: 'relative',
     overflow: 'hidden',
   });
-  expect(screen.getByText('BlurLayer 组件已挂载')).toBeOnTheScreen();
+  expect(screen.getByText('GlassLayer 组件已挂载')).toBeOnTheScreen();
   expect(
-    componentByTestID(BlurLayer, 'feedback-blur-layer').props
-  ).toMatchObject({ intensity: 'soft', tint: expect.any(String) });
-  const blurLayer = screen.getByTestId('feedback-blur-layer');
-  expect(StyleSheet.flatten(hostChild(blurLayer, 1).props.style)).toMatchObject(
-    {
-      backgroundColor: componentByTestID(BlurLayer, 'feedback-blur-layer').props
-        .tint,
-    }
-  );
-  fireEvent.press(screen.getByRole('tab', { name: '强模糊' }));
+    componentByTestID(GlassLayer, 'feedback-glass-layer').props
+  ).toMatchObject({ effect: 'clear', tintColor: expect.any(String) });
+  const glassLayer = screen.getByTestId('feedback-glass-layer', {
+    includeHiddenElements: true,
+  });
+  expect(StyleSheet.flatten(glassLayer.props.style)).toMatchObject({
+    backgroundColor: componentByTestID(GlassLayer, 'feedback-glass-layer').props
+      .tintColor,
+  });
+  fireEvent.press(screen.getByRole('tab', { name: '标准玻璃' }));
   expect(
-    componentByTestID(BlurLayer, 'feedback-blur-layer').props.intensity
-  ).toBe('strong');
-  fireEvent.press(screen.getByRole('button', { name: '卸载 BlurLayer 演示' }));
-  expect(screen.queryByTestId('feedback-blur-layer')).not.toBeOnTheScreen();
-  expect(screen.getByText('BlurLayer 组件未挂载')).toBeOnTheScreen();
+    componentByTestID(GlassLayer, 'feedback-glass-layer').props.effect
+  ).toBe('regular');
+  fireEvent.press(screen.getByRole('button', { name: '卸载 GlassLayer 演示' }));
+  expect(
+    screen.queryByTestId('feedback-glass-layer', {
+      includeHiddenElements: true,
+    })
+  ).not.toBeOnTheScreen();
+  expect(screen.getByText('GlassLayer 组件未挂载')).toBeOnTheScreen();
 });
 
-test('BlurLayer 随 ThemeProvider 在 light/dark 间切换原生 blurType', () => {
+test('GlassLayer 随 ThemeProvider 在 light/dark 间切换玻璃 colorScheme', () => {
   render(<App />);
-  const stateCoverage = createShowcaseStateCoverage('BlurLayer');
+  const stateCoverage = createShowcaseStateCoverage('GlassLayer');
   enterFoundation();
   fireEvent.press(screen.getByRole('tab', { name: '深色' }));
   fireEvent.press(screen.getByRole('button', { name: '返回首页' }));
   enterFeedback();
-  fireEvent.press(screen.getByRole('button', { name: '挂载 BlurLayer 演示' }));
+  fireEvent.press(screen.getByRole('button', { name: '挂载 GlassLayer 演示' }));
 
-  const darkBlurLayer = componentByTestID(BlurLayer, 'feedback-blur-layer');
-  expect(darkBlurLayer.props).toMatchObject({
-    intensity: 'soft',
-    tint: expect.any(String),
+  const darkGlassLayer = componentByTestID(GlassLayer, 'feedback-glass-layer');
+  expect(darkGlassLayer.props).toMatchObject({
+    effect: 'clear',
+    tintColor: expect.any(String),
   });
-  stateCoverage.prove('blur-layer.soft', 'blur-layer.custom-tint', () => {
-    expect(darkBlurLayer.props).toMatchObject({
-      intensity: 'soft',
-      tint: expect.any(String),
-    });
-  });
+  stateCoverage.prove(
+    'glass-layer.clear',
+    'glass-layer.custom-tint-color',
+    () => {
+      expect(darkGlassLayer.props).toMatchObject({
+        effect: 'clear',
+        tintColor: expect.any(String),
+      });
+    }
+  );
   expect(
-    hostChild(screen.getByTestId('feedback-blur-layer'), 0).props.blurType
+    screen.getByTestId('feedback-glass-layer', { includeHiddenElements: true })
+      .props.colorScheme
   ).toBe('dark');
-  fireEvent.press(screen.getByRole('tab', { name: '强模糊' }));
+  fireEvent.press(screen.getByRole('tab', { name: '标准玻璃' }));
   expect(
-    componentByTestID(BlurLayer, 'feedback-blur-layer').props.intensity
-  ).toBe('strong');
-  stateCoverage.prove('blur-layer.strong', () => {
+    componentByTestID(GlassLayer, 'feedback-glass-layer').props.effect
+  ).toBe('regular');
+  stateCoverage.prove('glass-layer.regular', () => {
     expect(
-      componentByTestID(BlurLayer, 'feedback-blur-layer').props.intensity
-    ).toBe('strong');
+      componentByTestID(GlassLayer, 'feedback-glass-layer').props.effect
+    ).toBe('regular');
   });
 
   fireEvent.press(screen.getByRole('button', { name: '返回首页' }));
@@ -515,11 +506,14 @@ test('BlurLayer 随 ThemeProvider 在 light/dark 间切换原生 blurType', () =
   enterFeedback();
 
   expect(
-    hostChild(screen.getByTestId('feedback-blur-layer'), 0).props.blurType
+    screen.getByTestId('feedback-glass-layer', { includeHiddenElements: true })
+      .props.colorScheme
   ).toBe('light');
-  stateCoverage.prove('blur-layer.theme', () => {
+  stateCoverage.prove('glass-layer.theme', () => {
     expect(
-      hostChild(screen.getByTestId('feedback-blur-layer'), 0).props.blurType
+      screen.getByTestId('feedback-glass-layer', {
+        includeHiddenElements: true,
+      }).props.colorScheme
     ).toBe('light');
   });
   stateCoverage.expectComplete();
@@ -846,26 +840,30 @@ test('破坏性 Confirm 的确认与取消均在 Promise settled 后写真实结
   });
 });
 
-test('Reveal 与 Blur draft 跨路由保留，重置只影响 Feedback', () => {
+test('Reveal 与 Glass draft 跨路由保留，重置只影响 Feedback', () => {
   render(<App />);
   enterFeedback();
 
   fireEvent.press(screen.getByRole('button', { name: '隐藏淡入内容' }));
-  fireEvent.press(screen.getByRole('button', { name: '挂载 BlurLayer 演示' }));
-  fireEvent.press(screen.getByRole('tab', { name: '强模糊' }));
+  fireEvent.press(screen.getByRole('button', { name: '挂载 GlassLayer 演示' }));
+  fireEvent.press(screen.getByRole('tab', { name: '标准玻璃' }));
   fireEvent.press(screen.getByRole('button', { name: '返回首页' }));
   enterFeedback();
 
   expect(screen.queryByTestId('feedback-reveal')).not.toBeOnTheScreen();
   expect(
-    componentByTestID(BlurLayer, 'feedback-blur-layer').props.intensity
-  ).toBe('strong');
+    componentByTestID(GlassLayer, 'feedback-glass-layer').props.effect
+  ).toBe('regular');
 
   fireEvent.press(screen.getByRole('button', { name: '重置本场景' }));
   expect(screen.getByTestId('feedback-reveal')).toBeOnTheScreen();
-  expect(screen.queryByTestId('feedback-blur-layer')).not.toBeOnTheScreen();
-  fireEvent.press(screen.getByRole('button', { name: '挂载 BlurLayer 演示' }));
   expect(
-    componentByTestID(BlurLayer, 'feedback-blur-layer').props.intensity
-  ).toBe('soft');
+    screen.queryByTestId('feedback-glass-layer', {
+      includeHiddenElements: true,
+    })
+  ).not.toBeOnTheScreen();
+  fireEvent.press(screen.getByRole('button', { name: '挂载 GlassLayer 演示' }));
+  expect(
+    componentByTestID(GlassLayer, 'feedback-glass-layer').props.effect
+  ).toBe('clear');
 });

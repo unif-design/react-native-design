@@ -605,7 +605,7 @@ function withJestGlobalConfigProbeFixture(run) {
 }
 
 const expectedRuntimeDependencies = {
-  '@sbaiahmed1/react-native-blur': '6.0.1',
+  '@callstack/liquid-glass': '0.8.2',
   '@unif/react-native-design': 'workspace:*',
   'react': '19.2.3',
   'react-native': '0.86.3',
@@ -1194,7 +1194,7 @@ test('catalog mutation gate 拒绝缺项、重复 id 与错误 scene', () => {
       name: '重复 id',
       expectedCode: 'CATALOG_COMPONENT_DUPLICATE',
       mutate(source) {
-        return source.replace("    id: 'BlurLayer',", "    id: 'Avatar',");
+        return source.replace("    id: 'GlassLayer',", "    id: 'Avatar',");
       },
     },
     {

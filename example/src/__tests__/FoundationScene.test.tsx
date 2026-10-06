@@ -7,7 +7,6 @@ import {
   Icon,
   avatar,
   avatarGradient,
-  blur,
   consoleTransport,
   control,
   darkColors,
@@ -62,7 +61,6 @@ jest.mock('@unif/react-native-design', () => {
     addTransport: jest.fn(actual.addTransport),
     avatar: { ...actual.avatar, md: 37 },
     avatarGradient: ['orange', 'magenta', 'purple'],
-    blur: { ...actual.blur, soft: 12, strong: 44 },
     childTestID: jest.fn(actual.childTestID),
     consoleTransport: {
       id: 'foundation-console-sentinel',
@@ -140,7 +138,7 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-test('Foundation 展示真实 theme、token、palette、scale、blur 与 Icon 事实', () => {
+test('Foundation 展示真实 theme、token、palette、scale 与 Icon 事实', () => {
   render(<App />);
   const iconAccessLog = (
     ICONS as typeof ICONS & { [mockIconAccessLogKey]: string[] }
@@ -263,7 +261,6 @@ test('Foundation 展示真实 theme、token、palette、scale、blur 与 Icon �
     'fixed',
     'motion',
     'pressedOpacity',
-    'blur',
     () => {
       const tokenMetrics = screen.getByTestId('foundation-token-metrics');
       expect(tokenMetrics).toHaveTextContent(
@@ -301,11 +298,6 @@ test('Foundation 展示真实 theme、token、palette、scale、blur 与 Icon �
       );
       expect(tokenMetrics).toHaveTextContent(
         new RegExp(`opacity ${escapeRegExp(pressedOpacity)}`)
-      );
-      expect(tokenMetrics).toHaveTextContent(
-        new RegExp(
-          `blur ${escapeRegExp(blur.soft)}-${escapeRegExp(blur.strong)}`
-        )
       );
     }
   );

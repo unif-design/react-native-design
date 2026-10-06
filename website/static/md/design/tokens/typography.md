@@ -4,7 +4,7 @@ title: 字体
 description: '字体、字重、字号与应用级 fontScale。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.33.1; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.34.0; edit source documentation. -->
 
 # 字体
 

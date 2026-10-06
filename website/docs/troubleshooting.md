@@ -113,7 +113,7 @@ yarn add react-native-svg \
   react-native-worklets \
   react-native-safe-area-context \
   react-native-reanimated-carousel \
-  @sbaiahmed1/react-native-blur
+  @callstack/liquid-glass
 ```
 
 iOS 装完还需 `cd ios && bundle exec pod install`。
@@ -252,3 +252,7 @@ cd ios && bundle exec pod install --repo-update
 ---
 
 > 没覆盖到的问题:对照[设计令牌](/docs/design/tokens/colors)核对 token 名,或按需 fetch 远程 [llms.txt](https://unif-design.github.io/react-native-design/llms.txt) 查逐组件 API。
+
+## 玻璃效果与平台降级
+
+`GlassLayer` 在 iOS 26+ 且上游支持标记为真时使用原生 Liquid Glass。旧 iOS 和 Android 显示半透明主题背景，Web 使用 CSS 近似效果。原生玻璃需 Xcode 26+、安装 `@callstack/liquid-glass`、执行 pod install 并重新构建；Expo Go 无法加载此模块。仅更新 JavaScript 或通过 Jest 测试不能证明原生模块已链接。详见 [GlassLayer](./components/glass-layer.mdx)。

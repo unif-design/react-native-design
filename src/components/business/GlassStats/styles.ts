@@ -9,11 +9,13 @@ import type { ColorTokens, ShadowTokens } from '../../../theme';
  *    iOS Core Animation `masksToBounds=true` 会裁掉 outer shadow。
  *  - `glass`:内层承担 borderRadius + overflow:hidden + border 边线。
  *
- *  BlurView + tint 双层由 `<BlurLayer intensity="soft"/>` 接管。 */
+ *  玻璃材质与平台降级由 `<GlassLayer effect="clear"/>` 接管。 */
 export const makeGlassStatsStyles = (c: ColorTokens, s: ShadowTokens) => {
   /** count 数字 mono display 字号,无对应 type token,保留 rf(20) 走字号缩放(非 r)。 */
   const countSize = rf(20);
   return StyleSheet.create({
+    // LiquidGlassView 需要自身圆角，父容器的 overflow 裁切不足以定义材质轮廓。
+    glassLayer: { borderRadius: radius['2xl'] },
     glassShell: {
       borderRadius: radius['2xl'],
       ...s.glassBar,

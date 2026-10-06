@@ -18,6 +18,7 @@ import {
   Cell,
   Checkbox,
   CircularProgress,
+  GlassLayer,
   IconButton,
   Input,
   Logo,
@@ -524,3 +525,18 @@ const invalidThumbnailSize: ThumbnailSize = attachmentDimensions;
 thumbnailSizeConsumer(invalidThumbnailSize);
 // @ts-expect-error fallback 不放开 source/uri 互斥
 <Thumbnail uri="image" source={1} fallback={<Text>文件</Text>} />;
+
+// 玻璃材质从公开入口消费，颜色允许使用 RN ColorValue。
+const glassLayerStyle = { borderRadius: 14 };
+<GlassLayer />;
+<GlassLayer
+  effect="clear"
+  tintColor="rgba(255,255,255,0.3)"
+  style={glassLayerStyle}
+  testID="glass"
+/>;
+<GlassLayer effect="regular" />;
+// @ts-expect-error 无材质的透明 View 不属于玻璃层 API
+<GlassLayer effect="none" />;
+// @ts-expect-error 材质通过 effect 指定
+<GlassLayer intensity="soft" />;

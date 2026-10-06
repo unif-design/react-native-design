@@ -1,3 +1,5 @@
+> 历史记录：玻璃实现与依赖已由 [2026-10-05 迁移记录](../migrations/2026-10-05-liquid-glass.md)取代；以下只保留当时依据，不用于当前接入。
+
 # 发布受支持的 Jest 接线入口实施计划
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
@@ -85,7 +87,7 @@ test('preset 可 require 且形状正确', () => {
   // 字面出现,不要断言完整包名。
   for (const fragment of [
     '@unif/react-native-design',
-    '@sbaiahmed1/react-native-blur',
+    '历史原生模糊依赖',
     'gesture-handler',
     'reanimated',
     'worklets',
@@ -255,7 +257,7 @@ module.exports = {
   // 本库与这些 peer 都发 ESM / TS 源码,RN preset 默认只放行
   // react-native / @react-native / @react-native-community 三个前缀。
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|@unif/react-native-design|@sbaiahmed1/react-native-blur|react-native-(gesture-handler|reanimated|worklets|safe-area-context|svg|reanimated-carousel))/)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|@unif/react-native-design|历史原生模糊依赖|react-native-(gesture-handler|reanimated|worklets|safe-area-context|svg|reanimated-carousel))/)',
   ],
 };
 ```

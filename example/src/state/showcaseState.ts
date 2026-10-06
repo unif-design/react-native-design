@@ -1,3 +1,4 @@
+import type { GlassEffect } from '@unif/react-native-design';
 import type { SceneId } from '../catalog/componentCatalog';
 import type { NavigationState } from '../navigation/exampleNavigation';
 
@@ -31,8 +32,8 @@ export type FeedbackSceneState = Readonly<{
   toastPosition: 'top' | 'bottom' | 'center';
   revealDuration: 0 | 200 | 500;
   revealVisible: boolean;
-  blurDemoEnabled: boolean;
-  blurIntensity: 'soft' | 'strong';
+  glassDemoEnabled: boolean;
+  glassEffect: GlassEffect;
 }>;
 
 export type FormsSceneState = Readonly<{
@@ -131,8 +132,8 @@ const sceneStateFactories: {
     toastPosition: 'bottom',
     revealDuration: 200,
     revealVisible: true,
-    blurDemoEnabled: false,
-    blurIntensity: 'soft',
+    glassDemoEnabled: false,
+    glassEffect: 'clear',
   }),
   forms: () => ({
     entryText: '可以编辑这段文字',

@@ -9,7 +9,6 @@ import {
   addTransport,
   avatar,
   avatarGradient,
-  blur,
   consoleTransport,
   control,
   createLogger,
@@ -233,7 +232,7 @@ export function FoundationScene(): React.JSX.Element {
               {fw.semi} / space {space['4']} / radius {radius.md} / avatar{' '}
               {avatar.md} / icon {icon.md} / control {control.lg} / dim{' '}
               {dim.sendBtn} / fixed {fixed.hitTarget} / motion {motion.base} /
-              opacity {pressedOpacity} / blur {blur.soft}-{blur.strong}
+              opacity {pressedOpacity}
             </Text>
             <Text style={styles.fact} testID="foundation-scale-metrics">
               缩放：r(8)={r(8)} / rf(15)={rf(15)} / normalize=

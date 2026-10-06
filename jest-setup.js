@@ -4,7 +4,7 @@
 
 /**
  * `@unif/react-native-design/jest-setup` —— 把本库 9 个 runtime peer 里在 Jest 中
- * 需要接线的那 4 个接上各自的**官方**桩 / mock / setup。放进消费者的
+ * 需要接线的那 5 个提供桩 / mock / setup。放进消费者的
  * `setupFilesAfterEnv`。
  *
  * 为什么由库提供:这份接线完全由本库的 peer 集决定,peer range 一变它就得变。
@@ -17,6 +17,21 @@
 
 // RNGH 官方 jest 桩:让 TurboModuleRegistry.getEnforcing('RNGestureHandlerModule') 不炸。
 require('react-native-gesture-handler/jestSetup');
+
+// Liquid Glass 依赖 iOS Fabric / TurboModule，Jest 只替换这个原生边界。
+// 默认不支持原生材质；组件测试可覆盖支持标记，核对两种平台接线。
+jest.mock('@callstack/liquid-glass', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    LiquidGlassView: function MockLiquidGlassView(props) {
+      return React.createElement(View, props);
+    },
+    LiquidGlassContainerView: View,
+    isLiquidGlassSupported: false,
+  };
+});
 
 // worklets 的 native 侧在 Jest 里不存在,直接 import 会在 `loadUnpackersWithCode` 处崩。
 jest.mock('react-native-worklets', () =>
