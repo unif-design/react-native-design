@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.36.0](https://github.com/unif-design/react-native-design/compare/v0.35.0...v0.36.0) (2026-10-06)
+
+
+### Features
+
+* **textarea:** support natural centered text in compact inputs ([#143](https://github.com/unif-design/react-native-design/issues/143)) ([47df724](https://github.com/unif-design/react-native-design/commit/47df72431beb9472ee715a57db93a1443444b88e))
+
 # [0.35.0](https://github.com/unif-design/react-native-design/compare/v0.34.0...v0.35.0) (2026-10-06)
 
 
