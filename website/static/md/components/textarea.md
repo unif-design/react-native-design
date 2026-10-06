@@ -4,11 +4,15 @@ title: Textarea 多行输入
 description: '多行输入，按内容和高度边界调整输入表面。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.34.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.35.0; edit source documentation. -->
 
 # Textarea 多行输入
 
-Textarea 固定 `multiline` 并顶对齐；单行请用 [Input](input.md)。它与 Input 使用相同严格受控/非受控 union、slot、错误和 ref 契约。
+Textarea 固定 `multiline`，默认顶对齐；单行请用 [Input](input.md)。它与 Input 使用相同严格受控/非受控 union、slot、错误和 ref 契约。
+
+`contentAlignment="center"` 按文字自然行高在最小输入区域内居中，用于聊天等紧凑输入。默认 `start` 保留顶对齐；两者都保留外层至少 44 的触达范围、多行增长、原文与最大高度内滚动，不强制文字行高。
+
+`plain` 使用水平和垂直 `space[3]` 的文字留白，适合由外层绘制的聊天卡片；`default` 保留独立表面的水平 `space[5]`、垂直 `space[4]`。外层只提供布局和表面，不叠加相同文字内边距。
 
 ```tsx
 const TextareaDemo = () => {

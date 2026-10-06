@@ -4,7 +4,7 @@ title: PasswordInput 密码输入
 description: '受控密码输入，支持显示与隐藏文字。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.34.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.35.0; edit source documentation. -->
 
 # PasswordInput 密码输入
 

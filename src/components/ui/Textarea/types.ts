@@ -19,6 +19,8 @@ export type TextareaProps = Omit<TextInputProps, RemovedTextInputProps> &
 interface TextareaLayoutProps {
   /** default 绘制独立输入表面；plain 嵌入复合输入，保留文字内边距但不绘制表面。 */
   surface?: 'default' | 'plain';
+  /** start 顶对齐；center 以原生自然文字高度居中，保留外层最小触达范围。 */
+  contentAlignment?: 'start' | 'center';
   /** 最小高度，默认 96（约 5 行） */
   minHeight?: number;
   /** 最大高度（超过后内部滚动），默认不限制 */

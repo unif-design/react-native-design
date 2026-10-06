@@ -5,7 +5,7 @@ import React, {
   useImperativeHandle,
   useState,
 } from 'react';
-import { Platform, Text, TextInput, View } from 'react-native';
+import { Platform, Pressable, Text, TextInput, View } from 'react-native';
 import type { TextInputProps } from 'react-native';
 import { fixed, useColors, useThemedStyles } from '../../../theme';
 import { childTestID } from '../../../utils/testID';
@@ -41,6 +41,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
       maxHeight,
       searchLayout,
       plainSurface,
+      contentAlignment = 'start',
       leading,
       trailing,
       error,
@@ -105,14 +106,16 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
       maxHeight
     );
     const plain = multiline && plainSurface === true;
+    const centered = multiline && contentAlignment === 'center';
+    const verticalInset = plain
+      ? TEXTAREA_PLAIN_VERTICAL_INSET
+      : TEXTAREA_VERTICAL_INSET;
     const multilineLayout = useMultilineLayout({
       enabled: multiline,
       value: controller.value,
-      minHeight: normalizedTextareaHeights.minHeight,
+      minHeight: centered ? verticalInset : normalizedTextareaHeights.minHeight,
       maxHeight: normalizedTextareaHeights.maxHeight,
-      verticalInset: plain
-        ? TEXTAREA_PLAIN_VERTICAL_INSET
-        : TEXTAREA_VERTICAL_INSET,
+      verticalInset,
       fontSize: styles.input.fontSize,
       placeholder: allowedNativeProps.placeholder as string | undefined,
       inputRef: nativeRef,
@@ -179,6 +182,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
           style={[
             styles.wrap,
             multiline && styles.wrapMultiline,
+            centered && styles.wrapCentered,
             searchLayout === undefined && !plain && wrapStateStyles,
             searchLayout !== undefined && styles.searchInteractiveRow,
             plain && styles.wrapPlain,
@@ -192,6 +196,20 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
               : { height: interactiveHeight },
           ]}
         >
+          {centered ? (
+            <Pressable
+              accessible={false}
+              focusable={false}
+              tabIndex={-1}
+              importantForAccessibility="no"
+              style={styles.focusSurface}
+              disabled={!effectiveEditable}
+              onPress={() => {
+                if (effectiveEditable) nativeRef.current?.focus();
+              }}
+              testID={childTestID(testID, 'focus-surface')}
+            />
+          ) : null}
           {searchLayout ? (
             <View
               pointerEvents="none"
@@ -236,6 +254,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
             }}
             style={[
               styles.input,
+              centered && styles.inputCentered,
               multiline && styles.inputMultiline,
               multiline &&
                 (multilineLayout.scrollEnabled

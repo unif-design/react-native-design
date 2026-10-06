@@ -3,7 +3,7 @@ title: TextEntryContent 文字编辑内容
 description: 受控文字、说明和确认按钮的组合。
 ---
 
-<!-- Generated from @unif/react-native-design@0.34.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.35.0; edit source documentation. -->
 
 # TextEntryContent 文字编辑内容
 

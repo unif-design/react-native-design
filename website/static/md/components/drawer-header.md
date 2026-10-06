@@ -4,7 +4,7 @@ title: DrawerHeader 抽屉头
 description: '展示抽屉顶部的头像、名称和副标题。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.34.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.35.0; edit source documentation. -->
 
 # DrawerHeader 抽屉头
 
