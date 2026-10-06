@@ -21,7 +21,12 @@ export const makeStyles = (c: ColorTokens) =>
       paddingVertical: TEXTAREA_VERTICAL_PADDING,
       alignItems: 'flex-start',
     },
+    wrapCentered: { alignItems: 'center' },
+    focusSurface: StyleSheet.absoluteFill,
+    inputCentered: { position: 'relative', zIndex: 1 },
     wrapPlain: {
+      paddingHorizontal: space[3],
+      paddingVertical: space[3],
       backgroundColor: 'transparent',
       borderWidth: 0,
       borderRadius: 0,

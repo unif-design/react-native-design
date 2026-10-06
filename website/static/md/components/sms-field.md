@@ -3,7 +3,7 @@ title: SmsField 短信字段
 description: 受控输入与发送按钮，不内置请求或倒计时。
 ---
 
-<!-- Generated from @unif/react-native-design@0.34.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.35.0; edit source documentation. -->
 
 # SmsField 短信字段
 

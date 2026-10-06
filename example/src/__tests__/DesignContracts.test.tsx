@@ -296,4 +296,88 @@ describe('Design 独立消费契约', () => {
       expect(props.onChangeText).not.toHaveBeenCalled();
     }
   );
+
+  test.each(['default', 'plain'] as const)(
+    'Textarea %s 居中使用自然文字高度，触达范围和原文由原输入保持',
+    (surface) => {
+      const onChangeText = jest.fn();
+      const view = render(
+        <ThemeProvider>
+          <Textarea
+            surface={surface}
+            contentAlignment="center"
+            minHeight={44}
+            maxHeight={120}
+            value=""
+            onChangeText={onChangeText}
+            testID="centered-input"
+            accessibilityLabel="居中输入"
+          />
+        </ThemeProvider>
+      );
+      const input = screen.getByLabelText('居中输入');
+      const root = screen.getByTestId('centered-input');
+      const frame = root.children[0];
+      if (!frame || typeof frame === 'string') throw new Error('缺少输入区域');
+      expect(StyleSheet.flatten(root.props.style).minHeight).toBe(44);
+      expect(StyleSheet.flatten(frame.props.style).alignItems).toBe('center');
+      expect(StyleSheet.flatten(input.props.style).minHeight).toBe(0);
+      expect(StyleSheet.flatten(input.props.style).lineHeight).toBeUndefined();
+      fireEvent.changeText(input, '  完整原文\n第二行  ');
+      expect(onChangeText).toHaveBeenCalledWith('  完整原文\n第二行  ');
+      view.rerender(
+        <ThemeProvider>
+          <Textarea
+            surface={surface}
+            contentAlignment="center"
+            minHeight={44}
+            maxHeight={120}
+            value="已采用的文字"
+            onChangeText={onChangeText}
+            testID="centered-input"
+            accessibilityLabel="居中输入"
+          />
+        </ThemeProvider>
+      );
+      expect(screen.getByLabelText('居中输入')).toBe(input);
+      expect(input.props.value).toBe('已采用的文字');
+      expect(onChangeText).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  test('居中输入空白转交同一输入焦点，独立操作与禁用不触发焦点', () => {
+    const action = jest.fn();
+    const props = {
+      value: '',
+      onChangeText: jest.fn(),
+      contentAlignment: 'center' as const,
+      minHeight: 96,
+      testID: 'focusable-input',
+      leading: {
+        kind: 'action' as const,
+        icon: 'search' as const,
+        accessibilityLabel: '查找',
+        onPress: action,
+      },
+    };
+    const view = render(
+      <ThemeProvider>
+        <Textarea {...props} />
+      </ThemeProvider>
+    );
+    const nativeRef = screen.UNSAFE_getByType(TextInput).props.ref;
+    const focus = jest.spyOn(nativeRef.current, 'focus');
+    fireEvent.press(screen.getByTestId('focusable-input-focus-surface'));
+    expect(focus).toHaveBeenCalledTimes(1);
+    fireEvent.press(screen.getByRole('button', { name: '查找' }));
+    expect(action).toHaveBeenCalledTimes(1);
+    expect(focus).toHaveBeenCalledTimes(1);
+    view.rerender(
+      <ThemeProvider>
+        <Textarea {...props} disabled />
+      </ThemeProvider>
+    );
+    fireEvent.press(screen.getByTestId('focusable-input-focus-surface'));
+    expect(focus).toHaveBeenCalledTimes(1);
+  });
 });
