@@ -179,10 +179,12 @@ test('初始空、首次非空、变空和再加入均有正确通知与 ref', a
 
 test('真实公开 ref 非动画切页，未知 id 不改变，普通渲染不重复通知', async () => {
   const page = await mount();
+  expect(page.getByLabelText('第1张，共3张')).toBeTruthy();
   await act(() => page.ref.current?.scrollTo('b', false));
   expect(page.ref.current?.getCurrent()).toBe(items[1]);
   expect(page.sdkRef().getCurrentIndex()).toBe(1);
   expect(page.getByText('第2/3张')).toBeTruthy();
+  expect(page.getByLabelText('第2张，共3张')).toBeTruthy();
   await act(() => page.ref.current?.scrollTo('unknown'));
   await page.update({ items: [...items], initialId: 'c' });
   expect(page.onCurrentChange.mock.calls.map(([item]) => item.id)).toEqual([

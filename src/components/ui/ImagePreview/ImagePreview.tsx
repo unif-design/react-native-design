@@ -231,7 +231,12 @@ export const ImagePreview = forwardRef<ImagePreviewHandle, ImagePreviewProps>(
               );
             }}
           />
-          <View style={styles.counter}>
+          <View
+            style={styles.counter}
+            accessible
+            accessibilityLiveRegion="polite"
+            accessibilityLabel={`第${selection.index + 1}张，共${items.length}张`}
+          >
             <Text style={styles.counterText}>
               第{selection.index + 1}/{items.length}张
             </Text>
