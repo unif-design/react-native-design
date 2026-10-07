@@ -8,6 +8,10 @@ import {
   SmsField,
   TextEntryContent,
   ThemeProvider,
+  fw,
+  r,
+  space,
+  type as typography,
   type ActionMenuAction,
 } from '@unif/react-native-design';
 
@@ -101,6 +105,117 @@ test('文字内容受控交接原文和外部更新，忙碌时禁止重复提�
   expect(input.props.editable).toBe(false);
   fireEvent.press(page.getByRole('button', { name: '确认' }));
   expect(onSubmit).toHaveBeenCalledTimes(1);
+});
+
+test('compact文字编辑使用单行Input和紧凑tokens，取消先于确认，默认card保留多行与原按钮顺序', () => {
+  const props = {
+    title: '重命名会话',
+    value: '原标题',
+    onChangeText: jest.fn(),
+    onSubmit: jest.fn(),
+    onCancel: jest.fn(),
+  };
+  const content = (variant?: 'card' | 'compact') => (
+    <ThemeProvider>
+      <TextEntryContent
+        {...props}
+        variant={variant}
+        placeholder={variant ? '新标题(最多50字)' : undefined}
+        testID="entry"
+      />
+    </ThemeProvider>
+  );
+  const page = render(content());
+  expect(page.getByLabelText('重命名会话').props.multiline).toBe(true);
+  expect(page.getByLabelText('重命名会话').props.autoFocus).toBe(true);
+  expect(page.getByLabelText('重命名会话').props.placeholder).toBeUndefined();
+  expect(
+    page.getAllByRole('button').map((button) => button.props.accessibilityLabel)
+  ).toEqual(['确认', '取消']);
+  const card = StyleSheet.flatten(page.getByTestId('entry').props.style);
+  expect(card).toMatchObject({
+    padding: space[5],
+    borderWidth: 1,
+    gap: space[4],
+  });
+  page.rerender(content('compact'));
+  expect(page.getByLabelText('重命名会话').props.multiline).toBe(false);
+  expect(page.getByLabelText('重命名会话').props.autoFocus).toBe(true);
+  expect(page.getByPlaceholderText('新标题(最多50字)')).toBeTruthy();
+  expect(
+    StyleSheet.flatten(page.getByTestId('entry').props.style)
+  ).toMatchObject({
+    padding: space[6],
+    borderWidth: 0,
+    borderRadius: r(14),
+    gap: space[5],
+  });
+  expect(
+    StyleSheet.flatten(page.getByText('重命名会话').props.style)
+  ).toMatchObject({ fontSize: typography.sm, fontWeight: fw.semi });
+  let actions = page.getByRole('button', { name: '取消' }).parent!;
+  while (
+    StyleSheet.flatten(actions.props.style)?.justifyContent !== 'flex-end' &&
+    actions.parent
+  )
+    actions = actions.parent;
+  expect(StyleSheet.flatten(actions.props.style)).toMatchObject({
+    justifyContent: 'flex-end',
+    flexWrap: 'wrap',
+    gap: space[4],
+  });
+  expect(
+    page.getAllByRole('button').map((button) => button.props.accessibilityLabel)
+  ).toEqual(['取消', '确认']);
+  page.rerender(content('card'));
+  expect(page.getByLabelText('重命名会话').props.multiline).toBe(true);
+  expect(page.getByPlaceholderText('新标题(最多50字)')).toBeTruthy();
+});
+
+test('compact保留受控原文、长度、自动聚焦、取消与busy语义', () => {
+  const onChangeText = jest.fn(),
+    onSubmit = jest.fn(),
+    onCancel = jest.fn();
+  const content = (busy = false, value = ' 原文\n第二行 ') => (
+    <ThemeProvider fontScale={1.5}>
+      <TextEntryContent
+        variant="compact"
+        title="编辑"
+        value={value}
+        onChangeText={onChangeText}
+        onSubmit={onSubmit}
+        onCancel={onCancel}
+        maxLength={50}
+        autoFocus={false}
+        busy={busy}
+      />
+    </ThemeProvider>
+  );
+  const page = render(content());
+  const input = page.getByLabelText('编辑');
+  expect(input.props.maxLength).toBe(50);
+  expect(input.props.autoFocus).toBe(false);
+  fireEvent.changeText(input, ' 新内容 ');
+  expect(onChangeText).toHaveBeenCalledWith(' 新内容 ');
+  expect(input.props.value).toBe(' 原文\n第二行 ');
+  fireEvent.press(page.getByRole('button', { name: '确认' }));
+  expect(onSubmit).toHaveBeenCalledWith(' 原文\n第二行 ');
+  fireEvent.press(page.getByRole('button', { name: '取消' }));
+  expect(onCancel).toHaveBeenCalledTimes(1);
+  expect(StyleSheet.flatten(page.getByText('编辑').props.style).fontSize).toBe(
+    typography.sm * 1.5
+  );
+  page.rerender(content(true, ' 外部更新 '));
+  expect(page.getByLabelText('编辑').props.editable).toBe(false);
+  expect(page.getByLabelText('编辑').props.value).toBe(' 外部更新 ');
+  fireEvent.press(page.getByRole('button', { name: '确认' }), {
+    stopPropagation: jest.fn(),
+  });
+  fireEvent.press(page.getByRole('button', { name: '取消' }), {
+    stopPropagation: jest.fn(),
+  });
+  expect(onSubmit).toHaveBeenCalledTimes(1);
+  expect(onCancel).toHaveBeenCalledTimes(1);
 });
 
 test('SmsField 的文案、长度和冷却来自消费者，不创建计时器', () => {
