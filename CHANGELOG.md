@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.38.0](https://github.com/unif-design/react-native-design/compare/v0.37.0...v0.38.0) (2026-10-07)
+
+
+### Features
+
+* align preview counters and expose content spacing ([#145](https://github.com/unif-design/react-native-design/issues/145)) ([4acbfe3](https://github.com/unif-design/react-native-design/commit/4acbfe3861cd9af6e47152d56b80598d441ad916))
+
 # [0.37.0](https://github.com/unif-design/react-native-design/compare/v0.36.0...v0.37.0) (2026-10-07)
 
 
