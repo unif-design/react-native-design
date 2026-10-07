@@ -13,6 +13,7 @@ export function ActionMenuContent({
   title,
   cancelLabel = '取消',
   style,
+  contentStyle,
   testID = 'action-menu',
 }: ActionMenuContentProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
@@ -35,6 +36,7 @@ export function ActionMenuContent({
       style={[
         isSheet ? styles.sheetCard : styles.dialogCard,
         isSheet && { paddingBottom: insets.bottom + space[5] },
+        contentStyle,
       ]}
       onPress={(event) => event.stopPropagation()}
     >

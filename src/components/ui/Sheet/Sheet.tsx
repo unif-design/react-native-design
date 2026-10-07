@@ -10,6 +10,7 @@ export function Sheet({
   footer,
   contentMode = 'fixed',
   contentContainerStyle,
+  footerStyle,
   style,
   testID,
 }: SheetProps): React.JSX.Element {
@@ -37,7 +38,9 @@ export function Sheet({
           {children}
         </View>
       )}
-      {footer ? <View style={styles.footer}>{footer}</View> : null}
+      {footer ? (
+        <View style={[styles.footer, footerStyle]}>{footer}</View>
+      ) : null}
     </View>
   );
 }

@@ -9,6 +9,7 @@ export interface SheetProps {
   footer?: ReactNode;
   contentMode?: SheetContentMode;
   contentContainerStyle?: StyleProp<ViewStyle>;
+  footerStyle?: StyleProp<ViewStyle>;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }

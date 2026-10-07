@@ -5,7 +5,7 @@ title: 常见问题
 description: '排查组件、主题、依赖和 Web 预览问题。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.35.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.37.0; edit source documentation. -->
 
 # 常见问题
 

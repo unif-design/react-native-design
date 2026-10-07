@@ -1,4 +1,5 @@
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import {
   ActionMenuContent,
   ImagePreview,
@@ -12,6 +13,7 @@ import {
 } from '@unif/react-native-design';
 
 const noop = () => {};
+const styles = StyleSheet.create({ compactContent: { paddingTop: 0 } });
 const actions: ActionMenuAction[] = [
   {
     id: 'delete',
@@ -32,8 +34,12 @@ const preview = React.createRef<ImagePreviewHandle>();
   onRequestDelete={(item) => item.id}
 />;
 preview.current?.scrollTo('stable', false);
-<Sheet contentMode="external-scroll">
-  <ActionMenuContent actions={actions} onClose={noop} />
+<Sheet contentMode="external-scroll" footerStyle={styles.compactContent}>
+  <ActionMenuContent
+    actions={actions}
+    onClose={noop}
+    contentStyle={styles.compactContent}
+  />
 </Sheet>;
 <TextEntryContent
   title="编辑"

@@ -12,7 +12,11 @@ import { radius, useThemedStyles } from '../../../theme';
 import { IconButton } from '../IconButton';
 import { Thumbnail } from '../Thumbnail';
 import { Carousel, type CarouselRef } from 'react-native-reanimated-carousel';
-import { DELETE_LABEL, IMAGE_UNAVAILABLE } from './constants';
+import {
+  DELETE_LABEL,
+  IMAGE_COUNTER_HEIGHT,
+  IMAGE_UNAVAILABLE,
+} from './constants';
 import { makeStyles } from './styles';
 import type {
   ImagePreviewHandle,
@@ -149,82 +153,89 @@ export const ImagePreview = forwardRef<ImagePreviewHandle, ImagePreviewProps>(
 
     return (
       <View style={[styles.container, style]} testID={testID}>
-        <Carousel
-          key={selection.carouselRevision}
-          ref={carouselRef}
-          data={data}
-          defaultIndex={selection.index}
-          loop={false}
-          itemSize={width}
-          style={{ width, height }}
-          keyExtractor={(id) => id}
-          testID={testID ? `${testID}-carousel` : undefined}
-          onScrollStart={() => {
-            if (
-              mounted.current &&
-              selection.carouselRevision === committed.current.carouselRevision
-            ) {
-              moving.current = true;
-            }
-          }}
-          onSnapToItem={(index) => {
-            const latest = committed.current;
-            if (
-              !mounted.current ||
-              selection.carouselRevision !== latest.carouselRevision ||
-              items.length !== latest.items.length ||
-              items.some(
-                (item, itemIndex) => item.id !== latest.items[itemIndex]?.id
+        <View style={{ width, height: height + IMAGE_COUNTER_HEIGHT / 2 }}>
+          <Carousel
+            key={selection.carouselRevision}
+            ref={carouselRef}
+            data={data}
+            defaultIndex={selection.index}
+            loop={false}
+            itemSize={width}
+            style={{ width, height }}
+            keyExtractor={(id) => id}
+            testID={testID ? `${testID}-carousel` : undefined}
+            onScrollStart={() => {
+              if (
+                mounted.current &&
+                selection.carouselRevision ===
+                  committed.current.carouselRevision
+              ) {
+                moving.current = true;
+              }
+            }}
+            onSnapToItem={(index) => {
+              const latest = committed.current;
+              if (
+                !mounted.current ||
+                selection.carouselRevision !== latest.carouselRevision ||
+                items.length !== latest.items.length ||
+                items.some(
+                  (item, itemIndex) => item.id !== latest.items[itemIndex]?.id
+                )
               )
-            )
-              return;
-            moving.current = false;
-            const id = items[index]?.id;
-            const nextIndex = latest.items.findIndex((item) => item.id === id);
-            if (nextIndex >= 0 && nextIndex !== latest.index) {
-              const next = { ...latest, index: nextIndex };
-              // SDK 已完成落位；句柄同步可读，不等待 React 下一次提交。
-              committed.current = next;
-              setSelection(next);
-              notifiedId.current = id;
-              currentChange.current?.(next.items[nextIndex]!);
-            }
-          }}
-          renderItem={({ item: id, index }) => {
-            const item = items.find((candidate) => candidate.id === id)!;
-            return (
-              <View style={[styles.media, { width, height }]}>
-                {item.source === undefined ? (
-                  <View style={styles.placeholder}>
-                    <Text style={styles.placeholderText}>
-                      {IMAGE_UNAVAILABLE}
-                    </Text>
-                  </View>
-                ) : (
-                  <Thumbnail
-                    source={item.source}
-                    size={{ width, height, borderRadius: radius.xl }}
-                    resizeMode="contain"
-                    imageStyle={styles.image}
-                    accessibilityLabel={item.label ?? `图片第 ${index + 1} 张`}
-                    fallback={
-                      <View style={styles.placeholder}>
-                        <Text style={styles.placeholderText}>
-                          {IMAGE_UNAVAILABLE}
-                        </Text>
-                      </View>
-                    }
-                  />
-                )}
-                <View pointerEvents="none" style={styles.border} />
-              </View>
-            );
-          }}
-        />
-        <View style={styles.counter}>
-          <Text style={styles.counterText}>
-            第{selection.index + 1}/{items.length}张
-          </Text>
+                return;
+              moving.current = false;
+              const id = items[index]?.id;
+              const nextIndex = latest.items.findIndex(
+                (item) => item.id === id
+              );
+              if (nextIndex >= 0 && nextIndex !== latest.index) {
+                const next = { ...latest, index: nextIndex };
+                // SDK 已完成落位；句柄同步可读，不等待 React 下一次提交。
+                committed.current = next;
+                setSelection(next);
+                notifiedId.current = id;
+                currentChange.current?.(next.items[nextIndex]!);
+              }
+            }}
+            renderItem={({ item: id, index }) => {
+              const item = items.find((candidate) => candidate.id === id)!;
+              return (
+                <View style={[styles.media, { width, height }]}>
+                  {item.source === undefined ? (
+                    <View style={styles.placeholder}>
+                      <Text style={styles.placeholderText}>
+                        {IMAGE_UNAVAILABLE}
+                      </Text>
+                    </View>
+                  ) : (
+                    <Thumbnail
+                      source={item.source}
+                      size={{ width, height, borderRadius: radius.xl }}
+                      resizeMode="contain"
+                      imageStyle={styles.image}
+                      accessibilityLabel={
+                        item.label ?? `图片第 ${index + 1} 张`
+                      }
+                      fallback={
+                        <View style={styles.placeholder}>
+                          <Text style={styles.placeholderText}>
+                            {IMAGE_UNAVAILABLE}
+                          </Text>
+                        </View>
+                      }
+                    />
+                  )}
+                  <View pointerEvents="none" style={styles.border} />
+                </View>
+              );
+            }}
+          />
+          <View style={styles.counter}>
+            <Text style={styles.counterText}>
+              第{selection.index + 1}/{items.length}张
+            </Text>
+          </View>
         </View>
         {current.canDelete && onRequestDelete ? (
           <IconButton

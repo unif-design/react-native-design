@@ -88,13 +88,14 @@ export const SheetDemo = () => {
 
 ## API
 
-| 参数                    | 类型                                       | 默认值    | 说明                                              |
-| ----------------------- | ------------------------------------------ | --------- | ------------------------------------------------- |
-| `children`              | `ReactNode`                                | 必填      | 中间内容                                          |
-| `header` / `footer`     | `ReactNode`                                | —         | 固定头尾；无头部显示非交互拖动指示                |
-| `contentMode`           | `'fixed' \| 'scroll' \| 'external-scroll'` | `'fixed'` | 普通布局、内部纵向 ScrollView、外部自带滚动       |
-| `contentContainerStyle` | `StyleProp<ViewStyle>`                     | —         | 内容区域样式；scroll 时作用于 ScrollView 内容容器 |
-| `style` / `testID`      | `StyleProp<ViewStyle>` / `string`          | —         | 根容器样式与定位                                  |
+| 参数                    | 类型                                       | 默认值    | 说明                                                     |
+| ----------------------- | ------------------------------------------ | --------- | -------------------------------------------------------- |
+| `children`              | `ReactNode`                                | 必填      | 中间内容                                                 |
+| `header` / `footer`     | `ReactNode`                                | —         | 固定头尾；无头部显示非交互拖动指示                       |
+| `contentMode`           | `'fixed' \| 'scroll' \| 'external-scroll'` | `'fixed'` | 普通布局、内部纵向 ScrollView、外部自带滚动              |
+| `contentContainerStyle` | `StyleProp<ViewStyle>`                     | —         | 内容区域样式；scroll 时作用于 ScrollView 内容容器        |
+| `footerStyle`           | `StyleProp<ViewStyle>`                     | —         | 覆盖固定底部容器的留白与边框，供调用者已组合的操作区使用 |
+| `style` / `testID`      | `StyleProp<ViewStyle>` / `string`          | —         | 根容器样式与定位                                         |
 
 公开类型为 `SheetProps` 和 `SheetContentMode`。内部滚动保留 `keyboardShouldPersistTaps="handled"`；外部列表不再包同方向 ScrollView。头尾不定义业务按钮协议，直接组合 Design 组件。主题变化沿现有 Provider 传递。
 
