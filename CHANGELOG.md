@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.37.0](https://github.com/unif-design/react-native-design/compare/v0.36.0...v0.37.0) (2026-10-07)
+
+
+### Features
+
+* **dialog:** add compact single-line text entry ([#144](https://github.com/unif-design/react-native-design/issues/144)) ([a5c0111](https://github.com/unif-design/react-native-design/commit/a5c0111bdeeed80bd2c5a055766560e044ce8d66))
+
 # [0.36.0](https://github.com/unif-design/react-native-design/compare/v0.35.0...v0.36.0) (2026-10-06)
 
 
