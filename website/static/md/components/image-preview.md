@@ -3,7 +3,7 @@ title: ImagePreview 图片预览
 description: 按稳定身份预览图片，交付切换和删除请求。
 ---
 
-<!-- Generated from @unif/react-native-design@0.35.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.37.0; edit source documentation. -->
 
 # ImagePreview 图片预览
 
@@ -81,6 +81,8 @@ import { ImagePreview } from '@unif/react-native-design';
   onRequestDelete={(item) => requestDelete(item)}
 />;
 ```
+
+页码以玻璃胶囊位于图片下边缘，独立于图片裁切层；图片仍按传入的 `height` 完整显示，媒体容器另预留半个缩放26布局单位的页码高度。宿主按实际可用区域为页码和删除入口留位。
 
 ## API
 

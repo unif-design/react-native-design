@@ -23,5 +23,6 @@ export interface ActionMenuContentProps {
   cancelLabel?: string;
   onClose(): void;
   style?: StyleProp<ViewStyle>;
+  contentStyle?: StyleProp<ViewStyle>;
   testID?: string;
 }

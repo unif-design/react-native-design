@@ -4,7 +4,7 @@ title: Reveal
 description: '提供内容入场与退场效果，并说明原生和 Web 差异。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.35.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.37.0; edit source documentation. -->
 
 # Reveal
 

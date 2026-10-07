@@ -3,7 +3,7 @@ title: ActionMenuContent 操作菜单内容
 description: 通用动作、忙碌禁用和可选二次确认。
 ---
 
-<!-- Generated from @unif/react-native-design@0.35.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.37.0; edit source documentation. -->
 
 # ActionMenuContent 操作菜单内容
 
@@ -84,14 +84,15 @@ const ActionMenuDemo = () => {
 
 `ActionMenuAction` 由 Design 定义：`id: string`、`label: string`、`onPress(): void` 必填；`disabled?`、`loading?`、`tone?: 'neutral' | 'danger'` 和 `confirmation?: ActionMenuConfirmation` 可选。确认内容为 `message: string` 与 `confirmLabel: string`。
 
-| 参数               | 类型                              | 默认值              | 说明                             |
-| ------------------ | --------------------------------- | ------------------- | -------------------------------- |
-| `actions`          | `readonly ActionMenuAction[]`     | 必填                | 调用方当前可用动作               |
-| `onClose`          | `() => void`                      | 必填                | 遮罩、普通取消与确认后的关闭请求 |
-| `presentation`     | `'dialog' \| 'sheet'`             | `'dialog'`          | 居中卡片或底部卡片               |
-| `title`            | `string`                          | —                   | 可选单行标题                     |
-| `cancelLabel`      | `string`                          | `'取消'`            | 普通取消与返回菜单文案           |
-| `style` / `testID` | `StyleProp<ViewStyle>` / `string` | — / `'action-menu'` | 根容器样式与定位前缀             |
+| 参数               | 类型                              | 默认值              | 说明                                                                  |
+| ------------------ | --------------------------------- | ------------------- | --------------------------------------------------------------------- |
+| `actions`          | `readonly ActionMenuAction[]`     | 必填                | 调用方当前可用动作                                                    |
+| `onClose`          | `() => void`                      | 必填                | 遮罩、普通取消与确认后的关闭请求                                      |
+| `presentation`     | `'dialog' \| 'sheet'`             | `'dialog'`          | 居中卡片或底部卡片                                                    |
+| `title`            | `string`                          | —                   | 可选单行标题                                                          |
+| `cancelLabel`      | `string`                          | `'取消'`            | 普通取消与返回菜单文案                                                |
+| `style` / `testID` | `StyleProp<ViewStyle>` / `string` | — / `'action-menu'` | 根容器样式与定位前缀                                                  |
+| `contentStyle`     | `StyleProp<ViewStyle>`            | —                   | 内部动作卡片样式；嵌入已有面板时可显式调整上留白，根容器仍由style控制 |
 
 普通动作只调用 `onPress`。有 confirmation 的动作先展示说明；确认时先 `onClose` 再调用该动作，取消确认仅返回菜单。禁用或加载时不能执行。正在确认的动作消失后回到菜单；业务目标是否仍然有效由应用在回调中复核。
 

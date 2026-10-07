@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
 import { fontMono, radius, space, type as typography } from '../../../theme';
 import type { ColorTokens } from '../../../theme';
+import { IMAGE_COUNTER_HEIGHT } from './constants';
 
 export const makeStyles = (colors: ColorTokens) =>
   StyleSheet.create({
@@ -31,8 +32,11 @@ export const makeStyles = (colors: ColorTokens) =>
       textAlign: 'center',
     },
     counter: {
+      position: 'absolute',
+      bottom: 0,
       alignSelf: 'center',
-      paddingVertical: space[1],
+      height: IMAGE_COUNTER_HEIGHT,
+      justifyContent: 'center',
       paddingHorizontal: space[3],
       borderRadius: radius.pill,
       borderWidth: StyleSheet.hairlineWidth,

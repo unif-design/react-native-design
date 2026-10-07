@@ -1,7 +1,7 @@
 # Unif Design — 全文文档聚合
 
 > 可选全文。普通查询优先通过 llms.txt 定位相关单页。
-<!-- Generated from @unif/react-native-design@0.36.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.37.0; edit source documentation. -->
 
 ## 目录
 
@@ -194,14 +194,15 @@ const ActionMenuDemo = () => {
 
 `ActionMenuAction` 由 Design 定义：`id: string`、`label: string`、`onPress(): void` 必填；`disabled?`、`loading?`、`tone?: 'neutral' | 'danger'` 和 `confirmation?: ActionMenuConfirmation` 可选。确认内容为 `message: string` 与 `confirmLabel: string`。
 
-| 参数               | 类型                              | 默认值              | 说明                             |
-| ------------------ | --------------------------------- | ------------------- | -------------------------------- |
-| `actions`          | `readonly ActionMenuAction[]`     | 必填                | 调用方当前可用动作               |
-| `onClose`          | `() => void`                      | 必填                | 遮罩、普通取消与确认后的关闭请求 |
-| `presentation`     | `'dialog' \| 'sheet'`             | `'dialog'`          | 居中卡片或底部卡片               |
-| `title`            | `string`                          | —                   | 可选单行标题                     |
-| `cancelLabel`      | `string`                          | `'取消'`            | 普通取消与返回菜单文案           |
-| `style` / `testID` | `StyleProp<ViewStyle>` / `string` | — / `'action-menu'` | 根容器样式与定位前缀             |
+| 参数               | 类型                              | 默认值              | 说明                                                                  |
+| ------------------ | --------------------------------- | ------------------- | --------------------------------------------------------------------- |
+| `actions`          | `readonly ActionMenuAction[]`     | 必填                | 调用方当前可用动作                                                    |
+| `onClose`          | `() => void`                      | 必填                | 遮罩、普通取消与确认后的关闭请求                                      |
+| `presentation`     | `'dialog' \| 'sheet'`             | `'dialog'`          | 居中卡片或底部卡片                                                    |
+| `title`            | `string`                          | —                   | 可选单行标题                                                          |
+| `cancelLabel`      | `string`                          | `'取消'`            | 普通取消与返回菜单文案                                                |
+| `style` / `testID` | `StyleProp<ViewStyle>` / `string` | — / `'action-menu'` | 根容器样式与定位前缀                                                  |
+| `contentStyle`     | `StyleProp<ViewStyle>`            | —                   | 内部动作卡片样式；嵌入已有面板时可显式调整上留白，根容器仍由style控制 |
 
 普通动作只调用 `onPress`。有 confirmation 的动作先展示说明；确认时先 `onClose` 再调用该动作，取消确认仅返回菜单。禁用或加载时不能执行。正在确认的动作消失后回到菜单；业务目标是否仍然有效由应用在回调中复核。
 
@@ -3349,6 +3350,8 @@ import { ImagePreview } from '@unif/react-native-design';
 />;
 ```
 
+页码以玻璃胶囊位于图片下边缘，独立于图片裁切层；图片仍按传入的 `height` 完整显示，媒体容器另预留半个缩放26布局单位的页码高度。宿主按实际可用区域为页码和删除入口留位。
+
 ## API
 
 类型由 `ImagePreviewProps`、`ImagePreviewItem` 和 `ImagePreviewHandle` 导出。
@@ -4648,13 +4651,14 @@ const sheetDemoStyles = (colors) => ({
 
 ## API
 
-| 参数                    | 类型                                       | 默认值    | 说明                                              |
-| ----------------------- | ------------------------------------------ | --------- | ------------------------------------------------- |
-| `children`              | `ReactNode`                                | 必填      | 中间内容                                          |
-| `header` / `footer`     | `ReactNode`                                | —         | 固定头尾；无头部显示非交互拖动指示                |
-| `contentMode`           | `'fixed' \| 'scroll' \| 'external-scroll'` | `'fixed'` | 普通布局、内部纵向 ScrollView、外部自带滚动       |
-| `contentContainerStyle` | `StyleProp<ViewStyle>`                     | —         | 内容区域样式；scroll 时作用于 ScrollView 内容容器 |
-| `style` / `testID`      | `StyleProp<ViewStyle>` / `string`          | —         | 根容器样式与定位                                  |
+| 参数                    | 类型                                       | 默认值    | 说明                                                     |
+| ----------------------- | ------------------------------------------ | --------- | -------------------------------------------------------- |
+| `children`              | `ReactNode`                                | 必填      | 中间内容                                                 |
+| `header` / `footer`     | `ReactNode`                                | —         | 固定头尾；无头部显示非交互拖动指示                       |
+| `contentMode`           | `'fixed' \| 'scroll' \| 'external-scroll'` | `'fixed'` | 普通布局、内部纵向 ScrollView、外部自带滚动              |
+| `contentContainerStyle` | `StyleProp<ViewStyle>`                     | —         | 内容区域样式；scroll 时作用于 ScrollView 内容容器        |
+| `footerStyle`           | `StyleProp<ViewStyle>`                     | —         | 覆盖固定底部容器的留白与边框，供调用者已组合的操作区使用 |
+| `style` / `testID`      | `StyleProp<ViewStyle>` / `string`          | —         | 根容器样式与定位                                         |
 
 公开类型为 `SheetProps` 和 `SheetContentMode`。内部滚动保留 `keyboardShouldPersistTaps="handled"`；外部列表不再包同方向 ScrollView。头尾不定义业务按钮协议，直接组合 Design 组件。主题变化沿现有 Provider 传递。
 
