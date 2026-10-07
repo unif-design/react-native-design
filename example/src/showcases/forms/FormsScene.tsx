@@ -95,6 +95,31 @@ export function FormsScene(): React.JSX.Element {
           />
         </SectionCard>
         <SectionCard
+          title="紧凑编辑内容"
+          description="单行输入、紧凑标题与右侧操作；宿主仍控制原文。"
+        >
+          <TextEntryContent
+            variant="compact"
+            title="简短标题"
+            confirmLabel="紧凑确定"
+            cancelLabel="紧凑取消"
+            placeholder="请输入短标题"
+            value={draft.entryText}
+            onChangeText={(entryText) =>
+              updateScene('forms', (current) => ({ ...current, entryText }))
+            }
+            onSubmit={() =>
+              record('TextEntryContent', '紧凑确认', '已提交当前原文')
+            }
+            onCancel={() =>
+              record('TextEntryContent', '紧凑取消', '已取消本次操作')
+            }
+            autoFocus={false}
+            maxLength={100}
+            testID="forms-text-entry-compact"
+          />
+        </SectionCard>
+        <SectionCard
           title="短信字段"
           description="文案、长度和冷却由当前示例控制。"
         >

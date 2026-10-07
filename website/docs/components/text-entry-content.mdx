@@ -10,7 +10,7 @@ import { LiveDemo } from '@site/src/components/LiveDemo';
 
 # TextEntryContent 文字编辑内容
 
-组合标题、说明、Textarea 和确认/取消按钮。值由调用方控制，宿主负责弹层、键盘与业务提交。
+组合标题、说明、文字输入和确认/取消按钮。默认 `card` 使用多行 Textarea，保留原有卡片和先确认后取消的操作顺序；`compact` 使用单行 Input、小标题和先取消后确认的右侧操作。值由调用方控制，宿主负责弹层、键盘与业务提交。
 
 export const TextEntryDemo = () => {
   const [value, setValue] = useState('欢迎编辑这段中文说明');
@@ -41,7 +41,33 @@ export const TextEntryDemo = () => {
   );
 };
 
+export const CompactTextEntryDemo = () => {
+  const [value, setValue] = useState('简短中文标题');
+  const [result, setResult] = useState('提交原文，不处理业务');
+  return (
+    <LiveDemo>
+      <View style={{ gap: 12 }}>
+        <TextEntryContent
+          variant="compact"
+          title="编辑标题"
+          placeholder="请输入短标题"
+          value={value}
+          onChangeText={setValue}
+          autoFocus={false}
+          maxLength={50}
+          confirmLabel="确定"
+          onSubmit={(text) => setResult(`已确认：${text}`)}
+          onCancel={() => setResult('已取消')}
+        />
+        <span className="demo-label">{result}</span>
+      </View>
+    </LiveDemo>
+  );
+};
+
 <TextEntryDemo />
+
+<CompactTextEntryDemo />
 
 ## 用法
 
@@ -67,10 +93,16 @@ const [value, setValue] = useState(initialValue);
 | `onChangeText` / `onSubmit`    | `(value: string) => void`         | 必填                | 输入变化、确认原文；不 trim 或自行保存             |
 | `onCancel`                     | `() => void`                      | 必填                | 取消请求                                           |
 | `message`                      | `string`                          | —                   | 可选说明                                           |
+| `variant`                      | `'card' \| 'compact'`             | `'card'`            | 默认多行卡片；紧凑单行内容                         |
+| `placeholder`                  | `string`                          | —                   | 交给实际 Textarea／Input，不默认添加提示           |
 | `busy`                         | `boolean`                         | `false`             | 输入不可编辑，确认显示加载，两个按钮均不可重复操作 |
-| `maxLength`                    | `number`                          | —                   | 交给 Textarea 的长度限制                           |
+| `maxLength`                    | `number`                          | —                   | 交给实际输入的长度限制                             |
 | `confirmLabel` / `cancelLabel` | `string`                          | `'确认'` / `'取消'` | 操作文案                                           |
 | `autoFocus`                    | `boolean`                         | `true`              | 原生输入自动聚焦；文档演示关闭                     |
 | `style` / `testID`             | `StyleProp<ViewStyle>` / `string` | —                   | 内容表面样式与定位                                 |
 
 只组合 Design 控件，不依赖 Chat。应用验证提交内容和处理错误；组件不管理提交 Promise。中文、大字号与明暗主题沿现有 ThemeProvider 处理。原生展厅位于「表单与输入」，实际键盘避让需在宿主验证。
+
+`compact` 标题使用 `type.sm`／`fw.semi`，表面无边框、圆角 `r(14)`、内边距 `space[6]`、内容间距 `space[5]`；操作行右对齐、间距 `space[4]`，取消采用 ghost sm，确认采用 primary sm。两种变体均保留原文提交、外部 value 更新、busy、maxLength 和 autoFocus；变体不决定会话、弹层位置或保存行为。
+
+操作行保留自然换行，让较大字号或较长的自定义按钮文案仍可完整显示。

@@ -42,6 +42,24 @@ preview.current?.scrollTo('stable', false);
   onSubmit={noop}
   onCancel={noop}
 />;
+<TextEntryContent
+  variant="compact"
+  placeholder="请输入短标题"
+  title="标题"
+  value="原文"
+  onChangeText={noop}
+  onSubmit={noop}
+  onCancel={noop}
+/>;
+<TextEntryContent
+  // @ts-expect-error 通用展示不包含业务专用variant。
+  variant="conversation"
+  title="标题"
+  value="原文"
+  onChangeText={noop}
+  onSubmit={noop}
+  onCancel={noop}
+/>;
 <SmsField
   value=""
   onChangeText={noop}
