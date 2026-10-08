@@ -69,6 +69,21 @@ export const showcaseStateContract = [
     },
   },
   {
+    id: 'action-menu-content.popover',
+    component: 'ActionMenuContent',
+    scene: 'actions',
+    label: '浮动菜单',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          props: { presentation: 'popover' },
+          presentProps: ['actions', 'onClose'],
+        },
+      ],
+    },
+  },
+  {
     id: 'text-entry-content.controlled',
     component: 'TextEntryContent',
     scene: 'forms',

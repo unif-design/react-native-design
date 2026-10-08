@@ -201,6 +201,34 @@ export function ActionsScene(): React.JSX.Element {
               }
             />
           </View>
+          <ActionMenuContent
+            presentation="popover"
+            testID="actions-floating-menu"
+            onClose={() =>
+              record('ActionMenuContent', '关闭浮动菜单', '已收到关闭请求')
+            }
+            actions={[
+              {
+                id: 'rename',
+                label: '重命名示例',
+                icon: 'edit',
+                onPress: () =>
+                  record('ActionMenuContent', '重命名', '已选择重命名'),
+              },
+              {
+                id: 'remove',
+                label: '浮动删除示例',
+                icon: 'trash',
+                tone: 'danger',
+                confirmation: {
+                  message: '移除原演示项目？',
+                  confirmLabel: '确认浮动移除',
+                },
+                onPress: () =>
+                  record('ActionMenuContent', '浮动移除', '已确认浮动移除'),
+              },
+            ]}
+          />
           <View style={styles.row}>
             <IconButton
               icon="chevron-left"

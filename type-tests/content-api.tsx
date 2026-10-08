@@ -18,6 +18,8 @@ const actions: ActionMenuAction[] = [
   {
     id: 'delete',
     label: '删除',
+    icon: 'trash',
+    accessibilityHint: '先确认再移除原项',
     onPress: noop,
     confirmation: { message: '确认删除？', confirmLabel: '删除' },
   },
@@ -89,3 +91,5 @@ preview.current?.scrollTo('stable', false);
 <SmsField value="" onChangeText={noop} onSend={noop} remainingSeconds={0} />;
 // @ts-expect-error 不增加第四种 Sheet 模式。
 <Sheet contentMode="auto">内容</Sheet>;
+
+<ActionMenuContent presentation="popover" actions={actions} onClose={noop} />;

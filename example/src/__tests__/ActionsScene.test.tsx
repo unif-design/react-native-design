@@ -358,5 +358,12 @@ test('动作内容真实交付选择和二次确认', () => {
   coverage.prove('action-menu-content.actions', () => {
     expect(screen.getAllByText(/已确认移除/).length).toBeGreaterThan(0);
   });
+  coverage.prove('action-menu-content.popover', () => {
+    fireEvent.press(screen.getByRole('button', { name: '重命名示例' }));
+    expect(screen.getAllByText(/已选择重命名/).length).toBeGreaterThan(0);
+    fireEvent.press(screen.getByRole('button', { name: '浮动删除示例' }));
+    fireEvent.press(screen.getByRole('button', { name: '确认浮动移除' }));
+    expect(screen.getAllByText(/已确认浮动移除/).length).toBeGreaterThan(0);
+  });
   coverage.expectComplete();
 });

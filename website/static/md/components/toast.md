@@ -4,7 +4,7 @@ title: Toast 轻提示
 description: '显示短暂提示，并由 ToastHost 承载。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.37.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.38.0; edit source documentation. -->
 
 # Toast 轻提示
 

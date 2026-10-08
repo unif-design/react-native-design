@@ -171,7 +171,10 @@ const expectedSceneTestFiles = {
 };
 
 const expectedStateIdsByComponent = {
-  ActionMenuContent: ['action-menu-content.actions'],
+  ActionMenuContent: [
+    'action-menu-content.actions',
+    'action-menu-content.popover',
+  ],
   TextEntryContent: ['text-entry-content.controlled'],
   SmsField: ['sms-field.controlled'],
   ImagePreview: ['image-preview.identity'],

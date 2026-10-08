@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { space, useThemedStyles } from '../../../theme';
+import { useThemedStyles } from '../../../theme';
 import { Button } from '../Button';
 import type { ActionMenuContentProps } from './types';
 import { makeStyles } from './styles';
+import { ActionMenuItem } from './ActionMenuItem';
+import { ActionMenuSheetCard } from './ActionMenuSheetCard';
 
 export function ActionMenuContent({
   actions,
@@ -17,29 +18,27 @@ export function ActionMenuContent({
   testID = 'action-menu',
 }: ActionMenuContentProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
-  const insets = useSafeAreaInsets();
   const [confirmationId, setConfirmationId] = useState<string | null>(null);
   const isSheet = presentation === 'sheet';
+  const isPopover = presentation === 'popover';
   const confirming = actions.find(
     (action) =>
       action.id === confirmationId && action.confirmation !== undefined
   );
 
+  const cancelConfirmation = () => setConfirmationId(null);
+  const confirmSelected = () => {
+    if (!confirming) return;
+    onClose();
+    confirming.onPress();
+  };
+
   useEffect(() => {
     if (!confirming) setConfirmationId(null);
   }, [confirming]);
 
-  const content = (
-    <Pressable
-      accessible={false}
-      testID={`${testID}-card`}
-      style={[
-        isSheet ? styles.sheetCard : styles.dialogCard,
-        isSheet && { paddingBottom: insets.bottom + space[5] },
-        contentStyle,
-      ]}
-      onPress={(event) => event.stopPropagation()}
-    >
+  const body = (
+    <>
       {title ? (
         <Text
           testID={`${testID}-title`}
@@ -55,25 +54,44 @@ export function ActionMenuContent({
           <Text style={styles.confirmation} accessibilityLiveRegion="polite">
             {confirming.confirmation.message}
           </Text>
-          <View style={styles.sheetActions}>
-            <Button
-              label={cancelLabel}
-              variant="neutral"
-              style={styles.sheetAction}
-              onPress={() => setConfirmationId(null)}
-            />
-            <Button
-              label={confirming.confirmation.confirmLabel}
-              variant="danger"
-              disabled={confirming.disabled}
-              loading={confirming.loading}
-              style={styles.sheetAction}
-              onPress={() => {
-                onClose();
-                confirming.onPress();
-              }}
-            />
-          </View>
+          {isPopover ? (
+            <View style={styles.popoverConfirmationActions}>
+              <ActionMenuItem
+                action={{
+                  id: 'cancel-confirmation',
+                  label: cancelLabel,
+                  onPress: cancelConfirmation,
+                }}
+                onPress={cancelConfirmation}
+              />
+              <ActionMenuItem
+                action={{
+                  ...confirming,
+                  label: confirming.confirmation.confirmLabel,
+                  icon: undefined,
+                  tone: 'danger',
+                }}
+                onPress={confirmSelected}
+              />
+            </View>
+          ) : (
+            <View style={styles.sheetActions}>
+              <Button
+                label={cancelLabel}
+                variant="neutral"
+                style={styles.sheetAction}
+                onPress={cancelConfirmation}
+              />
+              <Button
+                label={confirming.confirmation.confirmLabel}
+                variant="danger"
+                disabled={confirming.disabled}
+                loading={confirming.loading}
+                style={styles.sheetAction}
+                onPress={confirmSelected}
+              />
+            </View>
+          )}
         </>
       ) : (
         <>
@@ -81,31 +99,69 @@ export function ActionMenuContent({
             testID={`${testID}-actions`}
             style={isSheet ? styles.sheetActions : undefined}
           >
-            {actions.map((action) => (
-              <Button
-                key={action.id}
-                label={action.label}
-                disabled={action.disabled}
-                loading={action.loading}
-                variant={isSheet ? (action.tone ?? 'neutral') : 'text'}
-                style={isSheet ? styles.sheetAction : undefined}
-                onPress={() => {
-                  if (action.confirmation) {
-                    setConfirmationId(action.id);
-                    return;
-                  }
-                  action.onPress();
-                }}
-              />
-            ))}
+            {actions.map((action) =>
+              isPopover ? (
+                <ActionMenuItem
+                  key={action.id}
+                  action={action}
+                  onPress={() => {
+                    if (action.confirmation) setConfirmationId(action.id);
+                    else action.onPress();
+                  }}
+                />
+              ) : (
+                <Button
+                  key={action.id}
+                  label={action.label}
+                  leftIcon={action.icon}
+                  accessibilityHint={action.accessibilityHint}
+                  disabled={action.disabled}
+                  loading={action.loading}
+                  variant={isSheet ? (action.tone ?? 'neutral') : 'text'}
+                  style={isSheet ? styles.sheetAction : undefined}
+                  onPress={() => {
+                    if (action.confirmation) {
+                      setConfirmationId(action.id);
+                      return;
+                    }
+                    action.onPress();
+                  }}
+                />
+              )
+            )}
           </View>
-          {!isSheet ? (
+          {!isSheet && !isPopover ? (
             <Button label={cancelLabel} variant="text" onPress={onClose} />
           ) : null}
         </>
       )}
+    </>
+  );
+  const content = isSheet ? (
+    <ActionMenuSheetCard contentStyle={contentStyle} testID={`${testID}-card`}>
+      {body}
+    </ActionMenuSheetCard>
+  ) : isPopover ? (
+    <View testID={`${testID}-card`} style={[styles.popoverCard, contentStyle]}>
+      {body}
+    </View>
+  ) : (
+    <Pressable
+      accessible={false}
+      testID={`${testID}-card`}
+      style={[styles.dialogCard, contentStyle]}
+      onPress={(event) => event.stopPropagation()}
+    >
+      {body}
     </Pressable>
   );
+
+  if (isPopover)
+    return (
+      <View testID={testID} style={[styles.popoverRoot, style]}>
+        {content}
+      </View>
+    );
 
   return (
     <Pressable
