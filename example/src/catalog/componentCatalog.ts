@@ -78,7 +78,11 @@ export type ComponentCatalogEntry = Readonly<{
 }>;
 
 export const componentCatalog = [
-  { id: 'ActionMenuContent', scene: 'actions', states: ['操作与确认'] },
+  {
+    id: 'ActionMenuContent',
+    scene: 'actions',
+    states: ['操作与确认', '浮动菜单'],
+  },
   { id: 'TextEntryContent', scene: 'forms', states: ['受控编辑'] },
   { id: 'SmsField', scene: 'forms', states: ['受控与冷却'] },
   { id: 'ImagePreview', scene: 'media', states: ['稳定身份与删除'] },

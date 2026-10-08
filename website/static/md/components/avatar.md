@@ -4,7 +4,7 @@ title: Avatar 头像
 description: '展示文字或图片头像，支持形状、尺寸和配色。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.37.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.38.0; edit source documentation. -->
 
 # Avatar 头像
 

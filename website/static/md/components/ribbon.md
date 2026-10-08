@@ -4,7 +4,7 @@ title: Ribbon 缎带
 description: '为内容添加带文字的右上角条带。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.37.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.38.0; edit source documentation. -->
 
 # Ribbon 缎带
 

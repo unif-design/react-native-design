@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, StyleSheet } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet } from 'react-native';
 import { fireEvent, render } from '@testing-library/react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ActionMenuContent,
   Icon,
@@ -295,3 +296,184 @@ test.each([21, 22])(
     expect(onPress).toHaveBeenCalledTimes(1);
   }
 );
+
+test('popover只提供浮动菜单卡，文字与图标同排且禁用和忙碌动作不交付', () => {
+  const choose = jest.fn();
+  const close = jest.fn();
+  const page = render(
+    <ThemeProvider>
+      <ActionMenuContent
+        presentation="popover"
+        onClose={close}
+        actions={[
+          { id: 'rename', label: '重命名', icon: 'edit', onPress: choose },
+          {
+            id: 'disabled',
+            label: '不可使用',
+            disabled: true,
+            onPress: choose,
+          },
+          { id: 'busy', label: '处理中', loading: true, onPress: choose },
+        ]}
+      />
+    </ThemeProvider>
+  );
+  expect(page.queryByRole('button', { name: '取消' })).toBeNull();
+  expect(page.getByTestId('action-menu')).toHaveStyle({ width: r(200) });
+  expect(page.getByRole('button', { name: '重命名' })).toHaveStyle({
+    minHeight: 44,
+  });
+  fireEvent.press(page.getByRole('button', { name: '不可使用' }));
+  fireEvent.press(page.getByRole('button', { name: '处理中' }));
+  expect(choose).not.toHaveBeenCalled();
+  fireEvent.press(page.getByRole('button', { name: '重命名' }));
+  expect(choose).toHaveBeenCalledTimes(1);
+  expect(close).not.toHaveBeenCalled();
+});
+
+test('popover删除先确认，取消返回原两项，不把旧确认应用到被移除的动作', () => {
+  const remove = jest.fn();
+  const close = jest.fn();
+  const actions: ActionMenuAction[] = [
+    { id: 'rename', label: '重命名', icon: 'edit', onPress: jest.fn() },
+    {
+      id: 'delete',
+      label: '删除',
+      icon: 'trash',
+      tone: 'danger',
+      onPress: remove,
+      confirmation: { message: '删除后不可恢复', confirmLabel: '删除该会话' },
+    },
+  ];
+  const content = (items: ActionMenuAction[]) => (
+    <ThemeProvider>
+      <ActionMenuContent
+        presentation="popover"
+        actions={items}
+        onClose={close}
+      />
+    </ThemeProvider>
+  );
+  const page = render(content(actions));
+  fireEvent.press(page.getByRole('button', { name: '删除' }));
+  expect(remove).not.toHaveBeenCalled();
+  expect(page.getByText('删除后不可恢复')).toBeTruthy();
+  fireEvent.press(page.getByRole('button', { name: '取消' }));
+  expect(page.queryByText('删除后不可恢复')).toBeNull();
+  expect(page.getByRole('button', { name: '重命名' })).toBeTruthy();
+  fireEvent.press(page.getByRole('button', { name: '删除' }));
+  page.rerender(content([actions[0]!]));
+  expect(page.queryByRole('button', { name: '删除该会话' })).toBeNull();
+  expect(remove).not.toHaveBeenCalled();
+  page.rerender(content(actions));
+  fireEvent.press(page.getByRole('button', { name: '删除' }));
+  fireEvent.press(page.getByRole('button', { name: '删除该会话' }));
+  expect(close).toHaveBeenCalledTimes(1);
+  expect(remove).toHaveBeenCalledTimes(1);
+});
+
+test('popover鼠标按下保留输入焦点且仅点击一次交付，禁用后不会继续拦截', () => {
+  const original = Platform.OS;
+  Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
+  try {
+    const choose = jest.fn();
+    const content = (disabled = false) => (
+      <ThemeProvider>
+        <ActionMenuContent
+          presentation="popover"
+          onClose={jest.fn()}
+          actions={[{ id: 'copy', label: '复制', disabled, onPress: choose }]}
+        />
+      </ThemeProvider>
+    );
+    const page = render(content());
+    const preventDefault = jest.fn();
+    fireEvent(page.getByRole('button', { name: '复制' }), 'pointerDown', {
+      nativeEvent: { pointerType: 'mouse', button: 0 },
+      preventDefault,
+    });
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+    expect(choose).not.toHaveBeenCalled();
+    fireEvent.press(page.getByRole('button', { name: '复制' }));
+    expect(choose).toHaveBeenCalledTimes(1);
+    page.rerender(content(true));
+    fireEvent(page.getByRole('button', { name: '复制' }), 'pointerDown', {
+      nativeEvent: { pointerType: 'mouse', button: 0 },
+      preventDefault,
+    });
+    fireEvent.press(page.getByRole('button', { name: '复制' }));
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+    expect(choose).toHaveBeenCalledTimes(1);
+  } finally {
+    Object.defineProperty(Platform, 'OS', {
+      configurable: true,
+      value: original,
+    });
+  }
+});
+
+test('popover不读取安全区，不给输入框菜单新增SafeAreaProvider前置条件', () => {
+  const read = jest.mocked(useSafeAreaInsets);
+  const before = read.mock.calls.length;
+  render(
+    <ThemeProvider>
+      <ActionMenuContent
+        presentation="popover"
+        onClose={jest.fn()}
+        actions={[{ id: 'open', label: '打开', onPress: jest.fn() }]}
+      />
+    </ThemeProvider>
+  );
+  expect(read).toHaveBeenCalledTimes(before);
+});
+
+test('popover确认的取消和提交也保留原输入焦点且只交付一次', () => {
+  const original = Platform.OS;
+  Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
+  try {
+    const remove = jest.fn();
+    const close = jest.fn();
+    const preventDefault = jest.fn();
+    const page = render(
+      <ThemeProvider>
+        <ActionMenuContent
+          presentation="popover"
+          onClose={close}
+          actions={[
+            {
+              id: 'delete',
+              label: '删除',
+              onPress: remove,
+              confirmation: { message: '删除原项？', confirmLabel: '确认删除' },
+            },
+          ]}
+        />
+      </ThemeProvider>
+    );
+    fireEvent.press(page.getByRole('button', { name: '删除' }));
+    fireEvent(page.getByRole('button', { name: '取消' }), 'pointerDown', {
+      nativeEvent: { pointerType: 'mouse', button: 0 },
+      preventDefault,
+      stopPropagation: jest.fn(),
+    });
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+    fireEvent.press(page.getByRole('button', { name: '取消' }));
+    expect(close).not.toHaveBeenCalled();
+    expect(remove).not.toHaveBeenCalled();
+    fireEvent.press(page.getByRole('button', { name: '删除' }));
+    fireEvent(page.getByRole('button', { name: '确认删除' }), 'pointerDown', {
+      nativeEvent: { pointerType: 'mouse', button: 0 },
+      preventDefault,
+      stopPropagation: jest.fn(),
+    });
+    expect(preventDefault).toHaveBeenCalledTimes(2);
+    fireEvent.press(page.getByRole('button', { name: '确认删除' }));
+    expect(close).toHaveBeenCalledTimes(1);
+    expect(remove).toHaveBeenCalledTimes(1);
+  } finally {
+    Object.defineProperty(Platform, 'OS', {
+      configurable: true,
+      value: original,
+    });
+  }
+});

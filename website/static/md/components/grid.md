@@ -4,7 +4,7 @@ title: Grid 九宫格
 description: '以网格排列图标与文字入口。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.37.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.38.0; edit source documentation. -->
 
 # Grid 九宫格
 
