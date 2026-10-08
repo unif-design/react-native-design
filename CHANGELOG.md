@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.39.0](https://github.com/unif-design/react-native-design/compare/v0.38.0...v0.39.0) (2026-10-08)
+
+
+### Features
+
+* add shared popover action menu content ([#146](https://github.com/unif-design/react-native-design/issues/146)) ([dbb259d](https://github.com/unif-design/react-native-design/commit/dbb259d847c7cbed76b9a8f3158a9f6a305e4474))
+
 # [0.38.0](https://github.com/unif-design/react-native-design/compare/v0.37.0...v0.38.0) (2026-10-07)
 
 
