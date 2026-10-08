@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.39.1](https://github.com/unif-design/react-native-design/compare/v0.39.0...v0.39.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* **image-preview:** keep counter readable across image boundaries ([#147](https://github.com/unif-design/react-native-design/issues/147)) ([1e8c346](https://github.com/unif-design/react-native-design/commit/1e8c34643c58c243a251829a259a68c4cbc65273))
+
 # [0.39.0](https://github.com/unif-design/react-native-design/compare/v0.38.0...v0.39.0) (2026-10-08)
 
 
