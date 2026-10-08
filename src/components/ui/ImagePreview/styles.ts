@@ -40,8 +40,8 @@ export const makeStyles = (colors: ColorTokens) =>
       paddingHorizontal: space[3],
       borderRadius: radius.pill,
       borderWidth: StyleSheet.hairlineWidth,
-      borderColor: colors.glassPillBorder,
-      backgroundColor: colors.glassHighlight,
+      borderColor: colors.outline,
+      backgroundColor: colors.surface,
     },
     counterText: {
       color: colors.foreground,
