@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.2](https://github.com/unif-design/react-native-design/compare/v0.40.1...v0.40.2) (2026-10-09)
+
+
+### Bug Fixes
+
+* **dialog:** refine confirmation spacing and typography ([#150](https://github.com/unif-design/react-native-design/issues/150)) ([6afbe91](https://github.com/unif-design/react-native-design/commit/6afbe919ab5ed53bc41e04e9b9f028ebc87187c3))
+
 ## [0.40.1](https://github.com/unif-design/react-native-design/compare/v0.40.0...v0.40.1) (2026-10-09)
 
 
