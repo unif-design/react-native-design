@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Platform, StyleSheet } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import { fireEvent, render } from '@testing-library/react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -10,6 +10,9 @@ import {
   TextEntryContent,
   ThemeProvider,
   fw,
+  lightColors,
+  darkColors,
+  radius,
   r,
   space,
   type as typography,
@@ -146,16 +149,16 @@ test('compact文字编辑使用单行Input和紧凑tokens，取消先于确认�
   expect(
     StyleSheet.flatten(page.getByTestId('entry').props.style)
   ).toMatchObject({
-    padding: space[4],
+    padding: space[7],
     borderWidth: 0.5,
-    borderRadius: r(30),
+    borderRadius: radius['3xl'],
     gap: space[5],
   });
   expect(
     StyleSheet.flatten(page.getByText('重命名会话').props.style)
   ).toMatchObject({
-    fontSize: typography.body,
-    fontWeight: fw.medium,
+    fontSize: typography.h2,
+    fontWeight: fw.semi,
     textAlign: 'center',
   });
   expect(page.getByLabelText('重命名会话')).toHaveProp(
@@ -204,7 +207,7 @@ test('compact保留受控原文、长度、自动聚焦、取消与busy语义', 
   fireEvent.press(page.getByRole('button', { name: '取消' }));
   expect(onCancel).toHaveBeenCalledTimes(1);
   expect(StyleSheet.flatten(page.getByText('编辑').props.style).fontSize).toBe(
-    typography.body * 1.5
+    typography.h2 * 1.5
   );
   page.rerender(content(true, ' 外部更新 '));
   expect(page.getByLabelText('编辑').props.editable).toBe(false);
@@ -537,14 +540,14 @@ test('浮动指针在卡片边缘内限位，方向可跟随宿主翻转且不�
   });
   expect(
     page.getByTestId('action-menu-pointer-top', { includeHiddenElements: true })
-  ).toHaveStyle({ left: r(32) - r(26) / 2 });
+  ).toHaveStyle({ left: radius['3xl'] });
   page.rerender(content('bottom', 1000));
   expect(
     page.getByTestId('action-menu-pointer-bottom', {
       includeHiddenElements: true,
     })
   ).toHaveStyle({
-    left: 240 - r(32) - r(26) / 2,
+    left: 240 - radius['3xl'] - r(26),
     transform: [{ rotate: '180deg' }],
   });
   expect(page.getAllByRole('button')).toHaveLength(1);
@@ -602,5 +605,95 @@ test.each([40, 20])(
     expect(style.left).toBeGreaterThanOrEqual(0);
     expect(style.left + style.width).toBeLessThanOrEqual(width);
     expect(style.left + style.width / 2).toBe(width / 2);
+  }
+);
+
+test.each(['light', 'dark'] as const)(
+  'compact在%s主题保留品牌焦点和选区色',
+  (scheme) => {
+    const colors = scheme === 'dark' ? darkColors : lightColors;
+    const page = render(
+      <ThemeProvider forceScheme={scheme}>
+        <TextEntryContent
+          variant="compact"
+          title="重命名聊天"
+          value=""
+          onChangeText={jest.fn()}
+          onSubmit={jest.fn()}
+          onCancel={jest.fn()}
+          autoFocus={false}
+        />
+      </ThemeProvider>
+    );
+    const input = page.getByLabelText('重命名聊天');
+    expect(input.props.selectionColor).toBe(colors.primary);
+    fireEvent(input, 'focus');
+    expect(
+      page.UNSAFE_getAllByType(View).some((view) => {
+        const style = StyleSheet.flatten(view.props.style);
+        return (
+          style?.borderRadius === radius.pill &&
+          style.borderColor === colors.primary &&
+          style.backgroundColor === colors.surface
+        );
+      })
+    ).toBe(true);
+    fireEvent(input, 'blur');
+    expect(
+      page.UNSAFE_getAllByType(View).some((view) => {
+        const style = StyleSheet.flatten(view.props.style);
+        return (
+          style?.borderRadius === radius.pill &&
+          style.borderColor === 'transparent' &&
+          style.backgroundColor === colors.surfaceContainerHigh
+        );
+      })
+    ).toBe(true);
+  }
+);
+
+test.each(['light', 'dark'] as const)(
+  '浮动确认在%s主题使用危险按钮配色且忙碌时不能提交',
+  (scheme) => {
+    const colors = scheme === 'dark' ? darkColors : lightColors;
+    const remove = jest.fn();
+    const content = (loading = false) => (
+      <ThemeProvider forceScheme={scheme}>
+        <ActionMenuContent
+          presentation="popover"
+          cancelLabel={null}
+          onClose={jest.fn()}
+          actions={[
+            {
+              id: 'delete',
+              label: '删除',
+              tone: 'danger',
+              onPress: remove,
+              loading,
+              confirmation: {
+                title: '删除聊天',
+                message: '此操作无法撤销。',
+                confirmLabel: '删除',
+              },
+            },
+          ]}
+        />
+      </ThemeProvider>
+    );
+    const page = render(content());
+    fireEvent.press(page.getByRole('button', { name: '删除' }));
+    expect(page.getByRole('button', { name: '删除' })).toHaveStyle({
+      backgroundColor: colors.error,
+    });
+    expect(page.getByText('删除')).toHaveStyle({ color: colors.onError });
+    expect(page.getByRole('header', { name: '删除聊天' })).toHaveStyle({
+      color: colors.foreground,
+    });
+    page.rerender(content(true));
+    expect(page.UNSAFE_getByType(ActivityIndicator).props.color).toBe(
+      colors.onError
+    );
+    fireEvent.press(page.getByRole('button', { name: '删除' }));
+    expect(remove).not.toHaveBeenCalled();
   }
 );

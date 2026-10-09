@@ -19,8 +19,6 @@ export const makeStyles = (c: ColorTokens) =>
     },
     wrapInset: {
       borderRadius: radius.pill,
-      borderColor: 'transparent',
-      backgroundColor: c.surfaceContainerHighest,
     },
     wrapMultiline: {
       paddingVertical: TEXTAREA_VERTICAL_PADDING,
