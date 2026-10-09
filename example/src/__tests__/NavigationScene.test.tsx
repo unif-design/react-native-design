@@ -1,6 +1,6 @@
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
-import { Image } from 'react-native';
+import { Image, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   DrawerHeader,
@@ -331,6 +331,18 @@ test('Tabs 与 Segmented 使用 tablist/tab 的 selected、item disabled、globa
       screen.getByRole('tab', { name: '禁用分段' }).props.accessibilityState
     ).toMatchObject({ disabled: true });
   });
+  const enabledOpacity = StyleSheet.flatten(
+    screen.getByRole('tab', { name: '第二段' }).props.style
+  ).opacity;
+  for (const label of ['禁用分段', '锁定甲', '锁定乙']) {
+    expect(
+      StyleSheet.flatten(screen.getByRole('tab', { name: label }).props.style)
+        .opacity
+    ).toBeLessThan(enabledOpacity);
+  }
+  expect(
+    screen.getByRole('tab', { name: '锁定甲' }).props.accessibilityState
+  ).toMatchObject({ selected: true, disabled: true });
   segmentedCoverage.expectComplete();
 });
 

@@ -58,7 +58,7 @@ export function Segmented({
               { minHeight: sizing.minHeight, paddingHorizontal: sizing.px },
               on && { backgroundColor: activeBg },
               on && activeShadow,
-              { opacity: pressed ? 0.85 : 1 },
+              { opacity: itemDisabled ? 0.4 : pressed ? 0.85 : 1 },
             ]}
           >
             <Text
