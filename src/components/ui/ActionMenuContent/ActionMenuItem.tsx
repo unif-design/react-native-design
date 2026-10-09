@@ -18,11 +18,7 @@ export function ActionMenuItem({
   const disabled = action.disabled === true || busy || !label;
   const { mousePressed, ...mouseHandlers } = useMenuMousePress(disabled);
   const danger = action.tone === 'danger';
-  const color = danger
-    ? confirmation
-      ? colors.onError
-      : colors.error
-    : colors.foreground;
+  const color = danger ? colors.error : colors.foreground;
   return (
     <Pressable
       accessible={Boolean(label)}
