@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useThemedStyles } from '../../../theme';
 import { Button } from '../Button';
@@ -41,9 +41,11 @@ export function ActionMenuContent({
   }, [confirming]);
 
   const confirmedId = confirming?.id ?? null;
+  const notifyConfirmation = useRef(onConfirmationChange);
+  notifyConfirmation.current = onConfirmationChange;
   useEffect(() => {
-    onConfirmationChange?.(confirmedId);
-  }, [confirmedId, onConfirmationChange]);
+    notifyConfirmation.current?.(confirmedId);
+  }, [confirmedId]);
 
   const heading = confirming?.confirmation?.title ?? title;
   const body = (

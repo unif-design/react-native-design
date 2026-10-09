@@ -67,7 +67,7 @@ export const makeStyles = (c: ColorTokens, shadows: ShadowTokens) =>
       minHeight: fixed.hitTarget,
     },
     popoverConfirmLabel: { textAlign: 'center', fontWeight: fw.medium },
-    pointer: { position: 'absolute', width: r(26), height: r(14) },
+    pointer: { position: 'absolute' },
     dialogRoot: {
       flex: 1,
       justifyContent: 'center',

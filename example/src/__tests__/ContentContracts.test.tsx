@@ -537,15 +537,70 @@ test('浮动指针在卡片边缘内限位，方向可跟随宿主翻转且不�
   });
   expect(
     page.getByTestId('action-menu-pointer-top', { includeHiddenElements: true })
-  ).toHaveStyle({ left: r(32) - r(13) });
+  ).toHaveStyle({ left: r(32) - r(26) / 2 });
   page.rerender(content('bottom', 1000));
   expect(
     page.getByTestId('action-menu-pointer-bottom', {
       includeHiddenElements: true,
     })
   ).toHaveStyle({
-    left: 240 - r(32) - r(13),
+    left: 240 - r(32) - r(26) / 2,
     transform: [{ rotate: '180deg' }],
   });
   expect(page.getAllByRole('button')).toHaveLength(1);
 });
+
+test('确认阶段仅随当前动作变化通知，宿主的内联回调重建不重复通知', () => {
+  const changed = jest.fn();
+  const action = {
+    id: 'delete',
+    label: '删除',
+    onPress: jest.fn(),
+    confirmation: { message: '确认？', confirmLabel: '确认删除' },
+  };
+  const content = (actions: ActionMenuAction[]) => (
+    <ThemeProvider>
+      <ActionMenuContent
+        presentation="popover"
+        actions={actions}
+        onClose={jest.fn()}
+        onConfirmationChange={(id) => changed(id)}
+      />
+    </ThemeProvider>
+  );
+  const page = render(content([action]));
+  expect(changed.mock.calls).toEqual([[null]]);
+  page.rerender(content([action]));
+  expect(changed.mock.calls).toEqual([[null]]);
+  fireEvent.press(page.getByRole('button', { name: '删除' }));
+  page.rerender(content([action]));
+  expect(changed.mock.calls).toEqual([[null], ['delete']]);
+  page.rerender(content([]));
+  expect(changed.mock.calls).toEqual([[null], ['delete'], [null]]);
+});
+
+test.each([40, 20])(
+  '窄卡片实际宽%s时箭头居中且全部留在卡片横向范围内',
+  (width) => {
+    const page = render(
+      <ThemeProvider>
+        <ActionMenuContent
+          presentation="popover"
+          actions={[]}
+          onClose={jest.fn()}
+          pointer={{ edge: 'top', offset: 1000 }}
+        />
+      </ThemeProvider>
+    );
+    fireEvent(page.getByTestId('action-menu'), 'layout', {
+      nativeEvent: { layout: { width, height: 80 } },
+    });
+    const arrow = page.getByTestId('action-menu-pointer-top', {
+      includeHiddenElements: true,
+    });
+    const style = StyleSheet.flatten(arrow.props.style);
+    expect(style.left).toBeGreaterThanOrEqual(0);
+    expect(style.left + style.width).toBeLessThanOrEqual(width);
+    expect(style.left + style.width / 2).toBe(width / 2);
+  }
+);

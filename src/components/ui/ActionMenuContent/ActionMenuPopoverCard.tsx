@@ -15,10 +15,13 @@ export function ActionMenuPopoverCard({
   const styles = useThemedStyles(makeStyles);
   const colors = useColors();
   const [width, setWidth] = useState(0);
-  const half = r(13);
+  const pointerWidth = Math.min(r(26), width);
+  const pointerHeight = (pointerWidth * 14) / 26;
+  const half = pointerWidth / 2;
+  const inset = Math.min(r(32), width / 2);
   const offset =
     pointer && Number.isFinite(pointer.offset)
-      ? Math.max(r(32), Math.min(pointer.offset, width - r(32)))
+      ? Math.max(inset, Math.min(pointer.offset, width - inset))
       : width / 2;
   return (
     <View
@@ -39,15 +42,18 @@ export function ActionMenuPopoverCard({
           accessible={false}
           accessibilityElementsHidden
           importantForAccessibility="no-hide-descendants"
-          width={r(26)}
-          height={r(14)}
+          width={pointerWidth}
+          height={pointerHeight}
           viewBox="0 0 26 14"
           style={[
             styles.pointer,
-            { left: offset - half },
+            { left: offset - half, width: pointerWidth, height: pointerHeight },
             pointer.edge === 'top'
-              ? { top: -r(13) }
-              : { bottom: -r(13), transform: [{ rotate: '180deg' }] },
+              ? { top: -pointerHeight + r(1) }
+              : {
+                  bottom: -pointerHeight + r(1),
+                  transform: [{ rotate: '180deg' }],
+                },
           ]}
         >
           <Path
