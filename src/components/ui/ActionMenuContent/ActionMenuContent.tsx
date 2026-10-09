@@ -180,7 +180,7 @@ export function ActionMenuContent({
     return (
       <ActionMenuPopoverCard
         testID={testID}
-        style={style}
+        style={[confirming && styles.popoverConfirmRoot, style]}
         contentStyle={[confirming && styles.popoverConfirmCard, contentStyle]}
         pointer={pointer}
       >

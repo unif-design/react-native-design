@@ -683,15 +683,23 @@ test.each(['light', 'dark'] as const)(
     const page = render(content());
     fireEvent.press(page.getByRole('button', { name: '删除' }));
     expect(page.getByRole('button', { name: '删除' })).toHaveStyle({
-      backgroundColor: colors.error,
+      backgroundColor: colors.errorContainer,
+      borderRadius: radius.lg,
     });
-    expect(page.getByText('删除')).toHaveStyle({ color: colors.onError });
+    expect(page.getByTestId('action-menu-card')).toHaveStyle({
+      paddingHorizontal: space[8],
+      paddingVertical: space[7],
+    });
+    expect(page.getByText('删除')).toHaveStyle({
+      color: colors.error,
+      fontSize: typography.sm,
+    });
     expect(page.getByRole('header', { name: '删除聊天' })).toHaveStyle({
       color: colors.foreground,
     });
     page.rerender(content(true));
     expect(page.UNSAFE_getByType(ActivityIndicator).props.color).toBe(
-      colors.onError
+      colors.error
     );
     fireEvent.press(page.getByRole('button', { name: '删除' }));
     expect(remove).not.toHaveBeenCalled();

@@ -918,6 +918,11 @@ article header h1 {
   box-shadow: none !important;
 }
 
+/* 操作菜单的 RN 标题不继承文档 h1 的段间距。 */
+.markdown .unif-livedemo-frame [data-testid='action-menu-title'] {
+  margin-block: 0;
+}
+
 /* ---------- LiveDemo: 字体栈强制走 Unif sans / mono ---------- */
 /* react-native-web 把 RN 的 <Text> / <View> 渲染成带 atomic CSS class 的元素
    （如 css-text-XXX、r-fontFamily-XXX），其 font-family 默认走 RN-Web 内部栈

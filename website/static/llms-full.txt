@@ -1,7 +1,7 @@
 # Unif Design — 全文文档聚合
 
 > 可选全文。普通查询优先通过 llms.txt 定位相关单页。
-<!-- Generated from @unif/react-native-design@0.40.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.40.1; edit source documentation. -->
 
 ## 目录
 
@@ -215,7 +215,7 @@ const ActionMenuDemo = () => {
 
 ## 浮动菜单
 
-`presentation="popover"` 直接显示竖向操作行，可选图标、文字、危险色、禁用及忙碌状态。默认宽度`r(240)`、圆角`radius['3xl']`、主题描边和卡片阴影，每行至少44触达；图标无独立底圈；确认标题和说明左对齐，确认按钮为整行胶囊，菜单中的危险动作用主题危险文字色；二次确认使用 `error` 背景和 `onError` 文字／加载指示器，按压透明度沿用 `pressedOpacity`。确认卡采用 `space[7]` 内边距，明暗主题同步切换。没有title时不增加标题，不增加单独的取消行。
+`presentation="popover"` 直接显示竖向操作行，可选图标、文字、危险色、禁用及忙碌状态。默认宽度`r(240)`、圆角`radius['3xl']`、主题描边和卡片阴影，每行至少44触达；图标无独立底圈；确认标题和说明左对齐；确认阶段宽度为 `r(260)`，水平 `space[8]`、垂直 `space[7]` 留白分别覆盖菜单内边距。标题使用 `type.h2`／半粗体及1.3倍行高，说明使用 `type.sm`／常规字重及1.5倍行高。确认按钮为整行 `radius.lg` 圆角矩形、`type.sm`／半粗体；危险按钮采用 `errorContainer` 浅底和 `error` 文字／加载指示器，按压透明度沿用 `pressedOpacity`。明暗主题同步切换。没有title时不增加标题，不增加单独的取消行。
 
 此模式只提供菜单内容，不挂载Modal、遮罩或全屏容器，不计算锚点和安全区。输入框可以把它定位在加号上方；会话列表可以交给自己的窗口定位在长按行附近。`style`控制根卡片布局，`contentStyle`控制内部卡片；外部点击、返回和位置失效由宿主关闭。
 
