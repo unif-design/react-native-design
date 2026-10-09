@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.1](https://github.com/unif-design/react-native-design/compare/v0.40.0...v0.40.1) (2026-10-09)
+
+
+### Bug Fixes
+
+* **theme:** align conversation surfaces with brand tokens ([#149](https://github.com/unif-design/react-native-design/issues/149)) ([4057292](https://github.com/unif-design/react-native-design/commit/4057292da314569f9d473d9836af76e5aa721f33))
+
 # [0.40.0](https://github.com/unif-design/react-native-design/compare/v0.39.1...v0.40.0) (2026-10-09)
 
 
