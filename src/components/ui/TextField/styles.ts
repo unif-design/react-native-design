@@ -17,6 +17,11 @@ export const makeStyles = (c: ColorTokens) =>
       borderRadius: radius.md,
       borderWidth: TEXT_FIELD_BORDER_WIDTH,
     },
+    wrapInset: {
+      borderRadius: radius.pill,
+      borderColor: 'transparent',
+      backgroundColor: c.surfaceContainerHighest,
+    },
     wrapMultiline: {
       paddingVertical: TEXTAREA_VERTICAL_PADDING,
       alignItems: 'flex-start',

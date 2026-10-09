@@ -3,7 +3,7 @@ title: ImagePreview 图片预览
 description: 按稳定身份预览图片，交付切换和删除请求。
 ---
 
-<!-- Generated from @unif/react-native-design@0.39.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.39.1; edit source documentation. -->
 
 # ImagePreview 图片预览
 

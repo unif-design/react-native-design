@@ -3,11 +3,11 @@ title: TextEntryContent 文字编辑内容
 description: 受控文字、说明和确认按钮的组合。
 ---
 
-<!-- Generated from @unif/react-native-design@0.39.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.39.1; edit source documentation. -->
 
 # TextEntryContent 文字编辑内容
 
-组合标题、说明、文字输入和确认/取消按钮。默认 `card` 使用多行 Textarea，保留原有卡片和先确认后取消的操作顺序；`compact` 使用单行 Input、小标题和先取消后确认的右侧操作。值由调用方控制，宿主负责弹层、键盘与业务提交。
+组合标题、说明、文字输入和确认/取消按钮。默认 `card` 使用多行 Textarea，保留原有卡片和先确认后取消的操作顺序；`compact` 使用居中标题、灰色胶囊单行输入和先取消后确认的等宽按钮。输入复用 TextField 家族内部受控实现。值由调用方控制，宿主负责弹层、键盘与业务提交。
 
 ```tsx
 const TextEntryDemo = () => {
@@ -100,6 +100,6 @@ const [value, setValue] = useState(initialValue);
 
 只组合 Design 控件，不依赖 Chat。应用验证提交内容和处理错误；组件不管理提交 Promise。中文、大字号与明暗主题沿现有 ThemeProvider 处理。原生展厅位于「表单与输入」，实际键盘避让需在宿主验证。
 
-`compact` 标题使用 `type.sm`／`fw.semi`，表面无边框、圆角 `r(14)`、内边距 `space[6]`、内容间距 `space[5]`；操作行右对齐、间距 `space[4]`，取消采用 ghost sm，确认采用 primary sm。两种变体均保留原文提交、外部 value 更新、busy、maxLength 和 autoFocus；变体不决定会话、弹层位置或保存行为。
+`compact` 标题居中，使用 `type.body`／`fw.medium`；表面圆角 `r(30)`、内边距 `space[4]`、内容间距 `space[5]`。单行输入首次聚焦选中原文，底色不随焦点改变。取消采用 secondary lg、确认采用 primary lg，等宽胶囊并保留至少 44 的触达。两种变体均保留原文提交、外部 value 更新、busy、maxLength 和 autoFocus；变体不决定会话、弹层位置或保存行为。
 
 操作行保留自然换行，让较大字号或较长的自定义按钮文案仍可完整显示。
