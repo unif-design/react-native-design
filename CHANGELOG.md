@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.40.0](https://github.com/unif-design/react-native-design/compare/v0.39.1...v0.40.0) (2026-10-09)
+
+
+### Features
+
+* refine anchored action confirmations and compact text entry ([880f7d7](https://github.com/unif-design/react-native-design/commit/880f7d77703de05d107a661e53e8ddfcef9fea16))
+
 ## [0.39.1](https://github.com/unif-design/react-native-design/compare/v0.39.0...v0.39.1) (2026-10-08)
 
 
