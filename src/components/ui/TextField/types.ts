@@ -135,6 +135,8 @@ export type TextFieldBaseProps = Omit<TextInputProps, RemovedTextInputProps> &
     searchLayout?: SearchFieldLayout;
     /** internal:仅由 Textarea 的公开 surface 选择，无独立表面的多行输入。 */
     plainSurface?: boolean;
+    /** internal:TextEntryContent 的单行灰色胶囊，不对外透传样式。 */
+    insetSurface?: boolean;
     /** internal:Textarea 的文字对齐；不改变单行控件。 */
     contentAlignment?: 'start' | 'center';
   };

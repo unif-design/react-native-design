@@ -21,7 +21,11 @@ const actions: ActionMenuAction[] = [
     icon: 'trash',
     accessibilityHint: '先确认再移除原项',
     onPress: noop,
-    confirmation: { message: '确认删除？', confirmLabel: '删除' },
+    confirmation: {
+      title: '删除项目',
+      message: '确认删除？',
+      confirmLabel: '删除',
+    },
   },
 ];
 const items: readonly ImagePreviewItem[] = [
@@ -93,3 +97,12 @@ preview.current?.scrollTo('stable', false);
 <Sheet contentMode="auto">内容</Sheet>;
 
 <ActionMenuContent presentation="popover" actions={actions} onClose={noop} />;
+
+<ActionMenuContent
+  presentation="popover"
+  cancelLabel={null}
+  pointer={{ edge: 'top', offset: 120 }}
+  onConfirmationChange={noop}
+  actions={actions}
+  onClose={noop}
+/>;

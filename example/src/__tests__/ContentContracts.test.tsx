@@ -146,25 +146,25 @@ test('compact文字编辑使用单行Input和紧凑tokens，取消先于确认�
   expect(
     StyleSheet.flatten(page.getByTestId('entry').props.style)
   ).toMatchObject({
-    padding: space[6],
-    borderWidth: 0,
-    borderRadius: r(14),
+    padding: space[4],
+    borderWidth: 0.5,
+    borderRadius: r(30),
     gap: space[5],
   });
   expect(
     StyleSheet.flatten(page.getByText('重命名会话').props.style)
-  ).toMatchObject({ fontSize: typography.sm, fontWeight: fw.semi });
-  let actions = page.getByRole('button', { name: '取消' }).parent!;
-  while (
-    StyleSheet.flatten(actions.props.style)?.justifyContent !== 'flex-end' &&
-    actions.parent
-  )
-    actions = actions.parent;
-  expect(StyleSheet.flatten(actions.props.style)).toMatchObject({
-    justifyContent: 'flex-end',
-    flexWrap: 'wrap',
-    gap: space[4],
+  ).toMatchObject({
+    fontSize: typography.body,
+    fontWeight: fw.medium,
+    textAlign: 'center',
   });
+  expect(page.getByLabelText('重命名会话')).toHaveProp(
+    'selectTextOnFocus',
+    true
+  );
+  for (const label of ['取消', '确认']) {
+    expect(page.getByRole('button', { name: label })).toHaveStyle({ flex: 1 });
+  }
   expect(
     page.getAllByRole('button').map((button) => button.props.accessibilityLabel)
   ).toEqual(['取消', '确认']);
@@ -204,7 +204,7 @@ test('compact保留受控原文、长度、自动聚焦、取消与busy语义', 
   fireEvent.press(page.getByRole('button', { name: '取消' }));
   expect(onCancel).toHaveBeenCalledTimes(1);
   expect(StyleSheet.flatten(page.getByText('编辑').props.style).fontSize).toBe(
-    typography.sm * 1.5
+    typography.body * 1.5
   );
   page.rerender(content(true, ' 外部更新 '));
   expect(page.getByLabelText('编辑').props.editable).toBe(false);
@@ -319,7 +319,7 @@ test('popover只提供浮动菜单卡，文字与图标同排且禁用和忙碌�
     </ThemeProvider>
   );
   expect(page.queryByRole('button', { name: '取消' })).toBeNull();
-  expect(page.getByTestId('action-menu')).toHaveStyle({ width: r(200) });
+  expect(page.getByTestId('action-menu')).toHaveStyle({ width: r(240) });
   expect(page.getByRole('button', { name: '重命名' })).toHaveStyle({
     minHeight: 44,
   });
@@ -477,3 +477,130 @@ test('popover确认的取消和提交也保留原输入焦点且只交付一次'
     });
   }
 });
+
+test('浮动确认允许宿主取消，标题与单独删除按钮保留当前动作和busy保护', () => {
+  const remove = jest.fn(),
+    close = jest.fn(),
+    change = jest.fn();
+  const action: ActionMenuAction = {
+    id: 'remove',
+    label: '删除',
+    icon: 'trash',
+    tone: 'danger',
+    onPress: remove,
+    confirmation: {
+      title: '删除聊天',
+      message: '此操作无法撤销。',
+      confirmLabel: '删除',
+    },
+  };
+  const content = (loading = false) => (
+    <ThemeProvider>
+      <ActionMenuContent
+        presentation="popover"
+        cancelLabel={null}
+        actions={[{ ...action, loading }]}
+        onClose={close}
+        onConfirmationChange={change}
+      />
+    </ThemeProvider>
+  );
+  const page = render(content());
+  fireEvent.press(page.getByRole('button', { name: '删除' }));
+  expect(change).toHaveBeenLastCalledWith('remove');
+  expect(page.getByRole('header', { name: '删除聊天' })).toBeTruthy();
+  expect(page.getByText('此操作无法撤销。')).toBeTruthy();
+  expect(page.getAllByRole('button')).toHaveLength(1);
+  page.rerender(content(true));
+  fireEvent.press(page.getByRole('button', { name: '删除' }));
+  expect(remove).not.toHaveBeenCalled();
+  page.rerender(content());
+  fireEvent.press(page.getByRole('button', { name: '删除' }));
+  expect(close).toHaveBeenCalledTimes(1);
+  expect(remove).toHaveBeenCalledTimes(1);
+});
+
+test('浮动指针在卡片边缘内限位，方向可跟随宿主翻转且不进入读屏操作', () => {
+  const content = (edge: 'top' | 'bottom', offset: number) => (
+    <ThemeProvider>
+      <ActionMenuContent
+        presentation="popover"
+        pointer={{ edge, offset }}
+        actions={[{ id: 'rename', label: '重命名', onPress: jest.fn() }]}
+        onClose={jest.fn()}
+      />
+    </ThemeProvider>
+  );
+  const page = render(content('top', -100));
+  fireEvent(page.getByTestId('action-menu'), 'layout', {
+    nativeEvent: { layout: { width: 240, height: 80 } },
+  });
+  expect(
+    page.getByTestId('action-menu-pointer-top', { includeHiddenElements: true })
+  ).toHaveStyle({ left: r(32) - r(26) / 2 });
+  page.rerender(content('bottom', 1000));
+  expect(
+    page.getByTestId('action-menu-pointer-bottom', {
+      includeHiddenElements: true,
+    })
+  ).toHaveStyle({
+    left: 240 - r(32) - r(26) / 2,
+    transform: [{ rotate: '180deg' }],
+  });
+  expect(page.getAllByRole('button')).toHaveLength(1);
+});
+
+test('确认阶段仅随当前动作变化通知，宿主的内联回调重建不重复通知', () => {
+  const changed = jest.fn();
+  const action = {
+    id: 'delete',
+    label: '删除',
+    onPress: jest.fn(),
+    confirmation: { message: '确认？', confirmLabel: '确认删除' },
+  };
+  const content = (actions: ActionMenuAction[]) => (
+    <ThemeProvider>
+      <ActionMenuContent
+        presentation="popover"
+        actions={actions}
+        onClose={jest.fn()}
+        onConfirmationChange={(id) => changed(id)}
+      />
+    </ThemeProvider>
+  );
+  const page = render(content([action]));
+  expect(changed.mock.calls).toEqual([[null]]);
+  page.rerender(content([action]));
+  expect(changed.mock.calls).toEqual([[null]]);
+  fireEvent.press(page.getByRole('button', { name: '删除' }));
+  page.rerender(content([action]));
+  expect(changed.mock.calls).toEqual([[null], ['delete']]);
+  page.rerender(content([]));
+  expect(changed.mock.calls).toEqual([[null], ['delete'], [null]]);
+});
+
+test.each([40, 20])(
+  '窄卡片实际宽%s时箭头居中且全部留在卡片横向范围内',
+  (width) => {
+    const page = render(
+      <ThemeProvider>
+        <ActionMenuContent
+          presentation="popover"
+          actions={[]}
+          onClose={jest.fn()}
+          pointer={{ edge: 'top', offset: 1000 }}
+        />
+      </ThemeProvider>
+    );
+    fireEvent(page.getByTestId('action-menu'), 'layout', {
+      nativeEvent: { layout: { width, height: 80 } },
+    });
+    const arrow = page.getByTestId('action-menu-pointer-top', {
+      includeHiddenElements: true,
+    });
+    const style = StyleSheet.flatten(arrow.props.style);
+    expect(style.left).toBeGreaterThanOrEqual(0);
+    expect(style.left + style.width).toBeLessThanOrEqual(width);
+    expect(style.left + style.width / 2).toBe(width / 2);
+  }
+);

@@ -41,6 +41,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
       maxHeight,
       searchLayout,
       plainSurface,
+      insetSurface,
       contentAlignment = 'start',
       leading,
       trailing,
@@ -186,6 +187,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
             searchLayout === undefined && !plain && wrapStateStyles,
             searchLayout !== undefined && styles.searchInteractiveRow,
             plain && styles.wrapPlain,
+            !multiline && insetSurface && styles.wrapInset,
             multiline
               ? {
                   minHeight: normalizedHeight,

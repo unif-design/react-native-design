@@ -6,7 +6,11 @@ import { useMenuMousePress } from './useMenuMousePress';
 import { makeStyles } from './styles';
 import type { ActionMenuItemProps } from './types';
 
-export function ActionMenuItem({ action, onPress }: ActionMenuItemProps) {
+export function ActionMenuItem({
+  action,
+  onPress,
+  confirmation = false,
+}: ActionMenuItemProps) {
   const styles = useThemedStyles(makeStyles);
   const colors = useColors();
   const label = normalizeNonBlankText(action.label);
@@ -26,6 +30,7 @@ export function ActionMenuItem({ action, onPress }: ActionMenuItemProps) {
       {...mouseHandlers}
       style={({ pressed }) => [
         styles.popoverRow,
+        confirmation && styles.popoverConfirmButton,
         (pressed || mousePressed) && styles.popoverRowPressed,
         disabled && styles.popoverRowDisabled,
       ]}
@@ -46,6 +51,7 @@ export function ActionMenuItem({ action, onPress }: ActionMenuItemProps) {
       <Text
         style={[
           styles.popoverLabel,
+          confirmation && styles.popoverConfirmLabel,
           action.tone === 'danger' && styles.popoverDanger,
         ]}
       >

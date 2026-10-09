@@ -3,7 +3,7 @@ import { Text, View } from 'react-native';
 import { useThemedStyles } from '../../../theme';
 import { Button } from '../Button';
 import { Textarea } from '../Textarea';
-import { Input } from '../Input';
+import { TextFieldBase } from '../TextField/TextFieldBase';
 import { makeStyles } from './styles';
 import type { TextEntryContentProps } from './types';
 
@@ -26,7 +26,15 @@ export function TextEntryContent({
 }: TextEntryContentProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
   const compact = variant === 'compact';
-  const Field = compact ? Input : Textarea;
+  const fieldProps = {
+    value,
+    onChangeText,
+    maxLength,
+    editable: !busy,
+    autoFocus,
+    accessibilityLabel: title,
+    placeholder,
+  };
   return (
     <View
       style={[styles.root, compact && styles.compactRoot, style]}
@@ -39,28 +47,31 @@ export function TextEntryContent({
         {title}
       </Text>
       {message ? <Text style={styles.message}>{message}</Text> : null}
-      <Field
-        value={value}
-        onChangeText={onChangeText}
-        maxLength={maxLength}
-        editable={!busy}
-        autoFocus={autoFocus}
-        accessibilityLabel={title}
-        placeholder={placeholder}
-      />
+      {compact ? (
+        <TextFieldBase
+          {...fieldProps}
+          multiline={false}
+          insetSurface
+          selectTextOnFocus
+        />
+      ) : (
+        <Textarea {...fieldProps} />
+      )}
       <View style={[styles.actions, compact && styles.compactActions]}>
         {compact ? (
           <Button
             label={cancelLabel}
-            size="sm"
-            variant="ghost"
+            size="lg"
+            variant="secondary"
+            style={styles.compactButton}
             disabled={busy}
             onPress={onCancel}
           />
         ) : null}
         <Button
           label={confirmLabel}
-          size="sm"
+          size={compact ? 'lg' : 'sm'}
+          style={compact ? styles.compactButton : undefined}
           loading={busy}
           onPress={() => onSubmit(value)}
         />

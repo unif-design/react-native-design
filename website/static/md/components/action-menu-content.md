@@ -3,7 +3,7 @@ title: ActionMenuContent 操作菜单内容
 description: 通用动作、忙碌禁用和可选二次确认。
 ---
 
-<!-- Generated from @unif/react-native-design@0.39.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design; edit source documentation. -->
 
 # ActionMenuContent 操作菜单内容
 
@@ -85,7 +85,7 @@ const ActionMenuDemo = () => {
 
 ## API
 
-`ActionMenuAction` 由 Design 定义：`id: string`、`label: string`、`onPress(): void` 必填；`icon?: IconName`、`accessibilityHint?`、`disabled?`、`loading?`、`tone?: 'neutral' | 'danger'` 和 `confirmation?: ActionMenuConfirmation` 可选。确认内容为 `message: string` 与 `confirmLabel: string`。
+`ActionMenuAction` 由 Design 定义：`id: string`、`label: string`、`onPress(): void` 必填；`icon?: IconName`、`accessibilityHint?`、`disabled?`、`loading?`、`tone?: 'neutral' | 'danger'` 和 `confirmation?: ActionMenuConfirmation` 可选。确认内容为 `message: string` 与 `confirmLabel: string`，可选 `title` 覆盖确认阶段的标题。
 
 | 参数               | 类型                               | 默认值              | 说明                                                                  |
 | ------------------ | ---------------------------------- | ------------------- | --------------------------------------------------------------------- |
@@ -93,9 +93,11 @@ const ActionMenuDemo = () => {
 | `onClose`          | `() => void`                       | 必填                | 遮罩、普通取消与确认后的关闭请求                                      |
 | `presentation`     | `'dialog' \| 'sheet' \| 'popover'` | `'dialog'`          | 居中、底部或纯浮动菜单卡片                                            |
 | `title`            | `string`                           | —                   | 可选单行标题                                                          |
-| `cancelLabel`      | `string`                           | `'取消'`            | 普通取消与返回菜单文案                                                |
+| `cancelLabel`      | `string \| null`                   | `'取消'`            | 普通取消与返回菜单文案；null 隐藏，由宿主提供外部取消                 |
 | `style` / `testID` | `StyleProp<ViewStyle>` / `string`  | — / `'action-menu'` | 根容器样式与定位前缀                                                  |
 | `contentStyle`     | `StyleProp<ViewStyle>`             | —                   | 内部动作卡片样式；嵌入已有面板时可显式调整上留白，根容器仍由style控制 |
+
+`pointer?: { edge: 'top' | 'bottom'; offset: number }` 为浮动卡提供装饰箭头，offset 是相对卡片左边的指针中心；组件在圆角内限位，非有限值居中。宿主计算锚点与方向。`onConfirmationChange?(actionId: string | null)` 通知当前确认的动作 ID，动作失效时通知 null；它不改变业务目标或开关窗口。
 
 普通动作只调用 `onPress`。有 confirmation 的动作先展示说明；确认时先 `onClose` 再调用该动作，取消确认仅返回菜单。禁用或加载时不能执行。正在确认的动作消失后回到菜单；业务目标是否仍然有效由应用在回调中复核。
 
@@ -103,8 +105,33 @@ const ActionMenuDemo = () => {
 
 ## 浮动菜单
 
-`presentation="popover"` 直接显示竖向操作行，可选图标、文字、危险色、禁用及忙碌状态。默认宽度`r(200)`、圆角`r(20)`、主题描边和卡片阴影，每行至少44触达；确认按钮纵向布局，长确认文案不挤进两列。没有title时不增加标题，不增加单独的取消行。
+`presentation="popover"` 直接显示竖向操作行，可选图标、文字、危险色、禁用及忙碌状态。默认宽度`r(240)`、圆角`r(28)`、主题描边和卡片阴影，每行至少44触达；图标无独立底圈；确认标题和说明左对齐，确认按钮为整行胶囊，危险动作使用危险文字色。没有title时不增加标题，不增加单独的取消行。
 
 此模式只提供菜单内容，不挂载Modal、遮罩或全屏容器，不计算锚点和安全区。输入框可以把它定位在加号上方；会话列表可以交给自己的窗口定位在长按行附近。`style`控制根卡片布局，`contentStyle`控制内部卡片；外部点击、返回和位置失效由宿主关闭。
 
-普通动作继续只交`onPress`，宿主自行收起再执行。确认取消返回原菜单，确认提交先请求`onClose`再交当前动作。Web鼠标按下保留原输入焦点，点击和键盘激活仍只交一次动作；按钮禁用或忙碌时不能触发。
+普通动作继续只交`onPress`，宿主自行收起再执行。保留取消按钮时，确认取消返回原菜单；设置 `cancelLabel={null}` 时由宿主点外或返回关闭。确认提交先请求`onClose`再交当前动作。Web鼠标按下保留原输入焦点，点击和键盘激活仍只交一次动作；按钮禁用或忙碌时不能触发。
+
+```tsx
+<ActionMenuContent
+  presentation="popover"
+  cancelLabel={null}
+  pointer={{ edge: 'top', offset: 120 }}
+  actions={[
+    {
+      id: 'delete',
+      label: '删除',
+      icon: 'trash',
+      tone: 'danger',
+      confirmation: {
+        title: '删除项目',
+        message: '此操作无法撤销。',
+        confirmLabel: '删除',
+      },
+      onPress: deleteOriginalItem,
+    },
+  ]}
+  onClose={closeModal}
+/>
+```
+
+宿主应在确认阶段传入指针，其他阶段按设计省略；更换业务目标时创建新的内容实例，避免把确认复用到同 ID 的另一个对象。窗外关闭不交付删除。

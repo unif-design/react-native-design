@@ -204,6 +204,7 @@ export function ActionsScene(): React.JSX.Element {
           <ActionMenuContent
             presentation="popover"
             testID="actions-floating-menu"
+            pointer={{ edge: 'top', offset: 120 }}
             onClose={() =>
               record('ActionMenuContent', '关闭浮动菜单', '已收到关闭请求')
             }
@@ -221,6 +222,7 @@ export function ActionsScene(): React.JSX.Element {
                 icon: 'trash',
                 tone: 'danger',
                 confirmation: {
+                  title: '删除项目',
                   message: '移除原演示项目？',
                   confirmLabel: '确认浮动移除',
                 },

@@ -248,7 +248,7 @@ export type SanitizedTextFieldWrapperProps = {
 export function sanitizeTextFieldWrapperProps(
   props: Record<string, unknown>
 ): SanitizedTextFieldWrapperProps {
-  const { multiline, searchLayout, ...safeProps } = props;
+  const { multiline, searchLayout, insetSurface, ...safeProps } = props;
   const diagnostics: string[] = [];
   if (multiline !== undefined) {
     diagnostics.push('multiline');
@@ -256,6 +256,7 @@ export function sanitizeTextFieldWrapperProps(
   if (searchLayout !== undefined) {
     diagnostics.push('searchLayout');
   }
+  if (insetSurface !== undefined) diagnostics.push('insetSurface');
   return { props: safeProps, diagnostics };
 }
 

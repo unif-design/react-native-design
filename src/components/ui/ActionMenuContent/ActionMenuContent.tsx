@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useThemedStyles } from '../../../theme';
 import { Button } from '../Button';
@@ -6,6 +6,7 @@ import type { ActionMenuContentProps } from './types';
 import { makeStyles } from './styles';
 import { ActionMenuItem } from './ActionMenuItem';
 import { ActionMenuSheetCard } from './ActionMenuSheetCard';
+import { ActionMenuPopoverCard } from './ActionMenuPopoverCard';
 
 export function ActionMenuContent({
   actions,
@@ -13,6 +14,8 @@ export function ActionMenuContent({
   presentation = 'dialog',
   title,
   cancelLabel = '取消',
+  pointer,
+  onConfirmationChange,
   style,
   contentStyle,
   testID = 'action-menu',
@@ -37,34 +40,53 @@ export function ActionMenuContent({
     if (!confirming) setConfirmationId(null);
   }, [confirming]);
 
+  const confirmedId = confirming?.id ?? null;
+  const notifyConfirmation = useRef(onConfirmationChange);
+  notifyConfirmation.current = onConfirmationChange;
+  useEffect(() => {
+    notifyConfirmation.current?.(confirmedId);
+  }, [confirmedId]);
+
+  const heading = confirming?.confirmation?.title ?? title;
   const body = (
     <>
-      {title ? (
+      {heading ? (
         <Text
           testID={`${testID}-title`}
-          style={styles.title}
+          accessibilityRole="header"
+          style={[styles.title, isPopover && confirming && styles.popoverTitle]}
           numberOfLines={1}
           ellipsizeMode="tail"
         >
-          {title}
+          {heading}
         </Text>
       ) : null}
       {confirming?.confirmation ? (
         <>
-          <Text style={styles.confirmation} accessibilityLiveRegion="polite">
+          <Text
+            style={[
+              styles.confirmation,
+              isPopover && styles.popoverConfirmation,
+            ]}
+            accessibilityLiveRegion="polite"
+          >
             {confirming.confirmation.message}
           </Text>
           {isPopover ? (
             <View style={styles.popoverConfirmationActions}>
+              {cancelLabel !== null ? (
+                <ActionMenuItem
+                  confirmation
+                  action={{
+                    id: 'cancel-confirmation',
+                    label: cancelLabel,
+                    onPress: cancelConfirmation,
+                  }}
+                  onPress={cancelConfirmation}
+                />
+              ) : null}
               <ActionMenuItem
-                action={{
-                  id: 'cancel-confirmation',
-                  label: cancelLabel,
-                  onPress: cancelConfirmation,
-                }}
-                onPress={cancelConfirmation}
-              />
-              <ActionMenuItem
+                confirmation
                 action={{
                   ...confirming,
                   label: confirming.confirmation.confirmLabel,
@@ -76,12 +98,14 @@ export function ActionMenuContent({
             </View>
           ) : (
             <View style={styles.sheetActions}>
-              <Button
-                label={cancelLabel}
-                variant="neutral"
-                style={styles.sheetAction}
-                onPress={cancelConfirmation}
-              />
+              {cancelLabel !== null ? (
+                <Button
+                  label={cancelLabel}
+                  variant="neutral"
+                  style={styles.sheetAction}
+                  onPress={cancelConfirmation}
+                />
+              ) : null}
               <Button
                 label={confirming.confirmation.confirmLabel}
                 variant="danger"
@@ -130,7 +154,7 @@ export function ActionMenuContent({
               )
             )}
           </View>
-          {!isSheet && !isPopover ? (
+          {!isSheet && !isPopover && cancelLabel !== null ? (
             <Button label={cancelLabel} variant="text" onPress={onClose} />
           ) : null}
         </>
@@ -141,10 +165,6 @@ export function ActionMenuContent({
     <ActionMenuSheetCard contentStyle={contentStyle} testID={`${testID}-card`}>
       {body}
     </ActionMenuSheetCard>
-  ) : isPopover ? (
-    <View testID={`${testID}-card`} style={[styles.popoverCard, contentStyle]}>
-      {body}
-    </View>
   ) : (
     <Pressable
       accessible={false}
@@ -158,9 +178,14 @@ export function ActionMenuContent({
 
   if (isPopover)
     return (
-      <View testID={testID} style={[styles.popoverRoot, style]}>
-        {content}
-      </View>
+      <ActionMenuPopoverCard
+        testID={testID}
+        style={style}
+        contentStyle={[confirming && styles.popoverConfirmCard, contentStyle]}
+        pointer={pointer}
+      >
+        {body}
+      </ActionMenuPopoverCard>
     );
 
   return (

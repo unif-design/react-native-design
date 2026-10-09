@@ -13,16 +13,21 @@ export const makeStyles = (colors: ColorTokens) =>
     },
     title: { color: colors.foreground, fontSize: type.h3, fontWeight: fw.semi },
     compactRoot: {
-      borderWidth: 0,
-      borderRadius: r(14),
-      padding: space[6],
+      borderWidth: 0.5,
+      borderRadius: r(30),
+      padding: space[4],
       gap: space[5],
     },
-    compactTitle: { fontSize: type.sm },
+    compactTitle: {
+      fontSize: type.body,
+      fontWeight: fw.medium,
+      textAlign: 'center',
+      paddingVertical: space[2],
+    },
+    compactButton: { flex: 1, borderRadius: radius.pill },
     message: { color: colors.foregroundMuted, fontSize: type.sm },
     actions: { flexDirection: 'row', flexWrap: 'wrap', gap: space[3] },
     compactActions: {
-      justifyContent: 'flex-end',
-      gap: space[4],
+      gap: space[2],
     },
   });
