@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { fw, r, radius, space, type, type ColorTokens } from '../../../theme';
+import { fw, radius, space, type, type ColorTokens } from '../../../theme';
 
 export const makeStyles = (colors: ColorTokens) =>
   StyleSheet.create({
@@ -14,15 +14,15 @@ export const makeStyles = (colors: ColorTokens) =>
     title: { color: colors.foreground, fontSize: type.h3, fontWeight: fw.semi },
     compactRoot: {
       borderWidth: 0.5,
-      borderRadius: r(30),
-      padding: space[4],
+      borderRadius: radius['3xl'],
+      padding: space[7],
       gap: space[5],
     },
     compactTitle: {
-      fontSize: type.body,
-      fontWeight: fw.medium,
+      fontSize: type.h2,
+      fontWeight: fw.semi,
       textAlign: 'center',
-      paddingVertical: space[2],
+      paddingVertical: space[1],
     },
     compactButton: { flex: 1, borderRadius: radius.pill },
     message: { color: colors.foregroundMuted, fontSize: type.sm },

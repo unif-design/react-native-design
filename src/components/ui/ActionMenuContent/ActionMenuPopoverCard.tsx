@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { r, useColors, useThemedStyles } from '../../../theme';
+import { r, radius, useColors, useThemedStyles } from '../../../theme';
 import { makeStyles } from './styles';
 import type { ActionMenuPopoverCardProps } from './types';
 
@@ -18,7 +18,7 @@ export function ActionMenuPopoverCard({
   const pointerWidth = Math.min(r(26), width);
   const pointerHeight = (pointerWidth * 14) / 26;
   const half = pointerWidth / 2;
-  const inset = Math.min(r(32), width / 2);
+  const inset = Math.min(radius['3xl'] + half, width / 2);
   const offset =
     pointer && Number.isFinite(pointer.offset)
       ? Math.max(inset, Math.min(pointer.offset, width - inset))

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import { useThemedStyles } from '../../../theme';
+import { useColors, useThemedStyles } from '../../../theme';
 import { Button } from '../Button';
 import { Textarea } from '../Textarea';
 import { TextFieldBase } from '../TextField/TextFieldBase';
@@ -25,6 +25,7 @@ export function TextEntryContent({
   testID,
 }: TextEntryContentProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
+  const colors = useColors();
   const compact = variant === 'compact';
   const fieldProps = {
     value,
@@ -34,6 +35,7 @@ export function TextEntryContent({
     autoFocus,
     accessibilityLabel: title,
     placeholder,
+    selectionColor: colors.primary,
   };
   return (
     <View

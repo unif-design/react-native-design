@@ -17,7 +17,12 @@ export function ActionMenuItem({
   const busy = action.loading === true;
   const disabled = action.disabled === true || busy || !label;
   const { mousePressed, ...mouseHandlers } = useMenuMousePress(disabled);
-  const color = action.tone === 'danger' ? colors.error : colors.foreground;
+  const danger = action.tone === 'danger';
+  const color = danger
+    ? confirmation
+      ? colors.onError
+      : colors.error
+    : colors.foreground;
   return (
     <Pressable
       accessible={Boolean(label)}
@@ -31,7 +36,11 @@ export function ActionMenuItem({
       style={({ pressed }) => [
         styles.popoverRow,
         confirmation && styles.popoverConfirmButton,
-        (pressed || mousePressed) && styles.popoverRowPressed,
+        confirmation && danger && styles.popoverConfirmDanger,
+        (pressed || mousePressed) &&
+          (confirmation
+            ? styles.popoverConfirmPressed
+            : styles.popoverRowPressed),
         disabled && styles.popoverRowDisabled,
       ]}
     >
@@ -42,7 +51,7 @@ export function ActionMenuItem({
           importantForAccessibility="no-hide-descendants"
         >
           {busy ? (
-            <ActivityIndicator size="small" color={colors.foregroundMuted} />
+            <ActivityIndicator size="small" color={color} />
           ) : action.icon ? (
             <Icon name={action.icon} size={20} color={color} />
           ) : null}
@@ -52,7 +61,7 @@ export function ActionMenuItem({
         style={[
           styles.popoverLabel,
           confirmation && styles.popoverConfirmLabel,
-          action.tone === 'danger' && styles.popoverDanger,
+          { color },
         ]}
       >
         {action.label}
