@@ -4,7 +4,7 @@ title: 设计原则
 description: 'Unif Design 的文案、颜色、布局与组件组合原则。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.39.1; edit source documentation. -->
+<!-- Generated from @unif/react-native-design; edit source documentation. -->
 
 # 设计原则
 

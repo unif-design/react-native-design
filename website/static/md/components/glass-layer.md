@@ -4,7 +4,7 @@ title: GlassLayer 玻璃层
 description: '随主题渲染玻璃材质，并提供明确的平台降级。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.39.1; edit source documentation. -->
+<!-- Generated from @unif/react-native-design; edit source documentation. -->
 
 # GlassLayer 玻璃层
 

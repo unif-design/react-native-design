@@ -5,7 +5,7 @@ title: 升级 / 迁移
 description: '已发布版本的变量、接口与依赖调整。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.39.1; edit source documentation. -->
+<!-- Generated from @unif/react-native-design; edit source documentation. -->
 
 # 升级 / 迁移
 

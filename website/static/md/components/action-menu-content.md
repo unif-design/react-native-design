@@ -3,7 +3,7 @@ title: ActionMenuContent 操作菜单内容
 description: 通用动作、忙碌禁用和可选二次确认。
 ---
 
-<!-- Generated from @unif/react-native-design@0.39.1; edit source documentation. -->
+<!-- Generated from @unif/react-native-design; edit source documentation. -->
 
 # ActionMenuContent 操作菜单内容
 

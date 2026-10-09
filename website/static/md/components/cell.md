@@ -4,7 +4,7 @@ title: Cell · List 列表行
 description: '展示列表行信息，通过 List 组合不同分组样式。'
 ---
 
-<!-- Generated from @unif/react-native-design@0.39.1; edit source documentation. -->
+<!-- Generated from @unif/react-native-design; edit source documentation. -->
 
 # Cell · List 列表行
 

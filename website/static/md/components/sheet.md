@@ -3,7 +3,7 @@ title: Sheet 内容面板
 description: 固定头尾与三种有界内容布局。
 ---
 
-<!-- Generated from @unif/react-native-design@0.39.1; edit source documentation. -->
+<!-- Generated from @unif/react-native-design; edit source documentation. -->
 
 # Sheet 内容面板
 
