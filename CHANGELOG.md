@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.3](https://github.com/unif-design/react-native-design/compare/v0.40.2...v0.40.3) (2026-10-10)
+
+
+### Bug Fixes
+
+* **segmented:** show disabled items with reduced opacity ([#151](https://github.com/unif-design/react-native-design/issues/151)) ([9c02818](https://github.com/unif-design/react-native-design/commit/9c028186e80de110459cc8e6cb8b7e6b773a26a0))
+
 ## [0.40.2](https://github.com/unif-design/react-native-design/compare/v0.40.1...v0.40.2) (2026-10-09)
 
 
