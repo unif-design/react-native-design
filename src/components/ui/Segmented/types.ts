@@ -10,7 +10,7 @@ export type SegmentedProps = {
   items: TabItem[];
   /** 尺寸,默认 `'md'`。`'sm'` 给模型下拉等局促位用——更小,触控 < 44pt(见 styles.sizingFor) */
   size?: SegmentedSize;
-  /** [L-82] 整体禁用 —— 所有 item 不可点击,a11y state 同步 */
+  /** [L-82] 整体禁用 —— 所有 item 不可点击并淡化呈现，保留当前选中项，a11y state 同步 */
   disabled?: boolean;
   /** 容器 testID；item testID 自动派生为 `${testID}-${id}` */
   testID?: string;
