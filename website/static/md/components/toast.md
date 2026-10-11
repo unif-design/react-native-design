@@ -10,6 +10,8 @@ description: '显示短暂提示，并由 ToastHost 承载。'
 
 非阻塞反馈——3 秒后自动消失，居中或底部出现。
 
+原生和 Web 的提示表面均使用主题 GlassLayer，文字使用同主题 foreground；消息、持续时间、位置、状态点与读屏播报沿原契约。减少透明度时使用实色回退。
+
 ## 代码演示 {#实时预览}
 
 下方在 Web 平台解析到 `ToastHost.web.tsx`：使用纯 React state、CSS transition 与 timer 驱动 fade + slide；native 才解析到 `ToastHost.tsx` 并使用 Reanimated 4。两端共享同一个 Toast Store 与 delivery identity 契约。每个 Button 都带真实的 `onPress`，点击即可触发对应提示。

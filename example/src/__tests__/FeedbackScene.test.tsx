@@ -9,6 +9,7 @@ import {
 } from '@testing-library/react-native';
 import {
   GlassLayer,
+  lightColors,
   CircularProgress,
   Empty,
   Pulse,
@@ -445,8 +446,7 @@ test('GlassLayer 初始不挂载，用户开启后只在有限容器中切换 cl
     includeHiddenElements: true,
   });
   expect(StyleSheet.flatten(glassLayer.props.style)).toMatchObject({
-    backgroundColor: componentByTestID(GlassLayer, 'feedback-glass-layer').props
-      .tintColor,
+    backgroundColor: lightColors.surface,
   });
   fireEvent.press(screen.getByRole('tab', { name: '标准玻璃' }));
   expect(

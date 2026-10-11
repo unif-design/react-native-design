@@ -67,6 +67,8 @@ const ImagePreviewDemo = () => {
 };
 ```
 
+计数胶囊与删除控件使用主题玻璃，图片画布保持黑色、媒体保持 contain 且没有边框或圆角。返回控件由宿主组合 IconButton 的 glass 变体。
+
 ## 用法
 
 ```tsx

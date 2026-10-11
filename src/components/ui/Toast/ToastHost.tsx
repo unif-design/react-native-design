@@ -1,3 +1,4 @@
+import { GlassLayer } from '../GlassLayer';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -175,6 +176,7 @@ export function ToastHost({
   return (
     <View style={[styles.host, posStyle]} pointerEvents="none" testID={testID}>
       <Animated.View style={[styles.toast, animatedStyle]}>
+        <GlassLayer style={styles.material} />
         {dotColor ? (
           <View style={[styles.dot, { backgroundColor: dotColor }]} />
         ) : null}

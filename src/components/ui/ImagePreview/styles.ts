@@ -34,8 +34,10 @@ export const makeStyles = (colors: ColorTokens) =>
       borderRadius: radius.pill,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.outline,
-      backgroundColor: colors.surface,
+      backgroundColor: 'transparent',
+      overflow: 'hidden',
     },
+    counterMaterial: { borderRadius: radius.pill },
     counterText: {
       color: colors.foreground,
       fontSize: typography.sm,

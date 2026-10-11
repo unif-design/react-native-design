@@ -20,6 +20,8 @@ export const makeStyles = (c: ColorTokens) =>
       padding: r(2),
       alignSelf: 'flex-start',
     },
+    glass: { backgroundColor: 'transparent' },
+    material: { borderRadius: radius.md },
     segItem: {
       alignItems: 'center',
       justifyContent: 'center',

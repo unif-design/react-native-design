@@ -5,6 +5,8 @@ export type SegmentedSize = 'sm' | 'md';
 
 /** Segmented 与 Tabs 共用 item 形状；命名独立以表达控件意图差异。 */
 export type SegmentedProps = {
+  /** glass 用于浮动选择；默认 solid 适合正文内选择。 */
+  surface?: 'solid' | 'glass';
   value: string;
   onChange: (id: string) => void;
   items: TabItem[];

@@ -1,3 +1,4 @@
+import { GlassLayer } from '../GlassLayer';
 import React, { useMemo } from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
@@ -21,6 +22,7 @@ import type { SegmentedProps } from './types';
  * `size`:默认 `'md'`(44pt 触控达标);`'sm'` 紧凑(28pt)给模型下拉等局促位用。
  */
 export function Segmented({
+  surface = 'solid',
   value,
   onChange,
   items,
@@ -38,7 +40,12 @@ export function Segmented({
 
   return (
     // [L-34] accessibilityRole="tablist" —— SR 宣读"标签列表"
-    <View style={styles.seg} testID={testID} accessibilityRole="tablist">
+    <View
+      style={[styles.seg, surface === 'glass' && styles.glass]}
+      testID={testID}
+      accessibilityRole="tablist"
+    >
+      {surface === 'glass' ? <GlassLayer style={styles.material} /> : null}
       {items.map((it) => {
         const on = it.id === value;
         const itemTestID = childTestID(testID, it.id, it.testID);
@@ -64,7 +71,11 @@ export function Segmented({
             <Text
               style={{
                 fontSize: textSize,
-                color: on ? c.foreground : c.foregroundSubtle,
+                color: on
+                  ? c.foreground
+                  : surface === 'glass'
+                    ? c.foregroundMuted
+                    : c.foregroundSubtle,
                 fontWeight: on ? fw.semi : fw.medium,
               }}
               numberOfLines={1}

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import {
   ActivityIndicator,
+  StyleSheet,
   type AccessibilityRole,
   type AccessibilityState,
   type StyleProp,
@@ -10,9 +11,11 @@ import { Pressable } from 'react-native-gesture-handler';
 import {
   fixed,
   pressedOpacity,
+  radius,
   useColors,
   useThemedStyles,
 } from '../../../theme';
+import { GlassLayer } from '../GlassLayer';
 import { makeStyles, paletteFor, sizingFor } from './styles';
 import type {
   ButtonBaseRenderContext,
@@ -77,6 +80,7 @@ export function ButtonBase({
   const palette = useMemo(() => paletteFor(variant, c), [variant, c]);
 
   const isText = variant === 'text';
+  const glassRadius = StyleSheet.flatten(style)?.borderRadius ?? radius.pill;
   const unavailable = disabled === true || loading === true;
   const hasAccessibleName = accessibilityLabel !== undefined;
 
@@ -125,7 +129,7 @@ export function ButtonBase({
           // square 时方形:width=height,horizontal padding=0
           width: square ? sizing.h : undefined,
           paddingHorizontal: isText || square ? 0 : sizing.px,
-          borderRadius: sizing.br,
+          borderRadius: variant === 'glass' ? glassRadius : sizing.br,
           backgroundColor: palette.bg,
           borderColor: palette.border ?? 'transparent',
           borderWidth: palette.border ? 1 : 0,
@@ -136,6 +140,9 @@ export function ButtonBase({
         style,
       ]}
     >
+      {variant === 'glass' ? (
+        <GlassLayer style={{ borderRadius: glassRadius }} />
+      ) : null}
       {loading ? (
         <ActivityIndicator size={loadingSize ?? 'small'} color={palette.fg} />
       ) : (

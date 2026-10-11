@@ -1,3 +1,4 @@
+import { GlassLayer } from '../GlassLayer';
 import {
   forwardRef,
   useEffect,
@@ -236,6 +237,7 @@ export const ImagePreview = forwardRef<ImagePreviewHandle, ImagePreviewProps>(
             accessibilityLiveRegion="polite"
             accessibilityLabel={`第${selection.index + 1}张，共${items.length}张`}
           >
+            <GlassLayer style={styles.counterMaterial} />
             <Text style={styles.counterText}>
               第{selection.index + 1}/{items.length}张
             </Text>
@@ -245,7 +247,7 @@ export const ImagePreview = forwardRef<ImagePreviewHandle, ImagePreviewProps>(
           <IconButton
             icon="trash"
             size="sm"
-            variant="neutral"
+            variant="glass"
             disabled={current.deleting}
             accessibilityLabel={DELETE_LABEL}
             style={styles.deleteButton}

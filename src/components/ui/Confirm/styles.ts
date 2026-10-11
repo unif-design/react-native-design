@@ -22,11 +22,12 @@ export const makeStyles = (c: ColorTokens) =>
       backgroundColor: c.scrim,
     },
     sheet: {
-      backgroundColor: c.surface,
+      backgroundColor: 'transparent',
       borderTopLeftRadius: r(20),
       borderTopRightRadius: r(20),
       paddingTop: space['7'],
     },
+    material: { borderTopLeftRadius: r(20), borderTopRightRadius: r(20) },
     body: {
       paddingHorizontal: space['9'],
       gap: space['5'],

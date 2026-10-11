@@ -13,6 +13,7 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
  *   避免 header right-tray 多个 icon 都染成主橙色，视觉过重
  * - `outline` 白底 + 灰边框 + 深色字（中性操作）
  * - `danger` 红底（破坏性操作：删除 / 退出 / 解绑）
+ * - `glass` 浮动操作的主题玻璃表面，低版本和减少透明度时为实色
  * - `text` 纯文字按钮，无背景无 padding（行内链接式触发）
  */
 export type ButtonVariant =
@@ -22,7 +23,8 @@ export type ButtonVariant =
   | 'neutral'
   | 'outline'
   | 'danger'
-  | 'text';
+  | 'text'
+  | 'glass';
 
 export type ButtonProps = {
   /** 按钮文案；icon-only 场景请用 IconButton */

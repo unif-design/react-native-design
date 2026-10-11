@@ -22,12 +22,14 @@ export const makeStyles = (c: ColorTokens) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: space[2],
-      backgroundColor: c.inverseSurface,
+      backgroundColor: 'transparent',
+      overflow: 'hidden',
       borderRadius: radius.md,
       paddingHorizontal: space[6],
       paddingVertical: space[4],
       maxWidth: '85%',
     },
+    material: { borderRadius: radius.md },
     dot: {
       // 6×6 视觉原子:dot 直径/圆角无语义 token,保留 r() 缩放原始值
       width: r(6),
@@ -35,7 +37,7 @@ export const makeStyles = (c: ColorTokens) =>
       borderRadius: r(3),
     },
     text: {
-      color: c.inverseOnSurface,
+      color: c.foreground,
       fontSize: t.sm,
       fontWeight: fw.medium,
       flexShrink: 1,

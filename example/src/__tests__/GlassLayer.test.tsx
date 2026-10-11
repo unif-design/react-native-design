@@ -1,6 +1,6 @@
 import React from 'react';
-import { Platform, StyleSheet } from 'react-native';
-import { render, screen } from '@testing-library/react-native';
+import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
+import { act, render, screen, waitFor } from '@testing-library/react-native';
 import * as LiquidGlass from '@callstack/liquid-glass';
 import {
   GlassLayer,
@@ -12,6 +12,12 @@ import {
 } from '@unif/react-native-design';
 import { restoreNativeMocks } from './helpers/nativeMocks';
 
+beforeEach(() => {
+  jest
+    .spyOn(AccessibilityInfo, 'isReduceTransparencyEnabled')
+    .mockResolvedValue(false);
+});
+
 afterEach(() => {
   restoreNativeMocks();
   jest.restoreAllMocks();
@@ -19,7 +25,7 @@ afterEach(() => {
 
 test.each(['clear', 'regular'] as const)(
   '支持原生玻璃时将 %s 材质、主题和 tint 交给 LiquidGlassView',
-  (effect) => {
+  async (effect) => {
     jest.replaceProperty(
       LiquidGlass as { isLiquidGlassSupported: boolean },
       'isLiquidGlassSupported',
@@ -30,6 +36,11 @@ test.each(['clear', 'regular'] as const)(
         <GlassLayer effect={effect} testID="glass-layer" />
       </ThemeProvider>
     );
+    await waitFor(() =>
+      expect(
+        screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.effect
+      ).toBe(effect)
+    );
     const material = screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
     expect(material.props).toMatchObject({
       effect,
@@ -37,16 +48,16 @@ test.each(['clear', 'regular'] as const)(
       tintColor:
         effect === 'clear'
           ? lightColors.glassTintLight
-          : lightColors.sheetBackdrop,
+          : lightColors.glassRegularTint,
       animated: false,
       pointerEvents: 'none',
       accessible: false,
       accessibilityElementsHidden: true,
       importantForAccessibility: 'no-hide-descendants',
     });
-    expect(
-      StyleSheet.flatten(material.props.style).backgroundColor
-    ).toBeUndefined();
+    expect(StyleSheet.flatten(material.props.style).backgroundColor).toBe(
+      'transparent'
+    );
 
     view.rerender(
       <ThemeProvider forceScheme="dark">
@@ -60,18 +71,18 @@ test.each(['clear', 'regular'] as const)(
       tintColor:
         effect === 'clear'
           ? darkColors.glassTintLight
-          : darkColors.sheetBackdrop,
+          : darkColors.glassRegularTint,
     });
   }
 );
 
 test.each([
-  ['ios', 'light', 'clear', lightColors.glassTintLight],
-  ['ios', 'dark', 'regular', darkColors.sheetBackdrop],
-  ['android', 'light', 'regular', lightColors.sheetBackdrop],
-  ['android', 'dark', 'clear', darkColors.glassTintLight],
+  ['ios', 'light', 'clear', lightColors.surface],
+  ['ios', 'dark', 'regular', darkColors.surface],
+  ['android', 'light', 'regular', lightColors.surface],
+  ['android', 'dark', 'clear', darkColors.surface],
 ] as const)(
-  '%s 无原生材质时使用 %s 主题的 %s 半透明背景',
+  '%s 无原生材质时使用 %s 主题的 %s 实色背景',
   (os, scheme, effect, backgroundColor) => {
     jest.replaceProperty(
       LiquidGlass as { isLiquidGlassSupported: boolean },
@@ -107,7 +118,7 @@ test.each([
 
 test.each([true, false])(
   '自定义 tintColor 在原生支持=%s 时覆盖主题默认色',
-  (supported) => {
+  async (supported) => {
     jest.replaceProperty(
       LiquidGlass as { isLiquidGlassSupported: boolean },
       'isLiquidGlassSupported',
@@ -117,6 +128,11 @@ test.each([true, false])(
       <ThemeProvider>
         <GlassLayer tintColor={lightColors.primary} testID="glass-layer" />
       </ThemeProvider>
+    );
+    await waitFor(() =>
+      expect(
+        screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.effect
+      ).toBe(supported ? 'regular' : 'none')
     );
     expect(
       screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props
@@ -129,13 +145,13 @@ test.each([true, false])(
         screen.getByTestId('glass-layer', { includeHiddenElements: true }).props
           .style
       ).backgroundColor
-    ).toBe(supported ? undefined : lightColors.primary);
+    ).toBe(supported ? 'transparent' : lightColors.surface);
   }
 );
 
 test.each([true, false])(
   'GlassStats 在原生支持=%s 时接回 clear 材质、主题和圆角',
-  (supported) => {
+  async (supported) => {
     jest.replaceProperty(
       LiquidGlass as { isLiquidGlassSupported: boolean },
       'isLiquidGlassSupported',
@@ -153,6 +169,11 @@ test.each([true, false])(
     );
     expect(screen.getByText('12')).toBeOnTheScreen();
     expect(screen.getByText('本月')).toBeOnTheScreen();
+    await waitFor(() =>
+      expect(
+        screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.effect
+      ).toBe(supported ? 'clear' : 'none')
+    );
     const material = screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
     expect(material.props).toMatchObject({
       effect: supported ? 'clear' : 'none',
@@ -164,3 +185,45 @@ test.each([true, false])(
     });
   }
 );
+
+// 若异步初始查询覆盖了后来的系统事件，会重新打开用户已禁用的透明效果。
+test('固定深色材质在减少透明度事件后保持实色，迟到查询不能重新打开玻璃', async () => {
+  jest.replaceProperty(
+    LiquidGlass as { isLiquidGlassSupported: boolean },
+    'isLiquidGlassSupported',
+    true
+  );
+  let resolveInitial!: (value: boolean) => void;
+  jest.spyOn(AccessibilityInfo, 'isReduceTransparencyEnabled').mockReturnValue(
+    new Promise((resolve) => {
+      resolveInitial = resolve;
+    })
+  );
+  let onChange!: (enabled: boolean) => void;
+  const remove = jest.fn();
+  jest
+    .spyOn(AccessibilityInfo, 'addEventListener')
+    .mockImplementation((event, listener) => {
+      if (event === 'reduceTransparencyChanged')
+        onChange = listener as (enabled: boolean) => void;
+      return { remove };
+    });
+  const view = render(
+    <ThemeProvider forceScheme="light">
+      <GlassLayer colorScheme="dark" testID="glass" />
+    </ThemeProvider>
+  );
+  await act(async () => {
+    onChange(true);
+    resolveInitial(false);
+  });
+  const material = screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
+  expect(material.props).toMatchObject({ effect: 'none', colorScheme: 'dark' });
+  expect(StyleSheet.flatten(material.props.style).backgroundColor).toBe(
+    darkColors.surface
+  );
+  act(() => onChange(false));
+  expect(material.props.effect).toBe('regular');
+  view.unmount();
+  expect(remove).toHaveBeenCalled();
+});

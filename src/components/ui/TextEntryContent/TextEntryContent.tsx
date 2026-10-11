@@ -1,3 +1,4 @@
+import { GlassLayer } from '../GlassLayer';
 import React from 'react';
 import { Text, View } from 'react-native';
 import { useColors, useThemedStyles } from '../../../theme';
@@ -42,6 +43,7 @@ export function TextEntryContent({
       style={[styles.root, compact && styles.compactRoot, style]}
       testID={testID}
     >
+      {compact ? <GlassLayer style={styles.material} /> : null}
       <Text
         style={[styles.title, compact && styles.compactTitle]}
         accessibilityRole="header"

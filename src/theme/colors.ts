@@ -59,6 +59,8 @@ export const lightColors = {
   sheetBackdrop: 'rgba(245,245,247,0.72)',
   /** 玻璃感浅色 tint —— BlurView 之上的 0.55 白纱(数据条 / scanBtn)。 */
   glassTintLight: 'rgba(255,255,255,0.55)',
+  /** 浮动菜单、输入及提示的 regular 染色，与文字采用同一主题。 */
+  glassRegularTint: 'rgba(255,255,255,0.72)',
   /** 玻璃容器内部分隔线 —— 暗色翻成对应低透白,保证暗底可见。 */
   glassSeparator: 'rgba(0,0,0,0.08)',
   /** 玻璃容器的半透明背景，与轻薄染色 glassTintLight 分别表达表面与覆盖层。 */
@@ -166,6 +168,7 @@ export const darkColors: ColorTokens = {
   sheetBackdrop: 'rgba(245,245,247,0.72)',
   // 暗色 0.06 白透,凸起感由 glassBar 暗色黑 0.35 shadow 补
   glassTintLight: 'rgba(255,255,255,0.06)',
+  glassRegularTint: 'rgba(28,28,30,0.72)',
   glassSeparator: 'rgba(255,255,255,0.10)',
   // 暗色玻璃容器沿用深灰半透明背景。
   glassSurface: 'rgba(28,28,30,0.30)',

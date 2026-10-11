@@ -1,3 +1,4 @@
+import { GlassLayer } from '../GlassLayer';
 import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useThemedStyles } from '../../../theme';
@@ -172,6 +173,7 @@ export function ActionMenuContent({
       style={[styles.dialogCard, contentStyle]}
       onPress={(event) => event.stopPropagation()}
     >
+      <GlassLayer style={styles.dialogMaterial} />
       {body}
     </Pressable>
   );

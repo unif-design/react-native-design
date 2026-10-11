@@ -15,11 +15,10 @@ export const makeStyles = (c: ColorTokens, shadows: ShadowTokens) =>
       width: r(240),
       maxWidth: '100%',
       borderRadius: radius['3xl'],
-      borderWidth: 0.5,
-      borderColor: c.outline,
-      backgroundColor: c.surface,
+      backgroundColor: 'transparent',
       ...shadows.card,
     },
+    popoverMaterial: { borderRadius: radius['3xl'] },
     popoverCard: {
       borderRadius: radius['3xl'],
       overflow: 'hidden',
@@ -33,7 +32,7 @@ export const makeStyles = (c: ColorTokens, shadows: ShadowTokens) =>
       paddingVertical: space[3],
       paddingHorizontal: space[6],
     },
-    popoverRowPressed: { backgroundColor: c.surfaceContainer },
+    popoverRowPressed: { backgroundColor: c.glassSeparator },
     popoverRowDisabled: { opacity: 0.4 },
     popoverIcon: {
       width: 24,
@@ -80,7 +79,7 @@ export const makeStyles = (c: ColorTokens, shadows: ShadowTokens) =>
       fontSize: typography.sm,
       fontWeight: fw.semi,
     },
-    pointer: { position: 'absolute' },
+    pointer: { position: 'absolute', overflow: 'hidden' },
     dialogRoot: {
       flex: 1,
       justifyContent: 'center',
@@ -92,8 +91,13 @@ export const makeStyles = (c: ColorTokens, shadows: ShadowTokens) =>
       justifyContent: 'flex-end',
       backgroundColor: c.scrim,
     },
+    dialogMaterial: { borderRadius: radius.xl },
+    sheetMaterial: {
+      borderTopLeftRadius: radius.xl,
+      borderTopRightRadius: radius.xl,
+    },
     dialogCard: {
-      backgroundColor: c.surface,
+      backgroundColor: 'transparent',
       borderRadius: radius.xl,
       padding: space[4],
       width: '80%',
@@ -101,7 +105,7 @@ export const makeStyles = (c: ColorTokens, shadows: ShadowTokens) =>
       gap: space[2],
     },
     sheetCard: {
-      backgroundColor: c.surface,
+      backgroundColor: 'transparent',
       borderTopLeftRadius: radius.xl,
       borderTopRightRadius: radius.xl,
       paddingHorizontal: space[5],

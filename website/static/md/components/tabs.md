@@ -10,6 +10,8 @@ description: '切换同一层级的内容区域。'
 
 页面内分类切换 · 两种风格：**下划线 Tabs**（页面级）/ **分段控件 Segmented**（局部分组）。
 
+`Segmented` 的浮动场景可设置 `surface="glass"`，正文内继续默认 solid；选中和整体/单项禁用的状态与事件规则保持。
+
 ## 代码演示 {#实时预览}
 
 ```tsx
@@ -132,7 +134,7 @@ import { Tabs, Segmented } from '@unif/react-native-design';
 
 ## API
 
-来源：`src/components/ui/Tabs/types.ts`、`src/components/ui/Segmented/types.ts`。`Tabs` 与 `Segmented` props 形状一致，共用 `TabItem`。
+来源：`src/components/ui/Tabs/types.ts`、`src/components/ui/Segmented/types.ts`。`Tabs` 与 `Segmented` 共用 `TabItem`；surface 和 size 仅属于 Segmented。
 
 `TabsProps` / `SegmentedProps`：
 
@@ -141,6 +143,7 @@ import { Tabs, Segmented } from '@unif/react-native-design';
 | `value`    | `string`               | —       | 当前选中项的 `id`（必填）                                                                                                                                       |
 | `onChange` | `(id: string) => void` | —       | 切换回调，回传点中项的 `id`（必填）                                                                                                                             |
 | `items`    | `TabItem[]`            | —       | 列表项（Tabs ≥2 项才有意义；必填）                                                                                                                              |
+| `surface` | `solid \| glass` | `solid` | 仅 Segmented：正文实色或浮动玻璃 |
 | `size`     | `'sm' \| 'md'`         | `'md'`  | **仅 Segmented**；`'md'` 默认（高 44px / 基准字号 13，触控达标），`'sm'` 紧凑（高 28px / 基准字号 12，给模型下拉等局促位用，触控 < 44px）；fontScale 只缩放文字 |
 | `disabled` | `boolean`              | `false` | 整体禁用；所有项淡化且不可切换，保留当前选中值                                                                                                                  |
 | `testID`   | `string?`              | —       | 容器 testID；item testID 自动派生为 `${testID}-${id}`                                                                                                           |

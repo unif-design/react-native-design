@@ -29,6 +29,7 @@ export const makeStyles = (colors: ColorTokens) =>
       paddingBottom: space['9'],
       gap: space['5'],
     },
+    glassFooter: { backgroundColor: 'transparent', borderTopWidth: 0 },
     footer: {
       backgroundColor: colors.surface,
       paddingHorizontal: space['9'],

@@ -79,6 +79,8 @@ export function paletteFor(
       };
     case 'ghost':
       return { bg: 'transparent', fg: c.primary, border: undefined };
+    case 'glass':
+      return { bg: 'transparent', fg: c.foreground, border: undefined };
     case 'neutral':
       return { bg: 'transparent', fg: c.foreground, border: undefined };
     case 'outline':
