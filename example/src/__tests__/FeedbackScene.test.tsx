@@ -1,3 +1,4 @@
+import { ClipboardOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import {
@@ -83,7 +84,7 @@ function enterFeedback(): void {
 }
 
 function enterFoundation(): void {
-  fireEvent.press(screen.getByRole('button', { name: /基础能力与图标/ }));
+  fireEvent.press(screen.getByRole('button', { name: /主题与基础能力/ }));
 }
 
 function componentByTestID<T extends React.ComponentType<never>>(
@@ -122,7 +123,7 @@ test('Feedback 展示 Empty、Skeleton、确定进度与具备外层加载语义
   expect(screen.UNSAFE_getByType(Empty).props).toMatchObject({
     title: '暂无反馈记录',
     desc: '触发下方动作后可在结果面板查看安全摘要。',
-    icon: 'clipboard',
+    icon: ClipboardOutlined,
   });
   emptyCoverage.prove(
     'empty.title',
@@ -135,7 +136,7 @@ test('Feedback 展示 Empty、Skeleton、确定进度与具备外层加载语义
       ).toMatchObject({
         title: '暂无反馈记录',
         desc: '触发下方动作后可在结果面板查看安全摘要。',
-        icon: 'clipboard',
+        icon: ClipboardOutlined,
       });
     }
   );

@@ -1,3 +1,4 @@
+import { ChevronLeftOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
 import {
@@ -243,7 +244,7 @@ test.each([
       <ThemeProvider>
         <IconButton
           variant={variant}
-          icon="chevron-left"
+          icon={ChevronLeftOutlined}
           accessibilityLabel="玻璃返回"
           disabled={!loading}
           loading={loading}

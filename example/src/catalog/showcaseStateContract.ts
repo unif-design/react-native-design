@@ -146,62 +146,6 @@ export const showcaseStateContract = [
     },
   },
   {
-    id: 'icon.all-icons',
-    component: 'Icon',
-    scene: 'foundation',
-    label: '图标全集',
-    witness: {
-      kind: 'jsx-props',
-      specimens: [{ props: {}, presentProps: ['name'] }],
-    },
-  },
-  {
-    id: 'icon.name-search',
-    component: 'Icon',
-    scene: 'foundation',
-    label: '名称检索',
-    witness: {
-      kind: 'interaction',
-      targetComponent: 'Search',
-      testID: 'foundation-icon-search',
-      handler: 'onChangeText',
-      calls: [],
-    },
-  },
-  {
-    id: 'icon.sizes',
-    component: 'Icon',
-    scene: 'foundation',
-    label: '尺寸',
-    witness: {
-      kind: 'interaction',
-      targetComponent: 'Segmented',
-      testID: 'foundation-icon-size',
-      handler: 'onChange',
-      calls: [],
-    },
-  },
-  {
-    id: 'icon.color',
-    component: 'Icon',
-    scene: 'foundation',
-    label: '颜色',
-    witness: {
-      kind: 'jsx-props',
-      specimens: [{ props: {}, presentProps: ['color'] }],
-    },
-  },
-  {
-    id: 'icon.a11y-hidden',
-    component: 'Icon',
-    scene: 'foundation',
-    label: '无障碍隐藏',
-    witness: {
-      kind: 'jsx-props',
-      specimens: [{ props: {}, presentProps: ['name'] }],
-    },
-  },
-  {
     id: 'button.variants',
     component: 'Button',
     scene: 'actions',
@@ -274,7 +218,8 @@ export const showcaseStateContract = [
       specimens: [
         {
           testID: 'actions-button-icons',
-          props: { leftIcon: 'check', rightIcon: 'arrow-right' },
+          props: {},
+          presentProps: ['leftIcon', 'rightIcon'],
         },
       ],
     },
@@ -2598,7 +2543,7 @@ export const showcaseStateContract = [
     label: '自定义图标',
     witness: {
       kind: 'jsx-props',
-      specimens: [{ props: { icon: 'clipboard' } }],
+      specimens: [{ props: {}, presentProps: ['icon'] }],
     },
   },
   {

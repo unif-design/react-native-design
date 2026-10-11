@@ -46,10 +46,10 @@ description: '为内容或状态圆点提供脉冲动效。'
       <span className="demo-label">{'<Pulse>'} 包装 · spark 图标</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <Pulse from={0.4} duration={500}>
-          <Icon name="spark" size={20} color="#EB6E00" />
+          <SparkOutlined size={20} color="#EB6E00" />
         </Pulse>
         <Pulse from={0.3} duration={800}>
-          <Icon name="thinking" size={20} color="#3775F6" />
+          <ThinkingOutlined size={20} color="#3775F6" />
         </Pulse>
       </div>
     </div>
@@ -80,10 +80,11 @@ export function MyShimmerLine({ width }) {
 ### `<Pulse>` 包装组件
 
 ```tsx
-import { Pulse, Icon } from '@unif/react-native-design';
+import { SparkOutlined } from '@unif/react-native-icons';
+import { Pulse } from '@unif/react-native-design';
 
 <Pulse from={0.4} duration={500}>
-  <Icon name="spark" size={14} color="#EB6E00" />
+  <SparkOutlined size={14} color="#EB6E00" />
 </Pulse>;
 ```
 

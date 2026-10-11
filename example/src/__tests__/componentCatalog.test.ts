@@ -30,7 +30,6 @@ const expectedComponentIds = [
   'FormGroup',
   'FormRow',
   'Grid',
-  'Icon',
   'IconButton',
   'Input',
   'Logo',
@@ -93,8 +92,6 @@ const expectedRuntimeApis = [
   'fixed',
   'motion',
   'pressedOpacity',
-  'ICONS',
-  'ICON_NAMES',
   'childTestID',
   'createLogger',
   'setLogLevel',
@@ -109,7 +106,7 @@ const expectedRuntimeApis = [
 ] as const;
 
 const expectedComponentsByScene = {
-  foundation: ['Icon'],
+  foundation: [],
   actions: [
     'ActionMenuContent',
     'Button',
@@ -167,12 +164,12 @@ const expectedComponentsByScene = {
   ],
 } as const;
 
-test('catalog 精确覆盖 54 个公开组件且每项只有一个非空主场景', () => {
+test('catalog 精确覆盖 53 个公开组件且每项只有一个非空主场景', () => {
   expect(componentCatalog.map((entry) => entry.id).sort()).toEqual(
     [...expectedComponentIds].sort()
   );
-  expect(new Set(componentCatalog.map((entry) => entry.id)).size).toBe(54);
-  expect(componentCatalog).toHaveLength(54);
+  expect(new Set(componentCatalog.map((entry) => entry.id)).size).toBe(53);
+  expect(componentCatalog).toHaveLength(53);
   expect(componentCatalog.every((entry) => entry.states.length > 0)).toBe(true);
 });
 

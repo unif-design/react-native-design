@@ -43,12 +43,12 @@ import { Empty } from '@unif/react-native-design';
 
 ## API
 
-| 参数     | 类型       | 默认值    | 说明                                                                              |
-| -------- | ---------- | --------- | --------------------------------------------------------------------------------- |
-| `title`  | `string`   | —         | 大字标题（如「暂无数据」,15px / 600）                                             |
-| `desc`   | `string`   | —         | 小字描述（建议下一步操作,13px / 400 / `c.foregroundSubtle`）                      |
-| `icon`   | `IconName` | `'spark'` | 圆盘内图标;相机域可传 `'camera-off'` / `'permission-denied'` / `'error-alert'` 等 |
-| `testID` | `string`   | —         | E2E / 测试定位                                                                    |
+| 参数     | 类型                       | 默认值          | 说明                                                                                             |
+| -------- | -------------------------- | --------------- | ------------------------------------------------------------------------------------------------ |
+| `title`  | `string`                   | —               | 大字标题（如「暂无数据」,15px / 600）                                                            |
+| `desc`   | `string`                   | —               | 小字描述（建议下一步操作,13px / 400 / `c.foregroundSubtle`）                                     |
+| `icon`   | `ComponentType<IconProps>` | `SparkOutlined` | 圆盘内图标;相机域可传 `CameraOffOutlined` / `PermissionDeniedOutlined` / `ErrorAlertOutlined` 等 |
+| `testID` | `string`                   | —               | E2E / 测试定位                                                                                   |
 
 ## 主题键（Tokens）
 
@@ -66,7 +66,7 @@ import { Empty } from '@unif/react-native-design';
 
 来源：`src/components/ui/Empty/Empty.tsx`、`types.ts`。
 
-本组件为展示型空态,无交互。源码是 `<View>` + 圆盘 `<Icon>` + 标题 `<Text>` +（可选）描述 `<Text>`,**未设置任何 a11y prop**(无 `accessibilityRole` / `accessibilityLabel`),也无可传的 a11y prop（仅 `title` / `desc` / `icon` / `testID`）。`title` / `desc` 文本默认对 SR 可读;圆盘内的 `<Icon>` 按其自身实现对 SR 隐藏（见 [图标](icons.md)），故朗读内容即标题 + 描述。若需把「建议操作」做成可点项,放在 Empty 之外的 SuggestionList / [Button](button.md) 上,各自带交互语义。
+本组件为展示型空态,无交互。源码是 `<View>` + 圆盘内图标 + 标题 `<Text>` +（可选）描述 `<Text>`,**未设置任何 a11y prop**(无 `accessibilityRole` / `accessibilityLabel`),也无可传的 a11y prop（仅 `title` / `desc` / `icon` / `testID`）。`title` / `desc` 文本默认对 SR 可读;圆盘内的图标 按其自身实现对 SR 隐藏（见 [图标](icons.md)），故朗读内容即标题 + 描述。若需把「建议操作」做成可点项,放在 Empty 之外的 SuggestionList / [Button](button.md) 上,各自带交互语义。
 
 ## 视觉规范
 

@@ -1,3 +1,4 @@
+import { FileOutlined, ImageOutlined } from '@unif/react-native-icons';
 import React, { useRef, useState } from 'react';
 import { StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
 import {
@@ -6,7 +7,6 @@ import {
   Button,
   Empty,
   Input,
-  Icon,
   Logo,
   Segmented,
   Switch,
@@ -21,6 +21,8 @@ import {
   type ThumbnailSize,
   space,
   type,
+  useColors,
+  r,
   useThemedStyles,
 } from '@unif/react-native-design';
 import { ShowcaseScaffold } from '../../shared/ShowcaseScaffold';
@@ -114,6 +116,7 @@ function isThumbnailSize(value: string): value is ThumbnailSize {
 }
 
 export function MediaScene(): React.JSX.Element {
+  const colors = useColors();
   const { appendResult, back, state, updateScene } = useShowcase();
   const draft = state.scenes.media;
   const previewRef = useRef<ImagePreviewHandle>(null);
@@ -397,14 +400,18 @@ export function MediaScene(): React.JSX.Element {
             <Thumbnail
               source={LOCAL_IMAGE}
               size={{ width: 76, height: 76, borderRadius: 8 }}
-              fallback={<Icon name="file" />}
+              fallback={
+                <FileOutlined size={r(18)} color={colors.foregroundMuted} />
+              }
               selected
               accessibilityLabel="附件尺寸样例"
             />
             <Thumbnail
               uri={MEDIA_DECODE_FAILURE_URI}
               size={{ width: 96, height: 56, borderRadius: 0 }}
-              fallback={<Icon name="file" />}
+              fallback={
+                <FileOutlined size={r(18)} color={colors.foregroundMuted} />
+              }
               selected
               accessibilityLabel="附件失败占位样例"
             />
@@ -413,7 +420,7 @@ export function MediaScene(): React.JSX.Element {
           <Empty
             title="消费方请求失败空态"
             desc="这是业务边界示例，不是 Thumbnail 内置返回值。"
-            icon="image"
+            icon={ImageOutlined}
           />
         </SectionCard>
 

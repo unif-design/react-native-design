@@ -1,9 +1,10 @@
+import type { ComponentType } from 'react';
+import type { IconProps } from '@unif/react-native-icons';
 import type { ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
-import type { IconName } from '../Icon';
 
 export type NavBarAction = {
-  icon: IconName;
+  icon: ComponentType<IconProps>;
   onPress: () => void;
   /** 屏幕阅读器读出的非空功能描述。 */
   accessibilityLabel: string;

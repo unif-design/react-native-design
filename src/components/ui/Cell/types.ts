@@ -1,10 +1,13 @@
+import type { ComponentType } from 'react';
+import type { IconProps } from '@unif/react-native-icons';
 import type { ReactElement, ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
-import type { IconName } from '../Icon';
 
 export type CellTextValue = string | number | bigint;
 
-export type CellLeading = IconName | { kind: 'display'; node: ReactElement };
+export type CellLeading =
+  | ComponentType<IconProps>
+  | { kind: 'display'; node: ReactElement };
 
 export type CellExtra =
   | { kind: 'text'; value: CellTextValue }
@@ -31,7 +34,7 @@ type SharedCellProps = {
   titleLines?: number;
   /** 副标题由库内 Text 安全渲染。 */
   desc?: CellTextValue;
-  /** 图标名或显式的纯展示前导节点。 */
+  /** 图标组件或显式的纯展示前导节点。 */
   leading?: CellLeading;
   /** 危险态：icon 盒子与标题使用 error 色；action arrow 不显示。 */
   danger?: boolean;

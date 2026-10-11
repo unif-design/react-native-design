@@ -14,14 +14,14 @@ description: '以网格排列图标与文字入口。'
 
 ```tsx
 const items = [
-  { id: 'visit', icon: 'location', label: '拜访' },
-  { id: 'orders', icon: 'paperclip', label: '订单', badge: '3' },
-  { id: 'sku', icon: 'tag', label: '商品' },
-  { id: 'reports', icon: 'list', label: '报表' },
-  { id: 'msg', icon: 'mail', label: '消息', badge: 0 },
-  { id: 'team', icon: 'user', label: '团队' },
-  { id: 'settings', icon: 'settings', label: '设置' },
-  { id: 'more', icon: 'more-h', label: '更多' },
+  { id: 'visit', icon: LocationOutlined, label: '拜访' },
+  { id: 'orders', icon: PaperclipOutlined, label: '订单', badge: '3' },
+  { id: 'sku', icon: TagOutlined, label: '商品' },
+  { id: 'reports', icon: ListOutlined, label: '报表' },
+  { id: 'msg', icon: MailOutlined, label: '消息', badge: 0 },
+  { id: 'team', icon: UserOutlined, label: '团队' },
+  { id: 'settings', icon: SettingsOutlined, label: '设置' },
+  { id: 'more', icon: MoreHOutlined, label: '更多' },
 ];
 
   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -66,14 +66,14 @@ const items = [
 
 ### `GridItem`
 
-| 字段                 | 类型                | 默认值 | 说明                                              |
-| -------------------- | ------------------- | ------ | ------------------------------------------------- |
-| `id`                 | `string`            | —      | 唯一键，也用于派生 testID                         |
-| `icon`               | `IconName`          | —      | 图标名（[图标 catalog](icons.md)）                 |
-| `label`              | `string`            | —      | 格子文字，同时作为该格 `accessibilityLabel`       |
-| `accessibilityLabel` | `string?`           | —      | trim 后非空时覆盖名称；空白值回退到默认名称       |
-| `badge`              | `number \| string?` | —      | icon 右上角标（用 string 才能写 `'99+'`）         |
-| `testID`             | `string?`           | —      | 单格 testID（不传则自动用 `${gridTestID}-${id}`） |
+| 字段                 | 类型                       | 默认值 | 说明                                              |
+| -------------------- | -------------------------- | ------ | ------------------------------------------------- |
+| `id`                 | `string`                   | —      | 唯一键，也用于派生 testID                         |
+| `icon`               | `ComponentType<IconProps>` | —      | 图标组件（[图标 catalog](icons.md)）               |
+| `label`              | `string`                   | —      | 格子文字，同时作为该格 `accessibilityLabel`       |
+| `accessibilityLabel` | `string?`                  | —      | trim 后非空时覆盖名称；空白值回退到默认名称       |
+| `badge`              | `number \| string?`        | —      | icon 右上角标（用 string 才能写 `'99+'`）         |
+| `testID`             | `string?`                  | —      | 单格 testID（不传则自动用 `${gridTestID}-${id}`） |
 
 ## 视觉规范
 
@@ -91,19 +91,29 @@ const items = [
 ## 用法
 
 ```tsx
+import {
+  BoxListOutlined,
+  ListOutlined,
+  LocationOutlined,
+  MailOutlined,
+  MoreHOutlined,
+  OrderOutlined,
+  SettingsOutlined,
+  UserOutlined,
+} from '@unif/react-native-icons';
 import { Grid } from '@unif/react-native-design';
 
 <Grid
   columns={4}
   items={[
-    { id: 'visit', icon: 'location', label: '拜访' },
-    { id: 'orders', icon: 'order', label: '订单', badge: 3 },
-    { id: 'sku', icon: 'box-list', label: '商品' },
-    { id: 'reports', icon: 'list', label: '报表' },
-    { id: 'msg', icon: 'mail', label: '消息', badge: 0 },
-    { id: 'team', icon: 'user', label: '团队' },
-    { id: 'settings', icon: 'settings', label: '设置' },
-    { id: 'more', icon: 'more-h', label: '更多' },
+    { id: 'visit', icon: LocationOutlined, label: '拜访' },
+    { id: 'orders', icon: OrderOutlined, label: '订单', badge: 3 },
+    { id: 'sku', icon: BoxListOutlined, label: '商品' },
+    { id: 'reports', icon: ListOutlined, label: '报表' },
+    { id: 'msg', icon: MailOutlined, label: '消息', badge: 0 },
+    { id: 'team', icon: UserOutlined, label: '团队' },
+    { id: 'settings', icon: SettingsOutlined, label: '设置' },
+    { id: 'more', icon: MoreHOutlined, label: '更多' },
   ]}
   onPress={(item) => navigation.push(item.id)}
 />;
@@ -119,10 +129,11 @@ import { Grid } from '@unif/react-native-design';
 - 状态语义：源码未设 `accessibilityState`（无 selected/disabled/checked 概念）。
 
 ```tsx
+import { MailOutlined } from '@unif/react-native-icons';
 // role=button、默认名称“消息，0”
 <Grid
   columns={4}
-  items={[{ id: 'msg', icon: 'mail', label: '消息', badge: 0 }]}
+  items={[{ id: 'msg', icon: MailOutlined, label: '消息', badge: 0 }]}
   onPress={(item) => navigation.push(item.id)}
-/>
+/>;
 ```

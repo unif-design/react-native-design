@@ -8,7 +8,7 @@ extra_instructions = """
 - 暗色 shadow 大多置零(走 surface 5 层亮度阶梯),例外项有明确注释
 - r() 走 PixelRatio.roundToNearestPixel(尺寸缩放),rf() moderate 0.3(字号),
   fixed.* 物理常量不缩放
-- icons/data.ts 自动生成,不要手改;新 icon 走 scripts/build-icons.js
+- 图标直接消费 @unif/react-native-icons 的命名组件;Design 不维护图形源或名称适配
 - ButtonBase 用 render-prop children 共享 chrome,新按钮组件不要重复 Pressable/sizing
 - ui/ 原子无业务上下文;business/ 通用复合组件,navigation/store 耦合留在消费者仓库
 - 必须 conventional commits 前缀(feat / fix / chore / docs / test / refactor / ci)

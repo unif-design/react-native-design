@@ -1,3 +1,4 @@
+import { ArrowLeftOutlined, CameraOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import type { ReactTestInstance } from 'react-test-renderer';
@@ -70,7 +71,11 @@ test.each(['light', 'dark'] as const)(
         <NavBar
           title="拍摄"
           variant={variant}
-          left={{ icon: 'arrow-left', accessibilityLabel: '返回', onPress }}
+          left={{
+            icon: ArrowLeftOutlined,
+            accessibilityLabel: '返回',
+            onPress,
+          }}
         />
       </ThemeProvider>
     );
@@ -169,7 +174,12 @@ test('Carousel 只有媒体上的浮动分页使用材质，隐藏分页不留�
 test('EntryCard 默认材质不随按压淡化，入口仍交付一次', () => {
   const onPress = jest.fn();
   const page = render(
-    <EntryCard icon="camera" title="拍照" sub="拍摄照片" onPress={onPress} />,
+    <EntryCard
+      icon={CameraOutlined}
+      title="拍照"
+      sub="拍摄照片"
+      onPress={onPress}
+    />,
     { wrapper: Theme }
   );
   expectMaterialAncestorsOpaque(page.UNSAFE_getByType(GlassLayer));

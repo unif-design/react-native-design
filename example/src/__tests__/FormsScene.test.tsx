@@ -1,3 +1,4 @@
+import { CloseOutlined, UserOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { Text } from 'react-native';
@@ -100,10 +101,10 @@ test('Input 与 Textarea 分别保持 controlled/uncontrolled mode，并覆盖�
   ).props;
   expect(controlledInput).toMatchObject({
     value: '',
-    leading: { kind: 'icon', icon: 'user' },
+    leading: { kind: 'icon', icon: UserOutlined },
     trailing: {
       kind: 'action',
-      icon: 'close',
+      icon: CloseOutlined,
       accessibilityLabel: '清除姓名',
     },
   });

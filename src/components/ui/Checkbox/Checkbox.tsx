@@ -1,3 +1,4 @@
+import { CheckOutlined } from '@unif/react-native-icons';
 import React, { useEffect } from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
@@ -11,7 +12,7 @@ import {
 import { createLogger } from '../../../utils/logger';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { normalizeNonBlankText } from '../shared/accessibilityName';
-import { Icon } from '../Icon';
+
 import { makeStyles } from './styles';
 import type { CheckboxProps } from './types';
 
@@ -78,9 +79,8 @@ export function Checkbox({
           },
         ]}
       >
-        {/* 常驻渲染 + opacity 切显隐(非 {checked?<Icon/>:null} 条件挂载)—— 见 styles.tickHidden。 */}
-        <Icon
-          name="check"
+        {/* 常驻渲染 + opacity 切显隐(非 {checked?<CheckOutlined/>:null} 条件挂载)—— 见 styles.tickHidden。 */}
+        <CheckOutlined
           size={r(14)}
           color={c.onPrimary}
           strokeWidth={3.5}

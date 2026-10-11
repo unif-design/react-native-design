@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { r, useColors } from '../../../theme';
-import { Icon } from '../Icon';
+import { isIconComponent } from '../shared/isIconComponent';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { useListVariant } from './context';
 import type { CellLeading } from './types';
@@ -28,7 +28,8 @@ export function Leading({
   const c = useColors();
   const variant = useListVariant();
 
-  if (typeof slot === 'string') {
+  if (isIconComponent(slot)) {
+    const Glyph = slot;
     // grouped 模式:裸 icon 22px;flush 模式:28×28 圆角盒子,danger 时切 error-container
     if (variant === 'flush') {
       return (
@@ -41,17 +42,13 @@ export function Leading({
             },
           ]}
         >
-          <Icon name={slot} size={r(16)} color={danger ? c.error : c.primary} />
+          <Glyph size={r(16)} color={danger ? c.error : c.primary} />
         </View>
       );
     }
     return (
       <View {...A11Y_HIDDEN_PROPS}>
-        <Icon
-          name={slot}
-          size={r(22)}
-          color={danger ? c.error : c.foregroundMuted}
-        />
+        <Glyph size={r(22)} color={danger ? c.error : c.foregroundMuted} />
       </View>
     );
   }

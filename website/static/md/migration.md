@@ -75,8 +75,8 @@ import {
 
 | 旧写法(已删除)                                            | 新写法(正确)                                            |
 | --------------------------------------------------------- | ------------------------------------------------------- |
-| `import { colors } from '@unif/react-native-design'`      | `const c = useColors()`                                 |
-| `import { shadow } from '@unif/react-native-design'`      | `const s = useShadow()`,或 maker 第二参 `(c, s) => ...` |
+| `import { colors } from '@unif/react-native-design';`     | `const c = useColors()`                                 |
+| `import { shadow } from '@unif/react-native-design';`     | `const s = useShadow()`,或 maker 第二参 `(c, s) => ...` |
 | `colors.primary` / `colors.surface` / `colors.foreground` | `c.primary` / `c.surface` / `c.foreground`              |
 | `shadow.brandLg`                                          | `...s.brandLg`(spread 进 StyleSheet)                    |
 | 顶层 `StyleSheet.create({ ... colors.x ... })`            | `useThemedStyles(maker)` 运行期                         |

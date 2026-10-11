@@ -1,9 +1,10 @@
+import { ChevronRightOutlined } from '@unif/react-native-icons';
 import React, { useEffect } from 'react';
 import { type StyleProp, Text, type TextStyle, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
 import { pressedOpacity, r, useColors, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
-import { Icon } from '../Icon';
+
 import { A11Y_HIDDEN_PROPS, A11Y_TEXT_ONLY_STYLE } from '../shared/a11y';
 import {
   resolveCellActionAccessibilityLabel,
@@ -127,8 +128,7 @@ export function Cell(props: CellProps): React.JSX.Element {
           {...A11Y_HIDDEN_PROPS}
           style={flush ? styles.chevronFlush : undefined}
         >
-          <Icon
-            name="chevron-right"
+          <ChevronRightOutlined
             size={r(flush ? 18 : 20)}
             color={c.foregroundSubtle}
           />

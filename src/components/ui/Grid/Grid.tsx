@@ -4,7 +4,7 @@ import { Pressable } from 'react-native-gesture-handler';
 import { pressedOpacity, r, useColors, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
-import { Icon } from '../Icon';
+
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { gridItemAccessibilityLabel } from './accessibility';
 import { colWidth, makeStyles } from './styles';
@@ -69,7 +69,7 @@ export function Grid({
             <>
               <View>
                 {/* 28pt 介于 icon.md(26) / icon.lg(30) 之间的设计稿专定字形尺寸 */}
-                <Icon name={item.icon} size={r(28)} color={c.foregroundMuted} />
+                <item.icon size={r(28)} color={c.foregroundMuted} />
                 {item.badge != null ? (
                   <View {...A11Y_HIDDEN_PROPS} style={styles.badge}>
                     <Text style={styles.badgeText}>{item.badge}</Text>

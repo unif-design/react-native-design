@@ -1,3 +1,8 @@
+import {
+  CloseOutlined,
+  EditOutlined,
+  UserOutlined,
+} from '@unif/react-native-icons';
 import React, { useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import {
@@ -165,10 +170,10 @@ export function FormsScene(): React.JSX.Element {
                   inputValue,
                 }));
               }}
-              leading={{ kind: 'icon', icon: 'user', size: 18 }}
+              leading={{ kind: 'icon', icon: UserOutlined, size: 18 }}
               trailing={{
                 kind: 'action',
-                icon: 'close',
+                icon: CloseOutlined,
                 accessibilityLabel: '清除姓名',
                 onPress: () => {
                   updateScene('forms', (current) => ({
@@ -192,7 +197,7 @@ export function FormsScene(): React.JSX.Element {
                 }));
               }}
               leading={{ kind: 'text', value: '备注' }}
-              trailing={{ kind: 'icon', icon: 'edit', size: 18 }}
+              trailing={{ kind: 'icon', icon: EditOutlined, size: 18 }}
               placeholder="请输入拜访备注"
               accessibilityLabel="拜访备注"
               minHeight={96}
@@ -282,7 +287,7 @@ export function FormsScene(): React.JSX.Element {
               editable
               trailing={{
                 kind: 'action',
-                icon: 'close',
+                icon: CloseOutlined,
                 accessibilityLabel: '禁用输入操作',
                 onPress: () => record('Input', '操作槽', '禁用输入操作已触发'),
               }}

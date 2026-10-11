@@ -1,7 +1,9 @@
 import { StyleSheet } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { fixed } from '../../../theme';
-import { ICONS, type IconName } from '../../../icons';
+import type { ComponentType } from 'react';
+import type { IconProps } from '@unif/react-native-icons';
+import { isIconComponent } from '../shared/isIconComponent';
 import { normalizeNonBlankText } from '../shared/accessibilityName';
 import type {
   SearchFieldLayout,
@@ -103,13 +105,6 @@ export type NormalizedTextFieldSlot = {
   diagnostics: readonly string[];
 };
 
-function isIconName(value: unknown): value is IconName {
-  return (
-    typeof value === 'string' &&
-    Object.prototype.hasOwnProperty.call(ICONS, value)
-  );
-}
-
 /** 未类型化 JS 必须完整匹配一个受支持分支，不能靠 discriminant 后 cast 绕过校验。 */
 export function normalizeTextFieldSlot(slot: unknown): NormalizedTextFieldSlot {
   if (slot === undefined) {
@@ -130,7 +125,7 @@ export function normalizeTextFieldSlot(slot: unknown): NormalizedTextFieldSlot {
       const hasValidSize = candidate.size === undefined || size !== undefined;
       const hasValidColor =
         candidate.color === undefined || color !== undefined;
-      if (!isIconName(candidate.icon) || !hasValidSize || !hasValidColor) {
+      if (!isIconComponent(candidate.icon) || !hasValidSize || !hasValidColor) {
         return { slot: undefined, diagnostics: ['slot.icon'] };
       }
       return {
@@ -167,7 +162,7 @@ export function normalizeTextFieldSlot(slot: unknown): NormalizedTextFieldSlot {
           : undefined;
       // icon 与 label **恰好给一个**:两个都给无法决定渲染成什么,一个都不给没有可视内容。
       const actionLabel = normalizeNonBlankText(candidate.label);
-      const hasIcon = isIconName(candidate.icon);
+      const hasIcon = isIconComponent(candidate.icon);
       const hasLabel = actionLabel !== undefined;
       if (
         hasIcon === hasLabel ||
@@ -181,7 +176,7 @@ export function normalizeTextFieldSlot(slot: unknown): NormalizedTextFieldSlot {
         slot: {
           kind: 'action',
           ...(hasIcon
-            ? { icon: candidate.icon as IconName }
+            ? { icon: candidate.icon as ComponentType<IconProps> }
             : { label: actionLabel as string }),
           onPress: candidate.onPress as () => void,
           accessibilityLabel,

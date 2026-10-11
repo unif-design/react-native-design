@@ -1,6 +1,6 @@
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { useColors, useThemedStyles } from '../../../theme';
-import { Icon } from '../Icon';
+
 import { normalizeNonBlankText } from '../shared/accessibilityName';
 import { useMenuMousePress } from './useMenuMousePress';
 import { makeStyles } from './styles';
@@ -49,7 +49,7 @@ export function ActionMenuItem({
           {busy ? (
             <ActivityIndicator size="small" color={color} />
           ) : action.icon ? (
-            <Icon name={action.icon} size={20} color={color} />
+            <action.icon size={20} color={color} />
           ) : null}
         </View>
       ) : null}

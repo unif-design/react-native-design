@@ -1,3 +1,10 @@
+import {
+  ArrowLeftOutlined,
+  CheckOutlined,
+  CloseOutlined,
+  MailOutlined,
+  SettingsOutlined,
+} from '@unif/react-native-icons';
 import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -13,7 +20,6 @@ import {
   DrawerHeader,
   GradientWash,
   Grid,
-  Icon,
   IconButton,
   Input,
   List,
@@ -192,19 +198,19 @@ export function RuntimeApiScreen(): React.JSX.Element {
                   onPress={() => setUnexpectedPresses((count) => count + 1)}
                 />
                 <IconButton
-                  icon="check"
+                  icon={CheckOutlined}
                   accessibilityLabel="enabled IconButton"
                   testID="action-icon-enabled"
                   onPress={() => setButtonPresses((count) => count + 1)}
                 />
                 <IconButton
-                  icon="close"
+                  icon={CloseOutlined}
                   accessibilityLabel={'\t'}
                   testID="action-icon-blank"
                   onPress={() => setUnexpectedPresses((count) => count + 1)}
                 />
                 <IconButton
-                  icon="close"
+                  icon={CloseOutlined}
                   accessibilityLabel="loading IconButton（不应触发）"
                   loading
                   testID="action-icon-loading"
@@ -219,7 +225,7 @@ export function RuntimeApiScreen(): React.JSX.Element {
                   <NavBar
                     title="合法 action + display node 0"
                     left={{
-                      icon: 'arrow-left',
+                      icon: ArrowLeftOutlined,
                       accessibilityLabel: '返回',
                       onPress: () => setNavBarAction('合法 action 已触发'),
                     }}
@@ -341,7 +347,7 @@ export function RuntimeApiScreen(): React.JSX.Element {
                   disabled
                   trailing={{
                     kind: 'action',
-                    icon: 'close',
+                    icon: CloseOutlined,
                     onPress: () => setControlledInput('不应触发'),
                     accessibilityLabel: '禁用操作',
                   }}
@@ -351,7 +357,7 @@ export function RuntimeApiScreen(): React.JSX.Element {
                   defaultValue=""
                   trailing={{
                     kind: 'action',
-                    icon: 'close',
+                    icon: CloseOutlined,
                     onPress: () => setControlledInput('action'),
                     accessibilityLabel: '44pt 操作',
                   }}
@@ -502,6 +508,7 @@ function FontScaleSample({
   fontScale: number;
   expectedScale: number;
 }): React.JSX.Element {
+  const colors = useColors();
   const [segment, setSegment] = useState('first');
   const [stepper, setStepper] = useState(1);
 
@@ -511,13 +518,13 @@ function FontScaleSample({
         <FontScaleValueProbe id={id} expectedScale={expectedScale} />
         <Button
           label={`Button ${id}`}
-          leftIcon="check"
+          leftIcon={CheckOutlined}
           onPress={() => {}}
           testID={`font-scale-${id}-button`}
         />
-        <Icon
-          name="check"
+        <CheckOutlined
           size={20}
+          color={colors.foregroundMuted}
           testID={`font-scale-${id}-standalone-icon`}
         />
         <Avatar
@@ -1102,7 +1109,7 @@ function SvgIdSection(): React.JSX.Element {
 function DisplaySemanticsSection(): React.JSX.Element {
   const [gridPresses, setGridPresses] = useState(0);
   const gridItems = [
-    { id: 'messages', icon: 'mail', label: '消息', badge: 0 },
+    { id: 'messages', icon: MailOutlined, label: '消息', badge: 0 },
   ] as const;
 
   return (
@@ -1180,7 +1187,7 @@ function DisplaySemanticsSection(): React.JSX.Element {
         />
       </View>
       <Grid
-        items={[{ id: 'blank', icon: 'mail', label: '   ' }]}
+        items={[{ id: 'blank', icon: MailOutlined, label: '   ' }]}
         columns={1}
         onPress={() => setGridPresses((count) => count + 1)}
         testID="grid-blank-action"
@@ -1299,7 +1306,7 @@ function CellSection(): React.JSX.Element {
     <Section title="Cell action / control / static">
       <Text style={styles.result}>
         用 Inspector / screen reader 核对：cell-action-text 外层是
-        button，默认名称为 “订单，待支付，0”，IconName leading 与 chevron
+        button，默认名称为 “订单，待支付，0”，图标组件 leading 与 chevron
         都不形成第二焦点；cell-action-display 名称为“设备，在线”，其自定义
         leading 与 display extra 同样隐藏；cell-control 与 cell-static
         外层均为本地 View、无 action/role，只有 cell-control-switch 自己承担
@@ -1312,7 +1319,7 @@ function CellSection(): React.JSX.Element {
       </Text>
       <List>
         <Cell
-          leading="settings"
+          leading={SettingsOutlined}
           title="订单"
           desc="待支付"
           extra={{ kind: 'text', value: 0 }}

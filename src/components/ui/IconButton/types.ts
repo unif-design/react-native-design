@@ -1,13 +1,14 @@
+import type { ComponentType } from 'react';
+import type { IconProps } from '@unif/react-native-icons';
 import type { AccessibilityState, StyleProp, ViewStyle } from 'react-native';
-import type { IconName } from '../Icon';
 import type { ButtonSize, ButtonVariant } from '../Button/types';
 
 /** IconButton 支持的视觉变体:排除 'text'——text 撕除高度,与 square 方形布局语义冲突。 */
 export type IconButtonVariant = Exclude<ButtonVariant, 'text'>;
 
 export type IconButtonProps = {
-  /** 图标名 */
-  icon: IconName;
+  /** 图标组件 */
+  icon: ComponentType<IconProps>;
   /** 点击;disabled 时不触发 */
   onPress: () => void;
   /** 尺寸,默认 'md'(28 / 36 / 44 方形) */

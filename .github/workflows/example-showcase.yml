@@ -88,9 +88,6 @@ jobs:
       - name: Check runtime peers
         if: needs.changes.outputs.example == 'true' || needs.changes.outputs.tooling == 'true'
         run: yarn check:runtime-peers
-      - name: Check generated icons
-        if: needs.changes.outputs.contract == 'true'
-        run: yarn check:icons
       - name: Check jest entries
         if: needs.changes.outputs.example == 'true' || needs.changes.outputs.tooling == 'true'
         run: |

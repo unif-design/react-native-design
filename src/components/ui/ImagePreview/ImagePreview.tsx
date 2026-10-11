@@ -1,4 +1,5 @@
 import { GlassLayer } from '../GlassLayer';
+import { TrashOutlined } from '@unif/react-native-icons';
 import {
   forwardRef,
   useEffect,
@@ -245,7 +246,7 @@ export const ImagePreview = forwardRef<ImagePreviewHandle, ImagePreviewProps>(
         </View>
         {current.canDelete && onRequestDelete ? (
           <IconButton
-            icon="trash"
+            icon={TrashOutlined}
             size="sm"
             variant="glass"
             disabled={current.deleting}

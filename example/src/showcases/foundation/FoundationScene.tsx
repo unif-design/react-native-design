@@ -1,15 +1,15 @@
+import { ClipboardOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import {
   BRAND_ORANGE,
   Button,
-  ICONS,
-  ICON_NAMES,
   Segmented,
   addTransport,
   avatar,
   avatarGradient,
   consoleTransport,
+  childTestID,
   control,
   createLogger,
   darkColors,
@@ -47,7 +47,6 @@ import { ShowcaseScaffold } from '../../shared/ShowcaseScaffold';
 import { SectionCard } from '../../shared/SectionCard';
 import { isFontScalePreset, isThemeMode } from '../../state/showcaseState';
 import { useShowcase } from '../../state/useShowcase';
-import { IconCatalog } from './IconCatalog';
 
 const log = createLogger('FoundationScene');
 const ONE_SHOT_TRANSPORT_ID = 'foundation-scene-one-shot';
@@ -124,8 +123,7 @@ function runLoggerDiagnostic(): void {
 }
 
 export function FoundationScene(): React.JSX.Element {
-  const { back, setFontScale, setThemeMode, state, updateScene } =
-    useShowcase();
+  const { back, setFontScale, setThemeMode, state } = useShowcase();
   const theme = useTheme();
   const colors = useColors();
   const shadow = useShadow();
@@ -134,15 +132,11 @@ export function FoundationScene(): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
   const normalizedFontScale = normalizeFontScale(fontScale);
   const scaledBody = scaleFontMetric(type.body, fontScale);
-  const iconDataComplete = ICON_NAMES.every(
-    (name) => ICONS[name] !== undefined
-  );
-  const draft = state.scenes.foundation;
   const schemeLabel = theme.scheme === 'dark' ? '深色' : '浅色';
 
   return (
     <ShowcaseScaffold
-      title="基础能力与图标"
+      title="主题与基础能力"
       scene="foundation"
       onBack={() => {
         back();
@@ -162,10 +156,6 @@ export function FoundationScene(): React.JSX.Element {
             </Text>
             <Text style={styles.fact}>当前日志等级：{getLogLevel()}</Text>
             <Text style={styles.fact}>控制台传输器：{consoleTransport.id}</Text>
-            <Text style={styles.fact}>
-              图标诊断：{ICON_NAMES.length} /{' '}
-              {iconDataComplete ? '数据完整' : '数据缺失'}
-            </Text>
           </View>
         </SectionCard>
 
@@ -204,14 +194,14 @@ export function FoundationScene(): React.JSX.Element {
                   styles.swatch,
                   { backgroundColor: lightColors.background },
                 ]}
-                testID="foundation-swatch-light"
+                testID={childTestID('foundation-swatch', 'light')}
               />
               <View
                 style={[
                   styles.swatch,
                   { backgroundColor: darkColors.background },
                 ]}
-                testID="foundation-swatch-dark"
+                testID={childTestID('foundation-swatch', 'dark')}
               />
             </View>
             <Text style={styles.fact} testID="foundation-shadow-metrics">
@@ -249,14 +239,9 @@ export function FoundationScene(): React.JSX.Element {
           <Button
             label="记录主题诊断"
             onPress={runLoggerDiagnostic}
-            leftIcon="clipboard"
+            leftIcon={ClipboardOutlined}
           />
         </SectionCard>
-
-        <IconCatalog
-          draft={draft}
-          updateDraft={(updater) => updateScene('foundation', updater)}
-        />
       </View>
     </ShowcaseScaffold>
   );

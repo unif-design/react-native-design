@@ -1,3 +1,4 @@
+import { SearchOutlined } from '@unif/react-native-icons';
 import React, { useState } from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { Image, StyleSheet, Text, TextInput } from 'react-native';
@@ -355,7 +356,7 @@ describe('Design 独立消费契约', () => {
       testID: 'focusable-input',
       leading: {
         kind: 'action' as const,
-        icon: 'search' as const,
+        icon: SearchOutlined,
         accessibilityLabel: '查找',
         onPress: action,
       },

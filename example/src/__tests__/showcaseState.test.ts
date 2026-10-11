@@ -29,10 +29,6 @@ test('theme mode 与 fontScale 只接受指定 literal preset', () => {
 
 test('八个 concrete scene draft 可独立更新且切换 route 不丢失', () => {
   let state = createInitialShowcaseState();
-  state = updateShowcaseScene(state, 'foundation', (current) => ({
-    ...current,
-    iconQuery: 'arrow',
-  }));
   state = updateShowcaseScene(state, 'actions', (current) => ({
     ...current,
     chipSelected: true,
@@ -68,7 +64,7 @@ test('八个 concrete scene draft 可独立更新且切换 route 不丢失', () 
   };
 
   expect(navigated.scenes).toMatchObject({
-    foundation: { iconQuery: 'arrow' },
+    foundation: {},
     actions: { chipSelected: true },
     feedback: { toastKind: 'success' },
     forms: { inputValue: '可复现输入' },
@@ -102,7 +98,7 @@ test('每次初始化都创建八个互不共享的 scene draft', () => {
 test('scene draft 提供跨路由复现与按需挂载所需的最小字段', () => {
   const state = createInitialShowcaseState();
 
-  expect(state.scenes.foundation.iconLoadedCount).toBe(24);
+  expect(state.scenes.foundation).toEqual({});
   expect(state.scenes.feedback).toMatchObject({
     revealVisible: true,
     glassDemoEnabled: false,

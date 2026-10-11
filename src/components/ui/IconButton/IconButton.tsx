@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { createLogger } from '../../../utils/logger';
 import { ButtonBase } from '../Button/ButtonBase';
-import { Icon } from '../Icon';
 import { normalizeNonBlankText } from '../shared/accessibilityName';
 import type { IconButtonProps } from './types';
 
@@ -17,7 +16,7 @@ const log = createLogger('IconButton');
  * SR 必须靠 a11y label 朗读。
  */
 export function IconButton({
-  icon,
+  icon: Icon,
   onPress,
   size = 'md',
   iconSize,
@@ -60,11 +59,7 @@ export function IconButton({
       testID={testID}
     >
       {({ sizing, palette }) => (
-        <Icon
-          name={icon}
-          size={iconSize ?? sizing.fs + 4}
-          color={color ?? palette.fg}
-        />
+        <Icon size={iconSize ?? sizing.fs + 4} color={color ?? palette.fg} />
       )}
     </ButtonBase>
   );

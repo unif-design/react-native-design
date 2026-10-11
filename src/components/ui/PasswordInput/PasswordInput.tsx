@@ -1,3 +1,8 @@
+import {
+  EyeOffOutlined,
+  EyeOutlined,
+  LockOutlined,
+} from '@unif/react-native-icons';
 import React, { forwardRef, useEffect, useState } from 'react';
 import { Input } from '../Input';
 import type { TextFieldHandle, TextFieldSlot } from '../TextField/types';
@@ -53,7 +58,7 @@ export const PasswordInput = forwardRef<TextFieldHandle, PasswordInputProps>(
     const effectiveEditable = disabled !== true && editable !== false;
     const trailing: TextFieldSlot = {
       kind: 'action',
-      icon: showPassword ? 'eye' : 'eye-off',
+      icon: showPassword ? EyeOutlined : EyeOffOutlined,
       onPress: () => setShowPassword((visible) => !visible),
       accessibilityLabel: showPassword ? '隐藏密码' : '显示密码',
       disabled: !effectiveEditable,
@@ -72,7 +77,7 @@ export const PasswordInput = forwardRef<TextFieldHandle, PasswordInputProps>(
         autoComplete={rawAutoComplete ?? 'current-password'}
         autoCapitalize={rawAutoCapitalize ?? 'none'}
         secureTextEntry={!showPassword}
-        leading={{ kind: 'icon', icon: 'lock', size: 18 }}
+        leading={{ kind: 'icon', icon: LockOutlined, size: 18 }}
         trailing={trailing}
       />
     );

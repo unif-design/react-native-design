@@ -1,6 +1,6 @@
 import React, { type ReactNode } from 'react';
 import { Text } from 'react-native';
-import { ICONS, type IconName } from '../../../icons';
+import { isIconComponent } from '../shared/isIconComponent';
 import type { NavBarAction } from './types';
 
 export type NavBarSlotClassification =
@@ -23,21 +23,14 @@ type ThenableResolutionRecord = {
 
 const mappedThenables = new WeakMap<object, ThenableResolutionRecord>();
 
-function isIconName(value: unknown): value is IconName {
-  return (
-    typeof value === 'string' &&
-    Object.prototype.hasOwnProperty.call(ICONS, value)
-  );
-}
-
 /**
- * Type guard：action 的 icon 必须真实存在于生成的 registry，且有 handler 与非空名称。
+ * Action 必须提供可渲染图标组件、handler 与非空可访问名称。
  */
 export function isNavBarAction(v: unknown): v is NavBarAction {
   if (typeof v !== 'object' || v === null) return false;
   const slot = v as Record<string, unknown>;
   return (
-    isIconName(slot.icon) &&
+    isIconComponent(slot.icon) &&
     typeof slot.onPress === 'function' &&
     typeof slot.accessibilityLabel === 'string' &&
     slot.accessibilityLabel.trim().length > 0

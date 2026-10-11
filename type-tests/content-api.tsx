@@ -1,3 +1,4 @@
+import { CrosshairOutlined, TrashOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import {
@@ -13,12 +14,20 @@ import {
 } from '@unif/react-native-design';
 
 const noop = () => {};
+// @ts-expect-error 图标参数直接接收组件，不接受旧名称字符串。
+<IconButton icon="plus" accessibilityLabel="新增" onPress={noop} />;
+<IconButton
+  // @ts-expect-error 传组件本身，不传已经创建的元素。
+  icon={<CrosshairOutlined />}
+  accessibilityLabel="定位"
+  onPress={noop}
+/>;
 const styles = StyleSheet.create({ compactContent: { paddingTop: 0 } });
 const actions: ActionMenuAction[] = [
   {
     id: 'delete',
     label: '删除',
-    icon: 'trash',
+    icon: TrashOutlined,
     accessibilityHint: '先确认再移除原项',
     onPress: noop,
     confirmation: {
@@ -81,7 +90,7 @@ preview.current?.scrollTo('stable', false);
   maxLength={4}
 />;
 <IconButton
-  icon="crosshair"
+  icon={CrosshairOutlined}
   surfaceSize={36}
   iconSize={22}
   accessibilityLabel="定位"

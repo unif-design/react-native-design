@@ -32,19 +32,19 @@ const IconButtonDemo = () => {
           <span className="demo-label">size · sm 28 / md 36 / lg 44</span>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <IconButton
-              icon="bell"
+              icon={BellOutlined}
               size="sm"
               accessibilityLabel="通知"
               onPress={onPress}
             />
             <IconButton
-              icon="bell"
+              icon={BellOutlined}
               size="md"
               accessibilityLabel="通知"
               onPress={onPress}
             />
             <IconButton
-              icon="bell"
+              icon={BellOutlined}
               size="lg"
               accessibilityLabel="通知"
               onPress={onPress}
@@ -57,19 +57,19 @@ const IconButtonDemo = () => {
           </span>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <IconButton
-              icon="scan"
+              icon={ScanOutlined}
               variant="neutral"
               accessibilityLabel="扫码"
               onPress={onPress}
             />
             <IconButton
-              icon="scan"
+              icon={ScanOutlined}
               variant="primary"
               accessibilityLabel="扫码"
               onPress={onPress}
             />
             <IconButton
-              icon="scan"
+              icon={ScanOutlined}
               variant="ghost"
               accessibilityLabel="扫码"
               onPress={onPress}
@@ -80,7 +80,7 @@ const IconButtonDemo = () => {
           <span className="demo-label">disabled · opacity 0.5 + 不响应</span>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <IconButton
-              icon="check"
+              icon={CheckOutlined}
               variant="primary"
               accessibilityLabel="确认"
               disabled
@@ -98,13 +98,14 @@ const IconButtonDemo = () => {
 ## 用法
 
 ```tsx
+import { CloseOutlined, ScanOutlined } from '@unif/react-native-icons';
 import { IconButton } from '@unif/react-native-design';
 
 {
   /* NavBar 右侧扫码按钮 */
 }
 <IconButton
-  icon="scan"
+  icon={ScanOutlined}
   size="md"
   variant="neutral"
   accessibilityLabel="扫码"
@@ -116,7 +117,7 @@ import { IconButton } from '@unif/react-native-design';
   /* 卡片右上关闭 */
 }
 <IconButton
-  icon="close"
+  icon={CloseOutlined}
   size="sm"
   variant="ghost"
   accessibilityLabel="关闭"
@@ -128,7 +129,7 @@ import { IconButton } from '@unif/react-native-design';
 
 | 参数                 | 类型                                                                                      | 默认值     | 说明                                                                                         |
 | -------------------- | ----------------------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------- |
-| `icon`               | `IconName`                                                                                | —          | 包内生成图标目录中的闭集名称                                                                 |
+| `icon`               | `ComponentType<IconProps>`                                                                | —          | 从 Icons 导入的图标组件                                                                      |
 | `onPress`            | `() => void`                                                                              | —          | **必填**点击回调；disabled / loading 时组件移除有效 handler                                  |
 | `size`               | `('sm' \| 'md' \| 'lg')?`                                                                 | `'md'`     | 方形边长 28 / 36 / 44                                                                        |
 | `iconSize`           | `number?`                                                                                 | 随 size    | 图标与加载指示的独立尺寸                                                                     |
@@ -146,8 +147,9 @@ import { IconButton } from '@unif/react-native-design';
 `iconSize` 可独立设置图标和加载指示的尺寸；`surfaceSize` 可指定方形表面边长，同时按该值补足 44pt 命中区。缺省仍使用 `size` 对应的设备缩放尺寸。
 
 ```tsx
-<IconButton icon="chevron-left" surfaceSize={36} iconSize={21} style={{ borderRadius: 18 }} accessibilityLabel="返回" onPress={onBack} />
-<IconButton icon="crosshair" surfaceSize={36} iconSize={22} accessibilityLabel="定位" loading={locating} onPress={locate} />
+import { ChevronLeftOutlined, CrosshairOutlined } from '@unif/react-native-icons';
+<IconButton icon={ChevronLeftOutlined} surfaceSize={36} iconSize={21} style={{ borderRadius: 18 }} accessibilityLabel="返回" onPress={onBack} />
+<IconButton icon={CrosshairOutlined} surfaceSize={36} iconSize={22} accessibilityLabel="定位" loading={locating} onPress={locate} />
 ```
 
 ## 无障碍（a11y）
@@ -159,11 +161,12 @@ import { IconButton } from '@unif/react-native-design';
 - 状态语义：disabled 或 loading 时自动上报 `accessibilityState.disabled: true` 并移除有效 handler；loading 还上报 `busy: true`。调用方不能覆盖这两个字段。
 
 ```tsx
+import { ScanOutlined } from '@unif/react-native-icons';
 // label 必填(SR 唯一信息源);hint 仅在行为不显然时补
-<IconButton icon="scan" accessibilityLabel="扫码" accessibilityHint="打开二维码扫描" onPress={...} />
+<IconButton icon={ScanOutlined} accessibilityLabel="扫码" accessibilityHint="打开二维码扫描" onPress={...} />
 ```
 
 ## 使用注意
 
-- 不要把 icon 当装饰用 IconButton —— 装饰用 `<Icon>` 即可,没 hit area 浪费
+- 不要把 icon 当装饰用 IconButton —— 装饰直接使用 Icons 组件即可,没 hit area 浪费
 - 不要在 IconButton 内文字 + icon 混搭 —— 用 [Button](button.md) 的 `rightIcon` / `leftIcon` prop

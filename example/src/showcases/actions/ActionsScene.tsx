@@ -1,10 +1,21 @@
+import {
+  ArrowRightOutlined,
+  BellOutlined,
+  CheckOutlined,
+  ChevronLeftOutlined,
+  CloseOutlined,
+  CrosshairOutlined,
+  EditOutlined,
+  PlusOutlined,
+  SparkOutlined,
+  TrashOutlined,
+} from '@unif/react-native-icons';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
   ActionMenuContent,
   Button,
   Chip,
-  Icon,
   IconButton,
   Segmented,
   StatusDot,
@@ -217,14 +228,14 @@ export function ActionsScene(): React.JSX.Element {
               {
                 id: 'rename',
                 label: '重命名示例',
-                icon: 'edit',
+                icon: EditOutlined,
                 onPress: () =>
                   record('ActionMenuContent', '重命名', '已选择重命名'),
               },
               {
                 id: 'remove',
                 label: '浮动删除示例',
-                icon: 'trash',
+                icon: TrashOutlined,
                 tone: 'danger',
                 confirmation: {
                   title: '删除项目',
@@ -238,7 +249,7 @@ export function ActionsScene(): React.JSX.Element {
           />
           <View style={styles.row}>
             <IconButton
-              icon="chevron-left"
+              icon={ChevronLeftOutlined}
               surfaceSize={36}
               iconSize={21}
               variant="glass"
@@ -247,7 +258,7 @@ export function ActionsScene(): React.JSX.Element {
               onPress={() => record('IconButton', '返回', '已点击返回')}
             />
             <IconButton
-              icon="crosshair"
+              icon={CrosshairOutlined}
               surfaceSize={36}
               iconSize={22}
               accessibilityLabel="定位加载演示"
@@ -322,8 +333,8 @@ export function ActionsScene(): React.JSX.Element {
           <Button
             block
             label="双图标块级按钮"
-            leftIcon="check"
-            rightIcon="arrow-right"
+            leftIcon={CheckOutlined}
+            rightIcon={ArrowRightOutlined}
             testID="actions-button-icons"
             onPress={() => record('Button', '点击', '双图标块级按钮已触发')}
           />
@@ -348,7 +359,7 @@ export function ActionsScene(): React.JSX.Element {
             {iconButtonVariants.map((variant) => (
               <IconButton
                 key={variant}
-                icon="bell"
+                icon={BellOutlined}
                 variant={variant}
                 accessibilityLabel={iconVariantLabels[variant]}
                 testID={`actions-icon-button-variant-${variant}`}
@@ -366,7 +377,7 @@ export function ActionsScene(): React.JSX.Element {
             {buttonSizes.map((size) => (
               <IconButton
                 key={size}
-                icon="check"
+                icon={CheckOutlined}
                 size={size}
                 accessibilityLabel={`${sizeLabels[size]}图标按钮`}
                 testID={`actions-icon-button-size-${size}`}
@@ -376,7 +387,7 @@ export function ActionsScene(): React.JSX.Element {
               />
             ))}
             <IconButton
-              icon="spark"
+              icon={SparkOutlined}
               color={colors.success}
               accessibilityLabel="自定义颜色图标按钮"
               testID="actions-icon-button-color"
@@ -385,14 +396,14 @@ export function ActionsScene(): React.JSX.Element {
               }
             />
             <IconButton
-              icon="close"
+              icon={CloseOutlined}
               disabled
               accessibilityLabel="禁用图标按钮"
               testID="actions-icon-button-disabled"
               onPress={() => record('IconButton', '点击', '禁用图标按钮已触发')}
             />
             <IconButton
-              icon="plus"
+              icon={PlusOutlined}
               loading
               accessibilityLabel="加载图标按钮"
               testID="actions-icon-button-loading"
@@ -437,8 +448,12 @@ export function ActionsScene(): React.JSX.Element {
             />
             <Chip
               label="前后插槽标签"
-              leading={<Icon name="spark" size={12} />}
-              trailing={<Icon name="close" size={12} />}
+              leading={
+                <SparkOutlined size={12} color={colors.foregroundMuted} />
+              }
+              trailing={
+                <CloseOutlined size={12} color={colors.foregroundMuted} />
+              }
               testID="actions-chip-slots"
               onPress={() => record('Chip', '点击', '前后插槽标签已触发')}
             />

@@ -17,7 +17,6 @@
 - [ ] `yarn typecheck`
 - [ ] `yarn test`
 - [ ] (若改了 RN 组件)在 `example/` 里跑过,亮 + 暗主题都看了
-- [ ] (若加了 icon)`node scripts/build-icons.js` 已跑、`data.ts` 已更新
 
 ## 影响范围 / 注意点
 

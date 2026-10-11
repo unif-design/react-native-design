@@ -151,7 +151,7 @@
     "mdPath": "md/components/icons.md",
     "slug": "/components/icons",
     "section": "components",
-    "description": "按名称查询和使用公开 SVG 图标。"
+    "description": "预览常用图标，直接使用 Unif Icons 独立图标组件。"
   },
   {
     "title": "ImagePreview 图片预览",

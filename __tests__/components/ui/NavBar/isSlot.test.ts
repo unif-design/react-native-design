@@ -1,3 +1,4 @@
+import { ArrowLeftOutlined } from '@unif/react-native-icons';
 import { describe, expect, test } from '@jest/globals';
 import React from 'react';
 import { Text } from 'react-native';
@@ -74,7 +75,7 @@ describe('NavBar slot classification', () => {
   test('accepts only generated icon names for action objects', () => {
     expect(
       isNavBarAction({
-        icon: 'arrow-left',
+        icon: ArrowLeftOutlined,
         onPress,
         accessibilityLabel: '返回',
       })
@@ -89,10 +90,10 @@ describe('NavBar slot classification', () => {
   });
 
   test.each([
-    [{ icon: 'arrow-left' }, '缺 handler'],
-    [{ icon: 'arrow-left', onPress }, '缺可访问名称'],
+    [{ icon: ArrowLeftOutlined }, '缺 handler'],
+    [{ icon: ArrowLeftOutlined, onPress }, '缺可访问名称'],
     [
-      { icon: 'arrow-left', onPress, accessibilityLabel: '   ' },
+      { icon: ArrowLeftOutlined, onPress, accessibilityLabel: '   ' },
       '空可访问名称',
     ],
     [
@@ -106,7 +107,7 @@ describe('NavBar slot classification', () => {
   test('classifies a complete action object as an action', () => {
     expect(
       classifyNavBarSlot({
-        icon: 'arrow-left',
+        icon: ArrowLeftOutlined,
         onPress,
         accessibilityLabel: '返回',
       }).kind

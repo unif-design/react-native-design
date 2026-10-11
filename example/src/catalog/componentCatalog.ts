@@ -37,7 +37,6 @@ export const publicComponentIds = [
   'FormGroup',
   'FormRow',
   'Grid',
-  'Icon',
   'IconButton',
   'Input',
   'Logo',
@@ -88,11 +87,6 @@ export const componentCatalog = [
   { id: 'ImagePreview', scene: 'media', states: ['稳定身份与删除'] },
   { id: 'Sheet', scene: 'collections', states: ['三种内容模式'] },
 
-  {
-    id: 'Icon',
-    scene: 'foundation',
-    states: ['图标全集', '名称检索', '尺寸', '颜色', '无障碍隐藏'],
-  },
   {
     id: 'Button',
     scene: 'actions',
@@ -385,8 +379,6 @@ export const requiredRuntimeApis = [
   'fixed',
   'motion',
   'pressedOpacity',
-  'ICONS',
-  'ICON_NAMES',
   'childTestID',
   'createLogger',
   'setLogLevel',

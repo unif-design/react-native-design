@@ -1,3 +1,4 @@
+import { ChevronLeftOutlined, HomeOutlined } from '@unif/react-native-icons';
 import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import {
@@ -35,7 +36,7 @@ export function DefaultGlassControlsDemo() {
         <NavBar
           title="项目导航"
           left={{
-            icon: 'chevron-left',
+            icon: ChevronLeftOutlined,
             accessibilityLabel: '返回项目',
             onPress: () => setEvent('已返回'),
           }}
@@ -103,7 +104,7 @@ export function DefaultGlassControlsDemo() {
           />
         </View>
         <EntryCard
-          icon="home"
+          icon={HomeOutlined}
           title="工作空间"
           sub="打开入口"
           onPress={() => setEvent('已打开入口')}

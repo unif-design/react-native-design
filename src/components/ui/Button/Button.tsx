@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { Text } from 'react-native';
 import { scaleFontMetric, useFontScale, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
-import { Icon } from '../Icon';
 import { normalizeNonBlankText } from '../shared/accessibilityName';
 import { ButtonBase } from './ButtonBase';
 import { makeStyles } from './styles';
@@ -25,8 +24,8 @@ export function Button({
   block,
   disabled,
   loading,
-  leftIcon,
-  rightIcon,
+  leftIcon: LeftIcon,
+  rightIcon: RightIcon,
   style,
   testID,
   accessibilityHint,
@@ -61,8 +60,8 @@ export function Button({
         const textSize = scaleFontMetric(sizing.fs, fontScale);
         return (
           <>
-            {leftIcon ? (
-              <Icon name={leftIcon} size={sizing.fs + 2} color={palette.fg} />
+            {LeftIcon ? (
+              <LeftIcon size={sizing.fs + 2} color={palette.fg} />
             ) : null}
             <Text
               style={[styles.label, { color: palette.fg, fontSize: textSize }]}
@@ -70,8 +69,8 @@ export function Button({
             >
               {label}
             </Text>
-            {rightIcon ? (
-              <Icon name={rightIcon} size={sizing.fs + 2} color={palette.fg} />
+            {RightIcon ? (
+              <RightIcon size={sizing.fs + 2} color={palette.fg} />
             ) : null}
           </>
         );

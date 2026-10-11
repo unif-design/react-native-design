@@ -4,8 +4,9 @@ title: Thumbnail 缩略图
 description: '展示缩略图，支持尺寸、加载及失败占位。'
 ---
 
+import { FileOutlined } from '@unif/react-native-icons';
 import { LiveDemo } from '@site/src/components/LiveDemo';
-import { Button, Icon, Thumbnail } from '@unif/react-native-design';
+import { Button, Thumbnail, useColors } from '@unif/react-native-design';
 import { View } from 'react-native';
 import { useState } from 'react';
 
@@ -57,49 +58,53 @@ export const IMAGE_B =
     '<svg xmlns="http://www.w3.org/2000/svg" width="76" height="76"><rect width="76" height="76" fill="seagreen"/><text x="28" y="45" fill="white">B</text></svg>'
   );
 
-export const ThumbnailDimensionsDemo = () => {
+export const ThumbnailDimensionsContent = () => {
+  const colors = useColors();
   const [uri, setUri] = useState(IMAGE_A);
   const [large, setLarge] = useState(false);
   return (
-    <LiveDemo>
-      <View style={{ gap: 16 }}>
-        <Thumbnail
-          uri={uri}
-          size={{ width: large ? 120 : 76, height: 76, borderRadius: 8 }}
-          selected
-          fallback={<Icon name="file" />}
-          accessibilityLabel="附件图像框"
-          testID="thumbnail-dimensions-demo"
+    <View style={{ gap: 16 }}>
+      <Thumbnail
+        uri={uri}
+        size={{ width: large ? 120 : 76, height: 76, borderRadius: 8 }}
+        selected
+        fallback={<FileOutlined size={18} color={colors.foregroundMuted} />}
+        accessibilityLabel="附件图像框"
+        testID="thumbnail-dimensions-demo"
+      />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 12,
+        }}
+      >
+        <Button label="图片 A" onPress={() => setUri(IMAGE_A)} />
+        <Button label="图片 B" onPress={() => setUri(IMAGE_B)} />
+        <Button
+          label="图片失败"
+          onPress={() => setUri('data:image/png;base64,invalid')}
         />
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: 12,
-          }}
-        >
-          <Button label="图片 A" onPress={() => setUri(IMAGE_A)} />
-          <Button label="图片 B" onPress={() => setUri(IMAGE_B)} />
-          <Button
-            label="图片失败"
-            onPress={() => setUri('data:image/png;base64,invalid')}
-          />
-          <Button label="切换图像框" onPress={() => setLarge(!large)} />
-        </View>
+        <Button label="切换图像框" onPress={() => setLarge(!large)} />
       </View>
-    </LiveDemo>
+    </View>
   );
 };
 
-<ThumbnailDimensionsDemo />
+<LiveDemo>
+  <ThumbnailDimensionsContent />
+</LiveDemo>
 
 ```tsx
+import { FileOutlined } from '@unif/react-native-icons';
 import {
   Thumbnail,
-  Icon,
+  useColors,
   type ThumbnailDimensions,
 } from '@unif/react-native-design';
+// 以下片段放在组件内。
+const colors = useColors();
 const dimensions: Readonly<ThumbnailDimensions> = {
   width: 76,
   height: 76,
@@ -108,7 +113,7 @@ const dimensions: Readonly<ThumbnailDimensions> = {
 <Thumbnail
   source={{ uri: imageUri }}
   size={dimensions}
-  fallback={<Icon name="file" />}
+  fallback={<FileOutlined size={18} color={colors.foregroundMuted} />}
 />;
 ```
 

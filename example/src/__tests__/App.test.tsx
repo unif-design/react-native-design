@@ -211,7 +211,7 @@ test('ThemeProvider 将 system 映射为 undefined，并窄化三档主题与四
     expect(screen.UNSAFE_getByType(ThemeProvider).props.fontScale).toBe(1);
   });
 
-  fireEvent.press(screen.getByRole('button', { name: /基础能力与图标/ }));
+  fireEvent.press(screen.getByRole('button', { name: /主题与基础能力/ }));
   expect(screen.getByTestId('foundation-screen')).toBeOnTheScreen();
 
   const themeCases = [
@@ -268,7 +268,7 @@ test('Home 只挂八个中文 scene 入口，并在前进与返回时互斥挂�
   expect(screen.queryByTestId('pending-screen')).not.toBeOnTheScreen();
   expect(screen.queryByTestId(/^foundation-icons-/)).not.toBeOnTheScreen();
 
-  fireEvent.press(screen.getByRole('button', { name: /基础能力与图标/ }));
+  fireEvent.press(screen.getByRole('button', { name: /主题与基础能力/ }));
   expect(screen.queryByText('设计系统示例')).not.toBeOnTheScreen();
   expect(screen.getByTestId('foundation-screen')).toBeOnTheScreen();
 
@@ -303,7 +303,7 @@ test('Android BackHandler 只订阅一次，child consume、Home 不 consume，�
   const handler = nativeBack.getHandler();
   expect(handler()).toBe(false);
 
-  fireEvent.press(screen.getByRole('button', { name: /基础能力与图标/ }));
+  fireEvent.press(screen.getByRole('button', { name: /主题与基础能力/ }));
   expect(screen.getByTestId('foundation-screen')).toBeOnTheScreen();
   expect(nativeBack.addEventListener).toHaveBeenCalledTimes(1);
 
@@ -355,7 +355,7 @@ test('系统减少动态效果开启时 Home 与 Foundation 均展示真实事�
   render(<App />);
 
   expect(screen.getByText('减少动态效果：是')).toBeOnTheScreen();
-  fireEvent.press(screen.getByRole('button', { name: /基础能力与图标/ }));
+  fireEvent.press(screen.getByRole('button', { name: /主题与基础能力/ }));
   expect(screen.getByTestId('foundation-screen')).toBeOnTheScreen();
   expect(screen.getByText('减少动态效果：是')).toBeOnTheScreen();
 });

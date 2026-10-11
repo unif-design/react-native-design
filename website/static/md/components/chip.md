@@ -13,115 +13,116 @@ description: '用于选择、筛选或简短标签的胶囊控件。'
 ## 代码演示 {#实时预览}
 
 ```tsx
-const ChipDemo = () => {
+const ChipDemoContent = () => {
+  const colors = useColors();
   const [filter, setFilter] = useState('pending');
   const [tags, setTags] = useState(['王经理', '张组长', '李区域']);
   const [busy, setBusy] = useState(null);
   return (
-    <>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <span className="demo-label">单选 · selected 切换</span>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            <Chip
-              label="待跟进"
-              selected={filter === 'pending'}
-              onPress={() => setFilter('pending')}
-            />
-            <Chip
-              label="已完成"
-              selected={filter === 'done'}
-              onPress={() => setFilter('done')}
-            />
-            <Chip
-              label="已取消"
-              selected={filter === 'cancelled'}
-              onPress={() => setFilter('cancelled')}
-            />
-          </div>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <span className="demo-label">leading icon · 建议气泡</span>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            <Chip
-              label="今天的安排"
-              leading={<Icon name="spark" size={12} />}
-              onPress={() => {}}
-            />
-            <Chip
-              label="新建拜访"
-              leading={<Icon name="plus" size={12} />}
-              onPress={() => {}}
-            />
-          </div>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <span className="demo-label">trailing close · 多选 token</span>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {tags.map((name) => (
-              <Chip
-                key={name}
-                label={name}
-                selected
-                trailing={<Icon name="close" size={12} />}
-                onPress={() => setTags(tags.filter((x) => x !== name))}
-              />
-            ))}
-            {tags.length === 0 && (
-              <button
-                style={{
-                  fontSize: 12,
-                  color: '#999',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-                onClick={() => setTags(['王经理', '张组长', '李区域'])}
-              >
-                重置
-              </button>
-            )}
-          </div>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <span className="demo-label">
-            busy · 点了就转（请求在飞，二次点击被吞）
-          </span>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            <Chip
-              label="今日拜访计划"
-              leading={<Icon name="spark" size={12} />}
-              busy={busy === 'plan'}
-              onPress={() => {
-                setBusy('plan');
-                setTimeout(() => setBusy(null), 1600);
-              }}
-            />
-            <Chip
-              label="确认这一家"
-              selected
-              busy={busy === 'pick'}
-              onPress={() => {
-                setBusy('pick');
-                setTimeout(() => setBusy(null), 1600);
-              }}
-            />
-            <Chip label="不能点（disabled）" disabled onPress={() => {}} />
-          </div>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <span className="demo-label">
-            静态展示（无 onPress · 不响应按压）
-          </span>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            <Chip label="VIP" />
-            <Chip label="拜访周期 7 天" />
-          </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <span className="demo-label">单选 · selected 切换</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <Chip
+            label="待跟进"
+            selected={filter === 'pending'}
+            onPress={() => setFilter('pending')}
+          />
+          <Chip
+            label="已完成"
+            selected={filter === 'done'}
+            onPress={() => setFilter('done')}
+          />
+          <Chip
+            label="已取消"
+            selected={filter === 'cancelled'}
+            onPress={() => setFilter('cancelled')}
+          />
         </div>
       </div>
-    </>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <span className="demo-label">leading icon · 建议气泡</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <Chip
+            label="今天的安排"
+            leading={<SparkOutlined size={12} color={colors.foregroundMuted} />}
+            onPress={() => {}}
+          />
+          <Chip
+            label="新建拜访"
+            leading={<PlusOutlined size={12} color={colors.foregroundMuted} />}
+            onPress={() => {}}
+          />
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <span className="demo-label">trailing close · 多选 token</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {tags.map((name) => (
+            <Chip
+              key={name}
+              label={name}
+              selected
+              trailing={
+                <CloseOutlined size={12} color={colors.foregroundMuted} />
+              }
+              onPress={() => setTags(tags.filter((x) => x !== name))}
+            />
+          ))}
+          {tags.length === 0 && (
+            <button
+              style={{
+                fontSize: 12,
+                color: '#999',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+              onClick={() => setTags(['王经理', '张组长', '李区域'])}
+            >
+              重置
+            </button>
+          )}
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <span className="demo-label">
+          busy · 点了就转（请求在飞，二次点击被吞）
+        </span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <Chip
+            label="今日拜访计划"
+            leading={<SparkOutlined size={12} color={colors.foregroundMuted} />}
+            busy={busy === 'plan'}
+            onPress={() => {
+              setBusy('plan');
+              setTimeout(() => setBusy(null), 1600);
+            }}
+          />
+          <Chip
+            label="确认这一家"
+            selected
+            busy={busy === 'pick'}
+            onPress={() => {
+              setBusy('pick');
+              setTimeout(() => setBusy(null), 1600);
+            }}
+          />
+          <Chip label="不能点（disabled）" disabled onPress={() => {}} />
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <span className="demo-label">静态展示（无 onPress · 不响应按压）</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <Chip label="VIP" />
+          <Chip label="拜访周期 7 天" />
+        </div>
+      </div>
+    </div>
   );
 };
+
+  <ChipDemoContent />
 ```
 
 ## 状态
@@ -140,7 +141,11 @@ const ChipDemo = () => {
 ## 用法
 
 ```tsx
-import { Chip, Icon } from '@unif/react-native-design';
+import { CloseOutlined, SparkOutlined } from '@unif/react-native-icons';
+import { Chip, useColors } from '@unif/react-native-design';
+
+// 以下片段放在组件内，读取当前主题。
+const colors = useColors();
 
 {
   /* 单个可选中 chip */
@@ -156,7 +161,7 @@ import { Chip, Icon } from '@unif/react-native-design';
 }
 <Chip
   label="今天的安排"
-  leading={<Icon name="spark" size={12} />}
+  leading={<SparkOutlined size={12} color={colors.foregroundMuted} />}
   onPress={onSuggestion}
 />;
 
@@ -171,7 +176,7 @@ import { Chip, Icon } from '@unif/react-native-design';
 <Chip
   label="王经理"
   selected
-  trailing={<Icon name="close" size={12} />}
+  trailing={<CloseOutlined size={12} color={colors.foregroundMuted} />}
   onPress={() => removeFilter('manager-wang')}
 />;
 
@@ -180,7 +185,7 @@ import { Chip, Icon } from '@unif/react-native-design';
 }
 <Chip
   label="今日拜访计划"
-  leading={<Icon name="spark" size={12} />}
+  leading={<SparkOutlined size={12} color={colors.foregroundMuted} />}
   busy={pending === 'plan'}
   onPress={openTodayPlan}
 />;

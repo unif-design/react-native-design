@@ -1,3 +1,4 @@
+import { ArrowLeftOutlined, MoreHOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { Image, StyleSheet } from 'react-native';
@@ -71,11 +72,11 @@ test('NavBar 展示三种 variant、action/display slot，DrawerHeader 保持纯
   ).toMatchObject({
     variant: 'default',
     left: {
-      icon: 'arrow-left',
+      icon: ArrowLeftOutlined,
       accessibilityLabel: '演示返回动作',
     },
     right: {
-      icon: 'more-h',
+      icon: MoreHOutlined,
       accessibilityLabel: '演示更多动作',
     },
   });
@@ -84,7 +85,7 @@ test('NavBar 展示三种 variant、action/display slot，DrawerHeader 保持纯
       componentByTestID(NavBar, 'navigation-navbar-default').props
     ).toMatchObject({
       variant: 'default',
-      left: { icon: 'arrow-left', accessibilityLabel: '演示返回动作' },
+      left: { icon: ArrowLeftOutlined, accessibilityLabel: '演示返回动作' },
     });
   });
   expect(

@@ -89,16 +89,20 @@ function FadeIn({ children }: { children: React.ReactNode }) {
 ### 脉冲(思考中 / shimmer / blink cursor 全走它) {#脉冲}
 
 ```tsx
-import { Pulse, PulseDot, Icon, motion } from '@unif/react-native-design';
+import { SparkOutlined } from '@unif/react-native-icons';
+import { Pulse, PulseDot, motion, useColors } from '@unif/react-native-design';
 
-// 包裹任意 children
-<Pulse from={0.4} duration={motion.pulse / 2}>
-  <Icon name="spark" size={14} />
-</Pulse>
-
-// 圆点
-<PulseDot />
-
+function ThinkingFeedback() {
+  const colors = useColors();
+  return (
+    <>
+      <Pulse from={0.4} duration={motion.pulse / 2}>
+        <SparkOutlined size={14} color={colors.foregroundMuted} />
+      </Pulse>
+      <PulseDot />
+    </>
+  );
+}
 ```
 
 需要组合自定义容器时可使用 `usePulse`；其返回值同样由平台 driver 提供。共享代码优先用
