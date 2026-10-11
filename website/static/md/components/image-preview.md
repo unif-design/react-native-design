@@ -101,7 +101,7 @@ import { ImagePreview } from '@unif/react-native-design';
 
 ref 提供 `scrollTo(id: string, animated = true): void` 和 `getCurrent(): Readonly<ImagePreviewItem> | undefined`。未知 id 不改变当前项；动画完成前仍读取上一已落位项。重入、集合身份变化和卸载后隔离旧动画回调。
 
-同 URL 的不同 id 保持独立。当前项移除后取原位置后继，无后继取前一项。缺少来源或加载失败显示占位；只影响本次显示，不移除记录。图片采用 contain，序号与操作位于图片裁切区外。
+同 URL 的不同 id 保持独立。当前项移除后取原位置后继，无后继取前一项。缺少来源或加载失败显示占位；只影响本次显示，不移除记录。图片采用 contain，媒体表面不加边框或圆角，序号与操作位于图片裁切区外。
 
 ## 组合与验证
 
