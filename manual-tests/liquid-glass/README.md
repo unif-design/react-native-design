@@ -39,6 +39,8 @@
 
 `testMenuThemeOverride` 要求系统外观为 light，定向检查组件强制浅／深主题时的上下箭头和单删除确认，避免把“应用深色”与“系统深色”当成同一个条件。
 
+`testButtonMaterialStates` 检查点击前后、禁用和忙碌状态，并通过实际触摸确认不可用操作不交付；`testToastMaterial` 单独保留浅／深原生 Toast 图。`testFocusedReducedMaterials` 用于菜单与 Toast 变更后的实色降级复验，继续操作真实系统开关并恢复原值。
+
 ## 当前平台边界
 
 Xcode 27 + iOS 27 下，SDK 明确忽略 `UIDesignRequiresCompatibility`（`DTPlatformVersion >= 27`），该开关不能用于证明“不支持原生玻璃”。不伪造 SDK 元数据或支持标记。本场景的减少透明度截图证明的是无障碍实色降级，不能记为旧 iOS／Android 验收。
