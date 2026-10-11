@@ -1,3 +1,10 @@
+import {
+  CalendarOutlined,
+  ChatStarOutlined,
+  ChevronLeftOutlined,
+  EditOutlined,
+  TrashOutlined,
+} from '@unif/react-native-icons';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native';
 import {
@@ -25,7 +32,7 @@ export function LiquidGlassDemo() {
           variant="glass"
           surfaceSize={36}
           iconSize={21}
-          icon="chevron-left"
+          icon={ChevronLeftOutlined}
           accessibilityLabel="返回演示"
           onPress={() => setEvent('已返回')}
         />
@@ -55,13 +62,13 @@ export function LiquidGlassDemo() {
             {
               id: 'rename',
               label: '重命名',
-              icon: 'edit',
+              icon: EditOutlined,
               onPress: () => setEvent('编辑下方名称'),
             },
             {
               id: 'delete',
               label: '删除聊天',
-              icon: 'trash',
+              icon: TrashOutlined,
               tone: 'danger',
               confirmation: {
                 title: '删除聊天',
@@ -103,8 +110,8 @@ export function LiquidGlassDemo() {
           active={tab}
           onChange={setTab}
           items={[
-            { id: 'chat', label: '聊天', icon: 'chat-star' },
-            { id: 'visit', label: '拜访', icon: 'calendar' },
+            { id: 'chat', label: '聊天', icon: ChatStarOutlined },
+            { id: 'visit', label: '拜访', icon: CalendarOutlined },
           ]}
         />
       </View>

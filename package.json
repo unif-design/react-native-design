@@ -1,7 +1,7 @@
 {
   "name": "@unif/react-native-design",
   "version": "0.41.0",
-  "description": "Unif React Native 设计系统：基础组件、主题、字体和图标",
+  "description": "Unif React Native 设计系统：基础组件、主题和字体",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "sideEffects": [
@@ -37,7 +37,6 @@
     "!android/gradlew",
     "!android/gradlew.bat",
     "!android/local.properties",
-    "!**/icons/svg",
     "!**/__tests__",
     "!**/__fixtures__",
     "!**/__mocks__",
@@ -51,7 +50,6 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "test": "jest --passWithNoTests",
     "check:config": "node scripts/check-config.js",
-    "check:icons": "node scripts/check-icons-generated.js",
     "check:jest-entries": "node scripts/check-jest-entries.js",
     "check:runtime-peers": "node scripts/check-runtime-peers.js",
     "verify:example-showcase": "node --test scripts/__tests__/verify-example-showcase.test.mjs && node scripts/verify-example-showcase.mjs",
@@ -93,6 +91,8 @@
     "@react-native/metro-config": "0.86.3",
     "@release-it/conventional-changelog": "^11.0.0",
     "@types/react": "^19.2.0",
+    "@types/react-is": "^19.3.0",
+    "@unif/react-native-icons": "^0.1.0",
     "commitlint": "^21.0.1",
     "del-cli": "^7.0.0",
     "eslint": "^9.39.4",
@@ -119,6 +119,7 @@
   },
   "peerDependencies": {
     "@callstack/liquid-glass": ">=0.8.2 <0.9.0",
+    "@unif/react-native-icons": ">=0.1.0",
     "react": ">=19.2.3 <20.0.0",
     "react-native": ">=0.86.0",
     "react-native-gesture-handler": ">=3.0.0 <4.0.0",
@@ -173,6 +174,9 @@
       "<rootDir>/website/",
       "<rootDir>/example/",
       "<rootDir>/scripts/__tests__/"
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?|@unif/react-native-icons)/)"
     ]
   },
   "commitlint": {
@@ -212,5 +216,8 @@
       "release-it"
     ],
     "version": "0.62.0"
+  },
+  "dependencies": {
+    "react-is": "^19.2.8"
   }
 }

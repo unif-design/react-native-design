@@ -28,7 +28,7 @@ body:
       label: 具体提议
       description: 想加什么 API?props 名称 / 类型?用法示例?
       placeholder: |
-        例如:Empty 加 icon?: IconName prop,默认 'spark',允许传任何 IconName。
+        例如:Empty 的 icon 参数接收 Icons 组件，省略时显示 SparkOutlined。
 
         ```tsx
         <Empty icon="camera-off" title="无法访问相机" desc="..." />

@@ -1,3 +1,4 @@
+import { CloseOutlined, SearchOutlined } from '@unif/react-native-icons';
 import React, { forwardRef, useEffect } from 'react';
 import { fixed } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
@@ -100,7 +101,7 @@ export const Search = forwardRef<TextFieldHandle, SearchProps>(
       controller.value.length > 0 && effectiveEditable && controller.canUpdate
         ? {
             kind: 'action',
-            icon: 'close',
+            icon: CloseOutlined,
             onPress: () => controller.onChangeText(''),
             accessibilityLabel: '清除搜索内容',
           }
@@ -124,7 +125,7 @@ export const Search = forwardRef<TextFieldHandle, SearchProps>(
           onSubmitEditing?.(event);
           onSubmit?.(controller.value);
         }}
-        leading={{ kind: 'icon', icon: 'search', size: 18 }}
+        leading={{ kind: 'icon', icon: SearchOutlined, size: 18 }}
         trailing={trailing}
       />
     );

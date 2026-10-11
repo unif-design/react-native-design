@@ -41,8 +41,6 @@ export { Form, FormGroup, FormRow } from './Form';
 export type { FormProps, FormGroupProps, FormRowProps } from './Form';
 export { Grid } from './Grid';
 export type { GridItem, GridProps } from './Grid';
-export { Icon } from './Icon';
-export type { IconName, IconProps } from './Icon';
 export { IconButton } from './IconButton';
 export type { IconButtonProps } from './IconButton';
 export { Input } from './Input';

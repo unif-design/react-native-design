@@ -1,3 +1,14 @@
+import {
+  ChatPlusOutlined,
+  ChatStarOutlined,
+  ChevronLeftOutlined,
+  EditOutlined,
+  HomeOutlined,
+  PlusOutlined,
+  ShareOutlined,
+  TrashOutlined,
+  UserOutlined,
+} from '@unif/react-native-icons';
 import { useEffect, useState } from 'react';
 import {
   AccessibilityInfo,
@@ -170,7 +181,7 @@ function Scene() {
                 onPress={() => setPresses((count) => count + 1)}
                 trailing={
                   <IconButton
-                    icon="plus"
+                    icon={PlusOutlined}
                     variant="secondary"
                     size="sm"
                     disabled
@@ -221,7 +232,7 @@ function Scene() {
             <NavBar
               title="项目导航"
               left={{
-                icon: 'chevron-left',
+                icon: ChevronLeftOutlined,
                 accessibilityLabel: '返回项目',
                 onPress: () => setPresses((count) => count + 1),
               }}
@@ -237,7 +248,7 @@ function Scene() {
               ]}
             />
             <EntryCard
-              icon="home"
+              icon={HomeOutlined}
               title="工作空间"
               testID="glass-entry"
               sub="打开入口"
@@ -290,19 +301,19 @@ function Scene() {
               {
                 id: 'rename',
                 label: '重命名',
-                icon: 'edit',
+                icon: EditOutlined,
                 onPress: () => setResult('动作：重命名'),
               },
               {
                 id: 'share',
                 label: '分享聊天',
-                icon: 'share',
+                icon: ShareOutlined,
                 onPress: () => setResult('动作：分享'),
               },
               {
                 id: 'delete',
                 label: '删除聊天',
-                icon: 'trash',
+                icon: TrashOutlined,
                 tone: 'danger',
                 confirmation: {
                   title: '删除聊天',
@@ -344,7 +355,7 @@ function Scene() {
                 onPress={() => setPresses((count) => count + 1)}
               />
               <IconButton
-                icon="plus"
+                icon={PlusOutlined}
                 variant="glass"
                 accessibilityLabel="玻璃图标按钮"
                 onPress={() => setPresses((count) => count + 1)}
@@ -369,9 +380,9 @@ function Scene() {
               active={tab}
               onChange={setTab}
               items={[
-                { id: 'chat', icon: 'chat-plus', label: '聊天' },
-                { id: 'history', icon: 'chat-star', label: '历史' },
-                { id: 'profile', icon: 'user', label: '我的' },
+                { id: 'chat', icon: ChatPlusOutlined, label: '聊天' },
+                { id: 'history', icon: ChatStarOutlined, label: '历史' },
+                { id: 'profile', icon: UserOutlined, label: '我的' },
               ]}
             />
             <View style={styles.unavailableButtons}>
@@ -382,7 +393,7 @@ function Scene() {
                 onPress={() => setPresses((count) => count + 1)}
               />
               <IconButton
-                icon="plus"
+                icon={PlusOutlined}
                 variant="glass"
                 loading
                 accessibilityLabel="忙碌玻璃图标"

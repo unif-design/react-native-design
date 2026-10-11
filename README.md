@@ -1,6 +1,6 @@
 # @unif/react-native-design
 
-Unif 的 React Native 设计系统，提供基础组件、主题、字体、图标和通用 UI 组合。
+Unif 的 React Native 设计系统，提供基础组件、主题、字体和通用 UI 组合。图标直接使用 `@unif/react-native-icons` 的命名组件。
 
 [文档站](https://unif-design.github.io/react-native-design/) · [npm](https://www.npmjs.com/package/@unif/react-native-design) · [组件展厅](example/README.md)
 

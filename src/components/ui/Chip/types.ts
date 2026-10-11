@@ -12,7 +12,7 @@ export type ChipProps = {
    *  accessibilityState.busy。label 保留 —— 换掉它 chip 会塌成一个圆点、整行跟着重排。
    *  与 `disabled` 的分工:disabled = 现在不能点(更暗、无 spinner),busy = 正在办。 */
   busy?: boolean;
-  /** 可选的前置插槽 —— 如 <Icon name="spark" /> */
+  /** 可选的前置插槽 —— 如 <SparkOutlined /> */
   leading?: ReactNode;
   /** 可选的后置插槽 —— 如一个小的 × 关闭按钮 */
   trailing?: ReactNode;

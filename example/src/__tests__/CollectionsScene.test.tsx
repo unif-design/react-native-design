@@ -1,3 +1,4 @@
+import { ChevronRightOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import {
@@ -7,7 +8,6 @@ import {
   Empty,
   EntryCard,
   Grid,
-  Icon,
   List,
   Ribbon,
   type CarouselRef,
@@ -254,10 +254,10 @@ test('Collections 覆盖 Card、Ribbon、Cell/List、Grid 与 EntryCard 的公�
     ).toMatchObject({ danger: true, arrow: true });
   });
   expect(
-    componentByTestID(Cell, 'collections-cell-danger')
-      .findAllByType(Icon)
-      .some((node) => node.props.name === 'chevron-right')
-  ).toBe(false);
+    componentByTestID(Cell, 'collections-cell-danger').findAllByType(
+      ChevronRightOutlined
+    ).length
+  ).toBe(0);
   expect(componentByTestID(List, 'collections-list-grouped').props.flush).toBe(
     undefined
   );

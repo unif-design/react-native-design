@@ -607,6 +607,7 @@ function withJestGlobalConfigProbeFixture(run) {
 const expectedRuntimeDependencies = {
   '@callstack/liquid-glass': '0.8.2',
   '@unif/react-native-design': 'workspace:*',
+  '@unif/react-native-icons': '>=0.1.0',
   'react': '19.2.3',
   'react-native': '0.86.3',
   'react-native-gesture-handler': '3.1.0',
@@ -634,9 +635,6 @@ const catalogContractFiles = [
   'src/components/ui/index.ts',
   'src/components/business/index.ts',
   'src/theme/index.ts',
-  'src/icons/index.ts',
-  'src/icons/types.ts',
-  'src/icons/data.ts',
   'src/utils/testID/index.ts',
   'src/utils/logger/index.ts',
 ];
@@ -1202,8 +1200,8 @@ test('catalog mutation gate 拒绝缺项、重复 id 与错误 scene', () => {
       expectedCode: 'CATALOG_SCENE_MAPPING',
       mutate(source) {
         return source.replace(
-          "    id: 'Icon',\n    scene: 'foundation',",
-          "    id: 'Icon',\n    scene: 'actions',"
+          "    id: 'IconButton',\n    scene: 'actions',",
+          "    id: 'IconButton',\n    scene: 'foundation',"
         );
       },
     },
@@ -1356,13 +1354,18 @@ test('exhaustive verifier 将 sceneIds、Router、Home 与真实 scene consumpti
     },
     {
       label: 'Foundation 保留 import 但不再调用 childTestID',
-      file: 'example/src/showcases/foundation/IconCatalog.tsx',
+      file: 'example/src/showcases/foundation/FoundationScene.tsx',
       code: 'SCENE_RUNTIME_API_CONSUMPTION',
       mutate: (source) =>
-        source.replace(
-          "testID={childTestID('foundation-icons', name)}",
-          'testID={`foundation-icons-${name}`}'
-        ),
+        source
+          .replace(
+            "childTestID('foundation-swatch', 'light')",
+            "'foundation-swatch-light'"
+          )
+          .replace(
+            "childTestID('foundation-swatch', 'dark')",
+            "'foundation-swatch-dark'"
+          ),
     },
     {
       label: 'Business 保留 import 但不再调用 useSvgId',
@@ -2666,9 +2669,9 @@ test('完整验收链拒绝 useTheme 硬编码结果与 dead call 冒充', () =>
             "  const theme = { scheme: 'light' as const };"
           )
           .replace(
-            '  const draft = state.scenes.foundation;',
+            '  const colors = useColors();',
             [
-              '  const draft = state.scenes.foundation;',
+              '  const colors = useColors();',
               '  if (false) {',
               '    useTheme();',
               '  }',
@@ -2705,9 +2708,9 @@ test('完整验收链拒绝 BRAND_ORANGE 默认值硬编码与 dead binding 冒�
         source
           .replace('；品牌 {BRAND_ORANGE}', "；品牌 {['#', 'EB6E00'].join('')}")
           .replace(
-            '  const draft = state.scenes.foundation;',
+            '  const colors = useColors();',
             [
-              '  const draft = state.scenes.foundation;',
+              '  const colors = useColors();',
               '  if (false) {',
               '    void BRAND_ORANGE;',
               '  }',
@@ -2728,56 +2731,6 @@ test('完整验收链拒绝 BRAND_ORANGE 默认值硬编码与 dead binding 冒�
     assert.match(
       `${mutated.stdout}\n${mutated.stderr}`,
       /BRAND_ORANGE|品牌|runtime proof/u
-    );
-  });
-});
-
-test('完整验收链拒绝 ICONS 完整性硬编码 false 与 dead binding 冒充', () => {
-  withFixture([...new Set(runtimeAcceptanceFiles)], (fixture) => {
-    const clean = runExampleAcceptanceTest(fixture, 'FoundationScene.test.tsx');
-    assert.equal(clean.status, 0, `${clean.stdout}\n${clean.stderr}`);
-    assert.doesNotThrow(
-      () => showcaseVerifier.verifyExampleShowcase(fixture),
-      'ICONS causal mutation 的 clean fixture 必须先完整通过'
-    );
-
-    mutateFixtureFile(
-      fixture,
-      'example/src/showcases/foundation/FoundationScene.tsx',
-      (source) =>
-        source
-          .replace(
-            [
-              '  const iconDataComplete = ICON_NAMES.every(',
-              '    (name) => ICONS[name] !== undefined',
-              '  );',
-            ].join('\n'),
-            '  const iconDataComplete = false;'
-          )
-          .replace(
-            '  const draft = state.scenes.foundation;',
-            [
-              '  const draft = state.scenes.foundation;',
-              '  if (false) {',
-              '    void ICONS;',
-              '  }',
-            ].join('\n')
-          ),
-      '硬编码 iconDataComplete=false 并用 dead void ICONS 保留静态 binding'
-    );
-    assert.doesNotThrow(
-      () => showcaseVerifier.verifyExampleShowcase(fixture),
-      '静态 binding gate 不解释 ICONS dead branch'
-    );
-
-    const mutated = runExampleAcceptanceTest(
-      fixture,
-      'FoundationScene.test.tsx'
-    );
-    assert.equal(mutated.status, 1, `${mutated.stdout}\n${mutated.stderr}`);
-    assert.match(
-      `${mutated.stdout}\n${mutated.stderr}`,
-      /ICONS|warning|图标访问|runtime proof/u
     );
   });
 });
@@ -3809,7 +3762,6 @@ test('repo-specific workflow 保留独立 example gate 且共享 CI digest 不�
   for (const command of [
     'yarn check:config',
     'yarn check:runtime-peers',
-    'yarn check:icons',
     'node scripts/verify-example-showcase.mjs --check',
     'yarn verify:example-showcase',
     'yarn example typecheck',

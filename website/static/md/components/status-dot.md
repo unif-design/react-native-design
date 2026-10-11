@@ -10,12 +10,12 @@ description: '用圆点表达完成、错误、进行中和待处理状态。'
 
 用圆点展示完成、错误、进行中或待处理状态；业务状态由调用方映射。
 
-| 状态      | 视觉                     | 内部                                     |
-| --------- | ------------------------ | ---------------------------------------- |
-| `done`    | 绿底 + 白勾              | `success` 填充 + `<Icon name="check" />` |
-| `error`   | 红底 + 白叉              | `error` 填充 + `<Icon name="close" />`   |
-| `active`  | 边框 + 内嵌 `<PulseDot>` | `primary` 边框 + 跳动                    |
-| `pending` | 仅边框                   | `outline` 灰边                           |
+| 状态      | 视觉                     | 内部                                                                |
+| --------- | ------------------------ | ------------------------------------------------------------------- |
+| `done`    | 绿底 + 白勾              | `success` 填充 + `<CheckOutlined  size={18} color="currentColor"/>` |
+| `error`   | 红底 + 白叉              | `error` 填充 + `<CloseOutlined  size={18} color="currentColor"/>`   |
+| `active`  | 边框 + 内嵌 `<PulseDot>` | `primary` 边框 + 跳动                                               |
+| `pending` | 仅边框                   | `outline` 灰边                                                      |
 
 `tone='flat'`（默认）—— pending/active 底色透明（`'transparent'`），用于 Task。
 `tone='soft'` —— pending = `c.surface`、active = `c.primaryContainer`，用于 ChainOfThought（推理链气氛更柔）。
@@ -111,7 +111,7 @@ import { StatusDot } from '@unif/react-native-design';
 - 显式传空字符串 `''` 时，不派生默认名称，并把根节点移出独立可访问焦点。父容器已经
   合并播报标题与状态时用这一分支，避免重复朗读。
 
-内部 `<Icon>` / `<PulseDot>` 都对 SR 隐藏，不会和根状态名称形成重复焦点。默认名称是
+内部图标 / `<PulseDot>` 都对 SR 隐藏，不会和根状态名称形成重复焦点。默认名称是
 稳定的英文状态 key；面向中文用户的独立状态点应传明确的中文业务文案：
 
 ```tsx

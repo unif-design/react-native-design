@@ -4,6 +4,11 @@ title: NavBar 导航栏
 description: '页面顶部的标题与操作区域。'
 ---
 
+import {
+  ArrowLeftOutlined,
+  MenuOutlined,
+  MoreHOutlined,
+} from '@unif/react-native-icons';
 import { LiveDemo } from '@site/src/components/LiveDemo';
 import { NavBar } from '@unif/react-native-design';
 import { View } from 'react-native';
@@ -33,12 +38,12 @@ export const NavBarDemo = () => {
             title="AI 助手"
             subtitle="在线 · 已同步"
             left={{
-              icon: 'menu',
+              icon: MenuOutlined,
               onPress: () => setAction('打开抽屉'),
               accessibilityLabel: '抽屉',
             }}
             right={{
-              icon: 'more-h',
+              icon: MoreHOutlined,
               onPress: () => setAction('打开更多菜单'),
               accessibilityLabel: '更多',
             }}
@@ -57,12 +62,12 @@ export const NavBarDemo = () => {
             title="登录"
             variant="brand"
             left={{
-              icon: 'arrow-left',
+              icon: ArrowLeftOutlined,
               onPress: () => setAction('返回登录页'),
               accessibilityLabel: '返回',
             }}
             right={{
-              icon: 'more-h',
+              icon: MoreHOutlined,
               onPress: () => setAction('打开登录页菜单'),
               accessibilityLabel: '更多',
             }}
@@ -84,12 +89,12 @@ export const NavBarDemo = () => {
             title="我的名片"
             variant="transparent"
             left={{
-              icon: 'arrow-left',
+              icon: ArrowLeftOutlined,
               onPress: () => setAction('返回名片列表'),
               accessibilityLabel: '返回',
             }}
             right={{
-              icon: 'more-h',
+              icon: MoreHOutlined,
               onPress: () => setAction('打开名片菜单'),
               accessibilityLabel: '更多',
             }}
@@ -106,14 +111,23 @@ export const NavBarDemo = () => {
 ## 用法
 
 ```tsx
+import {
+  ArrowLeftOutlined,
+  MenuOutlined,
+  MoreHOutlined,
+} from '@unif/react-native-icons';
 import { NavBar } from '@unif/react-native-design';
 
 <NavBar
   title="AI 助手"
   subtitle="在线 · 已同步"
-  left={{ icon: 'menu', onPress: openDrawer, accessibilityLabel: '打开抽屉' }}
+  left={{
+    icon: MenuOutlined,
+    onPress: openDrawer,
+    accessibilityLabel: '打开抽屉',
+  }}
   right={{
-    icon: 'more-h',
+    icon: MoreHOutlined,
     onPress: openMenu,
     accessibilityLabel: '打开更多菜单',
   }}
@@ -130,23 +144,27 @@ import { NavBar } from '@unif/react-native-design';
 <NavBar
   title="我的名片"
   variant="transparent"
-  left={{ icon: 'arrow-left', onPress: goBack, accessibilityLabel: '返回' }}
+  left={{
+    icon: ArrowLeftOutlined,
+    onPress: goBack,
+    accessibilityLabel: '返回',
+  }}
 />;
 ```
 
 ## API
 
-| 参数       | 类型                                    | 默认值      | 说明                                                                                                                                                                                   |
-| ---------- | --------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `title`    | `string`                                | —           | 居中标题                                                                                                                                                                               |
-| `subtitle` | `string?`                               | —           | 副标题（小字号，主标题下方）                                                                                                                                                           |
-| `left`     | `NavBarSlot`                            | —           | 左槽：严格 `NavBarAction { icon, onPress, accessibilityLabel }` 或展示用 `ReactNode`                                                                                                   |
-| `right`    | `NavBarSlot`                            | —           | 右槽，同 `left`                                                                                                                                                                        |
+| 参数       | 类型                                    | 默认值      | 说明                                                                                                                                                                                             |
+| ---------- | --------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `title`    | `string`                                | —           | 居中标题                                                                                                                                                                                         |
+| `subtitle` | `string?`                               | —           | 副标题（小字号，主标题下方）                                                                                                                                                                     |
+| `left`     | `NavBarSlot`                            | —           | 左槽：严格 `NavBarAction { icon, onPress, accessibilityLabel }` 或展示用 `ReactNode`                                                                                                             |
+| `right`    | `NavBarSlot`                            | —           | 右槽，同 `left`                                                                                                                                                                                  |
 | `variant`  | `'default' \| 'brand' \| 'transparent'` | `'default'` | 视觉变体：`default` 系统玻璃 + hairline + 主题文字 / `brand` 品牌橙底 + 白字 / `transparent` 透明无边框 + **深字 `c.foreground`**（浮在浅色 hero 上；若需白字深色浮层后续加 `transparentLight`） |
-| `style`    | `StyleProp<ViewStyle>?`                 | —           | 根容器附加样式（margin / position 等布局微调）                                                                                                                                         |
-| `testID`   | `string?`                               | —           | E2E 定位                                                                                                                                                                               |
+| `style`    | `StyleProp<ViewStyle>?`                 | —           | 根容器附加样式（margin / position 等布局微调）                                                                                                                                                   |
+| `testID`   | `string?`                               | —           | E2E 定位                                                                                                                                                                                         |
 
-> `left` / `right` 传完整 `NavBarAction` 时渲染为内部 `IconButton`（`variant='ghost'`，icon 必须是生成的 `IconName`）。展示节点中的 `string` / `number` / `bigint`（包括 Fragment、nested collection 与 thenable resolved value 内的 primitive）会递归包装为本地 `Text`；非 Fragment element / portal 保持原有语义。thenable 映射按稳定源对象缓存，拒绝原因保持不变，非法 resolved value 失败关闭。缺字段、非法 icon 或 malformed node 会在 effect 中诊断并渲染为空。
+> `left` / `right` 传完整 `NavBarAction` 时渲染为内部 `IconButton`（`variant='ghost'`，icon 使用从 Icons 导入的 `ComponentType<IconProps>`）。展示节点中的 `string` / `number` / `bigint`（包括 Fragment、nested collection 与 thenable resolved value 内的 primitive）会递归包装为本地 `Text`；非 Fragment element / portal 保持原有语义。thenable 映射按稳定源对象缓存，拒绝原因保持不变，非法 resolved value 失败关闭。缺字段、非法 icon 或 malformed node 会在 effect 中诊断并渲染为空。
 
 ## 安全区（Safe Area）
 
@@ -175,12 +193,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 - 状态语义：NavBar 自身无可切换状态，不附加 `accessibilityState`。
 
 ```tsx
+import { ArrowLeftOutlined, MoreHOutlined } from '@unif/react-native-icons';
 // action 的 icon、onPress、accessibilityLabel 都必填
 <NavBar
   title="登录"
-  left={{ icon: 'arrow-left', onPress: goBack, accessibilityLabel: '返回' }}
-  right={{ icon: 'more-h', onPress: openMenu, accessibilityLabel: '更多' }}
-/>
+  left={{
+    icon: ArrowLeftOutlined,
+    onPress: goBack,
+    accessibilityLabel: '返回',
+  }}
+  right={{ icon: MoreHOutlined, onPress: openMenu, accessibilityLabel: '更多' }}
+/>;
 ```
 
 ## 关联组件

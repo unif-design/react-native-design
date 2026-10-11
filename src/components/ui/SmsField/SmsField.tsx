@@ -1,3 +1,4 @@
+import { MailOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { useColors } from '../../../theme';
 import { Input } from '../Input';
@@ -24,7 +25,7 @@ export function SmsField({
       textContentType="oneTimeCode"
       leading={{
         kind: 'icon',
-        icon: 'mail',
+        icon: MailOutlined,
         size: 18,
         color: colors.iconFaint40,
       }}

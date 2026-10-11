@@ -1,3 +1,4 @@
+import { ClipboardOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -219,7 +220,7 @@ export function FeedbackScene(): React.JSX.Element {
           <Empty
             title="暂无反馈记录"
             desc="触发下方动作后可在结果面板查看安全摘要。"
-            icon="clipboard"
+            icon={ClipboardOutlined}
             testID="feedback-empty-data-boundary"
           />
           <View style={styles.skeletonStack}>

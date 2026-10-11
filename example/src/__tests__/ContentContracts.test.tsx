@@ -1,10 +1,14 @@
+import {
+  EditOutlined,
+  PlusOutlined,
+  TrashOutlined,
+} from '@unif/react-native-icons';
 import React, { useState } from 'react';
 import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import { fireEvent, render } from '@testing-library/react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ActionMenuContent,
-  Icon,
   IconButton,
   SmsField,
   TextEntryContent,
@@ -265,7 +269,7 @@ test.each([21, 22])(
     const content = (loading = false) => (
       <ThemeProvider>
         <IconButton
-          icon="plus"
+          icon={PlusOutlined}
           size="md"
           surfaceSize={36}
           iconSize={iconSize}
@@ -276,7 +280,7 @@ test.each([21, 22])(
       </ThemeProvider>
     );
     const page = render(content());
-    expect(page.UNSAFE_getByType(Icon).props.size).toBe(iconSize);
+    expect(page.UNSAFE_getByType(PlusOutlined).props.size).toBe(iconSize);
     const button = page.getByRole('button', { name: '地图操作' });
     const style = StyleSheet.flatten(button.props.style);
     expect(style.width).toBe(36);
@@ -309,7 +313,12 @@ test('popover只提供浮动菜单卡，文字与图标同排且禁用和忙碌�
         presentation="popover"
         onClose={close}
         actions={[
-          { id: 'rename', label: '重命名', icon: 'edit', onPress: choose },
+          {
+            id: 'rename',
+            label: '重命名',
+            icon: EditOutlined,
+            onPress: choose,
+          },
           {
             id: 'disabled',
             label: '不可使用',
@@ -338,11 +347,11 @@ test('popover删除先确认，取消返回原两项，不把旧确认应用到�
   const remove = jest.fn();
   const close = jest.fn();
   const actions: ActionMenuAction[] = [
-    { id: 'rename', label: '重命名', icon: 'edit', onPress: jest.fn() },
+    { id: 'rename', label: '重命名', icon: EditOutlined, onPress: jest.fn() },
     {
       id: 'delete',
       label: '删除',
-      icon: 'trash',
+      icon: TrashOutlined,
       tone: 'danger',
       onPress: remove,
       confirmation: { message: '删除后不可恢复', confirmLabel: '删除该会话' },
@@ -488,7 +497,7 @@ test('浮动确认允许宿主取消，标题与单独删除按钮保留当前�
   const action: ActionMenuAction = {
     id: 'remove',
     label: '删除',
-    icon: 'trash',
+    icon: TrashOutlined,
     tone: 'danger',
     onPress: remove,
     confirmation: {

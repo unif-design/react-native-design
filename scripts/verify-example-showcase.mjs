@@ -72,7 +72,6 @@ const expectedUiComponents = [
   'FormGroup',
   'FormRow',
   'Grid',
-  'Icon',
   'IconButton',
   'Input',
   'Logo',
@@ -108,7 +107,7 @@ const expectedBusinessComponents = [
 ];
 
 const expectedComponentsByScene = {
-  foundation: ['Icon'],
+  foundation: [],
   actions: [
     'ActionMenuContent',
     'Button',
@@ -180,13 +179,6 @@ const expectedStateIdsByComponent = {
   ImagePreview: ['image-preview.identity'],
   Sheet: ['sheet.modes'],
 
-  Icon: [
-    'icon.all-icons',
-    'icon.name-search',
-    'icon.sizes',
-    'icon.color',
-    'icon.a11y-hidden',
-  ],
   Button: [
     'button.variants',
     'button.sizes',
@@ -483,8 +475,6 @@ const expectedRuntimeApis = [
   'fixed',
   'motion',
   'pressedOpacity',
-  'ICONS',
-  'ICON_NAMES',
   'childTestID',
   'createLogger',
   'setLogLevel',
@@ -531,8 +521,6 @@ const expectedRuntimeProofIdsByOwner = {
     'fixed',
     'motion',
     'pressedOpacity',
-    'ICONS',
-    'ICON_NAMES',
     'childTestID',
     'createLogger',
     'setLogLevel',
@@ -553,7 +541,7 @@ const expectedRuntimeProofTestFiles = {
 };
 
 const expectedSceneTitles = {
-  foundation: '基础能力与图标',
+  foundation: '主题与基础能力',
   actions: '操作与状态',
   feedback: '反馈与浮层',
   forms: '表单与输入',
@@ -566,6 +554,7 @@ const expectedSceneTitles = {
 const expectedRuntimeDependencies = {
   '@callstack/liquid-glass': '0.8.2',
   '@unif/react-native-design': 'workspace:*',
+  '@unif/react-native-icons': '>=0.1.0',
   'react': '19.2.3',
   'react-native': '0.86.3',
   'react-native-gesture-handler': '3.1.0',
@@ -589,6 +578,7 @@ const expectedTemplateDevDependencies = {
 
 const expectedRootPeerDependencies = {
   '@callstack/liquid-glass': '>=0.8.2 <0.9.0',
+  '@unif/react-native-icons': '>=0.1.0',
   'react': '>=19.2.3 <20.0.0',
   'react-native': '>=0.86.0',
   'react-native-gesture-handler': '>=3.0.0 <4.0.0',
@@ -2398,6 +2388,7 @@ function verifySceneStateTestProofs(root) {
         expectedStateIdsByComponent[component],
       ])
     );
+    if (expectedComponentsByScene[scene].length === 0) continue;
     verifyTypedProofCoverage({
       root,
       relativeTestFile: expectedSceneTestFiles[scene],
@@ -2749,9 +2740,7 @@ function verifySceneContract(root, entries, bindingAnalysis) {
           .map(
             (specifier) => specifier.propertyName?.text ?? specifier.name.text
           )
-          .filter((name) =>
-            ['Carousel', 'GlassLayer', 'ICONS', 'ICON_NAMES'].includes(name)
-          );
+          .filter((name) => ['Carousel', 'GlassLayer'].includes(name));
         if (importedHeavy.length) {
           failVerification(
             'HOME_HEAVY_IMPORT',
@@ -2764,9 +2753,6 @@ function verifySceneContract(root, entries, bindingAnalysis) {
   const heavyNames = new Set([
     'Carousel',
     'GlassLayer',
-    'ICONS',
-    'ICON_NAMES',
-    'IconCatalog',
     ...[...routeTargets.values()].map((target) => target.localName),
   ]);
   const homeImports = collectRuntimeImportBindings(
@@ -3432,7 +3418,6 @@ function verifyDocumentation(root) {
       'yarn example build:ios',
       'yarn check:config',
       'yarn check:runtime-peers',
-      'yarn check:icons',
       'yarn verify:example-showcase',
       'yarn example typecheck',
       'yarn example lint',
@@ -3620,7 +3605,6 @@ function verifyWorkflowContract(root) {
   const requiredCommands = [
     'yarn check:config',
     'yarn check:runtime-peers',
-    'yarn check:icons',
     'node scripts/verify-example-showcase.mjs --check',
     'yarn verify:example-showcase',
     'yarn example typecheck',
@@ -3813,7 +3797,9 @@ export function verifyExampleShowcase(root) {
     );
   }
   const emptyScenes = expectedScenes.filter(
-    (scene) => !entries.some((entry) => entry.scene === scene)
+    (scene) =>
+      expectedComponentsByScene[scene].length > 0 &&
+      !entries.some((entry) => entry.scene === scene)
   );
   if (emptyScenes.length) {
     failVerification(

@@ -1,3 +1,4 @@
+import { CloseOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { AccessibilityInfo, StyleSheet } from 'react-native';
 import {
@@ -57,7 +58,7 @@ test.each(['leading', 'trailing'] as const)(
   async (slot) => {
     const content = (
       <IconButton
-        icon="close"
+        icon={CloseOutlined}
         variant="secondary"
         onPress={jest.fn()}
         disabled

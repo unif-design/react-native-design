@@ -131,7 +131,7 @@ function Article() {
 }
 ```
 
-> `type` 导入时常起别名 `t`(避开 JS 保留字 `type`):`import { type as t } from '@unif/react-native-design'`。
+> `type` 导入时常起别名 `t`(避开 JS 保留字 `type`):`import { type as t } from '@unif/react-native-design';`。
 
 ## 应用级字号缩放(fontScale)
 

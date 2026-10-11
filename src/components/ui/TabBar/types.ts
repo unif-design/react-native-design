@@ -1,9 +1,10 @@
+import type { ComponentType } from 'react';
+import type { IconProps } from '@unif/react-native-icons';
 import type { StyleProp, ViewStyle } from 'react-native';
-import type { IconName } from '../Icon';
 
 export type TabBarItem = {
   id: string;
-  icon: IconName;
+  icon: ComponentType<IconProps>;
   label: string;
   /** 图标右上角的数字角标（用 string 才能写 '99+'） */
   badge?: number | string;

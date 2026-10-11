@@ -1,3 +1,8 @@
+import {
+  ArrowLeftOutlined,
+  CloseOutlined,
+  SearchOutlined,
+} from '@unif/react-native-icons';
 /**
  * 公共 API 的**编译期** fixture —— 由根 `yarn typecheck` 执行,不进 Jest。
  *
@@ -67,7 +72,7 @@ const publicTextFieldContainerStyle: TextFieldContainerStyle = {
 };
 const publicTextFieldSlot: TextFieldSlot = {
   kind: 'icon',
-  icon: 'search',
+  icon: SearchOutlined,
   size: 18,
 };
 const invalidTextFieldSlot: TextFieldSlot = {
@@ -130,18 +135,18 @@ const publicRibbonProps: RibbonProps = {
 // @ts-expect-error Button 始终是操作
 <Button label="保存" />;
 // @ts-expect-error IconButton 始终是操作
-<IconButton icon="close" accessibilityLabel="关闭" />;
+<IconButton icon={CloseOutlined} accessibilityLabel="关闭" />;
 <NavBar
   title="标题"
   // @ts-expect-error NavBar action object 必须有 handler
-  left={{ icon: 'arrow-left', accessibilityLabel: '返回' }}
+  left={{ icon: ArrowLeftOutlined, accessibilityLabel: '返回' }}
 />;
 // @ts-expect-error NavBar action object 必须有名称
-<NavBar title="标题" left={{ icon: 'arrow-left', onPress: noop }} />;
+<NavBar title="标题" left={{ icon: ArrowLeftOutlined, onPress: noop }} />;
 
 <Button label="保存" onPress={noop} accessibilityState={{ expanded: false }} />;
 <IconButton
-  icon="close"
+  icon={CloseOutlined}
   accessibilityLabel="关闭"
   onPress={noop}
   accessibilityState={{ selected: false }}
@@ -149,7 +154,7 @@ const publicRibbonProps: RibbonProps = {
 // @ts-expect-error Button 禁止调用方覆盖 disabled
 <Button label="保存" onPress={noop} accessibilityState={{ disabled: false }} />;
 <IconButton
-  icon="close"
+  icon={CloseOutlined}
   accessibilityLabel="关闭"
   onPress={noop}
   // @ts-expect-error IconButton 禁止调用方覆盖 busy
@@ -157,7 +162,7 @@ const publicRibbonProps: RibbonProps = {
 />;
 
 const navBarAction: NavBarAction = {
-  icon: 'arrow-left',
+  icon: ArrowLeftOutlined,
   onPress: noop,
   accessibilityLabel: '返回',
 };
@@ -406,7 +411,7 @@ inputRef.current?.setNativeProps({ text: 'bypass' });
 
 // --- slot 判别联合 --------------------------------------------------------
 
-<Input defaultValue="" leading={{ kind: 'icon', icon: 'search' }} />;
+<Input defaultValue="" leading={{ kind: 'icon', icon: SearchOutlined }} />;
 <Input
   defaultValue=""
   leading={publicTextFieldSlot}
@@ -422,7 +427,7 @@ inputRef.current?.setNativeProps({ text: 'bypass' });
   defaultValue=""
   trailing={{
     kind: 'action',
-    icon: 'close',
+    icon: CloseOutlined,
     onPress: () => setText(''),
     accessibilityLabel: '清除',
   }}
@@ -430,7 +435,7 @@ inputRef.current?.setNativeProps({ text: 'bypass' });
 <Input
   defaultValue=""
   // @ts-expect-error action slot 必须有 accessibilityLabel
-  trailing={{ kind: 'action', icon: 'close', onPress: () => setText('') }}
+  trailing={{ kind: 'action', icon: CloseOutlined, onPress: () => setText('') }}
 />;
 
 // --- Search / PasswordInput:单一值来源 -----------------------------------
@@ -448,7 +453,7 @@ inputRef.current?.setNativeProps({ text: 'bypass' });
 // @ts-expect-error Search 的 value/defaultValue 互斥
 <Search value="query" defaultValue="seed" onChangeText={setText} />;
 // @ts-expect-error Search owns leading slot
-<Search leading={{ kind: 'icon', icon: 'search' }} />;
+<Search leading={{ kind: 'icon', icon: SearchOutlined }} />;
 // @ts-expect-error Search 不公开原生 clearButtonMode
 <Search clearButtonMode="always" />;
 

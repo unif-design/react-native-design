@@ -1,3 +1,4 @@
+import { CloseOutlined, SearchOutlined } from '@unif/react-native-icons';
 import { describe, expect, test } from '@jest/globals';
 import { StyleSheet } from 'react-native';
 import {
@@ -126,7 +127,7 @@ describe('normalizeTextFieldSlot — 未类型化 action 不能绕过 handler/na
   test('有效 action 原样保留', () => {
     const action = {
       kind: 'action',
-      icon: 'close',
+      icon: CloseOutlined,
       onPress: () => {},
       accessibilityLabel: '清除',
     } as const;
@@ -139,13 +140,13 @@ describe('normalizeTextFieldSlot — 未类型化 action 不能绕过 handler/na
   test.each([
     [
       '缺 handler',
-      { kind: 'action', icon: 'close', accessibilityLabel: '清除' },
+      { kind: 'action', icon: CloseOutlined, accessibilityLabel: '清除' },
     ],
     [
       'handler 非函数',
       {
         kind: 'action',
-        icon: 'close',
+        icon: CloseOutlined,
         onPress: 'clear',
         accessibilityLabel: '清除',
       },
@@ -154,7 +155,7 @@ describe('normalizeTextFieldSlot — 未类型化 action 不能绕过 handler/na
       '空白 label',
       {
         kind: 'action',
-        icon: 'close',
+        icon: CloseOutlined,
         onPress: () => {},
         accessibilityLabel: '  ',
       },
@@ -184,7 +185,7 @@ describe('normalizeTextFieldSlot — 未类型化 action 不能绕过 handler/na
       'icon 与 label 都给',
       {
         kind: 'action',
-        icon: 'close',
+        icon: CloseOutlined,
         label: '清除',
         onPress: () => {},
         accessibilityLabel: '清除',
@@ -226,12 +227,12 @@ describe('normalizeTextFieldSlot — 未类型化 action 不能绕过 handler/na
     ['无效 icon', { kind: 'icon', icon: 'not-generated' }, 'slot.icon'],
     [
       'icon size 非有限数',
-      { kind: 'icon', icon: 'search', size: Number.POSITIVE_INFINITY },
+      { kind: 'icon', icon: SearchOutlined, size: Number.POSITIVE_INFINITY },
       'slot.icon',
     ],
     [
       'icon color 非字符串',
-      { kind: 'icon', icon: 'search', color: 42 },
+      { kind: 'icon', icon: SearchOutlined, color: 42 },
       'slot.icon',
     ],
     [
@@ -248,7 +249,7 @@ describe('normalizeTextFieldSlot — 未类型化 action 不能绕过 handler/na
       'action disabled 非布尔值',
       {
         kind: 'action',
-        icon: 'close',
+        icon: CloseOutlined,
         onPress: () => {},
         accessibilityLabel: '操作',
         disabled: 'false',
@@ -267,12 +268,12 @@ describe('normalizeTextFieldSlot — 未类型化 action 不能绕过 handler/na
     expect(
       normalizeTextFieldSlot({
         kind: 'icon',
-        icon: 'search',
+        icon: SearchOutlined,
         size: 33,
         color: 'tomato',
       })
     ).toEqual({
-      slot: { kind: 'icon', icon: 'search', size: 33, color: 'tomato' },
+      slot: { kind: 'icon', icon: SearchOutlined, size: 33, color: 'tomato' },
       diagnostics: [],
     });
     expect(normalizeTextFieldSlot({ kind: 'text', value: 0 })).toEqual({
@@ -282,7 +283,7 @@ describe('normalizeTextFieldSlot — 未类型化 action 不能绕过 handler/na
     expect(
       normalizeTextFieldSlot({
         kind: 'action',
-        icon: 'close',
+        icon: CloseOutlined,
         onPress,
         accessibilityLabel: '  清除  ',
         disabled: false,
@@ -290,7 +291,7 @@ describe('normalizeTextFieldSlot — 未类型化 action 不能绕过 handler/na
     ).toEqual({
       slot: {
         kind: 'action',
-        icon: 'close',
+        icon: CloseOutlined,
         onPress,
         accessibilityLabel: '清除',
         disabled: false,

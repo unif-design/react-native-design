@@ -1,8 +1,19 @@
+import {
+  AlertOutlined,
+  BuildingOutlined,
+  CheckOutlined,
+  EditOutlined,
+  GridOutlined,
+  HomeOutlined,
+  ImageOutlined,
+  SettingsOutlined,
+} from '@unif/react-native-icons';
+import type { ComponentType } from 'react';
+import type { IconProps } from '@unif/react-native-icons';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import {
   EntryCard,
-  type IconName,
   type ColorTokens,
   space,
   type,
@@ -18,57 +29,57 @@ import { useShowcase } from '../state/useShowcase';
 type HomeSceneEntry = Readonly<{
   id: SceneId;
   title: string;
-  icon: IconName;
+  icon: ComponentType<IconProps>;
   primaryState: string;
 }>;
 
 const homeScenes: readonly HomeSceneEntry[] = [
   {
     id: 'foundation',
-    title: '基础能力与图标',
-    icon: 'settings',
+    title: '主题与基础能力',
+    icon: SettingsOutlined,
     primaryState: '主题、字号、图标目录',
   },
   {
     id: 'actions',
     title: '操作与状态',
-    icon: 'check',
+    icon: CheckOutlined,
     primaryState: '按钮、标签与状态',
   },
   {
     id: 'feedback',
     title: '反馈与浮层',
-    icon: 'alert',
+    icon: AlertOutlined,
     primaryState: '空态、动效与全局反馈',
   },
   {
     id: 'forms',
     title: '表单与输入',
-    icon: 'edit',
+    icon: EditOutlined,
     primaryState: '输入、选择与校验',
   },
   {
     id: 'navigation',
     title: '导航组件',
-    icon: 'home',
+    icon: HomeOutlined,
     primaryState: '顶部、分段与底栏',
   },
   {
     id: 'collections',
     title: '容器与集合',
-    icon: 'grid',
+    icon: GridOutlined,
     primaryState: '卡片、列表与轮播',
   },
   {
     id: 'media',
     title: '媒体展示',
-    icon: 'image',
+    icon: ImageOutlined,
     primaryState: '头像、缩略图与 Logo',
   },
   {
     id: 'business',
     title: '业务复合组件',
-    icon: 'building',
+    icon: BuildingOutlined,
     primaryState: '背景、统计与版本',
   },
 ] as const;

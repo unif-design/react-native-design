@@ -1,3 +1,4 @@
+import { ArrowRightOutlined, CheckOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import {
@@ -100,8 +101,8 @@ test('Actions 展示 Button 全部 variant、size、block、左右图标与真�
       componentByTestID(Button, 'actions-button-icons').props
     ).toMatchObject({
       block: true,
-      leftIcon: 'check',
-      rightIcon: 'arrow-right',
+      leftIcon: CheckOutlined,
+      rightIcon: ArrowRightOutlined,
     });
   });
 

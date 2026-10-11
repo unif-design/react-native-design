@@ -25,14 +25,14 @@ retail biz2 设计稿 v7:Me 屏底部"设置 / 关于"两个入口从纵向 Cell
     style={{ display: 'flex', flexDirection: 'row', gap: 10, maxWidth: 360 }}
   >
     <EntryCard
-      icon="settings"
+      icon={SettingsOutlined}
       title="设置"
       sub="账号 / 通知 / 权限"
       onPress={() => {}}
       style={{ flex: 1 }}
     />
     <EntryCard
-      icon="info"
+      icon={InfoOutlined}
       title="关于 Unif"
       sub="V 2.6.0"
       onPress={() => {}}
@@ -45,16 +45,17 @@ retail biz2 设计稿 v7:Me 屏底部"设置 / 关于"两个入口从纵向 Cell
 
 | 元素      | 规则                                                                   |
 | --------- | ---------------------------------------------------------------------- |
-| 容器      | 无额外染色的系统玻璃，radius 14，padding `12px 14px`                            |
+| 容器      | 无额外染色的系统玻璃，radius 14，padding `12px 14px`                   |
 | 排布      | flex row + align center,gap 10                                         |
 | icon tile | 30×30,radius 9,`bg: surfaceContainer`,内部 icon 16px `foregroundMuted` |
 | title     | 13.5 / medium / letterSpacing -0.2,`foreground`                        |
 | sub       | 11,`foregroundMuted`,可选省略                                          |
-| 按下      | 前景 opacity 0.7，材质及祖先保持不透明(仅 `onPress` 存在时)                                       |
+| 按下      | 前景 opacity 0.7，材质及祖先保持不透明(仅 `onPress` 存在时)            |
 
 ## 用法
 
 ```tsx
+import { InfoOutlined, SettingsOutlined } from '@unif/react-native-icons';
 import { EntryCard } from '@unif/react-native-design';
 import { View } from 'react-native';
 
@@ -63,14 +64,14 @@ import { View } from 'react-native';
 }
 <View style={{ flexDirection: 'row', gap: 10 }}>
   <EntryCard
-    icon="settings"
+    icon={SettingsOutlined}
     title="设置"
     sub="账号 / 通知 / 权限"
     onPress={() => navigation.navigate('Setting')}
     style={{ flex: 1 }}
   />
   <EntryCard
-    icon="info"
+    icon={InfoOutlined}
     title={`关于 ${env.appName}`}
     sub={`V ${APP_VERSION}`}
     onPress={() => navigation.navigate('About')}
@@ -81,20 +82,20 @@ import { View } from 'react-native';
 
 ## API
 
-| 参数      | 类型                    | 默认值 | 说明                                        |
-| --------- | ----------------------- | ------ | ------------------------------------------- |
-| `icon`    | `IconName`              | —      | 左侧 icon tile 内的图标                     |
-| `title`   | `string`                | —      | 主标题(13.5 medium,numberOfLines=1)         |
-| `sub`     | `string?`               | —      | 副标题(11 muted),省略或空字符串时不渲染该行 |
-| `onPress` | `(() => void)?`         | —      | 点击回调;不传时不挂 Pressable,静态展示      |
-| `style`   | `StyleProp<ViewStyle>?` | —      | 外层附加样式,常用于 grid 列设 `flex: 1`     |
-| `testID`  | `string?`               | —      | E2E / 测试定位                              |
+| 参数      | 类型                       | 默认值 | 说明                                        |
+| --------- | -------------------------- | ------ | ------------------------------------------- |
+| `icon`    | `ComponentType<IconProps>` | —      | 左侧 icon tile 内的图标                     |
+| `title`   | `string`                   | —      | 主标题(13.5 medium,numberOfLines=1)         |
+| `sub`     | `string?`                  | —      | 副标题(11 muted),省略或空字符串时不渲染该行 |
+| `onPress` | `(() => void)?`            | —      | 点击回调;不传时不挂 Pressable,静态展示      |
+| `style`   | `StyleProp<ViewStyle>?`    | —      | 外层附加样式,常用于 grid 列设 `flex: 1`     |
+| `testID`  | `string?`                  | —      | E2E / 测试定位                              |
 
 ## 主题键（Tokens）
 
 | Token                                      | 来源                        | 作用                                            |
 | ------------------------------------------ | --------------------------- | ----------------------------------------------- |
-| `c.surface`                                | `useColors()`               | 不支持材质或减少透明度时的回退背景                                      |
+| `c.surface`                                | `useColors()`               | 不支持材质或减少透明度时的回退背景              |
 | `c.surfaceContainer`                       | `useColors()`               | icon tile 灰底色                                |
 | `c.foregroundMuted`                        | `useColors()`               | tile 内 icon 色 + sub 文字色                    |
 | `c.foreground`                             | `useColors()`               | title 文字色                                    |
@@ -115,8 +116,9 @@ a11y 语义是**条件性**的:仅当传了 `onPress` 时,EntryCard 才用 `<Pre
 - 状态语义:源码未设 `accessibilityState`(无 disabled/selected/checked 概念)。
 
 ```tsx
+import { SettingsOutlined } from '@unif/react-native-icons';
 // 可点:role=button、label 自动组合为“设置,账号 / 通知 / 权限”
-<EntryCard icon="settings" title="设置" sub="账号 / 通知 / 权限" onPress={() => ...} />
+<EntryCard icon={SettingsOutlined} title="设置" sub="账号 / 通知 / 权限" onPress={() => ...} />
 ```
 
 ## 使用注意

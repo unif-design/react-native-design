@@ -57,15 +57,24 @@ description: '默认中文文案的大小写、状态表达与标点建议。'
 **禁用所有装饰 emoji。** 包括国旗、贴纸、装饰字符。功能性状态全部走[图标系统](/docs/components/icons)。如果一个字符不传递信息,它就不应该出现。
 
 ```tsx
+import { LocationOutlined } from '@unif/react-native-icons';
+import { useColors } from '@unif/react-native-design';
+import { Text, View } from 'react-native';
 // ❌ Incorrect
 <Text>🎉 提交成功！</Text>
 <Text>📍 当前位置</Text>
 
 // ✅ Correct
 <Text>提交成功</Text>
-<Text>
-  <Icon name="location" size={14} /> 当前位置
-</Text>
+function LocationLabel() {
+  const colors = useColors();
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <LocationOutlined size={14} color={colors.foregroundMuted} />
+      <Text>当前位置</Text>
+    </View>
+  );
+}
 ```
 
 > 这些约定是[中文优先原则](/docs/design/principles#中文优先)的细化;硬性禁忌清单见[全局 Don'ts](/docs/design/donts)。

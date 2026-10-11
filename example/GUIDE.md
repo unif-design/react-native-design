@@ -69,7 +69,7 @@ scene 会卸载，可复现 draft 保存在根 Provider 中。
 
 | Scene ID      | 标题           | 主覆盖                                                                                              |
 | ------------- | -------------- | --------------------------------------------------------------------------------------------------- |
-| `foundation`  | 基础能力与图标 | Theme、token、Icon 全集、logger、testID                                                             |
+| `foundation`  | 主题与基础能力 | Theme、token、logger、testID                                                                        |
 | `actions`     | 操作与状态     | Button、IconButton、Chip、Tag、StatusDot                                                            |
 | `feedback`    | 反馈与浮层     | Empty、Skeleton、Spinner、Pulse、Reveal、Blur、Toast、Confirm                                       |
 | `forms`       | 表单与输入     | Input、PasswordInput、Textarea、Search、选择控件、Stepper（xs 横向触控 < 44pt / formatValue）、Form |
@@ -88,7 +88,7 @@ load/error event 后的组件状态，不代表真实网络、缓存或 native d
 
 ## 6. 主题、字号与减少动态效果
 
-在「基础能力与图标」scene 中操作：
+在「主题与基础能力」scene 中操作：
 
 - 主题模式：`system`、`light`、`dark`；`system` 读取设备当前 scheme。
 - fontScale：`1 / 1.25 / 1.5 / 2`，通过公开 `normalizeFontScale()` 进入根
@@ -96,7 +96,7 @@ load/error event 后的组件状态，不代表真实网络、缓存或 native d
 - reduced motion：只展示 `usePrefersReducedMotion()` 读取到的系统事实，没有本地伪造
   override。请在系统设置中切换后重新验证 Pulse、Reveal 与 Carousel autoplay。
 
-表单场景的“多行输入消费”使用包根 Textarea，提供填入多行、外部清空和 focus；媒体场景包含 76×76 与 96×56 实际尺寸及 Icon fallback，反馈场景包含 16pt 圆环的完整百分比。上述样例用于基础能力验收，没有实现 Composer 或附件业务流程。
+表单场景的“多行输入消费”使用包根 Textarea，提供填入多行、外部清空和 focus；媒体场景包含 76×76 与 96×56 实际尺寸及图标 fallback，反馈场景包含 16pt 圆环的完整百分比。上述样例用于基础能力验收，没有实现 Composer 或附件业务流程。
 
 ## 7. 自动化
 
@@ -107,7 +107,6 @@ load/error event 后的组件状态，不代表真实网络、缓存或 native d
 ```sh
 yarn check:config
 yarn check:runtime-peers
-yarn check:icons
 yarn verify:example-showcase
 yarn example typecheck
 yarn example lint

@@ -24,6 +24,7 @@ description: '安装依赖，配置主题与宿主，开始使用 Design 组件�
 | `react-native-safe-area-context`   | `>=5`              | `5.7.x`      |
 | `react-native-svg`                 | `>=15`             | `15.15.x`    |
 | `@callstack/liquid-glass`          | `>=0.8.2 <0.9.0`   | `0.8.2`      |
+| `@unif/react-native-icons`         | `>=0.1.0`          | `0.1.0`      |
 
 - Node.js `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`(与 `package.json#engines` 逐字一致;本仓 `.nvmrc` 固定 `v24.13.0`)、Yarn 4
 - TypeScript 6
@@ -46,7 +47,7 @@ yarn add @unif/react-native-design
 本库**不打包**下列依赖,宿主工程必须自行安装并完成原生侧配置。缺任一,Metro 打包或运行时就会报 `Unable to resolve module` / `Cannot find module`。
 
 ```sh
-yarn add react-native-svg \
+yarn add @unif/react-native-icons react-native-svg \
   react-native-gesture-handler \
   react-native-reanimated \
   react-native-worklets \

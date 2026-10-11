@@ -1,9 +1,10 @@
+import type { ComponentType } from 'react';
+import type { IconProps } from '@unif/react-native-icons';
 import type { StyleProp, ViewStyle } from 'react-native';
-import type { IconName } from '../Icon';
 
 export type GridItem = {
   id: string;
-  icon: IconName;
+  icon: ComponentType<IconProps>;
   label: string;
   /** 覆盖单格的可访问名称；空白值回退到 label + 可选 badge。 */
   accessibilityLabel?: string;

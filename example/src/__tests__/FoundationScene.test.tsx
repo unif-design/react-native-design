@@ -2,9 +2,6 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import {
   BRAND_ORANGE,
-  ICONS,
-  ICON_NAMES,
-  Icon,
   avatar,
   avatarGradient,
   consoleTransport,
@@ -29,44 +26,28 @@ import * as DesignRuntime from '@unif/react-native-design';
 import App from '../App';
 import { restoreNativeMocks } from './helpers/nativeMocks';
 import { createShowcaseRuntimeCoverage } from './helpers/showcaseRuntimeCoverage';
-import { createShowcaseStateCoverage } from './helpers/showcaseStateCoverage';
-
-const mockIconAccessLogKey = Symbol('foundation-icon-access-log');
-const mockIconAccessLog: string[] = [];
-
 jest.mock('@unif/react-native-design', () => {
   const actual = jest.requireActual<typeof DesignRuntime>(
     '@unif/react-native-design'
   );
-  const iconSentinel = new Proxy(
-    { ...actual.ICONS, warning: undefined },
-    {
-      get(target, property, receiver) {
-        if (property === mockIconAccessLogKey) return mockIconAccessLog;
-        if (
-          typeof property === 'string' &&
-          Object.prototype.hasOwnProperty.call(target, property)
-        ) {
-          mockIconAccessLog.push(property);
-        }
-        return Reflect.get(target, property, receiver);
-      },
-    }
-  );
   return {
     ...actual,
     BRAND_ORANGE: 'magenta',
-    ICONS: iconSentinel,
-    ICON_NAMES: [...actual.ICON_NAMES].reverse(),
     addTransport: jest.fn(actual.addTransport),
-    avatar: { ...actual.avatar, md: 37 },
+    avatar: {
+      ...actual.avatar,
+      md: 37,
+    },
     avatarGradient: ['orange', 'magenta', 'purple'],
     childTestID: jest.fn(actual.childTestID),
     consoleTransport: {
       id: 'foundation-console-sentinel',
       log: actual.consoleTransport.log,
     },
-    control: { ...actual.control, lg: 47 },
+    control: {
+      ...actual.control,
+      lg: 47,
+    },
     createLogger: jest.fn(actual.createLogger),
     darkColors: {
       ...actual.darkColors,
@@ -75,14 +56,29 @@ jest.mock('@unif/react-native-design', () => {
     },
     darkShadow: {
       ...actual.darkShadow,
-      card: { ...actual.darkShadow.card, shadowOpacity: 0.41 },
+      card: {
+        ...actual.darkShadow.card,
+        shadowOpacity: 0.41,
+      },
     },
-    dim: { ...actual.dim, sendBtn: 35 },
-    fixed: { ...actual.fixed, hitTarget: 48 },
+    dim: {
+      ...actual.dim,
+      sendBtn: 35,
+    },
+    fixed: {
+      ...actual.fixed,
+      hitTarget: 48,
+    },
     fontMono: 'Courier',
-    fw: { ...actual.fw, semi: '800' },
+    fw: {
+      ...actual.fw,
+      semi: '800',
+    },
     getLogLevel: jest.fn(actual.getLogLevel),
-    icon: { ...actual.icon, md: 29 },
+    icon: {
+      ...actual.icon,
+      md: 29,
+    },
     lightColors: {
       ...actual.lightColors,
       primary: 'magenta',
@@ -90,18 +86,35 @@ jest.mock('@unif/react-native-design', () => {
     },
     lightShadow: {
       ...actual.lightShadow,
-      card: { ...actual.lightShadow.card, shadowOpacity: 0.31 },
+      card: {
+        ...actual.lightShadow.card,
+        shadowOpacity: 0.31,
+      },
     },
-    motion: { ...actual.motion, base: 240 },
+    motion: {
+      ...actual.motion,
+      base: 240,
+    },
     pressedOpacity: 0.63,
     r: jest.fn(actual.r),
-    radius: { ...actual.radius, md: 13 },
+    radius: {
+      ...actual.radius,
+      md: 13,
+    },
     removeTransport: jest.fn(actual.removeTransport),
     rf: jest.fn(actual.rf),
     scaleFontMetric: jest.fn(actual.scaleFontMetric),
     setLogLevel: jest.fn(actual.setLogLevel),
-    space: { ...actual.space, '4': 13 },
-    type: { ...actual.type, body: 23, sm: 17, xxs: 11 },
+    space: {
+      ...actual.space,
+      '4': 13,
+    },
+    type: {
+      ...actual.type,
+      body: 23,
+      sm: 17,
+      xxs: 11,
+    },
     useColors: jest.fn(actual.useColors),
     useFontScale: jest.fn(actual.useFontScale),
     usePrefersReducedMotion: jest.fn(actual.usePrefersReducedMotion),
@@ -120,30 +133,25 @@ jest.mock('@unif/react-native-design', () => {
     },
   };
 });
-
 beforeEach(() => {
   jest.spyOn(console, 'info').mockImplementation(() => {});
 });
-
 function enterFoundation(): void {
-  fireEvent.press(screen.getByRole('button', { name: /基础能力与图标/ }));
+  fireEvent.press(
+    screen.getByRole('button', {
+      name: /主题与基础能力/,
+    })
+  );
 }
-
 function escapeRegExp(value: string | number): string {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
-
 afterEach(() => {
   restoreNativeMocks();
   jest.restoreAllMocks();
 });
-
-test('Foundation 展示真实 theme、token、palette、scale 与 Icon 事实', () => {
+test('Foundation 展示真实 theme、token、palette、scale 与尺寸令牌事实', () => {
   render(<App />);
-  const iconAccessLog = (
-    ICONS as typeof ICONS & { [mockIconAccessLogKey]: string[] }
-  )[mockIconAccessLogKey];
-  iconAccessLog.length = 0;
   const callableMocks = [
     DesignRuntime.childTestID,
     DesignRuntime.r,
@@ -159,7 +167,6 @@ test('Foundation 展示真实 theme、token、palette、scale 与 Icon 事实', 
   for (const callable of callableMocks) callable.mockClear();
   enterFoundation();
   const runtimeCoverage = createShowcaseRuntimeCoverage('foundation');
-
   runtimeCoverage.prove('useTheme', () => {
     expect(jest.mocked(DesignRuntime.useTheme)).toHaveBeenCalledTimes(1);
     expect(screen.getByText('当前主题：浅色')).toBeOnTheScreen();
@@ -182,8 +189,8 @@ test('Foundation 展示真实 theme、token、palette、scale 与 Icon 事实', 
     () => {
       const useColors = jest.mocked(DesignRuntime.useColors);
       const useThemedStyles = jest.mocked(DesignRuntime.useThemedStyles);
-      expect(useColors).toHaveBeenCalledTimes(2);
-      expect(useThemedStyles).toHaveBeenCalledTimes(10);
+      expect(useColors).toHaveBeenCalledTimes(1);
+      expect(useThemedStyles).toHaveBeenCalledTimes(8);
       expect(
         useThemedStyles.mock.calls.every(
           ([maker]) => typeof maker === 'function'
@@ -198,12 +205,16 @@ test('Foundation 展示真实 theme、token、palette、scale 与 Icon 事实', 
         screen.getByTestId('foundation-swatch-light', {
           includeHiddenElements: true,
         })
-      ).toHaveStyle({ backgroundColor: lightColors.background });
+      ).toHaveStyle({
+        backgroundColor: lightColors.background,
+      });
       expect(
         screen.getByTestId('foundation-swatch-dark', {
           includeHiddenElements: true,
         })
-      ).toHaveStyle({ backgroundColor: darkColors.background });
+      ).toHaveStyle({
+        backgroundColor: darkColors.background,
+      });
       expect(
         screen.getByText(
           `当前 primary：${String(useColors.mock.results[0]?.value.primary)}`
@@ -235,9 +246,7 @@ test('Foundation 展示真实 theme、token、palette、scale 与 Icon 事实', 
       const paletteMetrics = screen.getByTestId('foundation-palette-metrics');
       expect(paletteMetrics).toHaveTextContent(
         new RegExp(
-          `暖橙 ${escapeRegExp(
-            warmOrangePalette.light.length
-          )}/${escapeRegExp(warmOrangePalette.dark.length)}`
+          `暖橙 ${escapeRegExp(warmOrangePalette.light.length)}/${escapeRegExp(warmOrangePalette.dark.length)}`
         )
       );
       expect(paletteMetrics).toHaveTextContent(
@@ -328,35 +337,19 @@ test('Foundation 展示真实 theme、token、palette、scale 与 Icon 事实', 
       )
     );
   });
-  runtimeCoverage.prove('ICONS', 'ICON_NAMES', () => {
-    const warningIndex = ICON_NAMES.indexOf('warning');
-    const firstWarningAccess = iconAccessLog.indexOf('warning');
-    expect(warningIndex).toBeGreaterThanOrEqual(0);
-    expect(firstWarningAccess).toBe(warningIndex);
-    expect(iconAccessLog.slice(0, firstWarningAccess + 1)).toEqual(
-      ICON_NAMES.slice(0, warningIndex + 1)
-    );
-    expect(
-      screen.getByText(`图标诊断：${ICON_NAMES.length} / 数据缺失`)
-    ).toBeOnTheScreen();
-    expect(screen.getByText(ICON_NAMES[0] ?? '')).toBeOnTheScreen();
-  });
   runtimeCoverage.prove('childTestID', () => {
-    const firstIconName = ICON_NAMES[0];
-    if (!firstIconName) throw new Error('Icon catalog 必须至少包含一个名称');
     const childTestIDMock = jest.mocked(DesignRuntime.childTestID);
-    expect(childTestIDMock).toHaveBeenCalledTimes(24);
-    expect(childTestIDMock).toHaveBeenCalledWith(
-      'foundation-icons',
-      firstIconName
-    );
-    const firstCallIndex = childTestIDMock.mock.calls.findIndex(
-      ([parent, child]) =>
-        parent === 'foundation-icons' && child === firstIconName
-    );
-    const iconTestID = childTestIDMock.mock.results[firstCallIndex]?.value;
-    if (!iconTestID) throw new Error('childTestID 必须生成非空 ID');
-    expect(screen.getByTestId(iconTestID)).toBeOnTheScreen();
+    for (const child of ['light', 'dark']) {
+      expect(childTestIDMock).toHaveBeenCalledWith('foundation-swatch', child);
+      const index = childTestIDMock.mock.calls.findIndex(
+        ([parent, id]) => parent === 'foundation-swatch' && id === child
+      );
+      const id = childTestIDMock.mock.results[index]?.value;
+      expect(id).toBeTruthy();
+      expect(
+        screen.getByTestId(id!, { includeHiddenElements: true })
+      ).toBeOnTheScreen();
+    }
   });
   runtimeCoverage.prove('consoleTransport', () => {
     expect(
@@ -369,7 +362,6 @@ test('Foundation 展示真实 theme、token、palette、scale 与 Icon 事实', 
       'FoundationScene'
     );
   });
-
   const addTransport = jest.mocked(DesignRuntime.addTransport);
   const getLogLevel = jest.mocked(DesignRuntime.getLogLevel);
   const removeTransport = jest.mocked(DesignRuntime.removeTransport);
@@ -378,7 +370,11 @@ test('Foundation 展示真实 theme、token、palette、scale 与 Icon 事实', 
   getLogLevel.mockClear();
   removeTransport.mockClear();
   setLogLevel.mockClear();
-  fireEvent.press(screen.getByRole('button', { name: '记录主题诊断' }));
+  fireEvent.press(
+    screen.getByRole('button', {
+      name: '记录主题诊断',
+    })
+  );
   runtimeCoverage.prove(
     'setLogLevel',
     'getLogLevel',
@@ -390,7 +386,9 @@ test('Foundation 展示真实 theme、token、palette、scale 与 Icon 事实', 
       expect(setLogLevel).toHaveBeenCalledWith('info');
       expect(setLogLevel).toHaveBeenCalledTimes(2);
       expect(addTransport).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'foundation-scene-one-shot' })
+        expect.objectContaining({
+          id: 'foundation-scene-one-shot',
+        })
       );
       expect(addTransport).toHaveBeenCalledTimes(1);
       expect(removeTransport).toHaveBeenCalledWith('foundation-scene-one-shot');
@@ -402,89 +400,6 @@ test('Foundation 展示真实 theme、token、palette、scale 与 Icon 事实', 
   );
   runtimeCoverage.expectComplete();
 });
-
-test('Icon catalog 初始 24 个、每次多 24 个，并由大小写不敏感搜索与 Empty 驱动', () => {
-  render(<App />);
-  enterFoundation();
-  const stateCoverage = createShowcaseStateCoverage('Icon');
-
-  expect(screen.getAllByTestId(/^foundation-icons-/)).toHaveLength(24);
-  for (let loaded = 24; loaded < ICON_NAMES.length; loaded += 24) {
-    fireEvent.press(screen.getByRole('button', { name: '加载更多图标' }));
-  }
-  stateCoverage.prove('icon.all-icons', () => {
-    expect(screen.getAllByTestId(/^foundation-icons-/)).toHaveLength(
-      ICON_NAMES.length
-    );
-    expect(
-      screen.queryByRole('button', { name: '加载更多图标' })
-    ).not.toBeOnTheScreen();
-  });
-
-  fireEvent.press(screen.getByRole('tab', { name: '32 点图标' }));
-  const iconWrappers = screen.getAllByTestId(/^foundation-icons-/);
-  stateCoverage.prove('icon.sizes', () => {
-    expect(
-      iconWrappers.map((wrapper) => wrapper.findByType(Icon).props.size)
-    ).toEqual(Array.from({ length: ICON_NAMES.length }, () => 32));
-  });
-  const firstIcon = iconWrappers[0]?.findByType(Icon);
-  stateCoverage.prove('icon.color', () => {
-    const renderedColors = jest
-      .mocked(DesignRuntime.useColors)
-      .mock.results.at(-1)?.value;
-    expect(firstIcon?.props.color).toBe(renderedColors?.primary);
-  });
-  stateCoverage.prove('icon.a11y-hidden', () => {
-    expect(
-      firstIcon?.findByProps({
-        importantForAccessibility: 'no-hide-descendants',
-      }).props
-    ).toMatchObject({ accessibilityElementsHidden: true });
-  });
-
-  fireEvent.changeText(screen.getByPlaceholderText('搜索图标名称'), 'ARROW');
-  const arrowCount = ICON_NAMES.filter((name) =>
-    name.toLowerCase().includes('arrow')
-  ).length;
-  stateCoverage.prove('icon.name-search', () => {
-    expect(screen.getAllByTestId(/^foundation-icons-/)).toHaveLength(
-      arrowCount
-    );
-    expect(screen.getByText('arrow-left')).toBeOnTheScreen();
-  });
-
-  fireEvent.changeText(
-    screen.getByPlaceholderText('搜索图标名称'),
-    'not-a-real-icon'
-  );
-  expect(screen.getByText('没有匹配的图标')).toBeOnTheScreen();
-  expect(
-    screen.queryByRole('button', { name: '加载更多图标' })
-  ).not.toBeOnTheScreen();
-  stateCoverage.expectComplete();
-});
-
-test('Icon query 与 loadedCount 跨路由保留，scene reset 只重置 Foundation draft', () => {
-  render(<App />);
-  enterFoundation();
-
-  fireEvent.press(screen.getByRole('button', { name: '加载更多图标' }));
-  fireEvent.changeText(screen.getByPlaceholderText('搜索图标名称'), 'arrow');
-  fireEvent.press(screen.getByRole('button', { name: '返回首页' }));
-  enterFoundation();
-
-  expect(screen.getByPlaceholderText('搜索图标名称').props.value).toBe('arrow');
-  fireEvent.changeText(screen.getByPlaceholderText('搜索图标名称'), '');
-  expect(screen.getAllByTestId(/^foundation-icons-/)).toHaveLength(
-    Math.min(48, ICON_NAMES.length)
-  );
-
-  fireEvent.press(screen.getByRole('button', { name: '重置本场景' }));
-  expect(screen.getByPlaceholderText('搜索图标名称').props.value).toBe('');
-  expect(screen.getAllByTestId(/^foundation-icons-/)).toHaveLength(24);
-});
-
 test('logger action 通过真实 transport 进入最新结果，历史默认不展开且按需限制详情', () => {
   render(<App />);
   enterFoundation();
@@ -497,12 +412,16 @@ test('logger action 通过真实 transport 进入最新结果，历史默认不�
   getLogLevel.mockClear();
   removeTransport.mockClear();
   setLogLevel.mockClear();
-
   expect(screen.queryByTestId('result-latest')).not.toBeOnTheScreen();
-  fireEvent.press(screen.getByRole('button', { name: '记录主题诊断' }));
-
+  fireEvent.press(
+    screen.getByRole('button', {
+      name: '记录主题诊断',
+    })
+  );
   expect(addTransport).toHaveBeenCalledWith(
-    expect.objectContaining({ id: 'foundation-scene-one-shot' })
+    expect.objectContaining({
+      id: 'foundation-scene-one-shot',
+    })
   );
   expect(removeTransport).toHaveBeenLastCalledWith('foundation-scene-one-shot');
   expect(setLogLevel).toHaveBeenNthCalledWith(1, 'info');
@@ -518,19 +437,29 @@ test('logger action 通过真实 transport 进入最新结果，历史默认不�
     screen.getByText('最新结果：Logger · 记录 · 主题诊断示例已记录')
   ).toBeOnTheScreen();
   expect(screen.queryByTestId(/^result-history-/)).not.toBeOnTheScreen();
-
   for (let index = 0; index < 12; index += 1) {
-    fireEvent.press(screen.getByRole('button', { name: '记录主题诊断' }));
+    fireEvent.press(
+      screen.getByRole('button', {
+        name: '记录主题诊断',
+      })
+    );
   }
   expect(screen.queryByTestId(/^result-history-/)).not.toBeOnTheScreen();
-  fireEvent.press(screen.getByRole('button', { name: /查看历史记录/ }));
+  fireEvent.press(
+    screen.getByRole('button', {
+      name: /查看历史记录/,
+    })
+  );
   expect(screen.getAllByTestId(/^result-history-/)).toHaveLength(10);
   expect(screen.getByText('仅展示最近 10 条记录')).toBeOnTheScreen();
-
-  fireEvent.press(screen.getByRole('button', { name: '返回首页' }));
+  fireEvent.press(
+    screen.getByRole('button', {
+      name: '返回首页',
+    })
+  );
   expect(
     screen.getByRole('button', {
-      name: /基础能力与图标.*最近：主题诊断示例已记录/,
+      name: /主题与基础能力.*最近：主题诊断示例已记录/,
     })
   ).toBeOnTheScreen();
 });

@@ -1,3 +1,5 @@
+import { HomeOutlined, InfoOutlined } from '@unif/react-native-icons';
+import { CloseOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import {
@@ -80,7 +82,7 @@ test('IconButton uses the same disabled Web boundary', () => {
   const press = jest.fn();
   render(
     <IconButton
-      icon="close"
+      icon={CloseOutlined}
       accessibilityLabel="关闭"
       variant="secondary"
       disabled
@@ -160,8 +162,8 @@ test.each([
 test('TabBar exposes the controlled selection on its Web tab', () => {
   const change = jest.fn();
   const items = [
-    { id: 'home', label: '首页', icon: 'home' as const },
-    { id: 'info', label: '详情', icon: 'info' as const },
+    { id: 'home', label: '首页', icon: HomeOutlined },
+    { id: 'info', label: '详情', icon: InfoOutlined },
   ];
   const view = render(
     <TabBar

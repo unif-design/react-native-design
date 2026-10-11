@@ -1,3 +1,5 @@
+import type { ComponentType } from 'react';
+import type { IconProps } from '@unif/react-native-icons';
 import type { ComponentRef, RefObject } from 'react';
 import type { TextInput } from 'react-native';
 import type {
@@ -6,7 +8,6 @@ import type {
   TextStyle,
   ViewStyle,
 } from 'react-native';
-import type { IconName } from '../Icon';
 
 /**
  * 受控:必须同时给 `value` 和 `onChangeText`。
@@ -48,7 +49,12 @@ export interface TextFieldHandle {
  * 任意节点意味着库无法判断它是装饰还是操作,也无法保证它有可访问名称与 44pt 命中框。
  */
 export type TextFieldSlot =
-  | { kind: 'icon'; icon: IconName; size?: number; color?: string }
+  | {
+      kind: 'icon';
+      icon: ComponentType<IconProps>;
+      size?: number;
+      color?: string;
+    }
   | { kind: 'text'; value: string | number }
   | ({
       kind: 'action';
@@ -56,7 +62,7 @@ export type TextFieldSlot =
       accessibilityLabel: string;
       disabled?: boolean;
     } & (
-      | { icon: IconName; label?: never }
+      | { icon: ComponentType<IconProps>; label?: never }
       /**
        * 文字型操作(「获取验证码」「重新发送」这类)。命中框、禁用态与可访问名称
        * 与图标型完全一致 —— 只是渲染成文字。

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { Icon } from '../Icon';
 import { GlassLayer } from '../GlassLayer';
 import { r, useColors, useThemedStyles } from '../../../theme';
 import { makeStyles } from './styles';
@@ -20,10 +19,11 @@ export function EntryCard({
   const c = useColors();
   const styles = useThemedStyles(makeStyles);
 
+  const Glyph = icon;
   const content = (
     <>
       <View style={styles.iconTile}>
-        <Icon name={icon} size={r(16)} color={c.foregroundMuted} />
+        <Glyph size={r(16)} color={c.foregroundMuted} />
       </View>
       <View style={styles.body}>
         <Text style={styles.title} numberOfLines={1}>

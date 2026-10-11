@@ -1,6 +1,7 @@
+import type { ComponentType } from 'react';
+import type { IconProps } from '@unif/react-native-icons';
 import type { ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
-import type { IconName } from '../Icon';
 
 export interface ActionMenuConfirmation {
   title?: string;
@@ -11,7 +12,7 @@ export interface ActionMenuConfirmation {
 export interface ActionMenuAction {
   id: string;
   label: string;
-  icon?: IconName;
+  icon?: ComponentType<IconProps>;
   accessibilityHint?: string;
   onPress(): void;
   disabled?: boolean;

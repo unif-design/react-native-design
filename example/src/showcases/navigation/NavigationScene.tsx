@@ -1,3 +1,9 @@
+import {
+  HomeOutlined,
+  MailOutlined,
+  ClipboardOutlined,
+} from '@unif/react-native-icons';
+import { ArrowLeftOutlined, MoreHOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import {
@@ -40,9 +46,9 @@ const disabledSegmentItems = [
   { id: 'locked-second', label: '锁定乙' },
 ];
 const tabBarItems = [
-  { id: 'home', icon: 'home' as const, label: '首页' },
-  { id: 'messages', icon: 'mail' as const, label: '消息', badge: 3 },
-  { id: 'tasks', icon: 'clipboard' as const, label: '任务', badge: '99+' },
+  { id: 'home', icon: HomeOutlined, label: '首页' },
+  { id: 'messages', icon: MailOutlined, label: '消息', badge: 3 },
+  { id: 'tasks', icon: ClipboardOutlined, label: '任务', badge: '99+' },
 ];
 
 const tabLabels: Readonly<Record<string, string>> = {
@@ -101,12 +107,12 @@ export function NavigationScene(): React.JSX.Element {
               subtitle="左右都是具名操作"
               variant="default"
               left={{
-                icon: 'arrow-left',
+                icon: ArrowLeftOutlined,
                 accessibilityLabel: '演示返回动作',
                 onPress: () => record('NavBar', '操作', '返回动作已触发'),
               }}
               right={{
-                icon: 'more-h',
+                icon: MoreHOutlined,
                 accessibilityLabel: '演示更多动作',
                 onPress: () => record('NavBar', '操作', '更多动作已触发'),
               }}

@@ -7,11 +7,7 @@ export type { SceneId } from '../catalog/componentCatalog';
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type FontScalePreset = 1 | 1.25 | 1.5 | 2;
 
-export type FoundationSceneState = Readonly<{
-  iconQuery: string;
-  iconSize: 16 | 24 | 32;
-  iconLoadedCount: number;
-}>;
+export type FoundationSceneState = Readonly<Record<string, never>>;
 
 export type ActionsSceneState = Readonly<{
   buttonVariant:
@@ -121,7 +117,7 @@ export type ShowcaseState = Readonly<{
 const sceneStateFactories: {
   [K in SceneId]: () => SceneStateMap[K];
 } = {
-  foundation: () => ({ iconQuery: '', iconSize: 24, iconLoadedCount: 24 }),
+  foundation: () => ({}),
   actions: () => ({
     buttonVariant: 'primary',
     buttonSize: 'md',

@@ -1,7 +1,7 @@
 # Unif Design — 全文文档聚合
 
 > 可选全文。普通查询优先通过 llms.txt 定位相关单页。
-<!-- Generated from @unif/react-native-design@0.40.4; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@0.41.0; edit source documentation. -->
 
 ## 目录
 
@@ -146,7 +146,7 @@ const ActionMenuDemo = () => {
                 {
                   id: 'copy',
                   label: '复制',
-                  icon: 'copy',
+                  icon: CopyOutlined,
                   onPress: () => {
                     setResult('已选择复制');
                     setOpen(false);
@@ -161,7 +161,7 @@ const ActionMenuDemo = () => {
                 {
                   id: 'delete',
                   label: '删除',
-                  icon: 'trash',
+                  icon: TrashOutlined,
                   tone: 'danger',
                   confirmation: {
                     message: '删除这个演示项目？',
@@ -197,7 +197,7 @@ dialog、sheet、popover 均使用主题 GlassLayer。popover 卡片与箭头复
 
 ## API
 
-`ActionMenuAction` 由 Design 定义：`id: string`、`label: string`、`onPress(): void` 必填；`icon?: IconName`、`accessibilityHint?`、`disabled?`、`loading?`、`tone?: 'neutral' | 'danger'` 和 `confirmation?: ActionMenuConfirmation` 可选。确认内容为 `message: string` 与 `confirmLabel: string`，可选 `title` 覆盖确认阶段的标题。
+`ActionMenuAction` 由 Design 定义：`id: string`、`label: string`、`onPress(): void` 必填；`icon?: ComponentType<IconProps>`、`accessibilityHint?`、`disabled?`、`loading?`、`tone?: 'neutral' | 'danger'` 和 `confirmation?: ActionMenuConfirmation` 可选。确认内容为 `message: string` 与 `confirmLabel: string`，可选 `title` 覆盖确认阶段的标题。
 
 | 参数               | 类型                               | 默认值              | 说明                                                                  |
 | ------------------ | ---------------------------------- | ------------------- | --------------------------------------------------------------------- |
@@ -224,6 +224,7 @@ dialog、sheet、popover 均使用主题 GlassLayer。popover 卡片与箭头复
 普通动作继续只交`onPress`，宿主自行收起再执行。保留取消按钮时，确认取消返回原菜单；设置 `cancelLabel={null}` 时由宿主点外或返回关闭。确认提交先请求`onClose`再交当前动作。Web鼠标按下保留原输入焦点，点击和键盘激活仍只交一次动作；按钮禁用或忙碌时不能触发。
 
 ```tsx
+import { TrashOutlined } from '@unif/react-native-icons';
 <ActionMenuContent
   presentation="popover"
   cancelLabel={null}
@@ -232,7 +233,7 @@ dialog、sheet、popover 均使用主题 GlassLayer。popover 卡片与箭头复
     {
       id: 'delete',
       label: '删除',
-      icon: 'trash',
+      icon: TrashOutlined,
       tone: 'danger',
       confirmation: {
         title: '删除项目',
@@ -243,7 +244,7 @@ dialog、sheet、popover 均使用主题 GlassLayer。popover 卡片与箭头复
     },
   ]}
   onClose={closeModal}
-/>
+/>;
 ```
 
 宿主应在确认阶段传入指针，其他阶段按设计省略；更换业务目标时创建新的内容实例，避免把确认复用到同 ID 的另一个对象。窗外关闭不交付删除。
@@ -726,8 +727,8 @@ import { Button } from '@unif/react-native-design';
 | `block`              | `boolean?`                                                                                          | `false`     | 仅撑满父容器交叉轴（`alignSelf: stretch`）；主轴尺寸由父容器或 `style` 决定                  |
 | `disabled`           | `boolean?`                                                                                          | `false`     | 禁用（opacity 0.5 + 不响应 onPress）                                                         |
 | `loading`            | `boolean?`                                                                                          | `false`     | 加载态:用 `ActivityIndicator` 替代 label,自动 disabled                                       |
-| `leftIcon`           | `IconName?`                                                                                         | —           | 左侧图标,与文本同色；尺寸由 Button size 固定，不随 fontScale 放大                            |
-| `rightIcon`          | `IconName?`                                                                                         | —           | 右侧图标,与文本同色；尺寸由 Button size 固定，不随 fontScale 放大                            |
+| `leftIcon`           | `ComponentType<IconProps>?`                                                                         | —           | 左侧图标,与文本同色；尺寸由 Button size 固定，不随 fontScale 放大                            |
+| `rightIcon`          | `ComponentType<IconProps>?`                                                                         | —           | 右侧图标,与文本同色；尺寸由 Button size 固定，不随 fontScale 放大                            |
 | `style`              | `StyleProp<ViewStyle>?`                                                                             | —           | 额外样式覆盖（merge 到末尾）                                                                 |
 | `testID`             | `string?`                                                                                           | —           | E2E / 测试定位                                                                               |
 | `accessibilityHint`  | `string?`                                                                                           | —           | SR 行为说明 hint,仅在「行为不显然」时加                                                      |
@@ -1197,14 +1198,14 @@ const CellDemo = () => {
           </span>
           <List>
             <Cell
-              leading="settings"
+              leading={SettingsOutlined}
               title="主题"
               extra={{ kind: 'text', value: '跟随系统' }}
               arrow
               onPress={() => setLastAction('打开主题')}
             />
             <Cell
-              leading="bell"
+              leading={BellOutlined}
               title="通知"
               desc="由行尾开关控制"
               extra={{
@@ -1219,14 +1220,14 @@ const CellDemo = () => {
               }}
             />
             <Cell
-              leading="lock"
+              leading={LockOutlined}
               title="隐私"
               desc="位置 / 相机 / 麦克风"
               arrow
               onPress={() => setLastAction('打开隐私')}
             />
             <Cell
-              leading="info"
+              leading={InfoOutlined}
               title="版本"
               extra={{ kind: 'text', value: 'v1.0' }}
             />
@@ -1259,7 +1260,7 @@ const CellDemo = () => {
           </span>
           <List>
             <Cell
-              leading="lock"
+              leading={LockOutlined}
               title="云同步"
               desc="未登录"
               arrow
@@ -1287,6 +1288,7 @@ const CellDemo = () => {
 ## 用法
 
 ```tsx
+import { SettingsOutlined } from '@unif/react-native-icons';
 import { Cell, List, Switch } from '@unif/react-native-design';
 
 <List>
@@ -1294,7 +1296,7 @@ import { Cell, List, Switch } from '@unif/react-native-design';
     title="主题"
     extra={{ kind: 'text', value: '跟随系统' }}
     arrow
-    leading="settings"
+    leading={SettingsOutlined}
     onPress={openTheme}
   />
   <Cell
@@ -1333,8 +1335,13 @@ import { Cell, List, Switch } from '@unif/react-native-design';
 公开内容类型：
 
 ```ts
+import type { ComponentType, ReactElement } from 'react';
+import type { IconProps } from '@unif/react-native-icons';
+
 type CellTextValue = string | number | bigint;
-type CellLeading = IconName | { kind: 'display'; node: ReactElement };
+type CellLeading =
+  | ComponentType<IconProps>
+  | { kind: 'display'; node: ReactElement };
 type CellExtra =
   | { kind: 'text'; value: CellTextValue }
   | {
@@ -1365,7 +1372,7 @@ type StaticCellExtra =
 | `desc`               | `CellTextValue`        | —        | 副标题 / 描述；始终由库内 `<Text>` 安全渲染，最多 2 行                                      |
 | `extra`              | `CellExtra`            | —        | 三种公开配置；actionable 可用 text/display，static 仅 text/装饰 display，control 仅 control |
 | `arrow`              | `boolean`              | `false`  | 仅 actionable 可用；显示 chevron-right，`danger` 时仍不渲染                                 |
-| `leading`            | `CellLeading`          | —        | 图标名，或 `{ kind: 'display', node }` 纯展示节点                                           |
+| `leading`            | `CellLeading`          | —        | 图标组件，或 `{ kind: 'display', node }` 纯展示节点                                         |
 | `onPress`            | `() => void`           | —        | actionable 分支必填；control/static 禁止                                                    |
 | `disabled`           | `boolean`              | `false`  | 仅 actionable 可用；禁用时移除 handler、半透明并上报 disabled                               |
 | `danger`             | `boolean`              | `false`  | 危险态：icon 盒子 + 标题用 error 红,且不渲染 arrow（常用于退出登录 / 删除等）               |
@@ -1639,115 +1646,116 @@ import { Checkbox } from '@unif/react-native-design';
 ## 代码演示 {#实时预览}
 
 ```tsx
-const ChipDemo = () => {
+const ChipDemoContent = () => {
+  const colors = useColors();
   const [filter, setFilter] = useState('pending');
   const [tags, setTags] = useState(['王经理', '张组长', '李区域']);
   const [busy, setBusy] = useState(null);
   return (
-    <>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <span className="demo-label">单选 · selected 切换</span>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            <Chip
-              label="待跟进"
-              selected={filter === 'pending'}
-              onPress={() => setFilter('pending')}
-            />
-            <Chip
-              label="已完成"
-              selected={filter === 'done'}
-              onPress={() => setFilter('done')}
-            />
-            <Chip
-              label="已取消"
-              selected={filter === 'cancelled'}
-              onPress={() => setFilter('cancelled')}
-            />
-          </div>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <span className="demo-label">leading icon · 建议气泡</span>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            <Chip
-              label="今天的安排"
-              leading={<Icon name="spark" size={12} />}
-              onPress={() => {}}
-            />
-            <Chip
-              label="新建拜访"
-              leading={<Icon name="plus" size={12} />}
-              onPress={() => {}}
-            />
-          </div>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <span className="demo-label">trailing close · 多选 token</span>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {tags.map((name) => (
-              <Chip
-                key={name}
-                label={name}
-                selected
-                trailing={<Icon name="close" size={12} />}
-                onPress={() => setTags(tags.filter((x) => x !== name))}
-              />
-            ))}
-            {tags.length === 0 && (
-              <button
-                style={{
-                  fontSize: 12,
-                  color: '#999',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-                onClick={() => setTags(['王经理', '张组长', '李区域'])}
-              >
-                重置
-              </button>
-            )}
-          </div>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <span className="demo-label">
-            busy · 点了就转（请求在飞，二次点击被吞）
-          </span>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            <Chip
-              label="今日拜访计划"
-              leading={<Icon name="spark" size={12} />}
-              busy={busy === 'plan'}
-              onPress={() => {
-                setBusy('plan');
-                setTimeout(() => setBusy(null), 1600);
-              }}
-            />
-            <Chip
-              label="确认这一家"
-              selected
-              busy={busy === 'pick'}
-              onPress={() => {
-                setBusy('pick');
-                setTimeout(() => setBusy(null), 1600);
-              }}
-            />
-            <Chip label="不能点（disabled）" disabled onPress={() => {}} />
-          </div>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <span className="demo-label">
-            静态展示（无 onPress · 不响应按压）
-          </span>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            <Chip label="VIP" />
-            <Chip label="拜访周期 7 天" />
-          </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <span className="demo-label">单选 · selected 切换</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <Chip
+            label="待跟进"
+            selected={filter === 'pending'}
+            onPress={() => setFilter('pending')}
+          />
+          <Chip
+            label="已完成"
+            selected={filter === 'done'}
+            onPress={() => setFilter('done')}
+          />
+          <Chip
+            label="已取消"
+            selected={filter === 'cancelled'}
+            onPress={() => setFilter('cancelled')}
+          />
         </div>
       </div>
-    </>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <span className="demo-label">leading icon · 建议气泡</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <Chip
+            label="今天的安排"
+            leading={<SparkOutlined size={12} color={colors.foregroundMuted} />}
+            onPress={() => {}}
+          />
+          <Chip
+            label="新建拜访"
+            leading={<PlusOutlined size={12} color={colors.foregroundMuted} />}
+            onPress={() => {}}
+          />
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <span className="demo-label">trailing close · 多选 token</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {tags.map((name) => (
+            <Chip
+              key={name}
+              label={name}
+              selected
+              trailing={
+                <CloseOutlined size={12} color={colors.foregroundMuted} />
+              }
+              onPress={() => setTags(tags.filter((x) => x !== name))}
+            />
+          ))}
+          {tags.length === 0 && (
+            <button
+              style={{
+                fontSize: 12,
+                color: '#999',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+              onClick={() => setTags(['王经理', '张组长', '李区域'])}
+            >
+              重置
+            </button>
+          )}
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <span className="demo-label">
+          busy · 点了就转（请求在飞，二次点击被吞）
+        </span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <Chip
+            label="今日拜访计划"
+            leading={<SparkOutlined size={12} color={colors.foregroundMuted} />}
+            busy={busy === 'plan'}
+            onPress={() => {
+              setBusy('plan');
+              setTimeout(() => setBusy(null), 1600);
+            }}
+          />
+          <Chip
+            label="确认这一家"
+            selected
+            busy={busy === 'pick'}
+            onPress={() => {
+              setBusy('pick');
+              setTimeout(() => setBusy(null), 1600);
+            }}
+          />
+          <Chip label="不能点（disabled）" disabled onPress={() => {}} />
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <span className="demo-label">静态展示（无 onPress · 不响应按压）</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <Chip label="VIP" />
+          <Chip label="拜访周期 7 天" />
+        </div>
+      </div>
+    </div>
   );
 };
+
+  <ChipDemoContent />
 ```
 
 ## 状态
@@ -1766,7 +1774,11 @@ const ChipDemo = () => {
 ## 用法
 
 ```tsx
-import { Chip, Icon } from '@unif/react-native-design';
+import { CloseOutlined, SparkOutlined } from '@unif/react-native-icons';
+import { Chip, useColors } from '@unif/react-native-design';
+
+// 以下片段放在组件内，读取当前主题。
+const colors = useColors();
 
 {
   /* 单个可选中 chip */
@@ -1782,7 +1794,7 @@ import { Chip, Icon } from '@unif/react-native-design';
 }
 <Chip
   label="今天的安排"
-  leading={<Icon name="spark" size={12} />}
+  leading={<SparkOutlined size={12} color={colors.foregroundMuted} />}
   onPress={onSuggestion}
 />;
 
@@ -1797,7 +1809,7 @@ import { Chip, Icon } from '@unif/react-native-design';
 <Chip
   label="王经理"
   selected
-  trailing={<Icon name="close" size={12} />}
+  trailing={<CloseOutlined size={12} color={colors.foregroundMuted} />}
   onPress={() => removeFilter('manager-wang')}
 />;
 
@@ -1806,7 +1818,7 @@ import { Chip, Icon } from '@unif/react-native-design';
 }
 <Chip
   label="今日拜访计划"
-  leading={<Icon name="spark" size={12} />}
+  leading={<SparkOutlined size={12} color={colors.foregroundMuted} />}
   busy={pending === 'plan'}
   onPress={openTodayPlan}
 />;
@@ -2377,12 +2389,12 @@ import { Empty } from '@unif/react-native-design';
 
 ## API
 
-| 参数     | 类型       | 默认值    | 说明                                                                              |
-| -------- | ---------- | --------- | --------------------------------------------------------------------------------- |
-| `title`  | `string`   | —         | 大字标题（如「暂无数据」,15px / 600）                                             |
-| `desc`   | `string`   | —         | 小字描述（建议下一步操作,13px / 400 / `c.foregroundSubtle`）                      |
-| `icon`   | `IconName` | `'spark'` | 圆盘内图标;相机域可传 `'camera-off'` / `'permission-denied'` / `'error-alert'` 等 |
-| `testID` | `string`   | —         | E2E / 测试定位                                                                    |
+| 参数     | 类型                       | 默认值          | 说明                                                                                             |
+| -------- | -------------------------- | --------------- | ------------------------------------------------------------------------------------------------ |
+| `title`  | `string`                   | —               | 大字标题（如「暂无数据」,15px / 600）                                                            |
+| `desc`   | `string`                   | —               | 小字描述（建议下一步操作,13px / 400 / `c.foregroundSubtle`）                                     |
+| `icon`   | `ComponentType<IconProps>` | `SparkOutlined` | 圆盘内图标;相机域可传 `CameraOffOutlined` / `PermissionDeniedOutlined` / `ErrorAlertOutlined` 等 |
+| `testID` | `string`                   | —               | E2E / 测试定位                                                                                   |
 
 ## 主题键（Tokens）
 
@@ -2400,7 +2412,7 @@ import { Empty } from '@unif/react-native-design';
 
 来源：`src/components/ui/Empty/Empty.tsx`、`types.ts`。
 
-本组件为展示型空态,无交互。源码是 `<View>` + 圆盘 `<Icon>` + 标题 `<Text>` +（可选）描述 `<Text>`,**未设置任何 a11y prop**(无 `accessibilityRole` / `accessibilityLabel`),也无可传的 a11y prop（仅 `title` / `desc` / `icon` / `testID`）。`title` / `desc` 文本默认对 SR 可读;圆盘内的 `<Icon>` 按其自身实现对 SR 隐藏（见 [图标](md/components/icons.md)），故朗读内容即标题 + 描述。若需把「建议操作」做成可点项,放在 Empty 之外的 SuggestionList / [Button](md/components/button.md) 上,各自带交互语义。
+本组件为展示型空态,无交互。源码是 `<View>` + 圆盘内图标 + 标题 `<Text>` +（可选）描述 `<Text>`,**未设置任何 a11y prop**(无 `accessibilityRole` / `accessibilityLabel`),也无可传的 a11y prop（仅 `title` / `desc` / `icon` / `testID`）。`title` / `desc` 文本默认对 SR 可读;圆盘内的图标 按其自身实现对 SR 隐藏（见 [图标](md/components/icons.md)），故朗读内容即标题 + 描述。若需把「建议操作」做成可点项,放在 Empty 之外的 SuggestionList / [Button](md/components/button.md) 上,各自带交互语义。
 
 ## 视觉规范
 
@@ -2434,14 +2446,14 @@ retail biz2 设计稿 v7:Me 屏底部"设置 / 关于"两个入口从纵向 Cell
     style={{ display: 'flex', flexDirection: 'row', gap: 10, maxWidth: 360 }}
   >
     <EntryCard
-      icon="settings"
+      icon={SettingsOutlined}
       title="设置"
       sub="账号 / 通知 / 权限"
       onPress={() => {}}
       style={{ flex: 1 }}
     />
     <EntryCard
-      icon="info"
+      icon={InfoOutlined}
       title="关于 Unif"
       sub="V 2.6.0"
       onPress={() => {}}
@@ -2454,16 +2466,17 @@ retail biz2 设计稿 v7:Me 屏底部"设置 / 关于"两个入口从纵向 Cell
 
 | 元素      | 规则                                                                   |
 | --------- | ---------------------------------------------------------------------- |
-| 容器      | 无额外染色的系统玻璃，radius 14，padding `12px 14px`                            |
+| 容器      | 无额外染色的系统玻璃，radius 14，padding `12px 14px`                   |
 | 排布      | flex row + align center,gap 10                                         |
 | icon tile | 30×30,radius 9,`bg: surfaceContainer`,内部 icon 16px `foregroundMuted` |
 | title     | 13.5 / medium / letterSpacing -0.2,`foreground`                        |
 | sub       | 11,`foregroundMuted`,可选省略                                          |
-| 按下      | 前景 opacity 0.7，材质及祖先保持不透明(仅 `onPress` 存在时)                                       |
+| 按下      | 前景 opacity 0.7，材质及祖先保持不透明(仅 `onPress` 存在时)            |
 
 ## 用法
 
 ```tsx
+import { InfoOutlined, SettingsOutlined } from '@unif/react-native-icons';
 import { EntryCard } from '@unif/react-native-design';
 import { View } from 'react-native';
 
@@ -2472,14 +2485,14 @@ import { View } from 'react-native';
 }
 <View style={{ flexDirection: 'row', gap: 10 }}>
   <EntryCard
-    icon="settings"
+    icon={SettingsOutlined}
     title="设置"
     sub="账号 / 通知 / 权限"
     onPress={() => navigation.navigate('Setting')}
     style={{ flex: 1 }}
   />
   <EntryCard
-    icon="info"
+    icon={InfoOutlined}
     title={`关于 ${env.appName}`}
     sub={`V ${APP_VERSION}`}
     onPress={() => navigation.navigate('About')}
@@ -2490,20 +2503,20 @@ import { View } from 'react-native';
 
 ## API
 
-| 参数      | 类型                    | 默认值 | 说明                                        |
-| --------- | ----------------------- | ------ | ------------------------------------------- |
-| `icon`    | `IconName`              | —      | 左侧 icon tile 内的图标                     |
-| `title`   | `string`                | —      | 主标题(13.5 medium,numberOfLines=1)         |
-| `sub`     | `string?`               | —      | 副标题(11 muted),省略或空字符串时不渲染该行 |
-| `onPress` | `(() => void)?`         | —      | 点击回调;不传时不挂 Pressable,静态展示      |
-| `style`   | `StyleProp<ViewStyle>?` | —      | 外层附加样式,常用于 grid 列设 `flex: 1`     |
-| `testID`  | `string?`               | —      | E2E / 测试定位                              |
+| 参数      | 类型                       | 默认值 | 说明                                        |
+| --------- | -------------------------- | ------ | ------------------------------------------- |
+| `icon`    | `ComponentType<IconProps>` | —      | 左侧 icon tile 内的图标                     |
+| `title`   | `string`                   | —      | 主标题(13.5 medium,numberOfLines=1)         |
+| `sub`     | `string?`                  | —      | 副标题(11 muted),省略或空字符串时不渲染该行 |
+| `onPress` | `(() => void)?`            | —      | 点击回调;不传时不挂 Pressable,静态展示      |
+| `style`   | `StyleProp<ViewStyle>?`    | —      | 外层附加样式,常用于 grid 列设 `flex: 1`     |
+| `testID`  | `string?`                  | —      | E2E / 测试定位                              |
 
 ## 主题键（Tokens）
 
 | Token                                      | 来源                        | 作用                                            |
 | ------------------------------------------ | --------------------------- | ----------------------------------------------- |
-| `c.surface`                                | `useColors()`               | 不支持材质或减少透明度时的回退背景                                      |
+| `c.surface`                                | `useColors()`               | 不支持材质或减少透明度时的回退背景              |
 | `c.surfaceContainer`                       | `useColors()`               | icon tile 灰底色                                |
 | `c.foregroundMuted`                        | `useColors()`               | tile 内 icon 色 + sub 文字色                    |
 | `c.foreground`                             | `useColors()`               | title 文字色                                    |
@@ -2524,8 +2537,9 @@ a11y 语义是**条件性**的:仅当传了 `onPress` 时,EntryCard 才用 `<Pre
 - 状态语义:源码未设 `accessibilityState`(无 disabled/selected/checked 概念)。
 
 ```tsx
+import { SettingsOutlined } from '@unif/react-native-icons';
 // 可点:role=button、label 自动组合为“设置,账号 / 通知 / 权限”
-<EntryCard icon="settings" title="设置" sub="账号 / 通知 / 权限" onPress={() => ...} />
+<EntryCard icon={SettingsOutlined} title="设置" sub="账号 / 通知 / 权限" onPress={() => ...} />
 ```
 
 ## 使用注意
@@ -2947,14 +2961,14 @@ import { GlassStats } from '@unif/react-native-design';
 
 ```tsx
 const items = [
-  { id: 'visit', icon: 'location', label: '拜访' },
-  { id: 'orders', icon: 'paperclip', label: '订单', badge: '3' },
-  { id: 'sku', icon: 'tag', label: '商品' },
-  { id: 'reports', icon: 'list', label: '报表' },
-  { id: 'msg', icon: 'mail', label: '消息', badge: 0 },
-  { id: 'team', icon: 'user', label: '团队' },
-  { id: 'settings', icon: 'settings', label: '设置' },
-  { id: 'more', icon: 'more-h', label: '更多' },
+  { id: 'visit', icon: LocationOutlined, label: '拜访' },
+  { id: 'orders', icon: PaperclipOutlined, label: '订单', badge: '3' },
+  { id: 'sku', icon: TagOutlined, label: '商品' },
+  { id: 'reports', icon: ListOutlined, label: '报表' },
+  { id: 'msg', icon: MailOutlined, label: '消息', badge: 0 },
+  { id: 'team', icon: UserOutlined, label: '团队' },
+  { id: 'settings', icon: SettingsOutlined, label: '设置' },
+  { id: 'more', icon: MoreHOutlined, label: '更多' },
 ];
 
   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -2999,14 +3013,14 @@ const items = [
 
 ### `GridItem`
 
-| 字段                 | 类型                | 默认值 | 说明                                              |
-| -------------------- | ------------------- | ------ | ------------------------------------------------- |
-| `id`                 | `string`            | —      | 唯一键，也用于派生 testID                         |
-| `icon`               | `IconName`          | —      | 图标名（[图标 catalog](md/components/icons.md)）                 |
-| `label`              | `string`            | —      | 格子文字，同时作为该格 `accessibilityLabel`       |
-| `accessibilityLabel` | `string?`           | —      | trim 后非空时覆盖名称；空白值回退到默认名称       |
-| `badge`              | `number \| string?` | —      | icon 右上角标（用 string 才能写 `'99+'`）         |
-| `testID`             | `string?`           | —      | 单格 testID（不传则自动用 `${gridTestID}-${id}`） |
+| 字段                 | 类型                       | 默认值 | 说明                                              |
+| -------------------- | -------------------------- | ------ | ------------------------------------------------- |
+| `id`                 | `string`                   | —      | 唯一键，也用于派生 testID                         |
+| `icon`               | `ComponentType<IconProps>` | —      | 图标组件（[图标 catalog](md/components/icons.md)）               |
+| `label`              | `string`                   | —      | 格子文字，同时作为该格 `accessibilityLabel`       |
+| `accessibilityLabel` | `string?`                  | —      | trim 后非空时覆盖名称；空白值回退到默认名称       |
+| `badge`              | `number \| string?`        | —      | icon 右上角标（用 string 才能写 `'99+'`）         |
+| `testID`             | `string?`                  | —      | 单格 testID（不传则自动用 `${gridTestID}-${id}`） |
 
 ## 视觉规范
 
@@ -3024,19 +3038,29 @@ const items = [
 ## 用法
 
 ```tsx
+import {
+  BoxListOutlined,
+  ListOutlined,
+  LocationOutlined,
+  MailOutlined,
+  MoreHOutlined,
+  OrderOutlined,
+  SettingsOutlined,
+  UserOutlined,
+} from '@unif/react-native-icons';
 import { Grid } from '@unif/react-native-design';
 
 <Grid
   columns={4}
   items={[
-    { id: 'visit', icon: 'location', label: '拜访' },
-    { id: 'orders', icon: 'order', label: '订单', badge: 3 },
-    { id: 'sku', icon: 'box-list', label: '商品' },
-    { id: 'reports', icon: 'list', label: '报表' },
-    { id: 'msg', icon: 'mail', label: '消息', badge: 0 },
-    { id: 'team', icon: 'user', label: '团队' },
-    { id: 'settings', icon: 'settings', label: '设置' },
-    { id: 'more', icon: 'more-h', label: '更多' },
+    { id: 'visit', icon: LocationOutlined, label: '拜访' },
+    { id: 'orders', icon: OrderOutlined, label: '订单', badge: 3 },
+    { id: 'sku', icon: BoxListOutlined, label: '商品' },
+    { id: 'reports', icon: ListOutlined, label: '报表' },
+    { id: 'msg', icon: MailOutlined, label: '消息', badge: 0 },
+    { id: 'team', icon: UserOutlined, label: '团队' },
+    { id: 'settings', icon: SettingsOutlined, label: '设置' },
+    { id: 'more', icon: MoreHOutlined, label: '更多' },
   ]}
   onPress={(item) => navigation.push(item.id)}
 />;
@@ -3052,12 +3076,13 @@ import { Grid } from '@unif/react-native-design';
 - 状态语义：源码未设 `accessibilityState`（无 selected/disabled/checked 概念）。
 
 ```tsx
+import { MailOutlined } from '@unif/react-native-icons';
 // role=button、默认名称“消息，0”
 <Grid
   columns={4}
-  items={[{ id: 'msg', icon: 'mail', label: '消息', badge: 0 }]}
+  items={[{ id: 'msg', icon: MailOutlined, label: '消息', badge: 0 }]}
   onPress={(item) => navigation.push(item.id)}
-/>
+/>;
 ```
 
 ## IconButton 图标按钮
@@ -3090,19 +3115,19 @@ const IconButtonDemo = () => {
           <span className="demo-label">size · sm 28 / md 36 / lg 44</span>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <IconButton
-              icon="bell"
+              icon={BellOutlined}
               size="sm"
               accessibilityLabel="通知"
               onPress={onPress}
             />
             <IconButton
-              icon="bell"
+              icon={BellOutlined}
               size="md"
               accessibilityLabel="通知"
               onPress={onPress}
             />
             <IconButton
-              icon="bell"
+              icon={BellOutlined}
               size="lg"
               accessibilityLabel="通知"
               onPress={onPress}
@@ -3115,19 +3140,19 @@ const IconButtonDemo = () => {
           </span>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <IconButton
-              icon="scan"
+              icon={ScanOutlined}
               variant="neutral"
               accessibilityLabel="扫码"
               onPress={onPress}
             />
             <IconButton
-              icon="scan"
+              icon={ScanOutlined}
               variant="primary"
               accessibilityLabel="扫码"
               onPress={onPress}
             />
             <IconButton
-              icon="scan"
+              icon={ScanOutlined}
               variant="ghost"
               accessibilityLabel="扫码"
               onPress={onPress}
@@ -3138,7 +3163,7 @@ const IconButtonDemo = () => {
           <span className="demo-label">disabled · opacity 0.5 + 不响应</span>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <IconButton
-              icon="check"
+              icon={CheckOutlined}
               variant="primary"
               accessibilityLabel="确认"
               disabled
@@ -3156,13 +3181,14 @@ const IconButtonDemo = () => {
 ## 用法
 
 ```tsx
+import { CloseOutlined, ScanOutlined } from '@unif/react-native-icons';
 import { IconButton } from '@unif/react-native-design';
 
 {
   /* NavBar 右侧扫码按钮 */
 }
 <IconButton
-  icon="scan"
+  icon={ScanOutlined}
   size="md"
   variant="neutral"
   accessibilityLabel="扫码"
@@ -3174,7 +3200,7 @@ import { IconButton } from '@unif/react-native-design';
   /* 卡片右上关闭 */
 }
 <IconButton
-  icon="close"
+  icon={CloseOutlined}
   size="sm"
   variant="ghost"
   accessibilityLabel="关闭"
@@ -3186,7 +3212,7 @@ import { IconButton } from '@unif/react-native-design';
 
 | 参数                 | 类型                                                                                      | 默认值     | 说明                                                                                         |
 | -------------------- | ----------------------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------- |
-| `icon`               | `IconName`                                                                                | —          | 包内生成图标目录中的闭集名称                                                                 |
+| `icon`               | `ComponentType<IconProps>`                                                                | —          | 从 Icons 导入的图标组件                                                                      |
 | `onPress`            | `() => void`                                                                              | —          | **必填**点击回调；disabled / loading 时组件移除有效 handler                                  |
 | `size`               | `('sm' \| 'md' \| 'lg')?`                                                                 | `'md'`     | 方形边长 28 / 36 / 44                                                                        |
 | `iconSize`           | `number?`                                                                                 | 随 size    | 图标与加载指示的独立尺寸                                                                     |
@@ -3204,8 +3230,9 @@ import { IconButton } from '@unif/react-native-design';
 `iconSize` 可独立设置图标和加载指示的尺寸；`surfaceSize` 可指定方形表面边长，同时按该值补足 44pt 命中区。缺省仍使用 `size` 对应的设备缩放尺寸。
 
 ```tsx
-<IconButton icon="chevron-left" surfaceSize={36} iconSize={21} style={{ borderRadius: 18 }} accessibilityLabel="返回" onPress={onBack} />
-<IconButton icon="crosshair" surfaceSize={36} iconSize={22} accessibilityLabel="定位" loading={locating} onPress={locate} />
+import { ChevronLeftOutlined, CrosshairOutlined } from '@unif/react-native-icons';
+<IconButton icon={ChevronLeftOutlined} surfaceSize={36} iconSize={21} style={{ borderRadius: 18 }} accessibilityLabel="返回" onPress={onBack} />
+<IconButton icon={CrosshairOutlined} surfaceSize={36} iconSize={22} accessibilityLabel="定位" loading={locating} onPress={locate} />
 ```
 
 ## 无障碍（a11y）
@@ -3217,13 +3244,14 @@ import { IconButton } from '@unif/react-native-design';
 - 状态语义：disabled 或 loading 时自动上报 `accessibilityState.disabled: true` 并移除有效 handler；loading 还上报 `busy: true`。调用方不能覆盖这两个字段。
 
 ```tsx
+import { ScanOutlined } from '@unif/react-native-icons';
 // label 必填(SR 唯一信息源);hint 仅在行为不显然时补
-<IconButton icon="scan" accessibilityLabel="扫码" accessibilityHint="打开二维码扫描" onPress={...} />
+<IconButton icon={ScanOutlined} accessibilityLabel="扫码" accessibilityHint="打开二维码扫描" onPress={...} />
 ```
 
 ## 使用注意
 
-- 不要把 icon 当装饰用 IconButton —— 装饰用 `<Icon>` 即可,没 hit area 浪费
+- 不要把 icon 当装饰用 IconButton —— 装饰直接使用 Icons 组件即可,没 hit area 浪费
 - 不要在 IconButton 内文字 + icon 混搭 —— 用 [Button](md/components/button.md) 的 `rightIcon` / `leftIcon` prop
 
 ## 图标
@@ -3232,106 +3260,61 @@ import { IconButton } from '@unif/react-native-design';
 
 # 图标
 
-手绘 24×24 描边 SVG。所有图标遵守同一组绘制规则。**无 icon font、无 Unicode 承载 UI、无装饰 emoji。**
+图标使用独立的 `@unif/react-native-icons` 包。每个图标都是可直接导入的 React 组件，采用 `Outlined`、`Filled` 等风格后缀。
 
-目录以 `ICON_NAMES` 为完整源清单：手工语义类别按顺序展示，任何尚未归类的合法图标自动进入末尾“未分类”。顶部搜索框 `⌘K` 聚焦，点击 cell 复制图标语义名。
+本页保留常用预览，点击即可复制组件代码。[查看全部图标](https://unif-design.github.io/react-native-icons/#icons)请前往 Unif Icons 官网。
 
 <IconCatalog />
 
 ## 在 RN 中使用
 
+```sh
+yarn add @unif/react-native-icons react-native-svg
+```
+
 ```tsx
-import { Icon } from '@unif/react-native-design';
+import {
+  SendOutlined,
+  CheckOutlined,
+  CloseOutlined,
+} from '@unif/react-native-icons';
 import { useColors } from '@unif/react-native-design';
 
 function Demo() {
   const c = useColors();
   return (
     <>
-      <Icon name="send" size={20} />
-      <Icon name="check" size={18} color={c.success} />
-      <Icon name="close" size={14} color={c.foregroundSubtle} strokeWidth={2} />
+      <SendOutlined size={20} color={c.foregroundMuted} />
+      <CheckOutlined size={18} color={c.success} />
+      <CloseOutlined size={14} color={c.foregroundSubtle} strokeWidth={2} />
     </>
   );
 }
 ```
 
-`name` 是 TypeScript 字面量联合类型——所有图标名都有自动补全；`IconName` 由 `src/icons/data.ts` 生成（该文件 **AUTO-GENERATED，请勿手改**）。
+独立图标不会自动读取 Design 主题；需要跟随主题时，像上例一样显式传入 `useColors()` 提供的颜色。也可以直接传入颜色值，在不使用 Design 的项目中单独使用。
 
-### `<Icon>` props
+使用已有图标无需处理 SVG 文件或运行生成脚本。宿主尚未接入 `react-native-svg` 时，按 [Icons 安装指南](https://unif-design.github.io/react-native-icons/docs/getting-started)完成原生依赖接入。
 
-来源：`src/components/ui/Icon/types.ts`、`Icon.tsx`。
+## 常用属性
 
-| 参数          | 类型                    | 默认值                              | 说明                                               |
-| ------------- | ----------------------- | ----------------------------------- | -------------------------------------------------- |
-| `name`        | `IconName`              | —                                   | 图标语义名（字面量联合类型，自动补全）             |
-| `size`        | `number?`               | `r(18)`（随设备宽度缩放）           | 宽高（正方形）；传入值应已经过 `r()` 缩放          |
-| `color`       | `string?`               | `c.foregroundMuted`                 | 传给 SVG `stroke`（及 `fill="currentColor"` 元素） |
-| `strokeWidth` | `number?`               | 每图标自带值（当前源统一为 `1.75`） | 覆盖描边宽度                                       |
-| `style`       | `StyleProp<ViewStyle>?` | —                                   | 外层 `<View>` 样式                                 |
-| `testID`      | `string?`               | —                                   | E2E / 测试定位（挂在外层 `<View>`）                |
+| 属性          | 默认值   | 说明                             |
+| ------------- | -------- | -------------------------------- |
+| `size`        | `24`     | 宽高，使用逻辑像素，不做隐式缩放 |
+| `color`       | `'#000'` | 描边与实心图元颜色               |
+| `strokeWidth` | `1.75`   | 描边宽度，纯实心图元不受影响     |
+| `style`       | —        | SVG 样式                         |
+| `testID`      | —        | SVG 测试标识                     |
 
-> 未知 `name` 不抛错：打 `warn` 并渲染一个等尺寸空 `<View>` 占位（同样对 SR 隐藏）。
+完整属性、单图标导入和无障碍说明见 [Icons 组件 API](https://unif-design.github.io/react-native-icons/docs/api)。
 
-## 绘制规则
+## 图标维护
 
-每个新图标必须满足：
-
-| 属性              | 值                                                                             |
-| ----------------- | ------------------------------------------------------------------------------ |
-| `xmlns`           | `http://www.w3.org/2000/svg`                                                   |
-| `viewBox`         | `0 0 24 24`                                                                    |
-| `fill`            | `none`                                                                         |
-| `stroke`          | `currentColor`                                                                 |
-| `stroke-width`    | `1.75`                                                                         |
-| `stroke-linecap`  | `round`                                                                        |
-| `stroke-linejoin` | `round`                                                                        |
-| `color`           | `<Icon>` 的 `color` prop → `stroke`，默认 `c.foregroundMuted`（不传 color 时） |
-| 组件默认 `size`   | `r(18)`（随设备宽度缩放）；调用方传值应包 `r()`，如 `size={r(20)}`             |
-
-根节点必须精确包含表中的六个绘制属性。`svg` 的直接叶子只允许 `path`、`rect`、`circle`，shape 不得嵌套；属性必须使用双引号并落在对应元素的 allowlist 内。实心图元使用元素级 `fill="currentColor" stroke="none"`，透明度只能是 `[0, 1]` 内的有限数值；禁止硬编码颜色、未知标签和未知属性。
-
-## 添加新图标
-
-1. 在 `src/icons/svg/<name>.svg` 加新文件，遵守上面的完整文档、结构与属性规则
-2. 运行 `node scripts/build-icons.js`。脚本会先移除注释，再用全标签 stack scanner 收集所有结构、属性和数值错误；任一错误存在时都不会写 `src/icons/data.ts`。**不要手改 `data.ts`** —— 它是生成产物（`{ strokeWidth, elements }`）
-3. 运行 `yarn check:icons`。该命令在两个独立临时目录调用真实生成器，并逐字节比较两份临时结果与已提交的 `src/icons/data.ts`；它不会改工作区
-4. 文档站走的 `website/src/components/iconsCatalog.ts` 是从 `@unif/react-native-design` barrel re-export 的薄壳（`ICONS` / `ICON_NAMES` / `IconName`），自动同步，无需再生成
-5. `IconName` TypeScript 字面量类型自动包含新名字，IDE 立即给出补全
-6. 若新图标属于某个语义类别，把它加进 `website/src/components/IconCatalog.tsx` 的 `MANUAL_CATEGORIES` 对应组；未手工归类时仍会自动显示在“未分类”。分类中出现未知名或重复名会让 Website build 立即失败
-
-## 实现细节
-
-`src/components/ui/Icon/Icon.tsx` 用 `react-native-svg` 渲染——`<Svg>` + `<Path>` / `<Circle>` / `<Rect>`，路径数据来自 `src/icons/data.ts`。`color` prop 传给 `stroke`，`strokeWidth` 走每图标默认值或可覆盖。
-
-Website 的总数直接取 `ICON_NAMES.length`，搜索遍历完整计算分类。预览渲染会把每个 shape 的 `fill`、`stroke`、`opacity` 原样映射到 SVG，确保实心图元和半透明笔画与 RN `<Icon>` 一致。
-
-```tsx
-// 摘录
-import Svg, { Circle, Path, Rect } from 'react-native-svg';
-import { ICONS } from '@unif/react-native-design';
-
-<Svg width={size} height={size} viewBox="0 0 24 24"
-     fill="none" stroke={color}
-     strokeWidth={def.strokeWidth}
-     strokeLinecap="round" strokeLinejoin="round">
-  {def.elements.map((el, i) => /* path/circle/rect */)}
-</Svg>
-```
-
-## 无障碍（a11y）
-
-来源：`src/components/ui/Icon/Icon.tsx`、`types.ts`。
-
-`<Icon>` 是纯视觉图元，**源码刻意把它对 SR 隐藏**：外层 `<View>`（正常路径与未知图标 fallback 路径都）显式设 `accessibilityElementsHidden` + `importantForAccessibility="no-hide-descendants"`。它**不**设 `accessibilityRole` / `accessibilityLabel`，也没有可传的 a11y prop（仅 `name` / `size` / `color` / `strokeWidth` / `style` / `testID`）。
-
-这是有意为之：图标的语义应由**承载它的可交互父组件**提供朗读文案 —— 如 [IconButton](md/components/icon-button.md) 的必填 `accessibilityLabel`、[Button](md/components/button.md) 的 `label`。独立装饰用 `<Icon>` 即可，无需也不应给它单独挂 a11y。
+新增图标、绘制规则和组件生成统一参考 [Icons 维护指南](https://unif-design.github.io/react-native-icons/docs/contributing)。
 
 ## 头像
 
-头像使用 Avatar，可展示文字或图片；图标使用 Icon。两者的输入和无障碍责任分别由对应组件定义。
-
-详见 [Avatar 组件](md/components/avatar.md)。
+头像使用 [Avatar 组件](md/components/avatar.md)，可展示文字或图片；图标使用 Icons 的独立组件。
 
 ## ImagePreview 图片预览
 
@@ -3480,16 +3463,17 @@ const InputDemo = () => {
 ## slot、禁用与样式
 
 ```tsx
+import { CloseOutlined, SearchOutlined } from '@unif/react-native-icons';
 function SearchConditionField() {
   const colors = useColors();
   return (
     <Input
       value={query}
       onChangeText={setQuery}
-      leading={{ kind: 'icon', icon: 'search' }}
+      leading={{ kind: 'icon', icon: SearchOutlined }}
       trailing={{
         kind: 'action',
-        icon: 'close',
+        icon: CloseOutlined,
         onPress: () => setQuery(''),
         accessibilityLabel: '清除搜索条件',
       }}
@@ -3877,12 +3861,12 @@ const NavBarDemo = () => {
             title="AI 助手"
             subtitle="在线 · 已同步"
             left={{
-              icon: 'menu',
+              icon: MenuOutlined,
               onPress: () => setAction('打开抽屉'),
               accessibilityLabel: '抽屉',
             }}
             right={{
-              icon: 'more-h',
+              icon: MoreHOutlined,
               onPress: () => setAction('打开更多菜单'),
               accessibilityLabel: '更多',
             }}
@@ -3901,12 +3885,12 @@ const NavBarDemo = () => {
             title="登录"
             variant="brand"
             left={{
-              icon: 'arrow-left',
+              icon: ArrowLeftOutlined,
               onPress: () => setAction('返回登录页'),
               accessibilityLabel: '返回',
             }}
             right={{
-              icon: 'more-h',
+              icon: MoreHOutlined,
               onPress: () => setAction('打开登录页菜单'),
               accessibilityLabel: '更多',
             }}
@@ -3928,12 +3912,12 @@ const NavBarDemo = () => {
             title="我的名片"
             variant="transparent"
             left={{
-              icon: 'arrow-left',
+              icon: ArrowLeftOutlined,
               onPress: () => setAction('返回名片列表'),
               accessibilityLabel: '返回',
             }}
             right={{
-              icon: 'more-h',
+              icon: MoreHOutlined,
               onPress: () => setAction('打开名片菜单'),
               accessibilityLabel: '更多',
             }}
@@ -3949,14 +3933,23 @@ const NavBarDemo = () => {
 ## 用法
 
 ```tsx
+import {
+  ArrowLeftOutlined,
+  MenuOutlined,
+  MoreHOutlined,
+} from '@unif/react-native-icons';
 import { NavBar } from '@unif/react-native-design';
 
 <NavBar
   title="AI 助手"
   subtitle="在线 · 已同步"
-  left={{ icon: 'menu', onPress: openDrawer, accessibilityLabel: '打开抽屉' }}
+  left={{
+    icon: MenuOutlined,
+    onPress: openDrawer,
+    accessibilityLabel: '打开抽屉',
+  }}
   right={{
-    icon: 'more-h',
+    icon: MoreHOutlined,
     onPress: openMenu,
     accessibilityLabel: '打开更多菜单',
   }}
@@ -3973,23 +3966,27 @@ import { NavBar } from '@unif/react-native-design';
 <NavBar
   title="我的名片"
   variant="transparent"
-  left={{ icon: 'arrow-left', onPress: goBack, accessibilityLabel: '返回' }}
+  left={{
+    icon: ArrowLeftOutlined,
+    onPress: goBack,
+    accessibilityLabel: '返回',
+  }}
 />;
 ```
 
 ## API
 
-| 参数       | 类型                                    | 默认值      | 说明                                                                                                                                                                                   |
-| ---------- | --------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `title`    | `string`                                | —           | 居中标题                                                                                                                                                                               |
-| `subtitle` | `string?`                               | —           | 副标题（小字号，主标题下方）                                                                                                                                                           |
-| `left`     | `NavBarSlot`                            | —           | 左槽：严格 `NavBarAction { icon, onPress, accessibilityLabel }` 或展示用 `ReactNode`                                                                                                   |
-| `right`    | `NavBarSlot`                            | —           | 右槽，同 `left`                                                                                                                                                                        |
+| 参数       | 类型                                    | 默认值      | 说明                                                                                                                                                                                             |
+| ---------- | --------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `title`    | `string`                                | —           | 居中标题                                                                                                                                                                                         |
+| `subtitle` | `string?`                               | —           | 副标题（小字号，主标题下方）                                                                                                                                                                     |
+| `left`     | `NavBarSlot`                            | —           | 左槽：严格 `NavBarAction { icon, onPress, accessibilityLabel }` 或展示用 `ReactNode`                                                                                                             |
+| `right`    | `NavBarSlot`                            | —           | 右槽，同 `left`                                                                                                                                                                                  |
 | `variant`  | `'default' \| 'brand' \| 'transparent'` | `'default'` | 视觉变体：`default` 系统玻璃 + hairline + 主题文字 / `brand` 品牌橙底 + 白字 / `transparent` 透明无边框 + **深字 `c.foreground`**（浮在浅色 hero 上；若需白字深色浮层后续加 `transparentLight`） |
-| `style`    | `StyleProp<ViewStyle>?`                 | —           | 根容器附加样式（margin / position 等布局微调）                                                                                                                                         |
-| `testID`   | `string?`                               | —           | E2E 定位                                                                                                                                                                               |
+| `style`    | `StyleProp<ViewStyle>?`                 | —           | 根容器附加样式（margin / position 等布局微调）                                                                                                                                                   |
+| `testID`   | `string?`                               | —           | E2E 定位                                                                                                                                                                                         |
 
-> `left` / `right` 传完整 `NavBarAction` 时渲染为内部 `IconButton`（`variant='ghost'`，icon 必须是生成的 `IconName`）。展示节点中的 `string` / `number` / `bigint`（包括 Fragment、nested collection 与 thenable resolved value 内的 primitive）会递归包装为本地 `Text`；非 Fragment element / portal 保持原有语义。thenable 映射按稳定源对象缓存，拒绝原因保持不变，非法 resolved value 失败关闭。缺字段、非法 icon 或 malformed node 会在 effect 中诊断并渲染为空。
+> `left` / `right` 传完整 `NavBarAction` 时渲染为内部 `IconButton`（`variant='ghost'`，icon 使用从 Icons 导入的 `ComponentType<IconProps>`）。展示节点中的 `string` / `number` / `bigint`（包括 Fragment、nested collection 与 thenable resolved value 内的 primitive）会递归包装为本地 `Text`；非 Fragment element / portal 保持原有语义。thenable 映射按稳定源对象缓存，拒绝原因保持不变，非法 resolved value 失败关闭。缺字段、非法 icon 或 malformed node 会在 effect 中诊断并渲染为空。
 
 ## 安全区（Safe Area）
 
@@ -4018,12 +4015,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 - 状态语义：NavBar 自身无可切换状态，不附加 `accessibilityState`。
 
 ```tsx
+import { ArrowLeftOutlined, MoreHOutlined } from '@unif/react-native-icons';
 // action 的 icon、onPress、accessibilityLabel 都必填
 <NavBar
   title="登录"
-  left={{ icon: 'arrow-left', onPress: goBack, accessibilityLabel: '返回' }}
-  right={{ icon: 'more-h', onPress: openMenu, accessibilityLabel: '更多' }}
-/>
+  left={{
+    icon: ArrowLeftOutlined,
+    onPress: goBack,
+    accessibilityLabel: '返回',
+  }}
+  right={{ icon: MoreHOutlined, onPress: openMenu, accessibilityLabel: '更多' }}
+/>;
 ```
 
 ## 关联组件
@@ -4043,10 +4045,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 ## 品牌 {#品牌}
 
-| 组件                                | 说明                                           |
-| ----------------------------------- | ---------------------------------------------- |
-| [Logo](md/components/logo.md)       | 品牌标识容器；图片 `source` 由消费端持有并必传 |
-| [图标 Icon](md/components/icons.md) | 24×24 描边 SVG 目录,`<Icon name="..." />`      |
+| 组件                               | 说明                                           |
+| ---------------------------------- | ---------------------------------------------- |
+| [Logo](md/components/logo.md)      | 品牌标识容器；图片 `source` 由消费端持有并必传 |
+| [独立图标](md/components/icons.md) | `@unif/react-native-icons` 命名组件            |
 
 ## 通用 {#通用}
 
@@ -4206,10 +4208,10 @@ PasswordInput 不接受 `defaultValue`、`leading`、`trailing` 或 caller `secu
       <span className="demo-label">{'<Pulse>'} 包装 · spark 图标</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <Pulse from={0.4} duration={500}>
-          <Icon name="spark" size={20} color="#EB6E00" />
+          <SparkOutlined size={20} color="#EB6E00" />
         </Pulse>
         <Pulse from={0.3} duration={800}>
-          <Icon name="thinking" size={20} color="#3775F6" />
+          <ThinkingOutlined size={20} color="#3775F6" />
         </Pulse>
       </div>
     </div>
@@ -4240,10 +4242,11 @@ export function MyShimmerLine({ width }) {
 ### `<Pulse>` 包装组件
 
 ```tsx
-import { Pulse, Icon } from '@unif/react-native-design';
+import { SparkOutlined } from '@unif/react-native-icons';
+import { Pulse } from '@unif/react-native-design';
 
 <Pulse from={0.4} duration={500}>
-  <Icon name="spark" size={14} color="#EB6E00" />
+  <SparkOutlined size={14} color="#EB6E00" />
 </Pulse>;
 ```
 
@@ -4934,12 +4937,12 @@ const SmsFieldDemo = () => {
 
 用圆点展示完成、错误、进行中或待处理状态；业务状态由调用方映射。
 
-| 状态      | 视觉                     | 内部                                     |
-| --------- | ------------------------ | ---------------------------------------- |
-| `done`    | 绿底 + 白勾              | `success` 填充 + `<Icon name="check" />` |
-| `error`   | 红底 + 白叉              | `error` 填充 + `<Icon name="close" />`   |
-| `active`  | 边框 + 内嵌 `<PulseDot>` | `primary` 边框 + 跳动                    |
-| `pending` | 仅边框                   | `outline` 灰边                           |
+| 状态      | 视觉                     | 内部                                                                |
+| --------- | ------------------------ | ------------------------------------------------------------------- |
+| `done`    | 绿底 + 白勾              | `success` 填充 + `<CheckOutlined  size={18} color="currentColor"/>` |
+| `error`   | 红底 + 白叉              | `error` 填充 + `<CloseOutlined  size={18} color="currentColor"/>`   |
+| `active`  | 边框 + 内嵌 `<PulseDot>` | `primary` 边框 + 跳动                                               |
+| `pending` | 仅边框                   | `outline` 灰边                                                      |
 
 `tone='flat'`（默认）—— pending/active 底色透明（`'transparent'`），用于 Task。
 `tone='soft'` —— pending = `c.surface`、active = `c.primaryContainer`，用于 ChainOfThought（推理链气氛更柔）。
@@ -5035,7 +5038,7 @@ import { StatusDot } from '@unif/react-native-design';
 - 显式传空字符串 `''` 时，不派生默认名称，并把根节点移出独立可访问焦点。父容器已经
   合并播报标题与状态时用这一分支，避免重复朗读。
 
-内部 `<Icon>` / `<PulseDot>` 都对 SR 隐藏，不会和根状态名称形成重复焦点。默认名称是
+内部图标 / `<PulseDot>` 都对 SR 隐藏，不会和根状态名称形成重复焦点。默认名称是
 稳定的英文状态 key；面向中文用户的独立状态点应传明确的中文业务文案：
 
 ```tsx
@@ -5655,10 +5658,10 @@ thumb 恢复 `transform` transition，两端恢复 200ms 动画。
 
 ```tsx
 const items = [
-  { id: 'home', icon: 'home', label: '首页' },
-  { id: 'visits', icon: 'location', label: '拜访', badge: '3' },
-  { id: 'agent', icon: 'spark', label: 'AI' },
-  { id: 'me', icon: 'user', label: '我的' },
+  { id: 'home', icon: HomeOutlined, label: '首页' },
+  { id: 'visits', icon: LocationOutlined, label: '拜访', badge: '3' },
+  { id: 'agent', icon: SparkOutlined, label: 'AI' },
+  { id: 'me', icon: UserOutlined, label: '我的' },
 ];
 
 const TabBarDemo = () => {
@@ -5728,16 +5731,22 @@ const TabBarDemo = () => {
 ## 用法
 
 ```tsx
+import {
+  HomeOutlined,
+  LocationOutlined,
+  SparkOutlined,
+  UserOutlined,
+} from '@unif/react-native-icons';
 import { TabBar } from '@unif/react-native-design';
 
 <TabBar
   active="home"
   onChange={setActive}
   items={[
-    { id: 'home', icon: 'home', label: '首页' },
-    { id: 'visits', icon: 'location', label: '拜访', badge: 3 },
-    { id: 'agent', icon: 'spark', label: 'AI' },
-    { id: 'me', icon: 'user', label: '我的' },
+    { id: 'home', icon: HomeOutlined, label: '首页' },
+    { id: 'visits', icon: LocationOutlined, label: '拜访', badge: 3 },
+    { id: 'agent', icon: SparkOutlined, label: 'AI' },
+    { id: 'me', icon: UserOutlined, label: '我的' },
   ]}
 />;
 ```
@@ -5757,13 +5766,13 @@ import { TabBar } from '@unif/react-native-design';
 
 `TabBarItem`：
 
-| 字段     | 类型               | 默认值 | 说明                                             |
-| -------- | ------------------ | ------ | ------------------------------------------------ |
-| `id`     | `string`           | —      | 唯一标识，用作 key 与选中判定                    |
-| `icon`   | `IconName`         | —      | 图标名（见 [图标](md/components/icons.md)）                     |
-| `label`  | `string`           | —      | tab 文字（同时作 `accessibilityLabel`）          |
-| `badge`  | `number \| string` | —      | 图标右上角数字角标（用 `string` 才能写 `'99+'`） |
-| `testID` | `string?`          | —      | 单 tab testID（默认 `${barTestID}-${id}`）       |
+| 字段     | 类型                       | 默认值 | 说明                                             |
+| -------- | -------------------------- | ------ | ------------------------------------------------ |
+| `id`     | `string`                   | —      | 唯一标识，用作 key 与选中判定                    |
+| `icon`   | `ComponentType<IconProps>` | —      | 图标组件（见 [图标](md/components/icons.md)）                   |
+| `label`  | `string`                   | —      | tab 文字（同时作 `accessibilityLabel`）          |
+| `badge`  | `number \| string`         | —      | 图标右上角数字角标（用 `string` 才能写 `'99+'`） |
+| `testID` | `string?`                  | —      | 单 tab testID（默认 `${barTestID}-${id}`）       |
 
 ## 无障碍（a11y）
 
@@ -5774,15 +5783,16 @@ import { TabBar } from '@unif/react-native-design';
 - 状态语义：`accessibilityState={{ selected: on }}`——`selected` 由 `item.id === active` 派生。无 `disabled` 语义（`TabBarItem` 无 `disabled` 字段）。
 
 ```tsx
+import { HomeOutlined, LocationOutlined } from '@unif/react-native-icons';
 // 每个 tab 自动 role=tab、label=item.label、selected 由 active 决定
 <TabBar
   active={active}
   onChange={setActive}
   items={[
-    { id: 'home', icon: 'home', label: '首页' },
-    { id: 'visits', icon: 'location', label: '拜访', badge: 3 },
+    { id: 'home', icon: HomeOutlined, label: '首页' },
+    { id: 'visits', icon: LocationOutlined, label: '拜访', badge: 3 },
   ]}
-/>
+/>;
 ```
 
 ## 使用注意
@@ -6355,6 +6365,40 @@ const IMAGE_B =
     '<svg xmlns="http://www.w3.org/2000/svg" width="76" height="76"><rect width="76" height="76" fill="seagreen"/><text x="28" y="45" fill="white">B</text></svg>'
   );
 
+const ThumbnailDimensionsContent = () => {
+  const colors = useColors();
+  const [uri, setUri] = useState(IMAGE_A);
+  const [large, setLarge] = useState(false);
+  return (
+    <View style={{ gap: 16 }}>
+      <Thumbnail
+        uri={uri}
+        size={{ width: large ? 120 : 76, height: 76, borderRadius: 8 }}
+        selected
+        fallback={<FileOutlined size={18} color={colors.foregroundMuted} />}
+        accessibilityLabel="附件图像框"
+        testID="thumbnail-dimensions-demo"
+      />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 12,
+        }}
+      >
+        <Button label="图片 A" onPress={() => setUri(IMAGE_A)} />
+        <Button label="图片 B" onPress={() => setUri(IMAGE_B)} />
+        <Button
+          label="图片失败"
+          onPress={() => setUri('data:image/png;base64,invalid')}
+        />
+        <Button label="切换图像框" onPress={() => setLarge(!large)} />
+      </View>
+    </View>
+  );
+};
+
   <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span className="demo-label">三档尺寸 · sm / md / lg</span>
@@ -6376,48 +6420,18 @@ const IMAGE_B =
 ## 显式尺寸与失败占位
 
 ```tsx
-const ThumbnailDimensionsDemo = () => {
-  const [uri, setUri] = useState(IMAGE_A);
-  const [large, setLarge] = useState(false);
-  return (
-    <>
-      <View style={{ gap: 16 }}>
-        <Thumbnail
-          uri={uri}
-          size={{ width: large ? 120 : 76, height: 76, borderRadius: 8 }}
-          selected
-          fallback={<Icon name="file" />}
-          accessibilityLabel="附件图像框"
-          testID="thumbnail-dimensions-demo"
-        />
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: 12,
-          }}
-        >
-          <Button label="图片 A" onPress={() => setUri(IMAGE_A)} />
-          <Button label="图片 B" onPress={() => setUri(IMAGE_B)} />
-          <Button
-            label="图片失败"
-            onPress={() => setUri('data:image/png;base64,invalid')}
-          />
-          <Button label="切换图像框" onPress={() => setLarge(!large)} />
-        </View>
-      </View>
-    </>
-  );
-};
+  <ThumbnailDimensionsContent />
 ```
 
 ```tsx
+import { FileOutlined } from '@unif/react-native-icons';
 import {
   Thumbnail,
-  Icon,
+  useColors,
   type ThumbnailDimensions,
 } from '@unif/react-native-design';
+// 以下片段放在组件内。
+const colors = useColors();
 const dimensions: Readonly<ThumbnailDimensions> = {
   width: 76,
   height: 76,
@@ -6426,7 +6440,7 @@ const dimensions: Readonly<ThumbnailDimensions> = {
 <Thumbnail
   source={{ uri: imageUri }}
   size={dimensions}
-  fallback={<Icon name="file" />}
+  fallback={<FileOutlined size={18} color={colors.foregroundMuted} />}
 />;
 ```
 
@@ -7121,16 +7135,20 @@ function FadeIn({ children }: { children: React.ReactNode }) {
 ### 脉冲(思考中 / shimmer / blink cursor 全走它) {#脉冲}
 
 ```tsx
-import { Pulse, PulseDot, Icon, motion } from '@unif/react-native-design';
+import { SparkOutlined } from '@unif/react-native-icons';
+import { Pulse, PulseDot, motion, useColors } from '@unif/react-native-design';
 
-// 包裹任意 children
-<Pulse from={0.4} duration={motion.pulse / 2}>
-  <Icon name="spark" size={14} />
-</Pulse>
-
-// 圆点
-<PulseDot />
-
+function ThinkingFeedback() {
+  const colors = useColors();
+  return (
+    <>
+      <Pulse from={0.4} duration={motion.pulse / 2}>
+        <SparkOutlined size={14} color={colors.foregroundMuted} />
+      </Pulse>
+      <PulseDot />
+    </>
+  );
+}
 ```
 
 需要组合自定义容器时可使用 `usePulse`；其返回值同样由平台 driver 提供。共享代码优先用
@@ -7412,7 +7430,7 @@ function Article() {
 }
 ```
 
-> `type` 导入时常起别名 `t`(避开 JS 保留字 `type`):`import { type as t } from '@unif/react-native-design'`。
+> `type` 导入时常起别名 `t`(避开 JS 保留字 `type`):`import { type as t } from '@unif/react-native-design';`。
 
 ## 应用级字号缩放(fontScale)
 
@@ -7503,15 +7521,24 @@ function DynamicLabel({ size }: { size: number }) {
 **禁用所有装饰 emoji。** 包括国旗、贴纸、装饰字符。功能性状态全部走[图标系统](md/components/icons.md)。如果一个字符不传递信息,它就不应该出现。
 
 ```tsx
+import { LocationOutlined } from '@unif/react-native-icons';
+import { useColors } from '@unif/react-native-design';
+import { Text, View } from 'react-native';
 // ❌ Incorrect
 <Text>🎉 提交成功！</Text>
 <Text>📍 当前位置</Text>
 
 // ✅ Correct
 <Text>提交成功</Text>
-<Text>
-  <Icon name="location" size={14} /> 当前位置
-</Text>
+function LocationLabel() {
+  const colors = useColors();
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <LocationOutlined size={14} color={colors.foregroundMuted} />
+      <Text>当前位置</Text>
+    </View>
+  );
+}
 ```
 
 > 这些约定是[中文优先原则](md/design/principles.md#中文优先)的细化;硬性禁忌清单见[全局 Don'ts](md/design/donts.md)。
@@ -7539,6 +7566,7 @@ function DynamicLabel({ size }: { size: number }) {
 | `react-native-safe-area-context`   | `>=5`              | `5.7.x`      |
 | `react-native-svg`                 | `>=15`             | `15.15.x`    |
 | `@callstack/liquid-glass`          | `>=0.8.2 <0.9.0`   | `0.8.2`      |
+| `@unif/react-native-icons`         | `>=0.1.0`          | `0.1.0`      |
 
 - Node.js `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`(与 `package.json#engines` 逐字一致;本仓 `.nvmrc` 固定 `v24.13.0`)、Yarn 4
 - TypeScript 6
@@ -7561,7 +7589,7 @@ yarn add @unif/react-native-design
 本库**不打包**下列依赖,宿主工程必须自行安装并完成原生侧配置。缺任一,Metro 打包或运行时就会报 `Unable to resolve module` / `Cannot find module`。
 
 ```sh
-yarn add react-native-svg \
+yarn add @unif/react-native-icons react-native-svg \
   react-native-gesture-handler \
   react-native-reanimated \
   react-native-worklets \
@@ -7788,8 +7816,8 @@ import {
 
 | 旧写法(已删除)                                            | 新写法(正确)                                            |
 | --------------------------------------------------------- | ------------------------------------------------------- |
-| `import { colors } from '@unif/react-native-design'`      | `const c = useColors()`                                 |
-| `import { shadow } from '@unif/react-native-design'`      | `const s = useShadow()`,或 maker 第二参 `(c, s) => ...` |
+| `import { colors } from '@unif/react-native-design';`     | `const c = useColors()`                                 |
+| `import { shadow } from '@unif/react-native-design';`     | `const s = useShadow()`,或 maker 第二参 `(c, s) => ...` |
 | `colors.primary` / `colors.surface` / `colors.foreground` | `c.primary` / `c.surface` / `c.foreground`              |
 | `shadow.brandLg`                                          | `...s.brandLg`(spread 进 StyleSheet)                    |
 | 顶层 `StyleSheet.create({ ... colors.x ... })`            | `useThemedStyles(maker)` 运行期                         |

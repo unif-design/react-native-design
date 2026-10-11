@@ -1,7 +1,8 @@
+import { SparkOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { Text, View } from 'react-native';
 import { r, useColors, useThemedStyles } from '../../../theme';
-import { Icon } from '../Icon';
+
 import { makeStyles } from './styles';
 import type { EmptyProps } from './types';
 
@@ -12,16 +13,17 @@ import type { EmptyProps } from './types';
 export function Empty({
   title,
   desc,
-  icon = 'spark',
+  icon = SparkOutlined,
   style,
   testID,
 }: EmptyProps): React.JSX.Element {
   const c = useColors();
   const styles = useThemedStyles(makeStyles);
+  const Glyph = icon;
   return (
     <View style={[styles.wrap, style]} testID={testID}>
       <View style={styles.illust}>
-        <Icon name={icon} size={r(28)} color={c.primary} />
+        <Glyph size={r(28)} color={c.primary} />
       </View>
       <Text style={styles.title}>{title}</Text>
       {desc ? <Text style={styles.desc}>{desc}</Text> : null}

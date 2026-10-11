@@ -1,3 +1,13 @@
+import {
+  ArrowRightOutlined,
+  ClipboardOutlined,
+  HomeOutlined,
+  ImageOutlined,
+  InfoOutlined,
+  MailOutlined,
+  SettingsOutlined,
+  UserOutlined,
+} from '@unif/react-native-icons';
 import React, { useRef } from 'react';
 import { StyleSheet, Text, View, FlatList } from 'react-native';
 import {
@@ -28,22 +38,22 @@ import { useShowcase } from '../../state/useShowcase';
 type CarouselItem = Readonly<{ id: string; title: string }>;
 
 const staticGridItems: GridItem[] = [
-  { id: 'home', icon: 'home', label: '首页' },
-  { id: 'settings', icon: 'settings', label: '设置' },
+  { id: 'home', icon: HomeOutlined, label: '首页' },
+  { id: 'settings', icon: SettingsOutlined, label: '设置' },
 ];
 const actionGridItems: GridItem[] = [
-  { id: 'message', icon: 'mail', label: '消息', badge: 0 },
-  { id: 'task', icon: 'clipboard', label: '任务', badge: '99+' },
-  { id: 'profile', icon: 'user', label: '个人' },
-  { id: 'image', icon: 'image', label: '图片' },
+  { id: 'message', icon: MailOutlined, label: '消息', badge: 0 },
+  { id: 'task', icon: ClipboardOutlined, label: '任务', badge: '99+' },
+  { id: 'profile', icon: UserOutlined, label: '个人' },
+  { id: 'image', icon: ImageOutlined, label: '图片' },
 ];
 const sixColumnGridItems: GridItem[] = [
-  { id: 'home', icon: 'home', label: '首页' },
-  { id: 'message', icon: 'mail', label: '消息' },
-  { id: 'task', icon: 'clipboard', label: '任务' },
-  { id: 'profile', icon: 'user', label: '个人' },
-  { id: 'image', icon: 'image', label: '图片' },
-  { id: 'settings', icon: 'settings', label: '设置' },
+  { id: 'home', icon: HomeOutlined, label: '首页' },
+  { id: 'message', icon: MailOutlined, label: '消息' },
+  { id: 'task', icon: ClipboardOutlined, label: '任务' },
+  { id: 'profile', icon: UserOutlined, label: '个人' },
+  { id: 'image', icon: ImageOutlined, label: '图片' },
+  { id: 'settings', icon: SettingsOutlined, label: '设置' },
 ];
 const oneCarouselItem: CarouselItem[] = [{ id: 'one', title: '单页展示' }];
 const displayCarouselItems: CarouselItem[] = [
@@ -360,13 +370,13 @@ export function CollectionsScene(): React.JSX.Element {
         <SectionCard title="EntryCard">
           <View style={styles.row}>
             <EntryCard
-              icon="info"
+              icon={InfoOutlined}
               title="静态入口"
               sub="带副标题"
               testID="collections-entry-static"
             />
             <EntryCard
-              icon="arrow-right"
+              icon={ArrowRightOutlined}
               title="打开入口"
               onPress={() => record('EntryCard', '点击', '入口卡片已触发')}
               testID="collections-entry-action"
@@ -417,7 +427,7 @@ export function CollectionsScene(): React.JSX.Element {
               <Empty
                 title="空数据由消费方显示空态"
                 desc="Carousel 本身不负责空数据内容。"
-                icon="image"
+                icon={ImageOutlined}
                 testID="collections-empty-data-boundary"
               />
               <Carousel

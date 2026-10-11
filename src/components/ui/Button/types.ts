@@ -1,5 +1,6 @@
+import type { ComponentType } from 'react';
+import type { IconProps } from '@unif/react-native-icons';
 import type { AccessibilityState, StyleProp, ViewStyle } from 'react-native';
-import type { IconName } from '../Icon';
 
 /** Button 尺寸：sm=28 / md=36 / lg=44（对应 control.sm/md/lg） */
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -42,9 +43,9 @@ export type ButtonProps = {
   /** 加载态：显示 ActivityIndicator 替代 label，自动 disabled */
   loading?: boolean;
   /** 左侧图标，与文本同色同高 */
-  leftIcon?: IconName;
+  leftIcon?: ComponentType<IconProps>;
   /** 右侧图标，与文本同色同高 */
-  rightIcon?: IconName;
+  rightIcon?: ComponentType<IconProps>;
   /** 额外样式覆盖（merge 到 Pressable 的 style 数组末尾） */
   style?: StyleProp<ViewStyle>;
   /** E2E / 测试定位 */

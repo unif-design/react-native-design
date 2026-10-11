@@ -5,7 +5,6 @@
 // 且 dev 不开 sideEffects 优化(只在 build 后暴露)。
 // 0.5.1:修 docs-home.css 深色 OS 兜底选择器恒真(系统深色 + 站点切浅色时内容区被强制深色),见 #52。
 export * from './theme';
-export * from './icons';
 export * from './utils/testID';
 export * from './utils/logger';
 // 组件按 ui(基础)· business(业务)分层导出。文档站:https://unif-design.github.io/react-native-design/。

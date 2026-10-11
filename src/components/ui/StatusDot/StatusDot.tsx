@@ -1,7 +1,8 @@
+import { CheckOutlined, CloseOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { View } from 'react-native';
 import { r, useColors } from '../../../theme';
-import { Icon } from '../Icon';
+
 import { PulseDot } from '../Pulse';
 import { paletteFor, styles } from './styles';
 import type { StatusDotProps } from './types';
@@ -52,15 +53,13 @@ export function StatusDot({
       testID={testID}
     >
       {status === 'done' ? (
-        <Icon
-          name="check"
+        <CheckOutlined
           size={Math.round(size * 0.6)}
           color={c.onPrimary}
           strokeWidth={2.5}
         />
       ) : status === 'error' ? (
-        <Icon
-          name="close"
+        <CloseOutlined
           size={Math.round(size * 0.6)}
           color={c.onError}
           strokeWidth={2.5}

@@ -36,7 +36,7 @@ const ActionMenuDemo = () => {
                 {
                   id: 'copy',
                   label: '复制',
-                  icon: 'copy',
+                  icon: CopyOutlined,
                   onPress: () => {
                     setResult('已选择复制');
                     setOpen(false);
@@ -51,7 +51,7 @@ const ActionMenuDemo = () => {
                 {
                   id: 'delete',
                   label: '删除',
-                  icon: 'trash',
+                  icon: TrashOutlined,
                   tone: 'danger',
                   confirmation: {
                     message: '删除这个演示项目？',
@@ -87,7 +87,7 @@ dialog、sheet、popover 均使用主题 GlassLayer。popover 卡片与箭头复
 
 ## API
 
-`ActionMenuAction` 由 Design 定义：`id: string`、`label: string`、`onPress(): void` 必填；`icon?: IconName`、`accessibilityHint?`、`disabled?`、`loading?`、`tone?: 'neutral' | 'danger'` 和 `confirmation?: ActionMenuConfirmation` 可选。确认内容为 `message: string` 与 `confirmLabel: string`，可选 `title` 覆盖确认阶段的标题。
+`ActionMenuAction` 由 Design 定义：`id: string`、`label: string`、`onPress(): void` 必填；`icon?: ComponentType<IconProps>`、`accessibilityHint?`、`disabled?`、`loading?`、`tone?: 'neutral' | 'danger'` 和 `confirmation?: ActionMenuConfirmation` 可选。确认内容为 `message: string` 与 `confirmLabel: string`，可选 `title` 覆盖确认阶段的标题。
 
 | 参数               | 类型                               | 默认值              | 说明                                                                  |
 | ------------------ | ---------------------------------- | ------------------- | --------------------------------------------------------------------- |
@@ -114,6 +114,7 @@ dialog、sheet、popover 均使用主题 GlassLayer。popover 卡片与箭头复
 普通动作继续只交`onPress`，宿主自行收起再执行。保留取消按钮时，确认取消返回原菜单；设置 `cancelLabel={null}` 时由宿主点外或返回关闭。确认提交先请求`onClose`再交当前动作。Web鼠标按下保留原输入焦点，点击和键盘激活仍只交一次动作；按钮禁用或忙碌时不能触发。
 
 ```tsx
+import { TrashOutlined } from '@unif/react-native-icons';
 <ActionMenuContent
   presentation="popover"
   cancelLabel={null}
@@ -122,7 +123,7 @@ dialog、sheet、popover 均使用主题 GlassLayer。popover 卡片与箭头复
     {
       id: 'delete',
       label: '删除',
-      icon: 'trash',
+      icon: TrashOutlined,
       tone: 'danger',
       confirmation: {
         title: '删除项目',
@@ -133,7 +134,7 @@ dialog、sheet、popover 均使用主题 GlassLayer。popover 卡片与箭头复
     },
   ]}
   onClose={closeModal}
-/>
+/>;
 ```
 
 宿主应在确认阶段传入指针，其他阶段按设计省略；更换业务目标时创建新的内容实例，避免把确认复用到同 ID 的另一个对象。窗外关闭不交付删除。

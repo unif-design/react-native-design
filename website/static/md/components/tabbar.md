@@ -16,10 +16,10 @@ description: '展示底部导航项目及选中状态。'
 
 ```tsx
 const items = [
-  { id: 'home', icon: 'home', label: '首页' },
-  { id: 'visits', icon: 'location', label: '拜访', badge: '3' },
-  { id: 'agent', icon: 'spark', label: 'AI' },
-  { id: 'me', icon: 'user', label: '我的' },
+  { id: 'home', icon: HomeOutlined, label: '首页' },
+  { id: 'visits', icon: LocationOutlined, label: '拜访', badge: '3' },
+  { id: 'agent', icon: SparkOutlined, label: 'AI' },
+  { id: 'me', icon: UserOutlined, label: '我的' },
 ];
 
 const TabBarDemo = () => {
@@ -89,16 +89,22 @@ const TabBarDemo = () => {
 ## 用法
 
 ```tsx
+import {
+  HomeOutlined,
+  LocationOutlined,
+  SparkOutlined,
+  UserOutlined,
+} from '@unif/react-native-icons';
 import { TabBar } from '@unif/react-native-design';
 
 <TabBar
   active="home"
   onChange={setActive}
   items={[
-    { id: 'home', icon: 'home', label: '首页' },
-    { id: 'visits', icon: 'location', label: '拜访', badge: 3 },
-    { id: 'agent', icon: 'spark', label: 'AI' },
-    { id: 'me', icon: 'user', label: '我的' },
+    { id: 'home', icon: HomeOutlined, label: '首页' },
+    { id: 'visits', icon: LocationOutlined, label: '拜访', badge: 3 },
+    { id: 'agent', icon: SparkOutlined, label: 'AI' },
+    { id: 'me', icon: UserOutlined, label: '我的' },
   ]}
 />;
 ```
@@ -118,13 +124,13 @@ import { TabBar } from '@unif/react-native-design';
 
 `TabBarItem`：
 
-| 字段     | 类型               | 默认值 | 说明                                             |
-| -------- | ------------------ | ------ | ------------------------------------------------ |
-| `id`     | `string`           | —      | 唯一标识，用作 key 与选中判定                    |
-| `icon`   | `IconName`         | —      | 图标名（见 [图标](icons.md)）                     |
-| `label`  | `string`           | —      | tab 文字（同时作 `accessibilityLabel`）          |
-| `badge`  | `number \| string` | —      | 图标右上角数字角标（用 `string` 才能写 `'99+'`） |
-| `testID` | `string?`          | —      | 单 tab testID（默认 `${barTestID}-${id}`）       |
+| 字段     | 类型                       | 默认值 | 说明                                             |
+| -------- | -------------------------- | ------ | ------------------------------------------------ |
+| `id`     | `string`                   | —      | 唯一标识，用作 key 与选中判定                    |
+| `icon`   | `ComponentType<IconProps>` | —      | 图标组件（见 [图标](icons.md)）                   |
+| `label`  | `string`                   | —      | tab 文字（同时作 `accessibilityLabel`）          |
+| `badge`  | `number \| string`         | —      | 图标右上角数字角标（用 `string` 才能写 `'99+'`） |
+| `testID` | `string?`                  | —      | 单 tab testID（默认 `${barTestID}-${id}`）       |
 
 ## 无障碍（a11y）
 
@@ -135,15 +141,16 @@ import { TabBar } from '@unif/react-native-design';
 - 状态语义：`accessibilityState={{ selected: on }}`——`selected` 由 `item.id === active` 派生。无 `disabled` 语义（`TabBarItem` 无 `disabled` 字段）。
 
 ```tsx
+import { HomeOutlined, LocationOutlined } from '@unif/react-native-icons';
 // 每个 tab 自动 role=tab、label=item.label、selected 由 active 决定
 <TabBar
   active={active}
   onChange={setActive}
   items={[
-    { id: 'home', icon: 'home', label: '首页' },
-    { id: 'visits', icon: 'location', label: '拜访', badge: 3 },
+    { id: 'home', icon: HomeOutlined, label: '首页' },
+    { id: 'visits', icon: LocationOutlined, label: '拜访', badge: 3 },
   ]}
-/>
+/>;
 ```
 
 ## 使用注意

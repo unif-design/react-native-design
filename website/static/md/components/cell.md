@@ -25,14 +25,14 @@ const CellDemo = () => {
           </span>
           <List>
             <Cell
-              leading="settings"
+              leading={SettingsOutlined}
               title="主题"
               extra={{ kind: 'text', value: '跟随系统' }}
               arrow
               onPress={() => setLastAction('打开主题')}
             />
             <Cell
-              leading="bell"
+              leading={BellOutlined}
               title="通知"
               desc="由行尾开关控制"
               extra={{
@@ -47,14 +47,14 @@ const CellDemo = () => {
               }}
             />
             <Cell
-              leading="lock"
+              leading={LockOutlined}
               title="隐私"
               desc="位置 / 相机 / 麦克风"
               arrow
               onPress={() => setLastAction('打开隐私')}
             />
             <Cell
-              leading="info"
+              leading={InfoOutlined}
               title="版本"
               extra={{ kind: 'text', value: 'v1.0' }}
             />
@@ -87,7 +87,7 @@ const CellDemo = () => {
           </span>
           <List>
             <Cell
-              leading="lock"
+              leading={LockOutlined}
               title="云同步"
               desc="未登录"
               arrow
@@ -115,6 +115,7 @@ const CellDemo = () => {
 ## 用法
 
 ```tsx
+import { SettingsOutlined } from '@unif/react-native-icons';
 import { Cell, List, Switch } from '@unif/react-native-design';
 
 <List>
@@ -122,7 +123,7 @@ import { Cell, List, Switch } from '@unif/react-native-design';
     title="主题"
     extra={{ kind: 'text', value: '跟随系统' }}
     arrow
-    leading="settings"
+    leading={SettingsOutlined}
     onPress={openTheme}
   />
   <Cell
@@ -161,8 +162,13 @@ import { Cell, List, Switch } from '@unif/react-native-design';
 公开内容类型：
 
 ```ts
+import type { ComponentType, ReactElement } from 'react';
+import type { IconProps } from '@unif/react-native-icons';
+
 type CellTextValue = string | number | bigint;
-type CellLeading = IconName | { kind: 'display'; node: ReactElement };
+type CellLeading =
+  | ComponentType<IconProps>
+  | { kind: 'display'; node: ReactElement };
 type CellExtra =
   | { kind: 'text'; value: CellTextValue }
   | {
@@ -193,7 +199,7 @@ type StaticCellExtra =
 | `desc`               | `CellTextValue`        | —        | 副标题 / 描述；始终由库内 `<Text>` 安全渲染，最多 2 行                                      |
 | `extra`              | `CellExtra`            | —        | 三种公开配置；actionable 可用 text/display，static 仅 text/装饰 display，control 仅 control |
 | `arrow`              | `boolean`              | `false`  | 仅 actionable 可用；显示 chevron-right，`danger` 时仍不渲染                                 |
-| `leading`            | `CellLeading`          | —        | 图标名，或 `{ kind: 'display', node }` 纯展示节点                                           |
+| `leading`            | `CellLeading`          | —        | 图标组件，或 `{ kind: 'display', node }` 纯展示节点                                         |
 | `onPress`            | `() => void`           | —        | actionable 分支必填；control/static 禁止                                                    |
 | `disabled`           | `boolean`              | `false`  | 仅 actionable 可用；禁用时移除 handler、半透明并上报 disabled                               |
 | `danger`             | `boolean`              | `false`  | 危险态：icon 盒子 + 标题用 error 红,且不渲染 arrow（常用于退出登录 / 删除等）               |

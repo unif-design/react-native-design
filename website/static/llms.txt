@@ -1,8 +1,8 @@
 # Unif Design
 
-> Unif React Native 设计系统：基础组件、主题、字体和图标
+> Unif React Native 设计系统：基础组件、主题和字体
 
-文档构建依据：`@unif/react-native-design@0.40.4`；使用时核对实际安装版本。
+文档构建依据：`@unif/react-native-design@0.41.0`；使用时核对实际安装版本。
 
 先查找当前功能，再读取对应 API、示例或 FAQ。源码链接供查阅，应用从包根公开接口导入。
 迁移、测试和研发技能按任务读取；这些资料不自动加入产品运行时模型上下文。
@@ -35,7 +35,7 @@
 - [GlassStats 玻璃数据条](md/components/glass-stats.md) — 以多列数字和标签展示统计摘要。
 - [Grid 九宫格](md/components/grid.md) — 以网格排列图标与文字入口。
 - [IconButton 图标按钮](md/components/icon-button.md) — 只包含图标的按钮，需要提供无障碍名称。
-- [图标](md/components/icons.md) — 按名称查询和使用公开 SVG 图标。
+- [图标](md/components/icons.md) — 预览常用图标，直接使用 Unif Icons 独立图标组件。
 - [ImagePreview 图片预览](md/components/image-preview.md) — 按稳定身份预览图片，交付切换和删除请求。
 - [Input 输入框](md/components/input.md) — 单行文本输入，支持状态、插槽和公开 ref。
 - [Loading 加载](md/components/loading.md) — 展示未知时长的等待或可量化的圆形进度。

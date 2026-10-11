@@ -4,7 +4,6 @@ import { Pressable } from 'react-native-gesture-handler';
 import { useColors, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
-import { Icon } from '../Icon';
 import { normalizeSlotIconSize, normalizeTextFieldSlot } from './normalize';
 import { makeStyles } from './styles';
 import type { TextFieldSlot as TextFieldSlotConfig } from './types';
@@ -54,8 +53,7 @@ export function TextFieldSlot({
     case 'icon':
       return (
         <View {...A11Y_HIDDEN_PROPS} style={styles.slotDisplay} testID={testID}>
-          <Icon
-            name={safeSlot.icon}
+          <safeSlot.icon
             size={iconSize?.value ?? 18}
             color={safeSlot.color ?? colors.foregroundMuted}
           />
@@ -84,11 +82,7 @@ export function TextFieldSlot({
           testID={testID}
         >
           {safeSlot.icon !== undefined ? (
-            <Icon
-              name={safeSlot.icon}
-              size={18}
-              color={colors.foregroundMuted}
-            />
+            <safeSlot.icon size={18} color={colors.foregroundMuted} />
           ) : (
             // 文字型操作:命中框与 a11y 走同一个 Pressable,只是内容渲染成文字。
             // 禁用态用 muted 前景色,与图标型的视觉降级一致。
