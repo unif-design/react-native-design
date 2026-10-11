@@ -129,6 +129,89 @@ final class LiquidGlassScreenshots: XCTestCase {
     }
   }
 
+  func testCompleteControls() {
+    checkCompleteControls(includeNavigation: true)
+  }
+
+  func testRefinedMaterials() {
+    checkCompleteControls(includeNavigation: false)
+    for scheme in ["light", "dark"] {
+      for name in ["text", "confirm"] {
+        let app = scene(name, scheme: scheme)
+        if name == "confirm" {
+          XCTAssertTrue(app.staticTexts["删除附件？"].waitForExistence(timeout: 10))
+        }
+        capture("refined-\(scheme)-\(name)")
+        app.buttons.matching(identifier: "取消").firstMatch.tap()
+        waitForLabel(app.staticTexts["glass-result"], containing: name == "confirm" ? "已取消" : "编辑已取消")
+        app.terminate()
+      }
+    }
+  }
+
+  private func checkCompleteControls(includeNavigation: Bool) {
+    for scheme in ["light", "dark"] {
+      var app = scene("controls", scheme: scheme)
+      let busyChip = app.buttons.matching(identifier: "忙碌标签").firstMatch
+      let disabledChip = app.buttons.matching(identifier: "禁用标签").firstMatch
+      let disabledButton = app.buttons.matching(identifier: "禁用次要操作").firstMatch
+      let slotChip = app.buttons.matching(identifier: "带操作标签").firstMatch
+      XCTAssertFalse(busyChip.isEnabled)
+      XCTAssertFalse(disabledChip.isEnabled)
+      XCTAssertFalse(disabledButton.isEnabled)
+      XCTAssertFalse(slotChip.isEnabled)
+      capture("complete-\(scheme)-controls")
+      app.buttons.matching(identifier: "筛选客户").firstMatch.tap()
+      app.buttons.matching(identifier: "数量，增加").firstMatch.tap()
+      app.descendants(matching: .any).matching(identifier: "glass-switch").firstMatch.tap()
+      app.buttons.matching(identifier: "次要操作").firstMatch.tap()
+      busyChip.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+      disabledChip.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+      disabledButton.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+      slotChip.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+      slotChip.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.5)).tap()
+      waitForLabel(app.staticTexts["glass-result"], containing: "点击:1")
+      waitForLabel(app.staticTexts["glass-result"], containing: "筛选:true · 数量:1 · 通知:true")
+      capture("complete-\(scheme)-controls-selected")
+      app.buttons.matching(identifier: "清除搜索内容").firstMatch.tap()
+      let search = app.descendants(matching: .any).matching(identifier: "glass-search-input").firstMatch
+      search.tap()
+      search.typeText("store\n")
+      waitForLabel(app.staticTexts["glass-result"], containing: "搜索：store")
+      capture("complete-\(scheme)-search-submitted")
+      app.terminate()
+
+      if includeNavigation {
+        app = scene("navigation", scheme: scheme)
+        capture("complete-\(scheme)-navigation")
+        app.buttons.matching(identifier: "返回项目").firstMatch.tap()
+        app.descendants(matching: .any).matching(identifier: "glass-entry").firstMatch.tap()
+        app.descendants(matching: .any).matching(identifier: "glass-page-tabs-history").firstMatch.tap()
+        waitForLabel(app.staticTexts["glass-result"], containing: "点击:2")
+        waitForLabel(app.staticTexts["glass-result"], containing: "导航:history")
+        app.descendants(matching: .any).matching(identifier: "glass-carousel").firstMatch.swipeLeft()
+        app.descendants(matching: .any).matching(identifier: "glass-carousel-item-1").firstMatch.tap()
+        waitForLabel(app.staticTexts["glass-result"], containing: "轮播：2")
+        capture("complete-\(scheme)-navigation-selected")
+        app.terminate()
+      }
+
+      app = scene("sheet", scheme: scheme)
+      app.buttons.matching(identifier: "保留选择").firstMatch.tap()
+      waitForLabel(app.staticTexts["glass-result"], containing: "点击:1")
+      capture("complete-\(scheme)-sheet")
+      app.terminate()
+    }
+  }
+
+  func testCompleteReducedMaterials() {
+    captureReduced(["controls", "navigation", "sheet"], prefix: "complete-reduced")
+  }
+
+  func testRefinedReducedMaterials() {
+    captureReduced(["controls", "sheet", "text", "confirm"], prefix: "refined-reduced")
+  }
+
   private func displaySettings() -> (XCUIApplication, XCUIElement) {
     let settings = XCUIApplication(bundleIdentifier: "com.apple.Preferences")
     settings.launchArguments = ["-AppleLanguages", "(en)"]
@@ -188,6 +271,10 @@ final class LiquidGlassScreenshots: XCTestCase {
           XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "第1张，共2张")).firstMatch.waitForExistence(timeout: 10))
         }
         capture("\(prefix)-\(scheme)-\(name)")
+        if name == "text" || name == "confirm" {
+          app.buttons.matching(identifier: "取消").firstMatch.tap()
+          waitForLabel(app.staticTexts["glass-result"], containing: name == "confirm" ? "已取消" : "编辑已取消")
+        }
         app.terminate()
       }
     }

@@ -61,7 +61,7 @@ export function sizingFor(size: ButtonSize): ButtonSizing {
   }
 }
 
-/** Button 配色推导:7 种 variant → { bg, fg, border }。签名与 Tag/Avatar 的 paletteFor 一致。
+/** Button 配色推导:8 种 variant → { bg, fg, border }。签名与 Tag/Avatar 的 paletteFor 一致。
  *  text / ghost / neutral 共用 'transparent' 底;ghost↔text palette 字节级同一,
  *  差异在几何:text variant 在 ButtonBase 撕除高度与内边距。 */
 export function paletteFor(
@@ -73,7 +73,7 @@ export function paletteFor(
       return { bg: c.primary, fg: c.onPrimary, border: undefined };
     case 'secondary':
       return {
-        bg: c.surfaceContainerHigh,
+        bg: 'transparent',
         fg: c.foreground,
         border: undefined,
       };

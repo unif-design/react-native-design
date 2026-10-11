@@ -4,10 +4,11 @@ import type { StyleProp, ViewStyle } from 'react-native';
 export type ChipProps = {
   label: string;
   selected?: boolean;
+  /** 提供操作时自动采用系统玻璃；省略时为静态内容标签。 */
   onPress?: () => void;
-  /** 整体禁用:opacity 0.5 + 不响应 onPress + accessibilityState.disabled */
+  /** 禁用:前景 opacity 0.5 + 不响应 onPress + accessibilityState.disabled */
   disabled?: boolean;
-  /** 处理中(点了、请求在飞):leading 位换 spinner + opacity 0.6 + 不响应二次点击 +
+  /** 处理中(点了、请求在飞):leading 位换 spinner + 前景 opacity 0.6 + 不响应二次点击 +
    *  accessibilityState.busy。label 保留 —— 换掉它 chip 会塌成一个圆点、整行跟着重排。
    *  与 `disabled` 的分工:disabled = 现在不能点(更暗、无 spinner),busy = 正在办。 */
   busy?: boolean;

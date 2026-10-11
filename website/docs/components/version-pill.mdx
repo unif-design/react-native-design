@@ -9,7 +9,7 @@ import { VersionPill } from '@unif/react-native-design';
 
 # VersionPill 版本号药丸
 
-About / Splash / 调试面板等显版本号的小药丸。左侧状态点 + 版本号 + 可选 build 后缀,圆角胶囊。
+About / Splash / 调试面板等显版本号的小药丸。左侧状态点 + 版本号 + 可选 build 后缀，默认系统玻璃胶囊；状态文字和颜色保持原语义，不新增可点击动作。
 
 ## 代码演示 {#实时预览}
 
@@ -76,7 +76,7 @@ import { VersionPill } from '@unif/react-native-design';
 
 | 元素       | 规则                                                                                          |
 | ---------- | --------------------------------------------------------------------------------------------- |
-| 胶囊       | `c.surface` 底 + hairline `c.outline` 边，圆角 `radius.pill`（999），横向 padding 11 / 纵向 5 |
+| 胶囊       | 无额外染色的系统玻璃 + hairline `c.outline` 边，圆角 `radius.pill`（999），横向 padding 11 / 纵向 5 |
 | 状态点     | 5×5 圆点（`radius.pill`），色由 resolved status 决定                                          |
 | 状态文字   | `type.microPlus` + `c.foregroundMuted`，始终在状态点旁可见                                    |
 | 版本文字   | `type.microPlus`（11.5）+ `c.foregroundMuted` + `tabular-nums`（等宽数字）                    |

@@ -19,7 +19,7 @@ import type { SegmentedProps } from './types';
  * `size`:默认 `'md'`(44pt 触控达标);`'sm'` 紧凑(28pt)给模型下拉等局促位用。
  */
 export function Segmented({
-  surface = 'solid',
+  surface = 'glass',
   value,
   onChange,
   items,
@@ -46,6 +46,7 @@ export function Segmented({
       style={[styles.seg, surface === 'glass' && styles.glass]}
       testID={testID}
       accessibilityRole="tablist"
+      role="tablist"
     >
       {surface === 'glass' ? <GlassLayer style={styles.material} /> : null}
       {items.map((it) => {
@@ -59,6 +60,10 @@ export function Segmented({
             onPress={() => !itemDisabled && onChange(it.id)}
             disabled={itemDisabled}
             accessibilityRole="tab"
+            role="tab"
+            aria-selected={on}
+            aria-disabled={itemDisabled}
+            tabIndex={itemDisabled ? -1 : 0}
             accessibilityState={{ selected: on, disabled: itemDisabled }}
             accessibilityLabel={it.label}
             testID={itemTestID}

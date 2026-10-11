@@ -7,7 +7,7 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
 /**
  * Button 视觉变体：
  * - `primary` 品牌橙底（主操作，业务页面通常只有 1 个）
- * - `secondary` 浅灰底（次要操作）
+ * - `secondary` 系统玻璃表面（次要操作，保持 size 对应圆角）
  * - `ghost` 透明底 + 品牌橙字（弱化的主操作；IconButton 用作"高亮 icon"）
  * - `neutral` 透明底 + 主文字色（深灰 / 白）—— 中性 icon-only 场景，
  *   避免 header right-tray 多个 icon 都染成主橙色，视觉过重

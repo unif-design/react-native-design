@@ -9,7 +9,7 @@ export function Sheet({
   children,
   header,
   footer,
-  footerSurface = 'solid',
+  footerSurface = 'glass',
   contentMode = 'fixed',
   contentContainerStyle,
   footerStyle,
@@ -20,7 +20,9 @@ export function Sheet({
 
   return (
     <View style={[styles.root, style]} testID={testID}>
-      {header ?? (
+      {header != null ? (
+        <View style={styles.header}>{header}</View>
+      ) : (
         <View style={styles.grabberContainer}>
           <View style={styles.grabber} />
         </View>

@@ -8,7 +8,7 @@ description: '受控开关，用于切换开启和关闭状态。'
 
 # Switch 开关
 
-受控开关，用于切换开启与关闭状态。
+受控开关，用于切换开启与关闭状态。圆形滑块使用系统玻璃材质，轨道仍以灰色与主题主色表达开关状态。
 
 ## 代码演示 {#实时预览}
 
@@ -24,7 +24,7 @@ const SwitchDemo = () => {
   return (
     <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        <div style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 32, alignItems: 'center' }}>
           <div
             style={{
               display: 'flex',
@@ -41,7 +41,7 @@ const SwitchDemo = () => {
                 color: 'var(--ifm-color-emphasis-600)',
               }}
             >
-              关
+              {a ? '开' : '关'}
             </span>
           </div>
           <div
@@ -60,7 +60,7 @@ const SwitchDemo = () => {
                 color: 'var(--ifm-color-emphasis-600)',
               }}
             >
-              开
+              {b ? '开' : '关'}
             </span>
           </div>
           <div
@@ -144,9 +144,11 @@ const SwitchDemo = () => {
 
 | 状态 | 视觉                                                                                            |
 | ---- | ----------------------------------------------------------------------------------------------- |
-| 关   | 32×20 灰底 `c.surfaceContainerHighest`（亮色 `#E0E0E0`），16×16 白圆 thumb（`c.onPrimary`）在左 |
-| 开   | 32×20 主橙底 `c.primary`（`#EB6E00`），16×16 白圆 thumb 在右                                    |
-| 禁用 | 44×44 outer frame 保留，视觉子树 `opacity: 0.5`，handler 被移除                                 |
+| 关   | 32×20 灰底 `c.surfaceContainerHighest`，16×16 系统材质滑块在左 |
+| 开   | 32×20 主色底 `c.primary`，16×16 系统材质滑块在右 |
+| 禁用 | 44×44 outer frame 保留，仅语义轨道 `opacity: 0.5`；材质滑块不淡化，handler 被移除 |
+
+滑块复用 `GlassLayer`，原生默认不额外设置染色，Web 使用 CSS 近似材质。系统降低透明度或不支持材质时，回退为当前主题的实色表面。轨道与滑块是同一 visual frame 下的兄弟节点，禁用反馈不会降低材质及其祖先的整体透明度。
 
 outer RNGH `Pressable` 是透明的 44×44 真实布局 frame，尺寸直接读取
 `fixed.hitTarget`，不经过 `r()` 或 fontScale，也不再使用 `hitSlop`。32×20 visual

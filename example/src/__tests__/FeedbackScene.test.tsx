@@ -430,7 +430,7 @@ test('GlassLayer 初始不挂载，用户开启后只在有限容器中切换 cl
   expect(screen.getByText('GlassLayer 组件未挂载')).toBeOnTheScreen();
   expect(
     screen.getByText(
-      'iOS 26+ 使用原生玻璃；旧 iOS 和 Android 使用半透明背景，Web 使用 CSS 近似效果。原生视觉效果需在设备上验证。'
+      'iOS 26+ 使用原生玻璃；不支持的系统或开启减少透明度时使用实色表面，Web 使用 CSS 近似效果。原生视觉效果需在设备上验证。'
     )
   ).toBeOnTheScreen();
   fireEvent.press(screen.getByRole('button', { name: '挂载 GlassLayer 演示' }));

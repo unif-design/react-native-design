@@ -4,6 +4,7 @@ import { Pressable } from 'react-native-gesture-handler';
 import { fw, pressedOpacity, useColors, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
+import { GlassLayer } from '../GlassLayer';
 import { makeStyles } from './styles';
 import type { TabsProps } from './types';
 
@@ -33,7 +34,9 @@ export function Tabs({
       style={[styles.under, style]}
       testID={testID}
       accessibilityRole="tablist"
+      role="tablist"
     >
+      <GlassLayer />
       {items.map((it) => {
         const on = it.id === value;
         const itemDisabled = allDisabled || (it.disabled ?? false);
@@ -41,9 +44,14 @@ export function Tabs({
         return (
           <Pressable
             key={it.id}
+            collapsable={false}
             onPress={() => !itemDisabled && onChange(it.id)}
             disabled={itemDisabled}
             accessibilityRole="tab"
+            role="tab"
+            aria-selected={on}
+            aria-disabled={itemDisabled}
+            tabIndex={itemDisabled ? -1 : 0}
             accessibilityState={{
               selected: on,
               disabled: itemDisabled || undefined,

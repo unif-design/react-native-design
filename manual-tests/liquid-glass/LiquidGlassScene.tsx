@@ -13,14 +13,24 @@ import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import {
   ActionMenuContent,
   Button,
+  Carousel,
+  Chip,
   ConfirmHost,
+  EntryCard,
   IconButton,
   ImagePreview,
+  NavBar,
+  Search,
   Segmented,
+  Sheet,
+  Stepper,
+  Switch,
   TabBar,
+  Tabs,
   TextEntryContent,
   ThemeProvider,
   ToastHost,
+  VersionPill,
   confirm,
   toast,
   useColors,
@@ -58,11 +68,14 @@ function Scene() {
   const [segment, setSegment] = useState('all');
   const [tab, setTab] = useState('chat');
   const [presses, setPresses] = useState(0);
+  const [selected, setSelected] = useState(false);
+  const [quantity, setQuantity] = useState(0);
+  const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
     let current = true;
-    AccessibilityInfo.isReduceTransparencyEnabled().then((enabled) => {
-      if (current) setReduced(enabled);
+    AccessibilityInfo.isReduceTransparencyEnabled().then((preference) => {
+      if (current) setReduced(preference);
     });
     const subscription = AccessibilityInfo.addEventListener(
       'reduceTransparencyChanged',
@@ -125,7 +138,146 @@ function Scene() {
             )
           )}
         </View>
-        {scene.startsWith('menu') ? (
+        {scene === 'controls' ? (
+          <View style={styles.controls}>
+            <Search
+              defaultValue="客户"
+              accessibilityLabel="搜索客户"
+              testID="glass-search"
+              onSubmit={(text) => setResult(`搜索：${text}`)}
+            />
+            <View style={styles.buttons}>
+              <Chip
+                label="筛选客户"
+                selected={selected}
+                onPress={() => setSelected(!selected)}
+              />
+              <Chip
+                label="忙碌标签"
+                busy
+                onPress={() => setPresses((count) => count + 1)}
+              />
+              <Chip
+                label="禁用标签"
+                disabled
+                onPress={() => setPresses((count) => count + 1)}
+              />
+            </View>
+            <View style={styles.buttons}>
+              <Chip
+                label="带操作标签"
+                disabled
+                onPress={() => setPresses((count) => count + 1)}
+                trailing={
+                  <IconButton
+                    icon="plus"
+                    variant="secondary"
+                    size="sm"
+                    disabled
+                    accessibilityLabel="标签附加操作"
+                    onPress={() => setPresses((count) => count + 1)}
+                  />
+                }
+              />
+            </View>
+            <View style={styles.buttons}>
+              <Stepper
+                value={quantity}
+                min={0}
+                max={2}
+                onChange={setQuantity}
+                accessibilityLabel="数量"
+                testID="glass-stepper"
+              />
+              <Switch
+                value={enabled}
+                onChange={setEnabled}
+                accessibilityLabel="启用通知"
+                testID="glass-switch"
+              />
+              <Switch
+                value={true}
+                disabled
+                onChange={() => setPresses((count) => count + 1)}
+                accessibilityLabel="禁用通知"
+              />
+            </View>
+            <View style={styles.buttons}>
+              <Button
+                label="次要操作"
+                variant="secondary"
+                onPress={() => setPresses((count) => count + 1)}
+              />
+              <Button
+                label="禁用次要操作"
+                variant="secondary"
+                disabled
+                onPress={() => setPresses((count) => count + 1)}
+              />
+            </View>
+          </View>
+        ) : scene === 'navigation' ? (
+          <View style={styles.controls}>
+            <NavBar
+              title="项目导航"
+              left={{
+                icon: 'chevron-left',
+                accessibilityLabel: '返回项目',
+                onPress: () => setPresses((count) => count + 1),
+              }}
+            />
+            <Tabs
+              value={tab}
+              onChange={setTab}
+              testID="glass-page-tabs"
+              items={[
+                { id: 'chat', label: '概览' },
+                { id: 'history', label: '详情' },
+                { id: 'disabled', label: '禁用', disabled: true },
+              ]}
+            />
+            <EntryCard
+              icon="home"
+              title="工作空间"
+              testID="glass-entry"
+              sub="打开入口"
+              onPress={() => setPresses((count) => count + 1)}
+            />
+            <VersionPill version="1.0.0" build="42" />
+            <Carousel
+              testID="glass-carousel"
+              data={['#7C969E', '#967E95', '#A59470']}
+              renderItem={({ item }) => (
+                <View style={[styles.carouselItem, { backgroundColor: item }]}>
+                  <Text>预览内容</Text>
+                </View>
+              )}
+              height={110}
+              itemSize={width * 0.9 - 24}
+              indicatorPosition="overlay-bottom-right"
+              autoplay={false}
+              getAccessibilityLabel={(_item, index) => `预览第${index + 1}页`}
+              onPressItem={(_item, index) => setResult(`轮播：${index + 1}`)}
+            />
+          </View>
+        ) : scene === 'sheet' ? (
+          <View style={styles.sheetHost}>
+            <Sheet
+              header={<NavBar title="选择项目" />}
+              footer={
+                <Button
+                  label="保留选择"
+                  variant="secondary"
+                  onPress={() => setPresses((count) => count + 1)}
+                />
+              }
+            >
+              <Text style={{ color: colors.foreground }}>
+                正文使用清晰的内容表面，顶部与底部工具区跟随系统材质。
+              </Text>
+            </Sheet>
+          </View>
+        ) : scene.startsWith('menu') ? (
           <ActionMenuContent
             presentation="popover"
             cancelLabel={null}
@@ -244,7 +396,7 @@ function Scene() {
         testID="glass-result"
         style={[styles.result, { color: colors.foreground }]}
       >
-        {`${result} · 点击:${presses} · 选项:${segment} · 导航:${tab}`}
+        {`${result} · 点击:${presses} · 选项:${segment} · 导航:${tab} · 筛选:${selected} · 数量:${quantity} · 通知:${enabled}`}
       </Text>
     </SafeAreaView>
   );
@@ -266,6 +418,9 @@ const styles = StyleSheet.create({
   lightBand: { opacity: 0.58 },
   backdropLabel: { fontSize: 24, color: '#1C2330', fontWeight: '600' },
   overview: { width: '90%', gap: 34 },
+  controls: { width: '90%', gap: 24 },
+  carouselItem: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  sheetHost: { width: '90%', height: 350 },
   segmentHost: { alignSelf: 'center' },
   buttons: {
     flexDirection: 'row',

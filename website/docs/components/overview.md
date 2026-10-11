@@ -22,7 +22,7 @@ description: '按场景查找组件、代码示例与 API。'
 
 | 组件                                         | 说明                                                                |
 | -------------------------------------------- | ------------------------------------------------------------------- |
-| [Button](/docs/components/button)            | 主操作按钮,7 variant × 3 size,可 block                              |
+| [Button](/docs/components/button)            | 主操作按钮,8 variant × 3 size,可 block                              |
 | [IconButton](/docs/components/icon-button)   | 纯图标按钮,`accessibilityLabel` 类型必填                            |
 | [Avatar](/docs/components/avatar)            | circle/square monogram 头像,variant `brand`/`info`/`soft`/`neutral` |
 | [AvatarGroup](/docs/components/avatar-group) | 重叠头像组,统一形态与尺寸,支持 `max` 溢出及可选 action              |

@@ -13,13 +13,16 @@ import {
 export const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({
     card: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: space[4],
-      backgroundColor: c.surface,
+      backgroundColor: 'transparent',
       borderRadius: radius['2xl'],
       paddingVertical: space[5],
       paddingHorizontal: space[6],
+    },
+    material: { borderRadius: radius['2xl'] },
+    content: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: space[4],
     },
     iconTile: {
       width: icon.lg,

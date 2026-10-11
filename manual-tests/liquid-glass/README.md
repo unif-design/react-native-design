@@ -6,14 +6,17 @@
 
 通过 app 启动参数 `-glassScene <scene> -glassScheme light|dark` 选择画面。
 
-| scene                  | 验证内容                                                        |
-| ---------------------- | --------------------------------------------------------------- |
-| overview               | glass Button、IconButton、Segmented、TabBar；点击和受控选择结果 |
-| menu-top / menu-bottom | 上／下箭头浮菜单；实际点击“删除聊天”进入单一“删除”确认          |
-| text                   | compact TextEntry，取消交付                                     |
-| toast                  | 真实 ToastHost 的居中成功提示                                   |
-| confirm                | 真实 ConfirmHost 的删除确认与取消交付                           |
-| image                  | ImagePreview 的双图计数；图片是本地 1px PNG 测试资源            |
+| scene                  | 验证内容                                                                                 |
+| ---------------------- | ---------------------------------------------------------------------------------------- |
+| controls               | 默认交互 Chip、Search、secondary Button、Stepper、Switch；禁用和忙碌保护、真实输入与切换 |
+| navigation             | 默认 NavBar、Tabs、EntryCard、VersionPill 与浮动 Carousel 页码                           |
+| sheet                  | 内容实色与头尾系统材质、页脚真实动作                                                     |
+| overview               | glass Button、IconButton、Segmented、TabBar；点击和受控选择结果                          |
+| menu-top / menu-bottom | 上／下箭头浮菜单；实际点击“删除聊天”进入单一“删除”确认                                   |
+| text                   | compact TextEntry，取消交付                                                              |
+| toast                  | 真实 ToastHost 的居中成功提示                                                            |
+| confirm                | 真实 ConfirmHost 的删除确认与取消交付                                                    |
+| image                  | ImagePreview 的双图计数；图片是本地 1px PNG 测试资源                                     |
 
 画面背景使用固定色块，供观察材质取样、箭头接缝及减少透明度后的实色。它不是产品页面或图片质量示例。
 
@@ -40,6 +43,8 @@
 `testMenuThemeOverride` 要求系统外观为 light，定向检查组件强制浅／深主题时的上下箭头和单删除确认，避免把“应用深色”与“系统深色”当成同一个条件。
 
 `testButtonMaterialStates` 检查点击前后、禁用和忙碌状态，并通过实际触摸确认不可用操作不交付；`testToastMaterial` 单独保留浅／深原生 Toast 图。`testFocusedReducedMaterials` 用于菜单与 Toast 变更后的实色降级复验，继续操作真实系统开关并恢复原值。
+
+`testCompleteControls` 逐项点击新增的默认材质控件，并清除、输入和提交搜索值；`testCompleteReducedMaterials` 对新场景切换真实减少透明度设置再恢复。浅深主题下必须检查小尺寸 Switch 滑块和禁用前景是否仍可辨识。
 
 ## 当前平台边界
 

@@ -13,7 +13,11 @@ export const makeCarouselStyles = (c: ColorTokens) =>
       position: 'absolute',
       bottom: space['3'],
       right: space['5'],
+      paddingHorizontal: space[3],
+      paddingVertical: space[2],
+      borderRadius: radius.pill,
     },
+    dotsMaterial: { borderRadius: radius.pill },
     /** Pagination 本体保持第三方所需的横向 layout，只承载视觉 dot。 */
     dots: {
       // 正式版按 active 最大宽度为每个 dot 预留 12pt,额外保留 3pt 间距。

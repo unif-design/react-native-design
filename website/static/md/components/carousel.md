@@ -11,7 +11,7 @@ description: '轮播展示一组内容，支持切换、指示器和自动播放
 包装 `react-native-reanimated-carousel@5.0.0` 正式版的薄壳层,沿用上游正式命名并收口本设计系统需要的布局与交互:
 
 1. dot indicator 走 `c.primary` token,使用正式版 `Pagination`(`useSharedValue` + `progress` 驱动,无需自己跟 active state)
-2. `indicatorPosition` 控制指示器位置:`'bottom'` 独立行(占额外 16px 高度) / `'overlay-bottom-right'` 浮在 banner 右下角
+2. `indicatorPosition` 控制指示器位置:`'bottom'` 独立行(占额外 16px 高度) / `'overlay-bottom-right'` 以系统玻璃胶囊浮在 banner 右下角，普通 bottom 指示器和 slide 内容保持原呈现
 3. 类型泛型 `<T>` 让 `data`、`renderItem`、`keyExtractor` 和 action slide 回调共享同一 item 类型
 4. `forwardRef` 直接透传正式版 `CarouselRef`,支持 `scrollTo` / `prev` / `next` / `getCurrentIndex`
 5. slide 是严格二选一：不传 action 字段时渲染纯展示 `View`；`onPressItem` 与 `getAccessibilityLabel` 必须同时传入才渲染可操作 `Pressable`
@@ -170,7 +170,7 @@ slide 的节点类型与 a11y 语义由严格联合决定：
 | Dot · 默认               | 4×4 圆(`space['1']`),`c.primary` @ opacity 0.32                                           |
 | Dot · active             | 12×4 长条(`space['5']`),`c.primary` @ opacity 1;每个 dot 都预留 12pt 宽避免切换时布局跳动 |
 | `'bottom'` 占位          | 容器高度 = `height + 16`(`space['7']`)                                                    |
-| `'overlay-bottom-right'` | dot 浮层 absolute 在右下角,不占额外高度                                                   |
+| `'overlay-bottom-right'` | dot 浮层 absolute 在右下角，系统玻璃托底，水平/垂直 padding 为 space[3]/space[2]，不占额外高度                                                   |
 | 单页 / 关闭 indicator    | 不渲染 Pagination；不为 indicator 预留高度                                                |
 | `loop`                   | 默认开启 —— 最后一张滑回第一张                                                            |
 

@@ -10,7 +10,7 @@ export const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({
     under: {
       flexDirection: 'row',
-      backgroundColor: c.surface,
+      backgroundColor: 'transparent',
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: c.outline,
     },

@@ -72,8 +72,7 @@ export const SheetDemo = () => {
   <SheetDemo />
 </LiveDemo>
 
-
-页脚工具区可设置 `footerSurface="glass"`，默认 `solid`；正文和大型滚动内容维持清晰背景。Sheet 仍只负责布局，不创建窗口或确认状态。
+页脚工具区默认 `footerSurface="glass"`，可显式选择 `solid`；正文和大型滚动内容维持清晰背景。Sheet 仍只负责布局，不创建窗口或确认状态。
 
 ## 用法
 
@@ -97,7 +96,7 @@ export const SheetDemo = () => {
 | `header` / `footer`     | `ReactNode`                                | —         | 固定头尾；无头部显示非交互拖动指示                       |
 | `contentMode`           | `'fixed' \| 'scroll' \| 'external-scroll'` | `'fixed'` | 普通布局、内部纵向 ScrollView、外部自带滚动              |
 | `contentContainerStyle` | `StyleProp<ViewStyle>`                     | —         | 内容区域样式；scroll 时作用于 ScrollView 内容容器        |
-| `footerSurface` | `solid \| glass` | `solid` | 页脚工具区材质 |
+| `footerSurface`         | `solid \| glass`                           | `glass`   | 页脚工具区材质                                           |
 | `footerStyle`           | `StyleProp<ViewStyle>`                     | —         | 覆盖固定底部容器的留白与边框，供调用者已组合的操作区使用 |
 | `style` / `testID`      | `StyleProp<ViewStyle>` / `string`          | —         | 根容器样式与定位                                         |
 

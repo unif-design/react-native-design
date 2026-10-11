@@ -7,7 +7,8 @@ import React, {
 } from 'react';
 import { Platform, Pressable, Text, TextInput, View } from 'react-native';
 import type { TextInputProps } from 'react-native';
-import { fixed, useColors, useThemedStyles } from '../../../theme';
+import { fixed, radius, useColors, useThemedStyles } from '../../../theme';
+import { GlassLayer } from '../GlassLayer';
 import { childTestID } from '../../../utils/testID';
 import { createLogger } from '../../../utils/logger';
 import {
@@ -169,11 +170,69 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
     const interactiveHeight =
       searchLayout?.interactiveHeight ?? normalizedHeight;
 
+    const inputContent = (
+      <>
+        <TextFieldSlot
+          slot={leading}
+          effectiveEditable={effectiveEditable}
+          testID={childTestID(testID, 'leading')}
+        />
+        <TextInput
+          ref={nativeRef}
+          {...(allowedNativeProps as TextInputProps)}
+          value={controller.value}
+          onChangeText={controller.onChangeText}
+          editable={effectiveEditable}
+          multiline={multiline}
+          onContentSizeChange={onContentSizeChange}
+          onLayout={(event) => {
+            if (multiline) multilineLayout.onLayout?.(event);
+            onLayout?.(event);
+          }}
+          scrollEnabled={
+            scrollEnabled ??
+            (multiline ? multilineLayout.scrollEnabled : undefined)
+          }
+          onFocus={(event) => {
+            setFocused(true);
+            onFocus?.(event);
+          }}
+          onBlur={(event) => {
+            setFocused(false);
+            onBlur?.(event);
+          }}
+          style={[
+            styles.input,
+            centered && styles.inputCentered,
+            multiline && styles.inputMultiline,
+            multiline &&
+              (multilineLayout.scrollEnabled
+                ? styles.inputScrolling
+                : styles.inputClipped),
+            multiline && multilineLayout.inputStyle,
+            searchLayout !== undefined && {
+              minHeight: searchLayout.interactiveHeight,
+            },
+          ]}
+          placeholderTextColor={callerPlaceholder ?? colors.foregroundSubtle}
+          underlineColorAndroid={plain ? 'transparent' : callerUnderline}
+          accessibilityRole={accessibilityRole}
+          accessibilityState={mergedAccessibilityState}
+          testID={childTestID(testID, 'input')}
+        />
+        <TextFieldSlot
+          slot={trailing}
+          effectiveEditable={effectiveEditable}
+          testID={childTestID(testID, 'trailing')}
+        />
+      </>
+    );
+
     return (
       <View
         style={[
           sanitizedContainer.style,
-          !effectiveEditable && styles.containerDisabled,
+          !effectiveEditable && !searchLayout && styles.containerDisabled,
           searchLayout !== undefined && !multiline && styles.rootCentered,
           { minWidth: fixed.hitTarget, minHeight: normalizedHeight },
         ]}
@@ -217,67 +276,35 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
               pointerEvents="none"
               style={[
                 styles.searchVisibleSurface,
-                ...wrapStateStyles,
+                {
+                  borderColor: error
+                    ? colors.error
+                    : focused
+                      ? colors.primary
+                      : 'transparent',
+                },
                 {
                   top: searchLayout.verticalInset,
                   bottom: searchLayout.verticalInset,
                 },
               ]}
-            />
+            >
+              <GlassLayer style={{ borderRadius: radius.pill }} />
+            </View>
           ) : null}
-          <TextFieldSlot
-            slot={leading}
-            effectiveEditable={effectiveEditable}
-            testID={childTestID(testID, 'leading')}
-          />
-          <TextInput
-            ref={nativeRef}
-            {...(allowedNativeProps as TextInputProps)}
-            value={controller.value}
-            onChangeText={controller.onChangeText}
-            editable={effectiveEditable}
-            multiline={multiline}
-            onContentSizeChange={onContentSizeChange}
-            onLayout={(event) => {
-              if (multiline) multilineLayout.onLayout?.(event);
-              onLayout?.(event);
-            }}
-            scrollEnabled={
-              scrollEnabled ??
-              (multiline ? multilineLayout.scrollEnabled : undefined)
-            }
-            onFocus={(event) => {
-              setFocused(true);
-              onFocus?.(event);
-            }}
-            onBlur={(event) => {
-              setFocused(false);
-              onBlur?.(event);
-            }}
-            style={[
-              styles.input,
-              centered && styles.inputCentered,
-              multiline && styles.inputMultiline,
-              multiline &&
-                (multilineLayout.scrollEnabled
-                  ? styles.inputScrolling
-                  : styles.inputClipped),
-              multiline && multilineLayout.inputStyle,
-              searchLayout !== undefined && {
-                minHeight: searchLayout.interactiveHeight,
-              },
-            ]}
-            placeholderTextColor={callerPlaceholder ?? colors.foregroundSubtle}
-            underlineColorAndroid={plain ? 'transparent' : callerUnderline}
-            accessibilityRole={accessibilityRole}
-            accessibilityState={mergedAccessibilityState}
-            testID={childTestID(testID, 'input')}
-          />
-          <TextFieldSlot
-            slot={trailing}
-            effectiveEditable={effectiveEditable}
-            testID={childTestID(testID, 'trailing')}
-          />
+          {searchLayout ? (
+            <View
+              collapsable={false}
+              style={[
+                styles.searchContent,
+                !effectiveEditable && styles.containerDisabled,
+              ]}
+            >
+              {inputContent}
+            </View>
+          ) : (
+            inputContent
+          )}
         </View>
         {error ? (
           <Text

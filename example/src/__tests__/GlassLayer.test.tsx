@@ -230,14 +230,19 @@ test('固定深色材质在减少透明度事件后保持实色，迟到查询�
 });
 
 // 原生材质不能由祖先 opacity 淡化；禁用只淡化前景且仍禁止动作。
-test.each([false, true])(
-  '玻璃图标按钮 loading=%s 时材质宿主保持全不透明并阻止操作',
-  (loading) => {
+test.each([
+  ['glass', false],
+  ['glass', true],
+  ['secondary', false],
+  ['secondary', true],
+] as const)(
+  '%s 图标按钮 loading=%s 时材质宿主保持全不透明并阻止操作',
+  (variant, loading) => {
     const press = jest.fn();
     render(
       <ThemeProvider>
         <IconButton
-          variant="glass"
+          variant={variant}
           icon="chevron-left"
           accessibilityLabel="玻璃返回"
           disabled={!loading}

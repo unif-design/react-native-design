@@ -7,7 +7,7 @@ export const makeStyles = (c: ColorTokens) =>
     bar: {
       height: fixed.navbarH,
       paddingHorizontal: space[5],
-      backgroundColor: c.surface,
+      backgroundColor: 'transparent',
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: c.outline,
       flexDirection: 'row',

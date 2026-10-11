@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 import { useColors, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { IconButton } from '../IconButton';
+import { GlassLayer } from '../GlassLayer';
 import { classifyNavBarSlot, type NavBarSlotClassification } from './isSlot';
 import { makeStyles } from './styles';
 import type { NavBarAction, NavBarProps } from './types';
@@ -78,6 +79,7 @@ export function NavBar({
       ]}
       testID={testID}
     >
+      {!isBrand && !isTransparent ? <GlassLayer /> : null}
       <View style={styles.side}>{resolveSlot(leftSlot, tint)}</View>
       <View style={styles.center}>
         <Text style={[styles.title, { color: tint }]} numberOfLines={1}>

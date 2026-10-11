@@ -350,8 +350,9 @@ export function FeedbackScene(): React.JSX.Element {
           description="按需挂载玻璃层，在相同主题染色下比较两种材质。"
         >
           <Text style={styles.fact}>
-            iOS 26+ 使用原生玻璃；旧 iOS 和 Android 使用半透明背景，Web 使用 CSS
-            近似效果。原生视觉效果需在设备上验证。
+            iOS 26+
+            使用原生玻璃；不支持的系统或开启减少透明度时使用实色表面，Web 使用
+            CSS 近似效果。原生视觉效果需在设备上验证。
           </Text>
           <Segmented
             value={draft.glassEffect}

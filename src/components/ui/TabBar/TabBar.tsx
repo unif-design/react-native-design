@@ -14,7 +14,7 @@ import type { TabBarProps } from './types';
  * 想留 home indicator 的安全区，请外面包一层 `<SafeAreaView edges={['bottom']}>`。
  */
 export function TabBar({
-  surface = 'solid',
+  surface = 'glass',
   active,
   onChange,
   items,
@@ -28,6 +28,7 @@ export function TabBar({
       style={[styles.bar, surface === 'glass' && styles.glassBar, style]}
       testID={testID}
       accessibilityRole="tablist"
+      role="tablist"
     >
       {surface === 'glass' ? <GlassLayer style={styles.material} /> : null}
       {items.map((item) => {
@@ -42,6 +43,9 @@ export function TabBar({
             key={item.id}
             onPress={() => onChange(item.id)}
             accessibilityRole="tab"
+            role="tab"
+            aria-selected={on}
+            tabIndex={0}
             accessibilityState={{ selected: on }}
             accessibilityLabel={a11yLabel}
             testID={itemTestID}

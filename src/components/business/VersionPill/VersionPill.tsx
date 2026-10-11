@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 import { useColors, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { A11Y_HIDDEN_PROPS } from '../../ui/shared/a11y';
+import { GlassLayer } from '../../ui/GlassLayer';
 import { buildVersionPillLabel, resolveVersionStatus } from './content';
 import { makeVersionPillStyles } from './styles';
 import type { VersionPillProps } from './types';
@@ -46,6 +47,7 @@ export function VersionPill({
       style={[styles.pill, style]}
       testID={testID}
     >
+      <GlassLayer style={styles.material} />
       {/* 状态点仅颜色通道,屏幕阅读器由外层容器统一朗读,此处隐藏 */}
       <View
         {...A11Y_HIDDEN_PROPS}

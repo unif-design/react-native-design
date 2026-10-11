@@ -8,7 +8,7 @@ description: '页面顶部的标题与操作区域。'
 
 # NavBar 导航栏
 
-页面顶部导航栏，提供标题与左右操作区域。
+页面顶部导航栏，提供标题与左右操作区域。默认使用无额外染色的系统玻璃表面；品牌态保持品牌色，transparent 仍完全透明。不支持玻璃或减少透明度时由 Design 提供主题实色回退。
 
 ## 代码演示 {#实时预览}
 
@@ -139,7 +139,7 @@ import { NavBar } from '@unif/react-native-design';
 | `subtitle` | `string?`                               | —           | 副标题（小字号，主标题下方）                                                                                                                                                           |
 | `left`     | `NavBarSlot`                            | —           | 左槽：严格 `NavBarAction { icon, onPress, accessibilityLabel }` 或展示用 `ReactNode`                                                                                                   |
 | `right`    | `NavBarSlot`                            | —           | 右槽，同 `left`                                                                                                                                                                        |
-| `variant`  | `'default' \| 'brand' \| 'transparent'` | `'default'` | 视觉变体：`default` 白底 hairline + 深字 / `brand` 品牌橙底 + 白字 / `transparent` 透明无边框 + **深字 `c.foreground`**（浮在浅色 hero 上；若需白字深色浮层后续加 `transparentLight`） |
+| `variant`  | `'default' \| 'brand' \| 'transparent'` | `'default'` | 视觉变体：`default` 系统玻璃 + hairline + 主题文字 / `brand` 品牌橙底 + 白字 / `transparent` 透明无边框 + **深字 `c.foreground`**（浮在浅色 hero 上；若需白字深色浮层后续加 `transparentLight`） |
 | `style`    | `StyleProp<ViewStyle>?`                 | —           | 根容器附加样式（margin / position 等布局微调）                                                                                                                                         |
 | `testID`   | `string?`                               | —           | E2E 定位                                                                                                                                                                               |
 

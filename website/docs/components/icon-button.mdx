@@ -15,8 +15,9 @@ import { useState } from 'react';
 `size` 走 `ButtonSize`（sm/md/lg = 28/36/44）。`variant` 复用 Button palette，但
 IconButton 精确排除会撕掉方形高度的 `'text'`，默认是透明底 `'ghost'`。
 
-
 浮动返回、删除或导航圆按钮使用 `variant="glass"`，可组合 `surfaceSize={36}`、`iconSize={21}`。默认胶囊圆角；保留至少 44pt 命中补偿、可访问名称、disabled 和 loading。
+
+`secondary` 与 `glass` 都直接使用共享系统玻璃，前者保留尺寸对应圆角，后者为圆形；按压和不可用状态只淡化图标，材质保持可见。
 
 ## 代码演示 {#实时预览}
 
@@ -127,22 +128,22 @@ import { IconButton } from '@unif/react-native-design';
 
 ## API
 
-| 参数                 | 类型                                                                           | 默认值     | 说明                                                                                         |
-| -------------------- | ------------------------------------------------------------------------------ | ---------- | -------------------------------------------------------------------------------------------- |
-| `icon`               | `IconName`                                                                     | —          | 包内生成图标目录中的闭集名称                                                                 |
-| `onPress`            | `() => void`                                                                   | —          | **必填**点击回调；disabled / loading 时组件移除有效 handler                                  |
-| `size`               | `('sm' \| 'md' \| 'lg')?`                                                      | `'md'`     | 方形边长 28 / 36 / 44                                                                        |
-| `iconSize`           | `number?`                                                                      | 随 size    | 图标与加载指示的独立尺寸                                                                     |
-| `surfaceSize`        | `number?`                                                                      | 随 size    | 方形表面边长，并据此计算命中补偿                                                             |
+| 参数                 | 类型                                                                                      | 默认值     | 说明                                                                                         |
+| -------------------- | ----------------------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------- |
+| `icon`               | `IconName`                                                                                | —          | 包内生成图标目录中的闭集名称                                                                 |
+| `onPress`            | `() => void`                                                                              | —          | **必填**点击回调；disabled / loading 时组件移除有效 handler                                  |
+| `size`               | `('sm' \| 'md' \| 'lg')?`                                                                 | `'md'`     | 方形边长 28 / 36 / 44                                                                        |
+| `iconSize`           | `number?`                                                                                 | 随 size    | 图标与加载指示的独立尺寸                                                                     |
+| `surfaceSize`        | `number?`                                                                                 | 随 size    | 方形表面边长，并据此计算命中补偿                                                             |
 | `variant`            | `('primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'glass' \| 'danger')?` | `'ghost'`  | 与 Button 共用 palette，但精确排除会撕掉方形高度的 `'text'`                                  |
-| `color`              | `string?`                                                                      | variant fg | icon 描色 override(仅 icon 色,bg/border 仍由 variant 决定)                                   |
-| `disabled`           | `boolean?`                                                                     | `false`    | 不响应 + opacity 0.5                                                                         |
-| `loading`            | `boolean?`                                                                     | `false`    | 以 ActivityIndicator 替代 icon，自动 disabled + busy                                         |
-| `accessibilityLabel` | `string`                                                                       | —          | **必填且运行时必须非空** —— icon-only 按钮 SR 用户唯一信息源；空白值失败关闭并在 effect 诊断 |
-| `accessibilityHint`  | `string?`                                                                      | —          | 行为不显然时填(如"打开扫描器")                                                               |
-| `accessibilityState` | `Omit<AccessibilityState, 'disabled' \| 'busy'>?`                              | —          | caller 可补充 `selected` / `expanded` 等状态；`disabled` / `busy` 由组件接管，类型上禁止覆盖 |
-| `style`              | `StyleProp<ViewStyle>?`                                                        | —          | 容器附加样式                                                                                 |
-| `testID`             | `string?`                                                                      | —          | E2E / 测试定位                                                                               |
+| `color`              | `string?`                                                                                 | variant fg | icon 描色 override(仅 icon 色,bg/border 仍由 variant 决定)                                   |
+| `disabled`           | `boolean?`                                                                                | `false`    | 不响应 + opacity 0.5                                                                         |
+| `loading`            | `boolean?`                                                                                | `false`    | 以 ActivityIndicator 替代 icon，自动 disabled + busy                                         |
+| `accessibilityLabel` | `string`                                                                                  | —          | **必填且运行时必须非空** —— icon-only 按钮 SR 用户唯一信息源；空白值失败关闭并在 effect 诊断 |
+| `accessibilityHint`  | `string?`                                                                                 | —          | 行为不显然时填(如"打开扫描器")                                                               |
+| `accessibilityState` | `Omit<AccessibilityState, 'disabled' \| 'busy'>?`                                         | —          | caller 可补充 `selected` / `expanded` 等状态；`disabled` / `busy` 由组件接管，类型上禁止覆盖 |
+| `style`              | `StyleProp<ViewStyle>?`                                                                   | —          | 容器附加样式                                                                                 |
+| `testID`             | `string?`                                                                                 | —          | E2E / 测试定位                                                                               |
 
 `iconSize` 可独立设置图标和加载指示的尺寸；`surfaceSize` 可指定方形表面边长，同时按该值补足 44pt 命中区。缺省仍使用 `size` 对应的设备缩放尺寸。
 

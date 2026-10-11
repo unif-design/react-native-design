@@ -12,7 +12,7 @@ export type TabBarItem = {
 };
 
 export type TabBarProps = {
-  /** glass 用于浮动导航；默认 solid 保持贴边导航外观。 */
+  /** 默认 glass 跟随系统材质；贴边实色导航可显式选择 solid。 */
   surface?: 'solid' | 'glass';
   active: string;
   onChange: (id: string) => void;

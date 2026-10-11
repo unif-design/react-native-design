@@ -81,9 +81,15 @@ export function ButtonBase({
   const palette = useMemo(() => paletteFor(variant, c), [variant, c]);
 
   const isText = variant === 'text';
-  const glassRadius = StyleSheet.flatten(style)?.borderRadius ?? radius.pill;
+  const isGlass = variant === 'glass' || variant === 'secondary';
+  const glassRadius =
+    StyleSheet.flatten(style)?.borderRadius ??
+    (variant === 'glass' ? radius.pill : sizing.br);
   const unavailable = disabled === true || loading === true;
   const hasAccessibleName = accessibilityLabel !== undefined;
+  const effectiveAccessibilityState = hasAccessibleName
+    ? { ...accessibilityState, disabled: unavailable, busy: loading === true }
+    : undefined;
 
   // [M-7] 触控目标补偿:hitSlop 向外扩展命中区域到 fixed.hitTarget(44pt)。
   // 公式:vertical slop = max(0, (hitTarget - h) / 2);square 时同补 horizontal。
@@ -113,15 +119,17 @@ export function ButtonBase({
     <Pressable
       accessible={hasAccessibleName}
       accessibilityRole={hasAccessibleName ? accessibilityRole : undefined}
-      accessibilityState={
-        hasAccessibleName
-          ? {
-              ...accessibilityState,
-              disabled: unavailable,
-              busy: loading === true,
-            }
+      role={
+        hasAccessibleName && accessibilityRole === 'button'
+          ? 'button'
           : undefined
       }
+      accessibilityState={effectiveAccessibilityState}
+      aria-disabled={effectiveAccessibilityState?.disabled}
+      aria-busy={effectiveAccessibilityState?.busy}
+      aria-selected={effectiveAccessibilityState?.selected}
+      aria-checked={effectiveAccessibilityState?.checked}
+      aria-expanded={effectiveAccessibilityState?.expanded}
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
       disabled={unavailable}
@@ -136,25 +144,24 @@ export function ButtonBase({
           // square 时方形:width=height,horizontal padding=0
           width: square ? sizing.h : undefined,
           paddingHorizontal: isText || square ? 0 : sizing.px,
-          borderRadius: variant === 'glass' ? glassRadius : sizing.br,
+          borderRadius: isGlass ? glassRadius : sizing.br,
           backgroundColor: palette.bg,
           borderColor: palette.border ?? 'transparent',
           borderWidth: palette.border ? 1 : 0,
-          opacity:
-            variant === 'glass'
-              ? 1
-              : unavailable
-                ? 0.5
-                : pressed
-                  ? pressedOpacity
-                  : 1,
+          opacity: isGlass
+            ? 1
+            : unavailable
+              ? 0.5
+              : pressed
+                ? pressedOpacity
+                : 1,
           alignSelf: block ? 'stretch' : 'flex-start',
           gap: sizing.gap,
         },
         style,
       ]}
     >
-      {variant === 'glass'
+      {isGlass
         ? ({ pressed }) => {
             const opacity = unavailable ? 0.5 : pressed ? pressedOpacity : 1;
             return (

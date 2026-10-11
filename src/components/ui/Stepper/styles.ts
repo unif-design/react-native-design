@@ -20,12 +20,12 @@ export const makeStyles = (c: ColorTokens) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    /** btn / value 共用的 cell 基底 —— 居中 + surface 背景 + 上下边框。
+    /** btn / value 共用的 cell 基底 —— 居中 + 上下边框，材质位于命中框下方。
      *  左右边框 / 圆角由 btnLeft / btnRight 增量补齐;value 中间无侧边框。 */
     cell: {
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: c.surface,
+      backgroundColor: 'transparent',
       borderTopWidth: 1,
       borderBottomWidth: 1,
       borderColor: c.outline,

@@ -52,8 +52,14 @@ description: '随主题渲染玻璃材质，并提供明确的平台降级。'
   </div>
 ```
 
+交互 Chip、Search、secondary Button、导航和数值控件直接采用默认系统材质；状态与事件仍由调用方维护。
+
 ```tsx
-<LiquidGlassDemo />
+  <DefaultGlassControlsDemo />
+```
+
+```tsx
+  <LiquidGlassDemo />
 ```
 
 ## 用法
@@ -78,13 +84,13 @@ import { View, Text } from 'react-native';
 
 ## API
 
-| 参数        | 类型                   | 默认值                    | 说明                                       |
-| ----------- | ---------------------- | ------------------------- | ------------------------------------------ |
-| `effect`    | `'clear' \| 'regular'` | `'regular'`               | `clear` 更通透，`regular` 使用标准材质     |
-| `tintColor` | `ColorValue`           | 原生不额外染色          | 支持时的材质染色；实色降级使用对应主题 surface      |
-| `colorScheme` | `'light' \| 'dark'` | 继承主题 | 固定白色前景的相机控件使用 dark |
-| `style`     | `StyleProp<ViewStyle>` | `StyleSheet.absoluteFill` | 布局、定位和圆角；材质颜色使用 `tintColor` |
-| `testID`    | `string`               | —                         | 测试定位                                   |
+| 参数          | 类型                   | 默认值                    | 说明                                           |
+| ------------- | ---------------------- | ------------------------- | ---------------------------------------------- |
+| `effect`      | `'clear' \| 'regular'` | `'regular'`               | `clear` 更通透，`regular` 使用标准材质         |
+| `tintColor`   | `ColorValue`           | 原生不额外染色            | 支持时的材质染色；实色降级使用对应主题 surface |
+| `colorScheme` | `'light' \| 'dark'`    | 继承主题                  | 固定白色前景的相机控件使用 dark                |
+| `style`       | `StyleProp<ViewStyle>` | `StyleSheet.absoluteFill` | 布局、定位和圆角；材质颜色使用 `tintColor`     |
+| `testID`      | `string`               | —                         | 测试定位                                       |
 
 原生默认不设置 `tintColor`，让系统从背后内容生成玻璃材质，不额外叠加白色或黑色底。Web 仅作 CSS 近似：clear 使用轻薄的 `c.tabBarGlassTint`，regular 使用 `c.glassSurface`。默认随主题更新，也可通过 `colorScheme` 选择固定外观；这不会改变相邻文字颜色。
 
@@ -93,7 +99,7 @@ import { View, Text } from 'react-native';
 | 平台                               | 实现                                                                                        |
 | ---------------------------------- | ------------------------------------------------------------------------------------------- |
 | iOS 26+ 且原生支持标记为真         | `@callstack/liquid-glass` 的 `LiquidGlassView`，使用 `clear/regular` 原生材质与 `tintColor` |
-| 旧 iOS、Android 或原生支持标记为假 | 对应主题的实色 `surface`，不提供背景模糊                                                              |
+| 旧 iOS、Android 或原生支持标记为假 | 对应主题的实色 `surface`，不提供背景模糊                                                    |
 | Web                                | CSS `backdrop-filter` 与主题背景；`clear/regular` 分别使用 10/40px 的近似值                 |
 
 安装 `@callstack/liquid-glass`（本库 peer 范围 `>=0.8.2 <0.9.0`），iOS 执行 `bundle exec pod install` 并重新构建。上游要求 RN 0.80+、Xcode 26+；本库的 RN 要求仍以根 `package.json` 为准。当前 RN 0.86.3 的最低 iOS 版本为 15.1；玻璃能力的 iOS 26 门槛与应用最低版本是两件事，支持范围内的旧 iOS 使用实色回退。Expo Go 不支持此原生模块，Expo 工程需开发构建。见 [上游安装与 API](https://github.com/callstack/liquid-glass#documentation)。
