@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.4](https://github.com/unif-design/react-native-design/compare/v0.40.3...v0.40.4) (2026-10-11)
+
+
+### Bug Fixes
+
+* **image-preview:** remove image frame and rounded corners ([#152](https://github.com/unif-design/react-native-design/issues/152)) ([6e6471a](https://github.com/unif-design/react-native-design/commit/6e6471a2efd321129c319e60250caf3f64b2db86))
+
 ## [0.40.3](https://github.com/unif-design/react-native-design/compare/v0.40.2...v0.40.3) (2026-10-10)
 
 
