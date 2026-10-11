@@ -5784,7 +5784,7 @@ import { TabBar } from '@unif/react-native-design';
 
 页面内分类切换 · 两种风格：**下划线 Tabs**（页面级）/ **分段控件 Segmented**（局部分组）。
 
-`Segmented` 的浮动场景可设置 `surface="glass"`，正文内继续默认 solid；选中和整体/单项禁用的状态与事件规则保持。
+`Segmented` 的浮动场景可设置 `surface="glass"`，使用内外胶囊、适度留边与无阴影的中性选中底；选项仍由调用方提供。正文内继续默认 solid；选中和整体/单项禁用的状态与事件规则保持。
 
 ## 代码演示 {#实时预览}
 

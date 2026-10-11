@@ -98,6 +98,18 @@ final class LiquidGlassScreenshots: XCTestCase {
     }
   }
 
+  func testGlassSegmentedCapsule() {
+    for scheme in ["light", "dark"] {
+      let app = scene("overview", scheme: scheme)
+      waitForLabel(app.staticTexts["glass-result"], containing: "选项:all")
+      capture("native-\(scheme)-overview")
+      app.descendants(matching: .any).matching(identifier: "glass-segments-done").firstMatch.tap()
+      waitForLabel(app.staticTexts["glass-result"], containing: "选项:done")
+      capture("native-\(scheme)-overview-selected")
+      app.terminate()
+    }
+  }
+
   func testButtonMaterialStates() {
     for scheme in ["light", "dark"] {
       let app = scene("overview", scheme: scheme)

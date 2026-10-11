@@ -198,17 +198,19 @@ function Scene() {
                 onPress={() => setPresses((count) => count + 1)}
               />
             </View>
-            <Segmented
-              testID="glass-segments"
-              surface="glass"
-              value={segment}
-              onChange={setSegment}
-              items={[
-                { id: 'all', label: '全部' },
-                { id: 'active', label: '进行中' },
-                { id: 'done', label: '已结束' },
-              ]}
-            />
+            <View style={styles.segmentHost}>
+              <Segmented
+                testID="glass-segments"
+                surface="glass"
+                value={segment}
+                onChange={setSegment}
+                items={[
+                  { id: 'all', label: '全部' },
+                  { id: 'active', label: '进行中' },
+                  { id: 'done', label: '已结束' },
+                ]}
+              />
+            </View>
             <TabBar
               testID="glass-tabs"
               surface="glass"
@@ -264,6 +266,7 @@ const styles = StyleSheet.create({
   lightBand: { opacity: 0.58 },
   backdropLabel: { fontSize: 24, color: '#1C2330', fontWeight: '600' },
   overview: { width: '90%', gap: 34 },
+  segmentHost: { alignSelf: 'center' },
   buttons: {
     flexDirection: 'row',
     justifyContent: 'center',

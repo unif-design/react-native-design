@@ -85,16 +85,18 @@ export function LiquidGlassDemo() {
           />
         </View>
       </View>
-      <Segmented
-        surface="glass"
-        value={tab}
-        onChange={setTab}
-        items={[
-          { id: 'chat', label: '聊天' },
-          { id: 'visit', label: '拜访' },
-          { id: 'disabled', label: '禁用', disabled: true },
-        ]}
-      />
+      <View style={{ alignItems: 'center' }}>
+        <Segmented
+          surface="glass"
+          value={tab}
+          onChange={setTab}
+          items={[
+            { id: 'chat', label: '聊天' },
+            { id: 'visit', label: '拜访' },
+            { id: 'disabled', label: '禁用', disabled: true },
+          ]}
+        />
+      </View>
       <View style={{ width: 300, maxWidth: '100%' }}>
         <TabBar
           surface="glass"
