@@ -1,5 +1,15 @@
 # Changelog
 
+# [1.0.0](https://github.com/unif-design/react-native-design/compare/v0.41.0...v1.0.0) (2026-10-11)
+
+
+* feat!: migrate design controls to standalone icons ([1a1e2f0](https://github.com/unif-design/react-native-design/commit/1a1e2f0f6bc36fada0d03d9783e29dc2a8b5b459))
+
+
+### BREAKING CHANGES
+
+* 图标控件参数改为 Icons 组件；Design 不再导出 Icon、IconName 或生成图标目录。
+
 # [0.41.0](https://github.com/unif-design/react-native-design/compare/v0.40.4...v0.41.0) (2026-10-11)
 
 
