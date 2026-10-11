@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import { Text, View } from 'react-native';
-import { radius, useThemedStyles } from '../../../theme';
+import { useThemedStyles } from '../../../theme';
 import { IconButton } from '../IconButton';
 import { Thumbnail } from '../Thumbnail';
 import { Carousel, type CarouselRef } from 'react-native-reanimated-carousel';
@@ -211,7 +211,7 @@ export const ImagePreview = forwardRef<ImagePreviewHandle, ImagePreviewProps>(
                   ) : (
                     <Thumbnail
                       source={item.source}
-                      size={{ width, height, borderRadius: radius.xl }}
+                      size={{ width, height, borderRadius: 0 }}
                       resizeMode="contain"
                       imageStyle={styles.image}
                       accessibilityLabel={
@@ -226,7 +226,6 @@ export const ImagePreview = forwardRef<ImagePreviewHandle, ImagePreviewProps>(
                       }
                     />
                   )}
-                  <View pointerEvents="none" style={styles.border} />
                 </View>
               );
             }}

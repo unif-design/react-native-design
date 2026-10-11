@@ -8,14 +8,7 @@ export const makeStyles = (colors: ColorTokens) =>
     container: { alignItems: 'center', gap: space[2] },
     media: {
       backgroundColor: 'black',
-      borderRadius: radius.xl,
       overflow: 'hidden',
-    },
-    border: {
-      ...StyleSheet.absoluteFill,
-      borderColor: colors.outline,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderRadius: radius.xl,
     },
     image: { backgroundColor: 'black' },
     placeholder: {
