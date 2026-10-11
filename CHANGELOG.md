@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.41.0](https://github.com/unif-design/react-native-design/compare/v0.40.4...v0.41.0) (2026-10-11)
+
+
+### Features
+
+* apply system glass across shared controls and overlays ([#153](https://github.com/unif-design/react-native-design/issues/153)) ([5b3f749](https://github.com/unif-design/react-native-design/commit/5b3f749fd7404b6e726e01caabf462db1c96e639))
+
 ## [0.40.4](https://github.com/unif-design/react-native-design/compare/v0.40.3...v0.40.4) (2026-10-11)
 
 
