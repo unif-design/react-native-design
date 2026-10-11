@@ -1,9 +1,16 @@
 import React from 'react';
 import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
-import { act, render, screen, waitFor } from '@testing-library/react-native';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react-native';
 import * as LiquidGlass from '@callstack/liquid-glass';
 import {
   GlassLayer,
+  IconButton,
   GlassStats,
   ThemeProvider,
   darkColors,
@@ -45,10 +52,7 @@ test.each(['clear', 'regular'] as const)(
     expect(material.props).toMatchObject({
       effect,
       colorScheme: 'light',
-      tintColor:
-        effect === 'clear'
-          ? lightColors.glassTintLight
-          : lightColors.glassRegularTint,
+      tintColor: undefined,
       animated: false,
       pointerEvents: 'none',
       accessible: false,
@@ -68,10 +72,7 @@ test.each(['clear', 'regular'] as const)(
       screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props
     ).toMatchObject({
       colorScheme: 'dark',
-      tintColor:
-        effect === 'clear'
-          ? darkColors.glassTintLight
-          : darkColors.glassRegularTint,
+      tintColor: undefined,
     });
   }
 );
@@ -178,7 +179,7 @@ test.each([true, false])(
     expect(material.props).toMatchObject({
       effect: supported ? 'clear' : 'none',
       colorScheme: 'dark',
-      tintColor: darkColors.glassTintLight,
+      tintColor: undefined,
     });
     expect(StyleSheet.flatten(material.props.style)).toMatchObject({
       borderRadius: radius['2xl'],
@@ -227,3 +228,27 @@ test('固定深色材质在减少透明度事件后保持实色，迟到查询�
   view.unmount();
   expect(remove).toHaveBeenCalled();
 });
+
+// 原生材质不能由祖先 opacity 淡化；禁用只淡化前景且仍禁止动作。
+test.each([false, true])(
+  '玻璃图标按钮 loading=%s 时材质宿主保持全不透明并阻止操作',
+  (loading) => {
+    const press = jest.fn();
+    render(
+      <ThemeProvider>
+        <IconButton
+          variant="glass"
+          icon="chevron-left"
+          accessibilityLabel="玻璃返回"
+          disabled={!loading}
+          loading={loading}
+          onPress={press}
+        />
+      </ThemeProvider>
+    );
+    const button = screen.getByRole('button', { name: '玻璃返回' });
+    expect(StyleSheet.flatten(button.props.style).opacity).toBe(1);
+    fireEvent.press(button);
+    expect(press).not.toHaveBeenCalled();
+  }
+);

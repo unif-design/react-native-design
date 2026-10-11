@@ -81,12 +81,12 @@ import { View, Text } from 'react-native';
 | 参数        | 类型                   | 默认值                    | 说明                                       |
 | ----------- | ---------------------- | ------------------------- | ------------------------------------------ |
 | `effect`    | `'clear' \| 'regular'` | `'regular'`               | `clear` 更通透，`regular` 使用标准材质     |
-| `tintColor` | `ColorValue`           | 随主题和材质推导          | 支持时的材质染色；实色降级使用对应主题 surface      |
+| `tintColor` | `ColorValue`           | 原生不额外染色          | 支持时的材质染色；实色降级使用对应主题 surface      |
 | `colorScheme` | `'light' \| 'dark'` | 继承主题 | 固定白色前景的相机控件使用 dark |
 | `style`     | `StyleProp<ViewStyle>` | `StyleSheet.absoluteFill` | 布局、定位和圆角；材质颜色使用 `tintColor` |
 | `testID`    | `string`               | —                         | 测试定位                                   |
 
-`clear` 默认使用 `c.glassTintLight`，`regular` 默认使用 `c.glassRegularTint`，颜色由当前 `ThemeProvider` 提供。默认随主题更新，也可通过 `colorScheme` 选择固定外观；这不会改变相邻文字颜色。
+原生默认不设置 `tintColor`，让系统从背后内容生成玻璃材质，不额外叠加白色或黑色底。Web 仅作 CSS 近似：clear 使用轻薄的 `c.tabBarGlassTint`，regular 使用 `c.glassSurface`。默认随主题更新，也可通过 `colorScheme` 选择固定外观；这不会改变相邻文字颜色。
 
 ## 平台与接入
 
@@ -105,3 +105,5 @@ import { View, Text } from 'react-native';
 玻璃层不拦截触摸，隐藏自身无障碍子树，内容语义由其旁边的真实内容提供。材质更新不播放动画。原生监听减少透明度偏好，Web 监听 `prefers-reduced-transparency`；开启时使用实色 `surface`。Web 无 `backdrop-filter` 支持时也使用实色。系统查询尚未返回时先使用实色，迟到查询不会覆盖新的偏好事件。
 
 父容器应限定尺寸并提供相对定位。圆角通过 `style` 传给玻璃层；父容器负责内容裁切，外层按需承载阴影。组件只提供背景，不接受 `children`。
+
+原生玻璃层及其祖先不要设置小于 1 的 opacity。按压、禁用和淡入淡出只淡化前景内容，避免 UIKit 原生效果消失；整个表面仍可做位移。见 [UIVisualEffectView 的 alpha 约束](https://developer.apple.com/documentation/uikit/uivisualeffectview/)。

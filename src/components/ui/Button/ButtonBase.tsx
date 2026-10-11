@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
+  View,
   type AccessibilityRole,
   type AccessibilityState,
   type StyleProp,
@@ -102,6 +103,12 @@ export function ButtonBase({
     return { top: v, bottom: v, left: 0, right: 0 };
   }, [isText, sizing.h, square]);
 
+  const content = loading ? (
+    <ActivityIndicator size={loadingSize ?? 'small'} color={palette.fg} />
+  ) : (
+    children({ sizing, palette })
+  );
+
   return (
     <Pressable
       accessible={hasAccessibleName}
@@ -133,21 +140,37 @@ export function ButtonBase({
           backgroundColor: palette.bg,
           borderColor: palette.border ?? 'transparent',
           borderWidth: palette.border ? 1 : 0,
-          opacity: unavailable ? 0.5 : pressed ? pressedOpacity : 1,
+          opacity:
+            variant === 'glass'
+              ? 1
+              : unavailable
+                ? 0.5
+                : pressed
+                  ? pressedOpacity
+                  : 1,
           alignSelf: block ? 'stretch' : 'flex-start',
           gap: sizing.gap,
         },
         style,
       ]}
     >
-      {variant === 'glass' ? (
-        <GlassLayer style={{ borderRadius: glassRadius }} />
-      ) : null}
-      {loading ? (
-        <ActivityIndicator size={loadingSize ?? 'small'} color={palette.fg} />
-      ) : (
-        children({ sizing, palette })
-      )}
+      {variant === 'glass'
+        ? ({ pressed }) => {
+            const opacity = unavailable ? 0.5 : pressed ? pressedOpacity : 1;
+            return (
+              <>
+                <GlassLayer style={{ borderRadius: glassRadius }} />
+                {/* 原生材质的祖先不能降低 alpha，只淡化按钮前景。 */}
+                <View
+                  collapsable={false}
+                  style={[styles.base, { gap: sizing.gap, opacity }]}
+                >
+                  {content}
+                </View>
+              </>
+            );
+          }
+        : content}
     </Pressable>
   );
 }

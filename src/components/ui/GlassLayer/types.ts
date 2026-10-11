@@ -5,7 +5,7 @@ export type GlassEffect = 'clear' | 'regular';
 export interface GlassLayerProps {
   /** 玻璃材质，默认 regular；clear 更通透。Web 使用对应的 CSS 近似效果。 */
   effect?: GlassEffect;
-  /** 原生与 Web 材质的染色；实色降级始终采用对应主题的 surface。 */
+  /** 可选材质染色；原生默认不额外染色，由系统呈现。实色降级采用对应主题 surface。 */
   tintColor?: ColorValue;
   /** 默认继承主题；相机等固定白色前景可指定 dark，前景色仍由内容负责。 */
   colorScheme?: 'light' | 'dark';

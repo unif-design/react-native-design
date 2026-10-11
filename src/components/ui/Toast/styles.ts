@@ -30,6 +30,12 @@ export const makeStyles = (c: ColorTokens) =>
       maxWidth: '85%',
     },
     material: { borderRadius: radius.md },
+    content: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: space[2],
+      flexShrink: 1,
+    },
     dot: {
       // 6×6 视觉原子:dot 直径/圆角无语义 token,保留 r() 缩放原始值
       width: r(6),

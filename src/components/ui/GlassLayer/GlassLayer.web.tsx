@@ -43,7 +43,7 @@ export function GlassLayer({
     return () => media?.removeEventListener('change', update);
   }, []);
   const resolvedTint =
-    tintColor ?? (effect === 'clear' ? c.glassTintLight : c.glassRegularTint);
+    tintColor ?? (effect === 'clear' ? c.tabBarGlassTint : c.glassSurface);
   const filter = transparent
     ? `blur(${webGlassBlur[effect]}px) saturate(180%)`
     : 'none';

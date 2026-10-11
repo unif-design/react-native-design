@@ -21,8 +21,8 @@ afterEach(() => {
 });
 
 test.each([
-  ['clear', 'blur(10px) saturate(180%)', lightColors.glassTintLight],
-  ['regular', 'blur(40px) saturate(180%)', lightColors.glassRegularTint],
+  ['clear', 'blur(10px) saturate(180%)', lightColors.tabBarGlassTint],
+  ['regular', 'blur(40px) saturate(180%)', lightColors.glassSurface],
 ] as const)(
   'Web 的 %s 材质保留 CSS 近似效果与默认 tint',
   (effect, filter, backgroundColor) => {
@@ -61,8 +61,8 @@ test.each([
     ).toMatchObject({
       backgroundColor:
         effect === 'clear'
-          ? darkColors.glassTintLight
-          : darkColors.glassRegularTint,
+          ? darkColors.tabBarGlassTint
+          : darkColors.glassSurface,
     });
   }
 );
