@@ -11,6 +11,7 @@ import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { normalizeNonBlankText } from '../shared/accessibilityName';
+import { GlassLayer } from '../GlassLayer';
 import { makeStyles, THUMB_OFF_X, THUMB_ON_X } from './styles';
 import type { SwitchProps } from './types';
 
@@ -77,8 +78,12 @@ export function Switch({
       accessible={!hasBlankLabel}
       onPress={isDisabled ? undefined : () => onChange(!value)}
       disabled={isDisabled}
-      style={[styles.pressable, isDisabled && styles.pressableDisabled]}
+      style={styles.pressable}
       accessibilityRole={hasBlankLabel ? undefined : 'switch'}
+      role={hasBlankLabel ? undefined : 'switch'}
+      aria-checked={hasBlankLabel ? undefined : value}
+      aria-disabled={hasBlankLabel ? undefined : isDisabled}
+      tabIndex={isDisabled ? -1 : 0}
       accessibilityState={
         hasBlankLabel ? undefined : { checked: value, disabled: isDisabled }
       }
@@ -90,8 +95,15 @@ export function Switch({
         style={styles.visualFrame}
         testID={childTestID(testID, 'visual')}
       >
-        <View style={trackWebStyle} testID={childTestID(testID, 'track')}>
-          <View style={thumbWebStyle} testID={childTestID(testID, 'thumb')} />
+        <View
+          style={[trackWebStyle, isDisabled && styles.trackDisabled]}
+          testID={childTestID(testID, 'track')}
+        />
+        <View style={thumbWebStyle} testID={childTestID(testID, 'thumb')}>
+          <GlassLayer
+            style={styles.thumbMaterial}
+            testID={childTestID(testID, 'thumb-glass')}
+          />
         </View>
       </View>
     </Pressable>

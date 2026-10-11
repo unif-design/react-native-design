@@ -36,13 +36,13 @@ test('默认固定内容并将 root 与内容样式应用到各自容器', async
     StyleSheet.flatten(page.getByTestId('sheet').props.style)
   ).toMatchObject({
     flex: 1,
-    backgroundColor: lightColors.surface,
     borderRadius: 17,
   });
   expect(viewStyles(page)).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         flex: 1,
+        backgroundColor: lightColors.surface,
         paddingHorizontal: space['9'],
         paddingTop: space['4'],
         paddingBottom: space['9'],
@@ -113,7 +113,7 @@ test('外部滚动模式不在实际列表外再嵌套纵向 ScrollView', async 
   ).toHaveLength(1);
 });
 
-test('没有 header 时显示非交互 grabber，footer 保留基础间距和分隔线', async () => {
+test('没有 header 时显示非交互 grabber，玻璃 footer 保留基础间距', async () => {
   const page = await render(
     <ThemeProvider>
       <Sheet footer={<Text>底部操作</Text>}>
@@ -138,11 +138,11 @@ test('没有 header 时显示非交互 grabber，footer 保留基础间距和分
         backgroundColor: lightColors.foregroundMuted,
       }),
       expect.objectContaining({
-        backgroundColor: lightColors.surface,
+        backgroundColor: 'transparent',
         paddingHorizontal: space['9'],
         paddingTop: space['5'],
         paddingBottom: space['6'],
-        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopWidth: 0,
         borderTopColor: lightColors.outline,
       }),
     ])
@@ -199,13 +199,20 @@ test('主题和字体设置透传给 Sheet 样式与调用方组合的 Design �
     page.getByText('确认').props.style
   ).fontSize;
 
-  expect(
-    StyleSheet.flatten(page.getByTestId('sheet').props.style)
-  ).toMatchObject({ backgroundColor: lightColors.surface });
+  expect(viewStyles(page)).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        flex: 1,
+        backgroundColor: lightColors.surface,
+      }),
+    ])
+  );
   await page.rerender(content('dark', 1.5));
-  expect(
-    StyleSheet.flatten(page.getByTestId('sheet').props.style)
-  ).toMatchObject({ backgroundColor: darkColors.surface });
+  expect(viewStyles(page)).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ flex: 1, backgroundColor: darkColors.surface }),
+    ])
+  );
   expect(viewStyles(page)).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
@@ -219,3 +226,40 @@ test('主题和字体设置透传给 Sheet 样式与调用方组合的 Design �
     lightFontSize * 1.5
   );
 });
+
+test.each(['text', 'navbar'] as const)(
+  '自定义 %s header 保留主题内容底，页脚材质独立',
+  (kind) => {
+    const header =
+      kind === 'text' ? (
+        <Text testID="custom-title">项目标题</Text>
+      ) : (
+        <NavBar title="项目标题" testID="custom-title" />
+      );
+    const page = render(
+      <ThemeProvider>
+        <Sheet header={header} footer={<Text>工具区</Text>}>
+          <Text>正文</Text>
+        </Sheet>
+      </ThemeProvider>
+    );
+    let node = page.getByTestId('custom-title').parent;
+    while (
+      node &&
+      StyleSheet.flatten(node.props.style)?.backgroundColor !==
+        lightColors.surface
+    )
+      node = node.parent;
+    expect(node).not.toBeNull();
+    let footer = page.getByText('工具区').parent;
+    while (
+      footer &&
+      StyleSheet.flatten(footer.props.style)?.borderTopColor !==
+        lightColors.outline
+    )
+      footer = footer.parent;
+    expect(StyleSheet.flatten(footer?.props.style).backgroundColor).toBe(
+      'transparent'
+    );
+  }
+);

@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
 import { Icon } from '../Icon';
+import { GlassLayer } from '../GlassLayer';
 import { r, useColors, useThemedStyles } from '../../../theme';
 import { makeStyles } from './styles';
 import type { EntryCardProps } from './types';
@@ -37,6 +38,18 @@ export function EntryCard({
     </>
   );
 
+  const renderContent = (pressed = false) => (
+    <>
+      <GlassLayer style={styles.material} />
+      <View
+        collapsable={false}
+        style={[styles.content, pressed && styles.pressed]}
+      >
+        {content}
+      </View>
+    </>
+  );
+
   if (onPress) {
     // a11y label 包含副标题,SR 用户听到完整信息(标题+sub)再决定是否点击
     const a11yLabel = sub ? `${title},${sub}` : title;
@@ -46,15 +59,15 @@ export function EntryCard({
         accessibilityRole="button"
         accessibilityLabel={a11yLabel}
         testID={testID}
-        style={({ pressed }) => [styles.card, pressed && styles.pressed, style]}
+        style={[styles.card, style]}
       >
-        {content}
+        {({ pressed }) => renderContent(pressed)}
       </Pressable>
     );
   }
   return (
     <View style={[styles.card, style]} testID={testID}>
-      {content}
+      {renderContent()}
     </View>
   );
 }

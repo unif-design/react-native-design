@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
-import { r, radius, useColors, useThemedStyles } from '../../../theme';
+import { Platform, StyleSheet, View } from 'react-native';
+import { r, radius, useThemedStyles } from '../../../theme';
+import { GlassLayer } from '../GlassLayer';
+import { GlassGroup } from '../GlassLayer/GlassGroup';
 import { makeStyles } from './styles';
 import type { ActionMenuPopoverCardProps } from './types';
 
@@ -13,11 +14,12 @@ export function ActionMenuPopoverCard({
   testID,
 }: ActionMenuPopoverCardProps) {
   const styles = useThemedStyles(makeStyles);
-  const colors = useColors();
   const [width, setWidth] = useState(0);
   const pointerWidth = Math.min(r(26), width);
   const pointerHeight = (pointerWidth * 14) / 26;
   const half = pointerWidth / 2;
+  // Web 没有 SDK 材质融合，箭头恰好接边，避免重复叠色形成亮缝。
+  const overlap = Platform.OS === 'web' ? 0 : r(1);
   const inset = Math.min(radius['3xl'] + half, width / 2);
   const offset =
     pointer && Number.isFinite(pointer.offset)
@@ -29,41 +31,57 @@ export function ActionMenuPopoverCard({
       style={[styles.popoverRoot, style]}
       onLayout={(event) => setWidth(event.nativeEvent.layout.width)}
     >
+      <GlassGroup
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+        accessible={false}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
+        {pointer && width > 0 ? (
+          <View
+            testID={`${testID}-pointer-${pointer.edge}`}
+            pointerEvents="none"
+            accessible={false}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+            style={[
+              styles.pointer,
+              {
+                left: offset - half,
+                width: pointerWidth,
+                height: pointerHeight,
+              },
+              pointer.edge === 'top'
+                ? { top: -pointerHeight + overlap }
+                : {
+                    bottom: -pointerHeight + overlap,
+                    transform: [{ rotate: '180deg' }],
+                  },
+            ]}
+          >
+            <GlassLayer
+              style={{
+                width: pointerWidth / Math.SQRT2,
+                height: pointerWidth / Math.SQRT2,
+                left: (pointerWidth - pointerWidth / Math.SQRT2) / 2,
+                top: pointerHeight - pointerWidth / Math.SQRT2 / 2,
+                right: undefined,
+                bottom: undefined,
+                borderRadius: r(2),
+                transform: [{ rotate: '45deg' }],
+              }}
+            />
+          </View>
+        ) : null}
+        <GlassLayer style={styles.popoverMaterial} />
+      </GlassGroup>
       <View
         testID={`${testID}-card`}
         style={[styles.popoverCard, contentStyle]}
       >
         {children}
       </View>
-      {pointer && width > 0 ? (
-        <Svg
-          testID={`${testID}-pointer-${pointer.edge}`}
-          pointerEvents="none"
-          accessible={false}
-          accessibilityElementsHidden
-          importantForAccessibility="no-hide-descendants"
-          width={pointerWidth}
-          height={pointerHeight}
-          viewBox="0 0 26 14"
-          style={[
-            styles.pointer,
-            { left: offset - half, width: pointerWidth, height: pointerHeight },
-            pointer.edge === 'top'
-              ? { top: -pointerHeight + r(1) }
-              : {
-                  bottom: -pointerHeight + r(1),
-                  transform: [{ rotate: '180deg' }],
-                },
-          ]}
-        >
-          <Path
-            d="M0 14 L10 3 Q13 0 16 3 L26 14"
-            fill={colors.surface}
-            stroke={colors.outline}
-            strokeWidth={0.5}
-          />
-        </Svg>
-      ) : null}
     </View>
   );
 }

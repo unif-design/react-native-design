@@ -10,6 +10,8 @@ description: '切换同一层级的内容区域。'
 
 页面内分类切换 · 两种风格：**下划线 Tabs**（页面级）/ **分段控件 Segmented**（局部分组）。
 
+`Tabs` 与 `Segmented` 默认使用系统玻璃表面。Segmented 采用内外胶囊、r(4) 留边与无阴影的中性选中底；需要实色正文控件时显式设置 `surface="solid"`。选项、选中与整体/单项禁用的状态和事件规则保持。
+
 ## 代码演示 {#实时预览}
 
 ```tsx
@@ -80,7 +82,7 @@ const TabsDemo = () => {
 
 | 元素   | 规则                                                                                                   |
 | ------ | ------------------------------------------------------------------------------------------------------ |
-| 容器   | 高 44px（`fixed.hitTarget`），背景 `c.surface`，底部 hairline `c.outline`                              |
+| 容器   | 高 44px（`fixed.hitTarget`），系统玻璃表面，底部 hairline `c.outline`                              |
 | Tab 项 | `flex: 1` 平分，`14px`（`type.sm`），激活态 `c.primary` + 字重 600（非激活 `c.foregroundMuted` + 500） |
 | 下划线 | 2px `c.primary`，宽 36px（`icon.xl`，居中、非随 label），底对齐                                        |
 
@@ -90,11 +92,11 @@ const TabsDemo = () => {
 
 | 元素 | 规则                                                                                                                                                                                                                          |
 | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 容器 | `alignSelf: 'flex-start'` 内容自适应宽，背景 `c.surfaceContainerHigh`（亮色 `#F0F0F0`），圆角 8（`radius.md`），内 padding 2                                                                                                  |
+| 容器 | `alignSelf: 'flex-start'` 内容自适应宽，默认玻璃胶囊 `radius.pill`、内 padding r(4)；显式 solid 保留 `c.surfaceContainerHigh`、圆角 8、内 padding 2                                                                                                  |
 | 项   | 内容宽（非平分）；`minHeight` / 水平 padding / 基准字号随 `size`：`md` 44 / 16 / 13（`fixed.hitTarget`·`space[7]`·`type.xs`，默认、触控达标）· `sm` 28 / 12 / 12（高 28pt 物理常量·`space[5]`·`type.xxs`，紧凑、触控 < 44px） |
-| 激活 | 白底 thumb（暗色 `surfaceContainerHighest`），圆角 6（`radius.sm`），亮色态柔阴影                                                                                                                                             |
+| 激活 | 默认 `c.glassSeparator` 中性选中胶囊，无阴影；solid 保留主题实色选中底、圆角 6 与原阴影规则                                                                                                                                             |
 
-禁用项采用与 Tabs 一致的 0.4 透明度，文字、选中块及其阴影一起淡化，当前选中标记仍保留；点击不交付 onChange，禁用时也不改变按压透明度。整体 disabled 与单项 item.disabled 使用同一规则。
+禁用项采用与 Tabs 一致的 0.4 透明度，仅前景选项及选中块淡化，共享玻璃保持不透明，当前选中标记仍保留；点击不交付 onChange，禁用时也不改变按压透明度。整体 disabled 与单项 item.disabled 使用同一规则。
 
 `ThemeProvider fontScale` 只把 Segmented label 的基准字号缩放一次。track、item `minHeight`、水平 padding、内外圆角和阴影均保持原几何，不随字号档位放大。
 
@@ -132,7 +134,7 @@ import { Tabs, Segmented } from '@unif/react-native-design';
 
 ## API
 
-来源：`src/components/ui/Tabs/types.ts`、`src/components/ui/Segmented/types.ts`。`Tabs` 与 `Segmented` props 形状一致，共用 `TabItem`。
+来源：`src/components/ui/Tabs/types.ts`、`src/components/ui/Segmented/types.ts`。`Tabs` 与 `Segmented` 共用 `TabItem`；surface 和 size 仅属于 Segmented。
 
 `TabsProps` / `SegmentedProps`：
 
@@ -141,6 +143,7 @@ import { Tabs, Segmented } from '@unif/react-native-design';
 | `value`    | `string`               | —       | 当前选中项的 `id`（必填）                                                                                                                                       |
 | `onChange` | `(id: string) => void` | —       | 切换回调，回传点中项的 `id`（必填）                                                                                                                             |
 | `items`    | `TabItem[]`            | —       | 列表项（Tabs ≥2 项才有意义；必填）                                                                                                                              |
+| `surface` | `solid \| glass` | `glass` | 仅 Segmented：默认玻璃，可显式采用正文实色 |
 | `size`     | `'sm' \| 'md'`         | `'md'`  | **仅 Segmented**；`'md'` 默认（高 44px / 基准字号 13，触控达标），`'sm'` 紧凑（高 28px / 基准字号 12，给模型下拉等局促位用，触控 < 44px）；fontScale 只缩放文字 |
 | `disabled` | `boolean`              | `false` | 整体禁用；所有项淡化且不可切换，保留当前选中值                                                                                                                  |
 | `testID`   | `string?`              | —       | 容器 testID；item testID 自动派生为 `${testID}-${id}`                                                                                                           |

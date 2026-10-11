@@ -36,6 +36,7 @@ const buttonVariants = [
   'outline',
   'danger',
   'text',
+  'glass',
 ] as const;
 const buttonSizes = ['sm', 'md', 'lg'] as const;
 const iconButtonVariants = buttonVariants.filter(

@@ -20,13 +20,14 @@ import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { normalizeNonBlankText } from '../shared/accessibilityName';
+import { GlassLayer } from '../GlassLayer';
 import { makeStyles, THUMB_OFF_X, THUMB_ON_X } from './styles';
 import type { SwitchProps } from './types';
 
 const log = createLogger('Switch');
 
 /**
- * 布尔切换。32×20 轨道 + 16×16 白色把手,200ms 缓动。
+ * 布尔切换。32×20 轨道 + 16×16 系统材质把手,200ms 缓动。
  *
  * 不用 RN 原生 Switch(iOS 上无法精确还原 Unif 尺寸)。
  * reanimated 4 worklet 全程 UI 线程驱动。
@@ -86,8 +87,12 @@ export function Switch({
       accessible={!hasBlankLabel}
       onPress={isDisabled ? undefined : () => onChange(!value)}
       disabled={isDisabled}
-      style={[styles.pressable, isDisabled && styles.pressableDisabled]}
+      style={styles.pressable}
       accessibilityRole={hasBlankLabel ? undefined : 'switch'}
+      role={hasBlankLabel ? undefined : 'switch'}
+      aria-checked={hasBlankLabel ? undefined : value}
+      aria-disabled={hasBlankLabel ? undefined : isDisabled}
+      tabIndex={isDisabled ? -1 : 0}
       accessibilityState={
         hasBlankLabel ? undefined : { checked: value, disabled: isDisabled }
       }
@@ -100,12 +105,16 @@ export function Switch({
         testID={childTestID(testID, 'visual')}
       >
         <Animated.View
-          style={[styles.track, trackStyle]}
+          style={[styles.track, trackStyle, isDisabled && styles.trackDisabled]}
           testID={childTestID(testID, 'track')}
+        />
+        <Animated.View
+          style={[styles.thumb, thumbStyle]}
+          testID={childTestID(testID, 'thumb')}
         >
-          <Animated.View
-            style={[styles.thumb, thumbStyle]}
-            testID={childTestID(testID, 'thumb')}
+          <GlassLayer
+            style={styles.thumbMaterial}
+            testID={childTestID(testID, 'thumb-glass')}
           />
         </Animated.View>
       </View>

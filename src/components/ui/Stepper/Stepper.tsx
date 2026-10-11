@@ -2,12 +2,14 @@ import React, { useEffect } from 'react';
 import { Text, View } from 'react-native';
 import {
   pressedOpacity,
+  radius,
   scaleFontMetric,
   useFontScale,
   useThemedStyles,
 } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
+import { GlassLayer } from '../GlassLayer';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { normalizeNonBlankText } from '../shared/accessibilityName';
 import { getStepperValueAccessibilityProps } from './accessibility';
@@ -112,7 +114,17 @@ export function Stepper({
 
   return (
     <View style={styles.wrap} testID={testID}>
+      <GlassLayer
+        style={{
+          left: layout.decrementFrame.width - dims.btn,
+          right: layout.incrementFrame.width - dims.btn,
+          top: (layout.valueFrame.height - dims.h) / 2,
+          bottom: (layout.valueFrame.height - dims.h) / 2,
+          borderRadius: radius.md,
+        }}
+      />
       <StepperPressable
+        collapsable={false}
         accessible={!hasBlankLabel}
         onPress={
           decrementValue === undefined
@@ -179,6 +191,7 @@ export function Stepper({
         </View>
       </View>
       <StepperPressable
+        collapsable={false}
         accessible={!hasBlankLabel}
         onPress={
           incrementValue === undefined

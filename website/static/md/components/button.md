@@ -10,6 +10,10 @@ description: '触发操作的按钮，支持变体、尺寸、图标和交互状
 
 按钮用于触发操作。通过 `variant` 表达操作层级，支持不同尺寸、图标、加载和禁用状态。
 
+浮动操作可使用 `variant="glass"`：主题文字与胶囊玻璃背景共用 ButtonBase 的按压、禁用、loading 和命中区。正文主操作仍按语义选择 primary / danger。
+
+`secondary` 默认采用系统玻璃并保留尺寸对应圆角，`glass` 使用胶囊外形；两者无默认染色，禁用、加载和按压仅淡化前景。品牌主操作、危险操作和透明文字变体保留其语义。
+
 ## 代码演示 {#实时预览}
 
 ```tsx
@@ -88,21 +92,21 @@ import { Button } from '@unif/react-native-design';
 
 ## API
 
-| 参数                 | 类型                                                                                     | 默认值      | 说明                                                                                         |
-| -------------------- | ---------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------- |
-| `label`              | `string`                                                                                 | —           | 按钮文字，同时作为业务名称；去除首尾空白后不能为空；空白时不响应点击并提示开发诊断           |
-| `onPress`            | `() => void`                                                                             | —           | **必填**点击回调；`disabled` / `loading` 时组件移除有效 handler                              |
-| `size`               | `('sm' \| 'md' \| 'lg')?`                                                                | `'md'`      | 高度 28 / 36 / 44                                                                            |
-| `variant`            | `('primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'danger' \| 'text')?` | `'primary'` | 视觉变体                                                                                     |
-| `block`              | `boolean?`                                                                               | `false`     | 仅撑满父容器交叉轴（`alignSelf: stretch`）；主轴尺寸由父容器或 `style` 决定                  |
-| `disabled`           | `boolean?`                                                                               | `false`     | 禁用（opacity 0.5 + 不响应 onPress）                                                         |
-| `loading`            | `boolean?`                                                                               | `false`     | 加载态:用 `ActivityIndicator` 替代 label,自动 disabled                                       |
-| `leftIcon`           | `IconName?`                                                                              | —           | 左侧图标,与文本同色；尺寸由 Button size 固定，不随 fontScale 放大                            |
-| `rightIcon`          | `IconName?`                                                                              | —           | 右侧图标,与文本同色；尺寸由 Button size 固定，不随 fontScale 放大                            |
-| `style`              | `StyleProp<ViewStyle>?`                                                                  | —           | 额外样式覆盖（merge 到末尾）                                                                 |
-| `testID`             | `string?`                                                                                | —           | E2E / 测试定位                                                                               |
-| `accessibilityHint`  | `string?`                                                                                | —           | SR 行为说明 hint,仅在「行为不显然」时加                                                      |
-| `accessibilityState` | `Omit<AccessibilityState, 'disabled' \| 'busy'>?`                                        | —           | caller 可补充 `selected` / `expanded` 等状态；`disabled` / `busy` 由组件接管，类型上禁止覆盖 |
+| 参数                 | 类型                                                                                                | 默认值      | 说明                                                                                         |
+| -------------------- | --------------------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------- |
+| `label`              | `string`                                                                                            | —           | 按钮文字，同时作为业务名称；去除首尾空白后不能为空；空白时不响应点击并提示开发诊断           |
+| `onPress`            | `() => void`                                                                                        | —           | **必填**点击回调；`disabled` / `loading` 时组件移除有效 handler                              |
+| `size`               | `('sm' \| 'md' \| 'lg')?`                                                                           | `'md'`      | 高度 28 / 36 / 44                                                                            |
+| `variant`            | `('primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'glass' \| 'danger' \| 'text')?` | `'primary'` | 视觉变体                                                                                     |
+| `block`              | `boolean?`                                                                                          | `false`     | 仅撑满父容器交叉轴（`alignSelf: stretch`）；主轴尺寸由父容器或 `style` 决定                  |
+| `disabled`           | `boolean?`                                                                                          | `false`     | 禁用（opacity 0.5 + 不响应 onPress）                                                         |
+| `loading`            | `boolean?`                                                                                          | `false`     | 加载态:用 `ActivityIndicator` 替代 label,自动 disabled                                       |
+| `leftIcon`           | `IconName?`                                                                                         | —           | 左侧图标,与文本同色；尺寸由 Button size 固定，不随 fontScale 放大                            |
+| `rightIcon`          | `IconName?`                                                                                         | —           | 右侧图标,与文本同色；尺寸由 Button size 固定，不随 fontScale 放大                            |
+| `style`              | `StyleProp<ViewStyle>?`                                                                             | —           | 额外样式覆盖（merge 到末尾）                                                                 |
+| `testID`             | `string?`                                                                                           | —           | E2E / 测试定位                                                                               |
+| `accessibilityHint`  | `string?`                                                                                           | —           | SR 行为说明 hint,仅在「行为不显然」时加                                                      |
+| `accessibilityState` | `Omit<AccessibilityState, 'disabled' \| 'busy'>?`                                                   | —           | caller 可补充 `selected` / `expanded` 等状态；`disabled` / `busy` 由组件接管，类型上禁止覆盖 |
 
 ## 无障碍（a11y）
 
@@ -126,7 +130,6 @@ import { Button } from '@unif/react-native-design';
 | ------------------------------------------ | ------------------------- | ------------------------------------------------- |
 | `c.primary`                                | `useColors()`             | `primary` 变体背景色；`ghost` / `text` 变体文字色 |
 | `c.onPrimary`                              | `useColors()`             | `primary` 变体文字/图标色                         |
-| `c.surfaceContainerHigh`                   | `useColors()`             | `secondary` 变体背景色                            |
 | `c.foreground`                             | `useColors()`             | `secondary` / `neutral` / `outline` 变体文字色    |
 | `c.surface`                                | `useColors()`             | `outline` 变体背景色                              |
 | `c.outline`                                | `useColors()`             | `outline` 变体边框色                              |

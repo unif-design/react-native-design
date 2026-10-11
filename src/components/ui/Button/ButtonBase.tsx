@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import {
   ActivityIndicator,
+  StyleSheet,
+  View,
   type AccessibilityRole,
   type AccessibilityState,
   type StyleProp,
@@ -10,9 +12,11 @@ import { Pressable } from 'react-native-gesture-handler';
 import {
   fixed,
   pressedOpacity,
+  radius,
   useColors,
   useThemedStyles,
 } from '../../../theme';
+import { GlassLayer } from '../GlassLayer';
 import { makeStyles, paletteFor, sizingFor } from './styles';
 import type {
   ButtonBaseRenderContext,
@@ -77,8 +81,15 @@ export function ButtonBase({
   const palette = useMemo(() => paletteFor(variant, c), [variant, c]);
 
   const isText = variant === 'text';
+  const isGlass = variant === 'glass' || variant === 'secondary';
+  const glassRadius =
+    StyleSheet.flatten(style)?.borderRadius ??
+    (variant === 'glass' ? radius.pill : sizing.br);
   const unavailable = disabled === true || loading === true;
   const hasAccessibleName = accessibilityLabel !== undefined;
+  const effectiveAccessibilityState = hasAccessibleName
+    ? { ...accessibilityState, disabled: unavailable, busy: loading === true }
+    : undefined;
 
   // [M-7] 触控目标补偿:hitSlop 向外扩展命中区域到 fixed.hitTarget(44pt)。
   // 公式:vertical slop = max(0, (hitTarget - h) / 2);square 时同补 horizontal。
@@ -98,19 +109,27 @@ export function ButtonBase({
     return { top: v, bottom: v, left: 0, right: 0 };
   }, [isText, sizing.h, square]);
 
+  const content = loading ? (
+    <ActivityIndicator size={loadingSize ?? 'small'} color={palette.fg} />
+  ) : (
+    children({ sizing, palette })
+  );
+
   return (
     <Pressable
       accessible={hasAccessibleName}
       accessibilityRole={hasAccessibleName ? accessibilityRole : undefined}
-      accessibilityState={
-        hasAccessibleName
-          ? {
-              ...accessibilityState,
-              disabled: unavailable,
-              busy: loading === true,
-            }
+      role={
+        hasAccessibleName && accessibilityRole === 'button'
+          ? 'button'
           : undefined
       }
+      accessibilityState={effectiveAccessibilityState}
+      aria-disabled={effectiveAccessibilityState?.disabled}
+      aria-busy={effectiveAccessibilityState?.busy}
+      aria-selected={effectiveAccessibilityState?.selected}
+      aria-checked={effectiveAccessibilityState?.checked}
+      aria-expanded={effectiveAccessibilityState?.expanded}
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
       disabled={unavailable}
@@ -125,22 +144,40 @@ export function ButtonBase({
           // square 时方形:width=height,horizontal padding=0
           width: square ? sizing.h : undefined,
           paddingHorizontal: isText || square ? 0 : sizing.px,
-          borderRadius: sizing.br,
+          borderRadius: isGlass ? glassRadius : sizing.br,
           backgroundColor: palette.bg,
           borderColor: palette.border ?? 'transparent',
           borderWidth: palette.border ? 1 : 0,
-          opacity: unavailable ? 0.5 : pressed ? pressedOpacity : 1,
+          opacity: isGlass
+            ? 1
+            : unavailable
+              ? 0.5
+              : pressed
+                ? pressedOpacity
+                : 1,
           alignSelf: block ? 'stretch' : 'flex-start',
           gap: sizing.gap,
         },
         style,
       ]}
     >
-      {loading ? (
-        <ActivityIndicator size={loadingSize ?? 'small'} color={palette.fg} />
-      ) : (
-        children({ sizing, palette })
-      )}
+      {isGlass
+        ? ({ pressed }) => {
+            const opacity = unavailable ? 0.5 : pressed ? pressedOpacity : 1;
+            return (
+              <>
+                <GlassLayer style={{ borderRadius: glassRadius }} />
+                {/* 原生材质的祖先不能降低 alpha，只淡化按钮前景。 */}
+                <View
+                  collapsable={false}
+                  style={[styles.base, { gap: sizing.gap, opacity }]}
+                >
+                  {content}
+                </View>
+              </>
+            );
+          }
+        : content}
     </Pressable>
   );
 }

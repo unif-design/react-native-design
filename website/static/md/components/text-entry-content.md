@@ -66,6 +66,8 @@ const CompactTextEntryDemo = () => {
 };
 ```
 
+紧凑重命名 `variant="compact"` 使用主题玻璃；普通 card 保持正文表面。预填、全选、受控值、确认取消和 busy 保持，键盘避让仍由窗口宿主负责。
+
 ## 用法
 
 ```tsx

@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import type { ColorTokens } from '../../../theme';
-import { fixed, fw, r, type as t } from '../../../theme';
+import { fixed, fw, r, radius, type as t } from '../../../theme';
 import { badgeStyles } from '../shared/badgeStyles';
 
 export const makeStyles = (c: ColorTokens) => {
@@ -14,6 +14,12 @@ export const makeStyles = (c: ColorTokens) => {
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: c.outline,
     },
+    glassBar: {
+      backgroundColor: 'transparent',
+      borderTopWidth: 0,
+      borderRadius: radius.pill,
+    },
+    material: { borderRadius: radius.pill },
     tab: {
       flex: 1,
       alignItems: 'center',

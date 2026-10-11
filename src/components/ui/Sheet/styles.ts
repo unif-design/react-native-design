@@ -6,9 +6,10 @@ export const makeStyles = (colors: ColorTokens) =>
     root: {
       flex: 1,
       minHeight: 0,
-      backgroundColor: colors.surface,
     },
+    header: { backgroundColor: colors.surface },
     grabberContainer: {
+      backgroundColor: colors.surface,
       alignItems: 'center',
       paddingTop: space['3'],
       paddingBottom: space['2'],
@@ -20,6 +21,7 @@ export const makeStyles = (colors: ColorTokens) =>
       backgroundColor: colors.foregroundMuted,
     },
     contentRegion: {
+      backgroundColor: colors.surface,
       flex: 1,
       minHeight: 0,
     },
@@ -29,6 +31,7 @@ export const makeStyles = (colors: ColorTokens) =>
       paddingBottom: space['9'],
       gap: space['5'],
     },
+    glassFooter: { backgroundColor: 'transparent', borderTopWidth: 0 },
     footer: {
       backgroundColor: colors.surface,
       paddingHorizontal: space['9'],

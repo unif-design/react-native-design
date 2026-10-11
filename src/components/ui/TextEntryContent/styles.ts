@@ -12,7 +12,10 @@ export const makeStyles = (colors: ColorTokens) =>
       backgroundColor: colors.surface,
     },
     title: { color: colors.foreground, fontSize: type.h3, fontWeight: fw.semi },
+    material: { borderRadius: radius['3xl'] },
     compactRoot: {
+      backgroundColor: 'transparent',
+      overflow: 'hidden',
       borderWidth: 0.5,
       borderRadius: radius['3xl'],
       padding: space[7],

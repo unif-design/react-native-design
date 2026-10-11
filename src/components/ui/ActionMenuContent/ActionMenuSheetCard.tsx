@@ -1,3 +1,4 @@
+import { GlassLayer } from '../GlassLayer';
 import { Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { space, useThemedStyles } from '../../../theme';
@@ -22,6 +23,7 @@ export function ActionMenuSheetCard({
       ]}
       onPress={(event) => event.stopPropagation()}
     >
+      <GlassLayer style={styles.sheetMaterial} />
       {children}
     </Pressable>
   );

@@ -21,7 +21,8 @@ export type ActionsSceneState = Readonly<{
     | 'neutral'
     | 'outline'
     | 'danger'
-    | 'text';
+    | 'text'
+    | 'glass';
   buttonSize: 'sm' | 'md' | 'lg';
   buttonLoading: boolean;
   chipSelected: boolean;

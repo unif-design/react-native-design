@@ -1,3 +1,4 @@
+import { GlassLayer } from '../GlassLayer';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -128,6 +129,7 @@ export function ConfirmHost(): React.JSX.Element {
           onPress={() => {}}
           accessible={false}
         >
+          <GlassLayer style={styles.material} />
           {display ? (
             <>
               <View style={styles.body}>

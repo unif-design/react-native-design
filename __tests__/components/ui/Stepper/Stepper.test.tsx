@@ -24,6 +24,7 @@ function loadStepper() {
   jest.doMock('react-native', () => ({ Text: 'Text', View: 'View' }));
   jest.doMock('../../../../src/theme', () => ({
     fixed: { hitTarget: 44 },
+    radius: { md: 8 },
     pressedOpacity: 0.7,
     scaleFontMetric: (value: number) => value,
     useFontScale: () => 1,
@@ -48,6 +49,10 @@ function loadStepper() {
   jest.doMock('../../../../src/components/ui/Stepper/StepperPressable', () => ({
     StepperPressable: 'StepperPressable',
   }));
+  // 本用例隔离数值与命中框；真实材质组合由 example 契约测试覆盖。
+  jest.doMock('../../../../src/components/ui/GlassLayer', () => ({
+    GlassLayer: 'GlassLayer',
+  }));
 
   return require('../../../../src/components/ui/Stepper/Stepper')
     .Stepper as typeof import('../../../../src/components/ui/Stepper/Stepper').Stepper;
@@ -64,6 +69,7 @@ afterEach(() => {
   jest.dontMock('../../../../src/utils/logger');
   jest.dontMock('../../../../src/components/ui/Stepper/styles');
   jest.dontMock('../../../../src/components/ui/Stepper/StepperPressable');
+  jest.dontMock('../../../../src/components/ui/GlassLayer');
   jest.resetModules();
 });
 
@@ -79,13 +85,19 @@ describe('Stepper public display behavior', () => {
       formatValue: (value) => `${value} 箱`,
     }) as ReactElement<ElementProps>;
     const children = root.props.children as ReactElement<ElementProps>[];
-    const decrement = children[0]!;
-    const valueFrame = children[1]!;
-    const increment = children[2]!;
+    const buttons = children.filter(
+      (child) => child.type === 'StepperPressable'
+    );
+    const decrement = buttons[0]!;
+    const increment = buttons[1]!;
+    const valueFrame = children.find(
+      (child) => child.props.accessibilityValue !== undefined
+    )!;
     const valueVisual = valueFrame.props.children as ReactElement<ElementProps>;
     const valueText = valueVisual.props.children as ReactElement<ElementProps>;
 
     expect(valueText.props.children).toBe('4 箱');
+    expect(buttons).toHaveLength(2);
     expect(valueText.props).toMatchObject({
       adjustsFontSizeToFit: true,
       minimumFontScale: 0.75,

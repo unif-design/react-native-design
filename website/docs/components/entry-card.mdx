@@ -13,7 +13,7 @@ import { EntryCard } from '@unif/react-native-design';
 
 跟 [Cell](./cell) 的区别:
 
-- **独立 surface 小卡视觉**(bg + radius 14 + padding 12/14),不依赖 List 容器
+- **默认系统玻璃入口表面**(radius 14 + padding 12/14),不依赖 List 容器
 - icon tile **灰底**(`surfaceContainer`)+ `foregroundMuted` icon,语义弱化
 - **无 arrow / extra**,纯入口语义,适合放在 grid 双列里靠 caller `style={{flex:1}}` 撑等宽
 
@@ -46,12 +46,12 @@ retail biz2 设计稿 v7:Me 屏底部"设置 / 关于"两个入口从纵向 Cell
 
 | 元素      | 规则                                                                   |
 | --------- | ---------------------------------------------------------------------- |
-| 容器      | `bg: surface`,radius 14,padding `12px 14px`                            |
+| 容器      | 无额外染色的系统玻璃，radius 14，padding `12px 14px`                            |
 | 排布      | flex row + align center,gap 10                                         |
 | icon tile | 30×30,radius 9,`bg: surfaceContainer`,内部 icon 16px `foregroundMuted` |
 | title     | 13.5 / medium / letterSpacing -0.2,`foreground`                        |
 | sub       | 11,`foregroundMuted`,可选省略                                          |
-| 按下      | opacity 0.7(仅 `onPress` 存在时)                                       |
+| 按下      | 前景 opacity 0.7，材质及祖先保持不透明(仅 `onPress` 存在时)                                       |
 
 ## 用法
 
@@ -95,7 +95,7 @@ import { View } from 'react-native';
 
 | Token                                      | 来源                        | 作用                                            |
 | ------------------------------------------ | --------------------------- | ----------------------------------------------- |
-| `c.surface`                                | `useColors()`               | 卡片背景色                                      |
+| `c.surface`                                | `useColors()`               | 不支持材质或减少透明度时的回退背景                                      |
 | `c.surfaceContainer`                       | `useColors()`               | icon tile 灰底色                                |
 | `c.foregroundMuted`                        | `useColors()`               | tile 内 icon 色 + sub 文字色                    |
 | `c.foreground`                             | `useColors()`               | title 文字色                                    |

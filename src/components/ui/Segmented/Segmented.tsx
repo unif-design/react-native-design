@@ -1,3 +1,4 @@
+import { GlassLayer } from '../GlassLayer';
 import React, { useMemo } from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
@@ -13,14 +14,12 @@ import { makeStyles, sizingFor } from './styles';
 import type { SegmentedProps } from './types';
 
 /**
- * 局部分段控件 —— pill 在 track 上,激活项是亮色 thumb。
- *
- * **active thumb 必须比 track 亮一档** —— shadow 只在亮色态显示,
- * 暗色态由 surface 明度差表达层级。
+ * 局部分段控件：solid 保持实色选中块；glass 使用内外胶囊和中性选中底。
  *
  * `size`:默认 `'md'`(44pt 触控达标);`'sm'` 紧凑(28pt)给模型下拉等局促位用。
  */
 export function Segmented({
+  surface = 'glass',
   value,
   onChange,
   items,
@@ -33,12 +32,23 @@ export function Segmented({
   const fontScale = useFontScale();
   const sizing = useMemo(() => sizingFor(size), [size]);
   const textSize = scaleFontMetric(sizing.fs, fontScale);
-  const activeBg = scheme === 'dark' ? c.surfaceContainerHighest : c.surface;
-  const activeShadow = scheme === 'dark' ? null : shadow.subtle;
+  const isGlass = surface === 'glass';
+  const activeBg = isGlass
+    ? c.glassSeparator
+    : scheme === 'dark'
+      ? c.surfaceContainerHighest
+      : c.surface;
+  const activeShadow = isGlass || scheme === 'dark' ? null : shadow.subtle;
 
   return (
     // [L-34] accessibilityRole="tablist" —— SR 宣读"标签列表"
-    <View style={styles.seg} testID={testID} accessibilityRole="tablist">
+    <View
+      style={[styles.seg, surface === 'glass' && styles.glass]}
+      testID={testID}
+      accessibilityRole="tablist"
+      role="tablist"
+    >
+      {surface === 'glass' ? <GlassLayer style={styles.material} /> : null}
       {items.map((it) => {
         const on = it.id === value;
         const itemTestID = childTestID(testID, it.id, it.testID);
@@ -50,11 +60,16 @@ export function Segmented({
             onPress={() => !itemDisabled && onChange(it.id)}
             disabled={itemDisabled}
             accessibilityRole="tab"
+            role="tab"
+            aria-selected={on}
+            aria-disabled={itemDisabled}
+            tabIndex={itemDisabled ? -1 : 0}
             accessibilityState={{ selected: on, disabled: itemDisabled }}
             accessibilityLabel={it.label}
             testID={itemTestID}
             style={({ pressed }) => [
               styles.segItem,
+              isGlass && styles.glassItem,
               { minHeight: sizing.minHeight, paddingHorizontal: sizing.px },
               on && { backgroundColor: activeBg },
               on && activeShadow,
@@ -64,7 +79,11 @@ export function Segmented({
             <Text
               style={{
                 fontSize: textSize,
-                color: on ? c.foreground : c.foregroundSubtle,
+                color: on
+                  ? c.foreground
+                  : surface === 'glass'
+                    ? c.foregroundMuted
+                    : c.foregroundSubtle,
                 fontWeight: on ? fw.semi : fw.medium,
               }}
               numberOfLines={1}

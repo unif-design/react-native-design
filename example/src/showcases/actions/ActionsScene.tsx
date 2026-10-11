@@ -33,6 +33,7 @@ const buttonVariants: readonly ButtonVariant[] = [
   'outline',
   'danger',
   'text',
+  'glass',
 ];
 const buttonSizes: readonly ButtonSize[] = ['sm', 'md', 'lg'];
 const iconButtonVariants: readonly NonNullable<IconButtonProps['variant']>[] = [
@@ -42,6 +43,7 @@ const iconButtonVariants: readonly NonNullable<IconButtonProps['variant']>[] = [
   'neutral',
   'outline',
   'danger',
+  'glass',
 ];
 const tagVariants: readonly TagVariant[] = [
   'neutral',
@@ -68,6 +70,7 @@ const variantLabels: Readonly<Record<ButtonVariant, string>> = {
   outline: '描边按钮',
   danger: '危险按钮',
   text: '文字按钮',
+  glass: '玻璃按钮',
 };
 const variantTabLabels: Readonly<Record<ButtonVariant, string>> = {
   primary: '主色',
@@ -77,6 +80,7 @@ const variantTabLabels: Readonly<Record<ButtonVariant, string>> = {
   outline: '描边',
   danger: '危险',
   text: '文字',
+  glass: '玻璃',
 };
 const sizeLabels: Readonly<Record<ButtonSize, string>> = {
   sm: '小尺寸',
@@ -92,6 +96,7 @@ const iconVariantLabels: Readonly<
   neutral: '中性图标按钮',
   outline: '描边图标按钮',
   danger: '危险图标按钮',
+  glass: '玻璃图标按钮',
 };
 const tagVariantLabels: Readonly<Record<TagVariant, string>> = {
   neutral: '中性标签',
@@ -236,6 +241,7 @@ export function ActionsScene(): React.JSX.Element {
               icon="chevron-left"
               surfaceSize={36}
               iconSize={21}
+              variant="glass"
               accessibilityLabel="圆形返回演示"
               style={styles.circularButton}
               onPress={() => record('IconButton', '返回', '已点击返回')}

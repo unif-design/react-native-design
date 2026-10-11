@@ -1,3 +1,4 @@
+import { GlassLayer } from '../GlassLayer';
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
@@ -13,6 +14,7 @@ import type { TabBarProps } from './types';
  * 想留 home indicator 的安全区，请外面包一层 `<SafeAreaView edges={['bottom']}>`。
  */
 export function TabBar({
+  surface = 'glass',
   active,
   onChange,
   items,
@@ -23,13 +25,15 @@ export function TabBar({
   const styles = useThemedStyles(makeStyles);
   return (
     <View
-      style={[styles.bar, style]}
+      style={[styles.bar, surface === 'glass' && styles.glassBar, style]}
       testID={testID}
       accessibilityRole="tablist"
+      role="tablist"
     >
+      {surface === 'glass' ? <GlassLayer style={styles.material} /> : null}
       {items.map((item) => {
         const on = item.id === active;
-        const tint = on ? c.primary : c.foregroundSubtle;
+        const tint = on ? c.primary : c.foregroundMuted;
         const itemTestID = childTestID(testID, item.id, item.testID);
         // a11y label 包含角标数量,SR 用户知晓待处理条目数(如"消息,3条未读")
         const a11yLabel =
@@ -39,6 +43,9 @@ export function TabBar({
             key={item.id}
             onPress={() => onChange(item.id)}
             accessibilityRole="tab"
+            role="tab"
+            aria-selected={on}
+            tabIndex={0}
             accessibilityState={{ selected: on }}
             accessibilityLabel={a11yLabel}
             testID={itemTestID}

@@ -1,3 +1,4 @@
+import { GlassLayer } from '../GlassLayer';
 import React from 'react';
 import { ScrollView, View } from 'react-native';
 import { useThemedStyles } from '../../../theme';
@@ -8,6 +9,7 @@ export function Sheet({
   children,
   header,
   footer,
+  footerSurface = 'glass',
   contentMode = 'fixed',
   contentContainerStyle,
   footerStyle,
@@ -18,7 +20,9 @@ export function Sheet({
 
   return (
     <View style={[styles.root, style]} testID={testID}>
-      {header ?? (
+      {header != null ? (
+        <View style={styles.header}>{header}</View>
+      ) : (
         <View style={styles.grabberContainer}>
           <View style={styles.grabber} />
         </View>
@@ -39,7 +43,16 @@ export function Sheet({
         </View>
       )}
       {footer ? (
-        <View style={[styles.footer, footerStyle]}>{footer}</View>
+        <View
+          style={[
+            styles.footer,
+            footerSurface === 'glass' && styles.glassFooter,
+            footerStyle,
+          ]}
+        >
+          {footerSurface === 'glass' ? <GlassLayer /> : null}
+          {footer}
+        </View>
       ) : null}
     </View>
   );

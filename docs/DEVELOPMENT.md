@@ -26,6 +26,8 @@
 
 玻璃材质采用 [GlassLayer 迁移记录](migrations/2026-10-05-liquid-glass.md)：公开入口、消费者和平台降级直接升级，不保留旧接口；当前契约见组件源码与 Website 文档。
 
+全量系统材质范围与内容层边界见[54 个公开组件覆盖记录](reviews/2026-10-11-liquid-glass-coverage.md)，原生可复验场景见 [Liquid Glass 手工验证宿主](../manual-tests/liquid-glass/README.md)。
+
 ## 临时验证宿主
 
 仅在已授权的打包消费或真机验证中使用；日常文档与组件修改不执行此构建流程。

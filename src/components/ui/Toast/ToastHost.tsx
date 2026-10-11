@@ -1,3 +1,4 @@
+import { GlassLayer } from '../GlassLayer';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -154,9 +155,9 @@ export function ToastHost({
   }, [delivery, op, ty, finishIfCurrent]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: op.value,
     transform: [{ translateY: ty.value }],
   }));
+  const contentAnimation = useAnimatedStyle(() => ({ opacity: op.value }));
 
   if (inert || !delivery) return null;
 
@@ -175,12 +176,15 @@ export function ToastHost({
   return (
     <View style={[styles.host, posStyle]} pointerEvents="none" testID={testID}>
       <Animated.View style={[styles.toast, animatedStyle]}>
-        {dotColor ? (
-          <View style={[styles.dot, { backgroundColor: dotColor }]} />
-        ) : null}
-        <Text style={styles.text} testID={childTestID(testID, 'text')}>
-          {entry.message}
-        </Text>
+        <GlassLayer style={styles.material} />
+        <Animated.View style={[styles.content, contentAnimation]}>
+          {dotColor ? (
+            <View style={[styles.dot, { backgroundColor: dotColor }]} />
+          ) : null}
+          <Text style={styles.text} testID={childTestID(testID, 'text')}>
+            {entry.message}
+          </Text>
+        </Animated.View>
       </Animated.View>
     </View>
   );

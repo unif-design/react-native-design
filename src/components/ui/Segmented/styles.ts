@@ -20,6 +20,13 @@ export const makeStyles = (c: ColorTokens) =>
       padding: r(2),
       alignSelf: 'flex-start',
     },
+    glass: {
+      backgroundColor: 'transparent',
+      borderRadius: radius.pill,
+      padding: r(4),
+    },
+    material: { borderRadius: radius.pill },
+    glassItem: { borderRadius: radius.pill },
     segItem: {
       alignItems: 'center',
       justifyContent: 'center',

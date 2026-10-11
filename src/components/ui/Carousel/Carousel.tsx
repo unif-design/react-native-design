@@ -12,6 +12,7 @@ import {
 } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
+import { GlassLayer } from '../GlassLayer';
 import {
   effectiveCarouselAutoplay,
   normalizeCarouselAction,
@@ -159,6 +160,9 @@ function CarouselInner<T>(
               : styles.dotsWrapBottom
           }
         >
+          {indicatorPosition === 'overlay-bottom-right' ? (
+            <GlassLayer style={styles.dotsMaterial} />
+          ) : null}
           <Pagination
             progress={progress}
             count={data.length}

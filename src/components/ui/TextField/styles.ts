@@ -38,11 +38,17 @@ export const makeStyles = (c: ColorTokens) =>
     searchInteractiveRow: {
       borderWidth: 0,
     },
+    searchContent: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: space[3],
+    },
     searchVisibleSurface: {
       position: 'absolute',
       left: 0,
       right: 0,
-      borderRadius: radius.md,
+      borderRadius: radius.pill,
       borderWidth: 1,
     },
     wrapIdle: {

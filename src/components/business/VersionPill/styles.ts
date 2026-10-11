@@ -8,7 +8,7 @@ import {
   type ColorTokens,
 } from '../../../theme';
 
-/** VersionPill 样式工厂 —— hairline 描边 + surface 底胶囊。
+/** VersionPill 样式工厂 —— hairline 描边 + 系统玻璃胶囊。
  *  字号走 type.microPlus(11.5),现仓内仅 VersionPill 消费。 */
 export const makeVersionPillStyles = (c: ColorTokens) =>
   StyleSheet.create({
@@ -19,10 +19,11 @@ export const makeVersionPillStyles = (c: ColorTokens) =>
       paddingHorizontal: r(11),
       paddingVertical: r(5),
       borderRadius: radius.pill,
-      backgroundColor: c.surface,
+      backgroundColor: 'transparent',
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: c.outline,
     },
+    material: { borderRadius: radius.pill },
     dot: {
       width: r(5),
       height: r(5),

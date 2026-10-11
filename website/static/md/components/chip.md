@@ -8,7 +8,7 @@ description: '用于选择、筛选或简短标签的胶囊控件。'
 
 # Chip 标签
 
-用于筛选、选择或展示简短标签的胶囊控件。
+用于筛选、选择或展示简短标签的胶囊控件。提供 `onPress` 时自动使用系统玻璃，原生不额外染色，随主题和系统减少透明度设置呈现；无 `onPress` 的静态标签保留内容表面。
 
 ## 代码演示 {#实时预览}
 
@@ -126,14 +126,14 @@ const ChipDemo = () => {
 
 ## 状态
 
-| 状态                   | 视觉                                                                    |
-| ---------------------- | ----------------------------------------------------------------------- |
-| 默认                   | `c.surface` 白底 + 1px `c.outline` 细边框,`c.foreground` 文本           |
-| 选中 (`selected`)      | `c.primary` 边框 + `c.primaryContainerSubtle` 浅橙底 + `c.primary` 文本 |
-| 按下                   | 透明度 0.7（仅当传 `onPress` 时）                                       |
-| 禁用 (`disabled`)      | 透明度 0.5 + 不响应 `onPress`                                           |
-| 处理中 (`busy`)        | leading 位换 spinner + 透明度 0.6 + 不响应二次点击（label 保留）        |
-| 非交互（无 `onPress`） | 不响应按压、不显示按压态                                                |
+| 状态                   | 视觉                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| 默认                   | 交互 Chip 使用系统玻璃，`c.foreground` 文本；静态标签使用 `c.surface` 与 `c.outline` |
+| 选中 (`selected`)      | `c.primary` 边框与文字；交互 Chip 保持无额外染色的材质，静态标签使用浅橙底           |
+| 按下                   | 自有文案／忙碌指示透明度 0.7，材质不淡化（仅当传 `onPress` 时）                      |
+| 禁用 (`disabled`)      | 自有文案／忙碌指示透明度 0.5 + 不响应 `onPress`                                      |
+| 处理中 (`busy`)        | leading 位换 spinner + 自有文案／忙碌指示透明度 0.6 + 不响应二次点击（label 保留）   |
+| 非交互（无 `onPress`） | 不响应按压、不显示按压态                                                             |
 
 `disabled` 与 `busy` 的分工：**`disabled` = 现在不能点**（更暗、无动效）；**`busy` = 点过了，正在办**（spinner 传达进行中）。两者同时为真按 `disabled` 的视觉走。
 
@@ -188,26 +188,26 @@ import { Chip, Icon } from '@unif/react-native-design';
 
 ## API
 
-| 参数       | 类型                   | 默认值  | 说明                                                     |
-| ---------- | ---------------------- | ------- | -------------------------------------------------------- |
-| `label`    | `string`               | —       | 显示文本(单行 numberOfLines=1 截断)                      |
-| `selected` | `boolean`              | `false` | 选中态（主色边框 + 浅橙底 + 主色文本）                   |
-| `onPress`  | `() => void`           | —       | 点击回调；不传时 chip 渲染为静态 `<View>`，不响应按压    |
-| `disabled` | `boolean`              | `false` | 禁用（透明度 0.5 + 不响应 `onPress`）                    |
-| `busy`     | `boolean`              | `false` | 处理中（leading 换 spinner + 透明度 0.6 + 吞掉二次点击） |
-| `leading`  | `ReactNode`            | —       | 前置插槽（图标 / 小圆点等）                              |
-| `trailing` | `ReactNode`            | —       | 后置插槽（关闭按钮等）                                   |
-| `style`    | `StyleProp<ViewStyle>` | —       | 附加样式                                                 |
-| `testID`   | `string`               | —       | E2E / 测试定位                                           |
+| 参数       | 类型                   | 默认值  | 说明                                                                       |
+| ---------- | ---------------------- | ------- | -------------------------------------------------------------------------- |
+| `label`    | `string`               | —       | 显示文本(单行 numberOfLines=1 截断)                                        |
+| `selected` | `boolean`              | `false` | 选中态（主色边框与文本，静态标签另有浅橙底）                               |
+| `onPress`  | `() => void`           | —       | 点击回调；不传时 chip 渲染为静态 `<View>`，不响应按压                      |
+| `disabled` | `boolean`              | `false` | 禁用（自有文案／忙碌指示透明度 0.5 + 不响应 `onPress`）                    |
+| `busy`     | `boolean`              | `false` | 处理中（leading 换 spinner + 自有文案／忙碌指示透明度 0.6 + 吞掉二次点击） |
+| `leading`  | `ReactNode`            | —       | 前置插槽（图标 / 小圆点等）                                                |
+| `trailing` | `ReactNode`            | —       | 后置插槽（关闭按钮等）                                                     |
+| `style`    | `StyleProp<ViewStyle>` | —       | 附加样式                                                                   |
+| `testID`   | `string`               | —       | E2E / 测试定位                                                             |
 
 ## 主题键（Tokens）
 
 | Token                                      | 来源                        | 作用                                                         |
 | ------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
-| `c.surface`                                | `useColors()`               | 默认背景色                                                   |
-| `c.outline`                                | `useColors()`               | 默认边框色                                                   |
+| `c.surface`                                | `useColors()`               | 静态标签背景色 / 系统不支持或减少透明度时的降级表面          |
+| `c.outline`                                | `useColors()`               | 静态标签边框色                                               |
 | `c.primary`                                | `useColors()`               | 选中边框 + 文本色                                            |
-| `c.primaryContainerSubtle`                 | `useColors()`               | 选中浅橙底色                                                 |
+| `c.primaryContainerSubtle`                 | `useColors()`               | 静态选中标签底色                                             |
 | `c.foreground`                             | `useColors()`               | 默认文本色（`busy` spinner 也跟随它 / 选中时跟 `c.primary`） |
 | `radius.pill`                              | `@unif/react-native-design` | 胶囊圆角                                                     |
 | `space['2']` / `space['5']` / `space['3']` | `@unif/react-native-design` | 内容 gap(6)/ 水平内边距(12)/ 垂直内边距(8)                   |
@@ -230,6 +230,8 @@ a11y 语义是**条件性**的：仅当传了 `onPress` 时，Chip 才用 `<Pres
 // 处理中:state.busy=true、state.disabled=true（点击被吞，读屏念「忙碌」）
 <Chip label="今日拜访计划" busy onPress={openTodayPlan} />
 ```
+
+leading／trailing 允许任意组件，其自身状态由调用方维护；Chip 不降低这些插槽祖先的透明度，避免插槽里的玻璃按钮失效。
 
 ## 使用注意
 

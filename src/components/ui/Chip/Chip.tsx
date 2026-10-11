@@ -1,15 +1,17 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
 import {
   fixed,
   pressedOpacity,
+  radius,
   r,
   rf,
   useColors,
   useThemedStyles,
 } from '../../../theme';
 import { Spinner } from '../Spinner';
+import { GlassLayer } from '../GlassLayer';
 import { makeStyles } from './styles';
 import type { ChipProps } from './types';
 
@@ -21,11 +23,10 @@ const busySpinner = r(12);
 
 /**
  * 胶囊形可点击 chip。
- * - 默认：surface 底 + outline 细线边框，foreground 文本
+ * - 可交互：系统玻璃表面；静态标签保留内容底色
  * - 选中：主色边框 + 主色文本
- * - 按下：透明度 pressedOpacity(与 ButtonBase 同源)
- * - 禁用：透明度 0.5 + 不响应 onPress
- * - 处理中(`busy`)：leading 换 spinner + 透明度 0.6 + 不响应二次点击
+ * - 按下、禁用和 busy 仅淡化前景，材质祖先保持 alpha 1
+ * - 处理中(`busy`)：leading 换 spinner + 不响应二次点击
  *
  * 常用于建议 chip、筛选 pill、多选标签等。
  */
@@ -53,17 +54,19 @@ export function Chip({
   ) : (
     leading
   );
-  const inner = (
-    <View
-      style={[styles.chip, selected && styles.chipOn, style]}
-      testID={onPress ? undefined : testID}
-    >
-      {lead != null ? <View>{lead}</View> : null}
-      <Text style={[styles.text, selected && styles.textOn]} numberOfLines={1}>
+  const renderContent = (opacity = 1) => (
+    <>
+      {lead != null ? (
+        <View style={busy ? { opacity } : undefined}>{lead}</View>
+      ) : null}
+      <Text
+        style={[styles.text, selected && styles.textOn, { opacity }]}
+        numberOfLines={1}
+      >
         {label}
       </Text>
       {trailing != null ? <View>{trailing}</View> : null}
-    </View>
+    </>
   );
 
   if (onPress) {
@@ -80,6 +83,10 @@ export function Chip({
         onPress={onPress}
         disabled={inactive}
         accessibilityRole="button"
+        role="button"
+        aria-disabled={inactive}
+        aria-busy={!!busy}
+        aria-selected={!!selected}
         accessibilityState={{
           selected: !!selected,
           disabled: inactive,
@@ -88,22 +95,46 @@ export function Chip({
         accessibilityLabel={label}
         testID={testID}
         hitSlop={{ top: chipHitSlopV, bottom: chipHitSlopV, left: 0, right: 0 }}
-        style={({ pressed }) => [
-          {
-            alignSelf: 'flex-start',
-            opacity: disabled
-              ? 0.5
-              : busy
-                ? busyOpacity
-                : pressed
-                  ? pressedOpacity
-                  : 1,
-          },
-        ]}
+        style={styles.pressable}
       >
-        {inner}
+        {({ pressed }) => {
+          const opacity = disabled
+            ? 0.5
+            : busy
+              ? busyOpacity
+              : pressed
+                ? pressedOpacity
+                : 1;
+          return (
+            <View
+              style={[
+                styles.chip,
+                styles.glass,
+                selected && styles.glassOn,
+                style,
+              ]}
+            >
+              <GlassLayer
+                style={{
+                  borderRadius:
+                    StyleSheet.flatten(style)?.borderRadius ?? radius.pill,
+                }}
+              />
+              <View collapsable={false} style={styles.content}>
+                {renderContent(opacity)}
+              </View>
+            </View>
+          );
+        }}
       </Pressable>
     );
   }
-  return inner;
+  return (
+    <View
+      style={[styles.chip, selected && styles.chipOn, style]}
+      testID={testID}
+    >
+      {renderContent()}
+    </View>
+  );
 }

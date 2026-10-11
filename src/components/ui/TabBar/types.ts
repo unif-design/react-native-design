@@ -12,6 +12,8 @@ export type TabBarItem = {
 };
 
 export type TabBarProps = {
+  /** 默认 glass 跟随系统材质；贴边实色导航可显式选择 solid。 */
+  surface?: 'solid' | 'glass';
   active: string;
   onChange: (id: string) => void;
   items: TabBarItem[];
