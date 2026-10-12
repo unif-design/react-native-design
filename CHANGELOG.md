@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.1.0](https://github.com/unif-design/react-native-design/compare/v1.0.0...v1.1.0) (2026-10-12)
+
+
+### Features
+
+* refine fallback glass surfaces and action dialogs ([#155](https://github.com/unif-design/react-native-design/issues/155)) ([58e37eb](https://github.com/unif-design/react-native-design/commit/58e37eb5e82e3c8c18daff860d3ac2b3557c333b))
+
 # [1.0.0](https://github.com/unif-design/react-native-design/compare/v0.41.0...v1.0.0) (2026-10-11)
 
 
