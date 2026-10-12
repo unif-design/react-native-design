@@ -18,6 +18,8 @@ import { LiveDemo } from '@site/src/components/LiveDemo';
 
 组合头部、内容和底部。父容器提供有界高度，弹层、关闭、安全区与键盘交给宿主。
 
+滚动内容使用 `contentMode="scroll"` 和 `headerMode="overlay"` 时，标题悬浮于正文上方并使用玻璃材质；首屏留白跟随真实标题高度，正文可以滚到标题背后。固定布局和外部列表仍由原布局维护标题占位。默认背景统一由 Sheet 根容器提供，`style.backgroundColor` 可设置整个面板的底色，不会再被内部标题和正文覆盖成另一层白底。
+
 export const sheetDemoStyles = (colors) => ({
   text: { color: colors.foreground, fontSize: type.body },
 });
