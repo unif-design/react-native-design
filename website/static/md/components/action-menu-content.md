@@ -94,7 +94,8 @@ dialog、sheet、popover 均使用主题 GlassLayer。popover 卡片与箭头复
 | `actions`          | `readonly ActionMenuAction[]`      | 必填                | 调用方当前可用动作                                                    |
 | `onClose`          | `() => void`                       | 必填                | 遮罩、普通取消与确认后的关闭请求                                      |
 | `presentation`     | `'dialog' \| 'sheet' \| 'popover'` | `'dialog'`          | 居中、底部或纯浮动菜单卡片                                            |
-| `title`            | `string`                           | —                   | 可选单行标题                                                          |
+| `title`            | `string`                           | —                   | 可选标题（popover 保持单行）                                          |
+| `message`          | `string`                           | —                   | 标题下方的操作说明；不与标题拼接                                      |
 | `cancelLabel`      | `string \| null`                   | `'取消'`            | 普通取消与返回菜单文案；null 隐藏，由宿主提供外部取消                 |
 | `style` / `testID` | `StyleProp<ViewStyle>` / `string`  | — / `'action-menu'` | 根容器样式与定位前缀                                                  |
 | `contentStyle`     | `StyleProp<ViewStyle>`             | —                   | 内部动作卡片样式；嵌入已有面板时可显式调整上留白，根容器仍由style控制 |
@@ -138,3 +139,5 @@ import { TrashOutlined } from '@unif/react-native-icons';
 ```
 
 宿主应在确认阶段传入指针，其他阶段按设计省略；更换业务目标时创建新的内容实例，避免把确认复用到同 ID 的另一个对象。窗外关闭不交付删除。
+
+居中 `dialog` 使用独立标题、说明和竖向操作按钮。普通操作沿用中性主题表面，危险操作使用危险浅底和文字，取消放在操作组下方；完整动作及禁用／忙碌语义与 popover 一致。关闭确认可把“保留并关闭”放在前，“清空并关闭”标为 danger，业务仍由调用方结算。

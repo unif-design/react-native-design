@@ -714,3 +714,29 @@ test.each(['light', 'dark'] as const)(
     expect(remove).not.toHaveBeenCalled();
   }
 );
+
+test('居中操作提示分开显示标题和说明，保留、清空与取消各自只交付一次', () => {
+  const keep = jest.fn();
+  const clear = jest.fn();
+  const close = jest.fn();
+  const page = render(
+    <ThemeProvider>
+      <ActionMenuContent
+        title="关闭下单？"
+        message="保留后可继续编辑。"
+        actions={[
+          { id: 'keep', label: '保留并关闭', onPress: keep },
+          { id: 'clear', label: '清空并关闭', tone: 'danger', onPress: clear },
+        ]}
+        onClose={close}
+      />
+    </ThemeProvider>
+  );
+  expect(page.getByRole('header', { name: '关闭下单？' })).toBeOnTheScreen();
+  expect(page.getByText('保留后可继续编辑。')).toBeOnTheScreen();
+  fireEvent.press(page.getByRole('button', { name: '保留并关闭' }));
+  expect(keep).toHaveBeenCalledTimes(1);
+  expect(clear).not.toHaveBeenCalled();
+  fireEvent.press(page.getByRole('button', { name: '取消' }));
+  expect(close).toHaveBeenCalledTimes(1);
+});

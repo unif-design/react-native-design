@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 import { darkColors, lightColors, useTheme } from '../../../theme';
+import { styles } from './styles';
+import { GlassGradient } from './GlassGradient';
 import { webGlassBlur } from './constants';
 import type { GlassLayerProps } from './types';
 
@@ -18,6 +20,7 @@ const browser = globalThis as typeof globalThis & {
 export function GlassLayer({
   effect = 'regular',
   tintColor,
+  fallbackColor,
   colorScheme,
   style,
   testID,
@@ -29,7 +32,7 @@ export function GlassLayer({
       ? darkColors
       : lightColors
     : theme.colors;
-  const [transparent, setTransparent] = useState(false);
+  const [material, setMaterial] = useState({ blur: false, reduced: true });
   useEffect(() => {
     const media = browser.matchMedia?.(
       '(prefers-reduced-transparency: reduce)'
@@ -37,32 +40,49 @@ export function GlassLayer({
     const supported =
       browser.CSS?.supports('backdrop-filter', 'blur(1px)') ||
       browser.CSS?.supports('-webkit-backdrop-filter', 'blur(1px)');
-    const update = () => setTransparent(Boolean(supported) && !media?.matches);
+    const update = () =>
+      setMaterial({
+        blur: Boolean(supported),
+        reduced: media?.matches ?? false,
+      });
     update();
     media?.addEventListener('change', update);
     return () => media?.removeEventListener('change', update);
   }, []);
   const resolvedTint =
     tintColor ?? (effect === 'clear' ? c.tabBarGlassTint : c.glassSurface);
+  const transparent = material.blur && !material.reduced;
   const filter = transparent
     ? `blur(${webGlassBlur[effect]}px) saturate(180%)`
     : 'none';
-  // RN 类型不含 CSS backdrop-filter；SSR 和无模糊能力的浏览器先呈现实色。
+  // SSR 在媒体偏好读取前保持实色；无模糊能力时仍可绘制渐变。
   const webGlassStyle: ViewStyle &
     Pick<React.CSSProperties, 'backdropFilter' | 'WebkitBackdropFilter'> = {
     backdropFilter: filter,
     WebkitBackdropFilter: filter,
-    backgroundColor: transparent ? resolvedTint : c.surface,
+    backgroundColor: material.reduced
+      ? (fallbackColor ?? c.surface)
+      : transparent
+        ? resolvedTint
+        : 'transparent',
   };
 
   return (
     <View
-      style={[StyleSheet.absoluteFill, style, webGlassStyle]}
+      style={[StyleSheet.absoluteFill, style, styles.clipped, webGlassStyle]}
       pointerEvents="none"
       accessible={false}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       testID={testID}
-    />
+    >
+      {!material.blur && !material.reduced ? (
+        <GlassGradient
+          colors={c}
+          effect={effect}
+          testID={testID ? `${testID}-gradient` : undefined}
+        />
+      ) : null}
+    </View>
   );
 }
