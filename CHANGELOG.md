@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/unif-design/react-native-design/compare/v1.1.0...v1.1.1) (2026-10-12)
+
+
+### Bug Fixes
+
+* **sheet:** inherit surface and float scrolling headers ([#156](https://github.com/unif-design/react-native-design/issues/156)) ([6c24678](https://github.com/unif-design/react-native-design/commit/6c24678cbacd7a1a046f939a188bf66efb7602f1))
+
 # [1.1.0](https://github.com/unif-design/react-native-design/compare/v1.0.0...v1.1.0) (2026-10-12)
 
 
