@@ -88,7 +88,7 @@ test('Web 默认 regular，tintColor 覆盖主题背景且装饰层不接管无�
   });
 });
 
-test('Web 跟随减少透明度并在 CSS 无模糊能力时回退深色实心表面', () => {
+test('Web 跟随减少透明度，无 CSS 模糊能力时保留渐变', () => {
   let changed!: () => void;
   const media = {
     matches: false,
@@ -134,6 +134,35 @@ test('Web 跟随减少透明度并在 CSS 无模糊能力时回退深色实心�
   );
   expect(layer()).toMatchObject({
     backdropFilter: 'none',
-    backgroundColor: darkColors.surface,
+    backgroundColor: 'transparent',
   });
+  expect(
+    screen.getByTestId('web-glass-gradient', { includeHiddenElements: true })
+  ).toBeTruthy();
+});
+
+test('Web 减少透明度时采用显式实色背景', () => {
+  Object.defineProperty(globalThis, 'matchMedia', {
+    configurable: true,
+    value: () => ({
+      matches: true,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    }),
+  });
+  Object.defineProperty(globalThis, 'CSS', {
+    configurable: true,
+    value: { supports: () => false },
+  });
+  render(
+    <ThemeProvider>
+      <GlassLayer
+        fallbackColor={lightColors.surfaceContainerHigh}
+        testID="web-fallback"
+      />
+    </ThemeProvider>
+  );
+  expect(
+    screen.getByTestId('web-fallback', { includeHiddenElements: true })
+  ).toHaveStyle({ backgroundColor: lightColors.surfaceContainerHigh });
 });

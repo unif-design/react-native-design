@@ -14,6 +14,7 @@ export function ActionMenuContent({
   onClose,
   presentation = 'dialog',
   title,
+  message,
   cancelLabel = '取消',
   pointer,
   onConfirmationChange,
@@ -56,11 +57,14 @@ export function ActionMenuContent({
           testID={`${testID}-title`}
           accessibilityRole="header"
           style={[styles.title, isPopover && confirming && styles.popoverTitle]}
-          numberOfLines={1}
+          numberOfLines={isPopover ? 1 : undefined}
           ellipsizeMode="tail"
         >
           {heading}
         </Text>
+      ) : null}
+      {!confirming && message ? (
+        <Text style={styles.message}>{message}</Text>
       ) : null}
       {confirming?.confirmation ? (
         <>
@@ -122,11 +126,18 @@ export function ActionMenuContent({
         <>
           <View
             testID={`${testID}-actions`}
-            style={isSheet ? styles.sheetActions : undefined}
+            style={
+              isSheet
+                ? styles.sheetActions
+                : !isPopover
+                  ? styles.dialogActions
+                  : undefined
+            }
           >
             {actions.map((action) =>
-              isPopover ? (
+              !isSheet ? (
                 <ActionMenuItem
+                  confirmation={!isPopover}
                   key={action.id}
                   action={action}
                   onPress={() => {
@@ -156,7 +167,14 @@ export function ActionMenuContent({
             )}
           </View>
           {!isSheet && !isPopover && cancelLabel !== null ? (
-            <Button label={cancelLabel} variant="text" onPress={onClose} />
+            <Button
+              label={cancelLabel}
+              variant="neutral"
+              size="lg"
+              block
+              style={styles.cancelAction}
+              onPress={onClose}
+            />
           ) : null}
         </>
       )}

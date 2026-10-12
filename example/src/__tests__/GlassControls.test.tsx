@@ -9,6 +9,9 @@ import {
 } from '@testing-library/react-native';
 import * as LiquidGlass from '@callstack/liquid-glass';
 import {
+  Button,
+  lightColors,
+  darkColors,
   Chip,
   IconButton,
   Search,
@@ -147,3 +150,33 @@ test('Search 禁用时材质仍可见；恢复编辑后清除和提交使用同�
   expect(submit).toHaveBeenCalledWith('门店');
   await expectVisibleMaterial();
 });
+
+test.each(['light', 'dark'] as const)(
+  'secondary 在 %s 减少透明度时保留可区分的主题底色',
+  async (scheme) => {
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      false
+    );
+    jest
+      .spyOn(AccessibilityInfo, 'isReduceTransparencyEnabled')
+      .mockResolvedValue(true);
+    const colors = scheme === 'dark' ? darkColors : lightColors;
+    const press = jest.fn();
+    render(
+      <ThemeProvider forceScheme={scheme}>
+        <Button variant="secondary" label="AI识别" onPress={press} />
+      </ThemeProvider>
+    );
+    const layer = screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
+    expect(StyleSheet.flatten(layer.props.style).backgroundColor).toBe(
+      colors.surfaceContainerHigh
+    );
+    expect(StyleSheet.flatten(layer.props.style).backgroundColor).not.toBe(
+      colors.surface
+    );
+    fireEvent.press(screen.getByRole('button', { name: 'AI识别' }));
+    expect(press).toHaveBeenCalledTimes(1);
+  }
+);

@@ -6,13 +6,13 @@
 
 Design 公共 `src/index.tsx` 的两个组件 barrel 共 58 个运行值；排除 confirm、toast、usePulse、useSvgId 后，54 个可渲染组件均在下表。Radio.Group 随 Radio 核对；ThemeProvider、主题 tokens、图标数据及工具没有独立材质表面。
 
-原生统一消费 GlassLayer 的系统 regular 默认，不额外叠加浅／深底色或 tint。Web 为 CSS 近似；无能力或减少透明度时回退实色。透明度不能施加于原生玻璃或其祖先，前景淡化容器保持稳定。
+原生统一消费 GlassLayer 的系统 regular 默认，不额外叠加浅／深底色或 tint。Web 为 CSS 近似；无能力时采用主题半透明渐变，减少透明度时回退实色。透明度不能施加于原生玻璃或其祖先，前景淡化容器保持稳定。
 
 ## 完整组件清单
 
 | 类别与数量              | 完整组件清单                                                 | 结论与实际依据                                                                                                                                                                                                                                                                                                |
 | ----------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 材质基础（1）           | GlassLayer                                                   | 已采用系统 regular 默认、原生默认不附加 tint；Web 为轻量近似，无能力或减少透明度走主题实色。`src/components/ui/GlassLayer/GlassLayer.tsx`、`.web.tsx`、`useReducedTransparency.ts`。                                                                                                                          |
+| 材质基础（1）           | GlassLayer                                                   | 已采用系统 regular 默认、原生默认不附加 tint；Web 为轻量近似，无能力时使用主题半透明渐变，减少透明度时使用主题实色。`src/components/ui/GlassLayer/GlassLayer.tsx`、`.web.tsx`、`useReducedTransparency.ts`。                                                                                                                          |
 | 中性动作（3）           | Button、IconButton、Chip                                     | Button secondary 与 glass、IconButton 所消费的对应 ButtonBase 分支、交互 Chip 直接使用共享系统材质。primary/danger 保留语义色，纯 text/ghost/neutral 无底色动作不强造背景；静态 Chip 保留标签内容语义。依据 `Button/ButtonBase.tsx`、`Chip/Chip.tsx` 的 Pressable 与 busy/disabled 路径。                     |
 | 导航与分段（4）         | NavBar、Tabs、TabBar、Segmented                              | NavBar default 与 Tabs 已直接补默认 GL；NavBar brand 保持品牌色，transparent 保持明确透明契约。TabBar/Segmented 默认 glass，Segmented 保留显式 solid。依据各目录组件、styles 和 types；不新增色彩配置。                                                                                                       |
 | 搜索与数值动作（2）     | Search、Stepper                                              | Search 在 TextFieldBase 的搜索可视面补默认材质，文本状态仍由原 controller 持有。Stepper 已以单一 GL 托住原视觉条；md/sm 的至少 44pt 命中框和 xs dense 例外、min/max、adjustable 回调均不变。依据 `Search/Search.tsx`、`TextField/TextFieldBase.tsx`、`Stepper/Stepper.tsx`、`Stepper/layout.ts`。             |

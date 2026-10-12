@@ -79,13 +79,13 @@ test.each(['clear', 'regular'] as const)(
 );
 
 test.each([
-  ['ios', 'light', 'clear', lightColors.surface],
-  ['ios', 'dark', 'regular', darkColors.surface],
-  ['android', 'light', 'regular', lightColors.surface],
-  ['android', 'dark', 'clear', darkColors.surface],
+  ['ios', 'light', 'clear'],
+  ['ios', 'dark', 'regular'],
+  ['android', 'light', 'regular'],
+  ['android', 'dark', 'clear'],
 ] as const)(
-  '%s 无原生材质时使用 %s 主题的 %s 实色背景',
-  (os, scheme, effect, backgroundColor) => {
+  '%s 无原生材质时使用 %s 主题的 %s 半透明渐变',
+  async (os, scheme, effect) => {
     jest.replaceProperty(
       LiquidGlass as { isLiquidGlassSupported: boolean },
       'isLiquidGlassSupported',
@@ -101,9 +101,16 @@ test.each([
         />
       </ThemeProvider>
     );
+    await waitFor(() =>
+      expect(
+        screen.getByTestId('glass-layer', { includeHiddenElements: true })
+      ).toHaveStyle({ backgroundColor: 'transparent' })
+    );
     expect(
-      screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.effect
-    ).toBe('none');
+      screen.getByTestId('glass-layer-gradient', {
+        includeHiddenElements: true,
+      })
+    ).toBeTruthy();
     expect(
       screen.getByTestId('glass-layer', { includeHiddenElements: true })
     ).toHaveStyle({
@@ -113,7 +120,6 @@ test.each([
       left: 0,
       right: 0,
       borderRadius: 14,
-      backgroundColor,
     });
   }
 );
@@ -142,12 +148,11 @@ test.each([true, false])(
       effect: supported ? 'regular' : 'none',
       tintColor: lightColors.primary,
     });
-    expect(
-      StyleSheet.flatten(
-        screen.getByTestId('glass-layer', { includeHiddenElements: true }).props
-          .style
-      ).backgroundColor
-    ).toBe(supported ? 'transparent' : lightColors.surface);
+    await waitFor(() =>
+      expect(
+        screen.getByTestId('glass-layer', { includeHiddenElements: true })
+      ).toHaveStyle({ backgroundColor: 'transparent' })
+    );
   }
 );
 
@@ -256,5 +261,36 @@ test.each([
     expect(StyleSheet.flatten(button.props.style).opacity).toBe(1);
     fireEvent.press(button);
     expect(press).not.toHaveBeenCalled();
+  }
+);
+
+test.each([true, false])(
+  '减少透明度时才采用 fallbackColor，原生支持=%s',
+  async (supported) => {
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      supported
+    );
+    render(
+      <ThemeProvider>
+        <GlassLayer
+          fallbackColor={lightColors.surfaceContainerHigh}
+          testID="custom-fallback"
+        />
+      </ThemeProvider>
+    );
+    await waitFor(() =>
+      expect(
+        screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.effect
+      ).toBe(supported ? 'regular' : 'none')
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByTestId('custom-fallback', { includeHiddenElements: true })
+      ).toHaveStyle({ backgroundColor: 'transparent' })
+    );
+    const layer = screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
+    expect(layer.props.tintColor).toBeUndefined();
   }
 );

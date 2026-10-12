@@ -48,7 +48,7 @@
     "prepare": "bob build",
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "test": "jest --passWithNoTests",
+    "test": "yarn workspace @unif/react-native-design-example test",
     "check:config": "node scripts/check-config.js",
     "check:jest-entries": "node scripts/check-jest-entries.js",
     "check:runtime-peers": "node scripts/check-runtime-peers.js",

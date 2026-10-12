@@ -6,12 +6,15 @@ import {
 } from '@callstack/liquid-glass';
 import { darkColors, lightColors, useTheme } from '../../../theme';
 import type { GlassLayerProps } from './types';
+import { styles } from './styles';
+import { GlassGradient } from './GlassGradient';
 import { useReducedTransparency } from './useReducedTransparency';
 
-/** 装饰玻璃层；无材质或减少透明度时使用可读的实色表面。 */
+/** 装饰玻璃层；旧系统使用半透明渐变，减少透明度时使用清晰实色。 */
 export function GlassLayer({
   effect = 'regular',
   tintColor,
+  fallbackColor,
   colorScheme,
   style,
   testID,
@@ -23,9 +26,11 @@ export function GlassLayer({
       ? darkColors
       : lightColors
     : theme.colors;
-  const reduced = useReducedTransparency(isLiquidGlassSupported);
+  const reduced = useReducedTransparency();
   const nativeGlass = isLiquidGlassSupported && !reduced;
-  const backgroundColor = nativeGlass ? 'transparent' : c.surface;
+  const backgroundColor = reduced
+    ? (fallbackColor ?? c.surface)
+    : 'transparent';
 
   return (
     <LiquidGlassView
@@ -35,12 +40,25 @@ export function GlassLayer({
       colorScheme={scheme}
       // 纯装饰层无需材质切换动画，也不引入减少动态效果的额外状态。
       animated={false}
-      style={[StyleSheet.absoluteFill, style, { backgroundColor }]}
+      style={[
+        StyleSheet.absoluteFill,
+        style,
+        !nativeGlass && styles.clipped,
+        { backgroundColor },
+      ]}
       pointerEvents="none"
       accessible={false}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       testID={testID}
-    />
+    >
+      {!nativeGlass && !reduced ? (
+        <GlassGradient
+          colors={c}
+          effect={effect}
+          testID={testID ? `${testID}-gradient` : undefined}
+        />
+      ) : null}
+    </LiquidGlassView>
   );
 }

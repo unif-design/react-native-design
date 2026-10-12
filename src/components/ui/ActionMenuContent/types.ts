@@ -26,6 +26,8 @@ export interface ActionMenuContentProps {
   actions: readonly ActionMenuAction[];
   presentation?: 'dialog' | 'sheet' | 'popover';
   title?: string;
+  /** 标题下的操作后果说明，与标题分别排版。 */
+  message?: string;
   /** null 隐藏取消操作，宿主仍须提供点外／返回关闭。 */
   cancelLabel?: string | null;
   /** 指针中心相对卡片左边的坐标；仅 popover 绘制，不负责宿主定位。 */

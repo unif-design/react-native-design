@@ -57,7 +57,8 @@ function assertSafeProductionArguments(jestArgs) {
     if (
       argument === '--runInBand' ||
       argument === '--no-cache' ||
-      argument === '--ci'
+      argument === '--ci' ||
+      argument === '--coverage'
     ) {
       continue;
     }
@@ -76,7 +77,7 @@ function assertSafeProductionArguments(jestArgs) {
     }
     failGate(
       'JEST_PRODUCTION_ARGUMENT',
-      `production example Jest 只接受 --maxWorkers、--runInBand、--no-cache 与 --ci；focused/selection/config/reporter/non-execution 参数必须改走 test:focused：${String(argument)}`
+      `production example Jest 只接受 --maxWorkers、--runInBand、--no-cache 、--ci 与 --coverage；focused/selection/config/reporter/non-execution 参数必须改走 test:focused：${String(argument)}`
     );
   }
 }

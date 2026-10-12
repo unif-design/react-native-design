@@ -166,7 +166,12 @@ export function ButtonBase({
             const opacity = unavailable ? 0.5 : pressed ? pressedOpacity : 1;
             return (
               <>
-                <GlassLayer style={{ borderRadius: glassRadius }} />
+                <GlassLayer
+                  style={{ borderRadius: glassRadius }}
+                  fallbackColor={
+                    variant === 'secondary' ? c.surfaceContainerHigh : undefined
+                  }
+                />
                 {/* 原生材质的祖先不能降低 alpha，只淡化按钮前景。 */}
                 <View
                   collapsable={false}

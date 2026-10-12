@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { AccessibilityInfo } from 'react-native';
+import { AccessibilityInfo, Platform } from 'react-native';
 
-export function useReducedTransparency(supported: boolean): boolean {
+export function useReducedTransparency(): boolean {
   // 系统偏好未读回前保持实色，避免先闪出用户禁用的透明效果。
-  const [reduced, setReduced] = useState(true);
+  const [reduced, setReduced] = useState(Platform.OS === 'ios');
   useEffect(() => {
-    if (!supported) return;
+    if (Platform.OS !== 'ios') return;
     let current = true;
     let changed = false;
     const subscription = AccessibilityInfo.addEventListener(
@@ -25,6 +25,6 @@ export function useReducedTransparency(supported: boolean): boolean {
       current = false;
       subscription.remove();
     };
-  }, [supported]);
+  }, []);
   return reduced;
 }
