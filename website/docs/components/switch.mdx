@@ -150,7 +150,7 @@ export const SwitchDemo = () => {
 | 开   | 32×20 主色底 `c.primary`，16×16 系统材质滑块在右 |
 | 禁用 | 44×44 outer frame 保留，仅语义轨道 `opacity: 0.5`；材质滑块不淡化，handler 被移除 |
 
-滑块复用 `GlassLayer`，原生默认不额外设置染色，Web 使用 CSS 近似材质。系统降低透明度或不支持材质时，回退为当前主题的实色表面。轨道与滑块是同一 visual frame 下的兄弟节点，禁用反馈不会降低材质及其祖先的整体透明度。
+滑块复用 `GlassLayer`，原生默认不额外设置染色，Web 使用 CSS 近似材质。不支持原生材质时使用当前主题的半透明渐变；系统减少透明度时使用清晰实色。轨道与滑块是同一 visual frame 下的兄弟节点，禁用反馈不会降低材质及其祖先的整体透明度。
 
 outer RNGH `Pressable` 是透明的 44×44 真实布局 frame，尺寸直接读取
 `fixed.hitTarget`，不经过 `r()` 或 fontScale，也不再使用 `hitSlop`。32×20 visual

@@ -1894,7 +1894,7 @@ leading／trailing 允许任意组件，其自身状态由调用方维护；Chip
 `confirm()` 在任何路径下都会 resolve,不会悬挂 —— 包括没挂 Host、重入、Host 渲染抛错、Host 卸载和被后挂载的 Host 接管。详见下方[生命周期契约](#生命周期契约)。
 :::
 
-确认卡采用主题玻璃；减少透明度或原生不支持时使用实色。显示外观不改变 owner 接管、点外取消、Promise 结算和窗口归还。
+确认卡采用主题玻璃；旧系统使用主题半透明渐变，减少透明度时使用清晰实色。显示外观不改变 owner 接管、点外取消、Promise 结算和窗口归还。
 
 ## 用法
 
@@ -3848,7 +3848,7 @@ function BrandImage() {
 
 # NavBar 导航栏
 
-页面顶部导航栏，提供标题与左右操作区域。默认使用无额外染色的系统玻璃表面；品牌态保持品牌色，transparent 仍完全透明。不支持玻璃或减少透明度时由 Design 提供主题实色回退。
+页面顶部导航栏，提供标题与左右操作区域。默认使用无额外染色的系统玻璃表面；品牌态保持品牌色，transparent 仍完全透明。不支持原生玻璃时由 Design 提供主题半透明渐变，减少透明度时使用清晰实色。
 
 ## 代码演示 {#实时预览}
 
@@ -5276,7 +5276,7 @@ const StepperDemo = () => {
 | 圆角           | 8px（`radius.md`，外层左右两角），中间数字框无独立圆角                                                                                                                                                                        |
 | 按钮 visual    | md `r(32)²` / sm `r(28)²` / xs `r(24)²`，嵌在 side outer 内并朝中央贴边；`±` 基准字号 18px（`type.h1`），按 fontScale 缩放一次                                                                                                |
 | 数值 visual    | md `r(48) × r(32)` / sm `r(40) × r(28)` / xs `r(40) × r(24)`；1px 上下边线、无左右边线，基准字号 md 14 / sm 13 / xs 11，按 fontScale 缩放一次；`formatValue` 只替换可见文案                                                   |
-| 背景 / 描边    | 视觉区域共用无额外染色的系统玻璃，保留 1px `c.outline` 边；无材质时为主题实色                                                                                                                                                                          |
+| 背景 / 描边    | 视觉区域共用无额外染色的系统玻璃，保留 1px `c.outline` 边；无原生材质时为主题渐变，减少透明度时为清晰实色                                                                                                                                                                          |
 | 禁用           | 按钮前景 `opacity: 0.4`（达到 min/max 或整体 `disabled` 时；按下 0.7），材质与其祖先保持不透明                                                                                                                                                            |
 
 `ThemeProvider fontScale` 只改变 `±` 与中央数值的文字 metric。三个 visual wrapper、md/sm 至少 44pt 的 outer frame、xs 高 44pt 且横向小于 44pt 的 dense outer、边框、圆角和点击布局都不缩放；动态中央字号不会再经过 `useThemedStyles` 二次处理。
@@ -5552,7 +5552,7 @@ const SwitchDemo = () => {
 | 开   | 32×20 主色底 `c.primary`，16×16 系统材质滑块在右 |
 | 禁用 | 44×44 outer frame 保留，仅语义轨道 `opacity: 0.5`；材质滑块不淡化，handler 被移除 |
 
-滑块复用 `GlassLayer`，原生默认不额外设置染色，Web 使用 CSS 近似材质。系统降低透明度或不支持材质时，回退为当前主题的实色表面。轨道与滑块是同一 visual frame 下的兄弟节点，禁用反馈不会降低材质及其祖先的整体透明度。
+滑块复用 `GlassLayer`，原生默认不额外设置染色，Web 使用 CSS 近似材质。不支持原生材质时使用当前主题的半透明渐变；系统减少透明度时使用清晰实色。轨道与滑块是同一 visual frame 下的兄弟节点，禁用反馈不会降低材质及其祖先的整体透明度。
 
 outer RNGH `Pressable` 是透明的 44×44 真实布局 frame，尺寸直接读取
 `fixed.hitTarget`，不经过 `r()` 或 fontScale，也不再使用 `hitSlop`。32×20 visual
