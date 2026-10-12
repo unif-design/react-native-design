@@ -1,3 +1,13 @@
+import { AccessibilityInfo } from 'react-native';
+
+// 普通组件用例采用稳定的无障碍表面；材质用例单独设置并等待透明度查询/事件。
+// 避免未测试该系统边界的同步 render 在结束后留下异步材质更新。
+beforeEach(() => {
+  jest
+    .spyOn(AccessibilityInfo, 'isReduceTransparencyEnabled')
+    .mockResolvedValue(true);
+});
+
 // design 自身的 peer 接线来自 `@unif/react-native-design/jest-setup`
 // (由 jest.config.js 的 preset 带入)。本文件只放 example 特有的替身。
 
