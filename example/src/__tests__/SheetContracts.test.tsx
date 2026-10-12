@@ -42,7 +42,6 @@ test('默认固定内容并将 root 与内容样式应用到各自容器', async
     expect.arrayContaining([
       expect.objectContaining({
         flex: 1,
-        backgroundColor: lightColors.surface,
         paddingHorizontal: space['9'],
         paddingTop: space['4'],
         paddingBottom: space['9'],
@@ -51,6 +50,54 @@ test('默认固定内容并将 root 与内容样式应用到各自容器', async
       }),
     ])
   );
+});
+
+test('标题覆盖滚动内容并按真实高度避让，背景由 Sheet 根容器统一提供', async () => {
+  const page = await render(
+    <ThemeProvider>
+      <Sheet
+        testID="sheet"
+        headerMode="overlay"
+        contentMode="scroll"
+        style={{ backgroundColor: lightColors.surfaceContainer }}
+        header={<Text>浮动标题</Text>}
+        contentContainerStyle={{ paddingTop: 7 }}
+      >
+        <Text>正文</Text>
+      </Sheet>
+    </ThemeProvider>
+  );
+  const header = page.UNSAFE_root.findAll(
+    (node) =>
+      String(node.type) === 'View' &&
+      StyleSheet.flatten(node.props.style)?.zIndex === 1
+  )[0];
+  expect(StyleSheet.flatten(header.props.style)).toMatchObject({
+    position: 'absolute',
+    top: 0,
+    zIndex: 1,
+  });
+  await fireEvent(header, 'layout', {
+    nativeEvent: { layout: { height: 48, width: 320, x: 0, y: 0 } },
+  });
+  const scroll = page.UNSAFE_root.findAll(
+    (node) => String(node.type) === 'RCTScrollView'
+  )[0];
+  expect(
+    StyleSheet.flatten(scroll.props.contentContainerStyle).paddingTop
+  ).toBe(55);
+  expect(
+    StyleSheet.flatten(scroll.props.style).backgroundColor
+  ).toBeUndefined();
+  expect(
+    StyleSheet.flatten(page.getByTestId('sheet').props.style).backgroundColor
+  ).toBe(lightColors.surfaceContainer);
+  await fireEvent(header, 'layout', {
+    nativeEvent: { layout: { height: 72, width: 320, x: 0, y: 0 } },
+  });
+  expect(
+    StyleSheet.flatten(scroll.props.contentContainerStyle).paddingTop
+  ).toBe(79);
 });
 
 test('滚动模式只滚动中间内容并保留固定头尾', async () => {

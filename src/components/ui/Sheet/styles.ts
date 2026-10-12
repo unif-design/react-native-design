@@ -6,10 +6,16 @@ export const makeStyles = (colors: ColorTokens) =>
     root: {
       flex: 1,
       minHeight: 0,
-    },
-    header: { backgroundColor: colors.surface },
-    grabberContainer: {
       backgroundColor: colors.surface,
+    },
+    overlayHeader: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 1,
+    },
+    grabberContainer: {
       alignItems: 'center',
       paddingTop: space['3'],
       paddingBottom: space['2'],
@@ -21,7 +27,6 @@ export const makeStyles = (colors: ColorTokens) =>
       backgroundColor: colors.foregroundMuted,
     },
     contentRegion: {
-      backgroundColor: colors.surface,
       flex: 1,
       minHeight: 0,
     },
