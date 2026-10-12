@@ -77,6 +77,7 @@ test('标题覆盖滚动内容并按真实高度避让，背景由 Sheet 根容�
     top: 0,
     zIndex: 1,
   });
+  expect(header.props.pointerEvents).toBe('box-none');
   await fireEvent(header, 'layout', {
     nativeEvent: { layout: { height: 48, width: 320, x: 0, y: 0 } },
   });
@@ -98,6 +99,44 @@ test('标题覆盖滚动内容并按真实高度避让，背景由 Sheet 根容�
   expect(
     StyleSheet.flatten(scroll.props.contentContainerStyle).paddingTop
   ).toBe(79);
+});
+
+test('悬浮标题保留百分比顶部留白并跟随实际内容宽度', async () => {
+  const page = await render(
+    <ThemeProvider>
+      <Sheet
+        headerMode="overlay"
+        contentMode="scroll"
+        header={<Text>标题</Text>}
+        contentContainerStyle={{ paddingTop: '10%' }}
+      >
+        <Text>正文</Text>
+      </Sheet>
+    </ThemeProvider>
+  );
+  const header = page.UNSAFE_root.findAll(
+    (node) =>
+      String(node.type) === 'View' &&
+      StyleSheet.flatten(node.props.style)?.zIndex === 1
+  )[0];
+  const scroll = page.UNSAFE_root.findAll(
+    (node) => String(node.type) === 'RCTScrollView'
+  )[0];
+  await fireEvent(header, 'layout', {
+    nativeEvent: { layout: { x: 0, y: 0, width: 320, height: 48 } },
+  });
+  await fireEvent(scroll, 'layout', {
+    nativeEvent: { layout: { x: 0, y: 0, width: 320, height: 480 } },
+  });
+  expect(
+    StyleSheet.flatten(scroll.props.contentContainerStyle).paddingTop
+  ).toBe(80);
+  await fireEvent(scroll, 'layout', {
+    nativeEvent: { layout: { x: 0, y: 0, width: 640, height: 480 } },
+  });
+  expect(
+    StyleSheet.flatten(scroll.props.contentContainerStyle).paddingTop
+  ).toBe(112);
 });
 
 test('滚动模式只滚动中间内容并保留固定头尾', async () => {
