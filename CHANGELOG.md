@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/unif-design/react-native-design/compare/v1.1.1...v1.1.2) (2026-10-13)
+
+
+### Bug Fixes
+
+* **glass:** keep material stable across navigation ([#157](https://github.com/unif-design/react-native-design/issues/157)) ([e2e4e22](https://github.com/unif-design/react-native-design/commit/e2e4e2203d96fc5d8b55aeb0019264569b5e3c40))
+
 ## [1.1.1](https://github.com/unif-design/react-native-design/compare/v1.1.0...v1.1.1) (2026-10-12)
 
 
