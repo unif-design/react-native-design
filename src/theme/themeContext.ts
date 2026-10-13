@@ -1,11 +1,12 @@
 import { createContext } from 'react';
-import { Platform } from 'react-native';
 import { lightColors } from './colors';
 import { lightShadow } from './shadow';
 import type { ThemeContextValue } from './ThemeProvider';
 
 /** 原生系统偏好归主题宿主持有，后续控件共享已确认的材质状态。 */
-export const ReducedTransparencyContext = createContext(Platform.OS === 'ios');
+export const ReducedTransparencyContext = createContext<boolean | undefined>(
+  undefined
+);
 
 export const FALLBACK_THEME: ThemeContextValue = {
   scheme: 'light',

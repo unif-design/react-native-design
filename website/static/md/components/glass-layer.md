@@ -111,7 +111,7 @@ import { View, Text } from 'react-native';
 
 ## 无障碍与布局
 
-玻璃层不拦截触摸，隐藏自身无障碍子树，内容语义由其旁边的真实内容提供。材质更新不播放动画。原生监听减少透明度偏好，Web 监听 `prefers-reduced-transparency`；开启时使用 `fallbackColor` 或实色 `surface`。Web 无 `backdrop-filter` 支持时使用相同主题渐变。原生系统偏好由应用根部稳定的 ThemeProvider 统一读取和订阅。首次查询尚未返回时先使用实色；之后新导航、新按钮和弹层直接使用已知状态，不再各自重复从实色切换为玻璃。迟到查询不会覆盖新的偏好事件。
+玻璃层不拦截触摸，隐藏自身无障碍子树，内容语义由其旁边的真实内容提供。材质更新不播放动画。原生监听减少透明度偏好，Web 监听 `prefers-reduced-transparency`；开启时使用 `fallbackColor` 或实色 `surface`。Web 无 `backdrop-filter` 支持时使用相同主题渐变。原生系统偏好由应用根部稳定的 ThemeProvider 统一读取和订阅。首次查询尚未返回时先使用实色；之后新导航、新按钮和弹层直接使用已知状态，嵌套 ThemeProvider 也继承该系统偏好，不再重复从实色切换为玻璃。独立使用且没有主题宿主的 GlassLayer 仍自行读取和监听系统偏好。迟到查询不会覆盖新的偏好事件。
 
 父容器应限定尺寸并提供相对定位。圆角通过 `style` 传给玻璃层；父容器负责内容裁切，外层按需承载阴影。组件只提供背景，不接受 `children`。
 

@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { AccessibilityInfo, Platform } from 'react-native';
+import { ReducedTransparencyContext } from './themeContext';
 
 export function useReducedTransparency(): boolean {
+  const inherited = useContext(ReducedTransparencyContext);
   // 系统偏好未读回前保持实色，避免先闪出用户禁用的透明效果。
-  const [reduced, setReduced] = useState(Platform.OS === 'ios');
+  const [reduced, setReduced] = useState(inherited ?? Platform.OS === 'ios');
   useEffect(() => {
-    if (Platform.OS !== 'ios') return;
+    if (inherited !== undefined || Platform.OS !== 'ios') return;
     let current = true;
     let changed = false;
     const subscription = AccessibilityInfo.addEventListener(
@@ -25,6 +27,6 @@ export function useReducedTransparency(): boolean {
       current = false;
       subscription.remove();
     };
-  }, []);
-  return reduced;
+  }, [inherited]);
+  return inherited ?? reduced;
 }
