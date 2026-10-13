@@ -36,7 +36,7 @@ export const makeStyles = (c: ColorTokens) =>
       justifyContent: 'center',
     },
     title: {
-      fontSize: t.h1,
+      fontSize: t.h2,
       fontWeight: fw.semi,
       letterSpacing: -0.2,
     },
