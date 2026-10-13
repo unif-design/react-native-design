@@ -36,9 +36,7 @@ export const makeStyles = (c: ColorTokens) =>
       justifyContent: 'center',
     },
     title: {
-      // h3=15 是 chat/ui 通用正文标题字号,navbar 标题再大 0.5 / 字距 -0.2
-      // 是品牌印刷级排版微调,无对应 token,保留 inline delta(同 Privacy h1+2)
-      fontSize: t.h3 + 0.5,
+      fontSize: t.h1,
       fontWeight: fw.semi,
       letterSpacing: -0.2,
     },

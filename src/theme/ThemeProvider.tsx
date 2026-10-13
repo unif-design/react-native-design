@@ -3,7 +3,8 @@ import { useColorScheme } from 'react-native';
 import { lightColors, darkColors, type ColorTokens } from './colors';
 import { normalizeFontScale } from './fontScale';
 import { lightShadow, darkShadow, type ShadowTokens } from './shadow';
-import { ThemeContext } from './themeContext';
+import { ReducedTransparencyContext, ThemeContext } from './themeContext';
+import { useReducedTransparency } from './useReducedTransparency';
 import { createInvalidFontScaleDiagnostic } from './themeDiagnostics';
 import { createLogger } from '../utils/logger';
 
@@ -40,6 +41,7 @@ export function ThemeProvider({
   const scheme: ColorScheme =
     forceScheme ?? (sysScheme === 'dark' ? 'dark' : 'light');
   const normalizedFontScale = normalizeFontScale(fontScale);
+  const reducedTransparency = useReducedTransparency();
 
   useEffect(() => {
     reportInvalidFontScale(fontScale, normalizedFontScale, isDev);
@@ -58,6 +60,10 @@ export function ThemeProvider({
   );
 
   return (
-    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>
+      <ReducedTransparencyContext.Provider value={reducedTransparency}>
+        {children}
+      </ReducedTransparencyContext.Provider>
+    </ThemeContext.Provider>
   );
 }

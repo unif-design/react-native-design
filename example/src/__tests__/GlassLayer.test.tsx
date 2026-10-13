@@ -294,3 +294,82 @@ test.each([true, false])(
     expect(layer.props.tintColor).toBeUndefined();
   }
 );
+
+test.each([
+  [true, false],
+  [true, true],
+  [false, false],
+  [false, true],
+])(
+  '新导航按钮不闪实色，原生支持=%s，嵌套主题=%s',
+  async (supported, nested) => {
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      supported
+    );
+    const query = jest
+      .spyOn(AccessibilityInfo, 'isReduceTransparencyEnabled')
+      .mockResolvedValue(false);
+    query.mockClear();
+    const view = render(
+      <ThemeProvider>
+        <GlassLayer testID="existing-glass" />
+      </ThemeProvider>
+    );
+    await waitFor(() =>
+      expect(
+        StyleSheet.flatten(
+          screen.getByTestId('existing-glass', { includeHiddenElements: true })
+            .props.style
+        ).backgroundColor
+      ).toBe('transparent')
+    );
+    expect(query).toHaveBeenCalledTimes(1);
+    query.mockImplementation(() => new Promise(() => {}));
+    view.rerender(
+      <ThemeProvider>
+        <GlassLayer testID="existing-glass" />
+        {nested ? (
+          <ThemeProvider forceScheme="dark">
+            <GlassLayer testID="next-page-button" />
+          </ThemeProvider>
+        ) : (
+          <GlassLayer testID="next-page-button" />
+        )}
+      </ThemeProvider>
+    );
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId('next-page-button', { includeHiddenElements: true })
+          .props.style
+      ).backgroundColor
+    ).toBe('transparent');
+    expect(query).toHaveBeenCalledTimes(1);
+  }
+);
+
+test('独立玻璃层在无主题宿主时仍读取系统偏好，不永久停在实色', async () => {
+  jest.replaceProperty(
+    LiquidGlass as { isLiquidGlassSupported: boolean },
+    'isLiquidGlassSupported',
+    true
+  );
+  const query = jest
+    .spyOn(AccessibilityInfo, 'isReduceTransparencyEnabled')
+    .mockResolvedValue(false);
+  query.mockClear();
+  render(<GlassLayer colorScheme="dark" testID="standalone-glass" />);
+  await waitFor(() =>
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId('standalone-glass', { includeHiddenElements: true })
+          .props.style
+      ).backgroundColor
+    ).toBe('transparent')
+  );
+  expect(query).toHaveBeenCalledTimes(1);
+  expect(
+    screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.effect
+  ).toBe('regular');
+});

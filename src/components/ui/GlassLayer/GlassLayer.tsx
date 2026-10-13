@@ -8,7 +8,7 @@ import { darkColors, lightColors, useTheme } from '../../../theme';
 import type { GlassLayerProps } from './types';
 import { styles } from './styles';
 import { GlassGradient } from './GlassGradient';
-import { useReducedTransparency } from './useReducedTransparency';
+import { useReducedTransparency } from '../../../theme/useReducedTransparency';
 
 /** 装饰玻璃层；旧系统使用半透明渐变，减少透明度时使用清晰实色。 */
 export function GlassLayer({
