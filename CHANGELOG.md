@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3](https://github.com/unif-design/react-native-design/compare/v1.1.2...v1.1.3) (2026-10-13)
+
+
+### Bug Fixes
+
+* **navigation:** use compact navbar title size ([#158](https://github.com/unif-design/react-native-design/issues/158)) ([e617768](https://github.com/unif-design/react-native-design/commit/e61776854cae3c7f3ce0c713518ff85ea2710486))
+
 ## [1.1.2](https://github.com/unif-design/react-native-design/compare/v1.1.1...v1.1.2) (2026-10-13)
 
 
