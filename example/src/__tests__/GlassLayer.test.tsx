@@ -294,3 +294,46 @@ test.each([true, false])(
     expect(layer.props.tintColor).toBeUndefined();
   }
 );
+
+test.each([true, false])(
+  '主题已读取系统偏好后，新导航按钮不先闪实色，原生支持=%s',
+  async (supported) => {
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      supported
+    );
+    const query = jest
+      .spyOn(AccessibilityInfo, 'isReduceTransparencyEnabled')
+      .mockResolvedValue(false);
+    query.mockClear();
+    const view = render(
+      <ThemeProvider>
+        <GlassLayer testID="existing-glass" />
+      </ThemeProvider>
+    );
+    await waitFor(() =>
+      expect(
+        StyleSheet.flatten(
+          screen.getByTestId('existing-glass', { includeHiddenElements: true })
+            .props.style
+        ).backgroundColor
+      ).toBe('transparent')
+    );
+    expect(query).toHaveBeenCalledTimes(1);
+    query.mockImplementation(() => new Promise(() => {}));
+    view.rerender(
+      <ThemeProvider>
+        <GlassLayer testID="existing-glass" />
+        <GlassLayer testID="next-page-button" />
+      </ThemeProvider>
+    );
+    expect(
+      StyleSheet.flatten(
+        screen.getByTestId('next-page-button', { includeHiddenElements: true })
+          .props.style
+      ).backgroundColor
+    ).toBe('transparent');
+    expect(query).toHaveBeenCalledTimes(1);
+  }
+);

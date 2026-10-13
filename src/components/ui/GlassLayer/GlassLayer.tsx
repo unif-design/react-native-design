@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { StyleSheet } from 'react-native';
 import {
   LiquidGlassView,
@@ -8,7 +8,7 @@ import { darkColors, lightColors, useTheme } from '../../../theme';
 import type { GlassLayerProps } from './types';
 import { styles } from './styles';
 import { GlassGradient } from './GlassGradient';
-import { useReducedTransparency } from './useReducedTransparency';
+import { ReducedTransparencyContext } from '../../../theme/themeContext';
 
 /** 装饰玻璃层；旧系统使用半透明渐变，减少透明度时使用清晰实色。 */
 export function GlassLayer({
@@ -26,7 +26,7 @@ export function GlassLayer({
       ? darkColors
       : lightColors
     : theme.colors;
-  const reduced = useReducedTransparency();
+  const reduced = useContext(ReducedTransparencyContext);
   const nativeGlass = isLiquidGlassSupported && !reduced;
   const backgroundColor = reduced
     ? (fallbackColor ?? c.surface)

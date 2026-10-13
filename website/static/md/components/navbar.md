@@ -144,6 +144,8 @@ import { NavBar } from '@unif/react-native-design';
 />;
 ```
 
+标题统一使用 `type.h1`（基础 18）与 `fw.semi`（600），并跟随 ThemeProvider 字号缩放。
+
 ## API
 
 | 参数       | 类型                                    | 默认值      | 说明                                                                                                                                                                                             |
