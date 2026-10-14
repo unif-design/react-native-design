@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.2.0](https://github.com/unif-design/react-native-design/compare/v1.1.3...v1.2.0) (2026-10-14)
+
+
+### Features
+
+* **progress:** support visual labels with accessible percentage ([#159](https://github.com/unif-design/react-native-design/issues/159)) ([39cd6fa](https://github.com/unif-design/react-native-design/commit/39cd6fa2b3733e4bb2954969fe258aac34732916))
+
 ## [1.1.3](https://github.com/unif-design/react-native-design/compare/v1.1.2...v1.1.3) (2026-10-13)
 
 
