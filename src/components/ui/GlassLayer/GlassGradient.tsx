@@ -10,7 +10,12 @@ export function GlassGradient({ colors, effect, testID }: GlassGradientProps) {
   const opacity = glassGradientOpacity[effect];
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none" testID={testID}>
-      <Svg width="100%" height="100%">
+      <Svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 1 1"
+        preserveAspectRatio="none"
+      >
         <Defs>
           <LinearGradient id={id} x1="0%" y1="0%" x2="100%" y2="100%">
             <Stop
@@ -25,7 +30,7 @@ export function GlassGradient({ colors, effect, testID }: GlassGradientProps) {
             />
           </LinearGradient>
         </Defs>
-        <Rect width="100%" height="100%" fill={`url(#${id})`} />
+        <Rect width={1} height={1} fill={`url(#${id})`} />
       </Svg>
     </View>
   );
