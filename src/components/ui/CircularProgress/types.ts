@@ -13,6 +13,8 @@ export interface CircularProgressProps {
   trackColor?: string;
   /** 是否在圆环中央显示取整后的百分比，默认 false。 */
   showLabel?: boolean;
+  /** 自定义中央文字；接收 0..100 的取整百分比，不影响无障碍进度。 */
+  formatLabel?: (percentage: number) => string;
   /** 百分比文字颜色，默认 c.foreground。 */
   labelColor?: string;
   /** 进度条可访问性名称，默认“进度”。 */

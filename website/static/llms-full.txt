@@ -1,7 +1,7 @@
 # Unif Design — 全文文档聚合
 
 > 可选全文。普通查询优先通过 llms.txt 定位相关单页。
-<!-- Generated from @unif/react-native-design@1.1.2; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@1.1.3; edit source documentation. -->
 
 ## 目录
 
@@ -3653,22 +3653,25 @@ const ProgressFontDemo = () => {
 };
 ```
 
-中央百分比按 ThemeProvider.fontScale 缩放一次，系统字号沿 RN 原生行为处理。文字自然布局，圆环与描边保持 size / thickness 指定的实际尺寸。小圆环配大字号时外层占用可以增大；不会缩小字号、截掉百分号或自动关闭标签。showLabel=false 时保持 size × size 的固定占用；显示标签时采用平台固有尺寸，纵向容器的 stretch 不会把圆环拉成整行宽。外部显式设置裁切的容器仍由调用方负责。
+中央百分比按 ThemeProvider.fontScale 缩放一次，系统字号沿 RN 原生行为处理。文字自然布局，圆环与描边保持 size / thickness 指定的实际尺寸。小圆环配大字号时外层占用可以增大；不会缩小字号、截掉标签或自动关闭标签。showLabel=false 时保持 size × size 的固定占用；显示标签时采用平台固有尺寸，纵向容器的 stretch 不会把圆环拉成整行宽。外部显式设置裁切的容器仍由调用方负责。
+
+`formatLabel` 只定制中央标签，接收已经归一化并取整的 `0..100` 百分比；例如 `formatLabel={String}` 显示 `42`。默认仍显示 `42%`，读屏始终保留完整百分比，回调不改变圆环进度或尺寸。
 
 未知上传比例应使用 Spinner 配合实际状态说明，不传 NaN 或伪造 0%；100% 也不代表业务成功。
 
-| 参数                 | 类型                    | 默认值         | 说明                                               |
-| -------------------- | ----------------------- | -------------- | -------------------------------------------------- |
-| `value`              | `number`                | 必填           | `0..1` 的确定进度；越界值收敛到边界，非有限值按 0  |
-| `size`               | `number?`               | `32`           | 圆环直径；非有限或 `< 16` 钳到 16                  |
-| `thickness`          | `number?`               | `2`            | 描边宽度；无效值 fallback 到 2，最大不超过直径一半 |
-| `color`              | `string?`               | `c.primary`    | 已完成圆弧颜色                                     |
-| `trackColor`         | `string?`               | `c.outline`    | 未完成轨道颜色                                     |
-| `showLabel`          | `boolean?`              | `false`        | 是否在中央显示取整后的百分比                       |
-| `labelColor`         | `string?`               | `c.foreground` | 中央百分比文字颜色                                 |
-| `accessibilityLabel` | `string?`               | `进度`         | progressbar 的可访问性名称                         |
-| `style`              | `StyleProp<ViewStyle>?` | —              | 外层布局样式                                       |
-| `testID`             | `string?`               | —              | E2E / 测试定位                                     |
+| 参数                 | 类型                             | 默认值         | 说明                                               |
+| -------------------- | -------------------------------- | -------------- | -------------------------------------------------- |
+| `value`              | `number`                         | 必填           | `0..1` 的确定进度；越界值收敛到边界，非有限值按 0  |
+| `size`               | `number?`                        | `32`           | 圆环直径；非有限或 `< 16` 钳到 16                  |
+| `thickness`          | `number?`                        | `2`            | 描边宽度；无效值 fallback 到 2，最大不超过直径一半 |
+| `color`              | `string?`                        | `c.primary`    | 已完成圆弧颜色                                     |
+| `trackColor`         | `string?`                        | `c.outline`    | 未完成轨道颜色                                     |
+| `showLabel`          | `boolean?`                       | `false`        | 是否在中央显示取整后的百分比                       |
+| `formatLabel`        | `(percentage: number) => string` | —              | 自定义中央标签文字；不改变无障碍百分比             |
+| `labelColor`         | `string?`                        | `c.foreground` | 中央百分比文字颜色                                 |
+| `accessibilityLabel` | `string?`                        | `进度`         | progressbar 的可访问性名称                         |
+| `style`              | `StyleProp<ViewStyle>?`          | —              | 外层布局样式                                       |
+| `testID`             | `string?`                        | —              | E2E / 测试定位                                     |
 
 ### Spinner
 

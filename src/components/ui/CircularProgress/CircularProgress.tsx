@@ -20,6 +20,7 @@ export function CircularProgress({
   color,
   trackColor,
   showLabel = false,
+  formatLabel,
   labelColor,
   accessibilityLabel = '进度',
   style,
@@ -96,7 +97,7 @@ export function CircularProgress({
               styles.label,
             ]}
           >
-            {`${percentage}%`}
+            {formatLabel ? formatLabel(percentage) : `${percentage}%`}
           </Text>
         ) : null}
       </View>

@@ -71,12 +71,16 @@ const runEffects = (effects: Effect[]) => {
 
 beforeEach(() => {
   jest.resetModules();
+  jest.doMock('../../src/theme/useReducedTransparency', () => ({
+    useReducedTransparency: () => false,
+  }));
 });
 
 afterEach(() => {
   jest.dontMock('react');
   jest.dontMock('react-native');
   jest.dontMock('../../src/utils/logger');
+  jest.dontMock('../../src/theme/useReducedTransparency');
   jest.resetModules();
   if (originalDevDescriptor) {
     Object.defineProperty(globalThis, '__DEV__', originalDevDescriptor);

@@ -137,3 +137,21 @@ describe('CircularProgress', () => {
     expect(visual?.props['aria-hidden']).toBe(true);
   });
 });
+
+test('自定义中央文字只影响视觉，仍朗读完整百分比', () => {
+  const CircularProgress = loadCircularProgress();
+  const outer = CircularProgress({
+    value: 0.421,
+    showLabel: true,
+    formatLabel: String,
+  }) as ReactElement<ElementProps>;
+  const [visual] = childrenOf(outer);
+  const [, label] = childrenOf(visual!);
+  expect(label?.props.children).toBe('42');
+  expect(outer.props.accessibilityValue).toEqual({
+    min: 0,
+    max: 100,
+    now: 42,
+    text: '42%',
+  });
+});
