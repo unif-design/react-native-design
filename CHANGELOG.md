@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/unif-design/react-native-design/compare/v1.2.0...v1.2.1) (2026-10-14)
+
+
+### Bug Fixes
+
+* **glass:** preserve legacy popover background and pointer ([#160](https://github.com/unif-design/react-native-design/issues/160)) ([91a4817](https://github.com/unif-design/react-native-design/commit/91a48173863b4251345936f8e18318db6632afa0))
+
 # [1.2.0](https://github.com/unif-design/react-native-design/compare/v1.1.3...v1.2.0) (2026-10-14)
 
 
