@@ -2,7 +2,7 @@
 
 > Unif React Native 设计系统：基础组件、主题和字体
 
-文档构建依据：`@unif/react-native-design@1.3.0`；使用时核对实际安装版本。
+文档构建依据：`@unif/react-native-design@1.4.0`；使用时核对实际安装版本。
 
 先查找当前功能，再读取对应 API、示例或 FAQ。源码链接供查阅，应用从包根公开接口导入。
 迁移、测试和研发技能按任务读取；这些资料不自动加入产品运行时模型上下文。
@@ -28,7 +28,7 @@
 - [Confirm 确认对话框](md/components/confirm.md) — 展示确认弹窗，并通过 Promise 返回用户选择。
 - [Decorations 装饰图元](md/components/decorations.md) — 可组合到容器中的渐变与背景装饰。
 - [DrawerHeader 抽屉头](md/components/drawer-header.md) — 展示抽屉顶部的头像、名称和副标题。
-- [Empty 空态](md/components/empty.md) — 展示空内容状态的图标、标题和说明。
+- [Empty 空态](md/components/empty.md) — 展示空内容或简单失败提示，可选图标、说明和操作。
 - [EntryCard 入口卡](md/components/entry-card.md) — 用于图标与文字入口的紧凑卡片。
 - [Form 表单](md/components/form.md) — 组合表单分组、标签与输入控件。
 - [GlassLayer 玻璃层](md/components/glass-layer.md) — 随主题渲染玻璃材质，并提供明确的平台降级。

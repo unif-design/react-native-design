@@ -102,7 +102,7 @@
     "mdPath": "md/components/empty.md",
     "slug": "/components/empty",
     "section": "components",
-    "description": "展示空内容状态的图标、标题和说明。"
+    "description": "展示空内容或简单失败提示，可选图标、说明和操作。"
   },
   {
     "title": "EntryCard 入口卡",

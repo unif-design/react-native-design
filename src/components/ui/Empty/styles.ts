@@ -9,6 +9,7 @@ export const makeStyles = (c: ColorTokens) =>
       paddingVertical: space[7],
       gap: space[4],
     },
+    action: { alignSelf: 'center', alignItems: 'center' },
     illust: {
       width: icon['2xl'],
       height: icon['2xl'],
@@ -21,6 +22,7 @@ export const makeStyles = (c: ColorTokens) =>
       fontSize: t.h3,
       fontWeight: fw.semi,
       color: c.foreground,
+      textAlign: 'center',
     },
     desc: {
       fontSize: t.xs,
