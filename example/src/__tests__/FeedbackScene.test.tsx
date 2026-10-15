@@ -1,6 +1,6 @@
 import { ClipboardOutlined } from '@unif/react-native-icons';
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { Animated as NativeAnimated, StyleSheet } from 'react-native';
 import {
   act,
   fireEvent,
@@ -16,6 +16,7 @@ import {
   Pulse,
   PulseDot,
   Reveal,
+  ShimmerText,
   Skeleton,
   Spinner,
   confirm,
@@ -393,6 +394,59 @@ test('Pulse、PulseDot、usePulse 与 Reveal 使用合法 options，并保留子
   revealCoverage.expectComplete();
 });
 
+test('ShimmerText 由真实文字与开关展示扫光、长中文和系统静态状态', () => {
+  const { unmount } = render(<App />);
+  enterFeedback();
+  const coverage = createShowcaseStateCoverage('ShimmerText');
+
+  coverage.prove('shimmer-text.active', () => {
+    expect(
+      componentByTestID(ShimmerText, 'feedback-shimmer-text').props
+    ).toMatchObject({ active: true, children: '正在整理信息' });
+    expect(screen.getByText('正在整理信息')).toBeOnTheScreen();
+  });
+  coverage.prove('shimmer-text.long-text', () => {
+    expect(
+      componentByTestID(ShimmerText, 'feedback-shimmer-text-long').props
+    ).toMatchObject({
+      active: true,
+      numberOfLines: 1,
+      children: '正在整理已收到的信息，较长的中文保持原来的字号与单行截断规则',
+    });
+  });
+
+  fireEvent.press(screen.getByRole('button', { name: '停用文字扫光' }));
+  coverage.prove('shimmer-text.inactive', () => {
+    expect(
+      componentByTestID(ShimmerText, 'feedback-shimmer-text').props.active
+    ).toBe(false);
+    expect(screen.getByText('正在整理信息')).toHaveStyle({
+      color: lightColors.foreground,
+    });
+    expect(
+      componentByTestID(ShimmerText, 'feedback-shimmer-text-long').props.active
+    ).toBe(false);
+  });
+
+  unmount();
+  setReducedMotion(true);
+  const timingSpy = jest.spyOn(NativeAnimated, 'timing');
+  render(<App />);
+  timingSpy.mockClear();
+  enterFeedback();
+  coverage.prove('shimmer-text.reduced-motion', () => {
+    expect(screen.getByText('减少动态效果：是')).toBeOnTheScreen();
+    expect(
+      componentByTestID(ShimmerText, 'feedback-shimmer-text').props.active
+    ).toBe(true);
+    expect(screen.getByText('正在整理信息')).toHaveStyle({
+      color: lightColors.foreground,
+    });
+    expect(timingSpy).not.toHaveBeenCalled();
+  });
+  coverage.expectComplete();
+});
+
 test('系统减少动态效果开启时 Pulse、PulseDot 与 Reveal 真实停用非必要动画', () => {
   setReducedMotion(true);
   render(<App />);
@@ -400,7 +454,7 @@ test('系统减少动态效果开启时 Pulse、PulseDot 与 Reveal 真实停用
 
   expect(screen.getByText('减少动态效果：是')).toBeOnTheScreen();
   expect(
-    screen.getByText('脉冲与淡入遵循系统设置；加载指示仍保持旋转。')
+    screen.getByText('文字扫光、脉冲与淡入遵循系统设置；加载指示仍保持旋转。')
   ).toBeOnTheScreen();
   for (const [testID, opacity] of [
     ['feedback-pulse-default', 1],
@@ -841,11 +895,12 @@ test('破坏性 Confirm 的确认与取消均在 Promise settled 后写真实结
   });
 });
 
-test('Reveal 与 Glass draft 跨路由保留，重置只影响 Feedback', () => {
+test('Reveal、文字扫光与 Glass draft 跨路由保留，重置只影响 Feedback', () => {
   render(<App />);
   enterFeedback();
 
   fireEvent.press(screen.getByRole('button', { name: '隐藏淡入内容' }));
+  fireEvent.press(screen.getByRole('button', { name: '停用文字扫光' }));
   fireEvent.press(screen.getByRole('button', { name: '挂载 GlassLayer 演示' }));
   fireEvent.press(screen.getByRole('tab', { name: '标准玻璃' }));
   fireEvent.press(screen.getByRole('button', { name: '返回首页' }));
@@ -853,11 +908,17 @@ test('Reveal 与 Glass draft 跨路由保留，重置只影响 Feedback', () => 
 
   expect(screen.queryByTestId('feedback-reveal')).not.toBeOnTheScreen();
   expect(
+    componentByTestID(ShimmerText, 'feedback-shimmer-text').props.active
+  ).toBe(false);
+  expect(
     componentByTestID(GlassLayer, 'feedback-glass-layer').props.effect
   ).toBe('regular');
 
   fireEvent.press(screen.getByRole('button', { name: '重置本场景' }));
   expect(screen.getByTestId('feedback-reveal')).toBeOnTheScreen();
+  expect(
+    componentByTestID(ShimmerText, 'feedback-shimmer-text').props.active
+  ).toBe(true);
   expect(
     screen.queryByTestId('feedback-glass-layer', {
       includeHiddenElements: true,

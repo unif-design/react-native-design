@@ -29,6 +29,7 @@ export type FeedbackSceneState = Readonly<{
   toastPosition: 'top' | 'bottom' | 'center';
   revealDuration: 0 | 200 | 500;
   revealVisible: boolean;
+  shimmerActive: boolean;
   glassDemoEnabled: boolean;
   glassEffect: GlassEffect;
 }>;
@@ -129,6 +130,7 @@ const sceneStateFactories: {
     toastPosition: 'bottom',
     revealDuration: 200,
     revealVisible: true,
+    shimmerActive: true,
     glassDemoEnabled: false,
     glassEffect: 'clear',
   }),

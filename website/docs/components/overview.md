@@ -32,6 +32,7 @@ description: '按场景查找组件、代码示例与 API。'
 | [Thumbnail](/docs/components/thumbnail)      | 缩略图，支持尺寸档位、尺寸对象和失败占位                            |
 | [Loading](/docs/components/loading)          | `Spinner` 未知时长加载；`CircularProgress` 确定进度与可选百分比     |
 | [Pulse](/docs/components/pulse)              | `usePulse` + `<Pulse>` + `<PulseDot>`,通用脉冲底座                  |
+| [ShimmerText](/docs/components/shimmer-text) | 文字每四秒一次白色扫光，支持停用与减少动态效果 |
 | [Reveal](/docs/components/reveal)            | 淡入容器：native Reanimated 入/退场 / Web CSS 入场                  |
 | [StatusDot](/docs/components/status-dot)     | `done`/`error`/`active`/`pending` 圆点,`flat`/`soft` 双 tone        |
 

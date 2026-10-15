@@ -2687,6 +2687,61 @@ export const showcaseStateContract = [
     },
   },
   {
+    id: 'shimmer-text.active',
+    component: 'ShimmerText',
+    scene: 'feedback',
+    label: '文字扫光',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'feedback-shimmer-text',
+          props: {},
+          presentProps: ['active', 'style'],
+        },
+      ],
+    },
+  },
+  {
+    id: 'shimmer-text.inactive',
+    component: 'ShimmerText',
+    scene: 'feedback',
+    label: '停用扫光',
+    witness: {
+      kind: 'interaction',
+      targetComponent: 'Button',
+      testID: 'feedback-shimmer-toggle',
+      handler: 'onPress',
+      calls: ['updateScene'],
+    },
+  },
+  {
+    id: 'shimmer-text.long-text',
+    component: 'ShimmerText',
+    scene: 'feedback',
+    label: '长中文',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'feedback-shimmer-text-long',
+          props: { numberOfLines: 1 },
+          presentProps: ['style'],
+        },
+      ],
+    },
+  },
+  {
+    id: 'shimmer-text.reduced-motion',
+    component: 'ShimmerText',
+    scene: 'feedback',
+    label: '减少动态效果',
+    witness: {
+      kind: 'runtime-api',
+      calls: ['usePrefersReducedMotion'],
+    },
+  },
+  {
     id: 'pulse.default',
     component: 'Pulse',
     scene: 'feedback',

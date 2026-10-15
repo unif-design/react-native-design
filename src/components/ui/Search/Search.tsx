@@ -122,10 +122,20 @@ export const Search = forwardRef<TextFieldHandle, SearchProps>(
         returnKeyType="search"
         accessibilityRole="search"
         onSubmitEditing={(event) => {
+          if (!effectiveEditable) return;
           onSubmitEditing?.(event);
           onSubmit?.(controller.value);
         }}
-        leading={{ kind: 'icon', icon: SearchOutlined, size: 18 }}
+        leading={
+          onSubmit
+            ? {
+                kind: 'action',
+                icon: SearchOutlined,
+                accessibilityLabel: '搜索',
+                onPress: () => onSubmit(controller.value),
+              }
+            : { kind: 'icon', icon: SearchOutlined, size: 18 }
+        }
         trailing={trailing}
       />
     );

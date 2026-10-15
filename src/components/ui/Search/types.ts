@@ -17,6 +17,7 @@ type SearchBaseProps = Omit<
   | 'enterKeyHint'
 > & {
   onSubmitEditing?: TextInputProps['onSubmitEditing'];
+  /** 搜索图标和键盘搜索交付同一当前值；输入变化与清除不自动提交。 */
   onSubmit?: (value: string) => void;
 };
 

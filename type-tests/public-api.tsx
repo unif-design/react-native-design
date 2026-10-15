@@ -32,6 +32,8 @@ import {
   Radio,
   Ribbon,
   Search,
+  ShimmerText,
+  lightColors,
   Stepper,
   Switch,
   Textarea,
@@ -556,3 +558,15 @@ const glassLayerStyle = { borderRadius: 14 };
 <GlassLayer effect="none" />;
 // @ts-expect-error 材质通过 effect 指定
 <GlassLayer intensity="soft" />;
+
+const shimmerTextStyle = { fontSize: 14, color: lightColors.foregroundMuted };
+<ShimmerText style={shimmerTextStyle}>思考中</ShimmerText>;
+<ShimmerText active={false} numberOfLines={1}>
+  已思考
+</ShimmerText>;
+// @ts-expect-error 扫光组件只接受纯文字，不接收富文本节点
+<ShimmerText>
+  <Text>状态</Text>
+</ShimmerText>;
+// @ts-expect-error active 必须是布尔值
+<ShimmerText active="true">思考中</ShimmerText>;

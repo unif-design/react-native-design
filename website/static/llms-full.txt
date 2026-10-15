@@ -1,7 +1,7 @@
 # Unif Design — 全文文档聚合
 
 > 可选全文。普通查询优先通过 llms.txt 定位相关单页。
-<!-- Generated from @unif/react-native-design@1.2.2; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@1.3.0; edit source documentation. -->
 
 ## 目录
 
@@ -40,6 +40,7 @@
 - Ribbon 缎带
 - Search 搜索框
 - Sheet 内容面板
+- ShimmerText 文字扫光
 - Skeleton 骨架屏
 - SmsField 短信字段
 - StatusDot 状态点
@@ -4126,6 +4127,7 @@ import { ArrowLeftOutlined, MoreHOutlined } from '@unif/react-native-icons';
 | [Thumbnail](md/components/thumbnail.md)      | 缩略图，支持尺寸档位、尺寸对象和失败占位                            |
 | [Loading](md/components/loading.md)          | `Spinner` 未知时长加载；`CircularProgress` 确定进度与可选百分比     |
 | [Pulse](md/components/pulse.md)              | `usePulse` + `<Pulse>` + `<PulseDot>`,通用脉冲底座                  |
+| [ShimmerText](md/components/shimmer-text.md) | 文字每四秒一次白色扫光，支持停用与减少动态效果 |
 | [Reveal](md/components/reveal.md)            | 淡入容器：native Reanimated 入/退场 / Web CSS 入场                  |
 | [StatusDot](md/components/status-dot.md)     | `done`/`error`/`active`/`pending` 圆点,`flat`/`soft` 双 tone        |
 
@@ -4744,7 +4746,9 @@ Search 自管搜索 icon、清除 action、36pt 可视 surface、44pt 根命中�
 
 首次 render 锁定 controlled/uncontrolled mode。非受控 `defaultValue` 仅初始化一次；受控调用必须同时给 `value` 与 `onChangeText`。Search 只维护一个 controller value：输入、清除和 `onSubmit` 都读取它。
 
-按 return 时先执行 `onSubmitEditing(event)`，再执行 `onSubmit(currentValue)`。当前 value 非空、字段有效可编辑且 controller 能更新时才渲染清除 action；清除调用同一个 `onChangeText('')` 路径。
+提供 `onSubmit` 时，搜索 icon 是可点击的“搜索”按钮，点击交付 `onSubmit(currentValue)`；没有 `onSubmit` 时仍是装饰图标。按键盘搜索时先执行 `onSubmitEditing(event)`，再执行 `onSubmit(currentValue)`。输入变化和清除都不自动提交，是否发起查询由调用方决定。
+
+当前 value 非空、字段有效可编辑且 controller 能更新时才渲染清除 action；清除调用同一个 `onChangeText('')` 路径。`disabled` 或 `editable={false}` 时搜索按钮不可用，键盘事件也不交付提交。
 
 ## 删除的入口与 ref
 
@@ -4801,6 +4805,52 @@ const sheetDemoStyles = (colors) => ({
 公开类型为 `SheetProps` 和 `SheetContentMode`。内部滚动保留 `keyboardShouldPersistTaps="handled"`；外部列表不再包同方向 ScrollView。头尾不定义业务按钮协议，直接组合 Design 组件。主题变化沿现有 Provider 传递。
 
 原生展厅「容器与集合」提供三种布局。宿主负责 formSheet/Modal、高度、系统返回及键盘避让；关闭本身不表示业务成功或取消。
+
+## ShimmerText 文字扫光
+
+*Source: `docs/components/shimmer-text.mdx` · Mirror: `md/components/shimmer-text.md`*
+
+# ShimmerText 文字扫光
+
+为已知仍在进行的活动提供轻量文字提示。白光每四秒从文字开头扫到结尾，扫过后恢复原来的文字颜色；文案和活动是否结束由调用方提供。
+
+## 代码演示 {#实时预览}
+
+两处文字都使用真实的 `ShimmerText`。可以停用扫光或替换第一行文案，较长的中文在可用宽度内换行。页面明暗主题会同步到预览。
+
+```tsx
+  <ShimmerTextDemo />
+```
+
+## 用法
+
+```tsx
+import { ShimmerText } from '@unif/react-native-design';
+
+<ShimmerText active={running} style={styles.status}>
+  {statusText}
+</ShimmerText>;
+```
+
+`children` 接收字符串，`active` 默认启用。`style`、`numberOfLines`、`allowFontScaling` 和可访问属性沿 React Native `Text` 的使用方式传入。已有文字样式直接复用；应用字号可由 `useThemedStyles` 等现有出口计算一次，组件不再次缩放，系统字号仍按 `Text` 的设置处理。
+
+## 动效与状态
+
+每个周期为 4000 毫秒，前 1240 毫秒从首字到尾字依次向白色高亮，再恢复 `style.color` 指定的原色；其余时间保持原色。未指定颜色时使用当前主题的文字颜色。
+
+停用 `active`、系统开启减少动态效果或文案为空时呈现静态文字。平台动态色等不能用于颜色插值的输入也保持静态显示。替换文字会结束旧文案的动画并从新文案开始；卸载后释放本实例的动画资源。
+
+组件只负责视觉，不推断进度、不发出任务完成回调。屏幕阅读器读取完整文字，不逐字重复朗读；忙碌区域和额外说明由调用方按真实状态提供。
+
+## API
+
+公开类型以源码中的 [`ShimmerTextProps`](https://github.com/unif-design/react-native-design/blob/main/src/components/ui/ShimmerText/types.ts) 为准，从包根入口导入。
+
+```tsx
+import type { ShimmerTextProps } from '@unif/react-native-design';
+```
+
+短文、长中文、主题与字号需要在实际使用的平台核对；Web 预览只说明浏览器中的表现。
 
 ## Skeleton 骨架屏
 

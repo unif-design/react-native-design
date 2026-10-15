@@ -235,7 +235,7 @@
     "mdPath": "md/components/search.md",
     "slug": "/components/search",
     "section": "components",
-    "description": "搜索输入预设，支持文字修改与清空。"
+    "description": "搜索输入预设，支持文字修改、清空和手动搜索。"
   },
   {
     "title": "Sheet 内容面板",
@@ -243,6 +243,13 @@
     "slug": "/components/sheet",
     "section": "components",
     "description": "固定头尾与三种有界内容布局。"
+  },
+  {
+    "title": "ShimmerText 文字扫光",
+    "mdPath": "md/components/shimmer-text.md",
+    "slug": "/components/shimmer-text",
+    "section": "components",
+    "description": "保留原文字样式，以每四秒一次的白色扫光提示持续活动。"
   },
   {
     "title": "Skeleton 骨架屏",

@@ -1,7 +1,7 @@
 ---
 sidebar_position: 3
 title: Search 搜索框
-description: '搜索输入预设，支持文字修改与清空。'
+description: '搜索输入预设，支持文字修改、清空和手动搜索。'
 ---
 
 <!-- Generated from @unif/react-native-design; edit source documentation. -->
@@ -27,7 +27,9 @@ Search 自管搜索 icon、清除 action、36pt 可视 surface、44pt 根命中�
 
 首次 render 锁定 controlled/uncontrolled mode。非受控 `defaultValue` 仅初始化一次；受控调用必须同时给 `value` 与 `onChangeText`。Search 只维护一个 controller value：输入、清除和 `onSubmit` 都读取它。
 
-按 return 时先执行 `onSubmitEditing(event)`，再执行 `onSubmit(currentValue)`。当前 value 非空、字段有效可编辑且 controller 能更新时才渲染清除 action；清除调用同一个 `onChangeText('')` 路径。
+提供 `onSubmit` 时，搜索 icon 是可点击的“搜索”按钮，点击交付 `onSubmit(currentValue)`；没有 `onSubmit` 时仍是装饰图标。按键盘搜索时先执行 `onSubmitEditing(event)`，再执行 `onSubmit(currentValue)`。输入变化和清除都不自动提交，是否发起查询由调用方决定。
+
+当前 value 非空、字段有效可编辑且 controller 能更新时才渲染清除 action；清除调用同一个 `onChangeText('')` 路径。`disabled` 或 `editable={false}` 时搜索按钮不可用，键盘事件也不交付提交。
 
 ## 删除的入口与 ref
 
