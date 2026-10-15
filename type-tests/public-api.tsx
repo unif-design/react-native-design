@@ -247,6 +247,17 @@ const navBarDisplaySlot: NavBarSlot = <Text>只读</Text>;
 
 <CircularProgress value={0.42} />;
 <CircularProgress value={0.68} showLabel accessibilityLabel="上传进度" />;
+<CircularProgress
+  value={0.68}
+  animated
+  showLabel
+  formatLabel={String}
+  onAnimationComplete={(value) => value.toFixed(2)}
+/>;
+// @ts-expect-error animated 只接受 boolean
+<CircularProgress value={0.5} animated="true" />;
+// @ts-expect-error 完成回调接收归一化比例 number
+<CircularProgress value={0.5} onAnimationComplete={(value: string) => value} />;
 // @ts-expect-error CircularProgress 必须显式提供 value
 <CircularProgress />;
 // @ts-expect-error showLabel 只接受 boolean

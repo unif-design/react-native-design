@@ -1,5 +1,6 @@
 import { Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
+import Animated, { useAnimatedProps } from 'react-native-reanimated';
 import {
   r,
   type,
@@ -9,12 +10,17 @@ import {
 } from '../../../theme';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { normalizeCircularProgress } from './normalizeCircularProgress';
+import { useCircularProgressAnimation } from './useCircularProgressAnimation';
 import type { CircularProgressProps } from './types';
 
 import { styles } from './styles';
 
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
 export function CircularProgress({
   value,
+  animated = false,
+  onAnimationComplete,
   size = r(32),
   thickness = r(2),
   color,
@@ -31,13 +37,23 @@ export function CircularProgress({
   const normalized = normalizeCircularProgress({ value, size, thickness });
   const {
     circumference,
-    dashOffset,
+    safeValue,
     percentage,
     radius,
     safeSize,
     safeThickness,
   } = normalized;
   const center = safeSize / 2;
+  const { progress, percentage: visualPercentage } =
+    useCircularProgressAnimation(
+      safeValue,
+      animated,
+      showLabel,
+      onAnimationComplete
+    );
+  const animatedProps = useAnimatedProps(() => ({
+    strokeDashoffset: circumference * (1 - progress.value),
+  }));
 
   return (
     <View
@@ -72,7 +88,7 @@ export function CircularProgress({
             stroke={trackColor ?? colors.outline}
             strokeWidth={safeThickness}
           />
-          <Circle
+          <AnimatedCircle
             cx={center}
             cy={center}
             fill="none"
@@ -82,7 +98,7 @@ export function CircularProgress({
             originY={center}
             stroke={color ?? colors.primary}
             strokeDasharray={circumference}
-            strokeDashoffset={dashOffset}
+            animatedProps={animatedProps}
             strokeLinecap="round"
             strokeWidth={safeThickness}
           />
@@ -97,7 +113,9 @@ export function CircularProgress({
               styles.label,
             ]}
           >
-            {formatLabel ? formatLabel(percentage) : `${percentage}%`}
+            {formatLabel
+              ? formatLabel(visualPercentage)
+              : `${visualPercentage}%`}
           </Text>
         ) : null}
       </View>
