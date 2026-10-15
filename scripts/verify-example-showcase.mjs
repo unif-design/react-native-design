@@ -84,6 +84,7 @@ const expectedUiComponents = [
   'Ribbon',
   'Search',
   'Segmented',
+  'ShimmerText',
   'Skeleton',
   'Spinner',
   'StatusDot',
@@ -121,6 +122,7 @@ const expectedComponentsByScene = {
     'Empty',
     'Skeleton',
     'Spinner',
+    'ShimmerText',
     'Pulse',
     'PulseDot',
     'Reveal',
@@ -223,6 +225,12 @@ const expectedStateIdsByComponent = {
     'circular-progress.a11y-value',
   ],
   Spinner: ['spinner.sizes', 'spinner.color', 'spinner.stroke-width'],
+  ShimmerText: [
+    'shimmer-text.active',
+    'shimmer-text.inactive',
+    'shimmer-text.long-text',
+    'shimmer-text.reduced-motion',
+  ],
   Pulse: [
     'pulse.default',
     'pulse.opacity-range',

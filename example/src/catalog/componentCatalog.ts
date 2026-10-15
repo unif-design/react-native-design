@@ -49,6 +49,7 @@ export const publicComponentIds = [
   'Ribbon',
   'Search',
   'Segmented',
+  'ShimmerText',
   'Skeleton',
   'Spinner',
   'StatusDot',
@@ -120,6 +121,11 @@ export const componentCatalog = [
     states: ['确定进度', '中央百分比', '无障碍值'],
   },
   { id: 'Spinner', scene: 'feedback', states: ['尺寸', '颜色', '描边宽度'] },
+  {
+    id: 'ShimmerText',
+    scene: 'feedback',
+    states: ['文字扫光', '停用扫光', '长中文', '减少动态效果'],
+  },
   {
     id: 'Pulse',
     scene: 'feedback',

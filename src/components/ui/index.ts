@@ -66,6 +66,8 @@ export { Ribbon } from './Ribbon';
 export type { RibbonProps, RibbonTone } from './Ribbon';
 export { Search } from './Search';
 export type { SearchProps } from './Search';
+export { ShimmerText } from './ShimmerText';
+export type { ShimmerTextProps } from './ShimmerText';
 export { Skeleton } from './Skeleton';
 export type { SkeletonProps, SkeletonShape } from './Skeleton';
 export { Segmented } from './Segmented';

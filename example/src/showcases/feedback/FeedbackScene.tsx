@@ -11,6 +11,7 @@ import {
   PulseDot,
   Reveal,
   Segmented,
+  ShimmerText,
   Skeleton,
   Spinner,
   confirm,
@@ -279,7 +280,7 @@ export function FeedbackScene(): React.JSX.Element {
             减少动态效果：{reducedMotion ? '是' : '否'}
           </Text>
           <Text style={styles.fact}>
-            脉冲与淡入遵循系统设置；加载指示仍保持旋转。
+            文字扫光、脉冲与淡入遵循系统设置；加载指示仍保持旋转。
           </Text>
           <View style={styles.row}>
             <Pulse testID="feedback-pulse-default">
@@ -314,6 +315,32 @@ export function FeedbackScene(): React.JSX.Element {
               <Text style={styles.pulseText}>公开 Hook 脉冲</Text>
             </Animated.View>
           </View>
+          <ShimmerText
+            active={draft.shimmerActive}
+            style={styles.pulseText}
+            testID="feedback-shimmer-text"
+          >
+            正在整理信息
+          </ShimmerText>
+          <ShimmerText
+            active={draft.shimmerActive}
+            style={styles.pulseText}
+            numberOfLines={1}
+            testID="feedback-shimmer-text-long"
+          >
+            正在整理已收到的信息，较长的中文保持原来的字号与单行截断规则
+          </ShimmerText>
+          <Button
+            label={draft.shimmerActive ? '停用文字扫光' : '启用文字扫光'}
+            variant="secondary"
+            testID="feedback-shimmer-toggle"
+            onPress={() =>
+              updateScene('feedback', (current) => ({
+                ...current,
+                shimmerActive: !current.shimmerActive,
+              }))
+            }
+          />
           <Segmented
             value={String(draft.revealDuration)}
             items={revealDurationItems}
