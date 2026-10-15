@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/unif-design/react-native-design/compare/v1.2.1...v1.2.2) (2026-10-15)
+
+
+### Bug Fixes
+
+* **confirm:** enable Android modal button gestures ([#161](https://github.com/unif-design/react-native-design/issues/161)) ([c4548dc](https://github.com/unif-design/react-native-design/commit/c4548dcbe5f441e0f187a38a68011ffe30b024db))
+
 ## [1.2.1](https://github.com/unif-design/react-native-design/compare/v1.2.0...v1.2.1) (2026-10-14)
 
 
