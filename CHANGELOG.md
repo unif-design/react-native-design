@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.4.0](https://github.com/unif-design/react-native-design/compare/v1.3.0...v1.4.0) (2026-10-15)
+
+
+### Features
+
+* **feedback:** add reusable text shimmer and search submission ([#163](https://github.com/unif-design/react-native-design/issues/163)) ([769a9fa](https://github.com/unif-design/react-native-design/commit/769a9fa78c9a30d85cfc0ba61c8f53538d36ada8))
+
 # [1.3.0](https://github.com/unif-design/react-native-design/compare/v1.2.2...v1.3.0) (2026-10-15)
 
 
