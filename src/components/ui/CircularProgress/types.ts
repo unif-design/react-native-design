@@ -3,6 +3,10 @@ import type { StyleProp, ViewStyle } from 'react-native';
 export interface CircularProgressProps {
   /** 当前进度，使用 0..1；越界值会收敛到边界，非有限值按 0 处理。 */
   value: number;
+  /** 在已收到的真实值之间平滑过渡，默认 false；首次挂载、下降与 reduced motion 立即显示。 */
+  animated?: boolean;
+  /** 视觉到达当前归一化比例（0..1）时通知；不代表上传或业务成功。 */
+  onAnimationComplete?: (value: number) => void;
   /** 圆环直径，默认 32，最小 16。 */
   size?: number;
   /** 圆环描边宽度，默认 2，最大为半径。 */
@@ -13,7 +17,7 @@ export interface CircularProgressProps {
   trackColor?: string;
   /** 是否在圆环中央显示取整后的百分比，默认 false。 */
   showLabel?: boolean;
-  /** 自定义中央文字；接收 0..100 的取整百分比，不影响无障碍进度。 */
+  /** 自定义中央文字；接收当前视觉帧的 0..100 取整百分比，不影响无障碍进度。 */
   formatLabel?: (percentage: number) => string;
   /** 百分比文字颜色，默认 c.foreground。 */
   labelColor?: string;
