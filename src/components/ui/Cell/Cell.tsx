@@ -124,13 +124,10 @@ export function Cell(props: CellProps): React.JSX.Element {
       </View>
       <CellExtraContent extra={props.extra} textStyle={extraStyle} />
       {hasEffectiveAction && props.arrow && !props.danger ? (
-        <View
-          {...A11Y_HIDDEN_PROPS}
-          style={flush ? styles.chevronFlush : undefined}
-        >
+        <View {...A11Y_HIDDEN_PROPS}>
           <ChevronRightOutlined
-            size={r(flush ? 18 : 20)}
-            color={c.foregroundSubtle}
+            size={r(flush ? 20 : 22)}
+            color={c.foregroundMuted}
           />
         </View>
       ) : null}

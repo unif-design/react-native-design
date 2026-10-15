@@ -9,6 +9,7 @@ const FLUSH_BOX_SIZE = r(28);
 const FLUSH_BOX_RADIUS = r(7);
 
 const sharedStyles = StyleSheet.create({
+  dangerBox: { borderWidth: StyleSheet.hairlineWidth },
   flushBox: {
     width: FLUSH_BOX_SIZE,
     height: FLUSH_BOX_SIZE,
@@ -37,9 +38,9 @@ export function Leading({
           {...A11Y_HIDDEN_PROPS}
           style={[
             sharedStyles.flushBox,
+            danger && sharedStyles.dangerBox,
             {
               backgroundColor: danger ? c.errorContainer : c.primaryContainer,
-              borderWidth: danger ? StyleSheet.hairlineWidth : 0,
               borderColor: danger ? c.error : undefined,
             },
           ]}
