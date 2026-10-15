@@ -72,9 +72,6 @@ export const makeStyles = (c: ColorTokens) =>
       color: c.foregroundMuted,
       opacity: 0.55,
     },
-    chevronFlush: {
-      opacity: 0.35,
-    },
     /** flush 行间分隔线 —— hairline + outline,铺满 cell 全宽 */
     separator: {
       height: StyleSheet.hairlineWidth,

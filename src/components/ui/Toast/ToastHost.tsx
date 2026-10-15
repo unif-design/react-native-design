@@ -4,7 +4,6 @@ import { AccessibilityInfo, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   cancelAnimation,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -53,6 +52,7 @@ export function ToastHost({
   const op = useSharedValue(0);
   const ty = useSharedValue(8);
   const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const exitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const currentDeliveryRef = useRef<DeliveryIdentity | null>(null);
 
   useEffect(() => {
@@ -61,6 +61,10 @@ export function ToastHost({
       if (dismissTimer.current) {
         clearTimeout(dismissTimer.current);
         dismissTimer.current = null;
+      }
+      if (exitTimer.current) {
+        clearTimeout(exitTimer.current);
+        exitTimer.current = null;
       }
       cancelAnimation(op);
       cancelAnimation(ty);
@@ -79,6 +83,10 @@ export function ToastHost({
         clearTimeout(dismissTimer.current);
         dismissTimer.current = null;
       }
+      if (exitTimer.current) {
+        clearTimeout(exitTimer.current);
+        exitTimer.current = null;
+      }
       cancelAnimation(op);
       cancelAnimation(ty);
       setDelivery(null);
@@ -96,6 +104,10 @@ export function ToastHost({
       if (dismissTimer.current) {
         clearTimeout(dismissTimer.current);
         dismissTimer.current = null;
+      }
+      if (exitTimer.current) {
+        clearTimeout(exitTimer.current);
+        exitTimer.current = null;
       }
       cancelAnimation(op);
       cancelAnimation(ty);
@@ -139,9 +151,12 @@ export function ToastHost({
       // 定时器触发时可能早已不是当前投递(新 toast 抢先)—— 先自证再播退场动画。
       if (!isCurrentToastDelivery(delivery)) return;
       op.value = withTiming(0, { duration: motion.base });
-      ty.value = withTiming(from, { duration: motion.base }, (done) => {
-        if (done) runOnJS(finishIfCurrent)(delivery);
-      });
+      ty.value = withTiming(from, { duration: motion.base });
+      // 投递包含 JS 身份（Symbol 和对象引用），不能经 UI worklet 往返。
+      exitTimer.current = setTimeout(
+        () => finishIfCurrent(delivery),
+        motion.base
+      );
     }, entry.duration);
 
     return () => {
@@ -149,15 +164,19 @@ export function ToastHost({
         clearTimeout(dismissTimer.current);
         dismissTimer.current = null;
       }
+      if (exitTimer.current) {
+        clearTimeout(exitTimer.current);
+        exitTimer.current = null;
+      }
       cancelAnimation(op);
       cancelAnimation(ty);
     };
   }, [delivery, op, ty, finishIfCurrent]);
 
   const animatedStyle = useAnimatedStyle(() => ({
+    opacity: op.value,
     transform: [{ translateY: ty.value }],
   }));
-  const contentAnimation = useAnimatedStyle(() => ({ opacity: op.value }));
 
   if (inert || !delivery) return null;
 
@@ -177,14 +196,14 @@ export function ToastHost({
     <View style={[styles.host, posStyle]} pointerEvents="none" testID={testID}>
       <Animated.View style={[styles.toast, animatedStyle]}>
         <GlassLayer style={styles.material} />
-        <Animated.View style={[styles.content, contentAnimation]}>
+        <View style={styles.content}>
           {dotColor ? (
             <View style={[styles.dot, { backgroundColor: dotColor }]} />
           ) : null}
           <Text style={styles.text} testID={childTestID(testID, 'text')}>
             {entry.message}
           </Text>
-        </Animated.View>
+        </View>
       </Animated.View>
     </View>
   );
