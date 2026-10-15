@@ -39,6 +39,8 @@ export function Leading({
             sharedStyles.flushBox,
             {
               backgroundColor: danger ? c.errorContainer : c.primaryContainer,
+              borderWidth: danger ? StyleSheet.hairlineWidth : 0,
+              borderColor: danger ? c.error : undefined,
             },
           ]}
         >
