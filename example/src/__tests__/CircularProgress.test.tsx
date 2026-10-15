@@ -3,6 +3,7 @@ import { StyleSheet, Text } from 'react-native';
 import { act, render, screen } from '@testing-library/react-native';
 import {
   CircularProgress,
+  lightColors,
   ThemeProvider,
   type CircularProgressProps,
   type as typography,
@@ -249,7 +250,7 @@ test('无标签也能完成过渡；替换回调不重启动画或重复通知',
   expect(first).not.toHaveBeenCalled();
   expect(latest).toHaveBeenCalledTimes(1);
   expect(latest).toHaveBeenCalledWith(1);
-  page.update({ color: '#ffffff' });
+  page.update({ color: lightColors.foreground });
   expect(latest).toHaveBeenCalledTimes(1);
 });
 
