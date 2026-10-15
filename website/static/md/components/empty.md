@@ -1,78 +1,59 @@
 ---
 sidebar_position: 5
 title: Empty 空态
-description: '展示空内容状态的图标、标题和说明。'
+description: '展示空内容或简单失败提示，可选图标、说明和操作。'
 ---
 
 <!-- Generated from @unif/react-native-design; edit source documentation. -->
 
 # Empty 空态
 
-展示空内容状态，可配置图标、标题和说明。
+展示空内容或简单失败提示。`icon={null}` 隐藏装饰图标，`action` 接收居中展示的操作。请求、重试和加载状态由调用方维护。
 
 ## 代码演示 {#实时预览}
 
 ```tsx
-  <Empty
-    title="你好，我是 AI 助手"
-    desc="告诉我你今天的工作目标，我来帮你规划"
-  />
+  <Empty title="暂无客户" desc="客户添加后会显示在这里" />
+  <RetryDemo />
 ```
 
-## 用法
+## 简单失败与重试
 
 ```tsx
-import { Empty } from '@unif/react-native-design';
+import { Empty, IconButton } from '@unif/react-native-design';
+import { RefreshOutlined } from '@unif/react-native-icons';
 
 <Empty
-  title="你好，我是 AI 助手"
-  desc="告诉我你今天的工作目标，我来帮你规划"
+  title="暂时无法连接"
+  icon={null}
+  accessibilityRole="alert"
+  action={
+    <IconButton
+      icon={RefreshOutlined}
+      accessibilityLabel="重试"
+      loading={loading}
+      onPress={retry}
+    />
+  }
 />;
 ```
 
-通常配合 SuggestionList 使用，给用户初始话术：
-
-```tsx
-<Empty title="..." desc="..." />
-<SuggestionList align="center" items={[
-  { label: '今天的安排', leading: 'spark' },
-  { label: '帮我查询数据', leading: 'spark' },
-  { label: '新建一条记录', leading: 'spark' },
-]} onPress={(item) => sendMessage(item.label)} />
-```
+不传 `action` 时只显示内容；不传 `icon` 时保留默认图标。`desc` 仅用于补充说明，避免重复标题。已有数据的刷新失败由页面保留数据，并在合适位置显示提示。
 
 ## API
 
-| 参数     | 类型                       | 默认值          | 说明                                                                                             |
-| -------- | -------------------------- | --------------- | ------------------------------------------------------------------------------------------------ |
-| `title`  | `string`                   | —               | 大字标题（如「暂无数据」,15px / 600）                                                            |
-| `desc`   | `string`                   | —               | 小字描述（建议下一步操作,13px / 400 / `c.foregroundSubtle`）                                     |
-| `icon`   | `ComponentType<IconProps>` | `SparkOutlined` | 圆盘内图标;相机域可传 `CameraOffOutlined` / `PermissionDeniedOutlined` / `ErrorAlertOutlined` 等 |
-| `testID` | `string`                   | —               | E2E / 测试定位                                                                                   |
+| 参数                | 类型                               | 默认值          | 说明                                 |
+| ------------------- | ---------------------------------- | --------------- | ------------------------------------ |
+| `title`             | `string`                           | —               | 居中标题                             |
+| `desc`              | `string`                           | —               | 可选说明                             |
+| `icon`              | `ComponentType<IconProps> \| null` | `SparkOutlined` | 圆盘内图标；`null` 隐藏整个装饰区域  |
+| `action`            | `ReactNode`                        | —               | 可选操作区，居中展示调用方提供的按钮 |
+| `accessibilityRole` | `TextProps['accessibilityRole']`   | —               | 标题语义；简单错误可设为 `alert`     |
+| `style`             | `StyleProp<ViewStyle>`             | —               | 外层布局样式                         |
+| `testID`            | `string`                           | —               | 测试定位                             |
 
-## 主题键（Tokens）
+## 主题与无障碍
 
-| Token                                      | 来源                        | 作用                                             |
-| ------------------------------------------ | --------------------------- | ------------------------------------------------ |
-| `c.primaryContainer`                       | `useColors()`               | 圆盘背景色（浅橙）                               |
-| `c.primary`                                | `useColors()`               | 圆盘内 icon 色                                   |
-| `c.foreground`                             | `useColors()`               | 标题文字色                                       |
-| `c.foregroundSubtle`                       | `useColors()`               | 描述文字色                                       |
-| `icon['2xl']`                              | `@unif/react-native-design` | 圆盘尺寸（56）                                   |
-| `type.h3` / `type.xs`                      | `@unif/react-native-design` | 标题（15）/ 描述（13）字号                       |
-| `space['4']` / `space['3']` / `space['7']` | `@unif/react-native-design` | gap（10）/ 水平 padding（8）/ 垂直 padding（16） |
+标题使用 `type.h3`、`fw.semi` 和 `foreground`；说明使用 `type.xs` 和 `foregroundSubtle`。装饰图标使用 `primaryContainer` 圆盘与 `primary` 前景色。
 
-## 无障碍（a11y）
-
-来源：`src/components/ui/Empty/Empty.tsx`、`types.ts`。
-
-本组件为展示型空态,无交互。源码是 `<View>` + 圆盘内图标 + 标题 `<Text>` +（可选）描述 `<Text>`,**未设置任何 a11y prop**(无 `accessibilityRole` / `accessibilityLabel`),也无可传的 a11y prop（仅 `title` / `desc` / `icon` / `testID`）。`title` / `desc` 文本默认对 SR 可读;圆盘内的图标 按其自身实现对 SR 隐藏（见 [图标](icons.md)），故朗读内容即标题 + 描述。若需把「建议操作」做成可点项,放在 Empty 之外的 SuggestionList / [Button](button.md) 上,各自带交互语义。
-
-## 视觉规范
-
-| 元素   | 规则                                                                        |
-| ------ | --------------------------------------------------------------------------- |
-| illust | 56×56 圆（`icon['2xl']`），背景 `c.primaryContainer`，icon 28px `c.primary` |
-| title  | 15px / 600 / `c.foreground`（`type.h3` + `fw.semi`）                        |
-| desc   | 13px / 400 / `c.foregroundSubtle`（`type.xs`），居中                        |
-| 间距   | gap 10（`space['4']`），整体居中                                            |
+标题和说明可独立朗读，操作区保留按钮自身的可访问名称、禁用和加载语义。图标按钮必须提供 `accessibilityLabel`；组件不会自动发起请求或把失败解释为空结果。

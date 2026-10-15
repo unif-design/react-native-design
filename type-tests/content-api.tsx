@@ -3,6 +3,7 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import {
   ActionMenuContent,
+  Empty,
   ImagePreview,
   Sheet,
   SmsField,
@@ -114,4 +115,17 @@ preview.current?.scrollTo('stable', false);
   onConfirmationChange={noop}
   actions={actions}
   onClose={noop}
+/>;
+
+<Empty
+  title="暂时无法连接"
+  icon={null}
+  accessibilityRole="alert"
+  action={
+    <IconButton
+      icon={CrosshairOutlined}
+      accessibilityLabel="重试"
+      onPress={noop}
+    />
+  }
 />;

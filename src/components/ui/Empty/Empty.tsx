@@ -14,6 +14,8 @@ export function Empty({
   title,
   desc,
   icon = SparkOutlined,
+  action,
+  accessibilityRole,
   style,
   testID,
 }: EmptyProps): React.JSX.Element {
@@ -22,11 +24,16 @@ export function Empty({
   const Glyph = icon;
   return (
     <View style={[styles.wrap, style]} testID={testID}>
-      <View style={styles.illust}>
-        <Glyph size={r(28)} color={c.primary} />
-      </View>
-      <Text style={styles.title}>{title}</Text>
+      {Glyph ? (
+        <View style={styles.illust}>
+          <Glyph size={r(28)} color={c.primary} />
+        </View>
+      ) : null}
+      <Text accessibilityRole={accessibilityRole} style={styles.title}>
+        {title}
+      </Text>
       {desc ? <Text style={styles.desc}>{desc}</Text> : null}
+      {action ? <View style={styles.action}>{action}</View> : null}
     </View>
   );
 }
