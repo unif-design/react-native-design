@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/unif-design/react-native-design/compare/v1.5.0...v1.5.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* remove stale toast surfaces and clarify cell actions ([#165](https://github.com/unif-design/react-native-design/issues/165)) ([27a64cb](https://github.com/unif-design/react-native-design/commit/27a64cb41db8ddfb29296b37354c343df6b901c8))
+
 # [1.5.0](https://github.com/unif-design/react-native-design/compare/v1.4.0...v1.5.0) (2026-10-15)
 
 
