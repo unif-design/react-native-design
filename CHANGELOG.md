@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.5.0](https://github.com/unif-design/react-native-design/compare/v1.4.0...v1.5.0) (2026-10-15)
+
+
+### Features
+
+* support simple Empty feedback with optional actions ([#164](https://github.com/unif-design/react-native-design/issues/164)) ([1993013](https://github.com/unif-design/react-native-design/commit/1993013c07ba4c723a82cafebe1fe310b5d4c6a1))
+
 # [1.4.0](https://github.com/unif-design/react-native-design/compare/v1.3.0...v1.4.0) (2026-10-15)
 
 
