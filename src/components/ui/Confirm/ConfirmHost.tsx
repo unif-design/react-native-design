@@ -9,6 +9,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { space, useThemedStyles } from '../../../theme';
 import { Button } from '../Button';
@@ -104,62 +105,70 @@ export function ConfirmHost(): React.JSX.Element {
       statusBarTranslucent
       onRequestClose={handleCancel}
     >
-      {/* backdrop 点击取消;内层 sheet onPress 空占位拦截冒泡 */}
-      <Pressable
-        style={styles.backdrop}
-        onPress={handleCancel}
-        // [M-16] accessible={false}:否则 backdrop 把整个子树合并成单一「关闭, 按钮」,
-        // 遮蔽 sheet 内的 title/message/按钮。SR 取消路径走 cancel 按钮 + onRequestClose。
-        accessible={false}
-      >
-        {/* 半透黑遮罩 —— 两点都是必需的,少一点就露白:
+      {/* Android Modal 是独立原生窗口，不能复用应用根的手势分发。 */}
+      <GestureHandlerRootView>
+        {/* backdrop 点击取消;内层 sheet onPress 空占位拦截冒泡 */}
+        <Pressable
+          style={styles.backdrop}
+          onPress={handleCancel}
+          // [M-16] accessible={false}:否则 backdrop 把整个子树合并成单一「关闭, 按钮」,
+          // 遮蔽 sheet 内的 title/message/按钮。SR 取消路径走 cancel 按钮 + onRequestClose。
+          accessible={false}
+        >
+          {/* 半透黑遮罩 —— 两点都是必需的,少一点就露白:
             ① **向上外扩一屏**:animationType="slide" 位移的是 Modal 的**整个容器**(遮罩也在其中),
                位移 t 时屏幕 [0, t) 这段根本没有遮罩 —— 顶部挂着一条未压暗的白带,一路缩到动画
                结束才没(缓出末段最慢,细白带在状态栏那儿赖得最久)。外扩后任意 t 都盖满视口。
             ② **自持淡入淡出**:外扩解决了「盖不到」,但遮罩会随容器一起硬切出现 —— 故不蹭容器的
                位移动画,自己走 opacity。sheet 的 slide 仍由 Modal 原生驱动。
             pointerEvents=none:点击穿透到 backdrop(取消路径不变)。 */}
-        <Animated.View
-          pointerEvents="none"
-          style={[styles.scrim, { top: -screenH, opacity: scrimOpacity }]}
-          testID="confirm-scrim"
-        />
-        <Pressable
-          style={[styles.sheet, { paddingBottom: insets.bottom + space['7'] }]}
-          onPress={() => {}}
-          accessible={false}
-        >
-          <GlassLayer style={styles.material} />
-          {display ? (
-            <>
-              <View style={styles.body}>
-                <Text style={styles.title} accessibilityRole="header">
-                  {display.options.title}
-                </Text>
-                {display.options.message ? (
-                  <Text style={styles.message}>{display.options.message}</Text>
-                ) : null}
-              </View>
-              <View style={styles.actions}>
-                <Button
-                  testID="confirm-cancel"
-                  label={labels.cancelLabel}
-                  variant="secondary"
-                  style={styles.action}
-                  onPress={handleCancel}
-                />
-                <Button
-                  testID="confirm-ok"
-                  label={labels.confirmLabel}
-                  variant={display.options.destructive ? 'danger' : 'primary'}
-                  style={styles.action}
-                  onPress={handleConfirm}
-                />
-              </View>
-            </>
-          ) : null}
+          <Animated.View
+            pointerEvents="none"
+            style={[styles.scrim, { top: -screenH, opacity: scrimOpacity }]}
+            testID="confirm-scrim"
+          />
+          <Pressable
+            style={[
+              styles.sheet,
+              { paddingBottom: insets.bottom + space['7'] },
+            ]}
+            onPress={() => {}}
+            accessible={false}
+          >
+            <GlassLayer style={styles.material} />
+            {display ? (
+              <>
+                <View style={styles.body}>
+                  <Text style={styles.title} accessibilityRole="header">
+                    {display.options.title}
+                  </Text>
+                  {display.options.message ? (
+                    <Text style={styles.message}>
+                      {display.options.message}
+                    </Text>
+                  ) : null}
+                </View>
+                <View style={styles.actions}>
+                  <Button
+                    testID="confirm-cancel"
+                    label={labels.cancelLabel}
+                    variant="secondary"
+                    style={styles.action}
+                    onPress={handleCancel}
+                  />
+                  <Button
+                    testID="confirm-ok"
+                    label={labels.confirmLabel}
+                    variant={display.options.destructive ? 'danger' : 'primary'}
+                    style={styles.action}
+                    onPress={handleConfirm}
+                  />
+                </View>
+              </>
+            ) : null}
+          </Pressable>
         </Pressable>
-      </Pressable>
+      </GestureHandlerRootView>
     </Modal>
   );
 }

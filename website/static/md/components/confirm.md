@@ -100,6 +100,8 @@ RN `Modal` 是**独立的 native window**,根 Host 渲染的对话框会被它�
 
 `ConfirmEntry` / `ConfirmEvent` / lease 等标识类型是 Host 与 Store 之间的**内部协议**,不从包根导出,也不保证跨版本稳定。
 
+`ConfirmHost` 在自己的确认弹窗内管理手势根，确保 Android 独立窗口中的确认和取消按钮可点击。应用根的手势根不能覆盖该原生窗口；业务 Modal 中其他手势控件仍需按 RNGH 要求接线。
+
 ## 设计稿对照
 
 | 视觉态 | 规则                                                                                   |
