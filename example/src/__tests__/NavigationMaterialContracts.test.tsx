@@ -70,7 +70,9 @@ test.each(['light', 'dark'] as const)(
       <ThemeProvider forceScheme={scheme}>
         <NavBar
           title="拍摄"
+          subtitle="照片登记"
           variant={variant}
+          right={<Text>已就绪</Text>}
           left={{
             icon: ArrowLeftOutlined,
             accessibilityLabel: '返回',
@@ -80,12 +82,18 @@ test.each(['light', 'dark'] as const)(
       </ThemeProvider>
     );
     const page = render(content('default'));
+    expect(page.getAllByRole('header')).toHaveLength(1);
+    expect(page.getByRole('header', { name: '拍摄' })).toBeOnTheScreen();
+    expect(page.getByText('照片登记')).toBeOnTheScreen();
+    expect(page.getByText('已就绪')).toBeOnTheScreen();
     expectMaterialAncestorsOpaque(page.UNSAFE_getByType(GlassLayer));
     fireEvent.press(page.getByRole('button', { name: '返回' }));
     expect(onPress).toHaveBeenCalledTimes(1);
     page.rerender(content('brand'));
+    expect(page.getByRole('header', { name: '拍摄' })).toBeOnTheScreen();
     expect(page.UNSAFE_queryAllByType(GlassLayer)).toHaveLength(0);
     page.rerender(content('transparent'));
+    expect(page.getByRole('header', { name: '拍摄' })).toBeOnTheScreen();
     expect(page.UNSAFE_queryAllByType(GlassLayer)).toHaveLength(0);
   }
 );
