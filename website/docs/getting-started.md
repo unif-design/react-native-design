@@ -13,6 +13,8 @@ description: '安装依赖，配置主题与宿主，开始使用 Design 组件�
 
 支持矩阵严格来自 `package.json#peerDependencies`,本仓直接验证的版本是 React Native `0.86.3` + React `19.2.3`:
 
+本仓保留该开发基线以覆盖已有宿主；另在 Portal 消费端用 RN `0.88.0`、React `19.3.0`、Expo `58`、Reanimated `4.7.1`、Worklets `0.13.0` 验证了类型、双平台 production JS bundle 与 Android/iOS arm64 Debug 完整编译。新组合的主题、手势和布局仍需真机验收。
+
 | 依赖                               | 支持范围           | 本仓验证版本 |
 | ---------------------------------- | ------------------ | ------------ |
 | `react-native`                     | `>=0.86.0`         | `0.86.3`     |
