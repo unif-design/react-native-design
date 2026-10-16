@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/unif-design/react-native-design/compare/v1.6.0...v1.6.1) (2026-10-16)
+
+
+### Bug Fixes
+
+* **navbar:** expose title as an accessibility heading ([#167](https://github.com/unif-design/react-native-design/issues/167)) ([a7a2cef](https://github.com/unif-design/react-native-design/commit/a7a2cef7ab29b17e4e4459c099bff3f748c47849))
+
 # [1.6.0](https://github.com/unif-design/react-native-design/compare/v1.5.1...v1.6.0) (2026-10-16)
 
 
