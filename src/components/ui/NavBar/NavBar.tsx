@@ -82,7 +82,11 @@ export function NavBar({
       {!isBrand && !isTransparent ? <GlassLayer /> : null}
       <View style={styles.side}>{resolveSlot(leftSlot, tint)}</View>
       <View style={styles.center}>
-        <Text style={[styles.title, { color: tint }]} numberOfLines={1}>
+        <Text
+          style={[styles.title, { color: tint }]}
+          numberOfLines={1}
+          accessibilityRole="header"
+        >
           {title}
         </Text>
         {subtitle ? (

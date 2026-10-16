@@ -182,7 +182,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 来源：`src/components/ui/NavBar/NavBar.tsx`、`isSlot.ts`、`types.ts`。
 
-- 默认 `accessibilityRole`：NavBar 根 `<View>` **未**设置 role（无 `header` 等），`title` / `subtitle` 渲染为普通 `<Text>`，按文本默认对 SR 可读。
+- 主标题 `title` 的 `<Text>` 使用 `accessibilityRole="header"`，可由屏幕阅读器按标题定位；根 `<View>` 不合并左右动作，`subtitle` 保留普通文本语义。
 - a11y props：`left` / `right` 槽的 `NavBarAction.accessibilityLabel` **必填且非空**；action 同时必须有函数 `onPress`。若传展示用 `ReactNode`，React element 自行负责 a11y，primitive 文本由库内本地 `Text` 自然朗读。
 - 状态语义：NavBar 自身无可切换状态，不附加 `accessibilityState`。
 
