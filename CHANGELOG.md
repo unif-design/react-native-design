@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.6.0](https://github.com/unif-design/react-native-design/compare/v1.5.1...v1.6.0) (2026-10-16)
+
+
+### Features
+
+* **icon-button:** add optional inline confirmation ([#166](https://github.com/unif-design/react-native-design/issues/166)) ([a35ec30](https://github.com/unif-design/react-native-design/commit/a35ec30762041dbc7df03f019e16308a7a9604b1))
+
 ## [1.5.1](https://github.com/unif-design/react-native-design/compare/v1.5.0...v1.5.1) (2026-10-15)
 
 
