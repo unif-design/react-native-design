@@ -1,0 +1,94 @@
+---
+sidebar_position: 2
+title: InlineConfirm 原位确认
+description: 'IconButton 按需启用二次确认，同一区域只保留一处确认。'
+---
+
+<!-- Generated from @unif/react-native-design; edit source documentation. -->
+
+# InlineConfirm 原位确认
+
+`IconButton` 只有传入 `confirmation` 时才启用二次确认。首次点击后图标在原位平滑切换为确认文字，再次点击交付顶层 `onPress`。未传入配置时仍单击执行操作，适用于关闭、刷新和重试。
+
+用 `InlineConfirmScope` 包住可取消确认的区域。同一作用域只保留一处确认；点击区域内其他位置取消，其他按钮的首次操作仍照常执行。Scope 是普通 View，不创建遮罩，也不会接管业务操作。
+
+点外取消在触摸或鼠标释放后完成，系统取消手势时也会收尾，避免宽度收回动画移动正在点击的相邻按钮。
+
+## 代码演示 {#实时预览}
+
+点击任一删除图标、另一个删除图标或“其他操作”，观察确认和取消结果。文档主题同步到真实组件。
+
+```tsx
+  <InlineConfirmDemo />
+```
+
+## 按需确认
+
+```tsx
+import { TrashOutlined, RefreshOutlined } from '@unif/react-native-icons';
+import { IconButton, InlineConfirmScope, useColors } from '@unif/react-native-design';
+
+const colors = useColors();
+<InlineConfirmScope style={styles.screen}>
+  <IconButton
+    icon={RefreshOutlined}
+    accessibilityLabel="刷新"
+    variant="glass"
+    onPress={refresh}
+  />
+  <IconButton
+    icon={TrashOutlined}
+    accessibilityLabel="删除这一项"
+    variant="glass"
+    color={colors.error}
+    confirmation={{ label: '确认删除', confirmationKey: item.id }}
+    disabled={unavailable}
+    onPress={() => remove(item.id)}
+  />
+</InlineConfirmScope>;
+```
+
+图标、确认文案与颜色由调用方提供。删除使用错误色和“确认删除”；其他操作可传入相应图标、`label` 和 `color`。没有 `confirmation.confirming` 时，组件管理局部确认显示。列表使用稳定的 React key，并始终通过 `confirmationKey` 投影当前目标或内容版本，不只在确认对象出现时提供 key。
+
+图标与文字在 150 毫秒内交叉淡入淡出，表面宽度同时展开或收回。未确认时保持图标尺寸，不预留整段文字空白；父布局应允许确认文字横向扩宽。系统减少动态效果时直接切换。可执行资格与状态同步变化，不等待动画结束。
+
+## 复用已有确认对象
+
+```tsx
+<IconButton
+  icon={TrashOutlined}
+  accessibilityLabel="删除记忆"
+  variant="glass"
+  color={colors.error}
+  confirmation={{
+    label: '确认删除',
+    confirmationKey: `${record.id}:${record.version}`,
+    confirming: confirmation?.recordId === record.id,
+    onRequest: () => requestDelete(record),
+    onCancel: cancelDelete,
+  }}
+  onPress={confirmDelete}
+  loading={deleting}
+/>
+```
+
+受控配置必须同时提供 `onRequest` 与 `onCancel`。业务层继续保存目标、版本和提交状态；组件只投影确认显示。确认被消费后立即失活，宿主须将 `confirming` 回写为 `false` 才能发起下一轮。外部回写 `false` 只释放本地显示，不再反向调用 `onCancel`，因此共享确认对象可以安全地从一项切到另一项。
+
+`confirmationKey` 改变或进入 disabled/loading 会取消已有确认。首次受控确认已经不可用时，也会通知宿主取消一次。卸载仅释放作用域并使旧回调失活，不调用 `onCancel`；业务对象的清理由宿主管理。旧回调不会借用新一轮确认。请求、Promise、错误反馈和业务幂等仍由调用方负责。
+
+## API
+
+`IconButton` 沿用图标、颜色、尺寸、样式和可访问属性，新增可选 `confirmation`：
+
+| 参数 | 说明 |
+| --- | --- |
+| `label` | 必填的非空确认文案，例如“确认删除”。 |
+| `confirmationKey` | 字符串或数字；目标或版本变化时使旧确认失效。 |
+| `confirming` | 可选的宿主确认投影，省略时管理局部显示。 |
+| `onRequest` / `onCancel` | 首次请求、取消回调；受控模式必填。 |
+
+顶层 `onPress` 始终表示实际执行。`color` 同时作用于图标和确认文字；玻璃操作传 `variant="glass"`。相关类型 `IconButtonProps`、`IconButtonConfirmation`、`InlineConfirmScopeProps` 均从包根导入。
+
+`InlineConfirmScope` 接收 `ViewProps`。应覆盖用户能点击取消的整个页面或弹层内容；Scope 外的触摸不会自动取消。支持 `onAccessibilityEscape` 的屏幕阅读器退出手势同样取消当前确认。Modal、Portal 等独立视图树应各自放置 Scope。
+
+Web 示例只能验证浏览器交互。原生触摸冒泡、玻璃材质和屏幕阅读器仍需在消费端实际平台验证。

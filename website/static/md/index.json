@@ -161,6 +161,13 @@
     "description": "按稳定身份预览图片，交付切换和删除请求。"
   },
   {
+    "title": "InlineConfirm 原位确认",
+    "mdPath": "md/components/inline-confirm.md",
+    "slug": "/components/inline-confirm",
+    "section": "components",
+    "description": "IconButton 按需启用二次确认，同一区域只保留一处确认。"
+  },
+  {
     "title": "Input 输入框",
     "mdPath": "md/components/input.md",
     "slug": "/components/input",

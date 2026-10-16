@@ -1,6 +1,6 @@
 import { ArrowRightOutlined, CheckOutlined } from '@unif/react-native-icons';
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import {
   Button,
   Chip,
@@ -71,8 +71,36 @@ function componentByTestID<T extends React.ComponentType<never>>(
 }
 
 afterEach(() => {
+  jest.useRealTimers();
   restoreNativeMocks();
   jest.restoreAllMocks();
+});
+
+test('原位确认演示交付二击结果，切换按钮和点外取消不交付删除', () => {
+  jest.useFakeTimers();
+  render(<App />);
+  enterActions();
+  const scopeCoverage = createShowcaseStateCoverage('InlineConfirmScope');
+  scopeCoverage.prove('inline-confirm-scope.cancellation', () => {
+    fireEvent.press(screen.getByRole('button', { name: '删除第一条示例' }));
+    fireEvent.press(screen.getByRole('button', { name: '删除第二条示例' }));
+    expect(screen.getAllByRole('button', { name: '确认删除' })).toHaveLength(1);
+    expect(
+      screen.getByRole('button', { name: '删除第一条示例' })
+    ).toBeOnTheScreen();
+    fireEvent(screen.getByTestId('actions-inline-scope'), 'touchStart', {});
+    fireEvent(screen.getByTestId('actions-inline-scope'), 'touchEnd', {});
+    act(() => jest.runOnlyPendingTimers());
+    expect(screen.queryByRole('button', { name: '确认删除' })).toBeNull();
+    expect(screen.queryByTestId('result-latest')).not.toBeOnTheScreen();
+  });
+  fireEvent.press(screen.getByRole('button', { name: '删除第一条示例' }));
+  expect(screen.queryByTestId('result-latest')).not.toBeOnTheScreen();
+  fireEvent.press(screen.getByRole('button', { name: '确认删除' }));
+  expect(
+    screen.getByText('最新结果：IconButton · 删除 · 已确认第一条')
+  ).toBeOnTheScreen();
+  scopeCoverage.expectComplete();
 });
 
 test('Actions 展示 Button 全部 variant、size、block、左右图标与真实禁用状态', () => {
@@ -165,6 +193,7 @@ test('Button 配置切换后跨路由保留，返回 Actions 仍使用同一 dra
 });
 
 test('IconButton 覆盖公开 variant/size/color 且每个实例都有中文可访问名称', () => {
+  jest.useFakeTimers();
   render(<App />);
   enterActions();
   const stateCoverage = createShowcaseStateCoverage('IconButton');
@@ -174,6 +203,14 @@ test('IconButton 覆盖公开 variant/size/color 且每个实例都有中文可�
     .filter((node) =>
       String(node.props.testID).startsWith('actions-icon-button-')
     );
+  stateCoverage.prove('icon-button.confirmation', () => {
+    fireEvent.press(screen.getByRole('button', { name: '删除第一条示例' }));
+    expect(screen.getByRole('button', { name: '确认删除' })).toBeOnTheScreen();
+    fireEvent(screen.getByTestId('actions-inline-scope'), 'touchStart', {});
+    fireEvent(screen.getByTestId('actions-inline-scope'), 'touchEnd', {});
+    act(() => jest.runOnlyPendingTimers());
+    expect(screen.queryByRole('button', { name: '确认删除' })).toBeNull();
+  });
   stateCoverage.prove('icon-button.variants', () => {
     expect(
       specimens

@@ -26,6 +26,7 @@ description: '按场景查找组件、代码示例与 API。'
 | -------------------------------------------- | ------------------------------------------------------------------- |
 | [Button](button.md)            | 主操作按钮,8 variant × 3 size,可 block                              |
 | [IconButton](icon-button.md)   | 纯图标按钮,`accessibilityLabel` 类型必填                            |
+| [InlineConfirm](inline-confirm.md) | 图标原位切换确认文字，同一区域互斥与点外取消 |
 | [Avatar](avatar.md)            | circle/square monogram 头像,variant `brand`/`info`/`soft`/`neutral` |
 | [AvatarGroup](avatar-group.md) | 重叠头像组,统一形态与尺寸,支持 `max` 溢出及可选 action              |
 | [Tag](tag.md)                  | 状态徽章,5 语义 × 2 尺寸                                            |

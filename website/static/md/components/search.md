@@ -29,7 +29,9 @@ Search 自管搜索 icon、清除 action、36pt 可视 surface、44pt 根命中�
 
 提供 `onSubmit` 时，搜索 icon 是可点击的“搜索”按钮，点击交付 `onSubmit(currentValue)`；没有 `onSubmit` 时仍是装饰图标。按键盘搜索时先执行 `onSubmitEditing(event)`，再执行 `onSubmit(currentValue)`。输入变化和清除都不自动提交，是否发起查询由调用方决定。
 
-当前 value 非空、字段有效可编辑且 controller 能更新时才渲染清除 action；清除调用同一个 `onChangeText('')` 路径。`disabled` 或 `editable={false}` 时搜索按钮不可用，键盘事件也不交付提交。
+当前 value 非空、字段有效可编辑且 controller 能更新时才渲染玻璃清除按钮；清除调用同一个 `onChangeText('')` 路径。`disabled` 或 `editable={false}` 时搜索按钮不可用，键盘事件也不交付提交。
+
+需要右侧独立搜索按钮时，在 Search 外组合 `IconButton variant="glass"`，并用 `onSubmitEditing` 处理键盘提交；省略 Search 的 `onSubmit` 可保留左侧装饰图标。
 
 ## 删除的入口与 ref
 

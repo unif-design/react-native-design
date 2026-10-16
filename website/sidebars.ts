@@ -39,6 +39,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'components/button',
         'components/icon-button',
+        'components/inline-confirm',
         'components/action-menu-content',
         'components/avatar',
         'components/tag',

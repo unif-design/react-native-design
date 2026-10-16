@@ -222,6 +222,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
         />
         <TextFieldSlot
           slot={trailing}
+          glass={searchLayout !== undefined}
           effectiveEditable={effectiveEditable}
           testID={childTestID(testID, 'trailing')}
         />
