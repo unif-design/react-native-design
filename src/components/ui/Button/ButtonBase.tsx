@@ -7,6 +7,7 @@ import {
   type AccessibilityState,
   type StyleProp,
   type ViewStyle,
+  type ViewProps,
 } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
 import {
@@ -25,7 +26,10 @@ import type {
 } from './types';
 
 export type ButtonBaseProps = {
+  buttonRef?: React.Ref<View>;
   onPress: () => void;
+  onTouchStart?: ViewProps['onTouchStart'];
+  onPointerDown?: ViewProps['onPointerDown'];
   size?: ButtonSize;
   variant?: ButtonVariant;
   disabled?: boolean;
@@ -52,7 +56,10 @@ export type ButtonBaseProps = {
  *  职责:Pressable / sizing / palette / 视觉态 / a11y / text variant 特殊处理 /
  *  block / square。children 强制 render prop,sizingFor / paletteFor 在 styles.ts。 */
 export function ButtonBase({
+  buttonRef,
   onPress,
+  onTouchStart,
+  onPointerDown,
   size = 'md',
   variant = 'primary',
   disabled,
@@ -74,10 +81,8 @@ export function ButtonBase({
 
   const sizing = useMemo(() => {
     const base = sizingFor(size);
-    return square && surfaceSize !== undefined
-      ? { ...base, h: surfaceSize }
-      : base;
-  }, [size, square, surfaceSize]);
+    return surfaceSize !== undefined ? { ...base, h: surfaceSize } : base;
+  }, [size, surfaceSize]);
   const palette = useMemo(() => paletteFor(variant, c), [variant, c]);
 
   const isText = variant === 'text';
@@ -117,6 +122,7 @@ export function ButtonBase({
 
   return (
     <Pressable
+      ref={buttonRef}
       accessible={hasAccessibleName}
       accessibilityRole={hasAccessibleName ? accessibilityRole : undefined}
       role={
@@ -134,6 +140,8 @@ export function ButtonBase({
       accessibilityHint={accessibilityHint}
       disabled={unavailable}
       onPress={unavailable ? undefined : onPress}
+      onTouchStart={onTouchStart}
+      onPointerDown={onPointerDown}
       hitSlop={hitSlop}
       testID={testID}
       style={({ pressed }) => [

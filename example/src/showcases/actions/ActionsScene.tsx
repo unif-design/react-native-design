@@ -17,6 +17,7 @@ import {
   Button,
   Chip,
   IconButton,
+  InlineConfirmScope,
   Segmented,
   StatusDot,
   Tag,
@@ -179,6 +180,42 @@ export function ActionsScene(): React.JSX.Element {
       testID="actions-screen"
     >
       <View style={styles.stack}>
+        <SectionCard
+          title="原位删除确认"
+          description="点击删除图标后原位确认；切换另一个删除入口或点击区域内其他位置可取消。"
+        >
+          <InlineConfirmScope
+            testID="actions-inline-scope"
+            style={styles.stack}
+          >
+            <View style={styles.row}>
+              <IconButton
+                icon={TrashOutlined}
+                accessibilityLabel="删除第一条示例"
+                confirmation={{ label: '确认删除' }}
+                variant="glass"
+                color={colors.error}
+                testID="actions-inline-first"
+                onPress={() => record('IconButton', '删除', '已确认第一条')}
+              />
+              <IconButton
+                icon={TrashOutlined}
+                accessibilityLabel="删除第二条示例"
+                confirmation={{ label: '确认删除' }}
+                variant="glass"
+                color={colors.error}
+                onPress={() => record('IconButton', '删除', '已确认第二条')}
+              />
+            </View>
+            <Button
+              label="区域内其他操作"
+              variant="glass"
+              onPress={() =>
+                record('InlineConfirmScope', '其他操作', '已直接收到点击')
+              }
+            />
+          </InlineConfirmScope>
+        </SectionCard>
         <SectionCard
           title="操作菜单内容"
           description="删除示例先展示确认，应用决定后续操作。"

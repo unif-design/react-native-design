@@ -141,14 +141,16 @@ test('Search 禁用时材质仍可见；恢复编辑后清除和提交使用同�
       <Search defaultValue="客户" onSubmit={submit} testID="search" />
     </ThemeProvider>
   );
+  await expectVisibleMaterial(2);
   fireEvent.press(screen.getByRole('button', { name: '清除搜索内容' }));
   expect(screen.getByTestId('search-input').props.value).toBe('');
+  await expectVisibleMaterial();
   fireEvent.changeText(screen.getByTestId('search-input'), '门店');
   fireEvent(screen.getByTestId('search-input'), 'submitEditing', {
     nativeEvent: { text: '门店' },
   });
   expect(submit).toHaveBeenCalledWith('门店');
-  await expectVisibleMaterial();
+  await expectVisibleMaterial(2);
 });
 
 test.each(['light', 'dark'] as const)(

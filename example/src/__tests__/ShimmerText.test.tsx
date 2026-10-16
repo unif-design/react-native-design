@@ -74,12 +74,28 @@ test('公开文字组件保留文案、原生文字参数和调用方字号，�
     expect.anything(),
     expect.objectContaining({
       duration: 4000,
-      useNativeDriver: true,
+      useNativeDriver: false,
       isInteraction: false,
     })
   );
   page.rerender(view());
   expect(animations).toHaveLength(1);
+});
+
+test('深色默认白字扫过时改变颜色，随后恢复原色', () => {
+  const page = render(
+    <ThemeProvider forceScheme="dark">
+      <ShimmerText testID="white-status">思考中</ShimmerText>
+    </ThemeProvider>
+  );
+  const first = page.UNSAFE_getAllByType(Animated.Text)[0]!;
+  const original = first.props.style.color.__getValue();
+  const progress = animations[0]!.value;
+  if (!(progress instanceof Animated.Value)) throw new Error('缺少扫光进度');
+  act(() => progress.setValue(0.08));
+  expect(first.props.style.color.__getValue()).not.toBe(original);
+  act(() => progress.setValue(0.5));
+  expect(first.props.style.color.__getValue()).toBe(original);
 });
 
 test('文字换代、结束和卸载停止各自循环，迟到帧不会重新启动旧状态', () => {

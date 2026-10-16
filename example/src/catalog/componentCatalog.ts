@@ -38,6 +38,7 @@ export const publicComponentIds = [
   'FormRow',
   'Grid',
   'IconButton',
+  'InlineConfirmScope',
   'Input',
   'Logo',
   'NavBar',
@@ -96,8 +97,9 @@ export const componentCatalog = [
   {
     id: 'IconButton',
     scene: 'actions',
-    states: ['变体', '尺寸', '无障碍名称', '禁用', '加载'],
+    states: ['变体', '尺寸', '无障碍名称', '禁用', '加载', '可选原位确认'],
   },
+  { id: 'InlineConfirmScope', scene: 'actions', states: ['互斥与点外取消'] },
   {
     id: 'Chip',
     scene: 'actions',

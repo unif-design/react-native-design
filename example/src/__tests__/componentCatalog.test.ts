@@ -31,6 +31,7 @@ const expectedComponentIds = [
   'FormRow',
   'Grid',
   'IconButton',
+  'InlineConfirmScope',
   'Input',
   'Logo',
   'NavBar',
@@ -112,6 +113,7 @@ const expectedComponentsByScene = {
     'ActionMenuContent',
     'Button',
     'IconButton',
+    'InlineConfirmScope',
     'Chip',
     'Tag',
     'StatusDot',
@@ -166,12 +168,12 @@ const expectedComponentsByScene = {
   ],
 } as const;
 
-test('catalog 精确覆盖 54 个公开组件且每项只有一个非空主场景', () => {
+test('catalog 精确覆盖 55 个公开组件且每项只有一个非空主场景', () => {
   expect(componentCatalog.map((entry) => entry.id).sort()).toEqual(
     [...expectedComponentIds].sort()
   );
-  expect(new Set(componentCatalog.map((entry) => entry.id)).size).toBe(54);
-  expect(componentCatalog).toHaveLength(54);
+  expect(new Set(componentCatalog.map((entry) => entry.id)).size).toBe(55);
+  expect(componentCatalog).toHaveLength(55);
   expect(componentCatalog.every((entry) => entry.states.length > 0)).toBe(true);
 });
 

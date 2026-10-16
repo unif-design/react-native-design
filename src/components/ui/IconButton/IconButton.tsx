@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { createLogger } from '../../../utils/logger';
 import { ButtonBase } from '../Button/ButtonBase';
+import { InlineConfirmButton } from '../InlineConfirm/InlineConfirmButton';
 import { normalizeNonBlankText } from '../shared/accessibilityName';
 import type { IconButtonProps } from './types';
 
@@ -18,6 +19,7 @@ const log = createLogger('IconButton');
 export function IconButton({
   icon: Icon,
   onPress,
+  confirmation,
   size = 'md',
   iconSize,
   surfaceSize,
@@ -41,6 +43,27 @@ export function IconButton({
       );
     }
   }, [hasBlankLabel]);
+
+  if (confirmation)
+    return (
+      <InlineConfirmButton
+        icon={Icon}
+        onPress={onPress}
+        confirmation={confirmation}
+        size={size}
+        iconSize={iconSize}
+        surfaceSize={surfaceSize}
+        variant={variant}
+        color={color}
+        disabled={disabled === true || hasBlankLabel}
+        loading={loading}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityHint={accessibilityHint}
+        accessibilityState={accessibilityState}
+        style={style}
+        testID={testID}
+      />
+    );
 
   return (
     <ButtonBase

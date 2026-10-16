@@ -59,6 +59,32 @@ export type ShowcaseStateContractEntry = {
 
 export const showcaseStateContract = [
   {
+    id: 'icon-button.confirmation',
+    component: 'IconButton',
+    scene: 'actions',
+    label: '可选原位确认',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'actions-inline-first',
+          props: { accessibilityLabel: '删除第一条示例' },
+          presentProps: ['confirmation', 'onPress'],
+        },
+      ],
+    },
+  },
+  {
+    id: 'inline-confirm-scope.cancellation',
+    component: 'InlineConfirmScope',
+    scene: 'actions',
+    label: '互斥与点外取消',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [{ testID: 'actions-inline-scope', props: {} }],
+    },
+  },
+  {
     id: 'action-menu-content.actions',
     component: 'ActionMenuContent',
     scene: 'actions',

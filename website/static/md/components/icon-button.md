@@ -8,7 +8,9 @@ description: '只包含图标的按钮，需要提供无障碍名称。'
 
 # IconButton 图标按钮
 
-仅包含图标的按钮，用于工具栏或紧凑操作区。需要提供 `accessibilityLabel`。
+用于工具栏或紧凑操作区，默认单击执行。需要提供 `accessibilityLabel`。
+
+需要二次确认时传 `confirmation={{ label: '确认删除' }}`，并用 `InlineConfirmScope` 包住可取消区域；图标在原位平滑切换为确认文字。未传配置不增加确认步骤，详见[原位确认](inline-confirm.md)。`color` 同时应用于图标和确认文字，删除操作可传错误色。
 
 `size` 走 `ButtonSize`（sm/md/lg = 28/36/44）。`variant` 复用 Button palette，但
 IconButton 精确排除会撕掉方形高度的 `'text'`，默认是透明底 `'ghost'`。

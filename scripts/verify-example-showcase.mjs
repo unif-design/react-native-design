@@ -73,6 +73,7 @@ const expectedUiComponents = [
   'FormRow',
   'Grid',
   'IconButton',
+  'InlineConfirmScope',
   'Input',
   'Logo',
   'NavBar',
@@ -113,6 +114,7 @@ const expectedComponentsByScene = {
     'ActionMenuContent',
     'Button',
     'IconButton',
+    'InlineConfirmScope',
     'Chip',
     'Tag',
     'StatusDot',
@@ -172,6 +174,7 @@ const expectedSceneTestFiles = {
 };
 
 const expectedStateIdsByComponent = {
+  InlineConfirmScope: ['inline-confirm-scope.cancellation'],
   ActionMenuContent: [
     'action-menu-content.actions',
     'action-menu-content.popover',
@@ -195,6 +198,7 @@ const expectedStateIdsByComponent = {
     'icon-button.a11y-name',
     'icon-button.disabled',
     'icon-button.loading',
+    'icon-button.confirmation',
   ],
   Chip: [
     'chip.static',

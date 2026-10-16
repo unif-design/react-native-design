@@ -42,7 +42,9 @@ export type { FormProps, FormGroupProps, FormRowProps } from './Form';
 export { Grid } from './Grid';
 export type { GridItem, GridProps } from './Grid';
 export { IconButton } from './IconButton';
-export type { IconButtonProps } from './IconButton';
+export type { IconButtonProps, IconButtonConfirmation } from './IconButton';
+export { InlineConfirmScope } from './InlineConfirm';
+export type { InlineConfirmScopeProps } from './InlineConfirm';
 export { Input } from './Input';
 export type {
   InputProps,
