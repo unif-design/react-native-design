@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.2](https://github.com/unif-design/react-native-design/compare/v1.6.1...v1.6.2) (2026-10-16)
+
+
+### Bug Fixes
+
+* accept Reanimated 4.7 and Worklets 0.13 ([7fccb75](https://github.com/unif-design/react-native-design/commit/7fccb75a0c822fed509dd14334bc4dc4389a2b1c))
+
 ## [1.6.1](https://github.com/unif-design/react-native-design/compare/v1.6.0...v1.6.1) (2026-10-16)
 
 
