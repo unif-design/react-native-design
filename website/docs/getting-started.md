@@ -18,8 +18,8 @@ description: '安装依赖，配置主题与宿主，开始使用 Design 组件�
 | `react-native`                     | `>=0.86.0`         | `0.86.3`     |
 | `react`                            | `>=19.2.3 <20.0.0` | `19.2.3`     |
 | `react-native-gesture-handler`     | `>=3.0.0 <4.0.0`   | `3.1.0`      |
-| `react-native-reanimated`          | `>=4.5.2 <4.7.0`   | `4.6.0`      |
-| `react-native-worklets`            | `>=0.11.0 <0.13.0` | `0.12.1`     |
+| `react-native-reanimated`          | `>=4.5.2 <4.8.0`   | `4.6.0`      |
+| `react-native-worklets`            | `>=0.11.0 <0.14.0` | `0.12.1`     |
 | `react-native-reanimated-carousel` | `>=5.0.0 <6.0.0`   | `5.0.0`      |
 | `react-native-safe-area-context`   | `>=5`              | `5.7.x`      |
 | `react-native-svg`                 | `>=15`             | `15.15.x`    |
@@ -30,7 +30,7 @@ description: '安装依赖，配置主题与宿主，开始使用 Design 组件�
 - TypeScript 6
 
 :::info 仅支持新架构,RN 下限 0.86
-本库面向 RN 0.86+ 新架构(Fabric + TurboModules),支持 `react-native-reanimated@4.5/4.6` + `react-native-worklets@0.11/0.12`。旧架构(Bridge)与 RN `0.85` 及更低版本不在支持范围 —— 发布 contract 是 `>=0.86.0`,不封顶；当前验证基线为 RN `0.86.3`。
+本库面向 RN 0.86+ 新架构(Fabric + TurboModules),支持 `react-native-reanimated@4.5/4.6/4.7` + `react-native-worklets@0.11/0.12/0.13`。旧架构(Bridge)与 RN `0.85` 及更低版本不在支持范围 —— 发布 contract 是 `>=0.86.0`,不封顶；当前验证基线为 RN `0.86.3`。
 :::
 
 ## 安装依赖 {#安装依赖}
