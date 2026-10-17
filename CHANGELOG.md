@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.3](https://github.com/unif-design/react-native-design/compare/v1.6.2...v1.6.3) (2026-10-17)
+
+
+### Bug Fixes
+
+* align RN 0.88 hosts and harden component boundaries ([#169](https://github.com/unif-design/react-native-design/issues/169)) ([95767b8](https://github.com/unif-design/react-native-design/commit/95767b8eabf4495aa34a77f0260b477b160beb82))
+
 ## [1.6.2](https://github.com/unif-design/react-native-design/compare/v1.6.1...v1.6.2) (2026-10-16)
 
 
