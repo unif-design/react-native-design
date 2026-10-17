@@ -33,7 +33,7 @@ function clampDuration(raw: number | undefined): number {
   return Math.trunc(raw);
 }
 
-function emit(input: ToastInput, kind: ToastKind = 'info') {
+function emit(input: ToastInput, kind: ToastKind) {
   const entry: ToastEntry =
     typeof input === 'string'
       ? {

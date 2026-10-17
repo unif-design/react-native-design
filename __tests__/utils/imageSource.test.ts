@@ -1,4 +1,4 @@
-import { describe, expect, test } from '@jest/globals';
+import { describe, expect, jest, test } from '@jest/globals';
 import {
   canonicalSourceValue,
   createImageSourceResolver,
@@ -580,6 +580,91 @@ describe('resolveImageSource', () => {
     expect(resolveImageSource(7)).toEqual({
       source: 7,
       key: imageSourceKey(7),
+    });
+  });
+});
+
+describe('URI transport fields and snapshot descriptor boundaries', () => {
+  test.each([
+    { headers: null },
+    { headers: [] },
+    { headers: 'token' },
+    { headers: { token: 42 } },
+    { bundle: 7 },
+    { method: false },
+    { body: {} },
+    { cache: 'forever' },
+    { width: '20' },
+    { height: null },
+    { scale: true },
+  ])('rejects invalid transport metadata %j', (field) => {
+    expect(
+      resolveImageSource({ uri: 'https://example.test/a.png', ...field })
+    ).toBeUndefined();
+  });
+
+  test('preserves optional transport strings, finite dimensions and all cache policies', () => {
+    for (const cache of [
+      'default',
+      'reload',
+      'force-cache',
+      'only-if-cached',
+    ]) {
+      const source = {
+        uri: 'a',
+        bundle: 'assets',
+        method: 'POST',
+        body: '',
+        cache,
+        width: 0,
+        height: -1,
+        scale: 0.5,
+      };
+      expect(resolveImageSource(source)?.source).toEqual(source);
+    }
+  });
+
+  test('rejects array non-index keys, accessors and hidden entries without evaluating getters', () => {
+    const getter = jest.fn(() => ({ uri: 'a' }));
+    const accessor = [{ uri: 'a' }];
+    Object.defineProperty(accessor, '0', { get: getter });
+    const hidden = [{ uri: 'a' }];
+    Object.defineProperty(hidden, '0', { enumerable: false });
+    const wrongKey = new Proxy([{ uri: 'a' }], {
+      ownKeys: () => ['other', 'length'],
+    });
+    const missingDescriptor = new Proxy([{ uri: 'a' }], {
+      getOwnPropertyDescriptor(target, key) {
+        return key === '0'
+          ? undefined
+          : Reflect.getOwnPropertyDescriptor(target, key);
+      },
+    });
+    for (const value of [accessor, hidden, wrongKey, missingDescriptor]) {
+      expect(resolveImageSource(value)).toBeUndefined();
+    }
+    expect(getter).not.toHaveBeenCalled();
+  });
+
+  test('resolver transitions across primitive, object and array snapshots retain only equivalent inputs', () => {
+    const resolve = createImageSourceResolver();
+    expect(resolve(7)?.source).toBe(7);
+    const object = resolve({ uri: 'a', data: { nested: true } });
+    expect(resolve({ uri: 'a', data: { nested: true } })).toBe(object);
+    expect(resolve([{ uri: 'a', data: [] }])?.source).toEqual([
+      { uri: 'a', data: [] },
+    ]);
+    expect(resolve({ uri: 'a', data: [false] })?.source).toEqual({
+      uri: 'a',
+      data: [false],
+    });
+    expect(resolve({ uri: 'a', data: null })?.source).toEqual({
+      uri: 'a',
+      data: null,
+    });
+    expect(resolve({ uri: 'a', data: 2 })?.source).toEqual({
+      uri: 'a',
+      data: 2,
     });
   });
 });

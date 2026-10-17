@@ -13,28 +13,29 @@ description: '安装依赖，配置主题与宿主，开始使用 Design 组件�
 
 ## 环境要求 {#环境要求}
 
-支持矩阵严格来自 `package.json#peerDependencies`,本仓直接验证的版本是 React Native `0.86.3` + React `19.2.3`:
+支持矩阵严格来自 `package.json#peerDependencies`,本仓直接验证的版本是 React Native `0.88.0` + React `19.3.0`:
 
-本仓保留该开发基线以覆盖已有宿主；另在 Portal 消费端用 RN `0.88.0`、React `19.3.0`、Expo `58`、Reanimated `4.7.1`、Worklets `0.13.0` 验证了类型、双平台 production JS bundle 与 Android/iOS arm64 Debug 完整编译。新组合的主题、手势和布局仍需真机验收。
+本仓 root、example 与文档站采用同一开发基线；Portal 消费端用 RN `0.88.0`、React `19.3.0`、Expo `58`、Reanimated `4.7.1`、Worklets `0.13.0` 验证了类型、双平台 production JS bundle 与 Android/iOS arm64 Debug 完整编译。新组合的主题、手势和布局仍需真机验收。
 
 | 依赖                               | 支持范围           | 本仓验证版本 |
 | ---------------------------------- | ------------------ | ------------ |
-| `react-native`                     | `>=0.86.0`         | `0.86.3`     |
-| `react`                            | `>=19.2.3 <20.0.0` | `19.2.3`     |
+| `react-native`                     | `>=0.86.0`         | `0.88.0`     |
+| `react`                            | `>=19.2.3 <20.0.0` | `19.3.0`     |
 | `react-native-gesture-handler`     | `>=3.0.0 <4.0.0`   | `3.1.0`      |
-| `react-native-reanimated`          | `>=4.5.2 <4.8.0`   | `4.6.0`      |
-| `react-native-worklets`            | `>=0.11.0 <0.14.0` | `0.12.1`     |
+| `react-native-reanimated`          | `>=4.5.2 <4.8.0`   | `4.7.1`      |
+| `react-native-worklets`            | `>=0.11.0 <0.14.0` | `0.13.0`     |
 | `react-native-reanimated-carousel` | `>=5.0.0 <6.0.0`   | `5.0.0`      |
-| `react-native-safe-area-context`   | `>=5`              | `5.7.x`      |
-| `react-native-svg`                 | `>=15`             | `15.15.x`    |
+| `react-native-safe-area-context`   | `>=5`              | `5.8.0`      |
+| `react-native-svg`                 | `>=15`             | `15.16.0`    |
 | `@callstack/liquid-glass`          | `>=0.8.2 <0.9.0`   | `0.8.2`      |
-| `@unif/react-native-icons`         | `>=0.1.0`          | `0.1.0`      |
+| `@unif/react-native-icons`         | `>=0.1.0`          | `0.4.1`      |
 
-- Node.js `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`(与 `package.json#engines` 逐字一致;本仓 `.nvmrc` 固定 `v24.13.0`)、Yarn 4
+- RN `0.88.0` 开发基线要求 Node.js `^22.13.0 || ^24.3.0 || >= 26.0.0`；本仓 `.nvmrc` 固定 `v24.13.0`，使用 Yarn 4。根 `devEngines` 与 example/website `engines` 声明此范围。
+- 公开包的 `package.json#engines` 保留 `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`，兼容已有 RN `0.86+` 消费者；消费者还必须满足自己安装的 RN 版本要求。
 - TypeScript 6
 
 :::info 仅支持新架构,RN 下限 0.86
-本库面向 RN 0.86+ 新架构(Fabric + TurboModules),支持 `react-native-reanimated@4.5/4.6/4.7` + `react-native-worklets@0.11/0.12/0.13`。旧架构(Bridge)与 RN `0.85` 及更低版本不在支持范围 —— 发布 contract 是 `>=0.86.0`,不封顶；当前验证基线为 RN `0.86.3`。
+本库面向 RN 0.86+ 新架构(Fabric + TurboModules),支持 `react-native-reanimated@4.5/4.6/4.7` + `react-native-worklets@0.11/0.12/0.13`。旧架构(Bridge)与 RN `0.85` 及更低版本不在支持范围 —— 发布 contract 是 `>=0.86.0`,不封顶；当前验证基线为 RN `0.88.0`。
 :::
 
 ## 安装依赖 {#安装依赖}
@@ -66,7 +67,7 @@ iOS 装完原生包后,在 `ios/` 目录执行 `bundle exec pod install` 并重�
 > 版本范围见上方[环境要求](#环境要求)表格,唯一事实来源是 `package.json#peerDependencies`。
 
 :::caution Worklets 需要宿主自备 Babel / Metro
-`react-native-worklets` 的 Babel 插件与 Metro transformer 由**宿主工程**提供,不随本库分发。宿主必须装上与自身 RN 版本匹配的 `@babel/core`、`@react-native/babel-preset` 和 `@react-native/metro-config`；本仓验证的是 RN `0.86.3` 与对应 `0.86.3` 工具链，否则 worklet 编译会静默降级或直接报错。
+`react-native-worklets` 的 Babel 插件与 Metro transformer 由**宿主工程**提供,不随本库分发。宿主必须装上与自身 RN 版本匹配的 `@babel/core`、`@react-native/babel-preset` 和 `@react-native/metro-config`；本仓验证的是 RN `0.88.0` 与对应 `0.88.0` 工具链，否则 worklet 编译会静默降级或直接报错。
 :::
 
 :::caution RNRC 5.0.0 与 Gesture Handler 3 的 peer 冲突

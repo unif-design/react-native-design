@@ -17,8 +17,7 @@ export function buildSvgId(
   const cleanReactId = sanitizeSvgIdPart(reactId);
   const automatic =
     [cleanPrefix, cleanReactId].filter(Boolean).join('-') ||
-    ['svg-id', cleanReactId].filter(Boolean).join('-') ||
-    'svg-id';
+    ['svg-id', cleanReactId].filter(Boolean).join('-');
   const candidate = cleanOverride || automatic;
   return /^[A-Za-z_]/u.test(candidate) ? candidate : `svg-id-${candidate}`;
 }

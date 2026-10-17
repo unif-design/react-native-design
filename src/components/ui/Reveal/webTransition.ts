@@ -61,8 +61,8 @@ function isSafeWebTransform(transform: unknown): boolean {
 
       const keys = Object.keys(operation);
       if (keys.length !== 1) return false;
-      const key = keys[0];
-      if (key === undefined) return false;
+      // Object.keys returns a dense array; the one-key check above proves presence.
+      const key = keys[0]!;
       const value = (operation as Record<string, unknown>)[key];
 
       if (key === 'matrix' || key === 'matrix3d') {

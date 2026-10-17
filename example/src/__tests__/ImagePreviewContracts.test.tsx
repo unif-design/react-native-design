@@ -704,3 +704,21 @@ test('待交接定位同时移除原当前项，通知不倒退且与实时 ref 
   await page.update({ items: [items[1], items[2]] });
   expect(observed.map((row) => row.event)).toEqual(['a', 'c']);
 });
+
+test('无 testID 的预览忽略旧轮次滚动开始、同页与越界落位', async () => {
+  const page = await mount({ testID: undefined });
+  expect(mockCarouselProps.mock.lastCall![0].testID).toBeUndefined();
+  const stale = mockCarouselProps.mock.lastCall![0];
+  await page.update({ items: [...items].reverse(), testID: undefined });
+  const current = mockCarouselProps.mock.lastCall![0];
+  await act(() => stale.onScrollStart?.());
+  const selected = page.ref.current?.getCurrent();
+  await act(() => {
+    current.onSnapToItem?.(2);
+    current.onSnapToItem?.(999);
+  });
+  expect(page.ref.current?.getCurrent()).toBe(selected);
+  expect(page.onCurrentChange).toHaveBeenCalledTimes(1);
+  await page.unmount();
+  expect(() => stale.onScrollStart?.()).not.toThrow();
+});

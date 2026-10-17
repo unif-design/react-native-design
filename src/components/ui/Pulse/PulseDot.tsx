@@ -14,7 +14,7 @@ export function PulseDot({
   style,
   testID,
   ...opts
-}: PulseDotProps = {}): React.JSX.Element {
+}: PulseDotProps): React.JSX.Element {
   const c = useColors();
   const fill = color ?? c.primary;
   const animatedStyle = usePulseAnimation(opts, PULSE_DOT_DEFAULTS, log);

@@ -129,3 +129,19 @@ describe('logger', () => {
     expect(calls).toEqual(['ok']);
   });
 });
+
+test('production default filters debug and info while retaining warnings', () => {
+  const dev = Reflect.get(globalThis, '__DEV__');
+  Reflect.set(globalThis, '__DEV__', false);
+  jest.resetModules();
+  try {
+    const { createLogger, getLogLevel } = require('../../src/utils/logger');
+    expect(getLogLevel()).toBe('warn');
+    const debug = jest.spyOn(console, 'debug').mockImplementation(() => {});
+    createLogger('Production').debug('hidden');
+    expect(debug).not.toHaveBeenCalled();
+  } finally {
+    Reflect.set(globalThis, '__DEV__', dev);
+    jest.restoreAllMocks();
+  }
+});

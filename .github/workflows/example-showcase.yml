@@ -108,3 +108,9 @@ jobs:
       - name: Test example
         if: needs.changes.outputs.example == 'true'
         run: yarn example test --maxWorkers=2
+      - name: Test standard CI entry and development baseline
+        if: needs.changes.outputs.example == 'true' || needs.changes.outputs.tooling == 'true'
+        run: node --test scripts/__tests__/run-tests.test.mjs
+      - name: Verify library and example coverage
+        if: needs.changes.outputs.example == 'true'
+        run: yarn test:coverage --maxWorkers=2

@@ -13,12 +13,17 @@ module.exports = {
     // 经过本 mapper)。独立消费者只有一份 node_modules,不需要这些。
     '^react$': '<rootDir>/node_modules/react',
     '^react/(.*)$': '<rootDir>/node_modules/react/$1',
+    // RN 0.88 的 exports 子入口需要先于下面的通用深路径映射。
+    '^react-native/setup-env$':
+      '<rootDir>/node_modules/react-native/src/setup-env.js',
+    '^react-native/react-private-interface$':
+      '<rootDir>/node_modules/react-native/src/react-private-interface.js',
     // RN 自己也要按同一原则钉回来:@react-native/jest-preset 的
     // `^react-native($|/.*)` 值是 require 位置算出来的,preset 现在从**仓根**加载,
     // 那条就指向仓根拷贝 —— 而 `yarn example ios/android` 构建的是 example 拷贝,
     // 于是「测的」和「构建的」不是同一份。config 条目在 resolved mapper 里排在
     // preset 条目之前(first match wins),同名 key 直接覆盖 preset 那条。
-    // 两份今天同为 0.86.2,所以这条是防漂移,不是修当前的红。
+    // 两份验证基线同为 0.88.0,所以这条是防漂移,不是修当前的红。
     '^react-native($|/.*)': '<rootDir>/node_modules/react-native/$1',
     '^react-native-gesture-handler$':
       '<rootDir>/node_modules/react-native-gesture-handler/src/index.ts',

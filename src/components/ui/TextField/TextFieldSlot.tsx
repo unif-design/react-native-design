@@ -57,7 +57,7 @@ export function TextFieldSlot({
       return (
         <View {...A11Y_HIDDEN_PROPS} style={styles.slotDisplay} testID={testID}>
           <safeSlot.icon
-            size={iconSize?.value ?? 18}
+            size={iconSize!.value}
             color={safeSlot.color ?? colors.foregroundMuted}
           />
         </View>

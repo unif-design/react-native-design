@@ -373,3 +373,30 @@ test('独立玻璃层在无主题宿主时仍读取系统偏好，不永久停�
     screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.effect
   ).toBe('regular');
 });
+
+test('显式浅色覆盖深色主题，支持材质融合时提供无材质主题宿主', async () => {
+  jest.replaceProperty(
+    LiquidGlass as { isLiquidGlassSupported: boolean },
+    'isLiquidGlassSupported',
+    true
+  );
+  const {
+    GlassGroup,
+  } = require('../../../src/components/ui/GlassLayer/GlassGroup');
+  const page = render(
+    <ThemeProvider forceScheme="dark">
+      <GlassGroup testID="group">
+        <GlassLayer colorScheme="light" testID="layer" />
+      </GlassGroup>
+    </ThemeProvider>
+  );
+  await waitFor(() =>
+    expect(
+      page.getByTestId('layer', { includeHiddenElements: true }).props
+        .colorScheme
+    ).toBe('light')
+  );
+  expect(
+    page.getByTestId('group', { includeHiddenElements: true }).props
+  ).toMatchObject({ effect: 'none', colorScheme: 'dark', animated: false });
+});

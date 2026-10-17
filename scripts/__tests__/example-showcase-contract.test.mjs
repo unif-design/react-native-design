@@ -46,7 +46,7 @@ function withFixture(relativePaths, run) {
     }
     return run(fixture);
   } finally {
-    rmSync(fixture, { recursive: true, force: true });
+    rmSync(fixture, { recursive: true, force: true, maxRetries: 5 });
   }
 }
 
@@ -70,6 +70,7 @@ function runContractMutation(fixture, testNamePattern) {
     {
       cwd: repositoryRoot,
       encoding: 'utf8',
+      maxBuffer: 16 * 1024 * 1024,
       env,
     }
   );
@@ -329,6 +330,7 @@ function runExampleJestWrapper(
     {
       cwd,
       encoding: 'utf8',
+      maxBuffer: 16 * 1024 * 1024,
       env,
     }
   );
@@ -357,6 +359,7 @@ function runExampleFocusedJestWrapper(
     {
       cwd,
       encoding: 'utf8',
+      maxBuffer: 16 * 1024 * 1024,
       env,
     }
   );
@@ -607,26 +610,26 @@ function withJestGlobalConfigProbeFixture(run) {
 const expectedRuntimeDependencies = {
   '@callstack/liquid-glass': '0.8.2',
   '@unif/react-native-design': 'workspace:*',
-  '@unif/react-native-icons': '>=0.1.0',
-  'react': '19.2.3',
-  'react-native': '0.86.3',
+  '@unif/react-native-icons': '0.4.1',
+  'react': '19.3.0',
+  'react-native': '0.88.0',
   'react-native-gesture-handler': '3.1.0',
-  'react-native-reanimated': '4.6.0',
+  'react-native-reanimated': '4.7.1',
   'react-native-reanimated-carousel': '5.0.0',
   'react-native-safe-area-context': '5.8.0',
-  'react-native-svg': '15.15.5',
-  'react-native-worklets': '0.12.1',
+  'react-native-svg': '15.16.0',
+  'react-native-worklets': '0.13.0',
 };
 
 const expectedTemplateDevDependencies = {
-  '@react-native-community/cli': '20.1.0',
-  '@react-native-community/cli-platform-android': '20.1.0',
-  '@react-native-community/cli-platform-ios': '20.1.0',
-  '@react-native/babel-preset': '0.86.3',
-  '@react-native/eslint-config': '0.86.3',
-  '@react-native/jest-preset': '0.86.3',
-  '@react-native/metro-config': '0.86.3',
-  '@react-native/typescript-config': '0.86.3',
+  '@react-native-community/cli': '20.2.0',
+  '@react-native-community/cli-platform-android': '20.2.0',
+  '@react-native-community/cli-platform-ios': '20.2.0',
+  '@react-native/babel-preset': '0.88.0',
+  '@react-native/eslint-config': '0.88.0',
+  '@react-native/jest-preset': '0.88.0',
+  '@react-native/metro-config': '0.88.0',
+  '@react-native/typescript-config': '0.88.0',
 };
 
 const catalogContractFiles = [
@@ -692,7 +695,7 @@ const sourceContractFiles = [
   'example/Gemfile',
   'example/Gemfile.lock',
   'example/ios/Podfile.lock',
-  'example/ios/ReactNativeDesignExample/AppDelegate.swift',
+  'example/ios/ReactNativeDesignExample/SceneDelegate.swift',
   'example/ios/ReactNativeDesignExample/Info.plist',
   'example/ios/ReactNativeDesignExample.xcodeproj/project.pbxproj',
   'example/ios/ReactNativeDesignExample.xcodeproj/xcshareddata/xcschemes/ReactNativeDesignExample.xcscheme',
@@ -841,7 +844,7 @@ function plistArray(plist, key) {
   );
 }
 
-test('example workspace 提供 Design 的完整 RN 0.86.3 runtime graph', () => {
+test('example workspace 提供 Design 的完整 RN 0.88.0 runtime graph', () => {
   const examplePackage = readJson('example/package.json');
 
   assert.equal(examplePackage.name, '@unif/react-native-design-example');
@@ -856,7 +859,7 @@ test('example workspace 提供 Design 的完整 RN 0.86.3 runtime graph', () => 
     '^13.3.3'
   );
   assert.equal(examplePackage.devDependencies.jest, '^29.6.3');
-  assert.equal(examplePackage.devDependencies['react-test-renderer'], '19.2.3');
+  assert.equal(examplePackage.devDependencies['react-test-renderer'], '19.3.0');
   assert.equal(
     examplePackage.devDependencies['react-native-builder-bob'],
     undefined
@@ -871,6 +874,7 @@ test('workspace scripts 暴露真实 example 及完整本地 gate', () => {
     rootPackage.scripts.example,
     'yarn workspace @unif/react-native-design-example'
   );
+  assert.equal(rootPackage.scripts.test, 'node scripts/run-tests.mjs');
   assert.equal(
     rootPackage.scripts['verify:example-showcase'],
     'node --test scripts/__tests__/verify-example-showcase.test.mjs && node scripts/verify-example-showcase.mjs'
@@ -985,7 +989,7 @@ test('Yarn 不全局丢弃 peer warning', () => {
   );
 });
 
-test('Babel/Metro/Jest 使用 RN 0.86 workspace source contract', () => {
+test('Babel/Metro/Jest 使用 RN 0.88 workspace source contract', () => {
   const babelConfig = require(path.join(exampleRoot, 'babel.config.js'));
   const metroConfig = require(path.join(exampleRoot, 'metro.config.js'));
   const jestConfig = require(path.join(exampleRoot, 'jest.config.js'));
@@ -1059,20 +1063,23 @@ test('app registry 与 Android identity 原子同步并保留 New Architecture',
   assert.match(appGradle, /namespace "unif\.reactnativedesign\.example"/u);
   assert.match(appGradle, /applicationId "unif\.reactnativedesign\.example"/u);
   assert.match(appGradle, /autolinkLibrariesWithApp\(\)/u);
-  assert.match(appGradle, /getDefaultProguardFile\("proguard-android\.txt"\)/u);
-  assert.match(rootGradle, /buildToolsVersion = "36\.0\.0"/u);
+  assert.match(
+    appGradle,
+    /getDefaultProguardFile\("proguard-android-optimize\.txt"\)/u
+  );
+  assert.match(rootGradle, /buildToolsVersion = "37\.0\.0"/u);
   assert.match(rootGradle, /minSdkVersion = 24/u);
-  assert.match(rootGradle, /compileSdkVersion = 36/u);
+  assert.match(rootGradle, /compileSdkVersion = 37/u);
   assert.match(rootGradle, /targetSdkVersion = 36/u);
-  assert.match(rootGradle, /kotlinVersion = "2\.1\.20"/u);
-  assert.match(wrapper, /gradle-9\.3\.1-bin\.zip/u);
+  assert.match(rootGradle, /kotlinVersion = "2\.2\.0"/u);
+  assert.match(wrapper, /gradle-9\.4\.1-bin\.zip/u);
   assert.match(settings, /autolinkLibrariesFromCommand\(\)/u);
   assert.match(settings, /rootProject\.name = 'ReactNativeDesignExample'/u);
   assert.match(properties, /^newArchEnabled=true$/mu);
   assert.match(properties, /^hermesEnabled=true$/mu);
   assert.match(properties, /^edgeToEdgeEnabled=false$/mu);
-  assert.doesNotMatch(properties, /^android\.builtInKotlin=/mu);
-  assert.doesNotMatch(properties, /^android\.newDsl=/mu);
+  assert.match(properties, /^android\.builtInKotlin=false$/mu);
+  assert.match(properties, /^android\.newDsl=false$/mu);
   assert.match(activity, /^package unif\.reactnativedesign\.example$/mu);
   assert.match(
     activity,
@@ -1107,7 +1114,7 @@ test('iOS project/scheme/module/app identity 原子同步且保持 autolinking',
     'example/ios/ReactNativeDesignExample.xcodeproj/xcshareddata/xcschemes/ReactNativeDesignExample.xcscheme'
   );
   const delegate = read(
-    'example/ios/ReactNativeDesignExample/AppDelegate.swift'
+    'example/ios/ReactNativeDesignExample/SceneDelegate.swift'
   );
   const podfile = read('example/ios/Podfile');
 
@@ -1266,7 +1273,7 @@ test('mutation gate 拒绝 runtime manifest 的精确版本漂移', () => {
 
     const result = runContractMutation(
       fixture,
-      'example workspace 提供 Design 的完整 RN 0.86.3 runtime graph'
+      'example workspace 提供 Design 的完整 RN 0.88.0 runtime graph'
     );
     const output = `${result.stdout}\n${result.stderr}`;
     assert.equal(result.status, 1, output);

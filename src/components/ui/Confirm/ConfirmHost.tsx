@@ -63,7 +63,7 @@ export function ConfirmHost(): React.JSX.Element {
       }
       if (pendingRef.current?.id === event.id) {
         pendingRef.current = null;
-        setEntry((current) => (current?.id === event.id ? null : current));
+        setEntry(null);
       }
     };
     const lease = registerConfirmHost(subscriber);

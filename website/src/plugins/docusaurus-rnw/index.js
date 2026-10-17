@@ -29,10 +29,7 @@ module.exports = function reactNativeWebPlugin(context) {
   // context.siteDir = <repo>/website ; 上一级是 <repo>(design 仓根)。
   const projectRoot = path.resolve(context.siteDir, '..');
   const srcDir = path.join(projectRoot, 'src');
-  const runtimeManualDir = path.join(
-    projectRoot,
-    'manual-tests/runtime-api',
-  );
+  const runtimeManualDir = path.join(projectRoot, 'manual-tests/runtime-api');
   const animationFrameShim = path.join(__dirname, 'shims/AnimationFrame.js');
   const rnghPressableShim = path.join(__dirname, 'shims/RnghPressable.js');
   const siteModules = path.join(context.siteDir, 'node_modules');
@@ -48,8 +45,8 @@ module.exports = function reactNativeWebPlugin(context) {
   // 不带 `$`(前缀匹配)→ 子路径 `<pkg>/lib/...` 一并跟着走;包不存在则不 alias(免解析到空路径)。
   const dedupeAlias = Object.fromEntries(
     DEDUPED_RN_PACKAGES.filter((pkg) =>
-      fs.existsSync(path.join(siteModules, pkg)),
-    ).map((pkg) => [pkg, path.join(siteModules, pkg)]),
+      fs.existsSync(path.join(siteModules, pkg))
+    ).map((pkg) => [pkg, path.join(siteModules, pkg)])
   );
 
   // 几个 ESM-shipped 且带 Flow / TS 注解的 RN 库要让 babel-loader 处理（默认 node_modules 不走 babel）。
@@ -70,7 +67,9 @@ module.exports = function reactNativeWebPlugin(context) {
           // `website/src/clientModules/rn-globals.ts` 在 client boot 时 `window.global = window`
           // 真实注入(比 DefinePlugin 字面替换更稳;赋值/typeof 场景都能 handle)。
           new webpack.DefinePlugin({
-            __DEV__: JSON.stringify(!isServer ? process.env.NODE_ENV !== 'production' : false),
+            '__DEV__': JSON.stringify(
+              !isServer ? process.env.NODE_ENV !== 'production' : false
+            ),
             'process.env.JEST_WORKER_ID': JSON.stringify(undefined),
           }),
           // Worklets 0.12 的 Web 调度器会在 queueMicrotask 后直接调用 rAF；
@@ -97,7 +96,7 @@ module.exports = function reactNativeWebPlugin(context) {
               ) {
                 resource.request = rnghPressableShim;
               }
-            },
+            }
           ),
         ],
         // module.rules 必须 prepend，否则我们的 rule 会被 oneOf 短路掉。
@@ -143,6 +142,24 @@ module.exports = function reactNativeWebPlugin(context) {
         },
         module: {
           rules: [
+            {
+              // RN 0.88 forwards to RNW 0.21.4's public AssetRegistry. Its
+              // compatibility module mixes an ES import with CommonJS exports.
+              test: /\.js$/,
+              include: path.dirname(
+                require.resolve('@react-native/assets-registry/registry')
+              ),
+              use: {
+                loader: require.resolve('babel-loader'),
+                options: {
+                  babelrc: false,
+                  configFile: false,
+                  plugins: [
+                    require.resolve('@babel/plugin-transform-modules-commonjs'),
+                  ],
+                },
+              },
+            },
             {
               test: /\.(tsx|ts|jsx|mjs|js)$/,
               include: [srcDir, runtimeManualDir, rnPackagesPattern],

@@ -67,9 +67,7 @@ export function Reveal({
     if (!canAnimate) {
       setVisible(true);
       return () => {
-        if (generationRef.current === generation) {
-          generationRef.current += 1;
-        }
+        generationRef.current += 1;
       };
     }
 
@@ -81,9 +79,8 @@ export function Reveal({
     });
 
     return () => {
-      if (generationRef.current === generation) {
-        generationRef.current += 1;
-      }
+      // React runs this cleanup before the next effect setup increments generation.
+      generationRef.current += 1;
       cancelFrames();
     };
   }, [canAnimate, frameApi]);

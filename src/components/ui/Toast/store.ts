@@ -135,13 +135,9 @@ export function createToastStore(log: Logger): ToastStore {
     }
   }
 
-  /** 弹出最近一个仍可用的挂起 owner;抛错被作废的(subscriber 已置空)直接丢弃。 */
+  /** Only live owners enter this stack; release removes an owner before nulling it. */
   function popSuspended(): Owner | null {
-    while (suspended.length > 0) {
-      const next = suspended.pop();
-      if (next?.subscriber) return next;
-    }
-    return null;
+    return suspended.pop() ?? null;
   }
 
   /** 刚上任的 owner 在首投里抛错被作废:继续往下弹,别把栈里剩下的人一起埋掉。 */

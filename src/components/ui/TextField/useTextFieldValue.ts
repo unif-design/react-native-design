@@ -69,8 +69,8 @@ export function useTextFieldValue(
 
   const handleChangeText = useCallback(
     (next: string) => {
-      const current = stateRef.current;
-      if (!current) return;
+      // The ref is initialized before this callback is created and never reset.
+      const current = stateRef.current!;
       if (current.mode === 'uncontrolled') {
         stateRef.current = applyTextChange(current, next);
         bumpTick((tick) => tick + 1);

@@ -42,7 +42,7 @@ type DeliveryIdentity = {
  */
 export function ToastHost({
   testID,
-}: ToastHostProps = {}): React.JSX.Element | null {
+}: ToastHostProps): React.JSX.Element | null {
   const c = useColors();
   const styles = useThemedStyles(makeStyles);
   const insets = useSafeAreaInsets();
@@ -117,7 +117,9 @@ export function ToastHost({
     if (!isCurrentToastDelivery(finished)) return;
     completeToast(finished.ownerToken, finished.leaseId, finished.entry.id);
     currentDeliveryRef.current = null;
-    setDelivery((current) => (current === finished ? null : current));
+    // Every delivery update writes its identity first; the checks above prove
+    // no replacement can be queued when this completion is accepted.
+    setDelivery(null);
   }, []);
 
   useEffect(() => {

@@ -8,6 +8,19 @@ import { scaleNamedStyles } from '../../src/theme/useThemedStyles';
  * 无字号属性的 style 都必须返回**原引用**(缓存 / snapshot 稳定契约)。
  */
 describe('theme/scaleNamedStyles', () => {
+  test('仅 lineHeight 或 letterSpacing 的文字仍各自缩放一次', () => {
+    expect(
+      scaleNamedStyles(
+        { line: { lineHeight: 20 }, tracking: { letterSpacing: -1 } },
+        2
+      )
+    ).toEqual({ line: { lineHeight: 40 }, tracking: { letterSpacing: -2 } });
+  });
+
+  test('来自未类型化 StyleSheet 的空条目透传', () => {
+    const source = { empty: null, absent: undefined, invalid: false };
+    expect(scaleNamedStyles(source as never, 2)).toEqual(source);
+  });
   const styles = {
     title: {
       fontSize: 15,
