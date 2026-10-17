@@ -49,10 +49,7 @@ function hasElementShape(value: React.ReactElement): boolean {
   );
 }
 
-function isThenable(value: unknown): value is ReactNode {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
+function isThenable(value: object): boolean {
   try {
     return typeof (value as { then?: unknown }).then === 'function';
   } catch {
@@ -112,8 +109,8 @@ function createThenableRecord(
   value: object,
   path: string
 ): ThenableResolutionRecord {
-  let resolveMapped: (node: unknown) => void = () => {};
-  let rejectMapped: (reason?: unknown) => void = () => {};
+  let resolveMapped!: (node: unknown) => void;
+  let rejectMapped!: (reason?: unknown) => void;
   const mappedPromise = new Promise<unknown>((resolve, reject) => {
     resolveMapped = resolve;
     rejectMapped = reject;
@@ -346,7 +343,6 @@ function normalizeReactNode(
     );
   }
   if (isThenable(value)) return normalizeThenable(value, path, owner);
-  if (typeof value !== 'object') return { kind: 'invalid' };
   return isReactPortal(value)
     ? { kind: 'node', node: value }
     : { kind: 'invalid' };

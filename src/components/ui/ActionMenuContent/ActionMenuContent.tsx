@@ -33,9 +33,9 @@ export function ActionMenuContent({
 
   const cancelConfirmation = () => setConfirmationId(null);
   const confirmSelected = () => {
-    if (!confirming) return;
+    // This callback is exposed only by the confirming branch below.
     onClose();
-    confirming.onPress();
+    confirming!.onPress();
   };
 
   useEffect(() => {
@@ -153,8 +153,8 @@ export function ActionMenuContent({
                   accessibilityHint={action.accessibilityHint}
                   disabled={action.disabled}
                   loading={action.loading}
-                  variant={isSheet ? (action.tone ?? 'neutral') : 'text'}
-                  style={isSheet ? styles.sheetAction : undefined}
+                  variant={action.tone ?? 'neutral'}
+                  style={styles.sheetAction}
                   onPress={() => {
                     if (action.confirmation) {
                       setConfirmationId(action.id);

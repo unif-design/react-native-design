@@ -29,7 +29,7 @@ export default defineConfig([
   },
   {
     // 与 .gitignore 的预览生成目录一致，避免对打包后的第三方代码重复 lint。
-    ignores: ['node_modules/', 'lib/', 'website/', 'ds-bundle/'],
+    ignores: ['node_modules/', 'lib/', 'website/', 'ds-bundle/', '**/coverage/'],
   },
   {
     files: ['src/**/*.{ts,tsx}'],

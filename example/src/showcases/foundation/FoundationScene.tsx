@@ -218,11 +218,11 @@ export function FoundationScene(): React.JSX.Element {
               ；头像渐变 {avatarGradient.length} stops
             </Text>
             <Text style={styles.fact} testID="foundation-token-metrics">
-              Token：{fontMono ?? '系统默认'} / body {type.body} / semi{' '}
-              {fw.semi} / space {space['4']} / radius {radius.md} / avatar{' '}
-              {avatar.md} / icon {icon.md} / control {control.lg} / dim{' '}
-              {dim.sendBtn} / fixed {fixed.hitTarget} / motion {motion.base} /
-              opacity {pressedOpacity}
+              Token：{fontMono} / body {type.body} / semi {fw.semi} / space{' '}
+              {space['4']} / radius {radius.md} / avatar {avatar.md} / icon{' '}
+              {icon.md} / control {control.lg} / dim {dim.sendBtn} / fixed{' '}
+              {fixed.hitTarget} / motion {motion.base} / opacity{' '}
+              {pressedOpacity}
             </Text>
             <Text style={styles.fact} testID="foundation-scale-metrics">
               缩放：r(8)={r(8)} / rf(15)={rf(15)} / normalize=

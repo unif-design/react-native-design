@@ -23,7 +23,8 @@ function buildStops(
   offsets: ReadonlyArray<number>
 ): ReadonlyArray<GradientStop> {
   return palette.map((color, i) => ({
-    offset: offsets[i] ?? i / (palette.length - 1),
+    // Both private call sites pair the four palette stops with four offsets.
+    offset: offsets[i]!,
     color,
     opacity: 1,
   }));

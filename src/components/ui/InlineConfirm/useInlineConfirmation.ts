@@ -32,7 +32,8 @@ export function useInlineConfirmation(
     generation.current += 1;
     if (mounted.current)
       setPresentation({ confirming: false, generation: generation.current });
-    if (owner.current) scope?.release(owner.current);
+    // identity is assigned before effects or event handlers can call cancel.
+    scope?.release(owner.current!);
     // 宿主已撤回本项时只释放显示，避免 A → B 换目标后又清掉 B。
     if (mounted.current && latest.current.confirming !== false)
       latest.current.onCancel?.();

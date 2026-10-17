@@ -25,15 +25,13 @@ export function parseRgba(color: string): { color: string; opacity: number } {
   if (mRgba?.[1]) {
     const parts = mRgba[1].split(',').map((s) => s.trim());
     if (parts.length === 4) {
-      const alphaStr = parts[3];
-      if (alphaStr !== undefined) {
-        const alpha = parseFloat(alphaStr);
-        if (!Number.isNaN(alpha)) {
-          return {
-            color: `rgb(${parts.slice(0, 3).join(',')})`,
-            opacity: alpha,
-          };
-        }
+      // split 产生稠密数组；length === 4 已保证第 4 项存在。
+      const alpha = parseFloat(parts[3] as string);
+      if (!Number.isNaN(alpha)) {
+        return {
+          color: `rgb(${parts.slice(0, 3).join(',')})`,
+          opacity: alpha,
+        };
       }
     }
   }
@@ -41,9 +39,10 @@ export function parseRgba(color: string): { color: string; opacity: number } {
   const mHex8 = color.match(
     /^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/
   );
-  if (mHex8?.[1] && mHex8[2] && mHex8[3] && mHex8[4]) {
-    const alpha = parseInt(mHex8[4], 16) / 255;
-    return { color: `#${mHex8[1]}${mHex8[2]}${mHex8[3]}`, opacity: alpha };
+  if (mHex8) {
+    // 正则已保证完整的 8 位 hex，末两位必定是 alpha。
+    const alpha = parseInt(color.slice(-2), 16) / 255;
+    return { color: color.slice(0, 7), opacity: alpha };
   }
   return { color, opacity: 1 };
 }

@@ -1,4 +1,4 @@
-import { describe, expect, test } from '@jest/globals';
+import { describe, expect, jest, test } from '@jest/globals';
 import { StyleSheet } from 'react-native';
 import {
   createRevealWebAnimatedStyle,
@@ -267,4 +267,114 @@ describe('scheduleRevealAnimationFrames', () => {
 
     expect(cleanup).not.toThrow();
   });
+});
+
+describe('Web style preprocessing and frame API failures', () => {
+  test.each([
+    undefined,
+    null,
+    false,
+    [],
+    [false, null, []],
+    'invalid',
+    1,
+    { transform: {} },
+    { transform: [{}] },
+    { transform: [{ scale: 1, rotate: '0deg' }] },
+    { transform: [{ matrix: 'not-array' }] },
+  ])('empty or invalid style %j falls back safely', (style) => {
+    expect(resolveRevealWebStyle(style)).toEqual({
+      callerStyle: undefined,
+      targetOpacity: 1,
+    });
+  });
+
+  test.each([
+    { transform: 'rotate(10deg)' },
+    { transform: [{ matrix: [1, 0, 0, 1, 0, 0] }] },
+    { transform: [{ matrix3d: [1, 2] }] },
+    { transform: [{ rotate: '10deg' }] },
+  ])('preserves safe Web transform %j', (style) => {
+    expect(resolveRevealWebStyle(style)).toEqual({
+      callerStyle: style,
+      targetOpacity: 1,
+    });
+  });
+
+  test('failing current-generation reads cannot display, and cleanup works with no frame API', () => {
+    let visible = false;
+    const cleanup = scheduleRevealAnimationFrames({
+      api: undefined,
+      isCurrent: () => {
+        throw new Error('generation revoked');
+      },
+      onVisible: () => {
+        visible = true;
+      },
+    });
+    cleanup();
+    expect(visible).toBe(false);
+  });
+
+  test('a failed second request immediately displays, and failed cancellation cannot reactivate callbacks', () => {
+    const frames = createFrameHarness();
+    let requests = 0;
+    let visible = 0;
+    const cleanup = scheduleRevealAnimationFrames({
+      api: {
+        requestAnimationFrame(callback) {
+          requests += 1;
+          if (requests === 2) throw new Error('second request failed');
+          return frames.api.requestAnimationFrame(callback);
+        },
+        cancelAnimationFrame() {
+          throw new Error('cancel unavailable');
+        },
+      },
+      isCurrent: () => true,
+      onVisible: () => {
+        visible += 1;
+      },
+    });
+    frames.run(1);
+    expect(visible).toBe(1);
+    cleanup();
+    frames.run(1);
+    expect(visible).toBe(1);
+    const doubleFrames = createFrameHarness();
+    const cancel = scheduleRevealAnimationFrames({
+      api: {
+        requestAnimationFrame: doubleFrames.api.requestAnimationFrame,
+        cancelAnimationFrame() {
+          throw new Error('cancel unavailable');
+        },
+      },
+      isCurrent: () => true,
+      onVisible: () => {
+        visible += 1;
+      },
+    });
+    doubleFrames.run(1);
+    expect(cancel).not.toThrow();
+    doubleFrames.run(2);
+    expect(visible).toBe(1);
+  });
+});
+
+test('首次 RAF 调用失败后 cleanup 不取消不存在的 id', () => {
+  const cancel = jest.fn();
+  const visible = jest.fn();
+  const cleanup = scheduleRevealAnimationFrames({
+    api: {
+      requestAnimationFrame() {
+        throw new Error('request unavailable');
+      },
+      cancelAnimationFrame: cancel,
+    },
+    isCurrent: () => true,
+    onVisible: visible,
+  });
+  expect(visible).toHaveBeenCalledTimes(1);
+  cleanup();
+  expect(cancel).not.toHaveBeenCalled();
 });

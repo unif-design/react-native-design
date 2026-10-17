@@ -49,11 +49,14 @@ test('正式 verifier 不受环境变量过滤并拒绝损坏的 manifest', () =
       {
         cwd: repositoryRoot,
         encoding: 'utf8',
+        // The deliberately incomplete fixture reports every contract failure.
+        maxBuffer: 16 * 1024 * 1024,
         env,
       }
     );
     const output = `${result.stdout}\n${result.stderr}`;
 
+    assert.ifError(result.error);
     assert.equal(result.status, 1, output);
     assert.match(output, /5\.7\.0/u);
   } finally {

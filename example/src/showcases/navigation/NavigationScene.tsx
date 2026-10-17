@@ -156,16 +156,12 @@ export function NavigationScene(): React.JSX.Element {
             <Tabs
               value={draft.selectedTab}
               onChange={(selectedTab) => {
-                if (!(selectedTab in tabLabels)) return;
+                if (!Object.hasOwn(tabLabels, selectedTab)) return;
                 updateScene('navigation', (current) => ({
                   ...current,
                   selectedTab,
                 }));
-                record(
-                  'Tabs',
-                  '选择',
-                  `已选择${tabLabels[selectedTab] ?? '页签'}`
-                );
+                record('Tabs', '选择', `已选择${tabLabels[selectedTab]}`);
               }}
               items={tabItems}
               testID="navigation-tabs"
@@ -185,7 +181,7 @@ export function NavigationScene(): React.JSX.Element {
             <Segmented
               value={draft.selectedSegment}
               onChange={(selectedSegment) => {
-                if (!(selectedSegment in segmentLabels)) return;
+                if (!Object.hasOwn(segmentLabels, selectedSegment)) return;
                 updateScene('navigation', (current) => ({
                   ...current,
                   selectedSegment,
@@ -193,7 +189,7 @@ export function NavigationScene(): React.JSX.Element {
                 record(
                   'Segmented',
                   '选择',
-                  `已选择${segmentLabels[selectedSegment] ?? '分段'}`
+                  `已选择${segmentLabels[selectedSegment]}`
                 );
               }}
               items={segmentItems}
@@ -224,7 +220,7 @@ export function NavigationScene(): React.JSX.Element {
           <TabBar
             active={draft.selectedTabBarItem}
             onChange={(selectedTabBarItem) => {
-              if (!(selectedTabBarItem in tabBarLabels)) return;
+              if (!Object.hasOwn(tabBarLabels, selectedTabBarItem)) return;
               updateScene('navigation', (current) => ({
                 ...current,
                 selectedTabBarItem,
@@ -232,7 +228,7 @@ export function NavigationScene(): React.JSX.Element {
               record(
                 'TabBar',
                 '选择',
-                `已选择${tabBarLabels[selectedTabBarItem] ?? '页签'}`
+                `已选择${tabBarLabels[selectedTabBarItem]}`
               );
             }}
             items={tabBarItems}

@@ -166,3 +166,17 @@ test('Web 减少透明度时采用显式实色背景', () => {
     screen.getByTestId('web-fallback', { includeHiddenElements: true })
   ).toHaveStyle({ backgroundColor: lightColors.surfaceContainerHigh });
 });
+
+test('Web 无模糊支持时显式浅色仍绘制无 testID 渐变', () => {
+  Reflect.deleteProperty(globalThis, 'CSS');
+  const {
+    GlassGradient,
+  } = require('../../../src/components/ui/GlassLayer/GlassGradient');
+  const page = render(
+    <ThemeProvider forceScheme="dark">
+      <GlassLayer colorScheme="light" />
+    </ThemeProvider>
+  );
+  expect(page.UNSAFE_getByType(GlassGradient).props.colors).toBe(lightColors);
+  expect(page.UNSAFE_getByType(GlassGradient).props.testID).toBeUndefined();
+});

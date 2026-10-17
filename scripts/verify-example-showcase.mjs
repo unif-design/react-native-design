@@ -566,26 +566,26 @@ const expectedSceneTitles = {
 const expectedRuntimeDependencies = {
   '@callstack/liquid-glass': '0.8.2',
   '@unif/react-native-design': 'workspace:*',
-  '@unif/react-native-icons': '>=0.1.0',
-  'react': '19.2.3',
-  'react-native': '0.86.3',
+  '@unif/react-native-icons': '0.4.1',
+  'react': '19.3.0',
+  'react-native': '0.88.0',
   'react-native-gesture-handler': '3.1.0',
-  'react-native-reanimated': '4.6.0',
+  'react-native-reanimated': '4.7.1',
   'react-native-reanimated-carousel': '5.0.0',
   'react-native-safe-area-context': '5.8.0',
-  'react-native-svg': '15.15.5',
-  'react-native-worklets': '0.12.1',
+  'react-native-svg': '15.16.0',
+  'react-native-worklets': '0.13.0',
 };
 
 const expectedTemplateDevDependencies = {
-  '@react-native-community/cli': '20.1.0',
-  '@react-native-community/cli-platform-android': '20.1.0',
-  '@react-native-community/cli-platform-ios': '20.1.0',
-  '@react-native/babel-preset': '0.86.3',
-  '@react-native/eslint-config': '0.86.3',
-  '@react-native/jest-preset': '0.86.3',
-  '@react-native/metro-config': '0.86.3',
-  '@react-native/typescript-config': '0.86.3',
+  '@react-native-community/cli': '20.2.0',
+  '@react-native-community/cli-platform-android': '20.2.0',
+  '@react-native-community/cli-platform-ios': '20.2.0',
+  '@react-native/babel-preset': '0.88.0',
+  '@react-native/eslint-config': '0.88.0',
+  '@react-native/jest-preset': '0.88.0',
+  '@react-native/metro-config': '0.88.0',
+  '@react-native/typescript-config': '0.88.0',
 };
 
 const expectedRootPeerDependencies = {
@@ -1836,7 +1836,7 @@ function verifyRuntimeAndNativeContract(root) {
   const podfile = readText(root, 'example/ios/Podfile');
   const delegate = readText(
     root,
-    'example/ios/ReactNativeDesignExample/AppDelegate.swift'
+    'example/ios/ReactNativeDesignExample/SceneDelegate.swift'
   );
   const project = readText(
     root,
@@ -1855,20 +1855,22 @@ function verifyRuntimeAndNativeContract(root) {
     /namespace "unif\.reactnativedesign\.example"/u.test(appGradle) &&
     /applicationId "unif\.reactnativedesign\.example"/u.test(appGradle) &&
     /autolinkLibrariesWithApp\(\)/u.test(appGradle) &&
-    /getDefaultProguardFile\("proguard-android\.txt"\)/u.test(appGradle) &&
-    /buildToolsVersion = "36\.0\.0"/u.test(rootGradle) &&
+    /getDefaultProguardFile\("proguard-android-optimize\.txt"\)/u.test(
+      appGradle
+    ) &&
+    /buildToolsVersion = "37\.0\.0"/u.test(rootGradle) &&
     /minSdkVersion = 24/u.test(rootGradle) &&
-    /compileSdkVersion = 36/u.test(rootGradle) &&
+    /compileSdkVersion = 37/u.test(rootGradle) &&
     /targetSdkVersion = 36/u.test(rootGradle) &&
-    /kotlinVersion = "2\.1\.20"/u.test(rootGradle) &&
-    /gradle-9\.3\.1-bin\.zip/u.test(wrapper) &&
+    /kotlinVersion = "2\.2\.0"/u.test(rootGradle) &&
+    /gradle-9\.4\.1-bin\.zip/u.test(wrapper) &&
     /rootProject\.name = 'ReactNativeDesignExample'/u.test(settings) &&
     /autolinkLibrariesFromCommand\(\)/u.test(settings) &&
     /^newArchEnabled=true$/mu.test(properties) &&
     /^hermesEnabled=true$/mu.test(properties) &&
     /^edgeToEdgeEnabled=false$/mu.test(properties) &&
-    !/^android\.builtInKotlin=/mu.test(properties) &&
-    !/^android\.newDsl=/mu.test(properties) &&
+    /^android\.builtInKotlin=false$/mu.test(properties) &&
+    /^android\.newDsl=false$/mu.test(properties) &&
     /^package unif\.reactnativedesign\.example$/mu.test(activity) &&
     /getMainComponentName\(\): String = "ReactNativeDesignExample"/u.test(
       activity

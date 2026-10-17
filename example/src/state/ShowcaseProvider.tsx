@@ -167,9 +167,9 @@ export function ShowcaseProvider({
     if (!shouldConsume) return false;
     commit((current) => {
       const navigation = backNavigation(current.navigation);
-      return navigation === current.navigation
-        ? current
-        : { ...current, navigation };
+      // shouldConsumeHardwareBack already proved a two-entry route; back()
+      // synchronously returns the new home route before any state can change.
+      return { ...current, navigation };
     });
     return true;
   }, [commit]);

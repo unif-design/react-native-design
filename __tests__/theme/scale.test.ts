@@ -50,7 +50,8 @@ describe('scale', () => {
   const mockRN = (
     width: number,
     platform: 'ios' | 'web' = 'ios',
-    pixelScale = 100
+    pixelScale = 100,
+    height = 874
   ) => {
     jest.doMock('react-native', () => ({
       Platform: {
@@ -61,7 +62,7 @@ describe('scale', () => {
       Dimensions: {
         get: () => ({
           width,
-          height: 874,
+          height,
           scale: pixelScale,
           fontScale: 1,
         }),
@@ -104,6 +105,16 @@ describe('scale', () => {
     const { r, rf } = loadScale(375, 'web');
     expect(r(16)).toBe(16);
     expect(rf(15)).toBe(15);
+  });
+
+  test.each([0, -0])('Dimensions.height=%s uses the design width', (height) => {
+    mockRN(402, 'ios', 100, height);
+    expect(require('../../src/theme/scale').r(16)).toBe(16);
+  });
+
+  test('malformed native width metadata cannot propagate NaN', () => {
+    mockRN('unavailable' as unknown as number, 'ios');
+    expect(require('../../src/theme/scale').r(16)).toBe(16);
   });
 
   test('Dimensions.width fallback to DESIGN_WIDTH when 0/undefined', () => {

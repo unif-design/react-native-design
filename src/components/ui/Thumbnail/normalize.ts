@@ -69,10 +69,8 @@ export function sanitizeThumbnailImageStyle(
     if (flattened === undefined || flattened === null || flattened === false) {
       return invalidStyle();
     }
-    if (typeof flattened !== 'object' || Array.isArray(flattened)) {
-      return invalidStyle();
-    }
-
+    // RN StyleSheet.flatten returns an object for object/array inputs and
+    // undefined for non-objects (handled above); it never returns an array.
     const source = flattened as Record<string, unknown>;
     const reserved = new Set<string>(RESERVED_IMAGE_STYLE_KEYS);
     const foundReserved = new Set<string>();

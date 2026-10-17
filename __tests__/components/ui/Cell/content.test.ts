@@ -136,3 +136,12 @@ describe('resolveExtraSemanticText — display 的语义文本要落成真实节
     expect(resolveExtraSemanticText(extra as never)).toBeUndefined();
   });
 });
+
+test('display extra without separate semantic text contributes no additional name', () => {
+  expect(
+    resolveCellActionAccessibilityLabel({
+      title: '打开',
+      extra: { kind: 'display', node: null as never },
+    })
+  ).toBe('打开');
+});

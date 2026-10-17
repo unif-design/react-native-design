@@ -53,8 +53,7 @@ function visitArray(
   seen: WeakSet<object>,
   previous?: SnapshotResult
 ): SnapshotResult {
-  if (!keys.includes('length')) return invalid('descriptor');
-
+  // Array length is non-configurable; Reflect.ownKeys rejects any Proxy that hides it.
   const lengthDescriptor = Reflect.getOwnPropertyDescriptor(value, 'length');
   if (
     lengthDescriptor === undefined ||
@@ -196,8 +195,6 @@ function visit(
       return invalid(typeof value);
     case 'object':
       break;
-    case 'undefined':
-      return valid(undefined, 'undefined:');
   }
 
   try {
@@ -228,11 +225,7 @@ function snapshotValue(
   value: unknown,
   previous?: SnapshotResult
 ): SnapshotResult {
-  try {
-    return visit(value, new WeakSet<object>(), previous);
-  } catch {
-    return invalid('exception');
-  }
+  return visit(value, new WeakSet<object>(), previous);
 }
 
 export function canonicalSourceValue(value: unknown): string {

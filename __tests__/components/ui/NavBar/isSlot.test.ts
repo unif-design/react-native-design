@@ -559,3 +559,168 @@ describe('NavBar slot classification', () => {
     expect(classifyNavBarSlot(markerOnlyPortal).kind).toBe('invalid');
   });
 });
+
+describe('hostile node boundaries and thenable settlement', () => {
+  test('rejects accessors that throw while reading fragment children or iterable protocol', () => {
+    const props = Object.defineProperty({}, 'children', {
+      get() {
+        throw new Error('children unavailable');
+      },
+    });
+    const fragment = {
+      $$typeof: currentElementMarker,
+      type: React.Fragment,
+      props,
+      key: null,
+    };
+    const iterable = Object.defineProperty({}, Symbol.iterator, {
+      get() {
+        throw new Error('iterator unavailable');
+      },
+    });
+    const thenable = Object.defineProperty({}, 'then', {
+      get() {
+        throw new Error('then unavailable');
+      },
+    });
+    const values = [fragment, iterable, thenable];
+    const array = ['value'];
+    Object.defineProperty(array, '0', {
+      get() {
+        throw new Error('array item unavailable');
+      },
+    });
+    values.push(array);
+    for (const value of values)
+      expect(classifyNavBarSlot(value).kind).toBe('invalid');
+  });
+
+  test.each([
+    () => ({ next: 1 }),
+    () => ({ next: () => null }),
+    () => ({ next: () => 1 }),
+  ])('rejects invalid iterator results %#', (factory) => {
+    expect(classifyNavBarSlot({ [Symbol.iterator]: factory }).kind).toBe(
+      'invalid'
+    );
+  });
+
+  test('rejects an iterable yielding itself and closes it once', () => {
+    let closed = 0;
+    const self = {
+      [Symbol.iterator]: () => ({
+        next: () => ({ value: self, done: false }),
+        return: () => {
+          closed += 1;
+        },
+      }),
+    };
+    expect(classifyNavBarSlot(self).kind).toBe('invalid');
+    expect(closed).toBe(1);
+  });
+
+  test.each([
+    { key: 7 },
+    { containerInfo: undefined },
+    { containerInfo: null },
+    { $$typeof: Symbol('not-portal') },
+  ])('rejects malformed portal %#', (override) => {
+    expect(classifyNavBarSlot({ ...portal, ...override }).kind).toBe('invalid');
+  });
+
+  test('first thenable settlement wins across repeated resolve, reject and thrown callbacks', async () => {
+    const result = classifyNavBarSlot({
+      then(
+        resolve: (value: unknown) => void,
+        reject: (error: unknown) => void
+      ) {
+        resolve('first');
+        resolve('second');
+        reject(new Error('ignored'));
+        throw new Error('also ignored');
+      },
+    });
+    expect(result.kind).toBe('node');
+    if (result.kind === 'node') expectTextNode(await result.node, 'first');
+    const error = new Error('failed synchronously');
+    const rejected = classifyNavBarSlot({
+      then() {
+        throw error;
+      },
+    });
+    expect(rejected.kind).toBe('node');
+    if (rejected.kind === 'node')
+      await expect(rejected.node).rejects.toBe(error);
+  });
+
+  test('then accessor changing before invocation settles empty without invoking a non-function', async () => {
+    let reads = 0;
+    const value = Object.defineProperty({}, 'then', {
+      get() {
+        return ++reads === 1 ? () => {} : undefined;
+      },
+    });
+    await expectMappedThenableSettlesNull(classifyNavBarSlot(value));
+    expect(reads).toBe(2);
+  });
+
+  test('normalization errors from fulfilled hostile objects settle empty', async () => {
+    const value = new Proxy(
+      {},
+      {
+        get(_target, key) {
+          if (key === '$$typeof') throw new Error('invalid node');
+          return undefined;
+        },
+      }
+    );
+    await expectMappedThenableSettlesNull(
+      classifyNavBarSlot({
+        then(resolve: (next: unknown) => void) {
+          resolve(value);
+        },
+      })
+    );
+  });
+
+  test('a shared thenable dependency is accepted through both branches of an acyclic graph', async () => {
+    const leaf = {
+      then(resolve: (value: unknown) => void) {
+        resolve('leaf');
+      },
+    };
+    const left = {
+      then(resolve: (value: unknown) => void) {
+        resolve([leaf]);
+      },
+    };
+    const right = {
+      then(resolve: (value: unknown) => void) {
+        resolve([leaf]);
+      },
+    };
+    const diamond = {
+      then(resolve: (value: unknown) => void) {
+        resolve([left, right]);
+      },
+    };
+    const owner = {
+      then(resolve: (value: unknown) => void) {
+        resolve([diamond]);
+      },
+    };
+    const result = classifyNavBarSlot(owner);
+    expect(result.kind).toBe('node');
+    if (result.kind !== 'node') return;
+    const [mappedDiamond] = (await result.node) as React.ReactNode[];
+    const branches = (await mappedDiamond) as React.ReactNode[];
+    const [leftValue, rightValue] = await Promise.all(
+      branches.map(async (branch) => {
+        const [mappedLeaf] = (await branch) as React.ReactNode[];
+        return await mappedLeaf;
+      })
+    );
+    expectTextNode(leftValue, 'leaf');
+    expect(rightValue).toBe(leftValue);
+  });
+});

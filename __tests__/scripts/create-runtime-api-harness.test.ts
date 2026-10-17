@@ -28,16 +28,16 @@ const rootManifest = {
   name: '@unif/react-native-design',
   devDependencies: {
     '@babel/core': '^7.29.7',
-    '@react-native/metro-config': '0.86.3',
+    '@react-native/metro-config': '0.88.0',
     '@callstack/liquid-glass': '0.8.2',
-    'react': '19.2.3',
-    'react-native': '0.86.3',
+    'react': '19.3.0',
+    'react-native': '0.88.0',
     'react-native-gesture-handler': '^3.1.0',
-    'react-native-reanimated': '~4.6.0',
+    'react-native-reanimated': '~4.7.1',
     'react-native-reanimated-carousel': '^5.0.0',
     'react-native-safe-area-context': '^5.7.0',
-    'react-native-svg': '^15.15.5',
-    'react-native-worklets': '^0.12.1',
+    'react-native-svg': '^15.16.0',
+    'react-native-worklets': '^0.13.0',
   },
   peerDependencies: {
     '@callstack/liquid-glass': '>=0.8.2 <0.9.0',
@@ -55,34 +55,34 @@ const rootManifest = {
 /** 当前 install 解析出的精确 provider 版本 —— 每个非 optional peer 都必须在场。 */
 const resolved: Record<string, string> = {
   '@babel/core': '7.29.7',
-  '@react-native/metro-config': '0.86.3',
+  '@react-native/metro-config': '0.88.0',
   '@callstack/liquid-glass': '0.8.2',
-  'react': '19.2.3',
-  'react-native': '0.86.3',
+  'react': '19.3.0',
+  'react-native': '0.88.0',
   'react-native-gesture-handler': '3.1.0',
-  'react-native-reanimated': '4.6.0',
+  'react-native-reanimated': '4.7.1',
   'react-native-reanimated-carousel': '5.0.0',
   'react-native-safe-area-context': '5.8.0',
-  'react-native-svg': '15.15.5',
-  'react-native-worklets': '0.12.1',
+  'react-native-svg': '15.16.0',
+  'react-native-worklets': '0.13.0',
 };
 
 const templateManifest = {
-  dependencies: { 'react': '19.2.3', 'react-native': '0.86.3' },
-  devDependencies: { '@react-native-community/cli': '20.1.0' },
+  dependencies: { 'react': '19.3.0', 'react-native': '0.88.0' },
+  devDependencies: { '@react-native-community/cli': '20.2.0' },
 };
 
 const LOCK = [
-  '"@react-native-community/template@npm:0.86.3":',
-  '  version: 0.86.3',
-  '  resolution: "@react-native-community/template@npm:0.86.3"',
+  '"@react-native-community/template@npm:0.88.0":',
+  '  version: 0.88.0',
+  '  resolution: "@react-native-community/template@npm:0.88.0"',
   '  checksum: 10c0/7f6d577c49a98f116d002c39fc246656b1718f36c',
   '  languageName: node',
   '  linkType: hard',
   '',
-  '"@react-native-community/cli@npm:20.1.0":',
-  '  version: 20.1.0',
-  '  resolution: "@react-native-community/cli@npm:20.1.0"',
+  '"@react-native-community/cli@npm:20.2.0":',
+  '  version: 20.2.0',
+  '  resolution: "@react-native-community/cli@npm:20.2.0"',
   '  checksum: 10c0/aaaabbbbccccdddd',
   '  languageName: node',
   '  linkType: hard',
@@ -97,9 +97,9 @@ const PROVIDER_LOCK = [
   '  languageName: node',
   '  linkType: hard',
   '',
-  '"react-native-svg@npm:^15.15.5":',
-  '  version: 15.15.5',
-  '  resolution: "react-native-svg@npm:15.15.5"',
+  '"react-native-svg@npm:^15.16.0":',
+  '  version: 15.16.0',
+  '  resolution: "react-native-svg@npm:15.16.0"',
   '  checksum: 10c0/svg',
   '  languageName: node',
   '  linkType: hard',
@@ -109,10 +109,10 @@ const PROVIDER_LOCK = [
 describe('EXPECTED — 固定版本基线', () => {
   test('CLI / template / React / RN 全部钉死', () => {
     expect(EXPECTED).toEqual({
-      cli: '20.1.0',
-      template: '0.86.3',
-      react: '19.2.3',
-      reactNative: '0.86.3',
+      cli: '20.2.0',
+      template: '0.88.0',
+      react: '19.3.0',
+      reactNative: '0.88.0',
     });
   });
 });
@@ -125,7 +125,7 @@ describe('buildScaffoldArgs', () => {
       'init',
       'RuntimeApiHarness',
       '--version',
-      '0.86.3',
+      '0.88.0',
       '--template',
       '/installed/template',
       '--pm',
@@ -153,16 +153,16 @@ describe('buildHarnessManifest', () => {
     );
     expect(manifest.dependencies).toMatchObject({
       '@unif/react-native-design': 'file:/tmp/design.tgz',
-      'react': '19.2.3',
-      'react-native': '0.86.3',
+      'react': '19.3.0',
+      'react-native': '0.88.0',
       'react-native-gesture-handler': '3.1.0',
       'react-native-reanimated-carousel': '5.0.0',
-      'react-native-reanimated': '4.6.0',
-      'react-native-worklets': '0.12.1',
+      'react-native-reanimated': '4.7.1',
+      'react-native-worklets': '0.13.0',
     });
     expect(manifest.devDependencies).toMatchObject({
       '@babel/core': '7.29.7',
-      '@react-native/metro-config': '0.86.3',
+      '@react-native/metro-config': '0.88.0',
     });
   });
 
@@ -196,7 +196,7 @@ describe('buildHarnessManifest', () => {
     expect(() =>
       buildHarnessManifest(
         rootManifest,
-        { ...resolved, 'react-native-svg': '^15.15.5' },
+        { ...resolved, 'react-native-svg': '^15.16.0' },
         '/tmp/design.tgz'
       )
     ).toThrow('react-native-svg');
@@ -228,23 +228,23 @@ describe('resolveLockedDependency — direct descriptor / locator / install / pe
       resolveLockedDependency(
         rootManifest,
         PROVIDER_LOCK,
-        { 'react-native-svg': '15.15.5' },
+        { 'react-native-svg': '15.16.0' },
         'react-native-svg',
         rootManifest.peerDependencies['react-native-svg']
       )
-    ).toBe('15.15.5');
+    ).toBe('15.16.0');
   });
 
   test('descriptor 块指向错误 package locator 时 fail-fast', () => {
     const wrongLocator = PROVIDER_LOCK.replace(
-      'resolution: "react-native-svg@npm:15.15.5"',
-      'resolution: "react-native-safe-area-context@npm:15.15.5"'
+      'resolution: "react-native-svg@npm:15.16.0"',
+      'resolution: "react-native-safe-area-context@npm:15.16.0"'
     );
     expect(() =>
       resolveLockedDependency(
         rootManifest,
         wrongLocator,
-        { 'react-native-svg': '15.15.5' },
+        { 'react-native-svg': '15.16.0' },
         'react-native-svg',
         rootManifest.peerDependencies['react-native-svg']
       )
@@ -253,10 +253,10 @@ describe('resolveLockedDependency — direct descriptor / locator / install / pe
 
   test('lock locator 不满足根 direct range 时 fail-fast', () => {
     const outsideDirectRange = PROVIDER_LOCK.replace(
-      'version: 15.15.5',
+      'version: 15.16.0',
       'version: 14.0.0'
     ).replace(
-      'resolution: "react-native-svg@npm:15.15.5"',
+      'resolution: "react-native-svg@npm:15.16.0"',
       'resolution: "react-native-svg@npm:14.0.0"'
     );
     expect(() =>
@@ -275,8 +275,8 @@ describe('resolveLockedDependency — direct descriptor / locator / install / pe
       devDependencies: { 'react-native-svg': '^14.0.0' },
       peerDependencies: { 'react-native-svg': '>=15' },
     };
-    const lock = PROVIDER_LOCK.replaceAll('^15.15.5', '^14.0.0').replaceAll(
-      '15.15.5',
+    const lock = PROVIDER_LOCK.replaceAll('^15.16.0', '^14.0.0').replaceAll(
+      '15.16.0',
       '14.0.0'
     );
     expect(() =>
@@ -454,7 +454,7 @@ describe('runWithOwnedTempCleanup', () => {
 describe('assertExactVersion — CLI / template 漂移', () => {
   test('版本一致时通过', () => {
     expect(() =>
-      assertExactVersion('@react-native-community/cli', '20.1.0', EXPECTED.cli)
+      assertExactVersion('@react-native-community/cli', '20.2.0', EXPECTED.cli)
     ).not.toThrow();
   });
 
@@ -477,7 +477,7 @@ describe('assertTemplateManifest — template 的 React / RN 漂移', () => {
     expect(() =>
       assertTemplateManifest({
         ...templateManifest,
-        dependencies: { ...templateManifest.dependencies, react: '19.3.0' },
+        dependencies: { ...templateManifest.dependencies, react: '19.2.3' },
       })
     ).toThrow('react');
   });
@@ -508,8 +508,8 @@ describe('assertLockChecksums — 锁文件完整性', () => {
   test('两个包都有非空 checksum 时通过', () => {
     expect(() =>
       assertLockChecksums(LOCK, [
-        { name: '@react-native-community/template', version: '0.86.3' },
-        { name: '@react-native-community/cli', version: '20.1.0' },
+        { name: '@react-native-community/template', version: '0.88.0' },
+        { name: '@react-native-community/cli', version: '20.2.0' },
       ])
     ).not.toThrow();
   });
@@ -529,14 +529,14 @@ describe('assertLockChecksums — 锁文件完整性', () => {
     );
     expect(() =>
       assertLockChecksums(broken, [
-        { name: '@react-native-community/template', version: '0.86.3' },
+        { name: '@react-native-community/template', version: '0.88.0' },
       ])
     ).toThrow('@react-native-community/template');
   });
 
   test('findLockChecksum 只在对应条目块内查找,不串块', () => {
     expect(
-      findLockChecksum(LOCK, '@react-native-community/cli', '20.1.0')
+      findLockChecksum(LOCK, '@react-native-community/cli', '20.2.0')
     ).toBe('10c0/aaaabbbbccccdddd');
     expect(findLockChecksum(LOCK, 'not-installed', '1.0.0')).toBeNull();
   });
