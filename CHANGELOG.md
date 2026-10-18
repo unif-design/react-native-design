@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.7.0](https://github.com/unif-design/react-native-design/compare/v1.6.3...v1.7.0) (2026-10-18)
+
+
+### Features
+
+* unify glass surfaces and shared theme tokens ([#170](https://github.com/unif-design/react-native-design/issues/170)) ([ed6211e](https://github.com/unif-design/react-native-design/commit/ed6211e367a2f511fadcb7ed8f7b23d15cf1183c))
+
 ## [1.6.3](https://github.com/unif-design/react-native-design/compare/v1.6.2...v1.6.3) (2026-10-17)
 
 
