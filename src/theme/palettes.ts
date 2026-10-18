@@ -55,3 +55,9 @@ export const brandPalette = {
   wechatForeground: mediaPalette.foreground,
   dingTalk: ['#2595E8', '#3A9CED', '#59ADF8', '#6BC2FC'],
 } as const;
+
+/** 扫光动画的明暗端点；正文颜色仍跟随当前主题或调用方颜色。 */
+export const shimmerPalette = {
+  highlight: '#ffffff',
+  whiteContrast: '#999999',
+} as const;

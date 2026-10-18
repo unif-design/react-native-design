@@ -2980,7 +2980,7 @@ const items = [
     <span className="demo-label">6 列 · 紧凑入口</span>
     <Grid columns={6} items={items.slice(0, 6)} />
     <span className="demo-label">
-      {'card={false} · 嵌套已有白卡，去掉外层背景'}
+      {'card={false} · 嵌套已有卡片，去掉外层背景'}
     </span>
     <View
       style={{
@@ -3007,7 +3007,7 @@ const items = [
 | `items`   | `GridItem[]`                 | —      | 入口列表（见下）                                           |
 | `columns` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | `4`    | 列数；类型外的值（如 `7`）会**静默回退到 4 列**并打 warn   |
 | `onPress` | `(item: GridItem) => void`   | —      | 点击某格回调；提供时每格是 `button`，缺省时保持展示 `View` |
-| `card`    | `boolean`                    | `true` | 是否套白色卡片；`false` 则背景透明（嵌进已有白卡时用）     |
+| `card`    | `boolean`                    | `true` | 是否套玻璃卡片；`false` 则背景透明（嵌进已有卡片时用）     |
 | `testID`  | `string?`                    | —      | 容器 testID；每格自动派生为 `${testID}-${item.id}`         |
 
 ### `GridItem`
@@ -3025,14 +3025,14 @@ const items = [
 
 来源：`src/components/ui/Grid/styles.ts`（值取自 `src/theme/tokens.ts`）。
 
-| 元素           | 规则                                                                                                                                 |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| 容器（`card`） | `c.surface` 白底，`radius.xl`（12）圆角，`paddingVertical: space[5]`（12）/ `paddingHorizontal: space[3]`（8），1px `c.outline` 边框 |
-| 列宽           | 等宽，按 `columns` 取 `100% / 50% / 33.3% / 25% / 20% / 16.7%`（StyleSheet 预生成）                                                  |
-| 单格           | `paddingVertical: space[5]`（12），居中 icon + label，`gap: space[2]`（6）                                                           |
-| Icon           | `size=28`（介于 `icon.md`/`icon.lg`），色固定 `c.foregroundMuted`                                                                    |
-| Label          | `t.xxs`（12）/ `fw.medium`（500）/ `c.foreground`                                                                                    |
-| Badge          | 叠在 icon 右上的小红角标：`c.error` 底、`c.onError` 字、`t.nano`（10）、`fw.bold`                                                    |
+| 元素           | 规则                                                                                                                                       |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 容器（`card`） | 主题 `GlassLayer` 材质，`radius.xl`（12）圆角，`paddingVertical: space[5]`（12）/ `paddingHorizontal: space[3]`（8），1px `c.outline` 边框 |
+| 列宽           | 等宽，按 `columns` 取 `100% / 50% / 33.3% / 25% / 20% / 16.7%`（StyleSheet 预生成）                                                        |
+| 单格           | `paddingVertical: space[5]`（12），居中 icon + label，`gap: space[2]`（6）                                                                 |
+| Icon           | `size=28`（介于 `icon.md`/`icon.lg`），色固定 `c.foregroundMuted`                                                                          |
+| Label          | `t.xxs`（12）/ `fw.medium`（500）/ `c.foreground`                                                                                          |
+| Badge          | 叠在 icon 右上的小红角标：`c.error` 底、`c.onError` 字、`t.nano`（10）、`fw.bold`                                                          |
 
 ## 用法
 
@@ -6330,7 +6330,7 @@ const CompactTextEntryDemo = () => {
 };
 ```
 
-紧凑重命名 `variant="compact"` 使用主题玻璃；普通 card 保持正文表面。预填、全选、受控值、确认取消和 busy 保持，键盘避让仍由窗口宿主负责。
+`card` 与紧凑重命名 `variant="compact"` 均使用主题玻璃，分别保持原有圆角和布局。预填、全选、受控值、确认取消和 busy 保持，键盘避让仍由窗口宿主负责。
 
 ## 用法
 
@@ -6366,7 +6366,7 @@ const [value, setValue] = useState(initialValue);
 
 只组合 Design 控件，不依赖 Chat。应用验证提交内容和处理错误；组件不管理提交 Promise。中文、大字号与明暗主题沿现有 ThemeProvider 处理。原生展厅位于「表单与输入」，实际键盘避让需在宿主验证。
 
-`compact` 标题居中，使用 `type.h2`／`fw.semi`；表面圆角 `radius['3xl']`、内边距 `space[7]`、内容间距 `space[5]`。单行输入首次聚焦选中原文，闲置时采用主题浅表面，聚焦后使用主题表面与品牌边框，选区／光标使用品牌主色。取消采用 secondary lg、确认采用 primary lg，等宽胶囊并保留至少 44 的触达。两种变体均保留原文提交、外部 value 更新、busy、maxLength 和 autoFocus；变体不决定会话、弹层位置或保存行为。
+`compact` 标题居中，使用 `type.h2`／`fw.semi`；表面圆角 `radius['3xl']`、内边距 `space[7]`、内容间距 `space[5]`。单行输入首次聚焦选中原文，闲置和聚焦时均采用主题玻璃，聚焦后使用品牌边框，选区／光标使用品牌主色。取消采用 secondary lg、确认采用 primary lg，等宽胶囊并保留至少 44 的触达。两种变体均保留原文提交、外部 value 更新、busy、maxLength 和 autoFocus；变体不决定会话、弹层位置或保存行为。
 
 操作行保留自然换行，让较大字号或较长的自定义按钮文案仍可完整显示。
 
@@ -7256,6 +7256,8 @@ function MyView() {
 
 `mediaPalette`、`cameraPalette`、`scannerPalette` 集中维护固定媒体画布、取景文字和录制状态，保持照片与摄像头画面上的对比度；`brandPalette` 维护微信、钉钉等品牌原色。这些调色板不跟随明暗主题反转，普通页面仍使用 `useColors()`。
 
+`shimmerPalette` 集中维护文字扫光动画的明暗端点；正文基色仍来自当前主题或调用方颜色，白色正文使用较深端点保持动画可见。
+
 ## 动效
 
 *Source: `docs/design/tokens/motion.md` · Mirror: `md/design/tokens/motion.md`*
@@ -7678,7 +7680,7 @@ function DynamicLabel({ size }: { size: number }) {
 
 ## 补充档位与共用行高、字距
 
-`type` 补充 `badge`（9）、`badgePlus`（9.5）、`xxsPlus`（12.5）、`bodyLg`（16）、`bodyLgPlus`（16.5）、`h1Plus`（19）、`titleLg`（20）、`displayPlus`（24），全部使用 `rf` 字号缩放。原有字号档位保持。
+`type` 补充 `badge`（9）、`badgePlus`（9.5）、`nanoPlus`（10.5）、`xxsPlus`（12.5）、`bodyLg`（16）、`bodyLgPlus`（16.5）、`h1Plus`（19）、`titleLg`（20）、`displayPlus`（24），全部使用 `rf` 字号缩放。原有字号档位保持。
 
 `leading` 提供 badge / compact / sm / body / relaxed / heading 共用行高（12 / 16 / 20 / 21 / 22 / 24）。`tracking` 统一既有标题和标签字距；通过 `useThemedStyles` 消费，继续跟随用户字体设置。尺寸缩放 `r` 不再用来定义文字字号。
 

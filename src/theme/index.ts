@@ -12,6 +12,7 @@ export {
   cameraPalette,
   scannerPalette,
   brandPalette,
+  shimmerPalette,
 } from './palettes';
 
 export { lightShadow, darkShadow } from './shadow';

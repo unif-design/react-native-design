@@ -26,6 +26,7 @@ export const type = {
   xxs: rf(12),
   micro: rf(11),
   nano: rf(10), // TabBar/Grid 角标/小标签 10pt
+  nanoPlus: rf(10.5),
   // ── 半档微调(0.5 step,加于"近似 token + delta"反模式收敛) ──
   /** micro(11)与 xxs(12)之间:VersionPill / Splash / carousel 副标题。 */
   microPlus: rf(11.5),

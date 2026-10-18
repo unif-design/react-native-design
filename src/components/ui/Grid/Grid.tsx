@@ -6,6 +6,7 @@ import { createLogger } from '../../../utils/logger';
 import { childTestID } from '../../../utils/testID';
 
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
+import { GlassLayer } from '../GlassLayer';
 import { gridItemAccessibilityLabel } from './accessibility';
 import { colWidth, makeStyles } from './styles';
 import type { GridProps } from './types';
@@ -61,6 +62,7 @@ export function Grid({
   const cellWidth = colWidth(columns);
   return (
     <View style={[styles.wrap, card && styles.card, style]} testID={testID}>
+      {card ? <GlassLayer style={styles.material} /> : null}
       <View style={styles.inner}>
         {items.map((item, index) => {
           const itemTestID = childTestID(testID, item.id, item.testID);

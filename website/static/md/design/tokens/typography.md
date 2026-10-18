@@ -167,6 +167,6 @@ function DynamicLabel({ size }: { size: number }) {
 
 ## 补充档位与共用行高、字距
 
-`type` 补充 `badge`（9）、`badgePlus`（9.5）、`xxsPlus`（12.5）、`bodyLg`（16）、`bodyLgPlus`（16.5）、`h1Plus`（19）、`titleLg`（20）、`displayPlus`（24），全部使用 `rf` 字号缩放。原有字号档位保持。
+`type` 补充 `badge`（9）、`badgePlus`（9.5）、`nanoPlus`（10.5）、`xxsPlus`（12.5）、`bodyLg`（16）、`bodyLgPlus`（16.5）、`h1Plus`（19）、`titleLg`（20）、`displayPlus`（24），全部使用 `rf` 字号缩放。原有字号档位保持。
 
 `leading` 提供 badge / compact / sm / body / relaxed / heading 共用行高（12 / 16 / 20 / 21 / 22 / 24）。`tracking` 统一既有标题和标签字距；通过 `useThemedStyles` 消费，继续跟随用户字体设置。尺寸缩放 `r` 不再用来定义文字字号。

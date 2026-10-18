@@ -201,3 +201,5 @@ function MyView() {
 图片、视频和相机取景复用 `mediaPalette.background` / `foreground` / `overlay`；这些媒体角色保持深色背景和浅色前景，不随页面主题反转。品牌图像、地图标记的状态含义仍由对应内容决定。
 
 `mediaPalette`、`cameraPalette`、`scannerPalette` 集中维护固定媒体画布、取景文字和录制状态，保持照片与摄像头画面上的对比度；`brandPalette` 维护微信、钉钉等品牌原色。这些调色板不跟随明暗主题反转，普通页面仍使用 `useColors()`。
+
+`shimmerPalette` 集中维护文字扫光动画的明暗端点；正文基色仍来自当前主题或调用方颜色，白色正文使用较深端点保持动画可见。
