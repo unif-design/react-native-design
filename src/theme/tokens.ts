@@ -116,6 +116,7 @@ export const dim = {
  *  iOS HIG 要求触控目标 ≥44pt 物理。 */
 export const fixed = {
   hitTarget: 44,
+  compactControl: 36,
   navbarH: 44,
   tabbarH: 50,
   hairline: StyleSheet.hairlineWidth,

@@ -1,6 +1,6 @@
 import { CloseOutlined, SearchOutlined } from '@unif/react-native-icons';
 import React, { forwardRef, useEffect } from 'react';
-import { control, fixed } from '../../../theme';
+import { fixed } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { TextFieldBase } from '../TextField/TextFieldBase';
 import { normalizeSearchLayout } from '../TextField/normalize';
@@ -95,7 +95,10 @@ export const Search = forwardRef<TextFieldHandle, SearchProps>(
       { value, defaultValue, onChangeText },
       'Search'
     );
-    const searchLayout = normalizeSearchLayout(fixed.hitTarget, control.md);
+    const searchLayout = normalizeSearchLayout(
+      fixed.hitTarget,
+      fixed.compactControl
+    );
     const effectiveEditable = disabled !== true && editable !== false;
     const trailing: TextFieldSlot | undefined =
       controller.value.length > 0 && effectiveEditable && controller.canUpdate

@@ -8,7 +8,7 @@ description: '搜索输入预设，支持文字修改、清空和手动搜索。
 
 # Search 搜索框
 
-Search 自管搜索 icon、清除 action、`control.md` 可视 surface、44pt 根命中框、`returnKeyType="search"` 与 `accessibilityRole="search"`。这些入口不能由 caller 覆盖。
+Search 自管搜索 icon、清除 action、`fixed.compactControl` 可视 surface、44pt 根命中框、`returnKeyType="search"` 与 `accessibilityRole="search"`。这些入口不能由 caller 覆盖。
 
 搜索框可见胶囊默认采用系统玻璃，原生不额外染色，随主题与减少透明度设置变化；禁用只淡化前景。输入、清除、提交和 44pt 交互区域保持原有规则。
 
@@ -39,4 +39,4 @@ Search 自管搜索 icon、清除 action、`control.md` 可视 surface、44pt �
 
 ref 是 `TextFieldHandle`，只含 `focus()` / `blur()`；没有原生 `clear()`。无可见 label 时提供 `accessibilityLabel`。
 
-搜索框的可见高度复用 `control.md`，右侧独立图标按钮使用 `IconButton size="md"` 并垂直居中。输入内的清除按钮使用 `control.xs` 表面与 `icon.xxs` 图标，采用中性主题底色；保持 44pt 命中区域，不叠加玻璃材质。
+搜索框的可见高度复用 `fixed.compactControl`，右侧独立图标按钮使用 `IconButton surfaceSize={fixed.compactControl}` 并垂直居中。输入内的清除按钮使用 `control.xs` 表面与 `icon.xxs` 图标，采用中性主题底色；保持 44pt 命中区域，不叠加玻璃材质。
