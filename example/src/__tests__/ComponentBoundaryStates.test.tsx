@@ -166,6 +166,16 @@ test('Card 显式边框保留缺省和自定义宽度，暗色表面使用同一
       <Card borderColor="red" testID="default">
         <Text>内容</Text>
       </Card>
+      <Card
+        variant="glass"
+        borderColor="blue"
+        borderWidth={3}
+        padding={9}
+        borderRadius={17}
+        testID="glass-card"
+      >
+        <Text>玻璃内容</Text>
+      </Card>
       <Card variant="flat" borderColor="blue" borderWidth={4} testID="custom">
         {null}
       </Card>
@@ -184,6 +194,19 @@ test('Card 显式边框保留缺省和自定义宽度，暗色表面使用同一
       expect.objectContaining({ borderColor: 'red', borderWidth: 2 }),
     ])
   );
+  expect(
+    StyleSheet.flatten(page.getByTestId('glass-card').props.style)
+  ).toMatchObject({ backgroundColor: 'transparent', borderRadius: 17 });
+  expect(findStyle('glass-card')).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        borderColor: 'blue',
+        borderWidth: 3,
+        padding: 9,
+      }),
+    ])
+  );
+  expect(page.getByText('玻璃内容')).toBeTruthy();
   expect(findStyle('custom')).toEqual(
     expect.arrayContaining([
       expect.objectContaining({ borderColor: 'blue', borderWidth: 4 }),

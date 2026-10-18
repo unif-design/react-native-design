@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { fixed, fw, r, space, type as t } from '../../../theme';
+import { tracking, fixed, fw, r, space, type as t } from '../../../theme';
 import type { ColorTokens } from '../../../theme';
 
 export const makeStyles = (c: ColorTokens) =>
@@ -38,7 +38,7 @@ export const makeStyles = (c: ColorTokens) =>
     title: {
       fontSize: t.h2,
       fontWeight: fw.semi,
-      letterSpacing: -0.2,
+      letterSpacing: tracking.compact,
     },
     subtitle: {
       fontSize: t.micro,

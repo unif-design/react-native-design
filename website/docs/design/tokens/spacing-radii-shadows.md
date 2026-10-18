@@ -131,3 +131,5 @@ const makeStyles = (c: ColorTokens, s: ShadowTokens) =>
 ```
 
 颜色与暗色主题见[颜色](/docs/design/tokens/colors)。
+
+搜索与独立图标按钮共用 `control.md`（36），清除操作的可见表面使用 `control.xs`（22）和 `icon.xxs`（14）；交互命中仍不小于 `fixed.hitTarget`（44）。

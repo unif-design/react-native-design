@@ -162,3 +162,9 @@ function DynamicLabel({ size }: { size: number }) {
 库内 render-time dynamic typography 已按同一规则接线：Button、Avatar、Segmented、Stepper 中央值、Tag 与 AvatarWithRing 使用原始字号调用 `scaleFontMetric` 一次；Button Icon、Avatar / AvatarWithRing 容器、Segmented track、Stepper visual 与 outer（md/sm 至少 44pt；xs 高 44pt、横向小于 44pt）、Tag 高度均保留原尺寸。其余 `styles.ts` maker 产物只由 `useThemedStyles` 统一处理，不再在组件调用点重复缩放。
 
 缺少 `ThemeProvider` 时,主题 hook 返回同一个模块级 light fallback(`lightColors` / `lightShadow` / `fontScale=1`),保证引用稳定。开发环境会在 React effect 阶段一次性记录诊断;render 期间不会写日志。
+
+## 补充档位与共用行高、字距
+
+`type` 补充 `badge`（9）、`badgePlus`（9.5）、`xxsPlus`（12.5）、`bodyLg`（16）、`bodyLgPlus`（16.5）、`h1Plus`（19）、`titleLg`（20）、`displayPlus`（24），全部使用 `rf` 字号缩放。原有字号档位保持。
+
+`leading` 提供 badge / compact / sm / body / relaxed / heading 共用行高（12 / 16 / 20 / 21 / 22 / 24）。`tracking` 统一既有标题和标签字距；通过 `useThemedStyles` 消费，继续跟随用户字体设置。尺寸缩放 `r` 不再用来定义文字字号。

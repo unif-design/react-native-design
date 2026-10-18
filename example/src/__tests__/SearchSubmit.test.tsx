@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
+import { StyleSheet } from 'react-native';
 import { fireEvent, render } from '@testing-library/react-native';
-import { Search, ThemeProvider } from '@unif/react-native-design';
+import {
+  control,
+  fixed,
+  GlassLayer,
+  lightColors,
+  darkColors,
+  Search,
+  ThemeProvider,
+} from '@unif/react-native-design';
 
 test('搜索图标和键盘提交同一份当前值，输入和清除不触发提交', () => {
   const submit = jest.fn();
@@ -80,11 +89,29 @@ test.each([{ disabled: true }, { editable: false }])(
   }
 );
 
-test('没有提交处理器时搜索图标只作装饰', () => {
-  const page = render(
-    <ThemeProvider>
-      <Search defaultValue="茶" />
-    </ThemeProvider>
-  );
-  expect(page.queryByRole('button', { name: '搜索' })).toBeNull();
-});
+test.each(['light', 'dark'] as const)(
+  '搜索清除在 %s 下保持小型主题按钮和完整命中区域',
+  (scheme) => {
+    const page = render(
+      <ThemeProvider forceScheme={scheme}>
+        <Search defaultValue="茶" />
+      </ThemeProvider>
+    );
+    expect(page.queryByRole('button', { name: '搜索' })).toBeNull();
+    const clear = page.getByRole('button', { name: '清除搜索内容' });
+    const style = StyleSheet.flatten(clear.props.style);
+    expect(style).toMatchObject({
+      width: control.xs,
+      height: control.xs,
+      alignSelf: 'center',
+      backgroundColor: (scheme === 'dark' ? darkColors : lightColors)
+        .surfaceContainerHigh,
+    });
+    expect(
+      style.height + clear.props.hitSlop.top + clear.props.hitSlop.bottom
+    ).toBeGreaterThanOrEqual(fixed.hitTarget);
+    expect(page.UNSAFE_queryAllByType(GlassLayer)).toHaveLength(1);
+    fireEvent.press(clear);
+    expect(page.queryByRole('button', { name: '清除搜索内容' })).toBeNull();
+  }
+);

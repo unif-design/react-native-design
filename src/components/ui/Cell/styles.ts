@@ -1,9 +1,9 @@
 import { StyleSheet } from 'react-native';
 import {
+  tracking,
   fixed,
   fw,
   r,
-  rf,
   radius,
   space,
   type as t,
@@ -13,19 +13,22 @@ import {
 export const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({
     cell: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: space[5],
+      justifyContent: 'center',
       paddingHorizontal: space[6],
       paddingVertical: space[6],
       minHeight: r(56),
-      backgroundColor: c.surface,
+      backgroundColor: 'transparent',
       borderRadius: radius.lg,
     },
+    cellContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: space[5],
+    },
+    cellContentFlush: { gap: space[4] },
     cellFlush: {
       backgroundColor: 'transparent',
       borderRadius: 0,
-      gap: space[4],
       paddingHorizontal: r(11),
       paddingVertical: r(11),
       // [M-7] flush 可按压行高约 39pt < iOS HIG 44pt;用 minHeight 撑到 fixed.hitTarget
@@ -46,10 +49,10 @@ export const makeStyles = (c: ColorTokens) =>
       lineHeight: t.body * 1.3,
     },
     titleFlush: {
-      fontSize: rf(13),
+      fontSize: t.xs,
       fontWeight: fw.medium,
-      letterSpacing: -0.1,
-      lineHeight: rf(13) * 1.3,
+      letterSpacing: tracking.subtle,
+      lineHeight: t.xs * 1.3,
       color: c.foreground,
     },
     desc: {
@@ -58,7 +61,7 @@ export const makeStyles = (c: ColorTokens) =>
       lineHeight: t.xs * 1.4,
     },
     descFlush: {
-      fontSize: rf(11),
+      fontSize: t.micro,
       color: c.foregroundMuted,
       opacity: 0.55,
       marginTop: r(1),
@@ -68,7 +71,7 @@ export const makeStyles = (c: ColorTokens) =>
       color: c.foregroundSubtle,
     },
     extraFlush: {
-      fontSize: rf(11),
+      fontSize: t.micro,
       color: c.foregroundMuted,
       opacity: 0.55,
     },
@@ -81,7 +84,6 @@ export const makeStyles = (c: ColorTokens) =>
       gap: space[3],
     },
     listGrouped: {
-      backgroundColor: c.background,
       padding: space[3],
       borderRadius: radius.xl,
     },

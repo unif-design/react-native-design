@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import {
+  tracking,
   fw,
   r,
   radius,
@@ -21,14 +22,14 @@ export const makeStyles = (c: ColorTokens) =>
       fontWeight: fw.semi,
       color: c.foregroundSubtle,
       textTransform: 'uppercase',
-      letterSpacing: 1,
+      letterSpacing: tracking.loose,
       paddingHorizontal: space[1],
     },
     groupBody: {
-      backgroundColor: c.surface,
       borderRadius: radius.lg,
       overflow: 'hidden',
     },
+    groupMaterial: { borderRadius: radius.lg },
     divider: {
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: c.outline,

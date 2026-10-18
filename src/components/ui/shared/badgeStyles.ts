@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
 import {
   fw,
+  leading,
   r,
   radius,
   space,
@@ -31,6 +32,6 @@ export const badgeStyles = (c: ColorTokens, top: number) =>
       color: c.onError,
       fontSize: t.nano,
       fontWeight: fw.bold,
-      lineHeight: 12,
+      lineHeight: leading.badge,
     },
   });

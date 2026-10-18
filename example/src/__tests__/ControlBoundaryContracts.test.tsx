@@ -173,6 +173,11 @@ test.each([false, true])(
     expect(icons).toHaveLength(2);
     expect(icons[0]?.props.color).not.toBe(icons[1]?.props.color);
     expect(icons[0]?.props.size).toBeGreaterThan(0);
+    if (flush) {
+      expect(
+        StyleSheet.flatten(icons[0]?.parent?.props.style).backgroundColor
+      ).toBe(StyleSheet.flatten(icons[1]?.parent?.props.style).backgroundColor);
+    }
   }
 );
 

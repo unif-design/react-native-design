@@ -1,8 +1,21 @@
 import { ChevronRightOutlined } from '@unif/react-native-icons';
 import React, { useEffect } from 'react';
-import { type StyleProp, Text, type TextStyle, View } from 'react-native';
+import {
+  type StyleProp,
+  Text,
+  type TextStyle,
+  View,
+  StyleSheet,
+} from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { pressedOpacity, r, useColors, useThemedStyles } from '../../../theme';
+import {
+  pressedOpacity,
+  r,
+  radius,
+  useColors,
+  useThemedStyles,
+} from '../../../theme';
+import { GlassLayer } from '../GlassLayer';
 import { createLogger } from '../../../utils/logger';
 
 import { A11Y_HIDDEN_PROPS, A11Y_TEXT_ONLY_STYLE } from '../shared/a11y';
@@ -57,7 +70,7 @@ function CellExtraContent({
  * 设置 / 列表行。布局:`leading? · (title / desc) · extra? · arrow?`
  *
  * 两种风格(由父 `<List>` 通过 ListVariantContext 决定):
- * - `grouped`(默认):独立白卡片 + 8px 间距
+ * - `grouped`(默认):独立玻璃卡片 + 8px 间距
  * - `flush`(嵌在 Card 内):紧凑列表,28×28 橙色 icon 盒子,行间 inset hairline 分隔
  */
 export function Cell(props: CellProps): React.JSX.Element {
@@ -104,33 +117,49 @@ export function Cell(props: CellProps): React.JSX.Element {
   const descStyle = flush ? styles.descFlush : styles.desc;
   const extraStyle = flush ? styles.extraFlush : styles.extra;
 
-  const inner = (
+  const inner = (opacity = 1) => (
     <View
       style={cellStyle}
       testID={hasEffectiveAction ? undefined : props.testID}
     >
-      {props.leading !== undefined ? (
-        <Leading slot={props.leading} danger={props.danger} />
+      {!flush ? (
+        <GlassLayer
+          style={{
+            borderRadius:
+              StyleSheet.flatten(props.style)?.borderRadius ?? radius.lg,
+          }}
+        />
       ) : null}
-      <View style={styles.body}>
-        <Text style={titleStyle} numberOfLines={props.titleLines ?? 1}>
-          {stringifyCellText(props.title)}
-        </Text>
-        {props.desc !== undefined ? (
-          <Text style={descStyle} numberOfLines={2}>
-            {stringifyCellText(props.desc)}
+      <View
+        style={[
+          styles.cellContent,
+          flush && styles.cellContentFlush,
+          { opacity },
+        ]}
+      >
+        {props.leading !== undefined ? (
+          <Leading slot={props.leading} danger={props.danger} />
+        ) : null}
+        <View style={styles.body}>
+          <Text style={titleStyle} numberOfLines={props.titleLines ?? 1}>
+            {stringifyCellText(props.title)}
           </Text>
+          {props.desc !== undefined ? (
+            <Text style={descStyle} numberOfLines={2}>
+              {stringifyCellText(props.desc)}
+            </Text>
+          ) : null}
+        </View>
+        <CellExtraContent extra={props.extra} textStyle={extraStyle} />
+        {hasEffectiveAction && props.arrow && !props.danger ? (
+          <View {...A11Y_HIDDEN_PROPS}>
+            <ChevronRightOutlined
+              size={r(flush ? 20 : 22)}
+              color={c.foregroundMuted}
+            />
+          </View>
         ) : null}
       </View>
-      <CellExtraContent extra={props.extra} textStyle={extraStyle} />
-      {hasEffectiveAction && props.arrow && !props.danger ? (
-        <View {...A11Y_HIDDEN_PROPS}>
-          <ChevronRightOutlined
-            size={r(flush ? 20 : 22)}
-            color={c.foregroundMuted}
-          />
-        </View>
-      ) : null}
     </View>
   );
 
@@ -148,11 +177,10 @@ export function Cell(props: CellProps): React.JSX.Element {
         // 都感知不到「当前是哪一项」。
         accessibilityState={{ disabled: isDisabled, selected: props.selected }}
         testID={props.testID}
-        style={({ pressed }) => [
-          { opacity: isDisabled ? 0.5 : pressed ? pressedOpacity : 1 },
-        ]}
       >
-        {inner}
+        {({ pressed }) =>
+          inner(isDisabled ? 0.5 : pressed ? pressedOpacity : 1)
+        }
       </Pressable>
     );
   }
@@ -172,9 +200,9 @@ export function Cell(props: CellProps): React.JSX.Element {
         }
         testID={props.testID}
       >
-        {inner}
+        {inner()}
       </View>
     );
   }
-  return inner;
+  return inner();
 }

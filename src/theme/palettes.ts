@@ -21,3 +21,37 @@ export const warmOrangePalette = {
   light: ['#FFE3C8', '#FFEED7', '#FFE6CA', '#FBD9B6'] as const,
   dark: ['#1F1208', '#170D05', '#110903', '#0A0A0A'] as const,
 } as const;
+
+/** 图片、视频和相机保持深色取景背景，不随页面主题反转。 */
+export const mediaPalette = {
+  background: '#000000',
+  foreground: '#FFFFFF',
+  overlay: 'rgba(0,0,0,0.4)',
+} as const;
+
+/** 相机固定深色取景与录制状态；与页面明暗主题无关。 */
+export const cameraPalette = {
+  black: mediaPalette.background,
+  recRed: '#ff3b30',
+  recordingTint: 'rgba(255,59,48,0.18)',
+  watermarkShadow: 'rgba(0,0,0,0.7)',
+  previewCanvas: '#1C1C1E',
+} as const;
+
+/** 扫码取景上的固定前景，保持摄像头画面上的对比度。 */
+export const scannerPalette = {
+  cameraBg: '#0c0b0a',
+  white: mediaPalette.foreground,
+  hintText: 'rgba(255,255,255,0.86)',
+  toolbarLabel: 'rgba(255,255,255,0.82)',
+  windowBorder: 'rgba(255,255,255,0.55)',
+  crosshair: 'rgba(255,255,255,0.9)',
+  textShadow: 'rgba(0,0,0,0.55)',
+} as const;
+
+/** 第三方品牌标识原色，不随应用主题改变品牌。 */
+export const brandPalette = {
+  wechat: '#07C160',
+  wechatForeground: mediaPalette.foreground,
+  dingTalk: ['#2595E8', '#3A9CED', '#59ADF8', '#6BC2FC'],
+} as const;

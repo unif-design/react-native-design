@@ -1,3 +1,4 @@
+import { fw } from '../../../theme';
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
@@ -9,5 +10,5 @@ export const styles = StyleSheet.create({
   },
   // 环不参与文字测量，保持显式直径；文字自然撑开最小容器。
   ring: { position: 'absolute' },
-  label: { fontWeight: '600', textAlign: 'center', flexShrink: 0 },
+  label: { fontWeight: fw.semi, textAlign: 'center', flexShrink: 0 },
 });

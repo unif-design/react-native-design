@@ -18,7 +18,7 @@ import { LiveDemo } from '@site/src/components/LiveDemo';
 
 组合头部、内容和底部。父容器提供有界高度，弹层、关闭、安全区与键盘交给宿主。
 
-滚动内容使用 `contentMode="scroll"` 和 `headerMode="overlay"` 时，标题悬浮于正文上方并使用玻璃材质；首屏留白跟随真实标题高度，正文可以滚到标题背后。固定布局和外部列表仍由原布局维护标题占位。默认背景统一由 Sheet 根容器提供，`style.backgroundColor` 可设置整个面板的底色，不会再被内部标题和正文覆盖成另一层白底。
+滚动内容使用 `contentMode="scroll"` 和 `headerMode="overlay"` 时，标题悬浮于正文上方，默认使用玻璃材质；设置 `headerSurface="transparent"` 可去掉标题区材质，正文避让和滚动行为不变；首屏留白跟随真实标题高度，正文可以滚到标题背后。固定布局和外部列表仍由原布局维护标题占位。默认背景统一由 Sheet 根容器提供，`style.backgroundColor` 可设置整个面板的底色，不会再被内部标题和正文覆盖成另一层白底。
 
 export const sheetDemoStyles = (colors) => ({
   text: { color: colors.foreground, fontSize: type.body },
@@ -92,15 +92,17 @@ export const SheetDemo = () => {
 
 ## API
 
-| 参数                    | 类型                                       | 默认值    | 说明                                                     |
-| ----------------------- | ------------------------------------------ | --------- | -------------------------------------------------------- |
-| `children`              | `ReactNode`                                | 必填      | 中间内容                                                 |
-| `header` / `footer`     | `ReactNode`                                | —         | 固定头尾；无头部显示非交互拖动指示                       |
-| `contentMode`           | `'fixed' \| 'scroll' \| 'external-scroll'` | `'fixed'` | 普通布局、内部纵向 ScrollView、外部自带滚动              |
-| `contentContainerStyle` | `StyleProp<ViewStyle>`                     | —         | 内容区域样式；scroll 时作用于 ScrollView 内容容器        |
-| `footerSurface`         | `solid \| glass`                           | `glass`   | 页脚工具区材质                                           |
-| `footerStyle`           | `StyleProp<ViewStyle>`                     | —         | 覆盖固定底部容器的留白与边框，供调用者已组合的操作区使用 |
-| `style` / `testID`      | `StyleProp<ViewStyle>` / `string`          | —         | 根容器样式与定位                                         |
+| 参数                    | 类型                                       | 默认值    | 说明                                                        |
+| ----------------------- | ------------------------------------------ | --------- | ----------------------------------------------------------- |
+| `children`              | `ReactNode`                                | 必填      | 中间内容                                                    |
+| `header` / `footer`     | `ReactNode`                                | —         | 固定头尾；无头部显示非交互拖动指示                          |
+| `contentMode`           | `'fixed' \| 'scroll' \| 'external-scroll'` | `'fixed'` | 普通布局、内部纵向 ScrollView、外部自带滚动                 |
+| `contentContainerStyle` | `StyleProp<ViewStyle>`                     | —         | 内容区域样式；scroll 时作用于 ScrollView 内容容器           |
+| `headerMode`            | `fixed \| overlay`                         | `fixed`   | 内部滚动时可让标题悬浮于正文之上                            |
+| `headerSurface`         | `glass \| transparent`                     | `glass`   | 悬浮标题区材质；透明标题组合 `NavBar variant="transparent"` |
+| `footerSurface`         | `solid \| glass`                           | `glass`   | 页脚工具区材质                                              |
+| `footerStyle`           | `StyleProp<ViewStyle>`                     | —         | 覆盖固定底部容器的留白与边框，供调用者已组合的操作区使用    |
+| `style` / `testID`      | `StyleProp<ViewStyle>` / `string`          | —         | 根容器样式与定位                                            |
 
 公开类型为 `SheetProps` 和 `SheetContentMode`。内部滚动保留 `keyboardShouldPersistTaps="handled"`；外部列表不再包同方向 ScrollView。头尾不定义业务按钮协议，直接组合 Design 组件。主题变化沿现有 Provider 传递。
 

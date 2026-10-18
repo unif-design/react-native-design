@@ -6,7 +6,13 @@ export {
 } from './colors';
 export type { ColorTokens } from './colors';
 
-export { warmOrangePalette } from './palettes';
+export {
+  warmOrangePalette,
+  mediaPalette,
+  cameraPalette,
+  scannerPalette,
+  brandPalette,
+} from './palettes';
 
 export { lightShadow, darkShadow } from './shadow';
 export type { ShadowTokens } from './shadow';
@@ -23,6 +29,8 @@ export { usePrefersReducedMotion } from './usePrefersReducedMotion';
 export {
   fontMono,
   type,
+  leading,
+  tracking,
   fw,
   space,
   radius,

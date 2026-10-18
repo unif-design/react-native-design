@@ -8,12 +8,16 @@ description: '组合相关信息和操作的卡片容器。'
 
 # Card 卡片
 
-容纳相关信息和操作的卡片。通过已有变体选择背景、边框与阴影。
+容纳相关信息和操作的卡片。`variant="glass"` 使用共享玻璃材质，保持原圆角、内边距、边框和内容布局。各业务卡片自己选择材质，外层组合不再叠加背景。
 
 ## 代码演示 {#实时预览}
 
 ```tsx
   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <span className="demo-label">glass · 玻璃卡片</span>
+    <Card variant="glass">
+      <Text>独立维护的信息卡片</Text>
+    </Card>
     <span className="demo-label">default · 带阴影</span>
     <Card>
       <Text
@@ -184,18 +188,18 @@ function Confirm() {
 
 ## API
 
-| 参数           | 类型                             | 默认值               | 说明                                                                                                              |
-| -------------- | -------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `children`     | `ReactNode`                      | —                    | 卡片内容                                                                                                          |
-| `variant`      | `'default' \| 'flat' \| 'plain'` | `'default'`          | 带阴影 / 仅圆角无阴影。`'flat'` 已 deprecated 等价 `'plain'`                                                      |
-| `padding`      | `number`                         | `14`（`space['6']`） | 内边距                                                                                                            |
-| `borderRadius` | `number`                         | `12`（`radius.xl`）  | 圆角                                                                                                              |
-| `borderColor`  | `string`                         | —                    | 强调描边色（任意 variant 均生效;启用时默认 2px）                                                                  |
-| `borderWidth`  | `number`                         | `2`                  | 与 `borderColor` 配合                                                                                             |
-| `bare`         | `boolean`                        | `false`              | 抑制内边距,内容自控（与 variant 正交）                                                                            |
-| `fill`         | `boolean`                        | `false`              | 撑满模式:外层 + 内层 clip 均 `flex:1`,Card 在 flex 父里撑满、内容区填满外层（内部 `flex:1` 滚动列表据此拿到高度） |
-| `style`        | `StyleProp<ViewStyle>`           | —                    | 额外样式覆盖                                                                                                      |
-| `testID`       | `string`                         | —                    | E2E / 测试定位                                                                                                    |
+| 参数           | 类型                                        | 默认值               | 说明                                                                                                              |
+| -------------- | ------------------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `children`     | `ReactNode`                                 | —                    | 卡片内容                                                                                                          |
+| `variant`      | `'default' \| 'flat' \| 'plain' \| 'glass'` | `'default'`          | 带阴影 / 仅圆角无阴影。`'flat'` 已 deprecated 等价 `'plain'`                                                      |
+| `padding`      | `number`                                    | `14`（`space['6']`） | 内边距                                                                                                            |
+| `borderRadius` | `number`                                    | `12`（`radius.xl`）  | 圆角                                                                                                              |
+| `borderColor`  | `string`                                    | —                    | 强调描边色（任意 variant 均生效;启用时默认 2px）                                                                  |
+| `borderWidth`  | `number`                                    | `2`                  | 与 `borderColor` 配合                                                                                             |
+| `bare`         | `boolean`                                   | `false`              | 抑制内边距,内容自控（与 variant 正交）                                                                            |
+| `fill`         | `boolean`                                   | `false`              | 撑满模式:外层 + 内层 clip 均 `flex:1`,Card 在 flex 父里撑满、内容区填满外层（内部 `flex:1` 滚动列表据此拿到高度） |
+| `style`        | `StyleProp<ViewStyle>`                      | —                    | 额外样式覆盖                                                                                                      |
+| `testID`       | `string`                                    | —                    | E2E / 测试定位                                                                                                    |
 
 ## 无障碍（a11y）
 
@@ -207,4 +211,4 @@ function Confirm() {
 
 - ❌ 不要叠加多层阴影——卡片只有一种阴影
 - ❌ 不要把 List 行做成 Card——List 行用 [Cell](cell.md)
-- ❌ 不要给 Card 加渐变背景——只有 logo 和 drawer header 允许渐变
+- 玻璃卡片直接选择 `glass`；低版本系统复用主题渐变，减少透明度时使用清晰的主题底色。不要在玻璃卡片的祖先上设置 opacity，也不要叠加重复材质。

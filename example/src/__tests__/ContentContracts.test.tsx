@@ -643,7 +643,7 @@ test.each(['light', 'dark'] as const)(
         return (
           style?.borderRadius === radius.pill &&
           style.borderColor === colors.primary &&
-          style.backgroundColor === colors.surface
+          style.backgroundColor === 'transparent'
         );
       })
     ).toBe(true);
@@ -654,7 +654,7 @@ test.each(['light', 'dark'] as const)(
         return (
           style?.borderRadius === radius.pill &&
           style.borderColor === 'transparent' &&
-          style.backgroundColor === colors.surfaceContainerHigh
+          style.backgroundColor === 'transparent'
         );
       })
     ).toBe(true);

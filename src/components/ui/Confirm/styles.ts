@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { fw, r, space, type as t } from '../../../theme';
+import { tracking, fw, r, space, type as t } from '../../../theme';
 import type { ColorTokens } from '../../../theme';
 
 /** Confirm 对话框 styles —— 原生 Modal(transparent + slide)底部弹出卡片:
@@ -36,7 +36,7 @@ export const makeStyles = (c: ColorTokens) =>
       fontSize: t.heroSm,
       fontWeight: fw.semi,
       color: c.foreground,
-      letterSpacing: -0.2,
+      letterSpacing: tracking.compact,
     },
     message: {
       fontSize: t.body,

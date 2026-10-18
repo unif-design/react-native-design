@@ -1,5 +1,13 @@
 import { StyleSheet } from 'react-native';
-import { fontMono, fw, radius, rf, space, type as t } from '../../../theme';
+import {
+  tracking,
+  fontMono,
+  fw,
+  radius,
+  rf,
+  space,
+  type as t,
+} from '../../../theme';
 import type { ColorTokens, ShadowTokens } from '../../../theme';
 
 /** 玻璃质感数据条 styles。
@@ -47,7 +55,7 @@ export const makeGlassStatsStyles = (c: ColorTokens, s: ShadowTokens) => {
       fontSize: countSize,
       fontWeight: fw.bold,
       color: c.foreground,
-      letterSpacing: -0.3,
+      letterSpacing: tracking.snug,
       fontFamily: fontMono,
       lineHeight: countSize * 1.1,
     },

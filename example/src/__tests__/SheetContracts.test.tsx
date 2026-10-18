@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, Text } from 'react-native';
 import { fireEvent, render } from '@testing-library/react-native';
 import {
   Button,
+  GlassLayer,
   darkColors,
   lightColors,
   NavBar,
@@ -52,54 +53,61 @@ test('默认固定内容并将 root 与内容样式应用到各自容器', async
   );
 });
 
-test('标题覆盖滚动内容并按真实高度避让，背景由 Sheet 根容器统一提供', async () => {
-  const page = await render(
-    <ThemeProvider>
-      <Sheet
-        testID="sheet"
-        headerMode="overlay"
-        contentMode="scroll"
-        style={{ backgroundColor: lightColors.surfaceContainer }}
-        header={<Text>浮动标题</Text>}
-        contentContainerStyle={{ paddingTop: 7 }}
-      >
-        <Text>正文</Text>
-      </Sheet>
-    </ThemeProvider>
-  );
-  const header = page.UNSAFE_root.findAll(
-    (node) =>
-      String(node.type) === 'View' &&
-      StyleSheet.flatten(node.props.style)?.zIndex === 1
-  )[0];
-  expect(StyleSheet.flatten(header.props.style)).toMatchObject({
-    position: 'absolute',
-    top: 0,
-    zIndex: 1,
-  });
-  expect(header.props.pointerEvents).toBe('box-none');
-  await fireEvent(header, 'layout', {
-    nativeEvent: { layout: { height: 48, width: 320, x: 0, y: 0 } },
-  });
-  const scroll = page.UNSAFE_root.findAll(
-    (node) => String(node.type) === 'RCTScrollView'
-  )[0];
-  expect(
-    StyleSheet.flatten(scroll.props.contentContainerStyle).paddingTop
-  ).toBe(55);
-  expect(
-    StyleSheet.flatten(scroll.props.style).backgroundColor
-  ).toBeUndefined();
-  expect(
-    StyleSheet.flatten(page.getByTestId('sheet').props.style).backgroundColor
-  ).toBe(lightColors.surfaceContainer);
-  await fireEvent(header, 'layout', {
-    nativeEvent: { layout: { height: 72, width: 320, x: 0, y: 0 } },
-  });
-  expect(
-    StyleSheet.flatten(scroll.props.contentContainerStyle).paddingTop
-  ).toBe(79);
-});
+test.each(['glass', 'transparent'] as const)(
+  '标题材质 %s 保留悬浮布局和真实高度避让',
+  async (headerSurface) => {
+    const page = await render(
+      <ThemeProvider>
+        <Sheet
+          testID="sheet"
+          headerMode="overlay"
+          headerSurface={headerSurface}
+          contentMode="scroll"
+          style={{ backgroundColor: lightColors.surfaceContainer }}
+          header={<Text>浮动标题</Text>}
+          contentContainerStyle={{ paddingTop: 7 }}
+        >
+          <Text>正文</Text>
+        </Sheet>
+      </ThemeProvider>
+    );
+    const header = page.UNSAFE_root.findAll(
+      (node) =>
+        String(node.type) === 'View' &&
+        StyleSheet.flatten(node.props.style)?.zIndex === 1
+    )[0];
+    expect(StyleSheet.flatten(header.props.style)).toMatchObject({
+      position: 'absolute',
+      top: 0,
+      zIndex: 1,
+    });
+    expect(header.props.pointerEvents).toBe('box-none');
+    expect(page.UNSAFE_queryAllByType(GlassLayer)).toHaveLength(
+      headerSurface === 'glass' ? 1 : 0
+    );
+    await fireEvent(header, 'layout', {
+      nativeEvent: { layout: { height: 48, width: 320, x: 0, y: 0 } },
+    });
+    const scroll = page.UNSAFE_root.findAll(
+      (node) => String(node.type) === 'RCTScrollView'
+    )[0];
+    expect(
+      StyleSheet.flatten(scroll.props.contentContainerStyle).paddingTop
+    ).toBe(55);
+    expect(
+      StyleSheet.flatten(scroll.props.style).backgroundColor
+    ).toBeUndefined();
+    expect(
+      StyleSheet.flatten(page.getByTestId('sheet').props.style).backgroundColor
+    ).toBe(lightColors.surfaceContainer);
+    await fireEvent(header, 'layout', {
+      nativeEvent: { layout: { height: 72, width: 320, x: 0, y: 0 } },
+    });
+    expect(
+      StyleSheet.flatten(scroll.props.contentContainerStyle).paddingTop
+    ).toBe(79);
+  }
+);
 
 test('悬浮标题保留百分比顶部留白并跟随实际内容宽度', async () => {
   const page = await render(

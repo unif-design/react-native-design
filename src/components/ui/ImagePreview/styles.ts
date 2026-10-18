@@ -1,5 +1,11 @@
 import { StyleSheet } from 'react-native';
-import { fontMono, radius, space, type as typography } from '../../../theme';
+import {
+  fontMono,
+  mediaPalette,
+  radius,
+  space,
+  type as typography,
+} from '../../../theme';
 import type { ColorTokens } from '../../../theme';
 import { IMAGE_COUNTER_HEIGHT } from './constants';
 
@@ -7,20 +13,20 @@ export const makeStyles = (colors: ColorTokens) =>
   StyleSheet.create({
     container: { alignItems: 'center', gap: space[2] },
     media: {
-      backgroundColor: 'black',
+      backgroundColor: mediaPalette.background,
       overflow: 'hidden',
     },
-    image: { backgroundColor: 'black' },
+    image: { backgroundColor: mediaPalette.background },
     placeholder: {
       width: '100%',
       height: '100%',
-      backgroundColor: 'black',
+      backgroundColor: mediaPalette.background,
       justifyContent: 'center',
       alignItems: 'center',
       paddingHorizontal: space[3],
     },
     placeholderText: {
-      color: 'white',
+      color: mediaPalette.foreground,
       fontSize: typography.sm,
       textAlign: 'center',
     },

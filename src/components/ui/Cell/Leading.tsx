@@ -9,7 +9,6 @@ const FLUSH_BOX_SIZE = r(28);
 const FLUSH_BOX_RADIUS = r(7);
 
 const sharedStyles = StyleSheet.create({
-  dangerBox: { borderWidth: StyleSheet.hairlineWidth },
   flushBox: {
     width: FLUSH_BOX_SIZE,
     height: FLUSH_BOX_SIZE,
@@ -31,17 +30,15 @@ export function Leading({
 
   if (isIconComponent(slot)) {
     const Glyph = slot;
-    // grouped 模式:裸 icon 22px;flush 模式:28×28 圆角盒子,danger 时切 error-container
+    // 危险语义由图标和标题表达，flush 图标底色与同组其他行一致。
     if (variant === 'flush') {
       return (
         <View
           {...A11Y_HIDDEN_PROPS}
           style={[
             sharedStyles.flushBox,
-            danger && sharedStyles.dangerBox,
             {
-              backgroundColor: danger ? c.errorContainer : c.primaryContainer,
-              borderColor: danger ? c.error : undefined,
+              backgroundColor: c.primaryContainer,
             },
           ]}
         >

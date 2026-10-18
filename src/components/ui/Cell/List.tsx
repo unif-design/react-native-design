@@ -8,7 +8,7 @@ import type { ListProps } from './types';
 /**
  * Cell 的分组容器。
  *
- * - 默认 `grouped` = 灰底排列白卡片,间距 8px
+ * - 默认 `grouped` = 透明容器内排列玻璃卡片,间距 8px
  * - `flush=true` = 嵌在外层 Card 内,紧凑列表;`divider="full"` 铺满全宽 hairline / `"none"` 无分隔线
  */
 export function List({

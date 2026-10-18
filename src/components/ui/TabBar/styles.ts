@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import type { ColorTokens } from '../../../theme';
-import { fixed, fw, r, radius, type as t } from '../../../theme';
+import { leading, fixed, fw, r, radius, type as t } from '../../../theme';
 import { badgeStyles } from '../shared/badgeStyles';
 
 export const makeStyles = (c: ColorTokens) => {
@@ -29,7 +29,7 @@ export const makeStyles = (c: ColorTokens) => {
     label: {
       fontSize: t.nano,
       fontWeight: fw.medium,
-      lineHeight: 12,
+      lineHeight: leading.badge,
     },
     badge: badge.badge,
     badgeText: badge.badgeText,

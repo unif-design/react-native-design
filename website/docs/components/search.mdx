@@ -6,7 +6,7 @@ description: '搜索输入预设，支持文字修改、清空和手动搜索。
 
 # Search 搜索框
 
-Search 自管搜索 icon、清除 action、36pt 可视 surface、44pt 根命中框、`returnKeyType="search"` 与 `accessibilityRole="search"`。这些入口不能由 caller 覆盖。
+Search 自管搜索 icon、清除 action、`control.md` 可视 surface、44pt 根命中框、`returnKeyType="search"` 与 `accessibilityRole="search"`。这些入口不能由 caller 覆盖。
 
 搜索框可见胶囊默认采用系统玻璃，原生不额外染色，随主题与减少透明度设置变化；禁用只淡化前景。输入、清除、提交和 44pt 交互区域保持原有规则。
 
@@ -27,7 +27,7 @@ Search 自管搜索 icon、清除 action、36pt 可视 surface、44pt 根命中�
 
 提供 `onSubmit` 时，搜索 icon 是可点击的“搜索”按钮，点击交付 `onSubmit(currentValue)`；没有 `onSubmit` 时仍是装饰图标。按键盘搜索时先执行 `onSubmitEditing(event)`，再执行 `onSubmit(currentValue)`。输入变化和清除都不自动提交，是否发起查询由调用方决定。
 
-当前 value 非空、字段有效可编辑且 controller 能更新时才渲染玻璃清除按钮；清除调用同一个 `onChangeText('')` 路径。`disabled` 或 `editable={false}` 时搜索按钮不可用，键盘事件也不交付提交。
+当前 value 非空、字段有效可编辑且 controller 能更新时才渲染小型主题色清除按钮；清除调用同一个 `onChangeText('')` 路径。`disabled` 或 `editable={false}` 时搜索按钮不可用，键盘事件也不交付提交。
 
 需要右侧独立搜索按钮时，在 Search 外组合 `IconButton variant="glass"`，并用 `onSubmitEditing` 处理键盘提交；省略 Search 的 `onSubmit` 可保留左侧装饰图标。
 
@@ -36,3 +36,5 @@ Search 自管搜索 icon、清除 action、36pt 可视 surface、44pt 根命中�
 不支持 caller `leading`、`trailing`、`height`、`returnKeyType`、`accessibilityRole`、`role`、`clearButtonMode` 或 `enterKeyHint`。`disabled`/`editable={false}` 会移除清除 handler 并上报 disabled state。
 
 ref 是 `TextFieldHandle`，只含 `focus()` / `blur()`；没有原生 `clear()`。无可见 label 时提供 `accessibilityLabel`。
+
+搜索框的可见高度复用 `control.md`，右侧独立图标按钮使用 `IconButton size="md"` 并垂直居中。输入内的清除按钮使用 `control.xs` 表面与 `icon.xxs` 图标，采用中性主题底色；保持 44pt 命中区域，不叠加玻璃材质。

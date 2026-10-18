@@ -137,7 +137,7 @@ export type TextFieldBaseProps = Omit<TextInputProps, RemovedTextInputProps> &
     minHeight?: number;
     /** 最大高度(multiline=true 时生效);超出 ScrollView 内滚 */
     maxHeight?: number;
-    /** internal:Search 的 44pt interactive row + 36pt decorative surface。 */
+    /** internal:Search 的 44pt interactive row + control.md decorative surface。 */
     searchLayout?: SearchFieldLayout;
     /** internal:仅由 Textarea 的公开 surface 选择，无独立表面的多行输入。 */
     plainSurface?: boolean;

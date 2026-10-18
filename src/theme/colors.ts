@@ -17,6 +17,14 @@ export const lightColors = {
   onPrimary: '#FFFFFF',
   onPrimaryMuted: 'rgba(255,255,255,0.85)',
 
+  // 页面与地图展示角色
+  chatBackground: '#FFFFFF',
+  chatDrawerOverlay: '#242424',
+  warning: '#F2A93B',
+  mapCircleStroke: 'rgba(235,110,0,0.55)',
+  mapCircleFill: 'rgba(235,110,0,0.12)',
+  mapPinShadow: 'rgba(0,0,0,0.28)',
+
   // Semantic
   success: '#52C41A',
   successContainer: '#F0FFF0',
@@ -112,6 +120,13 @@ export const lightColors = {
 export type ColorTokens = { [K in keyof typeof lightColors]: string };
 
 export const darkColors: ColorTokens = {
+  chatBackground: '#000000',
+  chatDrawerOverlay: '#242424',
+  warning: '#FFC878',
+  mapCircleStroke: 'rgba(255,176,104,0.65)',
+  mapCircleFill: 'rgba(255,176,104,0.18)',
+  mapPinShadow: 'rgba(0,0,0,0.28)',
+
   // Brand
   primary: BRAND_ORANGE,
   primaryPressed: '#D06200',

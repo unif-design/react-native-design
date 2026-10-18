@@ -1,6 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { radius, space, useShadow, useThemedStyles } from '../../../theme';
+import { GlassLayer } from '../GlassLayer';
 import { makeStyles, variantToStyle } from './styles';
 import type { CardProps } from './types';
 
@@ -45,6 +46,9 @@ export function Card({
           },
         ]}
       >
+        {variant === 'glass' ? (
+          <GlassLayer style={{ borderRadius: br }} />
+        ) : null}
         {children}
       </View>
     </View>

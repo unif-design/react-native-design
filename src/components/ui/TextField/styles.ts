@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { fw, radius, space, type as t } from '../../../theme';
+import { fixed, fw, radius, space, type as t } from '../../../theme';
 import type { ColorTokens } from '../../../theme';
 import {
   TEXTAREA_VERTICAL_PADDING,
@@ -44,6 +44,7 @@ export const makeStyles = (c: ColorTokens) =>
       alignItems: 'center',
       gap: space[3],
     },
+    multilineContent: { alignItems: 'flex-start' },
     searchVisibleSurface: {
       position: 'absolute',
       left: 0,
@@ -52,12 +53,12 @@ export const makeStyles = (c: ColorTokens) =>
       borderWidth: 1,
     },
     wrapIdle: {
-      backgroundColor: c.surfaceContainerHigh,
+      backgroundColor: 'transparent',
       borderColor: 'transparent',
     },
-    /** focus/filled/error 三态共享的"激活"白底 base —— 配合各 variant border 差量使用 */
+    /** 交互状态只改变边框，玻璃材质由独立装饰层持有。 */
     wrapActive: {
-      backgroundColor: c.surface,
+      backgroundColor: 'transparent',
     },
     wrapFocus: {
       borderColor: c.primary,
@@ -109,11 +110,16 @@ export const makeStyles = (c: ColorTokens) =>
     // minWidth / height 不走 r()/fontScale —— 它是手指可达性约束,不是视觉 token;
     // paddingHorizontal 是呼吸空间,可以随屏幕缩放。
     actionFrame: {
-      minWidth: 44,
-      height: 44,
+      minWidth: fixed.hitTarget,
+      height: fixed.hitTarget,
       paddingHorizontal: space[2],
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    compactAction: {
+      alignSelf: 'center',
+      borderRadius: radius.pill,
+      backgroundColor: c.surfaceContainerHigh,
     },
     errorMsg: {
       fontSize: t.micro,
