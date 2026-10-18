@@ -8,7 +8,7 @@ description: '单行文本输入，支持状态、插槽和公开 ref。'
 
 # Input 输入框
 
-单行文本输入。可视高度默认及最小命中框均为 44pt；多行使用 [Textarea](textarea.md)。
+单行文本输入，背景统一使用 GlassLayer；焦点、填写和错误状态保留各自描边，禁用只淡化前景。可视高度默认及最小命中框均为 44pt；多行使用 [Textarea](textarea.md)。
 
 ```tsx
 const InputDemo = () => {

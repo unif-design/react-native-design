@@ -43,7 +43,7 @@ export function TextEntryContent({
       style={[styles.root, compact && styles.compactRoot, style]}
       testID={testID}
     >
-      {compact ? <GlassLayer style={styles.material} /> : null}
+      <GlassLayer style={compact ? styles.compactMaterial : styles.material} />
       <Text
         style={[styles.title, compact && styles.compactTitle]}
         accessibilityRole="header"
@@ -83,7 +83,7 @@ export function TextEntryContent({
           <Button
             label={cancelLabel}
             size="sm"
-            variant="outline"
+            variant="secondary"
             disabled={busy}
             onPress={onCancel}
           />

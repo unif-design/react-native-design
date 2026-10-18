@@ -116,7 +116,7 @@ export const CellDemo = () => {
 | 元素                | 规则                                                                                                                           |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | 整组容器（grouped） | `c.background` 浅灰底（视觉分组），`padding: 8`（`space[3]`），`borderRadius: 12`（`radius.xl`），`gap: 8`                     |
-| 单行                | `c.surface` 白底，`borderRadius: 10`（`radius.lg`），`min-height: 56`，`padding: 14`（`space[6]`，水平 + 垂直同值）            |
+| 单行                | 共享 GlassLayer 材质，`borderRadius: 10`（`radius.lg`），`min-height: 56`，`padding: 14`（`space[6]`，水平 + 垂直同值）        |
 | 行内布局            | 左 icon (grouped 22 / flush 28 盒) + 中 (title 15/500 + desc 13/subtle) + 右 extra (13/subtle) + arrow (grouped 20 / flush 18) |
 | **绝不**（grouped） | `border-bottom`、`hairline` 分隔（flush 模式才用 inset hairline）                                                              |
 
@@ -200,21 +200,21 @@ type StaticCellExtra =
 
 ### `<Cell>`
 
-| 参数                 | 类型                   | 默认值   | 说明                                                                                        |
-| -------------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------------- |
-| `title`              | `CellTextValue`        | —        | 主标题（必填）；始终由库内 `<Text>` + `stringifyCellText` 安全渲染                          |
-| `titleLines`         | `number`               | `1`      | 主标题的 `numberOfLines`                                                                    |
-| `desc`               | `CellTextValue`        | —        | 副标题 / 描述；始终由库内 `<Text>` 安全渲染，最多 2 行                                      |
-| `extra`              | `CellExtra`            | —        | 三种公开配置；actionable 可用 text/display，static 仅 text/装饰 display，control 仅 control |
-| `arrow`              | `boolean`              | `false`  | 仅 actionable 可用；显示 chevron-right，`danger` 时仍不渲染                                 |
-| `leading`            | `CellLeading`          | —        | 图标组件，或 `{ kind: 'display', node }` 纯展示节点                                         |
-| `onPress`            | `() => void`           | —        | actionable 分支必填；control/static 禁止                                                    |
-| `disabled`           | `boolean`              | `false`  | 仅 actionable 可用；禁用时移除 handler、半透明并上报 disabled                               |
-| `danger`             | `boolean`              | `false`  | 危险态：icon 盒子 + 标题用 error 红,且不渲染 arrow（常用于退出登录 / 删除等）               |
-| `style`              | `StyleProp<ViewStyle>` | —        | 额外样式覆盖（合并到 cell 容器的 style 数组）                                               |
-| `testID`             | `string`               | —        | E2E / 测试定位                                                                              |
-| `accessibilityLabel` | `string`               | 自动组合 | 仅 actionable 可用；覆盖自动名称                                                            |
-| `accessibilityHint`  | `string`               | —        | 仅 actionable 可用；说明操作结果                                                            |
+| 参数                 | 类型                   | 默认值   | 说明                                                                                              |
+| -------------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------------------- |
+| `title`              | `CellTextValue`        | —        | 主标题（必填）；始终由库内 `<Text>` + `stringifyCellText` 安全渲染                                |
+| `titleLines`         | `number`               | `1`      | 主标题的 `numberOfLines`                                                                          |
+| `desc`               | `CellTextValue`        | —        | 副标题 / 描述；始终由库内 `<Text>` 安全渲染，最多 2 行                                            |
+| `extra`              | `CellExtra`            | —        | 三种公开配置；actionable 可用 text/display，static 仅 text/装饰 display，control 仅 control       |
+| `arrow`              | `boolean`              | `false`  | 仅 actionable 可用；显示 chevron-right，`danger` 时仍不渲染                                       |
+| `leading`            | `CellLeading`          | —        | 图标组件，或 `{ kind: 'display', node }` 纯展示节点                                               |
+| `onPress`            | `() => void`           | —        | actionable 分支必填；control/static 禁止                                                          |
+| `disabled`           | `boolean`              | `false`  | 仅 actionable 可用；禁用时移除 handler、半透明并上报 disabled                                     |
+| `danger`             | `boolean`              | `false`  | 危险态：图标与标题用 error 红，图标盒子保持同组主题底色,且不渲染 arrow（常用于退出登录 / 删除等） |
+| `style`              | `StyleProp<ViewStyle>` | —        | 额外样式覆盖（合并到 cell 容器的 style 数组）                                                     |
+| `testID`             | `string`               | —        | E2E / 测试定位                                                                                    |
+| `accessibilityLabel` | `string`               | 自动组合 | 仅 actionable 可用；覆盖自动名称                                                                  |
+| `accessibilityHint`  | `string`               | —        | 仅 actionable 可用；说明操作结果                                                                  |
 
 `CellProps` 是三个互斥分支：
 
@@ -229,7 +229,7 @@ type StaticCellExtra =
 | 参数       | 类型                   | 默认值   | 说明                                                              |
 | ---------- | ---------------------- | -------- | ----------------------------------------------------------------- |
 | `children` | `ReactNode`            | —        | 一组 `<Cell>`                                                     |
-| `flush`    | `boolean`              | `false`  | 透明背景（嵌套用）；省略则白卡 + 8px gap + 浅灰底容器             |
+| `flush`    | `boolean`              | `false`  | 透明背景（嵌套用）；省略则玻璃卡 + 8px gap + 透明容器             |
 | `divider`  | `'full' \| 'none'`     | `'full'` | flush 模式下行间分隔线:`'full'` 铺满全宽 hairline / `'none'` 不画 |
 | `style`    | `StyleProp<ViewStyle>` | —        | 额外样式覆盖                                                      |
 | `testID`   | `string`               | —        | E2E / 测试定位                                                    |
@@ -283,10 +283,10 @@ type StaticCellExtra =
 
 ## 与 Form 的区别
 
-| 用途            | 选哪个                                |
-| --------------- | ------------------------------------- |
-| 数据展示 / 跳转 | **Cell · List** — 白卡 + gap          |
-| 数据录入 / 表单 | [Form](./form) — 白卡 + 行间 hairline |
+| 用途            | 选哪个                                  |
+| --------------- | --------------------------------------- |
+| 数据展示 / 跳转 | **Cell · List** — 玻璃卡 + gap          |
+| 数据录入 / 表单 | [Form](./form) — 玻璃卡 + 行间 hairline |
 
 ## 主题键（Tokens）
 
@@ -294,11 +294,11 @@ type StaticCellExtra =
 
 | Token                                | 来源          | 作用                                                                                      |
 | ------------------------------------ | ------------- | ----------------------------------------------------------------------------------------- |
-| `c.surface`                          | `useColors()` | grouped 模式下单行白卡背景色                                                              |
+| `c.surface`                          | `useColors()` | 减少透明度时玻璃卡的背景色                                                                |
 | `c.foreground`                       | `useColors()` | 主标题文字色（`title` / `titleFlush`）                                                    |
 | `c.foregroundSubtle`                 | `useColors()` | 副标题 / extra 文字色（grouped 模式）                                                     |
 | `c.foregroundMuted`                  | `useColors()` | 副标题 / extra 文字色（flush 模式，另加 `opacity: 0.55`）                                 |
-| `c.background`                       | `useColors()` | `<List>` grouped 模式外容器背景色（浅灰底）                                               |
+| `c.background`                       | `useColors()` | 页面背景参考；List 本身透明                                                               |
 | `c.outline`                          | `useColors()` | flush 模式行间 hairline 分隔线颜色                                                        |
 | `radius.lg`                          | 静态 token    | grouped 模式单行卡片圆角                                                                  |
 | `radius.xl`                          | 静态 token    | `<List>` grouped 模式外容器圆角                                                           |

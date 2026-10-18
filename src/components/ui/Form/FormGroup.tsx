@@ -1,11 +1,12 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { useThemedStyles } from '../../../theme';
+import { GlassLayer } from '../GlassLayer';
 import { makeStyles } from './styles';
 import type { FormGroupProps } from './types';
 
 /**
- * 白卡片上的分组：分组标题 + 一组行。
+ * 玻璃卡片上的分组：分组标题 + 一组行。
  * 组内行之间用 1px 细线分隔（表单是「不用 gap」规则的例外）。
  *
  * **业务约定：** 动态列表（运行时增删 FormRow）必须给每个 child 传稳定 `key` prop。
@@ -26,6 +27,7 @@ export function FormGroup({
         </Text>
       ) : null}
       <View style={styles.groupBody}>
+        <GlassLayer style={styles.groupMaterial} />
         {arr.map((child, i) => {
           const childKey =
             React.isValidElement(child) && child.key != null

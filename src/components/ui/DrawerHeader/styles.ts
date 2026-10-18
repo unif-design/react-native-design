@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import type { ColorTokens } from '../../../theme';
-import { avatar, fw, rf, space, type as t } from '../../../theme';
+import { avatar, fw, space, type as t } from '../../../theme';
 
 // 头像盒用 avatar.xl(56pt)而非 icon['2xl'] —— 两者数值相同但语义不同:
 // icon.* 是图标容器阶梯,avatar.* 是头像容器阶梯。此处是用户头像,按语义选 avatar。
@@ -33,7 +33,7 @@ export const makeStyles = (c: ColorTokens) =>
     avatarText: {
       color: c.onPrimary,
       fontWeight: fw.bold,
-      fontSize: rf(24),
+      fontSize: t.displayPlus,
     },
     name: {
       color: c.onPrimary,

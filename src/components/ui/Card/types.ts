@@ -5,9 +5,10 @@ import type { StyleProp, ViewStyle } from 'react-native';
  * Card **视觉变体**（控制装饰，跟 `bare` 是正交维度）：
  * - `default`：白底 + 阴影（标准卡片;默认无边框,传 `borderColor` 才显示边框）
  * - `plain`：仅白底（无阴影无边框，承载更轻量，如 chat 气泡内嵌组件）
+ * - `glass`：共享玻璃材质，圆角、留白和内容布局不变；低版本使用主题渐变。
  * - `flat`：**deprecated** — 等价于 `plain`，新代码请用 `plain`。
  */
-export type CardVariant = 'default' | 'flat' | 'plain';
+export type CardVariant = 'default' | 'flat' | 'plain' | 'glass';
 
 export type CardProps = {
   /** Card 内容 */

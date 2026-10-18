@@ -222,7 +222,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
         />
         <TextFieldSlot
           slot={trailing}
-          glass={searchLayout !== undefined}
+          compact={searchLayout !== undefined}
           effectiveEditable={effectiveEditable}
           testID={childTestID(testID, 'trailing')}
         />
@@ -233,7 +233,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
       <View
         style={[
           sanitizedContainer.style,
-          !effectiveEditable && !searchLayout && styles.containerDisabled,
+          !effectiveEditable && plain && styles.containerDisabled,
           searchLayout !== undefined && !multiline && styles.rootCentered,
           { minWidth: fixed.hitTarget, minHeight: normalizedHeight },
         ]}
@@ -258,6 +258,15 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
               : { height: interactiveHeight },
           ]}
         >
+          {!plain && !searchLayout ? (
+            <GlassLayer
+              style={{
+                borderRadius:
+                  !multiline && insetSurface ? radius.pill : radius.md,
+              }}
+              fallbackColor={colors.surfaceContainerHigh}
+            />
+          ) : null}
           {centered ? (
             <Pressable
               accessible={false}
@@ -293,11 +302,13 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
               <GlassLayer style={{ borderRadius: radius.pill }} />
             </View>
           ) : null}
-          {searchLayout ? (
+          {!plain ? (
             <View
               collapsable={false}
               style={[
                 styles.searchContent,
+                multiline && styles.multilineContent,
+                centered && styles.wrapCentered,
                 !effectiveEditable && styles.containerDisabled,
               ]}
             >

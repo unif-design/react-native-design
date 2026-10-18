@@ -9,6 +9,7 @@ export function Sheet({
   children,
   header,
   headerMode = 'fixed',
+  headerSurface = 'glass',
   footer,
   footerSurface = 'glass',
   contentMode = 'fixed',
@@ -45,7 +46,9 @@ export function Sheet({
               : undefined
           }
         >
-          {overlayHeader ? <GlassLayer effect="clear" /> : null}
+          {overlayHeader && headerSurface === 'glass' ? (
+            <GlassLayer effect="clear" />
+          ) : null}
           {header}
         </View>
       ) : (

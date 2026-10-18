@@ -95,7 +95,10 @@ export const Search = forwardRef<TextFieldHandle, SearchProps>(
       { value, defaultValue, onChangeText },
       'Search'
     );
-    const searchLayout = normalizeSearchLayout(fixed.hitTarget, 36);
+    const searchLayout = normalizeSearchLayout(
+      fixed.hitTarget,
+      fixed.compactControl
+    );
     const effectiveEditable = disabled !== true && editable !== false;
     const trailing: TextFieldSlot | undefined =
       controller.value.length > 0 && effectiveEditable && controller.canUpdate

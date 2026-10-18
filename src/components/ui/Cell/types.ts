@@ -36,7 +36,7 @@ type SharedCellProps = {
   desc?: CellTextValue;
   /** 图标组件或显式的纯展示前导节点。 */
   leading?: CellLeading;
-  /** 危险态：icon 盒子与标题使用 error 色；action arrow 不显示。 */
+  /** 危险态：图标与标题使用 error 色，图标盒子保持同组底色；action arrow 不显示。 */
   danger?: boolean;
   /**
    * 选中态：标题使用 primary 色，表示「列表里当前这一项」（会话列表的当前会话、
@@ -94,7 +94,7 @@ export type ListProps = {
   /** 一组 Cell */
   children: ReactNode;
   /**
-   * `flush=true` 时不画灰色容器,行直接放在透明背景上。
+   * `flush=true` 时不重复绘制玻璃材质,行直接放在透明背景上。
    * 用于:嵌套在 Card 内 / 第一屏 hero 区下方等已有底色的场景。
    */
   flush?: boolean;

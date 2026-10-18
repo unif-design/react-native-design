@@ -46,7 +46,7 @@ export const items = [
     <span className="demo-label">6 列 · 紧凑入口</span>
     <Grid columns={6} items={items.slice(0, 6)} />
     <span className="demo-label">
-      {'card={false} · 嵌套已有白卡，去掉外层背景'}
+      {'card={false} · 嵌套已有卡片，去掉外层背景'}
     </span>
     <View
       style={{
@@ -73,7 +73,7 @@ export const items = [
 | `items`   | `GridItem[]`                 | —      | 入口列表（见下）                                           |
 | `columns` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | `4`    | 列数；类型外的值（如 `7`）会**静默回退到 4 列**并打 warn   |
 | `onPress` | `(item: GridItem) => void`   | —      | 点击某格回调；提供时每格是 `button`，缺省时保持展示 `View` |
-| `card`    | `boolean`                    | `true` | 是否套白色卡片；`false` 则背景透明（嵌进已有白卡时用）     |
+| `card`    | `boolean`                    | `true` | 是否套玻璃卡片；`false` 则背景透明（嵌进已有卡片时用）     |
 | `testID`  | `string?`                    | —      | 容器 testID；每格自动派生为 `${testID}-${item.id}`         |
 
 ### `GridItem`
@@ -91,14 +91,14 @@ export const items = [
 
 来源：`src/components/ui/Grid/styles.ts`（值取自 `src/theme/tokens.ts`）。
 
-| 元素           | 规则                                                                                                                                 |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| 容器（`card`） | `c.surface` 白底，`radius.xl`（12）圆角，`paddingVertical: space[5]`（12）/ `paddingHorizontal: space[3]`（8），1px `c.outline` 边框 |
-| 列宽           | 等宽，按 `columns` 取 `100% / 50% / 33.3% / 25% / 20% / 16.7%`（StyleSheet 预生成）                                                  |
-| 单格           | `paddingVertical: space[5]`（12），居中 icon + label，`gap: space[2]`（6）                                                           |
-| Icon           | `size=28`（介于 `icon.md`/`icon.lg`），色固定 `c.foregroundMuted`                                                                    |
-| Label          | `t.xxs`（12）/ `fw.medium`（500）/ `c.foreground`                                                                                    |
-| Badge          | 叠在 icon 右上的小红角标：`c.error` 底、`c.onError` 字、`t.nano`（10）、`fw.bold`                                                    |
+| 元素           | 规则                                                                                                                                       |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 容器（`card`） | 主题 `GlassLayer` 材质，`radius.xl`（12）圆角，`paddingVertical: space[5]`（12）/ `paddingHorizontal: space[3]`（8），1px `c.outline` 边框 |
+| 列宽           | 等宽，按 `columns` 取 `100% / 50% / 33.3% / 25% / 20% / 16.7%`（StyleSheet 预生成）                                                        |
+| 单格           | `paddingVertical: space[5]`（12），居中 icon + label，`gap: space[2]`（6）                                                                 |
+| Icon           | `size=28`（介于 `icon.md`/`icon.lg`），色固定 `c.foregroundMuted`                                                                          |
+| Label          | `t.xxs`（12）/ `fw.medium`（500）/ `c.foreground`                                                                                          |
+| Badge          | 叠在 icon 右上的小红角标：`c.error` 底、`c.onError` 字、`t.nano`（10）、`fw.bold`                                                          |
 
 ## 用法
 

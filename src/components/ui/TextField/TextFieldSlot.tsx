@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
-import { useColors, useThemedStyles } from '../../../theme';
+import { control, icon, useColors, useThemedStyles } from '../../../theme';
 import { createLogger } from '../../../utils/logger';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { IconButton } from '../IconButton';
@@ -15,7 +15,7 @@ type TextFieldSlotProps = {
   slot: TextFieldSlotConfig | unknown;
   effectiveEditable: boolean;
   testID?: string;
-  glass?: boolean;
+  compact?: boolean;
 };
 
 /**
@@ -26,7 +26,7 @@ export function TextFieldSlot({
   slot,
   effectiveEditable,
   testID,
-  glass,
+  compact,
 }: TextFieldSlotProps): React.JSX.Element | null {
   const colors = useColors();
   const styles = useThemedStyles(makeStyles);
@@ -74,15 +74,16 @@ export function TextFieldSlot({
       );
     case 'action': {
       const disabled = !effectiveEditable || safeSlot.disabled === true;
-      if (glass && safeSlot.icon)
+      if (compact && safeSlot.icon)
         return (
           <View style={styles.actionFrame}>
             <IconButton
               icon={safeSlot.icon}
               onPress={safeSlot.onPress}
-              variant="glass"
-              size="sm"
-              iconSize={18}
+              variant="neutral"
+              surfaceSize={control.xs}
+              iconSize={icon.xxs}
+              style={styles.compactAction}
               color={colors.foregroundMuted}
               disabled={disabled}
               accessibilityLabel={safeSlot.accessibilityLabel}

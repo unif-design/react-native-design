@@ -1,6 +1,6 @@
 import { CloseOutlined } from '@unif/react-native-icons';
 import React from 'react';
-import { AccessibilityInfo, StyleSheet } from 'react-native';
+import { AccessibilityInfo, StyleSheet, Text } from 'react-native';
 import {
   fireEvent,
   render,
@@ -10,6 +10,13 @@ import {
 import * as LiquidGlass from '@callstack/liquid-glass';
 import {
   Button,
+  Card,
+  Cell,
+  FormGroup,
+  FormRow,
+  Input,
+  List,
+  Textarea,
   lightColors,
   darkColors,
   Chip,
@@ -30,6 +37,37 @@ beforeEach(() => {
 });
 
 afterEach(() => jest.restoreAllMocks());
+
+test.each(['light', 'dark'] as const)(
+  '输入、分组表单和列表在 %s 下使用独立玻璃且禁用不隐藏材质',
+  async (scheme) => {
+    const action = jest.fn();
+    const page = render(
+      <ThemeProvider forceScheme={scheme}>
+        <Input disabled accessibilityLabel="客户名称" defaultValue="门店" />
+        <Textarea disabled accessibilityLabel="备注" defaultValue="拜访备注" />
+        <FormGroup label="信息">
+          <FormRow label="说明">
+            <Text>说明内容</Text>
+          </FormRow>
+        </FormGroup>
+        <List>
+          <Cell title="客户" onPress={action} disabled />
+        </List>
+        <Card variant="glass" bare>
+          <List flush>
+            <Cell title="设置" />
+          </List>
+        </Card>
+      </ThemeProvider>
+    );
+    await expectVisibleMaterial(5);
+    fireEvent.press(page.getByRole('button', { name: '客户' }));
+    expect(action).not.toHaveBeenCalled();
+    expect(page.getByLabelText('客户名称')).toHaveProp('editable', false);
+    expect(page.getByLabelText('备注')).toHaveProp('editable', false);
+  }
+);
 
 async function expectVisibleMaterial(count = 1) {
   await waitFor(() => {
@@ -141,7 +179,7 @@ test('Search 禁用时材质仍可见；恢复编辑后清除和提交使用同�
       <Search defaultValue="客户" onSubmit={submit} testID="search" />
     </ThemeProvider>
   );
-  await expectVisibleMaterial(2);
+  await expectVisibleMaterial();
   fireEvent.press(screen.getByRole('button', { name: '清除搜索内容' }));
   expect(screen.getByTestId('search-input').props.value).toBe('');
   await expectVisibleMaterial();
@@ -150,7 +188,7 @@ test('Search 禁用时材质仍可见；恢复编辑后清除和提交使用同�
     nativeEvent: { text: '门店' },
   });
   expect(submit).toHaveBeenCalledWith('门店');
-  await expectVisibleMaterial(2);
+  await expectVisibleMaterial();
 });
 
 test.each(['light', 'dark'] as const)(

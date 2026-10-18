@@ -1,7 +1,7 @@
 # Unif Design — 全文文档聚合
 
 > 可选全文。普通查询优先通过 llms.txt 定位相关单页。
-<!-- Generated from @unif/react-native-design@1.6.2; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@1.6.3; edit source documentation. -->
 
 ## 目录
 
@@ -787,12 +787,16 @@ import { Button } from '@unif/react-native-design';
 
 # Card 卡片
 
-容纳相关信息和操作的卡片。通过已有变体选择背景、边框与阴影。
+容纳相关信息和操作的卡片。`variant="glass"` 使用共享玻璃材质，保持原圆角、内边距、边框和内容布局。各业务卡片自己选择材质，外层组合不再叠加背景。
 
 ## 代码演示 {#实时预览}
 
 ```tsx
   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <span className="demo-label">glass · 玻璃卡片</span>
+    <Card variant="glass">
+      <Text>独立维护的信息卡片</Text>
+    </Card>
     <span className="demo-label">default · 带阴影</span>
     <Card>
       <Text
@@ -963,18 +967,18 @@ function Confirm() {
 
 ## API
 
-| 参数           | 类型                             | 默认值               | 说明                                                                                                              |
-| -------------- | -------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `children`     | `ReactNode`                      | —                    | 卡片内容                                                                                                          |
-| `variant`      | `'default' \| 'flat' \| 'plain'` | `'default'`          | 带阴影 / 仅圆角无阴影。`'flat'` 已 deprecated 等价 `'plain'`                                                      |
-| `padding`      | `number`                         | `14`（`space['6']`） | 内边距                                                                                                            |
-| `borderRadius` | `number`                         | `12`（`radius.xl`）  | 圆角                                                                                                              |
-| `borderColor`  | `string`                         | —                    | 强调描边色（任意 variant 均生效;启用时默认 2px）                                                                  |
-| `borderWidth`  | `number`                         | `2`                  | 与 `borderColor` 配合                                                                                             |
-| `bare`         | `boolean`                        | `false`              | 抑制内边距,内容自控（与 variant 正交）                                                                            |
-| `fill`         | `boolean`                        | `false`              | 撑满模式:外层 + 内层 clip 均 `flex:1`,Card 在 flex 父里撑满、内容区填满外层（内部 `flex:1` 滚动列表据此拿到高度） |
-| `style`        | `StyleProp<ViewStyle>`           | —                    | 额外样式覆盖                                                                                                      |
-| `testID`       | `string`                         | —                    | E2E / 测试定位                                                                                                    |
+| 参数           | 类型                                        | 默认值               | 说明                                                                                                              |
+| -------------- | ------------------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `children`     | `ReactNode`                                 | —                    | 卡片内容                                                                                                          |
+| `variant`      | `'default' \| 'flat' \| 'plain' \| 'glass'` | `'default'`          | 带阴影 / 仅圆角无阴影。`'flat'` 已 deprecated 等价 `'plain'`                                                      |
+| `padding`      | `number`                                    | `14`（`space['6']`） | 内边距                                                                                                            |
+| `borderRadius` | `number`                                    | `12`（`radius.xl`）  | 圆角                                                                                                              |
+| `borderColor`  | `string`                                    | —                    | 强调描边色（任意 variant 均生效;启用时默认 2px）                                                                  |
+| `borderWidth`  | `number`                                    | `2`                  | 与 `borderColor` 配合                                                                                             |
+| `bare`         | `boolean`                                   | `false`              | 抑制内边距,内容自控（与 variant 正交）                                                                            |
+| `fill`         | `boolean`                                   | `false`              | 撑满模式:外层 + 内层 clip 均 `flex:1`,Card 在 flex 父里撑满、内容区填满外层（内部 `flex:1` 滚动列表据此拿到高度） |
+| `style`        | `StyleProp<ViewStyle>`                      | —                    | 额外样式覆盖                                                                                                      |
+| `testID`       | `string`                                    | —                    | E2E / 测试定位                                                                                                    |
 
 ## 无障碍（a11y）
 
@@ -986,7 +990,7 @@ function Confirm() {
 
 - ❌ 不要叠加多层阴影——卡片只有一种阴影
 - ❌ 不要把 List 行做成 Card——List 行用 [Cell](md/components/cell.md)
-- ❌ 不要给 Card 加渐变背景——只有 logo 和 drawer header 允许渐变
+- 玻璃卡片直接选择 `glass`；低版本系统复用主题渐变，减少透明度时使用清晰的主题底色。不要在玻璃卡片的祖先上设置 opacity，也不要叠加重复材质。
 
 ## Carousel 轮播
 
@@ -1288,7 +1292,7 @@ const CellDemo = () => {
 | 元素                | 规则                                                                                                                           |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | 整组容器（grouped） | `c.background` 浅灰底（视觉分组），`padding: 8`（`space[3]`），`borderRadius: 12`（`radius.xl`），`gap: 8`                     |
-| 单行                | `c.surface` 白底，`borderRadius: 10`（`radius.lg`），`min-height: 56`，`padding: 14`（`space[6]`，水平 + 垂直同值）            |
+| 单行                | 共享 GlassLayer 材质，`borderRadius: 10`（`radius.lg`），`min-height: 56`，`padding: 14`（`space[6]`，水平 + 垂直同值）        |
 | 行内布局            | 左 icon (grouped 22 / flush 28 盒) + 中 (title 15/500 + desc 13/subtle) + 右 extra (13/subtle) + arrow (grouped 20 / flush 18) |
 | **绝不**（grouped） | `border-bottom`、`hairline` 分隔（flush 模式才用 inset hairline）                                                              |
 
@@ -1372,21 +1376,21 @@ type StaticCellExtra =
 
 ### `<Cell>`
 
-| 参数                 | 类型                   | 默认值   | 说明                                                                                        |
-| -------------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------------- |
-| `title`              | `CellTextValue`        | —        | 主标题（必填）；始终由库内 `<Text>` + `stringifyCellText` 安全渲染                          |
-| `titleLines`         | `number`               | `1`      | 主标题的 `numberOfLines`                                                                    |
-| `desc`               | `CellTextValue`        | —        | 副标题 / 描述；始终由库内 `<Text>` 安全渲染，最多 2 行                                      |
-| `extra`              | `CellExtra`            | —        | 三种公开配置；actionable 可用 text/display，static 仅 text/装饰 display，control 仅 control |
-| `arrow`              | `boolean`              | `false`  | 仅 actionable 可用；显示 chevron-right，`danger` 时仍不渲染                                 |
-| `leading`            | `CellLeading`          | —        | 图标组件，或 `{ kind: 'display', node }` 纯展示节点                                         |
-| `onPress`            | `() => void`           | —        | actionable 分支必填；control/static 禁止                                                    |
-| `disabled`           | `boolean`              | `false`  | 仅 actionable 可用；禁用时移除 handler、半透明并上报 disabled                               |
-| `danger`             | `boolean`              | `false`  | 危险态：icon 盒子 + 标题用 error 红,且不渲染 arrow（常用于退出登录 / 删除等）               |
-| `style`              | `StyleProp<ViewStyle>` | —        | 额外样式覆盖（合并到 cell 容器的 style 数组）                                               |
-| `testID`             | `string`               | —        | E2E / 测试定位                                                                              |
-| `accessibilityLabel` | `string`               | 自动组合 | 仅 actionable 可用；覆盖自动名称                                                            |
-| `accessibilityHint`  | `string`               | —        | 仅 actionable 可用；说明操作结果                                                            |
+| 参数                 | 类型                   | 默认值   | 说明                                                                                              |
+| -------------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------------------- |
+| `title`              | `CellTextValue`        | —        | 主标题（必填）；始终由库内 `<Text>` + `stringifyCellText` 安全渲染                                |
+| `titleLines`         | `number`               | `1`      | 主标题的 `numberOfLines`                                                                          |
+| `desc`               | `CellTextValue`        | —        | 副标题 / 描述；始终由库内 `<Text>` 安全渲染，最多 2 行                                            |
+| `extra`              | `CellExtra`            | —        | 三种公开配置；actionable 可用 text/display，static 仅 text/装饰 display，control 仅 control       |
+| `arrow`              | `boolean`              | `false`  | 仅 actionable 可用；显示 chevron-right，`danger` 时仍不渲染                                       |
+| `leading`            | `CellLeading`          | —        | 图标组件，或 `{ kind: 'display', node }` 纯展示节点                                               |
+| `onPress`            | `() => void`           | —        | actionable 分支必填；control/static 禁止                                                          |
+| `disabled`           | `boolean`              | `false`  | 仅 actionable 可用；禁用时移除 handler、半透明并上报 disabled                                     |
+| `danger`             | `boolean`              | `false`  | 危险态：图标与标题用 error 红，图标盒子保持同组主题底色,且不渲染 arrow（常用于退出登录 / 删除等） |
+| `style`              | `StyleProp<ViewStyle>` | —        | 额外样式覆盖（合并到 cell 容器的 style 数组）                                                     |
+| `testID`             | `string`               | —        | E2E / 测试定位                                                                                    |
+| `accessibilityLabel` | `string`               | 自动组合 | 仅 actionable 可用；覆盖自动名称                                                                  |
+| `accessibilityHint`  | `string`               | —        | 仅 actionable 可用；说明操作结果                                                                  |
 
 `CellProps` 是三个互斥分支：
 
@@ -1401,7 +1405,7 @@ type StaticCellExtra =
 | 参数       | 类型                   | 默认值   | 说明                                                              |
 | ---------- | ---------------------- | -------- | ----------------------------------------------------------------- |
 | `children` | `ReactNode`            | —        | 一组 `<Cell>`                                                     |
-| `flush`    | `boolean`              | `false`  | 透明背景（嵌套用）；省略则白卡 + 8px gap + 浅灰底容器             |
+| `flush`    | `boolean`              | `false`  | 透明背景（嵌套用）；省略则玻璃卡 + 8px gap + 透明容器             |
 | `divider`  | `'full' \| 'none'`     | `'full'` | flush 模式下行间分隔线:`'full'` 铺满全宽 hairline / `'none'` 不画 |
 | `style`    | `StyleProp<ViewStyle>` | —        | 额外样式覆盖                                                      |
 | `testID`   | `string`               | —        | E2E / 测试定位                                                    |
@@ -1455,10 +1459,10 @@ type StaticCellExtra =
 
 ## 与 Form 的区别
 
-| 用途            | 选哪个                                |
-| --------------- | ------------------------------------- |
-| 数据展示 / 跳转 | **Cell · List** — 白卡 + gap          |
-| 数据录入 / 表单 | [Form](md/components/form.md) — 白卡 + 行间 hairline |
+| 用途            | 选哪个                                  |
+| --------------- | --------------------------------------- |
+| 数据展示 / 跳转 | **Cell · List** — 玻璃卡 + gap          |
+| 数据录入 / 表单 | [Form](md/components/form.md) — 玻璃卡 + 行间 hairline |
 
 ## 主题键（Tokens）
 
@@ -1466,11 +1470,11 @@ type StaticCellExtra =
 
 | Token                                | 来源          | 作用                                                                                      |
 | ------------------------------------ | ------------- | ----------------------------------------------------------------------------------------- |
-| `c.surface`                          | `useColors()` | grouped 模式下单行白卡背景色                                                              |
+| `c.surface`                          | `useColors()` | 减少透明度时玻璃卡的背景色                                                                |
 | `c.foreground`                       | `useColors()` | 主标题文字色（`title` / `titleFlush`）                                                    |
 | `c.foregroundSubtle`                 | `useColors()` | 副标题 / extra 文字色（grouped 模式）                                                     |
 | `c.foregroundMuted`                  | `useColors()` | 副标题 / extra 文字色（flush 模式，另加 `opacity: 0.55`）                                 |
-| `c.background`                       | `useColors()` | `<List>` grouped 模式外容器背景色（浅灰底）                                               |
+| `c.background`                       | `useColors()` | 页面背景参考；List 本身透明                                                               |
 | `c.outline`                          | `useColors()` | flush 模式行间 hairline 分隔线颜色                                                        |
 | `radius.lg`                          | 静态 token    | grouped 模式单行卡片圆角                                                                  |
 | `radius.xl`                          | 静态 token    | `<List>` grouped 模式外容器圆角                                                           |
@@ -2632,7 +2636,7 @@ const FormDemo = () => {
 | 元素     | 规则                                                                                                                 |
 | -------- | -------------------------------------------------------------------------------------------------------------------- |
 | 分组标题 | `t.xs`（13）/ `fw.semi`（600）/ `c.foregroundSubtle`，全大写、`letterSpacing: 1`、`paddingHorizontal: space[1]`（4） |
-| 分组卡片 | `c.surface` 白底，`radius.lg`（10）圆角，`overflow: hidden`，组内 `gap: space[3]`（8）                               |
+| 分组卡片 | 共享 GlassLayer 材质，`radius.lg`（10）圆角，`overflow: hidden`，组内 `gap: space[3]`（8）                           |
 | Form Row | `minHeight: 48`，左 label + 右控件，`paddingHorizontal: space[7]`（16）/ `paddingVertical: space[5]`（12）           |
 | 行 label | `t.sm`（14）/ `fw.medium`（500）/ `c.foreground`                                                                     |
 | 行间分隔 | `StyleSheet.hairlineWidth`、`c.outline`（亮色 `#EDEDED`）（这是 form 的例外，**不**用 gap）                          |
@@ -2706,10 +2710,10 @@ import {
 
 ## 与 Cell · List 的区别
 
-| 用途                         | 选哪个                             |
-| ---------------------------- | ---------------------------------- |
-| 数据展示（设置项、客户列表） | [Cell · List](md/components/cell.md) — 白卡 + gap |
-| 数据录入（表单）             | **Form** — 白卡 + 行间 hairline    |
+| 用途                         | 选哪个                               |
+| ---------------------------- | ------------------------------------ |
+| 数据展示（设置项、客户列表） | [Cell · List](md/components/cell.md) — 玻璃卡 + gap |
+| 数据录入（表单）             | **Form** — 玻璃卡 + 行间 hairline    |
 
 录入场景密度更高，hairline 分隔比 gap 更高效；展示场景反之。设置列表若把
 Switch / Stepper 放在 Cell 行尾，必须选择 Cell 的显式 control 分支，不能把控件
@@ -2976,7 +2980,7 @@ const items = [
     <span className="demo-label">6 列 · 紧凑入口</span>
     <Grid columns={6} items={items.slice(0, 6)} />
     <span className="demo-label">
-      {'card={false} · 嵌套已有白卡，去掉外层背景'}
+      {'card={false} · 嵌套已有卡片，去掉外层背景'}
     </span>
     <View
       style={{
@@ -3003,7 +3007,7 @@ const items = [
 | `items`   | `GridItem[]`                 | —      | 入口列表（见下）                                           |
 | `columns` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | `4`    | 列数；类型外的值（如 `7`）会**静默回退到 4 列**并打 warn   |
 | `onPress` | `(item: GridItem) => void`   | —      | 点击某格回调；提供时每格是 `button`，缺省时保持展示 `View` |
-| `card`    | `boolean`                    | `true` | 是否套白色卡片；`false` 则背景透明（嵌进已有白卡时用）     |
+| `card`    | `boolean`                    | `true` | 是否套玻璃卡片；`false` 则背景透明（嵌进已有卡片时用）     |
 | `testID`  | `string?`                    | —      | 容器 testID；每格自动派生为 `${testID}-${item.id}`         |
 
 ### `GridItem`
@@ -3021,14 +3025,14 @@ const items = [
 
 来源：`src/components/ui/Grid/styles.ts`（值取自 `src/theme/tokens.ts`）。
 
-| 元素           | 规则                                                                                                                                 |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| 容器（`card`） | `c.surface` 白底，`radius.xl`（12）圆角，`paddingVertical: space[5]`（12）/ `paddingHorizontal: space[3]`（8），1px `c.outline` 边框 |
-| 列宽           | 等宽，按 `columns` 取 `100% / 50% / 33.3% / 25% / 20% / 16.7%`（StyleSheet 预生成）                                                  |
-| 单格           | `paddingVertical: space[5]`（12），居中 icon + label，`gap: space[2]`（6）                                                           |
-| Icon           | `size=28`（介于 `icon.md`/`icon.lg`），色固定 `c.foregroundMuted`                                                                    |
-| Label          | `t.xxs`（12）/ `fw.medium`（500）/ `c.foreground`                                                                                    |
-| Badge          | 叠在 icon 右上的小红角标：`c.error` 底、`c.onError` 字、`t.nano`（10）、`fw.bold`                                                    |
+| 元素           | 规则                                                                                                                                       |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 容器（`card`） | 主题 `GlassLayer` 材质，`radius.xl`（12）圆角，`paddingVertical: space[5]`（12）/ `paddingHorizontal: space[3]`（8），1px `c.outline` 边框 |
+| 列宽           | 等宽，按 `columns` 取 `100% / 50% / 33.3% / 25% / 20% / 16.7%`（StyleSheet 预生成）                                                        |
+| 单格           | `paddingVertical: space[5]`（12），居中 icon + label，`gap: space[2]`（6）                                                                 |
+| Icon           | `size=28`（介于 `icon.md`/`icon.lg`），色固定 `c.foregroundMuted`                                                                          |
+| Label          | `t.xxs`（12）/ `fw.medium`（500）/ `c.foreground`                                                                                          |
+| Badge          | 叠在 icon 右上的小红角标：`c.error` 底、`c.onError` 字、`t.nano`（10）、`fw.bold`                                                          |
 
 ## 用法
 
@@ -3518,7 +3522,7 @@ Web 示例只能验证浏览器交互。原生触摸冒泡、玻璃材质和屏�
 
 # Input 输入框
 
-单行文本输入。可视高度默认及最小命中框均为 44pt；多行使用 [Textarea](md/components/textarea.md)。
+单行文本输入，背景统一使用 GlassLayer；焦点、填写和错误状态保留各自描边，禁用只淡化前景。可视高度默认及最小命中框均为 44pt；多行使用 [Textarea](md/components/textarea.md)。
 
 ```tsx
 const InputDemo = () => {
@@ -4803,7 +4807,7 @@ import { Card, Ribbon } from '@unif/react-native-design';
 
 # Search 搜索框
 
-Search 自管搜索 icon、清除 action、36pt 可视 surface、44pt 根命中框、`returnKeyType="search"` 与 `accessibilityRole="search"`。这些入口不能由 caller 覆盖。
+Search 自管搜索 icon、清除 action、`fixed.compactControl` 可视 surface、44pt 根命中框、`returnKeyType="search"` 与 `accessibilityRole="search"`。这些入口不能由 caller 覆盖。
 
 搜索框可见胶囊默认采用系统玻璃，原生不额外染色，随主题与减少透明度设置变化；禁用只淡化前景。输入、清除、提交和 44pt 交互区域保持原有规则。
 
@@ -4824,7 +4828,7 @@ Search 自管搜索 icon、清除 action、36pt 可视 surface、44pt 根命中�
 
 提供 `onSubmit` 时，搜索 icon 是可点击的“搜索”按钮，点击交付 `onSubmit(currentValue)`；没有 `onSubmit` 时仍是装饰图标。按键盘搜索时先执行 `onSubmitEditing(event)`，再执行 `onSubmit(currentValue)`。输入变化和清除都不自动提交，是否发起查询由调用方决定。
 
-当前 value 非空、字段有效可编辑且 controller 能更新时才渲染玻璃清除按钮；清除调用同一个 `onChangeText('')` 路径。`disabled` 或 `editable={false}` 时搜索按钮不可用，键盘事件也不交付提交。
+当前 value 非空、字段有效可编辑且 controller 能更新时才渲染小型主题色清除按钮；清除调用同一个 `onChangeText('')` 路径。`disabled` 或 `editable={false}` 时搜索按钮不可用，键盘事件也不交付提交。
 
 需要右侧独立搜索按钮时，在 Search 外组合 `IconButton variant="glass"`，并用 `onSubmitEditing` 处理键盘提交；省略 Search 的 `onSubmit` 可保留左侧装饰图标。
 
@@ -4834,6 +4838,8 @@ Search 自管搜索 icon、清除 action、36pt 可视 surface、44pt 根命中�
 
 ref 是 `TextFieldHandle`，只含 `focus()` / `blur()`；没有原生 `clear()`。无可见 label 时提供 `accessibilityLabel`。
 
+搜索框的可见高度复用 `fixed.compactControl`，右侧独立图标按钮使用 `IconButton surfaceSize={fixed.compactControl}` 并垂直居中。输入内的清除按钮使用 `control.xs` 表面与 `icon.xxs` 图标，采用中性主题底色；保持 44pt 命中区域，不叠加玻璃材质。
+
 ## Sheet 内容面板
 
 *Source: `docs/components/sheet.mdx` · Mirror: `md/components/sheet.md`*
@@ -4842,7 +4848,7 @@ ref 是 `TextFieldHandle`，只含 `focus()` / `blur()`；没有原生 `clear()`
 
 组合头部、内容和底部。父容器提供有界高度，弹层、关闭、安全区与键盘交给宿主。
 
-滚动内容使用 `contentMode="scroll"` 和 `headerMode="overlay"` 时，标题悬浮于正文上方并使用玻璃材质；首屏留白跟随真实标题高度，正文可以滚到标题背后。固定布局和外部列表仍由原布局维护标题占位。默认背景统一由 Sheet 根容器提供，`style.backgroundColor` 可设置整个面板的底色，不会再被内部标题和正文覆盖成另一层白底。
+滚动内容使用 `contentMode="scroll"` 和 `headerMode="overlay"` 时，标题悬浮于正文上方，默认使用玻璃材质；设置 `headerSurface="transparent"` 可去掉标题区材质，正文避让和滚动行为不变；首屏留白跟随真实标题高度，正文可以滚到标题背后。固定布局和外部列表仍由原布局维护标题占位。默认背景统一由 Sheet 根容器提供，`style.backgroundColor` 可设置整个面板的底色，不会再被内部标题和正文覆盖成另一层白底。
 
 ```tsx
 const sheetDemoStyles = (colors) => ({
@@ -4870,15 +4876,17 @@ const sheetDemoStyles = (colors) => ({
 
 ## API
 
-| 参数                    | 类型                                       | 默认值    | 说明                                                     |
-| ----------------------- | ------------------------------------------ | --------- | -------------------------------------------------------- |
-| `children`              | `ReactNode`                                | 必填      | 中间内容                                                 |
-| `header` / `footer`     | `ReactNode`                                | —         | 固定头尾；无头部显示非交互拖动指示                       |
-| `contentMode`           | `'fixed' \| 'scroll' \| 'external-scroll'` | `'fixed'` | 普通布局、内部纵向 ScrollView、外部自带滚动              |
-| `contentContainerStyle` | `StyleProp<ViewStyle>`                     | —         | 内容区域样式；scroll 时作用于 ScrollView 内容容器        |
-| `footerSurface`         | `solid \| glass`                           | `glass`   | 页脚工具区材质                                           |
-| `footerStyle`           | `StyleProp<ViewStyle>`                     | —         | 覆盖固定底部容器的留白与边框，供调用者已组合的操作区使用 |
-| `style` / `testID`      | `StyleProp<ViewStyle>` / `string`          | —         | 根容器样式与定位                                         |
+| 参数                    | 类型                                       | 默认值    | 说明                                                        |
+| ----------------------- | ------------------------------------------ | --------- | ----------------------------------------------------------- |
+| `children`              | `ReactNode`                                | 必填      | 中间内容                                                    |
+| `header` / `footer`     | `ReactNode`                                | —         | 固定头尾；无头部显示非交互拖动指示                          |
+| `contentMode`           | `'fixed' \| 'scroll' \| 'external-scroll'` | `'fixed'` | 普通布局、内部纵向 ScrollView、外部自带滚动                 |
+| `contentContainerStyle` | `StyleProp<ViewStyle>`                     | —         | 内容区域样式；scroll 时作用于 ScrollView 内容容器           |
+| `headerMode`            | `fixed \| overlay`                         | `fixed`   | 内部滚动时可让标题悬浮于正文之上                            |
+| `headerSurface`         | `glass \| transparent`                     | `glass`   | 悬浮标题区材质；透明标题组合 `NavBar variant="transparent"` |
+| `footerSurface`         | `solid \| glass`                           | `glass`   | 页脚工具区材质                                              |
+| `footerStyle`           | `StyleProp<ViewStyle>`                     | —         | 覆盖固定底部容器的留白与边框，供调用者已组合的操作区使用    |
+| `style` / `testID`      | `StyleProp<ViewStyle>` / `string`          | —         | 根容器样式与定位                                            |
 
 公开类型为 `SheetProps` 和 `SheetContentMode`。内部滚动保留 `keyboardShouldPersistTaps="handled"`；外部列表不再包同方向 ScrollView。头尾不定义业务按钮协议，直接组合 Design 组件。主题变化沿现有 Provider 传递。
 
@@ -6322,7 +6330,7 @@ const CompactTextEntryDemo = () => {
 };
 ```
 
-紧凑重命名 `variant="compact"` 使用主题玻璃；普通 card 保持正文表面。预填、全选、受控值、确认取消和 busy 保持，键盘避让仍由窗口宿主负责。
+`card` 与紧凑重命名 `variant="compact"` 均使用主题玻璃，分别保持原有圆角和布局。预填、全选、受控值、确认取消和 busy 保持，键盘避让仍由窗口宿主负责。
 
 ## 用法
 
@@ -6358,7 +6366,7 @@ const [value, setValue] = useState(initialValue);
 
 只组合 Design 控件，不依赖 Chat。应用验证提交内容和处理错误；组件不管理提交 Promise。中文、大字号与明暗主题沿现有 ThemeProvider 处理。原生展厅位于「表单与输入」，实际键盘避让需在宿主验证。
 
-`compact` 标题居中，使用 `type.h2`／`fw.semi`；表面圆角 `radius['3xl']`、内边距 `space[7]`、内容间距 `space[5]`。单行输入首次聚焦选中原文，闲置时采用主题浅表面，聚焦后使用主题表面与品牌边框，选区／光标使用品牌主色。取消采用 secondary lg、确认采用 primary lg，等宽胶囊并保留至少 44 的触达。两种变体均保留原文提交、外部 value 更新、busy、maxLength 和 autoFocus；变体不决定会话、弹层位置或保存行为。
+`compact` 标题居中，使用 `type.h2`／`fw.semi`；表面圆角 `radius['3xl']`、内边距 `space[7]`、内容间距 `space[5]`。单行输入首次聚焦选中原文，闲置和聚焦时均采用主题玻璃，聚焦后使用品牌边框，选区／光标使用品牌主色。取消采用 secondary lg、确认采用 primary lg，等宽胶囊并保留至少 44 的触达。两种变体均保留原文提交、外部 value 更新、busy、maxLength 和 autoFocus；变体不决定会话、弹层位置或保存行为。
 
 操作行保留自然换行，让较大字号或较长的自定义按钮文案仍可完整显示。
 
@@ -6510,7 +6518,7 @@ const TextareaLayoutDemo = () => {
 
 ## 嵌入复合输入
 
-`surface` 可选 `default`（缺省）或 `plain`。`default` 绘制独立输入的背景、圆角、边框及焦点／错误描边。`plain` 用于外层卡片已经提供表面的复合输入，不绘制这些装饰；文字、焦点事件、错误说明、禁用状态及最小触达区域保持原契约。
+`surface` 可选 `default`（缺省）或 `plain`。`default` 绘制独立输入的玻璃背景、圆角、边框及焦点／错误描边；禁用只淡化前景。`plain` 用于外层卡片已经提供表面的复合输入，不绘制这些装饰；文字、焦点事件、错误说明、禁用状态及最小触达区域保持原契约。
 
 两种表面都保留水平 `space[5]` 和垂直 `space[4]` 的文字内边距；消费者不需要再给文字区叠加内边距。`plain` 没有边框，其垂直内边距合计为 `2 * space[4]`。`minHeight`／`maxHeight` 仍包含这些间距；例如消费者按四行文字计算上限时，应将文字高度与这部分垂直间距相加。`containerStyle` 只作用于外层布局，不能用于穿透修改内部输入表面。
 
@@ -7240,6 +7248,16 @@ function MyView() {
 
 更多使用方式见[快速开始](md/getting-started.md)，旧变量调整见[版本迁移](md/migration.md)。
 
+## 页面与媒体配色
+
+`chatBackground`、`chatDrawerOverlay`、`warning`、`mapCircleStroke`、`mapCircleFill`、`mapPinShadow` 由 ColorTokens 统一维护，使用 `useColors` / `useThemedStyles` 获取当前主题。业务页面不自行定义同义颜色。
+
+图片、视频和相机取景复用 `mediaPalette.background` / `foreground` / `overlay`；这些媒体角色保持深色背景和浅色前景，不随页面主题反转。品牌图像、地图标记的状态含义仍由对应内容决定。
+
+`mediaPalette`、`cameraPalette`、`scannerPalette` 集中维护固定媒体画布、取景文字和录制状态，保持照片与摄像头画面上的对比度；`brandPalette` 维护微信、钉钉等品牌原色。这些调色板不跟随明暗主题反转，普通页面仍使用 `useColors()`。
+
+`shimmerPalette` 集中维护文字扫光动画的明暗端点；正文基色仍来自当前主题或调用方颜色，白色正文使用较深端点保持动画可见。
+
 ## 动效
 
 *Source: `docs/design/tokens/motion.md` · Mirror: `md/design/tokens/motion.md`*
@@ -7493,6 +7511,10 @@ const makeStyles = (c: ColorTokens, s: ShadowTokens) =>
 
 颜色与暗色主题见[颜色](md/design/tokens/colors.md)。
 
+搜索与独立图标按钮共用 `control.md`（36），清除操作的可见表面使用 `control.xs`（22）和 `icon.xxs`（14）；交互命中仍不小于 `fixed.hitTarget`（44）。
+
+`fixed.compactControl` 为搜索胶囊及其相邻圆形操作的 36pt 可视尺寸，不随屏宽变化；`fixed.hitTarget` 继续提供至少 44pt 的触达范围。
+
 ## 字体
 
 *Source: `docs/design/tokens/typography.md` · Mirror: `md/design/tokens/typography.md`*
@@ -7655,6 +7677,12 @@ function DynamicLabel({ size }: { size: number }) {
 库内 render-time dynamic typography 已按同一规则接线：Button、Avatar、Segmented、Stepper 中央值、Tag 与 AvatarWithRing 使用原始字号调用 `scaleFontMetric` 一次；Button Icon、Avatar / AvatarWithRing 容器、Segmented track、Stepper visual 与 outer（md/sm 至少 44pt；xs 高 44pt、横向小于 44pt）、Tag 高度均保留原尺寸。其余 `styles.ts` maker 产物只由 `useThemedStyles` 统一处理，不再在组件调用点重复缩放。
 
 缺少 `ThemeProvider` 时,主题 hook 返回同一个模块级 light fallback(`lightColors` / `lightShadow` / `fontScale=1`),保证引用稳定。开发环境会在 React effect 阶段一次性记录诊断;render 期间不会写日志。
+
+## 补充档位与共用行高、字距
+
+`type` 补充 `badge`（9）、`badgePlus`（9.5）、`nanoPlus`（10.5）、`xxsPlus`（12.5）、`bodyLg`（16）、`bodyLgPlus`（16.5）、`h1Plus`（19）、`titleLg`（20）、`displayPlus`（24），全部使用 `rf` 字号缩放。原有字号档位保持。
+
+`leading` 提供 badge / compact / sm / body / relaxed / heading 共用行高（12 / 16 / 20 / 21 / 22 / 24）。`tracking` 统一既有标题和标签字距；通过 `useThemedStyles` 消费，继续跟随用户字体设置。尺寸缩放 `r` 不再用来定义文字字号。
 
 ## 语调与文案
 

@@ -14,6 +14,7 @@ export const makeStyles = (c: ColorTokens) =>
       overflow: 'hidden',
     },
     flat: {},
+    glass: { backgroundColor: 'transparent' },
     // fill 模式:外层撑满 flex 父、内层 clip 填满外层 —— 让内部 flex:1 滚动视图拿到高度。
     fill: { flex: 1 },
   });
@@ -22,7 +23,8 @@ export const makeStyles = (c: ColorTokens) =>
  * variant → 装饰样式映射(§8 返 style 值的 helper,合并入 styles.ts):
  * - `default`:`s.card` 标准卡片阴影
  * - `flat`:走 `styles.flat`(目前空,deprecated 等价 plain;保留以容纳未来差量)
- * - `plain`:`undefined`(纯白底,装饰为零)
+ * - `plain`:`undefined`(主题实色底,装饰为零)
+ * - `glass`:透明外层，内层由 GlassLayer 提供材质
  */
 export function variantToStyle(
   v: CardVariant,
@@ -36,5 +38,7 @@ export function variantToStyle(
       return styles.flat;
     case 'plain':
       return undefined;
+    case 'glass':
+      return styles.glass;
   }
 }

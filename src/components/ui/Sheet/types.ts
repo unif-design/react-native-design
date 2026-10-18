@@ -8,6 +8,8 @@ export interface SheetProps {
   header?: ReactNode;
   /** 滚动正文可经过标题背后；固定或外部滚动内容仍由调用方布局。 */
   headerMode?: 'fixed' | 'overlay';
+  /** 悬浮标题区的材质；transparent 保留标题高度与正文滚动避让。 */
+  headerSurface?: 'glass' | 'transparent';
   footer?: ReactNode;
   /** 页脚工具区默认 glass；正文仍使用实色表面。 */
   footerSurface?: 'solid' | 'glass';

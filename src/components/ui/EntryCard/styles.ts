@@ -1,10 +1,11 @@
 import { StyleSheet } from 'react-native';
 import {
+  type as typography,
+  tracking,
   fw,
   icon,
   pressedOpacity,
   r,
-  rf,
   radius,
   space,
   type ColorTokens,
@@ -41,13 +42,13 @@ export const makeStyles = (c: ColorTokens) =>
     },
     title: {
       // 13.5pt —— 介于 type.xs(13) / type.sm(14) 之间的设计稿专定字号
-      fontSize: rf(13) + 0.5,
+      fontSize: typography.xsPlus,
       fontWeight: fw.medium,
-      letterSpacing: -0.2,
+      letterSpacing: tracking.compact,
       color: c.foreground,
     },
     sub: {
-      fontSize: rf(11),
+      fontSize: typography.micro,
       color: c.foregroundMuted,
     },
     pressed: {

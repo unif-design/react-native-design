@@ -33,6 +33,7 @@ jest.mock('../../../src/components/ui/Thumbnail', () => {
   };
 });
 import React from 'react';
+import { mediaPalette } from '@unif/react-native-design';
 import { StyleSheet, View } from 'react-native';
 import { act, fireEvent, render } from '@testing-library/react-native';
 import {
@@ -288,12 +289,12 @@ test('媒体尺寸 contain、主题/大字仅缩放文字，序号与操作在�
       (style) =>
         style?.width === 300 &&
         style?.height === 400 &&
-        style?.backgroundColor === 'black'
+        style?.backgroundColor === mediaPalette.background
     );
   expect(mediaFrame).toMatchObject({
     width: 300,
     height: 400,
-    backgroundColor: 'black',
+    backgroundColor: mediaPalette.background,
   });
   expect(mediaFrame?.borderWidth).toBeUndefined();
   expect(
@@ -335,7 +336,7 @@ test('媒体尺寸 contain、主题/大字仅缩放文字，序号与操作在�
       expect.objectContaining({
         width: 300,
         height: 400,
-        backgroundColor: 'black',
+        backgroundColor: mediaPalette.background,
       }),
     ])
   );

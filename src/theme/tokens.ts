@@ -8,7 +8,15 @@ export const fontMono = Platform.select({
 });
 
 export const type = {
+  badge: rf(9),
+  badgePlus: rf(9.5),
   display: rf(22),
+  displayPlus: rf(24),
+  h1Plus: rf(19),
+  titleLg: rf(20),
+  bodyLg: rf(16),
+  bodyLgPlus: rf(16.5),
+  xxsPlus: rf(12.5),
   h1: rf(18),
   h2: rf(17),
   h3: rf(15),
@@ -18,6 +26,7 @@ export const type = {
   xxs: rf(12),
   micro: rf(11),
   nano: rf(10), // TabBar/Grid 角标/小标签 10pt
+  nanoPlus: rf(10.5),
   // ── 半档微调(0.5 step,加于"近似 token + delta"反模式收敛) ──
   /** micro(11)与 xxs(12)之间:VersionPill / Splash / carousel 副标题。 */
   microPlus: rf(11.5),
@@ -79,6 +88,7 @@ export const avatar = {
 /** 图标盒尺寸阶梯(IconBox / 浅色 bg + 中心 icon)。
  *  icon['2xl'] 与 avatar.xl 同值但语义不同(图标 vs 头像),业务按语义选不要混用。 */
 export const icon = {
+  'xxs': r(14),
   'xs': r(18),
   'sm': r(22),
   'md': r(26),
@@ -91,6 +101,7 @@ export const icon = {
  *  lg 44 数值与 fixed.hitTarget 一致,但 lg 是 scaled / hitTarget 是物理常量,语义不同
  *  不要合用。 */
 export const control = {
+  xs: r(22),
   sm: r(28),
   md: r(36),
   lg: r(44),
@@ -106,6 +117,7 @@ export const dim = {
  *  iOS HIG 要求触控目标 ≥44pt 物理。 */
 export const fixed = {
   hitTarget: 44,
+  compactControl: 36,
   navbarH: 44,
   tabbarH: 50,
   hairline: StyleSheet.hairlineWidth,
@@ -122,3 +134,30 @@ export const motion = {
  *  ButtonBase、Chip、Cell、Grid、EntryCard、Tabs、Segmented、TabBar 等
  *  凡需要「按压反馈」的组件统一引用此值,避免散落多处手写 0.7 后不同步。 */
 export const pressedOpacity = 0.7;
+
+/** 共用文字行高；跟随屏幕与用户字体缩放。 */
+export const leading = {
+  badge: rf(12),
+  compact: rf(16),
+  sm: rf(20),
+  body: rf(21),
+  relaxed: rf(22),
+  heading: rf(24),
+} as const;
+
+/** 既有标题、标签与编号字距，集中维护，保持各场景原有排版。 */
+export const tracking = {
+  tighter: -0.5,
+  tight: -0.35,
+  snug: -0.3,
+  compact: -0.2,
+  subtle: -0.1,
+  normal: 0,
+  wide: 0.2,
+  wider: 0.5,
+  caps: 0.6,
+  loose: 1,
+  spaced: 1.4,
+  expanded: 1.5,
+  extraWide: 2,
+} as const;

@@ -48,13 +48,14 @@ export const makeStyles = (c: ColorTokens) => {
       width: '100%',
     },
     card: {
-      backgroundColor: c.surface,
+      backgroundColor: 'transparent',
       borderRadius: radius.xl,
       paddingVertical: space[5],
       paddingHorizontal: space[3],
       borderWidth: 1,
       borderColor: c.outline,
     },
+    material: { borderRadius: radius.xl },
     inner: {
       flexDirection: 'row',
       flexWrap: 'wrap',

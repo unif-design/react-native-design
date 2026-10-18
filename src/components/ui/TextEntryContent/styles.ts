@@ -9,10 +9,11 @@ export const makeStyles = (colors: ColorTokens) =>
       borderWidth: 1,
       borderColor: colors.outline,
       borderRadius: radius.xl,
-      backgroundColor: colors.surface,
+      backgroundColor: 'transparent',
     },
     title: { color: colors.foreground, fontSize: type.h3, fontWeight: fw.semi },
-    material: { borderRadius: radius['3xl'] },
+    material: { borderRadius: radius.xl },
+    compactMaterial: { borderRadius: radius['3xl'] },
     compactRoot: {
       backgroundColor: 'transparent',
       overflow: 'hidden',
