@@ -213,8 +213,8 @@ export const StepperDemo = () => {
 | 圆角           | 8px（`radius.md`，外层左右两角），中间数字框无独立圆角                                                                                                                                                                        |
 | 按钮 visual    | md `r(32)²` / sm `r(28)²` / xs `r(24)²`，嵌在 side outer 内并朝中央贴边；`±` 基准字号 18px（`type.h1`），按 fontScale 缩放一次                                                                                                |
 | 数值 visual    | md `r(48) × r(32)` / sm `r(40) × r(28)` / xs `r(40) × r(24)`；1px 上下边线、无左右边线，基准字号 md 14 / sm 13 / xs 11，按 fontScale 缩放一次；`formatValue` 只替换可见文案                                                   |
-| 背景 / 描边    | 视觉区域共用无额外染色的系统玻璃，保留 1px `c.outline` 边；无原生材质时为主题渐变，减少透明度时为清晰实色                                                                                                                                                                          |
-| 禁用           | 按钮前景 `opacity: 0.4`（达到 min/max 或整体 `disabled` 时；按下 0.7），材质与其祖先保持不透明                                                                                                                                                            |
+| 背景 / 描边    | 视觉区域共用无额外染色的系统玻璃，保留 1px `c.outline` 边；旧 iOS 或减少透明度时为清晰实色，Android 保留主题渐变                                                                                                              |
+| 禁用           | 按钮前景 `opacity: 0.4`（达到 min/max 或整体 `disabled` 时；按下 0.7），材质与其祖先保持不透明                                                                                                                                |
 
 `ThemeProvider fontScale` 只改变 `±` 与中央数值的文字 metric。三个 visual wrapper、md/sm 至少 44pt 的 outer frame、xs 高 44pt 且横向小于 44pt 的 dense outer、边框、圆角和点击布局都不缩放；动态中央字号不会再经过 `useThemedStyles` 二次处理。
 

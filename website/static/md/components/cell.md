@@ -286,7 +286,7 @@ type StaticCellExtra =
 
 | Token                                | 来源          | 作用                                                                                      |
 | ------------------------------------ | ------------- | ----------------------------------------------------------------------------------------- |
-| `c.surface`                          | `useColors()` | 减少透明度时玻璃卡的背景色                                                                |
+| `c.surface`                          | `useColors()` | 旧 iOS 或减少透明度时玻璃卡的背景色                                                       |
 | `c.foreground`                       | `useColors()` | 主标题文字色（`title` / `titleFlush`）                                                    |
 | `c.foregroundSubtle`                 | `useColors()` | 副标题 / extra 文字色（grouped 模式）                                                     |
 | `c.foregroundMuted`                  | `useColors()` | 副标题 / extra 文字色（flush 模式，另加 `opacity: 0.55`）                                 |

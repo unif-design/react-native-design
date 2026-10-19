@@ -148,4 +148,4 @@ import { Button } from '@unif/react-native-design';
 
 `ThemeProvider fontScale` 只把 Button label 字号缩放一次。Button 高度、水平 padding、gap、圆角和左右 Icon 尺寸仍由原始 `size` token 决定，不随字号档位改变。例如 `fontScale={1.5}` 会放大文字，但 `md` 仍保持 `control.md` 的原有几何，Icon 仍使用未缩放的 `type.sm + 2`。
 
-`secondary` 的原生玻璃行为保持不变；低版本采用主题半透明渐变；减少透明度时使用主题 `surfaceContainerHigh` 实底，与普通内容表面区分。
+`secondary` 的原生玻璃行为保持不变；旧 iOS 或减少透明度时使用主题 `surfaceContainerHigh` 实底；Android 保留主题半透明渐变，与普通内容表面区分。
