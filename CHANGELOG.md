@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.3](https://github.com/unif-design/react-native-design/compare/v1.9.2...v1.9.3) (2026-10-19)
+
+
+### Bug Fixes
+
+* **stepper:** limit disabled opacity to action labels ([#176](https://github.com/unif-design/react-native-design/issues/176)) ([1cc9c24](https://github.com/unif-design/react-native-design/commit/1cc9c245e49a30f719b055a507331a8a7b3dc056))
+
 ## [1.9.2](https://github.com/unif-design/react-native-design/compare/v1.9.1...v1.9.2) (2026-10-19)
 
 
