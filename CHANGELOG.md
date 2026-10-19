@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.8.0](https://github.com/unif-design/react-native-design/compare/v1.7.0...v1.8.0) (2026-10-19)
+
+
+### Features
+
+* add linear progress component ([#172](https://github.com/unif-design/react-native-design/issues/172)) ([7c6355d](https://github.com/unif-design/react-native-design/commit/7c6355d4c8c0e32b02798ce0017ded47e01177fb))
+
 # [1.7.0](https://github.com/unif-design/react-native-design/compare/v1.6.3...v1.7.0) (2026-10-18)
 
 
