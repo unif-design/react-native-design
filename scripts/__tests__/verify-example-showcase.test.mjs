@@ -21,7 +21,7 @@ test('正式 verifier 不受环境变量过滤并拒绝损坏的 manifest', () =
     path.join(os.tmpdir(), 'react-native-design-verifier-')
   );
   try {
-    mkdirSync(path.join(fixture, 'example'), { recursive: true });
+    mkdirSync(path.join(fixture, 'example/src'), { recursive: true });
     copyFileSync(
       path.join(repositoryRoot, 'package.json'),
       path.join(fixture, 'package.json')
@@ -49,7 +49,7 @@ test('正式 verifier 不受环境变量过滤并拒绝损坏的 manifest', () =
       {
         cwd: repositoryRoot,
         encoding: 'utf8',
-        // The deliberately incomplete fixture reports every contract failure.
+        // Invalid input must fail before the full regression suite starts.
         maxBuffer: 16 * 1024 * 1024,
         env,
       }
@@ -59,6 +59,7 @@ test('正式 verifier 不受环境变量过滤并拒绝损坏的 manifest', () =
     assert.ifError(result.error);
     assert.equal(result.status, 1, output);
     assert.match(output, /5\.7\.0/u);
+    assert.doesNotMatch(output, /TAP version|# tests|tests passed/);
   } finally {
     rmSync(fixture, { recursive: true, force: true });
   }
