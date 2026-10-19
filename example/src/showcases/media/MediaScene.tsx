@@ -409,6 +409,7 @@ export function MediaScene(): React.JSX.Element {
             <Thumbnail
               uri={MEDIA_DECODE_FAILURE_URI}
               size={{ width: 96, height: 56, borderRadius: 0 }}
+              backgroundColor="transparent"
               fallback={
                 <FileOutlined size={r(18)} color={colors.foregroundMuted} />
               }

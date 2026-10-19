@@ -154,6 +154,7 @@ import { Thumbnail } from '@unif/react-native-design';
 | `source`             | `ImageSourcePropType`                            | 与 `uri` 严格二选一    | 本地 asset、URI object 或 URI candidate 数组；Web 明确使用数组首项            |
 | `size`               | `ThumbnailSize \| Readonly<ThumbnailDimensions>` | `'md'`                 | 三档或显式图像框                                                              |
 | `fallback`           | `ReactNode`                                      | —                      | 无有效 source 或当前图片失败时的内容                                          |
+| `backgroundColor`    | RN `ColorValue`                                  | `colors.surfaceContainer` | 图像框底色；设为 `transparent` 可透出调用方已有的玻璃等材质                 |
 | `selected`           | `boolean`                                        | `false`                | frame 内始终存在的 ring 是否切为 2pt 品牌色                                   |
 | `resizeMode`         | RN `ImageProps['resizeMode']`                    | `'cover'`              | `cover / contain / stretch / center / repeat / none`                          |
 | `containerStyle`     | `StyleProp<ViewStyle>`                           | —                      | 完整 caller layout，只落到外层 View；可用 margin/flex/position/size/transform |
@@ -166,6 +167,8 @@ import { Thumbnail } from '@unif/react-native-design';
 ### 稳定结构与 source
 
 Thumbnail 始终渲染相同的两层 View：外层承载 `containerStyle` / `testID`，内层 visual frame 承载固定 size、圆角、裁切、placeholder、图片和 ring。ring 是 `pointerEvents="none"` 的 absolute overlay，未选时透明、选中时品牌色；两态都保持相同 frame 尺寸，不再用 border + padding 扩大布局。
+
+在已有玻璃图标容器中使用 `backgroundColor="transparent"`，加载中、图片透明区域和失败占位均透出容器材质。该属性只改变图像框底色，不改变图片实例、尺寸、裁切或选中环；更换底色不会重试失败的图片。
 
 合法 source 使用与 Avatar 相同的 immutable semantic snapshot 和 keyed image attempt。native 保留 URI candidate 数组，Web 使用首个 candidate；source 真实变化才创建新 attempt。source 非法或加载失败时只移除图片尝试，visual frame、placeholder 和 ring 继续存在。普通 JS 绕过类型传入缺失/同时存在的 `uri` + `source`、空白 URI、非法 source 或保留 image geometry 时，组件在 dev effect 诊断并失败关闭，生产环境静默，不会返回 `null`。
 

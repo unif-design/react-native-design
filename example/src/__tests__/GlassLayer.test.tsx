@@ -64,6 +64,10 @@ test.each(['clear', 'regular'] as const)(
       'transparent'
     );
 
+    expect(
+      StyleSheet.flatten(material.props.style).borderWidth
+    ).toBeUndefined();
+
     view.rerender(
       <ThemeProvider forceScheme="dark">
         <GlassLayer effect={effect} testID="glass-layer" />
@@ -121,6 +125,18 @@ test.each([
       right: 0,
       borderRadius: 14,
     });
+    const style = StyleSheet.flatten(
+      screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.style
+    );
+    if (os === 'ios') {
+      expect(style).toMatchObject({
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: (scheme === 'dark' ? darkColors : lightColors)
+          .glassSeparator,
+      });
+    } else {
+      expect(style.borderWidth).toBeUndefined();
+    }
   }
 );
 
@@ -226,6 +242,7 @@ test('固定深色材质在减少透明度事件后保持实色，迟到查询�
   });
   const material = screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
   expect(material.props).toMatchObject({ effect: 'none', colorScheme: 'dark' });
+  expect(StyleSheet.flatten(material.props.style).borderWidth).toBeUndefined();
   expect(StyleSheet.flatten(material.props.style).backgroundColor).toBe(
     darkColors.surface
   );
