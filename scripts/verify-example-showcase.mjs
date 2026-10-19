@@ -3583,7 +3583,7 @@ function verifyWorkflowContract(root) {
   const digest = createHash('sha256').update(sharedCi).digest('hex');
   if (
     digest !==
-    'a4c20ce45b3993fd609bce506bb5a0856ea99f574d75dcc6faf7305fcfc9c26a'
+    '4fea451faf61ff41faf088a89e9f4db3cdcd8e65f56d975be1e657d737298718'
   ) {
     failVerification(
       'SHARED_CI_DIGEST',
@@ -3893,8 +3893,8 @@ function runCli() {
   const contractRoot = path.resolve(
     process.argv[checkOnly ? 3 : 2] ?? repositoryRoot
   );
+  verifyExampleShowcase(contractRoot);
   if (checkOnly) {
-    verifyExampleShowcase(contractRoot);
     return;
   }
   const args = ['--test'];

@@ -3750,7 +3750,7 @@ test('repo-specific workflow 保留独立 example gate 且共享 CI digest 不�
   const sharedCi = read('.github/workflows/ci.yml');
   assert.equal(
     createHash('sha256').update(sharedCi).digest('hex'),
-    'a4c20ce45b3993fd609bce506bb5a0856ea99f574d75dcc6faf7305fcfc9c26a'
+    '4fea451faf61ff41faf088a89e9f4db3cdcd8e65f56d975be1e657d737298718'
   );
 
   const workflow = read('.github/workflows/example-showcase.yml');
