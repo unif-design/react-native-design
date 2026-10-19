@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.9.0](https://github.com/unif-design/react-native-design/compare/v1.8.0...v1.9.0) (2026-10-19)
+
+
+### Features
+
+* support transparent thumbnails and refine legacy iOS glass ([#173](https://github.com/unif-design/react-native-design/issues/173)) ([f01702c](https://github.com/unif-design/react-native-design/commit/f01702c24f81c54558695af0caf736daf1bd9ab6))
+
 # [1.8.0](https://github.com/unif-design/react-native-design/compare/v1.7.0...v1.8.0) (2026-10-19)
 
 
