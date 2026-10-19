@@ -1,7 +1,7 @@
 # Unif Design — 全文文档聚合
 
 > 可选全文。普通查询优先通过 llms.txt 定位相关单页。
-<!-- Generated from @unif/react-native-design@1.8.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@1.9.0; edit source documentation. -->
 
 ## 目录
 
@@ -780,7 +780,7 @@ import { Button } from '@unif/react-native-design';
 
 `ThemeProvider fontScale` 只把 Button label 字号缩放一次。Button 高度、水平 padding、gap、圆角和左右 Icon 尺寸仍由原始 `size` token 决定，不随字号档位改变。例如 `fontScale={1.5}` 会放大文字，但 `md` 仍保持 `control.md` 的原有几何，Icon 仍使用未缩放的 `type.sm + 2`。
 
-`secondary` 的原生玻璃行为保持不变；低版本采用主题半透明渐变；减少透明度时使用主题 `surfaceContainerHigh` 实底，与普通内容表面区分。
+`secondary` 的原生玻璃行为保持不变；旧 iOS 或减少透明度时使用主题 `surfaceContainerHigh` 实底；Android 保留主题半透明渐变，与普通内容表面区分。
 
 ## Card 卡片
 
@@ -991,7 +991,7 @@ function Confirm() {
 
 - ❌ 不要叠加多层阴影——卡片只有一种阴影
 - ❌ 不要把 List 行做成 Card——List 行用 [Cell](md/components/cell.md)
-- 玻璃卡片直接选择 `glass`；低版本系统复用主题渐变，减少透明度时使用清晰的主题底色。不要在玻璃卡片的祖先上设置 opacity，也不要叠加重复材质。
+- 玻璃卡片直接选择 `glass`；旧 iOS 或减少透明度时使用清晰的主题底色，Android 保留主题渐变。不要在玻璃卡片的祖先上设置 opacity，也不要叠加重复材质。
 
 ## Carousel 轮播
 
@@ -1471,7 +1471,7 @@ type StaticCellExtra =
 
 | Token                                | 来源          | 作用                                                                                      |
 | ------------------------------------ | ------------- | ----------------------------------------------------------------------------------------- |
-| `c.surface`                          | `useColors()` | 减少透明度时玻璃卡的背景色                                                                |
+| `c.surface`                          | `useColors()` | 旧 iOS 或减少透明度时玻璃卡的背景色                                                       |
 | `c.foreground`                       | `useColors()` | 主标题文字色（`title` / `titleFlush`）                                                    |
 | `c.foregroundSubtle`                 | `useColors()` | 副标题 / extra 文字色（grouped 模式）                                                     |
 | `c.foregroundMuted`                  | `useColors()` | 副标题 / extra 文字色（flush 模式，另加 `opacity: 0.55`）                                 |
@@ -1901,7 +1901,7 @@ leading／trailing 允许任意组件，其自身状态由调用方维护；Chip
 `confirm()` 在任何路径下都会 resolve,不会悬挂 —— 包括没挂 Host、重入、Host 渲染抛错、Host 卸载和被后挂载的 Host 接管。详见下方[生命周期契约](#生命周期契约)。
 :::
 
-确认卡采用主题玻璃；旧系统使用主题半透明渐变，减少透明度时使用清晰实色。显示外观不改变 owner 接管、点外取消、Promise 结算和窗口归还。
+确认卡采用主题玻璃；旧 iOS 或减少透明度时使用清晰实色，Android 保留主题半透明渐变。显示外观不改变 owner 接管、点外取消、Promise 结算和窗口归还。
 
 ## 用法
 
@@ -2744,7 +2744,7 @@ Switch / Stepper 放在 Cell 行尾，必须选择 Cell 的显式 control 分支
 
 为已有内容提供装饰玻璃背景。组件读取当前主题，不接管内容、交互或布局。
 
-无原生材质或浏览器不支持模糊时，采用主题半透明渐变。只有开启减少透明度或 iOS 偏好尚未读回时，才使用 `fallbackColor` 或主题 `surface` 实色。`secondary` Button／IconButton 的无障碍实色为 `surfaceContainerHigh`，避免与内容表面混在一起；普通低版本使用与输入框相同的渐变。
+旧 iOS 或 iOS 原生支持标记为假时，采用 `fallbackColor` 或主题 `surface` 实色分组，不叠加渐变和额外描边。开启减少透明度或 iOS 偏好尚未读回时也采用此实色背景。`secondary` Button／IconButton 与输入框使用 `surfaceContainerHigh`，与普通内容表面区分；Android 与缺少 CSS 模糊的 Web 继续使用主题半透明渐变。
 
 ## 代码演示 {#实时预览}
 
@@ -2820,26 +2820,27 @@ import { View, Text } from 'react-native';
 
 ## API
 
-| 参数            | 类型                   | 默认值                    | 说明                                                                |
-| --------------- | ---------------------- | ------------------------- | ------------------------------------------------------------------- |
-| `effect`        | `'clear' \| 'regular'` | `'regular'`               | `clear` 更通透，`regular` 使用标准材质                              |
-| `tintColor`     | `ColorValue`           | 原生不额外染色            | 支持时的材质染色；减少透明度时使用 fallbackColor 或对应主题 surface |
-| `fallbackColor` | `ColorValue`           | 主题 `surface`            | 仅减少透明度或 iOS 偏好读取前使用的清晰底色                         |
-| `colorScheme`   | `'light' \| 'dark'`    | 继承主题                  | 固定白色前景的相机控件使用 dark                                     |
-| `style`         | `StyleProp<ViewStyle>` | `StyleSheet.absoluteFill` | 布局、定位和圆角；材质颜色使用 `tintColor`                          |
-| `testID`        | `string`               | —                         | 测试定位                                                            |
+| 参数            | 类型                   | 默认值                    | 说明                                                        |
+| --------------- | ---------------------- | ------------------------- | ----------------------------------------------------------- |
+| `effect`        | `'clear' \| 'regular'` | `'regular'`               | `clear` 更通透，`regular` 使用标准材质                      |
+| `tintColor`     | `ColorValue`           | 原生不额外染色            | 支持时的材质染色；实色降级使用 fallbackColor 或主题 surface |
+| `fallbackColor` | `ColorValue`           | 主题 `surface`            | 旧 iOS、减少透明度或 iOS 偏好读取前使用的清晰底色           |
+| `colorScheme`   | `'light' \| 'dark'`    | 继承主题                  | 固定白色前景的相机控件使用 dark                             |
+| `style`         | `StyleProp<ViewStyle>` | `StyleSheet.absoluteFill` | 布局、定位和圆角；材质颜色使用 `tintColor`                  |
+| `testID`        | `string`               | —                         | 测试定位                                                    |
 
 原生默认不设置 `tintColor`，让系统从背后内容生成玻璃材质，不额外叠加白色或黑色底。Web 仅作 CSS 近似：clear 使用轻薄的 `c.tabBarGlassTint`，regular 使用 `c.glassSurface`。默认随主题更新，也可通过 `colorScheme` 选择固定外观；这不会改变相邻文字颜色。
 
 ## 平台与接入
 
-| 平台                               | 实现                                                                                        |
-| ---------------------------------- | ------------------------------------------------------------------------------------------- |
-| iOS 26+ 且原生支持标记为真         | `@callstack/liquid-glass` 的 `LiquidGlassView`，使用 `clear/regular` 原生材质与 `tintColor` |
-| 旧 iOS、Android 或原生支持标记为假 | 对应主题的半透明渐变；iOS 额外使用主题细边线区分表面与页面背景，不提供原生折射或背景模糊     |
-| Web                                | CSS `backdrop-filter` 与主题背景；`clear/regular` 分别使用 10/40px 的近似值                 |
+| 平台                           | 实现                                                                                        |
+| ------------------------------ | ------------------------------------------------------------------------------------------- |
+| iOS 26+ 且原生支持标记为真     | `@callstack/liquid-glass` 的 `LiquidGlassView`，使用 `clear/regular` 原生材质与 `tintColor` |
+| 旧 iOS 或 iOS 原生支持标记为假 | `fallbackColor` 或主题 `surface` 实色分组，无额外渐变或描边                                 |
+| Android                        | 对应主题的半透明渐变，不提供原生折射或背景模糊                                              |
+| Web                            | CSS `backdrop-filter` 与主题背景；`clear/regular` 分别使用 10/40px 的近似值                 |
 
-安装 `@callstack/liquid-glass`（本库 peer 范围 `>=0.8.2 <0.9.0`），iOS 执行 `bundle exec pod install` 并重新构建。上游要求 RN 0.80+、Xcode 26+；本库的 RN 要求仍以根 `package.json` 为准。当前 RN 0.86.3 的最低 iOS 版本为 15.1；玻璃能力的 iOS 26 门槛与应用最低版本是两件事，支持范围内的旧 iOS 使用半透明渐变。Expo Go 不支持此原生模块，Expo 工程需开发构建。见 [上游安装与 API](https://github.com/callstack/liquid-glass#documentation)。
+安装 `@callstack/liquid-glass`（本库 peer 范围 `>=0.8.2 <0.9.0`），iOS 执行 `bundle exec pod install` 并重新构建。上游要求 RN 0.80+、Xcode 26+；本库的 RN 要求仍以根 `package.json` 为准。当前 RN 0.86.3 的最低 iOS 版本为 15.1；玻璃能力的 iOS 26 门槛与应用最低版本是两件事，支持范围内的旧 iOS 使用主题实色分组。Expo Go 不支持此原生模块，Expo 工程需开发构建。见 [上游安装与 API](https://github.com/callstack/liquid-glass#documentation)。
 
 是否支持原生玻璃由上游 `isLiquidGlassSupported` 判定，包括系统 API 和宿主设计兼容设置。Web 像素值属于内部近似参数，不表示原生玻璃的模糊半径，也不作为公共主题 token。
 
@@ -2851,7 +2852,7 @@ import { View, Text } from 'react-native';
 
 原生玻璃层及其祖先不要设置小于 1 的 opacity。按压、禁用和淡入淡出只淡化前景内容，避免 UIKit 原生效果消失；整个表面仍可做位移。见 [UIVisualEffectView 的 alpha 约束](https://developer.apple.com/documentation/uikit/uivisualeffectview/)。
 
-低版本渐变复用已安装的 react-native-svg，随主题和圆角变化，不新增原生依赖。clear 比 regular 更通透；输入框、按钮、菜单与提示共享此逻辑。未开启减少透明度时不再把不支持原生玻璃等同实色界面。装饰层本身裁切渐变，不裁切调用方的内容或浮动菜单。
+旧 iOS 的卡片、输入框、按钮、菜单与提示共享实色降级，调用方可用 `fallbackColor` 表达内容表面、输入表面或图标底色，不必复制平台判断。`clear` 与 `regular` 在实色降级时不改变透明度。Android 和无 CSS 模糊的 Web 渐变继续复用既有实现。装饰层只裁切自身，不裁切调用方内容或浮动菜单。
 
 ## GlassStats 玻璃数据条
 
@@ -4027,7 +4028,7 @@ function BrandImage() {
 
 # NavBar 导航栏
 
-页面顶部导航栏，提供标题与左右操作区域。默认使用无额外染色的系统玻璃表面；品牌态保持品牌色，transparent 仍完全透明。不支持原生玻璃时由 Design 提供主题半透明渐变，减少透明度时使用清晰实色。
+页面顶部导航栏，提供标题与左右操作区域。默认使用无额外染色的系统玻璃表面；品牌态保持品牌色，transparent 仍完全透明。旧 iOS 或减少透明度时使用清晰实色，Android 保留主题半透明渐变。
 
 ## 代码演示 {#实时预览}
 
@@ -5516,8 +5517,8 @@ const StepperDemo = () => {
 | 圆角           | 8px（`radius.md`，外层左右两角），中间数字框无独立圆角                                                                                                                                                                        |
 | 按钮 visual    | md `r(32)²` / sm `r(28)²` / xs `r(24)²`，嵌在 side outer 内并朝中央贴边；`±` 基准字号 18px（`type.h1`），按 fontScale 缩放一次                                                                                                |
 | 数值 visual    | md `r(48) × r(32)` / sm `r(40) × r(28)` / xs `r(40) × r(24)`；1px 上下边线、无左右边线，基准字号 md 14 / sm 13 / xs 11，按 fontScale 缩放一次；`formatValue` 只替换可见文案                                                   |
-| 背景 / 描边    | 视觉区域共用无额外染色的系统玻璃，保留 1px `c.outline` 边；无原生材质时为主题渐变，减少透明度时为清晰实色                                                                                                                                                                          |
-| 禁用           | 按钮前景 `opacity: 0.4`（达到 min/max 或整体 `disabled` 时；按下 0.7），材质与其祖先保持不透明                                                                                                                                                            |
+| 背景 / 描边    | 视觉区域共用无额外染色的系统玻璃，保留 1px `c.outline` 边；旧 iOS 或减少透明度时为清晰实色，Android 保留主题渐变                                                                                                              |
+| 禁用           | 按钮前景 `opacity: 0.4`（达到 min/max 或整体 `disabled` 时；按下 0.7），材质与其祖先保持不透明                                                                                                                                |
 
 `ThemeProvider fontScale` 只改变 `±` 与中央数值的文字 metric。三个 visual wrapper、md/sm 至少 44pt 的 outer frame、xs 高 44pt 且横向小于 44pt 的 dense outer、边框、圆角和点击布局都不缩放；动态中央字号不会再经过 `useThemedStyles` 二次处理。
 
@@ -5668,7 +5669,14 @@ const SwitchDemo = () => {
   return (
     <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 32, alignItems: 'center' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 32,
+            alignItems: 'center',
+          }}
+        >
           <div
             style={{
               display: 'flex',
@@ -5786,13 +5794,13 @@ const SwitchDemo = () => {
 
 来源：`src/components/ui/Switch/styles.ts`、`Switch.tsx`。
 
-| 状态 | 视觉                                                                                            |
-| ---- | ----------------------------------------------------------------------------------------------- |
-| 关   | 32×20 灰底 `c.surfaceContainerHighest`，16×16 系统材质滑块在左 |
-| 开   | 32×20 主色底 `c.primary`，16×16 系统材质滑块在右 |
+| 状态 | 视觉                                                                              |
+| ---- | --------------------------------------------------------------------------------- |
+| 关   | 32×20 灰底 `c.surfaceContainerHighest`，16×16 系统材质滑块在左                    |
+| 开   | 32×20 主色底 `c.primary`，16×16 系统材质滑块在右                                  |
 | 禁用 | 44×44 outer frame 保留，仅语义轨道 `opacity: 0.5`；材质滑块不淡化，handler 被移除 |
 
-滑块复用 `GlassLayer`，原生默认不额外设置染色，Web 使用 CSS 近似材质。不支持原生材质时使用当前主题的半透明渐变；系统减少透明度时使用清晰实色。轨道与滑块是同一 visual frame 下的兄弟节点，禁用反馈不会降低材质及其祖先的整体透明度。
+滑块复用 `GlassLayer`，原生默认不额外设置染色，Web 使用 CSS 近似材质。旧 iOS 或系统减少透明度时使用清晰实色；Android 保留当前主题的半透明渐变。轨道与滑块是同一 visual frame 下的兄弟节点，禁用反馈不会降低材质及其祖先的整体透明度。
 
 outer RNGH `Pressable` 是透明的 44×44 真实布局 frame，尺寸直接读取
 `fixed.hitTarget`，不经过 `r()` 或 fontScale，也不再使用 `hitSlop`。32×20 visual

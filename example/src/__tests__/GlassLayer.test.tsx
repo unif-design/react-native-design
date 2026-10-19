@@ -83,8 +83,6 @@ test.each(['clear', 'regular'] as const)(
 );
 
 test.each([
-  ['ios', 'light', 'clear'],
-  ['ios', 'dark', 'regular'],
   ['android', 'light', 'regular'],
   ['android', 'dark', 'clear'],
 ] as const)(
@@ -128,15 +126,47 @@ test.each([
     const style = StyleSheet.flatten(
       screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.style
     );
-    if (os === 'ios') {
-      expect(style).toMatchObject({
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: (scheme === 'dark' ? darkColors : lightColors)
-          .glassSeparator,
-      });
-    } else {
-      expect(style.borderWidth).toBeUndefined();
-    }
+    expect(style.borderWidth).toBeUndefined();
+  }
+);
+
+test.each([
+  ['light', 'clear', false],
+  ['dark', 'regular', false],
+  ['light', 'regular', true],
+  ['dark', 'clear', true],
+] as const)(
+  '旧 iOS 使用 %s 主题分组实色，effect=%s，自定义底色=%s',
+  async (scheme, effect, custom) => {
+    jest.replaceProperty(LiquidGlass, 'isLiquidGlassSupported', false);
+    jest.replaceProperty(Platform, 'OS', 'ios');
+    const colors = scheme === 'dark' ? darkColors : lightColors;
+    render(
+      <ThemeProvider forceScheme={scheme}>
+        <GlassLayer
+          effect={effect}
+          fallbackColor={custom ? colors.primaryContainer : undefined}
+          style={{ borderRadius: 14 }}
+          testID="grouped-surface"
+        />
+      </ThemeProvider>
+    );
+    await act(async () => {});
+    const material = screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
+    expect(material.props.effect).toBe('none');
+    expect(StyleSheet.flatten(material.props.style)).toMatchObject({
+      backgroundColor: custom ? colors.primaryContainer : colors.surface,
+      borderRadius: 14,
+      overflow: 'hidden',
+    });
+    expect(
+      StyleSheet.flatten(material.props.style).borderWidth
+    ).toBeUndefined();
+    expect(
+      screen.queryByTestId('grouped-surface-gradient', {
+        includeHiddenElements: true,
+      })
+    ).toBeNull();
   }
 );
 
@@ -167,7 +197,9 @@ test.each([true, false])(
     await waitFor(() =>
       expect(
         screen.getByTestId('glass-layer', { includeHiddenElements: true })
-      ).toHaveStyle({ backgroundColor: 'transparent' })
+      ).toHaveStyle({
+        backgroundColor: supported ? 'transparent' : lightColors.surface,
+      })
     );
   }
 );
@@ -282,7 +314,7 @@ test.each([
 );
 
 test.each([true, false])(
-  '减少透明度时才采用 fallbackColor，原生支持=%s',
+  'iOS 实色降级采用 fallbackColor，原生支持=%s',
   async (supported) => {
     jest.replaceProperty(
       LiquidGlass as { isLiquidGlassSupported: boolean },
@@ -305,7 +337,11 @@ test.each([true, false])(
     await waitFor(() =>
       expect(
         screen.getByTestId('custom-fallback', { includeHiddenElements: true })
-      ).toHaveStyle({ backgroundColor: 'transparent' })
+      ).toHaveStyle({
+        backgroundColor: supported
+          ? 'transparent'
+          : lightColors.surfaceContainerHigh,
+      })
     );
     const layer = screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
     expect(layer.props.tintColor).toBeUndefined();
@@ -318,7 +354,7 @@ test.each([
   [false, false],
   [false, true],
 ])(
-  '新导航按钮不闪实色，原生支持=%s，嵌套主题=%s',
+  '新导航按钮直接采用已知系统材质，原生支持=%s，嵌套主题=%s',
   async (supported, nested) => {
     jest.replaceProperty(
       LiquidGlass as { isLiquidGlassSupported: boolean },
@@ -340,7 +376,7 @@ test.each([
           screen.getByTestId('existing-glass', { includeHiddenElements: true })
             .props.style
         ).backgroundColor
-      ).toBe('transparent')
+      ).toBe(supported ? 'transparent' : lightColors.surface)
     );
     expect(query).toHaveBeenCalledTimes(1);
     query.mockImplementation(() => new Promise(() => {}));
@@ -361,7 +397,9 @@ test.each([
         screen.getByTestId('next-page-button', { includeHiddenElements: true })
           .props.style
       ).backgroundColor
-    ).toBe('transparent');
+    ).toBe(
+      supported ? 'transparent' : (nested ? darkColors : lightColors).surface
+    );
     expect(query).toHaveBeenCalledTimes(1);
   }
 );

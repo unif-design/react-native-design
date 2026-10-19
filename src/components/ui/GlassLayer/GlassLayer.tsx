@@ -10,7 +10,7 @@ import { styles } from './styles';
 import { GlassGradient } from './GlassGradient';
 import { useReducedTransparency } from '../../../theme/useReducedTransparency';
 
-/** 装饰玻璃层；旧系统使用半透明渐变，减少透明度时使用清晰实色。 */
+/** 装饰材质层；旧 iOS 使用分组实色，其他降级平台使用半透明渐变。 */
 export function GlassLayer({
   effect = 'regular',
   tintColor,
@@ -28,9 +28,8 @@ export function GlassLayer({
     : theme.colors;
   const reduced = useReducedTransparency();
   const nativeGlass = isLiquidGlassSupported && !reduced;
-  const backgroundColor = reduced
-    ? (fallbackColor ?? c.surface)
-    : 'transparent';
+  const solid = reduced || (Platform.OS === 'ios' && !nativeGlass);
+  const backgroundColor = solid ? (fallbackColor ?? c.surface) : 'transparent';
 
   return (
     <LiquidGlassView
@@ -44,12 +43,6 @@ export function GlassLayer({
         StyleSheet.absoluteFill,
         style,
         !nativeGlass && styles.clipped,
-        !nativeGlass &&
-          !reduced &&
-          Platform.OS === 'ios' && [
-            styles.fallbackOutline,
-            { borderColor: c.glassSeparator },
-          ],
         { backgroundColor },
       ]}
       pointerEvents="none"
@@ -58,7 +51,7 @@ export function GlassLayer({
       importantForAccessibility="no-hide-descendants"
       testID={testID}
     >
-      {!nativeGlass && !reduced ? (
+      {!nativeGlass && !solid ? (
         <GlassGradient
           colors={c}
           effect={effect}

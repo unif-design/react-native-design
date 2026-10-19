@@ -220,14 +220,12 @@ test.each(['unsupported', 'reduced-transparency'] as const)(
     );
     await waitFor(() =>
       expect(screen.getByTestId('setting-thumb-glass', hidden)).toHaveStyle({
-        backgroundColor:
-          mode === 'unsupported' ? 'transparent' : darkColors.surface,
+        backgroundColor: darkColors.surface,
       })
     );
-    if (mode === 'unsupported')
-      expect(
-        screen.getByTestId('setting-thumb-glass-gradient', hidden)
-      ).toBeTruthy();
+    expect(
+      screen.queryByTestId('setting-thumb-glass-gradient', hidden)
+    ).toBeNull();
     expectOpaqueMaterialAncestors();
   }
 );
