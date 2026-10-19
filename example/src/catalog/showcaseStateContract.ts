@@ -2677,6 +2677,51 @@ export const showcaseStateContract = [
     },
   },
   {
+    id: 'linear-progress.determinate',
+    component: 'LinearProgress',
+    scene: 'feedback',
+    label: '确定进度',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        { testID: 'feedback-linear-progress-zero', props: { value: 0 } },
+        { testID: 'feedback-linear-progress', props: { value: 0.42 } },
+        { testID: 'feedback-linear-progress-complete', props: { value: 1 } },
+      ],
+    },
+  },
+  {
+    id: 'linear-progress.appearance',
+    component: 'LinearProgress',
+    scene: 'feedback',
+    label: '颜色与高度',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'feedback-linear-progress-complete',
+          props: { thickness: 4 },
+          presentProps: ['color', 'trackColor'],
+        },
+      ],
+    },
+  },
+  {
+    id: 'linear-progress.a11y-value',
+    component: 'LinearProgress',
+    scene: 'feedback',
+    label: '无障碍值',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [
+        {
+          testID: 'feedback-linear-progress',
+          props: { accessibilityLabel: '网页加载进度' },
+        },
+      ],
+    },
+  },
+  {
     id: 'spinner.sizes',
     component: 'Spinner',
     scene: 'feedback',

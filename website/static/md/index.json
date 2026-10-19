@@ -175,6 +175,13 @@
     "description": "单行文本输入，支持状态、插槽和公开 ref。"
   },
   {
+    "title": "LinearProgress 横向进度",
+    "mdPath": "md/components/linear-progress.md",
+    "slug": "/components/linear-progress",
+    "section": "components",
+    "description": "根据真实加载比例展示一条轻量进度线。"
+  },
+  {
     "title": "Loading 加载",
     "mdPath": "md/components/loading.md",
     "slug": "/components/loading",
