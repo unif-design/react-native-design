@@ -27,7 +27,7 @@ const _warned = new Set<string>();
 
 /**
  * 数字步进器 [−][ N ][+]。
- * 按钮自动夹到 min/max；越界的按钮透明度变 0.4。
+ * 按钮自动夹到 min/max；越界的按钮符号透明度变 0.4。
  *
  * 健壮性：value/min/max 的非法或非有限输入均折叠到安全范围；step <=0 或
  * 非有限数时回退 1；min > max 时折叠为 min 的零范围。
@@ -143,25 +143,24 @@ export function Stepper({
           hasBlankLabel ? undefined : `当前值 ${safeValue}，减 ${safeStep}`
         }
         testID={decrementTestID}
-        style={({ pressed }) => [
-          styles.actionFrame,
-          layout.decrementFrame,
-          {
-            opacity: !canDecrement ? 0.4 : pressed ? pressedOpacity : 1,
-          },
-        ]}
+        style={[styles.actionFrame, layout.decrementFrame]}
       >
-        <View
-          {...A11Y_HIDDEN_PROPS}
-          style={[
-            styles.cell,
-            styles.btnLeft,
-            { width: dims.btn, height: dims.h },
-          ]}
-          testID={childTestID(testID, 'decrement-visual')}
-        >
-          <Text style={styles.btnText}>−</Text>
-        </View>
+        {({ pressed }) => {
+          const opacity = !canDecrement ? 0.4 : pressed ? pressedOpacity : 1;
+          return (
+            <View
+              {...A11Y_HIDDEN_PROPS}
+              style={[
+                styles.cell,
+                styles.btnLeft,
+                { width: dims.btn, height: dims.h },
+              ]}
+              testID={childTestID(testID, 'decrement-visual')}
+            >
+              <Text style={[styles.btnText, { opacity }]}>−</Text>
+            </View>
+          );
+        }}
       </StepperPressable>
       <View
         accessible={!hasBlankLabel}
@@ -210,25 +209,24 @@ export function Stepper({
           hasBlankLabel ? undefined : `当前值 ${safeValue}，加 ${safeStep}`
         }
         testID={incrementTestID}
-        style={({ pressed }) => [
-          styles.actionFrame,
-          layout.incrementFrame,
-          {
-            opacity: !canIncrement ? 0.4 : pressed ? pressedOpacity : 1,
-          },
-        ]}
+        style={[styles.actionFrame, layout.incrementFrame]}
       >
-        <View
-          {...A11Y_HIDDEN_PROPS}
-          style={[
-            styles.cell,
-            styles.btnRight,
-            { width: dims.btn, height: dims.h },
-          ]}
-          testID={childTestID(testID, 'increment-visual')}
-        >
-          <Text style={styles.btnText}>+</Text>
-        </View>
+        {({ pressed }) => {
+          const opacity = !canIncrement ? 0.4 : pressed ? pressedOpacity : 1;
+          return (
+            <View
+              {...A11Y_HIDDEN_PROPS}
+              style={[
+                styles.cell,
+                styles.btnRight,
+                { width: dims.btn, height: dims.h },
+              ]}
+              testID={childTestID(testID, 'increment-visual')}
+            >
+              <Text style={[styles.btnText, { opacity }]}>+</Text>
+            </View>
+          );
+        }}
       </StepperPressable>
     </View>
   );
