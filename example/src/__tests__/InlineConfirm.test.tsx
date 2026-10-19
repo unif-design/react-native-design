@@ -9,6 +9,7 @@ import {
   ThemeProvider,
   lightColors,
   control,
+  type as typography,
 } from '@unif/react-native-design';
 
 const reanimated = jest.requireMock<typeof import('react-native-reanimated')>(
@@ -486,3 +487,37 @@ test('减少动态效果时直接切换且保持自定义确认文案与颜色',
   expect(execute).toHaveBeenCalledTimes(1);
   expect(timing).not.toHaveBeenCalled();
 });
+
+test.each([1, 1.3])(
+  '确认文字在字号 %s 下独立于动画宽度测量，显示与测量使用同一字号',
+  (fontScale) => {
+    const page = render(
+      <ThemeProvider fontScale={fontScale}>
+        <IconButton
+          {...common}
+          size="sm"
+          onPress={() => {}}
+          confirmation={{ label: '确认删除' }}
+        />
+      </ThemeProvider>
+    );
+    const content = page.UNSAFE_getAllByType(Animated.View).find((node) => {
+      const width = StyleSheet.flatten(node.props.style)?.width;
+      return typeof width?.__getValue === 'function';
+    });
+    if (!content) throw new Error('缺少确认内容');
+    // Yoga 的 column 绝对定位子节点会受父宽约束，不能用它测量完整文字。
+    expect(StyleSheet.flatten(content.props.style)).toMatchObject({
+      flexDirection: 'row',
+      height: control.sm,
+    });
+    const labels = page.UNSAFE_getAllByType(Text);
+    expect(labels).toHaveLength(2);
+    for (const label of labels) {
+      expect(StyleSheet.flatten(label.props.style)).toMatchObject({
+        fontSize: typography.xxs * fontScale,
+      });
+      expect(label.props.numberOfLines).toBe(1);
+    }
+  }
+);

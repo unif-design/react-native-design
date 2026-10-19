@@ -4,7 +4,12 @@ import { fw } from '../../../theme';
 export const styles = StyleSheet.create({
   // 宽度由内容过渡决定；square 仍负责图标态的 44pt 命中补偿。
   surface: { width: undefined, paddingHorizontal: 0 },
-  content: { alignItems: 'center', justifyContent: 'center' },
+  // row 避免 Yoga 用动画中的父宽约束绝对定位测量层。
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   layer: {
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
