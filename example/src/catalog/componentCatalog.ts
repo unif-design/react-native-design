@@ -219,6 +219,7 @@ export const componentCatalog = [
       '禁用',
       '尺寸',
       '格式化值',
+      '直接编辑数字与会话状态',
     ],
   },
   { id: 'Form', scene: 'forms', states: ['单分组', '多分组'] },

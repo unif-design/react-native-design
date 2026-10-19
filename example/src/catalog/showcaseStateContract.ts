@@ -1129,6 +1129,16 @@ export const showcaseStateContract = [
     },
   },
   {
+    id: 'stepper.editable',
+    component: 'Stepper',
+    scene: 'forms',
+    label: '直接编辑数字与会话状态',
+    witness: {
+      kind: 'jsx-props',
+      specimens: [{ testID: 'forms-stepper-main', props: { editable: true } }],
+    },
+  },
+  {
     id: 'stepper.format-value',
     component: 'Stepper',
     scene: 'forms',

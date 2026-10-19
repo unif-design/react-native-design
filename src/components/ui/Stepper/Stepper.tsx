@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Text, View } from 'react-native';
+import { Platform, Text, TextInput, View } from 'react-native';
 import {
   pressedOpacity,
   radius,
@@ -19,6 +19,7 @@ import { nextStepperValue, normalizeStepper } from './normalizeStepper';
 import { StepperPressable } from './StepperPressable';
 import { makeStyles, sizingFor } from './styles';
 import type { StepperProps } from './types';
+import { useStepperEditing } from './useStepperEditing';
 
 const log = createLogger('Stepper');
 
@@ -41,6 +42,8 @@ export function Stepper({
   step,
   size = 'md',
   formatValue,
+  editable = false,
+  onEditingChange,
   disabled = false,
   testID,
 }: StepperProps): React.JSX.Element {
@@ -58,11 +61,19 @@ export function Stepper({
     step,
     disabled: disabled === true || hasBlankLabel,
   });
-  const { safeMin, safeStep, safeValue, canDecrement, canIncrement } =
-    normalized;
+  const { safeMin, safeStep, safeValue } = normalized;
+  const editingEnabled = editable && !normalized.rangeDisabled;
+  const editor = useStepperEditing(
+    value,
+    editingEnabled,
+    normalized,
+    onChange,
+    onEditingChange
+  );
+  const { canDecrement, canIncrement } = editor.normalized;
   const displayValue = resolveStepperDisplayValue(safeValue, formatValue);
-  const decrementValue = nextStepperValue(normalized, 'decrement');
-  const incrementValue = nextStepperValue(normalized, 'increment');
+  const decrementValue = nextStepperValue(editor.normalized, 'decrement');
+  const incrementValue = nextStepperValue(editor.normalized, 'increment');
   const valueAccessibilityProps = getStepperValueAccessibilityProps({
     normalized,
     onChange,
@@ -111,6 +122,7 @@ export function Stepper({
   const decrementTestID = childTestID(testID, 'decrement');
   const valueTestID = childTestID(testID, 'value');
   const incrementTestID = childTestID(testID, 'increment');
+  const ValueFrame = editable ? StepperPressable : View;
 
   return (
     <View style={styles.wrap} testID={testID}>
@@ -125,11 +137,12 @@ export function Stepper({
       />
       <StepperPressable
         collapsable={false}
+        {...editor.stepPressProps}
         accessible={!hasBlankLabel}
         onPress={
           decrementValue === undefined
             ? undefined
-            : () => onChange(decrementValue)
+            : () => editor.change(decrementValue)
         }
         disabled={!canDecrement}
         accessibilityRole={hasBlankLabel ? undefined : 'button'}
@@ -140,7 +153,9 @@ export function Stepper({
           hasBlankLabel ? undefined : { disabled: !canDecrement }
         }
         accessibilityHint={
-          hasBlankLabel ? undefined : `当前值 ${safeValue}，减 ${safeStep}`
+          hasBlankLabel
+            ? undefined
+            : `当前值 ${editor.normalized.safeValue}，减 ${safeStep}`
         }
         testID={decrementTestID}
         style={[styles.actionFrame, layout.decrementFrame]}
@@ -162,40 +177,93 @@ export function Stepper({
           );
         }}
       </StepperPressable>
-      <View
-        accessible={!hasBlankLabel}
-        accessibilityRole={hasBlankLabel ? undefined : 'adjustable'}
-        accessibilityLabel={accessibleName}
-        {...(hasBlankLabel ? {} : valueAccessibilityProps)}
-        style={[styles.valueFrame, layout.valueFrame]}
-        testID={valueTestID}
-      >
+      {editor.editing ? (
         <View
-          {...A11Y_HIDDEN_PROPS}
-          style={[styles.cell, { width: dims.w, height: dims.h }]}
-          testID={childTestID(testID, 'value-visual')}
+          style={[styles.valueFrame, layout.valueFrame]}
+          testID={valueTestID}
         >
-          <Text
-            {...(formatValue === undefined
-              ? {}
-              : {
-                  adjustsFontSizeToFit: true,
-                  minimumFontScale: 0.75,
-                  numberOfLines: 1,
-                })}
-            style={[styles.valueText, { fontSize: valueFontSize }]}
-          >
-            {displayValue}
-          </Text>
+          <View
+            {...A11Y_HIDDEN_PROPS}
+            style={[
+              styles.cell,
+              styles.inputVisual,
+              { width: dims.w, height: dims.h },
+              editor.invalid && styles.invalid,
+            ]}
+            testID={childTestID(testID, 'value-visual')}
+          />
+          <TextInput
+            {...editor.inputProps}
+            autoFocus
+            selectTextOnFocus
+            value={editor.draft!}
+            accessibilityLabel={accessibleName}
+            accessibilityHint={
+              editor.invalid ? '请输入有效数字' : '完成或离开输入框以确认数值'
+            }
+            keyboardType={
+              safeMin < 0
+                ? Platform.OS === 'ios'
+                  ? 'numbers-and-punctuation'
+                  : 'numeric'
+                : 'decimal-pad'
+            }
+            returnKeyType="done"
+            submitBehavior="submit"
+            underlineColorAndroid="transparent"
+            style={[
+              styles.valueText,
+              styles.input,
+              layout.valueFrame,
+              { fontSize: valueFontSize },
+            ]}
+            testID={childTestID(testID, 'input')}
+          />
         </View>
-      </View>
+      ) : (
+        <ValueFrame
+          accessible={!hasBlankLabel}
+          accessibilityRole={hasBlankLabel ? undefined : 'adjustable'}
+          accessibilityLabel={accessibleName}
+          {...(hasBlankLabel ? {} : valueAccessibilityProps)}
+          {...(editable
+            ? {
+                onPress: editor.begin,
+                disabled: !editingEnabled,
+                accessibilityHint: '点按以输入数字，也可使用增减操作',
+              }
+            : {})}
+          style={[styles.valueFrame, layout.valueFrame]}
+          testID={valueTestID}
+        >
+          <View
+            {...A11Y_HIDDEN_PROPS}
+            style={[styles.cell, { width: dims.w, height: dims.h }]}
+            testID={childTestID(testID, 'value-visual')}
+          >
+            <Text
+              {...(formatValue === undefined
+                ? {}
+                : {
+                    adjustsFontSizeToFit: true,
+                    minimumFontScale: 0.75,
+                    numberOfLines: 1,
+                  })}
+              style={[styles.valueText, { fontSize: valueFontSize }]}
+            >
+              {displayValue}
+            </Text>
+          </View>
+        </ValueFrame>
+      )}
       <StepperPressable
         collapsable={false}
+        {...editor.stepPressProps}
         accessible={!hasBlankLabel}
         onPress={
           incrementValue === undefined
             ? undefined
-            : () => onChange(incrementValue)
+            : () => editor.change(incrementValue)
         }
         disabled={!canIncrement}
         accessibilityRole={hasBlankLabel ? undefined : 'button'}
@@ -206,7 +274,9 @@ export function Stepper({
           hasBlankLabel ? undefined : { disabled: !canIncrement }
         }
         accessibilityHint={
-          hasBlankLabel ? undefined : `当前值 ${safeValue}，加 ${safeStep}`
+          hasBlankLabel
+            ? undefined
+            : `当前值 ${editor.normalized.safeValue}，加 ${safeStep}`
         }
         testID={incrementTestID}
         style={[styles.actionFrame, layout.incrementFrame]}

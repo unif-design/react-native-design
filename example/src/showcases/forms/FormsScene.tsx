@@ -58,6 +58,7 @@ export function FormsScene(): React.JSX.Element {
   const draft = state.scenes.forms;
   const refInput = useRef<TextFieldHandle>(null);
   const textareaRef = useRef<TextFieldHandle>(null);
+  const [stepperEditing, setStepperEditing] = useState(false);
   const [refStatus, setRefStatus] = useState('等待操作');
   const [localSpecimenRevision, setLocalSpecimenRevision] = useState(0);
   const record = (component: string, action: string, summary: string) => {
@@ -511,8 +512,15 @@ export function FormsScene(): React.JSX.Element {
               step={2}
               size="md"
               accessibilityLabel="数量"
+              editable
+              onEditingChange={setStepperEditing}
               testID="forms-stepper-main"
             />
+            <Text style={styles.status} testID="forms-stepper-status">
+              {stepperEditing
+                ? '正在输入，请完成数字编辑'
+                : '数量已确认，可继续提交'}
+            </Text>
             <Stepper
               value={5}
               onChange={() => {}}

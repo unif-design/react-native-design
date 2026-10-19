@@ -55,7 +55,7 @@
 - [Skeleton 骨架屏](md/components/skeleton.md) — 内容加载前的骨架占位。
 - [SmsField 短信字段](md/components/sms-field.md) — 受控输入与发送按钮，不内置请求或倒计时。
 - [StatusDot 状态点](md/components/status-dot.md) — 用圆点表达完成、错误、进行中和待处理状态。
-- [Stepper 步进器](md/components/stepper.md) — 通过增减操作调整数值，并控制范围与展示格式。
+- [Stepper 步进器](md/components/stepper.md) — 通过增减或直接输入调整数值，并控制范围与展示格式。
 - [Switch 开关](md/components/switch.md) — 受控开关，用于切换开启和关闭状态。
 - [TabBar 底部 tab 栏](md/components/tabbar.md) — 展示底部导航项目及选中状态。
 - [Tabs 标签页](md/components/tabs.md) — 切换同一层级的内容区域。

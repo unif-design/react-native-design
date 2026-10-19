@@ -72,7 +72,7 @@ scene 会卸载，可复现 draft 保存在根 Provider 中。
 | `foundation`  | 主题与基础能力 | Theme、token、logger、testID                                                                        |
 | `actions`     | 操作与状态     | Button、IconButton、Chip、Tag、StatusDot                                                            |
 | `feedback`    | 反馈与浮层     | Empty、Skeleton、Spinner、Pulse、Reveal、Blur、Toast、Confirm                                       |
-| `forms`       | 表单与输入     | Input、PasswordInput、Textarea、Search、选择控件、Stepper（xs 横向触控 < 44pt / formatValue）、Form |
+| `forms`       | 表单与输入     | Input、PasswordInput、Textarea、Search、选择控件、Stepper（xs 横向触控 < 44pt / formatValue / editable / 编辑状态）、Form |
 | `navigation`  | 导航组件       | NavBar、DrawerHeader、Tabs、Segmented、TabBar                                                       |
 | `collections` | 容器与集合     | Card、Ribbon、Cell、List、Grid、EntryCard、Carousel                                                 |
 | `media`       | 媒体展示       | Avatar、Thumbnail、Logo、remote image success/failure                                               |

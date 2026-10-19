@@ -332,6 +332,7 @@ const expectedStateIdsByComponent = {
     'stepper.disabled',
     'stepper.sizes',
     'stepper.format-value',
+    'stepper.editable',
   ],
   Form: ['form.single-group', 'form.multi-group'],
   FormGroup: ['form-group.labelled', 'form-group.unlabelled'],

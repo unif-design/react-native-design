@@ -46,6 +46,13 @@ export const makeStyles = (c: ColorTokens) =>
       fontWeight: fw.medium,
       lineHeight: t.h1,
     },
+    inputVisual: { position: 'absolute' },
+    input: {
+      textAlign: 'center',
+      padding: 0,
+      backgroundColor: 'transparent',
+    },
+    invalid: { borderColor: c.error },
     valueText: {
       color: c.foreground,
       fontWeight: fw.medium,
