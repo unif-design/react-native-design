@@ -64,6 +64,7 @@ const expectedUiComponents = [
   'Checkbox',
   'Chip',
   'CircularProgress',
+  'LinearProgress',
   'ConfirmHost',
   'DrawerHeader',
   'Empty',
@@ -121,6 +122,7 @@ const expectedComponentsByScene = {
   ],
   feedback: [
     'CircularProgress',
+    'LinearProgress',
     'Empty',
     'Skeleton',
     'Spinner',
@@ -227,6 +229,11 @@ const expectedStateIdsByComponent = {
     'circular-progress.determinate',
     'circular-progress.label',
     'circular-progress.a11y-value',
+  ],
+  LinearProgress: [
+    'linear-progress.determinate',
+    'linear-progress.appearance',
+    'linear-progress.a11y-value',
   ],
   Spinner: ['spinner.sizes', 'spinner.color', 'spinner.stroke-width'],
   ShimmerText: [

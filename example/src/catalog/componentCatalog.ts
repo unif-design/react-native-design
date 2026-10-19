@@ -29,6 +29,7 @@ export const publicComponentIds = [
   'Checkbox',
   'Chip',
   'CircularProgress',
+  'LinearProgress',
   'ConfirmHost',
   'DrawerHeader',
   'Empty',
@@ -121,6 +122,11 @@ export const componentCatalog = [
     id: 'CircularProgress',
     scene: 'feedback',
     states: ['确定进度', '中央百分比', '无障碍值'],
+  },
+  {
+    id: 'LinearProgress',
+    scene: 'feedback',
+    states: ['确定进度', '颜色与高度', '无障碍值'],
   },
   { id: 'Spinner', scene: 'feedback', states: ['尺寸', '颜色', '描边宽度'] },
   {

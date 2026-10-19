@@ -23,6 +23,7 @@ import {
   Cell,
   Checkbox,
   CircularProgress,
+  LinearProgress,
   GlassLayer,
   IconButton,
   Input,
@@ -65,6 +66,7 @@ import {
 
 const setText = (_value: string) => {};
 const noop = () => {};
+const progressLayoutStyle = { top: 0 };
 const inputRef = createRef<TextFieldHandle>();
 const tooShortContainer = { height: 20 };
 const safeContainerStyle = { marginTop: 8 };
@@ -248,6 +250,20 @@ const navBarDisplaySlot: NavBarSlot = <Text>只读</Text>;
 </Ribbon>;
 
 <CircularProgress value={0.42} />;
+<LinearProgress value={0.42} />;
+<LinearProgress
+  value={1}
+  thickness={4}
+  color="#123456"
+  trackColor="#eeeeee"
+  accessibilityLabel="网页加载进度"
+  style={progressLayoutStyle}
+  testID="loading"
+/>;
+// @ts-expect-error LinearProgress 必须提供真实比例
+<LinearProgress />;
+// @ts-expect-error 比例只接受数值
+<LinearProgress value="42%" />;
 <CircularProgress value={0.68} showLabel accessibilityLabel="上传进度" />;
 <CircularProgress
   value={0.68}

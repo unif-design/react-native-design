@@ -69,6 +69,7 @@ description: '按场景查找组件、代码示例与 API。'
 | [Empty](/docs/components/empty)              | 空状态                                                 |
 | [Skeleton](/docs/components/skeleton)        | 骨架占位,`shape='line'/'rect'/'circle'`(走 `usePulse`) |
 | [CircularProgress](/docs/components/loading) | `0..1` 确定圆形进度，可选中央百分比文字                |
+| [LinearProgress](/docs/components/linear-progress) | `0..1` 横向进度，默认 2pt，支持主题与读屏百分比 |
 
 ## 数据展示 {#数据展示}
 

@@ -6,6 +6,7 @@ import {
   GlassLayer,
   Button,
   CircularProgress,
+  LinearProgress,
   Empty,
   Pulse,
   PulseDot,
@@ -273,6 +274,27 @@ export function FeedbackScene(): React.JSX.Element {
               accessibilityLabel="小圆环大字号样例"
             />
           </View>
+        </SectionCard>
+
+        <SectionCard title="横向进度">
+          <LinearProgress
+            value={0}
+            accessibilityLabel="尚未开始的加载"
+            testID="feedback-linear-progress-zero"
+          />
+          <LinearProgress
+            value={0.42}
+            accessibilityLabel="网页加载进度"
+            testID="feedback-linear-progress"
+          />
+          <LinearProgress
+            value={1}
+            thickness={4}
+            color={colors.success}
+            trackColor={colors.outline}
+            accessibilityLabel="已加载完成"
+            testID="feedback-linear-progress-complete"
+          />
         </SectionCard>
 
         <SectionCard title="动态效果">

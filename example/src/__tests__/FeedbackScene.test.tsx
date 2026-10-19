@@ -12,6 +12,7 @@ import {
   GlassLayer,
   lightColors,
   CircularProgress,
+  LinearProgress,
   Empty,
   Pulse,
   PulseDot,
@@ -225,6 +226,34 @@ test('Feedback 展示 Empty、Skeleton、确定进度与具备外层加载语义
   });
   expect(screen.getByText('加载中')).toBeOnTheScreen();
   spinnerCoverage.expectComplete();
+});
+
+test('横向进度展厅保留初始、加载和完成状态及主题外观', () => {
+  const coverage = createShowcaseStateCoverage('LinearProgress');
+  render(<App />);
+  enterFeedback();
+  coverage.prove('linear-progress.determinate', () => {
+    expect(
+      screen.UNSAFE_getAllByType(LinearProgress).map((node) => node.props.value)
+    ).toEqual([0, 0.42, 1]);
+  });
+  coverage.prove('linear-progress.appearance', () => {
+    expect(
+      componentByTestID(LinearProgress, 'feedback-linear-progress-complete')
+        .props
+    ).toMatchObject({
+      thickness: 4,
+      color: lightColors.success,
+      trackColor: lightColors.outline,
+    });
+  });
+  coverage.prove('linear-progress.a11y-value', () => {
+    expect(
+      screen.getByRole('progressbar', { name: '网页加载进度' }).props
+        .accessibilityValue
+    ).toEqual({ min: 0, max: 100, now: 42, text: '42%' });
+  });
+  coverage.expectComplete();
 });
 
 test('Pulse、PulseDot、usePulse 与 Reveal 使用合法 options，并保留子内容语义', () => {

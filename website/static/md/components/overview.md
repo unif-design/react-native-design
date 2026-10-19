@@ -71,6 +71,7 @@ description: '按场景查找组件、代码示例与 API。'
 | [Empty](empty.md)              | 空状态                                                 |
 | [Skeleton](skeleton.md)        | 骨架占位,`shape='line'/'rect'/'circle'`(走 `usePulse`) |
 | [CircularProgress](loading.md) | `0..1` 确定圆形进度，可选中央百分比文字                |
+| [LinearProgress](linear-progress.md) | `0..1` 横向进度，默认 2pt，支持主题与读屏百分比 |
 
 ## 数据展示 {#数据展示}
 

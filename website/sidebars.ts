@@ -46,6 +46,7 @@ const sidebars: SidebarsConfig = {
         'components/thumbnail',
         'components/image-preview',
         'components/loading',
+        'components/linear-progress',
         'components/pulse',
         'components/shimmer-text',
         'components/reveal',
