@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.2](https://github.com/unif-design/react-native-design/compare/v1.9.1...v1.9.2) (2026-10-19)
+
+
+### Bug Fixes
+
+* **inline-confirm:** measure labels independently of animated width ([#175](https://github.com/unif-design/react-native-design/issues/175)) ([4abba7d](https://github.com/unif-design/react-native-design/commit/4abba7dfda5d41700fd8bf158f3889ae53cf6c55))
+
 ## [1.9.1](https://github.com/unif-design/react-native-design/compare/v1.9.0...v1.9.1) (2026-10-19)
 
 
