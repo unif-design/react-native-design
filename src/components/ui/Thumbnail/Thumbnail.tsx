@@ -26,6 +26,7 @@ export function Thumbnail(props: ThumbnailProps): React.JSX.Element {
     source,
     size = 'md',
     fallback,
+    backgroundColor,
     selected,
     containerStyle,
     imageStyle,
@@ -87,7 +88,13 @@ export function Thumbnail(props: ThumbnailProps): React.JSX.Element {
 
   return (
     <View style={containerStyle} testID={testID}>
-      <View style={[styles.visualFrame, dim]}>
+      <View
+        style={[
+          styles.visualFrame,
+          dim,
+          backgroundColor !== undefined && { backgroundColor },
+        ]}
+      >
         {resolvedSource === undefined ? (
           fallbackContent
         ) : (

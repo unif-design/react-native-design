@@ -296,6 +296,7 @@ const publicThumbnailImageStyle: ThumbnailImageStyle = {
 };
 <Thumbnail
   uri="https://example.test/thumbnail.png"
+  backgroundColor="transparent"
   containerStyle={thumbnailContainerStyle}
   imageStyle={publicThumbnailImageStyle}
 />;

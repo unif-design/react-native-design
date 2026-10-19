@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type {
+  ColorValue,
   ImageProps,
   ImageSourcePropType,
   ImageStyle,
@@ -62,6 +63,8 @@ interface ThumbnailCommonProps {
   size?: ThumbnailSize | Readonly<ThumbnailDimensions>;
   /** 无有效 source 或当前图片失败时居中显示；加载中不显示。 */
   fallback?: ReactNode;
+  /** 图像框底色，默认 surfaceContainer；嵌入已有材质时可设为 transparent。 */
+  backgroundColor?: ColorValue;
   /** 选中态:在固定 visual frame 内显示 2pt 品牌色 ring。 */
   selected?: boolean;
   /** 完整外部布局样式，只落到稳定根 View。 */

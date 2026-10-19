@@ -8,6 +8,7 @@ import {
   Textarea,
   ThemeProvider,
   Thumbnail,
+  lightColors,
   type as typography,
 } from '@unif/react-native-design';
 
@@ -105,62 +106,79 @@ describe('Design 独立消费契约', () => {
     }
   );
 
-  test('Thumbnail 显式尺寸与失败占位不破坏图片实例隔离', () => {
-    const view = render(
-      <Thumbnail
-        uri="https://example.test/a.png"
-        size={{ width: 76, height: 51, borderRadius: 0 }}
-        fallback={<Text>文件占位</Text>}
-        selected
-        testID="thumb"
-      />
-    );
-    const frame = screen.getByTestId('thumb').children[0];
-    expect(typeof frame).not.toBe('string');
-    if (typeof frame === 'string' || !frame) throw new Error('缺少图像框');
-    expect(StyleSheet.flatten(frame.props.style)).toMatchObject({
-      width: 76,
-      height: 51,
-      borderRadius: 0,
-      overflow: 'hidden',
-    });
-    expect(
-      screen.queryByText('文件占位', { includeHiddenElements: true })
-    ).toBeNull();
-    const oldImage = screen.UNSAFE_getByType(Image);
-    const oldOnError = oldImage.props.onError;
-    fireEvent(oldImage, 'error');
-    expect(
-      screen.getByText('文件占位', { includeHiddenElements: true })
-    ).toBeTruthy();
-    view.rerender(
-      <Thumbnail
-        uri="https://example.test/a.png"
-        size={{ width: 90, height: 60 }}
-        fallback={<Text>新的占位</Text>}
-      />
-    );
-    expect(
-      screen.getByText('新的占位', { includeHiddenElements: true })
-    ).toBeTruthy();
-    expect(screen.UNSAFE_queryByType(Image)).toBeNull();
-    view.rerender(
-      <Thumbnail
-        uri="https://example.test/b.png"
-        fallback={<Text>新的占位</Text>}
-      />
-    );
-    expect(
-      screen.queryByText('新的占位', { includeHiddenElements: true })
-    ).toBeNull();
-    expect(screen.UNSAFE_getByType(Image).props.source).toEqual({
-      uri: 'https://example.test/b.png',
-    });
-    act(() => oldOnError());
-    expect(screen.UNSAFE_getByType(Image).props.source).toEqual({
-      uri: 'https://example.test/b.png',
-    });
-  });
+  test.each([undefined, 'transparent'])(
+    'Thumbnail 背景 %s 在加载与失败后保持一致，不破坏图片实例隔离',
+    (backgroundColor) => {
+      const view = render(
+        <Thumbnail
+          backgroundColor={backgroundColor}
+          uri="https://example.test/a.png"
+          size={{ width: 76, height: 51, borderRadius: 0 }}
+          fallback={<Text>文件占位</Text>}
+          selected
+          testID="thumb"
+        />
+      );
+      const frame = screen.getByTestId('thumb').children[0];
+      expect(typeof frame).not.toBe('string');
+      if (typeof frame === 'string' || !frame) throw new Error('缺少图像框');
+      expect(StyleSheet.flatten(frame.props.style)).toMatchObject({
+        width: 76,
+        height: 51,
+        borderRadius: 0,
+        overflow: 'hidden',
+        backgroundColor: backgroundColor ?? lightColors.surfaceContainer,
+      });
+      expect(
+        screen.queryByText('文件占位', { includeHiddenElements: true })
+      ).toBeNull();
+      const oldImage = screen.UNSAFE_getByType(Image);
+      const oldOnError = oldImage.props.onError;
+      fireEvent(oldImage, 'error');
+      expect(StyleSheet.flatten(frame.props.style).backgroundColor).toBe(
+        backgroundColor ?? lightColors.surfaceContainer
+      );
+      expect(
+        screen.getByText('文件占位', { includeHiddenElements: true })
+      ).toBeTruthy();
+      view.rerender(
+        <Thumbnail
+          backgroundColor={
+            backgroundColor === undefined ? 'transparent' : undefined
+          }
+          uri="https://example.test/a.png"
+          size={{ width: 90, height: 60 }}
+          fallback={<Text>新的占位</Text>}
+        />
+      );
+      expect(
+        screen.getByText('新的占位', { includeHiddenElements: true })
+      ).toBeTruthy();
+      expect(screen.UNSAFE_queryByType(Image)).toBeNull();
+      expect(StyleSheet.flatten(frame.props.style).backgroundColor).toBe(
+        backgroundColor === undefined
+          ? 'transparent'
+          : lightColors.surfaceContainer
+      );
+      view.rerender(
+        <Thumbnail
+          backgroundColor={backgroundColor}
+          uri="https://example.test/b.png"
+          fallback={<Text>新的占位</Text>}
+        />
+      );
+      expect(
+        screen.queryByText('新的占位', { includeHiddenElements: true })
+      ).toBeNull();
+      expect(screen.UNSAFE_getByType(Image).props.source).toEqual({
+        uri: 'https://example.test/b.png',
+      });
+      act(() => oldOnError());
+      expect(screen.UNSAFE_getByType(Image).props.source).toEqual({
+        uri: 'https://example.test/b.png',
+      });
+    }
+  );
 
   test('Thumbnail 无有效 source 时显示有名称的占位，不挂载图片', () => {
     const warning = jest.spyOn(console, 'warn').mockImplementation(() => {});

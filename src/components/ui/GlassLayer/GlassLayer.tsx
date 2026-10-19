@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import {
   LiquidGlassView,
   isLiquidGlassSupported,
@@ -44,6 +44,12 @@ export function GlassLayer({
         StyleSheet.absoluteFill,
         style,
         !nativeGlass && styles.clipped,
+        !nativeGlass &&
+          !reduced &&
+          Platform.OS === 'ios' && [
+            styles.fallbackOutline,
+            { borderColor: c.glassSeparator },
+          ],
         { backgroundColor },
       ]}
       pointerEvents="none"
