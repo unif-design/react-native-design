@@ -1,7 +1,7 @@
 # Unif Design — 全文文档聚合
 
 > 可选全文。普通查询优先通过 llms.txt 定位相关单页。
-<!-- Generated from @unif/react-native-design@1.9.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@1.9.3; edit source documentation. -->
 
 ## 目录
 
@@ -1654,6 +1654,8 @@ import { Checkbox } from '@unif/react-native-design';
 # Chip 标签
 
 用于筛选、选择或展示简短标签的胶囊控件。提供 `onPress` 时自动使用系统玻璃，原生不额外染色，随主题和系统减少透明度设置呈现；无 `onPress` 的静态标签保留内容表面。
+
+旧 iOS 或开启减少透明度时，交互 Chip 使用主题 `surfaceContainerHigh` 实底，与聊天和普通内容表面区分；iOS 26+ 原生玻璃仍不额外染色。
 
 ## 代码演示 {#实时预览}
 

@@ -1,6 +1,12 @@
 import { CloseOutlined } from '@unif/react-native-icons';
 import React from 'react';
-import { AccessibilityInfo, StyleSheet, Text } from 'react-native';
+import {
+  AccessibilityInfo,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {
   fireEvent,
   render,
@@ -162,6 +168,76 @@ test('交互 Chip 只交付一次点击，静态标签不创建控制材质', as
   expect(
     screen.UNSAFE_queryAllByType(LiquidGlass.LiquidGlassView)
   ).toHaveLength(0);
+});
+
+describe.each(['light', 'dark'] as const)('Chip 在 %s 聊天表面', (scheme) => {
+  test.each([
+    [false, false],
+    [false, true],
+    [true, false],
+    [true, true],
+  ])(
+    '原生支持=%s、减少透明度=%s 时保留可区分的材质与交互状态',
+    async (supported, reduced) => {
+      jest.replaceProperty(Platform, 'OS', 'ios');
+      jest.replaceProperty(
+        LiquidGlass as { isLiquidGlassSupported: boolean },
+        'isLiquidGlassSupported',
+        supported
+      );
+      jest
+        .spyOn(AccessibilityInfo, 'isReduceTransparencyEnabled')
+        .mockResolvedValue(reduced);
+      const colors = scheme === 'dark' ? darkColors : lightColors;
+      const press = jest.fn();
+      render(
+        <ThemeProvider forceScheme={scheme}>
+          <View style={{ backgroundColor: colors.chatBackground }}>
+            <Chip label="今日安排" selected onPress={press} />
+            <Chip label="正在处理" busy onPress={press} />
+            <Chip label="不可操作" disabled onPress={press} />
+            <Chip label="客户标签" testID="static-chip" />
+          </View>
+        </ThemeProvider>
+      );
+      const native = supported && !reduced;
+      await waitFor(() => {
+        const materials = screen.UNSAFE_getAllByType(
+          LiquidGlass.LiquidGlassView
+        );
+        expect(materials).toHaveLength(3);
+        for (const material of materials) {
+          expect(material.props.effect).toBe(native ? 'regular' : 'none');
+          expect(StyleSheet.flatten(material.props.style).backgroundColor).toBe(
+            native ? 'transparent' : colors.surfaceContainerHigh
+          );
+          expect(material.props.tintColor).toBeUndefined();
+          if (!native) {
+            expect(
+              StyleSheet.flatten(material.props.style).backgroundColor
+            ).not.toBe(colors.chatBackground);
+          }
+        }
+      });
+      const selected = screen.getByRole('button', { name: '今日安排' });
+      expect(selected.props.accessibilityState.selected).toBe(true);
+      expect(
+        selected
+          .findAllByType(View)
+          .map((node) => StyleSheet.flatten(node.props.style))
+      ).toContainEqual(
+        expect.objectContaining({ borderColor: colors.primary })
+      );
+      fireEvent.press(selected);
+      fireEvent.press(screen.getByRole('button', { name: '正在处理' }));
+      fireEvent.press(screen.getByRole('button', { name: '不可操作' }));
+      expect(press).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId('static-chip')).toHaveStyle({
+        backgroundColor: colors.surface,
+        borderColor: colors.outline,
+      });
+    }
+  );
 });
 
 test('Search 禁用时材质仍可见；恢复编辑后清除和提交使用同一值', async () => {

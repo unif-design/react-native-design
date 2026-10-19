@@ -115,6 +115,7 @@ export function Chip({
               ]}
             >
               <GlassLayer
+                fallbackColor={c.surfaceContainerHigh}
                 style={{
                   borderRadius:
                     StyleSheet.flatten(style)?.borderRadius ?? radius.pill,
