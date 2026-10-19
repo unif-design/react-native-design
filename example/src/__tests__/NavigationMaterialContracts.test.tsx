@@ -1,8 +1,9 @@
 import { ArrowLeftOutlined, CameraOutlined } from '@unif/react-native-icons';
 import React from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { AccessibilityInfo, Platform, StyleSheet, Text } from 'react-native';
 import type { ReactTestInstance } from 'react-test-renderer';
-import { fireEvent, render } from '@testing-library/react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import * as LiquidGlass from '@callstack/liquid-glass';
 import {
   Carousel,
   EntryCard,
@@ -45,6 +46,8 @@ jest.mock('react-native-reanimated-carousel', () => {
     Pagination: () => ReactModule.createElement(View),
   };
 });
+
+afterEach(() => jest.restoreAllMocks());
 
 const Theme = ({ children }: { children: React.ReactNode }) => (
   <ThemeProvider>{children}</ThemeProvider>
@@ -151,6 +154,104 @@ test.each(['xs', 'sm', 'md'] as const)(
     expect(onChange).not.toHaveBeenCalled();
     fireEvent.press(plus);
     expect(onChange).toHaveBeenCalledWith(1);
+  }
+);
+
+test.each([
+  [true, 'light'],
+  [true, 'dark'],
+  [false, 'light'],
+  [false, 'dark'],
+] as const)(
+  'Stepper iOS 原生玻璃=%s、%s 主题只淡化加减符号，边界切换保留整条表面',
+  async (supported, scheme) => {
+    jest.replaceProperty(Platform, 'OS', 'ios');
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      supported
+    );
+    jest
+      .spyOn(AccessibilityInfo, 'isReduceTransparencyEnabled')
+      .mockResolvedValue(false);
+    const onChange = jest.fn();
+    const content = (value: number, disabled = false) => (
+      <ThemeProvider forceScheme={scheme}>
+        <Stepper
+          value={value}
+          min={0}
+          max={2}
+          disabled={disabled}
+          onChange={onChange}
+          accessibilityLabel="箱数"
+          size="xs"
+          formatValue={(count) => `${count} 箱`}
+          testID="stepper"
+        />
+      </ThemeProvider>
+    );
+    const page = render(content(0));
+    await waitFor(() =>
+      expect(
+        page.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.effect
+      ).toBe(supported ? 'regular' : 'none')
+    );
+    const materialStyle = StyleSheet.flatten(
+      page.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.style
+    );
+    const expectForeground = (symbol: string, opacity: number) => {
+      const text = page.getByText(symbol, { includeHiddenElements: true });
+      expect(StyleSheet.flatten(text.props.style).opacity ?? 1).toBe(opacity);
+      expectMaterialAncestorsOpaque(
+        page.getByTestId(
+          `stepper-${symbol === '−' ? 'decrement' : 'increment'}-visual`,
+          { includeHiddenElements: true }
+        )
+      );
+    };
+
+    expectForeground('−', 0.4);
+    expectForeground('+', 1);
+    fireEvent.press(page.getByRole('button', { name: '箱数，减少' }));
+    expect(onChange).not.toHaveBeenCalled();
+    fireEvent.press(page.getByRole('button', { name: '箱数，增加' }));
+    expect(onChange).toHaveBeenLastCalledWith(1);
+
+    page.rerender(content(1));
+    expectForeground('−', 1);
+    expectForeground('+', 1);
+    expect(
+      page.getByText('1 箱', { includeHiddenElements: true })
+    ).toBeTruthy();
+    const plus = page.getByRole('button', { name: '箱数，增加' });
+    const touch = {
+      currentTarget: 1,
+      persist() {},
+      nativeEvent: { pageX: 0, pageY: 0, timestamp: 0 },
+    };
+    fireEvent(plus, 'responderGrant', touch);
+    expectForeground('+', 0.7);
+    fireEvent(plus, 'responderRelease', touch);
+    await waitFor(() => expectForeground('+', 1));
+    expect(onChange).toHaveBeenLastCalledWith(2);
+
+    page.rerender(content(2));
+    expectForeground('−', 1);
+    expectForeground('+', 0.4);
+    expect(page.getByRole('button', { name: '箱数，增加' })).toBeDisabled();
+    page.rerender(content(1, true));
+    expectForeground('−', 0.4);
+    expectForeground('+', 0.4);
+    onChange.mockClear();
+    fireEvent.press(page.getByRole('button', { name: '箱数，减少' }));
+    fireEvent.press(page.getByRole('button', { name: '箱数，增加' }));
+    expect(onChange).not.toHaveBeenCalled();
+    expect(page.getByRole('adjustable', { name: '箱数' })).toBeDisabled();
+    expect(
+      StyleSheet.flatten(
+        page.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.style
+      )
+    ).toEqual(materialStyle);
   }
 );
 

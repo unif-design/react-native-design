@@ -105,20 +105,20 @@ describe('Stepper public display behavior', () => {
     });
     expect(valueFrame.props.accessibilityValue?.now).toBe(4);
     expect(decrement.props).not.toHaveProperty('hitSlop');
-    expect(
-      (decrement.props.style as (state: { pressed: boolean }) => unknown[])({
-        pressed: false,
-      })[1]
-    ).toEqual({ width: 24, height: 44, alignItems: 'flex-end' });
+    expect((decrement.props.style as unknown[])[1]).toEqual({
+      width: 24,
+      height: 44,
+      alignItems: 'flex-end',
+    });
     expect(valueFrame.props.style).toEqual([
       'valueFrame',
       { width: 40, height: 44 },
     ]);
-    expect(
-      (increment.props.style as (state: { pressed: boolean }) => unknown[])({
-        pressed: false,
-      })[1]
-    ).toEqual({ width: 24, height: 44, alignItems: 'flex-start' });
+    expect((increment.props.style as unknown[])[1]).toEqual({
+      width: 24,
+      height: 44,
+      alignItems: 'flex-start',
+    });
     expect(root.props.style).toBe('wrap');
   });
 });
