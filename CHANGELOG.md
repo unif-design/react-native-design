@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.1](https://github.com/unif-design/react-native-design/compare/v1.9.0...v1.9.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* **glass:** use grouped surfaces on older iOS ([#174](https://github.com/unif-design/react-native-design/issues/174)) ([6a2ec71](https://github.com/unif-design/react-native-design/commit/6a2ec71aca478de9decd9a157c3b1c9aaec8eef0))
+
 # [1.9.0](https://github.com/unif-design/react-native-design/compare/v1.8.0...v1.9.0) (2026-10-19)
 
 
