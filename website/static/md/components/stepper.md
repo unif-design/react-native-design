@@ -1,7 +1,7 @@
 ---
 sidebar_position: 6
 title: Stepper 步进器
-description: '通过增减操作调整数值，并控制范围与展示格式。'
+description: '通过增减或直接输入调整数值，并控制范围与展示格式。'
 ---
 
 <!-- Generated from @unif/react-native-design; edit source documentation. -->
@@ -18,6 +18,7 @@ const StepperDemo = () => {
   const [b, setB] = useState(0);
   const [c, setC] = useState(50);
   const [compact, setCompact] = useState(4);
+  const [compactEditing, setCompactEditing] = useState(false);
   const total = a + b + c;
   const amount = a * 120 + b * 96 + c * 48;
   return (
@@ -46,13 +47,17 @@ const StepperDemo = () => {
               min={0}
               max={99}
               size="xs"
+              editable
+              onEditingChange={setCompactEditing}
               formatValue={(value) => `${value} 箱`}
               accessibilityLabel="紧凑整箱数量"
             />
             <Text
               style={{ fontSize: 13, color: 'var(--ifm-color-emphasis-600)' }}
             >
-              xs + formatValue
+              {compactEditing
+                ? '正在输入，请完成数字编辑'
+                : '点按数字输入，非编辑时显示单位'}
             </Text>
           </View>
           <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
@@ -255,10 +260,11 @@ const [qty, setQty] = useState(12);
 />;
 
 {
-  /* 紧凑视觉 + 单位文案；不需要覆盖中央值样式 */
+  /* 点按中央输入数字；非编辑时仍显示单位 */
 }
 <Stepper
   size="xs"
+  editable
   value={packs}
   onChange={setPacks}
   min={0}
@@ -279,22 +285,42 @@ const [qty, setQty] = useState(12);
 />;
 ```
 
+`editable` 默认关闭。开启后点按中央值进入纯数字输入，完成或失焦会把有限十进制数字夹到 `[min, max]` 后通过 `onChange` 交回；`step` 只用于加减，不对输入取整。明确输入与当前值相同的数字也提交一次。
+
+空串、只有符号、单位文字和非有限数不会提交，也不会转成 0：保留原草稿并显示错误边框，辅助技术提示“请输入有效数字”。修正后即可提交。输入期间按加减会以有效草稿为基础只提交一次；外部 `value`、范围、步长变化或禁用会取消草稿。组件卸载不提交数值。业务需要非负整数等规则时，由消费者在受控回调中验证。
+
+若外层表单依赖此值提交，请通过 `onEditingChange` 记录编辑状态；编辑未结束时禁用提交按钮，并在提交处理函数中再次检查。非法或空草稿失焦后仍为 `true`，只有成功提交（含相同值）、取消、外部更新或卸载才通知 `false`。更换回调函数不会中断会话或重复通知。消费者自己的业务校验错误也应阻止提交。
+
+```tsx
+const [editing, setEditing] = useState(false);
+<Stepper
+  value={qty}
+  onChange={setQty}
+  accessibilityLabel="数量"
+  editable
+  onEditingChange={setEditing}
+/>;
+// 提交按钮 disabled={editing}；处理提交时也先检查 editing。
+```
+
 ## API
 
 来源：`src/components/ui/Stepper/types.ts`、`Stepper.tsx`。
 
-| 参数                 | 类型                        | 默认值  | 说明                                                                                                                 |
-| -------------------- | --------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------- |
-| `value`              | `number`                    | —       | 当前值（受控，必填）                                                                                                 |
-| `onChange`           | `(value: number) => void`   | —       | 变更回调（已自动夹到 `[min, max]`，必填）                                                                            |
-| `accessibilityLabel` | `string`                    | —       | 中央 adjustable 的上下文名称（必填）；左右按钮自动组合“`${label}，减少` / `${label}，增加`”                          |
-| `min`                | `number?`                   | `0`     | 下限（达到时 `−` 禁用）                                                                                              |
-| `max`                | `number?`                   | `99`    | 上限（达到时 `+` 禁用）                                                                                              |
-| `step`               | `number?`                   | `1`     | 步长（非正数 / 非有限数回退为 1）                                                                                    |
-| `size`               | `'xs' \| 'sm' \| 'md'`      | `'md'`  | visual 高度 `r(24)` / `r(28)` / `r(32)`；xs 是横向触控小于 44pt 的 dense 紧凑档（类似 Segmented sm），sm/md 行为不变 |
-| `formatValue`        | `(value: number) => string` | —       | 格式化中央可见文案；入参是归一化后的安全值，运算与 adjustable `now` 仍为 number                                      |
-| `disabled`           | `boolean?`                  | `false` | 整体禁用（三个操作节点都不暴露 action）                                                                              |
-| `testID`             | `string?`                   | —       | 根定位；派生三个 outer `-decrement` / `-value` / `-increment` 与对应 `-*-visual`                                     |
+| 参数                 | 类型                         | 默认值  | 说明                                                                                                                 |
+| -------------------- | ---------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------- |
+| `value`              | `number`                     | —       | 当前值（受控，必填）                                                                                                 |
+| `onChange`           | `(value: number) => void`    | —       | 变更回调（已自动夹到 `[min, max]`，必填）                                                                            |
+| `accessibilityLabel` | `string`                     | —       | 中央 adjustable 的上下文名称（必填）；左右按钮自动组合“`${label}，减少` / `${label}，增加`”                          |
+| `min`                | `number?`                    | `0`     | 下限（达到时 `−` 禁用）                                                                                              |
+| `max`                | `number?`                    | `99`    | 上限（达到时 `+` 禁用）                                                                                              |
+| `step`               | `number?`                    | `1`     | 步长（非正数 / 非有限数回退为 1）                                                                                    |
+| `size`               | `'xs' \| 'sm' \| 'md'`       | `'md'`  | visual 高度 `r(24)` / `r(28)` / `r(32)`；xs 是横向触控小于 44pt 的 dense 紧凑档（类似 Segmented sm），sm/md 行为不变 |
+| `formatValue`        | `(value: number) => string`  | —       | 格式化中央可见文案；入参是归一化后的安全值，运算与 adjustable `now` 仍为 number                                      |
+| `editable`           | `boolean?`                   | `false` | 允许点按中央值直接输入；合法输入在完成或失焦时提交，非编辑时仍使用 `formatValue`                                     |
+| `onEditingChange`    | `(editing: boolean) => void` | —       | 编辑会话开始/结束通知；非法失焦不结束，父表单可据此阻止提交旧数值                                                    |
+| `disabled`           | `boolean?`                   | `false` | 整体禁用（三个操作节点都不暴露 action）                                                                              |
+| `testID`             | `string?`                    | —       | 根定位；派生三个 outer `-decrement` / `-value` / `-increment` 与对应 `-*-visual`                                     |
 
 > 归一化边界：缺省仍是 `min=0`、`max=99`、`step=1`。只有 `typeof === 'number' && Number.isFinite(...)` 的输入参与运算；字符串、对象、NaN、Infinity 等未类型化值不会产生 NaN。非法 `min` 回退 0，非法 `max` 或 `max < safeMin` 折叠到 `safeMin`，非法/非正 `step` 回退 1，非法 `value` 回退 `safeMin`。`formatValue` 在归一化后调用。零范围、外部 `disabled` 与空白业务名称都不会暴露任何 action。无 `style`、`valueStyle` 或 `buttonStyle` prop。
 
@@ -308,6 +334,7 @@ const [qty, setQty] = useState(12);
 - 单一归一化结果同时驱动可见值、disabled opacity、side/native/Web handler 和状态。native custom `accessibilityActions` 到 `safeMin` 只列 `increment`、到 `safeMax` 只列 `decrement`；标准 adjustable 手势仍可能派发无效方向，driver 会在调用 `onChange` 前将其确定性 no-op。
 - Web 中央 slider 显式输出 `aria-disabled`、`aria-valuemin/max/now` 与 tab order；ArrowUp/Right 增加，ArrowDown/Left 减少，Home/End 跳到上下限。已识别的边界按键仍阻止浏览器默认行为，但不会发出无效变更。
 - 外部 `disabled` 或零范围时，native 中央完全省略 `accessibilityActions` 与 `onAccessibilityAction`；Web 中央设置 `aria-disabled=true`、`tabIndex=-1` 并省略键盘 handler。两个侧按钮也都 disabled 且没有 handler。
+- 开启 `editable` 时中央仍保留原 adjustable 增减语义，可点按进入输入框；输入框使用相同业务名称和 44pt 高度，不携带 slider 的方向键 handler，左右方向键用于移动光标。编辑错误保留在输入框并提供错误提示，两个侧按钮只对有效草稿开放。
 - 两侧采用 platform seam：native 使用 RNGH `Pressable`，Web 使用 RN core `Pressable`，不依赖 Website 的仓库级 RNGH shim。
 
 ```tsx
@@ -336,6 +363,7 @@ Web Inspector 检查中央 `role=slider`、`aria-valuemin/max/now`、disabled �
 
 ## 使用注意
 
+- 需要直接编辑时使用 `editable`；非编辑显示单位仍用 `formatValue`。
 - ❌ 不要用覆盖层替换 Stepper 中央值；单位文案用 `formatValue`，数值行为仍由 Stepper 持有
 - ❌ 不要省略或复用无上下文的 `accessibilityLabel`——名称应说明正在调整哪个业务值
 - ❌ 不要去掉描边或圆角——Stepper 必须看起来"可点击"

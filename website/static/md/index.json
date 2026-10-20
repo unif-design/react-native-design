@@ -291,7 +291,7 @@
     "mdPath": "md/components/stepper.md",
     "slug": "/components/stepper",
     "section": "components",
-    "description": "通过增减操作调整数值，并控制范围与展示格式。"
+    "description": "通过增减或直接输入调整数值，并控制范围与展示格式。"
   },
   {
     "title": "Switch 开关",

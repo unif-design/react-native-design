@@ -678,6 +678,22 @@ test('Stepper 覆盖尺寸、步长、边界、零范围与禁用语义，只保
       screen.getByRole('adjustable', { name: '数量' }).props.accessibilityValue
     ).toMatchObject({ min: 0, max: 10, now: 2 });
   });
+  stateCoverage.prove('stepper.editable', () => {
+    fireEvent.press(screen.getByTestId('forms-stepper-main-value'));
+    const input = screen.getByTestId('forms-stepper-main-input');
+    expect(input.props.value).toBe('2');
+    expect(screen.getByText('正在输入，请完成数字编辑')).toBeOnTheScreen();
+    fireEvent.changeText(input, '7');
+    fireEvent(input, 'submitEditing');
+    expect(screen.getByText('数量已确认，可继续提交')).toBeOnTheScreen();
+    expect(componentByTestID(Stepper, 'forms-stepper-main').props.value).toBe(
+      7
+    );
+    expect(
+      screen.getByRole('adjustable', { name: '数量' }).props.accessibilityValue
+        .now
+    ).toBe(7);
+  });
   const stepperResult = screen
     .getByTestId('result-latest')
     .findAllByType(Text)

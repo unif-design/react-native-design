@@ -211,6 +211,8 @@ const navBarDisplaySlot: NavBarSlot = <Text>只读</Text>;
   onChange={noop}
   accessibilityLabel="整箱数量"
   size={compactStepperSize}
+  editable
+  onEditingChange={(editing: boolean) => editing}
   formatValue={(value) => `${value} 箱`}
 />;
 <Stepper
@@ -226,6 +228,14 @@ const navBarDisplaySlot: NavBarSlot = <Text>只读</Text>;
   accessibilityLabel="数量"
   // @ts-expect-error Stepper 不开放内部 value 样式覆盖
   valueStyle={invalidStepperValueStyle}
+/>;
+
+<Stepper
+  value={1}
+  onChange={noop}
+  accessibilityLabel="数量"
+  // @ts-expect-error editable 只能为 boolean
+  editable="true"
 />;
 
 // --- Ribbon:业务只传文案 / tone，位置与折角由 Design 持有 -----------

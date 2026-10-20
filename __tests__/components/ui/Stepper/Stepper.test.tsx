@@ -49,6 +49,23 @@ function loadStepper() {
   jest.doMock('../../../../src/components/ui/Stepper/StepperPressable', () => ({
     StepperPressable: 'StepperPressable',
   }));
+  // 本用例只检查未编辑的纯布局；真实 hook 与交互由 example/StepperEditing 覆盖。
+  jest.doMock(
+    '../../../../src/components/ui/Stepper/useStepperEditing',
+    () => ({
+      useStepperEditing: (
+        _value: number,
+        _enabled: boolean,
+        normalized: unknown,
+        onChange: unknown
+      ) => ({
+        normalized,
+        editing: false,
+        change: onChange,
+        stepPressProps: {},
+      }),
+    })
+  );
   // 本用例隔离数值与命中框；真实材质组合由 example 契约测试覆盖。
   jest.doMock('../../../../src/components/ui/GlassLayer', () => ({
     GlassLayer: 'GlassLayer',
@@ -70,6 +87,7 @@ afterEach(() => {
   jest.dontMock('../../../../src/components/ui/Stepper/styles');
   jest.dontMock('../../../../src/components/ui/Stepper/StepperPressable');
   jest.dontMock('../../../../src/components/ui/GlassLayer');
+  jest.dontMock('../../../../src/components/ui/Stepper/useStepperEditing');
   jest.resetModules();
 });
 
