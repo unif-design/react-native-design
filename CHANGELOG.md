@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.1](https://github.com/unif-design/react-native-design/compare/v1.10.0...v1.10.1) (2026-10-20)
+
+
+### Bug Fixes
+
+* **carousel:** cancel item presses when swiping ([#178](https://github.com/unif-design/react-native-design/issues/178)) ([0f40e8a](https://github.com/unif-design/react-native-design/commit/0f40e8a30b5f992c67608ca1a4431d6b9b7062e2))
+
 # [1.10.0](https://github.com/unif-design/react-native-design/compare/v1.9.3...v1.10.0) (2026-10-20)
 
 
