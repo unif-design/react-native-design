@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.10.0](https://github.com/unif-design/react-native-design/compare/v1.9.3...v1.10.0) (2026-10-20)
+
+
+### Features
+
+* **stepper:** add numeric editing and restore chip fallback ([#177](https://github.com/unif-design/react-native-design/issues/177)) ([9f49dbd](https://github.com/unif-design/react-native-design/commit/9f49dbdc14f7cc2ba67f5425ca5db362611e8ac9))
+
 ## [1.9.3](https://github.com/unif-design/react-native-design/compare/v1.9.2...v1.9.3) (2026-10-19)
 
 
