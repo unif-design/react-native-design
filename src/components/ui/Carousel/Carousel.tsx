@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { Pressable, useWindowDimensions, View } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
+import { Pressable } from 'react-native-gesture-handler';
 import {
   Carousel as ReanimatedCarousel,
   Pagination,
@@ -127,9 +128,7 @@ function CarouselInner<T>(
           const itemLabel = itemAccessibility[index]?.label;
 
           if (action.kind === 'action' && itemLabel !== undefined) {
-            // RN Pressable 而非 RNGH Pressable:Carousel 的 GestureDetector 已挂在
-            // ReanimatedCarousel 内部,外层再套 RNGH Pressable 会产生手势冲突;
-            // 用 RN 原生 Pressable 让库自己的拖拽手势优先,tap 仍正常触发。
+            // 与轮播共享原生手势仲裁，拖拽接管时取消点击，避免旧 iOS 松手误开详情。
             return (
               <Pressable
                 onPress={() => action.onPressItem(item, index)}

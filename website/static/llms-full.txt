@@ -1,7 +1,7 @@
 # Unif Design — 全文文档聚合
 
 > 可选全文。普通查询优先通过 llms.txt 定位相关单页。
-<!-- Generated from @unif/react-native-design@1.9.3; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@1.10.0; edit source documentation. -->
 
 ## 目录
 
@@ -1138,7 +1138,8 @@ slide 的节点类型与 a11y 语义由严格联合决定：
 
 - display slide：不传 `onPressItem` / `getAccessibilityLabel`，每张 slide 是普通 `<View>`，不形成 button 焦点。
 - action slide：运行时只有 `onPressItem` 与 `getAccessibilityLabel` **都是函数**才进入 action 配置；partial 或非函数未类型化值会让整组回退 display-only，并在 effect 诊断。
-- 每个 item 的 getter 结果还会单独验证：trim 后非空 string 才拼为 `${业务名称}，第 ${index + 1} 项，共 ${data.length} 项` 并渲染 RN core button；空白、非 string 或 getter 抛错只让对应 slide 失败关闭为 View，并在 effect 诊断，不生成“第 N 项”兜底按钮名。
+- 每个 item 的 getter 结果还会单独验证：trim 后非空 string 才拼为 `${业务名称}，第 ${index + 1} 项，共 ${data.length} 项` 并渲染 RNGH Pressable button；空白、非 string 或 getter 抛错只让对应 slide 失败关闭为 View，并在 effect 诊断，不生成“第 N 项”兜底按钮名。
+- 横向拖拽由轮播手势接管并取消 slide 点击；普通点击和读屏器激活仍交付 `onPressItem`。
 - Pagination 仅在多页时渲染，并由本地 `View` 从 a11y tree 隐藏；隐藏 props 不会透传给第三方 Pagination。
 
 ```tsx
