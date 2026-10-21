@@ -120,7 +120,8 @@ export function useStepperEditing(
         ? active.current
         : controlledSession;
   const updateDraft = (next: string | null) => {
-    if (next === draft) return;
+    // 同批次输入可能回到 render 时的原文；字符串事件仍须逐次交付。
+    if (next === null && draft === null) return;
     if (controlledDraft === undefined) setLocalDraft(next);
     draftChange.current?.(next);
   };

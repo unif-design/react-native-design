@@ -690,3 +690,28 @@ test.each([false, true])(
     expect(page.onChange.mock.calls).toEqual([...previousChanges, [6]]);
   }
 );
+
+test.each(['controlled', 'uncontrolled'] as const)(
+  '%s 原输入回调在一次批次中 12→123→12 时仍交付最后原文',
+  (mode) => {
+    const observed = jest.fn();
+    const page =
+      mode === 'controlled'
+        ? controlledSetup('12', { value: 12, max: 999 })
+        : setup({ value: 12, max: 999, onDraftChange: observed });
+    if (mode === 'uncontrolled')
+      fireEvent.press(page.getByTestId('quantity-value'));
+    const onDraftChange =
+      'onDraftChange' in page ? page.onDraftChange : observed;
+    onDraftChange.mockClear();
+    const onChangeText = page.getByTestId('quantity-input').props.onChangeText;
+    act(() => {
+      onChangeText('123');
+      onChangeText('12');
+    });
+    expect(onDraftChange.mock.calls).toEqual([['123'], ['12']]);
+    expect(page.getByTestId('quantity-input').props.value).toBe('12');
+    fireEvent(page.getByTestId('quantity-input'), 'submitEditing');
+    expect(page.onChange.mock.calls).toEqual([[12]]);
+  }
+);
