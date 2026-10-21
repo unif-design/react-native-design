@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.11.0](https://github.com/unif-design/react-native-design/compare/v1.10.1...v1.11.0) (2026-10-21)
+
+
+### Features
+
+* support recoverable Stepper input drafts ([#179](https://github.com/unif-design/react-native-design/issues/179)) ([783fa5d](https://github.com/unif-design/react-native-design/commit/783fa5d0e45fe77f9616ff4d8491dab3bd881b39))
+
 ## [1.10.1](https://github.com/unif-design/react-native-design/compare/v1.10.0...v1.10.1) (2026-10-20)
 
 
