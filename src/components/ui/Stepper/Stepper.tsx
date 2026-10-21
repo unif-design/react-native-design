@@ -43,6 +43,8 @@ export function Stepper({
   size = 'md',
   formatValue,
   editable = false,
+  draft,
+  onDraftChange,
   onEditingChange,
   disabled = false,
   testID,
@@ -68,7 +70,9 @@ export function Stepper({
     editingEnabled,
     normalized,
     onChange,
-    onEditingChange
+    onEditingChange,
+    draft,
+    onDraftChange
   );
   const { canDecrement, canIncrement } = editor.normalized;
   const displayValue = resolveStepperDisplayValue(safeValue, formatValue);
