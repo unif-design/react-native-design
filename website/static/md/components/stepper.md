@@ -19,6 +19,7 @@ const StepperDemo = () => {
   const [c, setC] = useState(50);
   const [compact, setCompact] = useState(4);
   const [compactEditing, setCompactEditing] = useState(false);
+  const [compactDraft, setCompactDraft] = useState(null);
   const total = a + b + c;
   const amount = a * 120 + b * 96 + c * 48;
   return (
@@ -48,6 +49,8 @@ const StepperDemo = () => {
               max={99}
               size="xs"
               editable
+              draft={compactDraft}
+              onDraftChange={setCompactDraft}
               onEditingChange={setCompactEditing}
               formatValue={(value) => `${value} 箱`}
               accessibilityLabel="紧凑整箱数量"
@@ -56,7 +59,7 @@ const StepperDemo = () => {
               style={{ fontSize: 13, color: 'var(--ifm-color-emphasis-600)' }}
             >
               {compactEditing
-                ? '正在输入，请完成数字编辑'
+                ? `原始草稿：${JSON.stringify(compactDraft)}`
                 : '点按数字输入，非编辑时显示单位'}
             </Text>
           </View>
@@ -303,24 +306,49 @@ const [editing, setEditing] = useState(false);
 // 提交按钮 disabled={editing}；处理提交时也先检查 editing。
 ```
 
+### 受控原始草稿
+
+需要跨卸载保留未完成输入时，同时传 `draft` 与 `onDraftChange`，在组件外的所属状态中保存原文。`null` 表示未编辑，字符串会原样显示，包括空串、`-`、`01.` 等中间输入；省略 `draft` 时继续由组件持有草稿。上方紧凑示例展示原始字符串与已提交数字的区别。
+
+```tsx
+const [qty, setQty] = useState(4);
+const [draft, setDraft] = useState<string | null>(null);
+
+<Stepper
+  value={qty}
+  onChange={setQty}
+  editable
+  draft={draft}
+  onDraftChange={setDraft}
+  accessibilityLabel="商品数量"
+/>;
+// 未提交判断使用 draft !== null；草稿所属状态可跨 Stepper 卸载保留。
+```
+
+挂载已有草稿只恢复编辑展示，不调用 `onChange` 或 `onDraftChange`。卸载仍通知 `onEditingChange(false)`，但不会用 `onDraftChange(null)` 清空外部草稿；重新挂载会显示同一原文。初次挂载为禁用状态时保留草稿，首次启用再进入编辑。等待资格核验等禁用期间，消费者仍应根据 `draft !== null` 阻止提交旧数值。
+
+合法数字提交先调用 `onChange(number)`，随后用 `onDraftChange(null)` 请求结束。宿主接纳 `null` 后才通知 `onEditingChange(false)`；领域校验拒绝结束时可继续保留原文并修改。同一原文的完成与迟到失焦只交付一次，接纳新原文后可再次提交。外部 `value`、范围或步长变化，以及活跃编辑时禁用，仍会取消草稿；这些变化会立即使旧输入和旧按钮回调失效，展示回到当前数字；宿主稍后接纳清空通知也不会让旧草稿再次提交。
+
 ## API
 
 来源：`src/components/ui/Stepper/types.ts`、`Stepper.tsx`。
 
-| 参数                 | 类型                         | 默认值  | 说明                                                                                                                 |
-| -------------------- | ---------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------- |
-| `value`              | `number`                     | —       | 当前值（受控，必填）                                                                                                 |
-| `onChange`           | `(value: number) => void`    | —       | 变更回调（已自动夹到 `[min, max]`，必填）                                                                            |
-| `accessibilityLabel` | `string`                     | —       | 中央 adjustable 的上下文名称（必填）；左右按钮自动组合“`${label}，减少` / `${label}，增加`”                          |
-| `min`                | `number?`                    | `0`     | 下限（达到时 `−` 禁用）                                                                                              |
-| `max`                | `number?`                    | `99`    | 上限（达到时 `+` 禁用）                                                                                              |
-| `step`               | `number?`                    | `1`     | 步长（非正数 / 非有限数回退为 1）                                                                                    |
-| `size`               | `'xs' \| 'sm' \| 'md'`       | `'md'`  | visual 高度 `r(24)` / `r(28)` / `r(32)`；xs 是横向触控小于 44pt 的 dense 紧凑档（类似 Segmented sm），sm/md 行为不变 |
-| `formatValue`        | `(value: number) => string`  | —       | 格式化中央可见文案；入参是归一化后的安全值，运算与 adjustable `now` 仍为 number                                      |
-| `editable`           | `boolean?`                   | `false` | 允许点按中央值直接输入；合法输入在完成或失焦时提交，非编辑时仍使用 `formatValue`                                     |
-| `onEditingChange`    | `(editing: boolean) => void` | —       | 编辑会话开始/结束通知；非法失焦不结束，父表单可据此阻止提交旧数值                                                    |
-| `disabled`           | `boolean?`                   | `false` | 整体禁用（三个操作节点都不暴露 action）                                                                              |
-| `testID`             | `string?`                    | —       | 根定位；派生三个 outer `-decrement` / `-value` / `-increment` 与对应 `-*-visual`                                     |
+| 参数                 | 类型                              | 默认值  | 说明                                                                                                                 |
+| -------------------- | --------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------- |
+| `value`              | `number`                          | —       | 当前值（受控，必填）                                                                                                 |
+| `onChange`           | `(value: number) => void`         | —       | 变更回调（已自动夹到 `[min, max]`，必填）                                                                            |
+| `accessibilityLabel` | `string`                          | —       | 中央 adjustable 的上下文名称（必填）；左右按钮自动组合“`${label}，减少` / `${label}，增加`”                          |
+| `min`                | `number?`                         | `0`     | 下限（达到时 `−` 禁用）                                                                                              |
+| `max`                | `number?`                         | `99`    | 上限（达到时 `+` 禁用）                                                                                              |
+| `step`               | `number?`                         | `1`     | 步长（非正数 / 非有限数回退为 1）                                                                                    |
+| `size`               | `'xs' \| 'sm' \| 'md'`            | `'md'`  | visual 高度 `r(24)` / `r(28)` / `r(32)`；xs 是横向触控小于 44pt 的 dense 紧凑档（类似 Segmented sm），sm/md 行为不变 |
+| `formatValue`        | `(value: number) => string`       | —       | 格式化中央可见文案；入参是归一化后的安全值，运算与 adjustable `now` 仍为 number                                      |
+| `editable`           | `boolean?`                        | `false` | 允许点按中央值直接输入；合法输入在完成或失焦时提交，非编辑时仍使用 `formatValue`                                     |
+| `draft`              | `string \| null`                  | —       | 受控原始编辑文字；`null` 为未编辑，省略时组件内部持有；与 `onDraftChange` 配合使用                                   |
+| `onDraftChange`      | `(draft: string \| null) => void` | —       | 进入/输入交付原文，提交或外部更新取消时请求 `null`；卸载不清空外部草稿                                               |
+| `onEditingChange`    | `(editing: boolean) => void`      | —       | 编辑会话开始/结束通知；非法失焦不结束，父表单可据此阻止提交旧数值                                                    |
+| `disabled`           | `boolean?`                        | `false` | 整体禁用（三个操作节点都不暴露 action）                                                                              |
+| `testID`             | `string?`                         | —       | 根定位；派生三个 outer `-decrement` / `-value` / `-increment` 与对应 `-*-visual`                                     |
 
 > 归一化边界：缺省仍是 `min=0`、`max=99`、`step=1`。只有 `typeof === 'number' && Number.isFinite(...)` 的输入参与运算；字符串、对象、NaN、Infinity 等未类型化值不会产生 NaN。非法 `min` 回退 0，非法 `max` 或 `max < safeMin` 折叠到 `safeMin`，非法/非正 `step` 回退 1，非法 `value` 回退 `safeMin`。`formatValue` 在归一化后调用。零范围、外部 `disabled` 与空白业务名称都不会暴露任何 action。无 `style`、`valueStyle` 或 `buttonStyle` prop。
 

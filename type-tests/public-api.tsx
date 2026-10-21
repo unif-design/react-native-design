@@ -216,6 +216,42 @@ const navBarDisplaySlot: NavBarSlot = <Text>只读</Text>;
   formatValue={(value) => `${value} 箱`}
 />;
 <Stepper
+  value={4}
+  onChange={noop}
+  accessibilityLabel="受控原始数量"
+  editable
+  draft="01."
+  onDraftChange={(draft: string | null) => draft}
+/>;
+<Stepper
+  value={4}
+  onChange={noop}
+  accessibilityLabel="尚未开始编辑"
+  editable
+  draft={null}
+  onDraftChange={(draft) => draft?.trim()}
+/>;
+<Stepper
+  value={4}
+  onChange={noop}
+  accessibilityLabel="观察非受控草稿"
+  onDraftChange={(draft: string | null) => draft}
+/>;
+<Stepper
+  value={4}
+  onChange={noop}
+  accessibilityLabel="数量"
+  // @ts-expect-error draft 保存原始文字，不接收数字
+  draft={4}
+/>;
+<Stepper
+  value={4}
+  onChange={noop}
+  accessibilityLabel="数量"
+  // @ts-expect-error onDraftChange 同时接收原始字符串和结束时的 null
+  onDraftChange={(draft: number) => draft}
+/>;
+<Stepper
   value={1}
   onChange={noop}
   accessibilityLabel="数量"
