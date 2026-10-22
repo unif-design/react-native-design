@@ -46,16 +46,18 @@ description: '显示短暂提示，并由 ToastHost 承载。'
 
 来源：`src/components/ui/Toast/styles.ts`、`ToastHost.tsx`、`ToastHost.web.tsx`、`toast.ts`。
 
-| 元素   | 规则                                                                                    |
-| ------ | --------------------------------------------------------------------------------------- |
-| 形态   | 圆角 8（`radius.md`）`c.inverseSurface` 底（亮色 `#1C1C1E`），`c.inverseOnSurface` 白字 |
-| 内边距 | 横向 14（`space[6]`）/ 纵向 10（`space[4]`）                                            |
-| 宽度   | max-width 85%，水平居中；距底部 32px（`space[10]`）                                     |
-| 字号   | 14px（`type.sm`）/ 500                                                                  |
-| 出现   | 200ms（`motion.base`）fade + 8px slide-up                                               |
-| 停留   | 默认 3000ms（`duration` 可覆盖）                                                        |
-| 退出   | 200ms fade + 下滑 8px                                                                   |
-| 层级   | host `position: absolute` + `zIndex: 200` + `pointerEvents: none`                       |
+| 元素   | 规则                                                                                               |
+| ------ | -------------------------------------------------------------------------------------------------- |
+| 形态   | 圆角 8（`radius.md`），`GlassLayer` 主题材质与 `c.foreground` 文字；按系统支持与减少透明度偏好降级 |
+| 内边距 | 横向 14（`space[6]`）/ 纵向 10（`space[4]`）                                                       |
+| 宽度   | max-width 85%，水平居中；距底部 32px（`space[10]`）                                                |
+| 字号   | 14px（`type.sm`）/ 500                                                                             |
+| 出现   | 200ms（`motion.base`）8px 位移；原生仅文字与状态点淡入，Web 整体淡入                               |
+| 停留   | 默认 3000ms（`duration` 可覆盖）                                                                   |
+| 退出   | 200ms 位移回入场方向并卸载；原生仅前景淡出，Web 整体淡出                                           |
+| 层级   | host `position: absolute` + `zIndex: 200` + `pointerEvents: none`                                  |
+
+原生玻璃层及祖先始终保持 alpha 为 1，避免 `UIVisualEffectView` 在首次挂载或重新显示时丢失材质。`top` 从上方进入，`center` / `bottom` 从下方进入；提示退场完成后背景与内容一起卸载。
 
 ## 状态变体
 

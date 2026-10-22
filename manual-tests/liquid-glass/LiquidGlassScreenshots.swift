@@ -89,6 +89,28 @@ final class LiquidGlassScreenshots: XCTestCase {
     }
   }
 
+  func testToastMaterialLifecycle() {
+    for scheme in ["light", "dark"] {
+      let app = scene("toast-lifecycle", scheme: scheme)
+      let trigger = app.buttons.matching(identifier: "显示提示").firstMatch
+      trigger.tap()
+      XCTAssertTrue(app.staticTexts["材质提示 1"].waitForExistence(timeout: 2))
+      capture("toast-lifecycle-\(scheme)-first")
+      trigger.tap()
+      XCTAssertTrue(app.staticTexts["材质提示 2"].waitForExistence(timeout: 2))
+      XCTAssertFalse(app.staticTexts["材质提示 1"].exists)
+      capture("toast-lifecycle-\(scheme)-replacement")
+      let dismissed = NSPredicate(format: "exists == false")
+      expectation(for: dismissed, evaluatedWith: app.staticTexts["材质提示 2"])
+      waitForExpectations(timeout: 5)
+      capture("toast-lifecycle-\(scheme)-dismissed")
+      trigger.tap()
+      XCTAssertTrue(app.staticTexts["材质提示 3"].waitForExistence(timeout: 2))
+      capture("toast-lifecycle-\(scheme)-remounted")
+      app.terminate()
+    }
+  }
+
   func testToastMaterial() {
     for scheme in ["light", "dark"] {
       let app = scene("toast", scheme: scheme)

@@ -15,6 +15,7 @@
 | menu-top / menu-bottom | 上／下箭头浮菜单；实际点击“删除聊天”进入单一“删除”确认                                   |
 | text                   | compact TextEntry，取消交付                                                              |
 | toast                  | 真实 ToastHost 的居中成功提示                                                            |
+| toast-lifecycle        | 默认 3 秒时长；真实点击触发首次、显示期间替换、退场后重新挂载提示                        |
 | confirm                | 真实 ConfirmHost 的删除确认与取消交付                                                    |
 | image                  | ImagePreview 的双图计数；图片是本地 1px PNG 测试资源                                     |
 
@@ -43,6 +44,8 @@
 `testMenuThemeOverride` 要求系统外观为 light，定向检查组件强制浅／深主题时的上下箭头和单删除确认，避免把“应用深色”与“系统深色”当成同一个条件。
 
 `testButtonMaterialStates` 检查点击前后、禁用和忙碌状态，并通过实际触摸确认不可用操作不交付；`testToastMaterial` 单独保留浅／深原生 Toast 图。`testFocusedReducedMaterials` 用于菜单与 Toast 变更后的实色降级复验，继续操作真实系统开关并恢复原值。
+
+`testToastMaterialLifecycle` 在浅／深主题下点击三次：首次、3 秒内替换、退场卸载后的重新显示，分别保存提示与空闲截图。测试断言文本与卸载时序，玻璃背景是否完整仍须人工核对截图；不以文字出现代替材质验收。
 
 `testCompleteControls` 逐项点击新增的默认材质控件，并清除、输入和提交搜索值；`testCompleteReducedMaterials` 对新场景切换真实减少透明度设置再恢复。浅深主题下必须检查小尺寸 Switch 滑块和禁用前景是否仍可辨识。
 

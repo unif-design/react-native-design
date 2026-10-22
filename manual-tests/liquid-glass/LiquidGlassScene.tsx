@@ -336,6 +336,21 @@ function Scene() {
             autoFocus={false}
             style={styles.textEntry}
           />
+        ) : scene === 'toast-lifecycle' ? (
+          <View style={styles.buttons}>
+            <Button
+              label="显示提示"
+              onPress={() => {
+                const count = presses + 1;
+                setPresses(count);
+                toast({
+                  message: `材质提示 ${count}`,
+                  kind: 'success',
+                  position: 'center',
+                });
+              }}
+            />
+          </View>
         ) : scene === 'image' ? (
           <ImagePreview
             width={width - 48}

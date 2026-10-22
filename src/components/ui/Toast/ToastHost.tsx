@@ -176,8 +176,10 @@ export function ToastHost({
   }, [delivery, op, ty, finishIfCurrent]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: op.value,
     transform: [{ translateY: ty.value }],
+  }));
+  const contentAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: op.value,
   }));
 
   if (inert || !delivery) return null;
@@ -198,14 +200,18 @@ export function ToastHost({
     <View style={[styles.host, posStyle]} pointerEvents="none" testID={testID}>
       <Animated.View style={[styles.toast, animatedStyle]}>
         <GlassLayer style={styles.material} />
-        <View style={styles.content}>
+        {/* 原生材质的祖先必须保持 alpha=1，只淡化文字与状态点。 */}
+        <Animated.View
+          collapsable={false}
+          style={[styles.content, contentAnimatedStyle]}
+        >
           {dotColor ? (
             <View style={[styles.dot, { backgroundColor: dotColor }]} />
           ) : null}
           <Text style={styles.text} testID={childTestID(testID, 'text')}>
             {entry.message}
           </Text>
-        </View>
+        </Animated.View>
       </Animated.View>
     </View>
   );
