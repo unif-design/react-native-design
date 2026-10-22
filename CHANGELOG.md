@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.1](https://github.com/unif-design/react-native-design/compare/v1.11.0...v1.11.1) (2026-10-22)
+
+
+### Bug Fixes
+
+* **toast:** keep native glass ancestors opaque ([#180](https://github.com/unif-design/react-native-design/issues/180)) ([8e9e283](https://github.com/unif-design/react-native-design/commit/8e9e283f851c1a1b6de337051c806747e3ea0fc8))
+
 # [1.11.0](https://github.com/unif-design/react-native-design/compare/v1.10.1...v1.11.0) (2026-10-21)
 
 
