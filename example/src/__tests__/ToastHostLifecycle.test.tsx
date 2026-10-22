@@ -1,6 +1,7 @@
 import React from 'react';
 import { act, cleanup, render } from '@testing-library/react-native';
 import { AccessibilityInfo, StyleSheet } from 'react-native';
+import * as LiquidGlass from '@callstack/liquid-glass';
 import { ThemeProvider, toast, motion } from '@unif/react-native-design';
 import { ToastHost as NativeToastHost } from '../../../src/components/ui/Toast/ToastHost';
 import { ToastHost as WebToastHost } from '../../../src/components/ui/Toast/ToastHost.web';
@@ -308,3 +309,50 @@ test('Web 系统减少动效时关闭 CSS 转场且保留自动退出', () => {
   act(() => jest.advanceTimersByTime(400 + motion.base));
   expect(page.queryByText('reduce motion')).toBeNull();
 });
+
+test.each(['top', 'center', 'bottom'] as const)(
+  '原生 %s 提示首次、连续替换及退场后重挂时不淡化玻璃祖先',
+  async (position) => {
+    jest
+      .spyOn(AccessibilityInfo, 'isReduceTransparencyEnabled')
+      .mockResolvedValue(false);
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      true
+    );
+    const page = render(
+      <ThemeProvider>
+        <NativeToastHost testID="material-toast" />
+      </ThemeProvider>
+    );
+    await act(async () => {});
+
+    const expectMaterial = () => {
+      const material = page.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
+      expect(material.props.effect).toBe('regular');
+      // UIVisualEffectView 要求自身及祖先 alpha 为 1，前景可以独立淡化。
+      let node = material;
+      while (node.parent) {
+        node = node.parent;
+        const style = StyleSheet.flatten(node.props.style);
+        expect(style?.opacity ?? 1).toBe(1);
+      }
+    };
+
+    act(() => toast({ message: '首次提示', position }));
+    expectMaterial();
+    act(() => jest.advanceTimersByTime(1000));
+    act(() => toast({ message: '连续替换', position }));
+    expect(page.queryByText('首次提示')).toBeNull();
+    expectMaterial();
+    act(() => jest.advanceTimersByTime(3000 + motion.base));
+    expect(page.queryByTestId('material-toast')).toBeNull();
+    expect(
+      page.UNSAFE_queryAllByType(LiquidGlass.LiquidGlassView)
+    ).toHaveLength(0);
+    act(() => jest.advanceTimersByTime(1000));
+    act(() => toast({ message: '间隔后首次', position }));
+    expectMaterial();
+  }
+);
