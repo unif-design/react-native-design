@@ -37,6 +37,7 @@ export type ButtonBaseProps = {
   block?: boolean;
   /** 方形约束 — width=height=sizing.h,优先级高于 horizontal padding。IconButton 用。 */
   square?: boolean;
+  iconButton?: boolean;
   surfaceSize?: number;
   loadingSize?: number;
   accessibilityLabel?: string;
@@ -66,6 +67,7 @@ export function ButtonBase({
   loading,
   block,
   square,
+  iconButton,
   surfaceSize,
   loadingSize,
   accessibilityLabel,
@@ -177,7 +179,11 @@ export function ButtonBase({
                 <GlassLayer
                   style={{ borderRadius: glassRadius }}
                   fallbackColor={
-                    variant === 'secondary' ? c.surfaceContainerHigh : undefined
+                    iconButton
+                      ? c.surfaceContainerHighest
+                      : variant === 'secondary'
+                        ? c.surfaceContainerHigh
+                        : undefined
                   }
                 />
                 {/* 原生材质的祖先不能降低 alpha，只淡化按钮前景。 */}

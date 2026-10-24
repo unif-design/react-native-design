@@ -1,7 +1,7 @@
 # Unif Design — 全文文档聚合
 
 > 可选全文。普通查询优先通过 llms.txt 定位相关单页。
-<!-- Generated from @unif/react-native-design@1.11.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@1.11.1; edit source documentation. -->
 
 ## 目录
 
@@ -977,6 +977,7 @@ function Confirm() {
 | `borderColor`  | `string`                                    | —                    | 强调描边色（任意 variant 均生效;启用时默认 2px）                                                                  |
 | `borderWidth`  | `number`                                    | `2`                  | 与 `borderColor` 配合                                                                                             |
 | `bare`         | `boolean`                                   | `false`              | 抑制内边距,内容自控（与 variant 正交）                                                                            |
+| `fallbackColor` | `ColorValue` | 主题 `surface` | glass 无原生玻璃时的表面底色；原生玻璃仍由系统呈现 |
 | `fill`         | `boolean`                                   | `false`              | 撑满模式:外层 + 内层 clip 均 `flex:1`,Card 在 flex 父里撑满、内容区填满外层（内部 `flex:1` 滚动列表据此拿到高度） |
 | `style`        | `StyleProp<ViewStyle>`                      | —                    | 额外样式覆盖                                                                                                      |
 | `testID`       | `string`                                    | —                    | E2E / 测试定位                                                                                                    |
@@ -2747,7 +2748,7 @@ Switch / Stepper 放在 Cell 行尾，必须选择 Cell 的显式 control 分支
 
 为已有内容提供装饰玻璃背景。组件读取当前主题，不接管内容、交互或布局。
 
-旧 iOS 或 iOS 原生支持标记为假时，采用 `fallbackColor` 或主题 `surface` 实色分组，不叠加渐变和额外描边。开启减少透明度或 iOS 偏好尚未读回时也采用此实色背景。`secondary` Button／IconButton 与输入框使用 `surfaceContainerHigh`，与普通内容表面区分；Android 与缺少 CSS 模糊的 Web 继续使用主题半透明渐变。
+Android、旧 iOS 或原生支持标记为假时，采用 `fallbackColor` 或主题 `surface` 实色分组，不叠加渐变和额外描边。开启减少透明度或 iOS 偏好尚未读回时也采用此实色背景。`secondary` Button 与输入框使用 `surfaceContainerHigh`，IconButton（含确认状态）统一使用 `surfaceContainerHighest`，与白色列表和聊天背景区分；缺少 CSS 模糊的 Web 继续使用主题半透明渐变。
 
 ## 代码演示 {#实时预览}
 
@@ -2827,7 +2828,7 @@ import { View, Text } from 'react-native';
 | --------------- | ---------------------- | ------------------------- | ----------------------------------------------------------- |
 | `effect`        | `'clear' \| 'regular'` | `'regular'`               | `clear` 更通透，`regular` 使用标准材质                      |
 | `tintColor`     | `ColorValue`           | 原生不额外染色            | 支持时的材质染色；实色降级使用 fallbackColor 或主题 surface |
-| `fallbackColor` | `ColorValue`           | 主题 `surface`            | 旧 iOS、减少透明度或 iOS 偏好读取前使用的清晰底色           |
+| `fallbackColor` | `ColorValue`           | 主题 `surface`            | Android、旧 iOS、减少透明度或 iOS 偏好读取前使用的清晰底色           |
 | `colorScheme`   | `'light' \| 'dark'`    | 继承主题                  | 固定白色前景的相机控件使用 dark                             |
 | `style`         | `StyleProp<ViewStyle>` | `StyleSheet.absoluteFill` | 布局、定位和圆角；材质颜色使用 `tintColor`                  |
 | `testID`        | `string`               | —                         | 测试定位                                                    |
@@ -2840,7 +2841,7 @@ import { View, Text } from 'react-native';
 | ------------------------------ | ------------------------------------------------------------------------------------------- |
 | iOS 26+ 且原生支持标记为真     | `@callstack/liquid-glass` 的 `LiquidGlassView`，使用 `clear/regular` 原生材质与 `tintColor` |
 | 旧 iOS 或 iOS 原生支持标记为假 | `fallbackColor` 或主题 `surface` 实色分组，无额外渐变或描边                                 |
-| Android                        | 对应主题的半透明渐变，不提供原生折射或背景模糊                                              |
+| Android                        | 与旧 iOS 相同的主题实色分组，不提供原生折射或背景模糊                                              |
 | Web                            | CSS `backdrop-filter` 与主题背景；`clear/regular` 分别使用 10/40px 的近似值                 |
 
 安装 `@callstack/liquid-glass`（本库 peer 范围 `>=0.8.2 <0.9.0`），iOS 执行 `bundle exec pod install` 并重新构建。上游要求 RN 0.80+、Xcode 26+；本库的 RN 要求仍以根 `package.json` 为准。当前 RN 0.86.3 的最低 iOS 版本为 15.1；玻璃能力的 iOS 26 门槛与应用最低版本是两件事，支持范围内的旧 iOS 使用主题实色分组。Expo Go 不支持此原生模块，Expo 工程需开发构建。见 [上游安装与 API](https://github.com/callstack/liquid-glass#documentation)。
@@ -2855,7 +2856,7 @@ import { View, Text } from 'react-native';
 
 原生玻璃层及其祖先不要设置小于 1 的 opacity。按压、禁用和淡入淡出只淡化前景内容，避免 UIKit 原生效果消失；整个表面仍可做位移。见 [UIVisualEffectView 的 alpha 约束](https://developer.apple.com/documentation/uikit/uivisualeffectview/)。
 
-旧 iOS 的卡片、输入框、按钮、菜单与提示共享实色降级，调用方可用 `fallbackColor` 表达内容表面、输入表面或图标底色，不必复制平台判断。`clear` 与 `regular` 在实色降级时不改变透明度。Android 和无 CSS 模糊的 Web 渐变继续复用既有实现。装饰层只裁切自身，不裁切调用方内容或浮动菜单。
+Android 与旧 iOS 的卡片、输入框、按钮、菜单与提示共享实色降级，调用方可用 `fallbackColor` 表达内容表面、输入表面或图标底色，不必复制平台判断。`clear` 与 `regular` 在实色降级时不改变透明度。无 CSS 模糊的 Web 渐变继续复用既有实现。装饰层只裁切自身，不裁切调用方内容或浮动菜单。
 
 ## GlassStats 玻璃数据条
 
@@ -3094,6 +3095,8 @@ import { MailOutlined } from '@unif/react-native-icons';
 *Source: `docs/components/icon-button.mdx` · Mirror: `md/components/icon-button.md`*
 
 # IconButton 图标按钮
+
+不支持原生玻璃时，glass／secondary 图标按钮及确认状态统一采用主题 surfaceContainerHighest；原生 Liquid Glass 的透明度与材质保持系统呈现。
 
 用于工具栏或紧凑操作区，默认单击执行。需要提供 `accessibilityLabel`。
 

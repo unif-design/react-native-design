@@ -11,6 +11,7 @@ import {
 import * as LiquidGlass from '@callstack/liquid-glass';
 import {
   GlassLayer,
+  Card,
   IconButton,
   GlassStats,
   ThemeProvider,
@@ -83,63 +84,19 @@ test.each(['clear', 'regular'] as const)(
 );
 
 test.each([
-  ['android', 'light', 'regular'],
-  ['android', 'dark', 'clear'],
+  ['ios', 'light', 'clear', false],
+  ['ios', 'dark', 'regular', false],
+  ['ios', 'light', 'regular', true],
+  ['ios', 'dark', 'clear', true],
+  ['android', 'light', 'clear', false],
+  ['android', 'dark', 'regular', false],
+  ['android', 'light', 'regular', true],
+  ['android', 'dark', 'clear', true],
 ] as const)(
-  '%s 无原生材质时使用 %s 主题的 %s 半透明渐变',
-  async (os, scheme, effect) => {
-    jest.replaceProperty(
-      LiquidGlass as { isLiquidGlassSupported: boolean },
-      'isLiquidGlassSupported',
-      false
-    );
-    jest.replaceProperty(Platform, 'OS', os);
-    render(
-      <ThemeProvider forceScheme={scheme}>
-        <GlassLayer
-          effect={effect}
-          style={{ borderRadius: 14 }}
-          testID="glass-layer"
-        />
-      </ThemeProvider>
-    );
-    await waitFor(() =>
-      expect(
-        screen.getByTestId('glass-layer', { includeHiddenElements: true })
-      ).toHaveStyle({ backgroundColor: 'transparent' })
-    );
-    expect(
-      screen.getByTestId('glass-layer-gradient', {
-        includeHiddenElements: true,
-      })
-    ).toBeTruthy();
-    expect(
-      screen.getByTestId('glass-layer', { includeHiddenElements: true })
-    ).toHaveStyle({
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      left: 0,
-      right: 0,
-      borderRadius: 14,
-    });
-    const style = StyleSheet.flatten(
-      screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.style
-    );
-    expect(style.borderWidth).toBeUndefined();
-  }
-);
-
-test.each([
-  ['light', 'clear', false],
-  ['dark', 'regular', false],
-  ['light', 'regular', true],
-  ['dark', 'clear', true],
-] as const)(
-  '旧 iOS 使用 %s 主题分组实色，effect=%s，自定义底色=%s',
-  async (scheme, effect, custom) => {
+  '%s 无原生玻璃时使用 %s 主题分组实色，effect=%s，自定义底色=%s',
+  async (os, scheme, effect, custom) => {
     jest.replaceProperty(LiquidGlass, 'isLiquidGlassSupported', false);
-    jest.replaceProperty(Platform, 'OS', 'ios');
+    jest.replaceProperty(Platform, 'OS', os);
     const colors = scheme === 'dark' ? darkColors : lightColors;
     render(
       <ThemeProvider forceScheme={scheme}>
@@ -155,6 +112,11 @@ test.each([
     const material = screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
     expect(material.props.effect).toBe('none');
     expect(StyleSheet.flatten(material.props.style)).toMatchObject({
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
       backgroundColor: custom ? colors.primaryContainer : colors.surface,
       borderRadius: 14,
       overflow: 'hidden',
@@ -455,3 +417,76 @@ test('显式浅色覆盖深色主题，支持材质融合时提供无材质主�
     page.getByTestId('group', { includeHiddenElements: true }).props
   ).toMatchObject({ effect: 'none', colorScheme: 'dark', animated: false });
 });
+
+test.each([
+  ['ios', 'light', 'glass', false],
+  ['ios', 'dark', 'secondary', false],
+  ['android', 'light', 'secondary', false],
+  ['android', 'dark', 'glass', false],
+  ['ios', 'light', 'glass', true],
+  ['ios', 'dark', 'secondary', true],
+] as const)(
+  '%s %s 图标按钮 %s 使用统一降级底色且保留原生玻璃=%s',
+  async (os, scheme, variant, supported) => {
+    jest.replaceProperty(Platform, 'OS', os);
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      supported
+    );
+    const colors = scheme === 'dark' ? darkColors : lightColors;
+    const press = jest.fn();
+    render(
+      <ThemeProvider forceScheme={scheme}>
+        <IconButton
+          icon={ChevronLeftOutlined}
+          variant={variant}
+          accessibilityLabel="返回"
+          onPress={press}
+        />
+      </ThemeProvider>
+    );
+    await waitFor(() =>
+      expect(
+        StyleSheet.flatten(
+          screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.style
+        ).backgroundColor
+      ).toBe(supported ? 'transparent' : colors.surfaceContainerHighest)
+    );
+    expect(
+      screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.effect
+    ).toBe(supported ? 'regular' : 'none');
+    fireEvent.press(screen.getByRole('button', { name: '返回' }));
+    expect(press).toHaveBeenCalledTimes(1);
+  }
+);
+
+test.each([false, true])(
+  '卡片可区分白色聊天背景，原生玻璃支持=%s 时保留系统材质',
+  async (supported) => {
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      supported
+    );
+    render(
+      <ThemeProvider forceScheme="light">
+        <Card variant="glass" fallbackColor={lightColors.surfaceContainerHigh}>
+          <IconButton
+            icon={ChevronLeftOutlined}
+            accessibilityLabel="选择客户"
+            onPress={() => {}}
+          />
+        </Card>
+      </ThemeProvider>
+    );
+    await waitFor(() =>
+      expect(
+        StyleSheet.flatten(
+          screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.style
+        ).backgroundColor
+      ).toBe(supported ? 'transparent' : lightColors.surfaceContainerHigh)
+    );
+    expect(screen.getByRole('button', { name: '选择客户' })).toBeOnTheScreen();
+  }
+);

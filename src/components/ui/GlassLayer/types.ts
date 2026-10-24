@@ -8,7 +8,7 @@ export interface GlassLayerProps {
   effect?: GlassEffect;
   /** 可选材质染色；原生默认不额外染色，由系统呈现。 */
   tintColor?: ColorValue;
-  /** 旧 iOS 或系统减少透明度时的实色背景；默认主题 surface。 */
+  /** 无原生玻璃或系统减少透明度时的实色背景；默认主题 surface。 */
   fallbackColor?: ColorValue;
   /** 默认继承主题；相机等固定白色前景可指定 dark，前景色仍由内容负责。 */
   colorScheme?: 'light' | 'dark';

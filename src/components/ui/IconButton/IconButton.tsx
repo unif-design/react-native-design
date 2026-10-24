@@ -67,6 +67,7 @@ export function IconButton({
 
   return (
     <ButtonBase
+      iconButton
       square
       onPress={onPress}
       size={size}
