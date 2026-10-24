@@ -10,6 +10,7 @@ export function Card({
   variant = 'default',
   padding,
   borderRadius,
+  fallbackColor,
   borderColor,
   borderWidth,
   bare,
@@ -47,7 +48,10 @@ export function Card({
         ]}
       >
         {variant === 'glass' ? (
-          <GlassLayer style={{ borderRadius: br }} />
+          <GlassLayer
+            style={{ borderRadius: br }}
+            fallbackColor={fallbackColor}
+          />
         ) : null}
         {children}
       </View>

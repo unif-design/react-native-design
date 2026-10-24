@@ -197,6 +197,7 @@ function Confirm() {
 | `borderColor`  | `string`                                    | —                    | 强调描边色（任意 variant 均生效;启用时默认 2px）                                                                  |
 | `borderWidth`  | `number`                                    | `2`                  | 与 `borderColor` 配合                                                                                             |
 | `bare`         | `boolean`                                   | `false`              | 抑制内边距,内容自控（与 variant 正交）                                                                            |
+| `fallbackColor` | `ColorValue` | 主题 `surface` | glass 无原生玻璃时的表面底色；原生玻璃仍由系统呈现 |
 | `fill`         | `boolean`                                   | `false`              | 撑满模式:外层 + 内层 clip 均 `flex:1`,Card 在 flex 父里撑满、内容区填满外层（内部 `flex:1` 滚动列表据此拿到高度） |
 | `style`        | `StyleProp<ViewStyle>`                      | —                    | 额外样式覆盖                                                                                                      |
 | `testID`       | `string`                                    | —                    | E2E / 测试定位                                                                                                    |

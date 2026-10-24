@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import {
   LiquidGlassView,
   isLiquidGlassSupported,
@@ -7,10 +7,9 @@ import {
 import { darkColors, lightColors, useTheme } from '../../../theme';
 import type { GlassLayerProps } from './types';
 import { styles } from './styles';
-import { GlassGradient } from './GlassGradient';
 import { useReducedTransparency } from '../../../theme/useReducedTransparency';
 
-/** 装饰材质层；旧 iOS 使用分组实色，其他降级平台使用半透明渐变。 */
+/** 装饰材质层；无原生玻璃时统一使用主题分组实色。 */
 export function GlassLayer({
   effect = 'regular',
   tintColor,
@@ -28,8 +27,9 @@ export function GlassLayer({
     : theme.colors;
   const reduced = useReducedTransparency();
   const nativeGlass = isLiquidGlassSupported && !reduced;
-  const solid = reduced || (Platform.OS === 'ios' && !nativeGlass);
-  const backgroundColor = solid ? (fallbackColor ?? c.surface) : 'transparent';
+  const backgroundColor = nativeGlass
+    ? 'transparent'
+    : (fallbackColor ?? c.surface);
 
   return (
     <LiquidGlassView
@@ -50,14 +50,6 @@ export function GlassLayer({
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       testID={testID}
-    >
-      {!nativeGlass && !solid ? (
-        <GlassGradient
-          colors={c}
-          effect={effect}
-          testID={testID ? `${testID}-gradient` : undefined}
-        />
-      ) : null}
-    </LiquidGlassView>
+    />
   );
 }

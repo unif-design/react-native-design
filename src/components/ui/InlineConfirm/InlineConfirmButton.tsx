@@ -45,6 +45,7 @@ export function InlineConfirmButton({
   );
   return (
     <ButtonBase
+      iconButton
       buttonRef={button}
       onPress={press}
       onTouchStart={(event) => event.stopPropagation()}
