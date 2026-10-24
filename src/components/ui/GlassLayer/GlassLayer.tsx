@@ -1,13 +1,10 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import {
-  LiquidGlassView,
-  isLiquidGlassSupported,
-} from '@callstack/liquid-glass';
+import { LiquidGlassView } from '@callstack/liquid-glass';
 import { darkColors, lightColors, useTheme } from '../../../theme';
 import type { GlassLayerProps } from './types';
 import { styles } from './styles';
-import { useReducedTransparency } from '../../../theme/useReducedTransparency';
+import { useGlassFallback } from './useGlassFallback';
 
 /** 装饰材质层；无原生玻璃时统一使用主题分组实色。 */
 export function GlassLayer({
@@ -25,8 +22,7 @@ export function GlassLayer({
       ? darkColors
       : lightColors
     : theme.colors;
-  const reduced = useReducedTransparency();
-  const nativeGlass = isLiquidGlassSupported && !reduced;
+  const nativeGlass = !useGlassFallback();
   const backgroundColor = nativeGlass
     ? 'transparent'
     : (fallbackColor ?? c.surface);

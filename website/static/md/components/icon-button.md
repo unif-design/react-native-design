@@ -8,7 +8,7 @@ description: '只包含图标的按钮，需要提供无障碍名称。'
 
 # IconButton 图标按钮
 
-不支持原生玻璃时，glass／secondary 图标按钮及确认状态统一采用主题 surfaceContainerHighest；原生 Liquid Glass 的透明度与材质保持系统呈现。
+Android、旧 iOS 或减少透明度时，glass／secondary 图标按钮及确认状态统一采用轻中性主题 surfaceContainerHigh；原生 Liquid Glass 的透明度与材质保持系统呈现，Web 保留既有表面。
 
 用于工具栏或紧凑操作区，默认单击执行。需要提供 `accessibilityLabel`。
 

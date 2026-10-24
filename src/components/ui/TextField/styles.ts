@@ -1,13 +1,13 @@
 import { StyleSheet } from 'react-native';
 import { fixed, fw, radius, space, type as t } from '../../../theme';
-import type { ColorTokens } from '../../../theme';
+import type { ColorTokens, ShadowTokens } from '../../../theme';
 import {
   TEXTAREA_VERTICAL_PADDING,
   TEXT_FIELD_BORDER_WIDTH,
 } from './constants';
 
 /** TextField primitive styles —— Input + Textarea 共享。 */
-export const makeStyles = (c: ColorTokens) =>
+export const makeStyles = (c: ColorTokens, shadow: ShadowTokens) =>
   StyleSheet.create({
     wrap: {
       flexDirection: 'row',
@@ -55,6 +55,13 @@ export const makeStyles = (c: ColorTokens) =>
     wrapIdle: {
       backgroundColor: 'transparent',
       borderColor: 'transparent',
+    },
+    wrapFallbackIdle: {
+      borderColor: c.outlineVariant,
+    },
+    wrapFallbackSurface: {
+      backgroundColor: c.surface,
+      ...shadow.subtle,
     },
     /** 交互状态只改变边框，玻璃材质由独立装饰层持有。 */
     wrapActive: {

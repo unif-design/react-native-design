@@ -9,6 +9,7 @@ import { Platform, Pressable, Text, TextInput, View } from 'react-native';
 import type { TextInputProps } from 'react-native';
 import { fixed, radius, useColors, useThemedStyles } from '../../../theme';
 import { GlassLayer } from '../GlassLayer';
+import { useGlassFallback } from '../GlassLayer/useGlassFallback';
 import { childTestID } from '../../../utils/testID';
 import { createLogger } from '../../../utils/logger';
 import {
@@ -84,6 +85,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
       .filter(([, entry]) => entry !== undefined)
       .map(([name]) => name)
       .join(',');
+    const glassFallback = useGlassFallback();
     const colors = useColors();
     const styles = useThemedStyles(makeStyles);
     const [focused, setFocused] = useState(false);
@@ -166,7 +168,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
         ? [styles.wrapActive, styles.wrapFocus]
         : filled
           ? [styles.wrapActive, styles.wrapFilled]
-          : [styles.wrapIdle];
+          : [styles.wrapIdle, glassFallback && styles.wrapFallbackIdle];
     const interactiveHeight =
       searchLayout?.interactiveHeight ?? normalizedHeight;
 
@@ -245,6 +247,10 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
             multiline && styles.wrapMultiline,
             centered && styles.wrapCentered,
             searchLayout === undefined && !plain && wrapStateStyles,
+            searchLayout === undefined &&
+              !plain &&
+              glassFallback &&
+              styles.wrapFallbackSurface,
             searchLayout !== undefined && styles.searchInteractiveRow,
             plain && styles.wrapPlain,
             !multiline && insetSurface && styles.wrapInset,
@@ -264,7 +270,9 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
                 borderRadius:
                   !multiline && insetSurface ? radius.pill : radius.md,
               }}
-              fallbackColor={colors.surfaceContainerHigh}
+              fallbackColor={
+                glassFallback ? colors.surface : colors.surfaceContainerHigh
+              }
             />
           ) : null}
           {centered ? (

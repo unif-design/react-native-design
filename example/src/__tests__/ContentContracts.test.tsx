@@ -4,8 +4,15 @@ import {
   TrashOutlined,
 } from '@unif/react-native-icons';
 import React, { useState } from 'react';
-import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
-import { fireEvent, render } from '@testing-library/react-native';
+import {
+  AccessibilityInfo,
+  ActivityIndicator,
+  Platform,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import * as LiquidGlass from '@callstack/liquid-glass';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ActionMenuContent,
@@ -617,9 +624,22 @@ test.each([40, 20])(
   }
 );
 
-test.each(['light', 'dark'] as const)(
-  'compact在%s主题保留品牌焦点和选区色',
-  (scheme) => {
+test.each([
+  ['light', false],
+  ['dark', false],
+  ['light', true],
+  ['dark', true],
+] as const)(
+  'compact在%s主题和原生玻璃=%s时保留品牌焦点和选区色',
+  async (scheme, supported) => {
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      supported
+    );
+    jest
+      .spyOn(AccessibilityInfo, 'isReduceTransparencyEnabled')
+      .mockResolvedValue(false);
     const colors = scheme === 'dark' ? darkColors : lightColors;
     const page = render(
       <ThemeProvider forceScheme={scheme}>
@@ -634,6 +654,11 @@ test.each(['light', 'dark'] as const)(
         />
       </ThemeProvider>
     );
+    await waitFor(() =>
+      expect(
+        page.UNSAFE_getAllByType(LiquidGlass.LiquidGlassView)[0].props.effect
+      ).toBe(supported ? 'regular' : 'none')
+    );
     const input = page.getByLabelText('重命名聊天');
     expect(input.props.selectionColor).toBe(colors.primary);
     fireEvent(input, 'focus');
@@ -643,7 +668,7 @@ test.each(['light', 'dark'] as const)(
         return (
           style?.borderRadius === radius.pill &&
           style.borderColor === colors.primary &&
-          style.backgroundColor === 'transparent'
+          style.backgroundColor === (supported ? 'transparent' : colors.surface)
         );
       })
     ).toBe(true);
@@ -653,8 +678,9 @@ test.each(['light', 'dark'] as const)(
         const style = StyleSheet.flatten(view.props.style);
         return (
           style?.borderRadius === radius.pill &&
-          style.borderColor === 'transparent' &&
-          style.backgroundColor === 'transparent'
+          style.borderColor ===
+            (supported ? 'transparent' : colors.outlineVariant) &&
+          style.backgroundColor === (supported ? 'transparent' : colors.surface)
         );
       })
     ).toBe(true);

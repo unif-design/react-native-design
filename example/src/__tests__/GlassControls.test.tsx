@@ -24,6 +24,9 @@ import {
   List,
   Textarea,
   lightColors,
+  lightShadow,
+  r,
+  darkShadow,
   darkColors,
   Chip,
   IconButton,
@@ -294,5 +297,150 @@ test.each(['light', 'dark'] as const)(
     );
     fireEvent.press(screen.getByRole('button', { name: 'AI识别' }));
     expect(press).toHaveBeenCalledTimes(1);
+  }
+);
+
+describe.each(['light', 'dark'] as const)(
+  '输入在 %s 原生降级表面',
+  (scheme) => {
+    test.each([
+      ['ios', false, false],
+      ['ios', false, true],
+      ['ios', true, false],
+      ['ios', true, true],
+      ['android', false, false],
+    ] as const)(
+      '%s 支持=%s、减少透明度=%s 时保留输入层次与交互边框',
+      async (os, supported, reduced) => {
+        jest.replaceProperty(Platform, 'OS', os);
+        jest.replaceProperty(
+          LiquidGlass as { isLiquidGlassSupported: boolean },
+          'isLiquidGlassSupported',
+          supported
+        );
+        jest
+          .spyOn(AccessibilityInfo, 'isReduceTransparencyEnabled')
+          .mockResolvedValue(reduced);
+        const colors = scheme === 'dark' ? darkColors : lightColors;
+        const shadow = scheme === 'dark' ? darkShadow : lightShadow;
+        const native = supported && !reduced;
+        const changed = jest.fn();
+        const page = render(
+          <ThemeProvider forceScheme={scheme}>
+            <Input
+              testID="field"
+              accessibilityLabel="客户名称"
+              value=""
+              onChangeText={changed}
+            />
+          </ThemeProvider>
+        );
+        const surface = () =>
+          page
+            .getByTestId('field')
+            .findAllByType(View)
+            .find(
+              (node) => StyleSheet.flatten(node.props.style)?.borderWidth === 1
+            )!;
+        await waitFor(() => {
+          expect(
+            StyleSheet.flatten(
+              page.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.style
+            ).backgroundColor
+          ).toBe(native ? 'transparent' : colors.surface);
+          expect(StyleSheet.flatten(surface().props.style)).toMatchObject({
+            borderColor: native ? 'transparent' : colors.outlineVariant,
+          });
+          if (native)
+            expect(
+              StyleSheet.flatten(surface().props.style).shadowOpacity
+            ).toBeUndefined();
+          else
+            expect(StyleSheet.flatten(surface().props.style)).toMatchObject({
+              ...shadow.subtle,
+              backgroundColor: colors.surface,
+            });
+        });
+        fireEvent(page.getByLabelText('客户名称'), 'focus', {
+          nativeEvent: {},
+        });
+        expect(StyleSheet.flatten(surface().props.style)).toMatchObject({
+          borderColor: colors.primary,
+        });
+        fireEvent.changeText(page.getByLabelText('客户名称'), '门店');
+        expect(changed).toHaveBeenLastCalledWith('门店');
+        page.rerender(
+          <ThemeProvider forceScheme={scheme}>
+            <Input
+              testID="field"
+              accessibilityLabel="客户名称"
+              value="门店"
+              onChangeText={changed}
+              error="请核实客户"
+            />
+          </ThemeProvider>
+        );
+        expect(StyleSheet.flatten(surface().props.style)).toMatchObject({
+          borderColor: colors.error,
+        });
+        page.rerender(
+          <ThemeProvider forceScheme={scheme}>
+            <Input
+              testID="field"
+              accessibilityLabel="客户名称"
+              value="门店"
+              onChangeText={changed}
+              disabled
+            />
+          </ThemeProvider>
+        );
+        expect(page.getByLabelText('客户名称')).toHaveProp('editable', false);
+        expect(
+          page.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.effect
+        ).toBe(native ? 'regular' : 'none');
+      }
+    );
+  }
+);
+
+test.each([
+  ['light', false],
+  ['dark', false],
+  ['light', true],
+  ['dark', true],
+] as const)(
+  'flush Cell 在 %s 原生玻璃=%s 时保留图标语义并区分中性降级底',
+  async (scheme, supported) => {
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      supported
+    );
+    const colors = scheme === 'dark' ? darkColors : lightColors;
+    const page = render(
+      <ThemeProvider forceScheme={scheme}>
+        <List flush>
+          <Cell title="设置" leading={CloseOutlined} />
+          <Cell title="退出" leading={CloseOutlined} danger />
+        </List>
+      </ThemeProvider>
+    );
+    await waitFor(() => {
+      const boxes = page
+        .UNSAFE_getAllByType(View)
+        .filter(
+          (node) => StyleSheet.flatten(node.props.style)?.width === r(28)
+        );
+      expect(boxes).toHaveLength(2);
+      for (const box of boxes)
+        expect(StyleSheet.flatten(box.props.style).backgroundColor).toBe(
+          supported ? colors.primaryContainer : colors.surfaceContainerHigh
+        );
+    });
+    const glyphs = page.UNSAFE_getAllByType(CloseOutlined);
+    expect(glyphs.map((node) => node.props.color)).toEqual([
+      colors.primary,
+      colors.error,
+    ]);
   }
 );

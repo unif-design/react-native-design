@@ -1,21 +1,37 @@
+import { CloseOutlined } from '@unif/react-native-icons';
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { act, render, screen } from '@testing-library/react-native';
+import { Platform, StyleSheet, View } from 'react-native';
+import { act, render, renderHook, screen } from '@testing-library/react-native';
 import { LiquidGlassView } from '@callstack/liquid-glass';
 import {
   ThemeProvider,
+  Input,
+  IconButton,
   darkColors,
   lightColors,
 } from '@unif/react-native-design';
 import { GlassLayer } from '../../../src/components/ui/GlassLayer/GlassLayer.web';
+import { useGlassFallback } from '../../../src/components/ui/GlassLayer/useGlassFallback.web';
+
+// Exercise the same platform entries selected by Metro/Webpack.
+jest.mock('../../../src/components/ui/GlassLayer/useGlassFallback', () =>
+  jest.requireActual(
+    '../../../src/components/ui/GlassLayer/useGlassFallback.web'
+  )
+);
+jest.mock('../../../src/components/ui/GlassLayer/GlassLayer', () =>
+  jest.requireActual('../../../src/components/ui/GlassLayer/GlassLayer.web')
+);
 
 beforeEach(() => {
+  jest.replaceProperty(Platform, 'OS', 'web');
   Object.defineProperty(globalThis, 'CSS', {
     configurable: true,
     value: { supports: () => true },
   });
 });
 afterEach(() => {
+  jest.restoreAllMocks();
   Reflect.deleteProperty(globalThis, 'CSS');
   Reflect.deleteProperty(globalThis, 'matchMedia');
 });
@@ -179,4 +195,45 @@ test('Web 无模糊支持时显式浅色仍绘制无 testID 渐变', () => {
   );
   expect(page.UNSAFE_getByType(GlassGradient).props.colors).toBe(lightColors);
   expect(page.UNSAFE_getByType(GlassGradient).props.testID).toBeUndefined();
+});
+
+test('Web 输入外壳不采用原生降级装饰', () => {
+  const { result } = renderHook(() => useGlassFallback());
+  expect(result.current).toBe(false);
+});
+
+test('Web 输入与减少透明度的图标按钮保留原有表面', () => {
+  Object.defineProperty(globalThis, 'matchMedia', {
+    configurable: true,
+    value: () => ({
+      matches: true,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    }),
+  });
+  const page = render(
+    <ThemeProvider>
+      <Input testID="web-field" accessibilityLabel="名称" />
+      <IconButton
+        icon={CloseOutlined}
+        variant="glass"
+        accessibilityLabel="关闭"
+        onPress={jest.fn()}
+      />
+    </ThemeProvider>
+  );
+  const materials = page.UNSAFE_getAllByType(GlassLayer);
+  expect(materials.map((node) => node.props.fallbackColor)).toEqual([
+    lightColors.surfaceContainerHigh,
+    lightColors.surfaceContainerHighest,
+  ]);
+  const field = page
+    .getByTestId('web-field')
+    .findAllByType(View)
+    .find((node) => StyleSheet.flatten(node.props.style)?.borderWidth === 1)!;
+  expect(StyleSheet.flatten(field.props.style)).toMatchObject({
+    backgroundColor: 'transparent',
+    borderColor: 'transparent',
+  });
+  expect(StyleSheet.flatten(field.props.style).shadowOpacity).toBeUndefined();
 });
