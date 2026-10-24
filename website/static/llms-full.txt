@@ -1,7 +1,7 @@
 # Unif Design — 全文文档聚合
 
 > 可选全文。普通查询优先通过 llms.txt 定位相关单页。
-<!-- Generated from @unif/react-native-design@1.11.1; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@1.12.0; edit source documentation. -->
 
 ## 目录
 
@@ -1194,6 +1194,8 @@ slide 的节点类型与 a11y 语义由严格联合决定：
 *Source: `docs/components/cell.mdx` · Mirror: `md/components/cell.md`*
 
 # Cell · List 列表行
+
+`List flush` 中默认图标容器在 Android、旧 iOS 或减少透明度时使用轻中性底色；iOS 原生玻璃可用时与 Web 保留既有浅品牌底，危险语义仍由图标和文字颜色表达。自定义 leading、图片和头像保持原样。
 
 列表中的信息行，可组合文字、图标、操作和附加内容；使用 List 组织分组或紧凑列表。
 
@@ -3096,7 +3098,7 @@ import { MailOutlined } from '@unif/react-native-icons';
 
 # IconButton 图标按钮
 
-不支持原生玻璃时，glass／secondary 图标按钮及确认状态统一采用主题 surfaceContainerHighest；原生 Liquid Glass 的透明度与材质保持系统呈现。
+Android、旧 iOS 或减少透明度时，glass／secondary 图标按钮及确认状态统一采用轻中性主题 surfaceContainerHigh；原生 Liquid Glass 的透明度与材质保持系统呈现，Web 保留既有表面。
 
 用于工具栏或紧凑操作区，默认单击执行。需要提供 `accessibilityLabel`。
 
@@ -3530,7 +3532,7 @@ Web 示例只能验证浏览器交互。原生触摸冒泡、玻璃材质和屏�
 
 # Input 输入框
 
-单行文本输入，背景统一使用 GlassLayer；焦点、填写和错误状态保留各自描边，禁用只淡化前景。可视高度默认及最小命中框均为 44pt；多行使用 [Textarea](md/components/textarea.md)。
+单行文本输入，背景统一使用 GlassLayer；Android、旧 iOS 或减少透明度时使用主题 surface 实色、细中性边界与轻阴影形成层次，原生玻璃与 Web 外观保持。焦点、填写和错误状态保留各自描边，禁用只淡化前景。可视高度默认及最小命中框均为 44pt；多行使用 [Textarea](md/components/textarea.md)。
 
 ```tsx
 const InputDemo = () => {
@@ -6623,6 +6625,8 @@ const TextareaLayoutDemo = () => {
 ```
 
 输入表面（包括内部 padding 和边框）在 minHeight / maxHeight 范围内增长与缩短；错误说明在表面外，不占上限。首次长文、外部 value 更新、宽度与应用字号变化后，按真实内容重新测量；超过上限默认内部滚动，不截断文字。省略 maxHeight 可持续增长。
+
+iOS 使用输入框实际宽度和同一字体/缩放策略的原生文字行独立测量，不依赖输入框固定高度后的内容尺寸事件；测量节点不可见且不进入可访问树，旧文本、宽度或字体的迟到结果不会应用到新内容。Android 保留自然测量，Web 保留 scrollHeight 测量。
 
 受控清空通过外部 value 更新，ref 仍仅有 focus / blur。onFocus / onBlur 与 onContentSizeChange 原样交付；contentSize 是文字测量，组合区的总高度应由消费者自己的 onLayout 测量。页面负责键盘避让，回车可显式设置 submitBehavior="newline"，发送与语音采集留在消费者。
 

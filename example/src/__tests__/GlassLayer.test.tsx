@@ -1,4 +1,4 @@
-import { ChevronLeftOutlined } from '@unif/react-native-icons';
+import { ChevronLeftOutlined, type IconProps } from '@unif/react-native-icons';
 import React from 'react';
 import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
 import {
@@ -451,7 +451,7 @@ test.each([
         StyleSheet.flatten(
           screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.style
         ).backgroundColor
-      ).toBe(supported ? 'transparent' : colors.surfaceContainerHighest)
+      ).toBe(supported ? 'transparent' : colors.surfaceContainerHigh)
     );
     expect(
       screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.effect
@@ -488,5 +488,48 @@ test.each([false, true])(
       ).toBe(supported ? 'transparent' : lightColors.surfaceContainerHigh)
     );
     expect(screen.getByRole('button', { name: '选择客户' })).toBeOnTheScreen();
+  }
+);
+
+test.each([false, true])(
+  '原生支持=%s 时初始透明度偏好就绪不重新绘制图标',
+  async (supported) => {
+    jest.replaceProperty(Platform, 'OS', 'ios');
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      supported
+    );
+    let resolvePreference!: (value: boolean) => void;
+    jest
+      .spyOn(AccessibilityInfo, 'isReduceTransparencyEnabled')
+      .mockReturnValue(
+        new Promise((resolve) => {
+          resolvePreference = resolve;
+        })
+      );
+    const Glyph = jest.fn((_props: IconProps) => null);
+    render(
+      <ThemeProvider>
+        <IconButton
+          icon={Glyph}
+          iconSize={21}
+          variant="glass"
+          accessibilityLabel="返回"
+          onPress={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+    expect(Glyph).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      resolvePreference(false);
+    });
+    expect(Glyph).toHaveBeenCalledTimes(1);
+    expect(Glyph.mock.calls[0]?.[0]).toMatchObject({ size: 21 });
+    const material = screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
+    expect(material.props.effect).toBe(supported ? 'regular' : 'none');
+    expect(StyleSheet.flatten(material.props.style).backgroundColor).toBe(
+      supported ? 'transparent' : lightColors.surfaceContainerHigh
+    );
   }
 );

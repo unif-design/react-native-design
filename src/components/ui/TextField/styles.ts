@@ -1,13 +1,13 @@
 import { StyleSheet } from 'react-native';
 import { fixed, fw, radius, space, type as t } from '../../../theme';
-import type { ColorTokens } from '../../../theme';
+import type { ColorTokens, ShadowTokens } from '../../../theme';
 import {
   TEXTAREA_VERTICAL_PADDING,
   TEXT_FIELD_BORDER_WIDTH,
 } from './constants';
 
 /** TextField primitive styles —— Input + Textarea 共享。 */
-export const makeStyles = (c: ColorTokens) =>
+export const makeStyles = (c: ColorTokens, shadow: ShadowTokens) =>
   StyleSheet.create({
     wrap: {
       flexDirection: 'row',
@@ -56,6 +56,13 @@ export const makeStyles = (c: ColorTokens) =>
       backgroundColor: 'transparent',
       borderColor: 'transparent',
     },
+    wrapFallbackIdle: {
+      borderColor: c.outlineVariant,
+    },
+    wrapFallbackSurface: {
+      backgroundColor: c.surface,
+      ...shadow.subtle,
+    },
     /** 交互状态只改变边框，玻璃材质由独立装饰层持有。 */
     wrapActive: {
       backgroundColor: 'transparent',
@@ -78,6 +85,13 @@ export const makeStyles = (c: ColorTokens) =>
       margin: 0,
       // react-native-web: 抑制浏览器默认 focus outline,让 wrapFocus 的 brand 边框接管
       outlineWidth: 0,
+    },
+    measurement: {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      flex: 0,
+      opacity: 0,
     },
     /** multiline 覆盖:Android 默认居中,需要顶对齐 */
     inputMultiline: {

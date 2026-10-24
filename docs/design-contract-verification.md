@@ -2,6 +2,8 @@
 
 适用源码基线：`99360cb7911be1ea883050d9fe740ed4212e1914` 之上的 Design 新架构实现，本地验证日期 2026-09-17。目标依据为本机架构仓的 [Design 总契约](../../unif-platform-architecture/libraries/react-native-design.md)及其八个专题；本文件记录实现与本地开发验证边界。完整 CI 与发布证据以对应 PR、Actions 和 Release 为准，不代替用户最终验收。
 
+> 2026-10-24补充：本文保留2026-09-17的阶段证据。iOS Textarea自然测量在真实语音/原生输入历史组合下存在旧框高问题，当前独立测量实现及新验证边界见[后续记录](reviews/2026-10-24-textarea-native-measurement.md)；本文下方旧自然测量结论不能替代该设备结果。
+
 ## 实现与公共契约
 
 | 单元 | 实现及主要依据 | 公开契约 |

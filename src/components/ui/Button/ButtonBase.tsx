@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import {
   ActivityIndicator,
+  Platform,
   StyleSheet,
   View,
   type AccessibilityRole,
@@ -180,7 +181,9 @@ export function ButtonBase({
                   style={{ borderRadius: glassRadius }}
                   fallbackColor={
                     iconButton
-                      ? c.surfaceContainerHighest
+                      ? Platform.OS === 'web'
+                        ? c.surfaceContainerHighest
+                        : c.surfaceContainerHigh
                       : variant === 'secondary'
                         ? c.surfaceContainerHigh
                         : undefined

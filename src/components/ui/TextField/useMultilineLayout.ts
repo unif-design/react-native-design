@@ -1,6 +1,6 @@
 import type { MultilineLayout, MultilineLayoutInput } from './types';
 
-/** 原生 Yoga 直接测量文本；固定 height 会阻断 iOS Fabric 的后续内容尺寸通知。 */
+/** Android 继续由原生 Yoga 测量；iOS 使用对应平台的独立文字测量。 */
 export function useMultilineLayout({
   minHeight,
   maxHeight,
