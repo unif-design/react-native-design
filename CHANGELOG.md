@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.12.0](https://github.com/unif-design/react-native-design/compare/v1.11.1...v1.12.0) (2026-10-24)
+
+
+### Features
+
+* **glass:** support consistent opaque fallback surfaces ([20a7ee7](https://github.com/unif-design/react-native-design/commit/20a7ee731ff137063f64c76a371e811265647bd8))
+
 ## [1.11.1](https://github.com/unif-design/react-native-design/compare/v1.11.0...v1.11.1) (2026-10-22)
 
 
