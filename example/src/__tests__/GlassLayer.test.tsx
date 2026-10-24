@@ -429,7 +429,11 @@ test.each([
   '%s %s 图标按钮 %s 使用统一降级底色且保留原生玻璃=%s',
   async (os, scheme, variant, supported) => {
     jest.replaceProperty(Platform, 'OS', os);
-    jest.replaceProperty(LiquidGlass, 'isLiquidGlassSupported', supported);
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      supported
+    );
     const colors = scheme === 'dark' ? darkColors : lightColors;
     const press = jest.fn();
     render(
@@ -460,7 +464,11 @@ test.each([
 test.each([false, true])(
   '卡片可区分白色聊天背景，原生玻璃支持=%s 时保留系统材质',
   async (supported) => {
-    jest.replaceProperty(LiquidGlass, 'isLiquidGlassSupported', supported);
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      supported
+    );
     render(
       <ThemeProvider forceScheme="light">
         <Card variant="glass" fallbackColor={lightColors.surfaceContainerHigh}>
