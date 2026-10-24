@@ -19,6 +19,7 @@ import {
 } from './normalize';
 import { makeStyles } from './styles';
 import { TextFieldSlot } from './TextFieldSlot';
+import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import type { TextFieldBaseProps, TextFieldHandle } from './types';
 import { useErrorAnnouncement } from './useErrorAnnouncement';
 import { useTextFieldValue } from './useTextFieldValue';
@@ -123,6 +124,12 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
       fontSize: styles.input.fontSize,
       placeholder: allowedNativeProps.placeholder as string | undefined,
       inputRef: nativeRef,
+      allowFontScaling:
+        allowedNativeProps.allowFontScaling as TextInputProps['allowFontScaling'],
+      maxFontSizeMultiplier:
+        allowedNativeProps.maxFontSizeMultiplier as TextInputProps['maxFontSizeMultiplier'],
+      lineBreakStrategyIOS:
+        allowedNativeProps.lineBreakStrategyIOS as TextInputProps['lineBreakStrategyIOS'],
     });
     const sanitizedContainer = sanitizeTextFieldContainerStyle(containerStyle);
     const effectiveEditable = disabled !== true && editable !== false;
@@ -222,6 +229,31 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
           accessibilityState={mergedAccessibilityState}
           testID={childTestID(testID, 'input')}
         />
+        {multilineLayout.measurement ? (
+          <Text
+            key={multilineLayout.measurement.key}
+            {...A11Y_HIDDEN_PROPS}
+            pointerEvents="none"
+            allowFontScaling={
+              allowedNativeProps.allowFontScaling as TextInputProps['allowFontScaling']
+            }
+            maxFontSizeMultiplier={
+              allowedNativeProps.maxFontSizeMultiplier as TextInputProps['maxFontSizeMultiplier']
+            }
+            lineBreakStrategyIOS={
+              allowedNativeProps.lineBreakStrategyIOS as TextInputProps['lineBreakStrategyIOS']
+            }
+            style={[
+              styles.input,
+              styles.measurement,
+              { width: multilineLayout.measurement.width },
+            ]}
+            onTextLayout={multilineLayout.measurement.onTextLayout}
+            testID={childTestID(testID, 'measurement')}
+          >
+            {multilineLayout.measurement.text}
+          </Text>
+        ) : null}
         <TextFieldSlot
           slot={trailing}
           compact={searchLayout !== undefined}

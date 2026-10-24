@@ -6626,6 +6626,8 @@ const TextareaLayoutDemo = () => {
 
 输入表面（包括内部 padding 和边框）在 minHeight / maxHeight 范围内增长与缩短；错误说明在表面外，不占上限。首次长文、外部 value 更新、宽度与应用字号变化后，按真实内容重新测量；超过上限默认内部滚动，不截断文字。省略 maxHeight 可持续增长。
 
+iOS 使用输入框实际宽度和同一字体/缩放策略的原生文字行独立测量，不依赖输入框固定高度后的内容尺寸事件；测量节点不可见且不进入可访问树，旧文本、宽度或字体的迟到结果不会应用到新内容。Android 保留自然测量，Web 保留 scrollHeight 测量。
+
 受控清空通过外部 value 更新，ref 仍仅有 focus / blur。onFocus / onBlur 与 onContentSizeChange 原样交付；contentSize 是文字测量，组合区的总高度应由消费者自己的 onLayout 测量。页面负责键盘避让，回车可显式设置 submitBehavior="newline"，发送与语音采集留在消费者。
 
 ## 用法

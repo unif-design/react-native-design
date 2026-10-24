@@ -5,6 +5,7 @@ import type { TextInput } from 'react-native';
 import type {
   StyleProp,
   TextInputProps,
+  TextProps,
   TextStyle,
   ViewStyle,
 } from 'react-native';
@@ -155,6 +156,9 @@ export interface MultilineLayoutInput {
   verticalInset: number;
   fontSize: number | undefined;
   placeholder: string | undefined;
+  allowFontScaling?: TextInputProps['allowFontScaling'];
+  maxFontSizeMultiplier?: TextInputProps['maxFontSizeMultiplier'];
+  lineBreakStrategyIOS?: TextInputProps['lineBreakStrategyIOS'];
   inputRef: RefObject<ComponentRef<typeof TextInput> | null>;
 }
 
@@ -162,6 +166,12 @@ export interface MultilineLayout {
   inputStyle: Pick<TextStyle, 'height' | 'minHeight' | 'maxHeight'>;
   scrollEnabled: boolean;
   onLayout?: TextInputProps['onLayout'];
+  measurement?: {
+    key: string;
+    text: string;
+    width: number;
+    onTextLayout: NonNullable<TextProps['onTextLayout']>;
+  };
 }
 
 /** RN Web 的公开 host ref 仅在平台实现内使用这两个 DOM 测量属性。 */

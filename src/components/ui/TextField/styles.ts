@@ -86,6 +86,13 @@ export const makeStyles = (c: ColorTokens, shadow: ShadowTokens) =>
       // react-native-web: 抑制浏览器默认 focus outline,让 wrapFocus 的 brand 边框接管
       outlineWidth: 0,
     },
+    measurement: {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      flex: 0,
+      opacity: 0,
+    },
     /** multiline 覆盖:Android 默认居中,需要顶对齐 */
     inputMultiline: {
       textAlignVertical: 'top' as const,
