@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.1](https://github.com/unif-design/react-native-design/compare/v1.12.0...v1.12.1) (2026-10-24)
+
+
+### Bug Fixes
+
+* refine fallback controls and iOS textarea layout ([a2c3e64](https://github.com/unif-design/react-native-design/commit/a2c3e64a4d5265f28eb5afc3512607699472ae01))
+
 # [1.12.0](https://github.com/unif-design/react-native-design/compare/v1.11.1...v1.12.0) (2026-10-24)
 
 
