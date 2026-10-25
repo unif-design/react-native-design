@@ -1,3 +1,4 @@
+import { resolveThemeColors } from '../../../src/theme/nativeFallbackColors';
 import React from 'react';
 import { FlatList, StyleSheet, Text } from 'react-native';
 import { fireEvent, render } from '@testing-library/react-native';
@@ -237,12 +238,12 @@ test('没有 header 时显示非交互 grabber，玻璃 footer 保留基础间�
         paddingTop: space['5'],
         paddingBottom: space['6'],
         borderTopWidth: 0,
-        borderTopColor: '#EEEEF2',
+        borderTopColor: resolveThemeColors('light').outline,
       }),
     ])
   );
   const footerStyle = styles.find(
-    (style) => style?.borderTopColor === '#EEEEF2'
+    (style) => style?.borderTopColor === resolveThemeColors('light').outline
   );
   expect(footerStyle?.height).toBeUndefined();
 });
@@ -348,7 +349,8 @@ test.each(['text', 'navbar'] as const)(
     let footer = page.getByText('工具区').parent;
     while (
       footer &&
-      StyleSheet.flatten(footer.props.style)?.borderTopColor !== '#EEEEF2'
+      StyleSheet.flatten(footer.props.style)?.borderTopColor !==
+        resolveThemeColors('light').outline
     )
       footer = footer.parent;
     expect(StyleSheet.flatten(footer?.props.style).backgroundColor).toBe(

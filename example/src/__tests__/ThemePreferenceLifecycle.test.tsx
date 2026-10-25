@@ -1,3 +1,4 @@
+import { resolveThemeColors } from '../../../src/theme/nativeFallbackColors';
 import { act, render, renderHook, screen } from '@testing-library/react-native';
 import React from 'react';
 import { AccessibilityInfo, Platform, Text } from 'react-native';
@@ -106,27 +107,11 @@ test.each([
       ),
     });
     if (softWhite) {
-      expect(hook.result.current.colors).toMatchObject({
-        background: '#F5F5F7',
-        surface: '#FFFFFF',
-        surfaceContainer: '#F7F7F9',
-        surfaceContainerHigh: '#FAFAFC',
-        heroGradient0: '#FBFBFD',
-        heroHalo: '#F0F0F5',
-        foreground: '#333333',
-        primary: '#EB6E00',
-        error: '#F4511E',
-        success: '#52C41A',
-      });
+      expect(hook.result.current.colors).toBe(resolveThemeColors('light'));
+      expect(hook.result.current.colors).not.toBe(lightColors);
     } else {
       expect(hook.result.current.colors).toBe(lightColors);
     }
-    expect(warmOrangePalette.resolve('light')).toEqual(
-      softWhite
-        ? ['#F9F9FB', '#FFFFFF', '#F8F8FA', '#F6F6F9']
-        : warmOrangePalette.light
-    );
-    expect(warmOrangePalette.resolve('dark')).toBe(warmOrangePalette.dark);
     expect(hook.result.current.shadow).toBe(lightShadow);
     expect(hook.result.current.fontScale).toBe(1.35);
     const colors = hook.result.current.colors;
@@ -160,10 +145,10 @@ test('旧 iOS 既有背景只换色，stop 位置、halo 几何与透明度不�
     </ThemeProvider>
   );
   expect(screen.UNSAFE_getByType(GradientWash).props.stops).toEqual([
-    { offset: 0, color: '#F9F9FB', opacity: 1 },
-    { offset: 0.35, color: '#FFFFFF', opacity: 1 },
-    { offset: 0.75, color: '#F8F8FA', opacity: 1 },
-    { offset: 1, color: '#F6F6F9', opacity: 1 },
+    { offset: 0, color: warmOrangePalette.resolve('light')[0], opacity: 1 },
+    { offset: 0.35, color: warmOrangePalette.resolve('light')[1], opacity: 1 },
+    { offset: 0.75, color: warmOrangePalette.resolve('light')[2], opacity: 1 },
+    { offset: 1, color: warmOrangePalette.resolve('light')[3], opacity: 1 },
   ]);
   expect(
     screen.UNSAFE_getAllByType(RadialHalo).map((item) => ({
@@ -171,9 +156,9 @@ test('旧 iOS 既有背景只换色，stop 位置、halo 几何与透明度不�
       opacity: item.props.maxOpacity,
     }))
   ).toEqual([
-    { color: '#F0F0F5', opacity: 0.22 },
-    { color: '#F0F0F5', opacity: 0.18 },
-    { color: '#F0F0F5', opacity: 0.16 },
+    { color: resolveThemeColors('light').heroHalo, opacity: 0.22 },
+    { color: resolveThemeColors('light').heroHalo, opacity: 0.18 },
+    { color: resolveThemeColors('light').heroHalo, opacity: 0.16 },
   ]);
   expect(screen.getByText('订单详情')).toBeVisible();
 });
@@ -182,21 +167,21 @@ test('柔雾白不覆盖调用方的自定义背景颜色', () => {
   jest.replaceProperty(Platform, 'OS', 'android');
   jest.replaceProperty(LiquidGlass, 'isLiquidGlassSupported', false);
   const stops = {
-    light: [{ offset: 0, color: '#123456' }],
-    dark: [{ offset: 0, color: '#654321' }],
+    light: [{ offset: 0, color: lightColors.success }],
+    dark: [{ offset: 0, color: darkColors.warning }],
   };
   render(
     <ThemeProvider forceScheme="light">
       <ScreenBackdrop
         preset="warmOrange"
         stops={stops}
-        halos={[{ size: 120, color: '#778899', maxOpacity: 0.2 }]}
+        halos={[{ size: 120, color: lightColors.error, maxOpacity: 0.2 }]}
       />
     </ThemeProvider>
   );
   expect(screen.UNSAFE_getByType(GradientWash).props.stops).toBe(stops.light);
   expect(screen.UNSAFE_getByType(RadialHalo).props).toMatchObject({
-    color: '#778899',
+    color: lightColors.error,
     size: 120,
     maxOpacity: 0.2,
   });

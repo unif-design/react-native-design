@@ -1,3 +1,4 @@
+import { resolveThemeColors } from '../../../src/theme/nativeFallbackColors';
 import {
   EditOutlined,
   PlusOutlined,
@@ -682,7 +683,7 @@ test.each([
             (supported
               ? 'transparent'
               : scheme === 'light'
-                ? '#E1E1E7'
+                ? resolveThemeColors('light').outlineVariant
                 : colors.outlineVariant) &&
           style.backgroundColor === (supported ? 'transparent' : colors.surface)
         );

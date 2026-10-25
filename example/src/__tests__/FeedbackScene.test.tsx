@@ -1,3 +1,4 @@
+import { resolveThemeColors } from '../../../src/theme/nativeFallbackColors';
 import { ClipboardOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import { Animated as NativeAnimated, StyleSheet } from 'react-native';
@@ -244,7 +245,7 @@ test('横向进度展厅保留初始、加载和完成状态及主题外观', ()
     ).toMatchObject({
       thickness: 4,
       color: lightColors.success,
-      trackColor: '#EEEEF2',
+      trackColor: resolveThemeColors('light').outline,
     });
   });
   coverage.prove('linear-progress.a11y-value', () => {

@@ -1,3 +1,4 @@
+import { resolveThemeColors } from '../../../src/theme/nativeFallbackColors';
 import { CloseOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import {
@@ -194,10 +195,12 @@ describe.each(['light', 'dark'] as const)('Chip 在 %s 聊天表面', (scheme) =
       const colors = scheme === 'dark' ? darkColors : lightColors;
       const neutralSurface =
         scheme === 'light' && !supported
-          ? '#FAFAFC'
+          ? resolveThemeColors('light').surfaceContainerHigh
           : colors.surfaceContainerHigh;
       const neutralOutline =
-        scheme === 'light' && !supported ? '#EEEEF2' : colors.outline;
+        scheme === 'light' && !supported
+          ? resolveThemeColors('light').outline
+          : colors.outline;
       const press = jest.fn();
       render(
         <ThemeProvider forceScheme={scheme}>
@@ -296,7 +299,9 @@ test.each(['light', 'dark'] as const)(
     );
     const layer = screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
     expect(StyleSheet.flatten(layer.props.style).backgroundColor).toBe(
-      scheme === 'light' ? '#FAFAFC' : colors.surfaceContainerHigh
+      scheme === 'light'
+        ? resolveThemeColors('light').surfaceContainerHigh
+        : colors.surfaceContainerHigh
     );
     expect(StyleSheet.flatten(layer.props.style).backgroundColor).not.toBe(
       colors.surface
@@ -358,7 +363,7 @@ describe.each(['light', 'dark'] as const)(
             borderColor: native
               ? 'transparent'
               : scheme === 'light' && !supported
-                ? '#E1E1E7'
+                ? resolveThemeColors('light').outlineVariant
                 : colors.outlineVariant,
           });
           if (native)
@@ -447,7 +452,7 @@ test.each([
           supported
             ? colors.primaryContainer
             : scheme === 'light'
-              ? '#FAFAFC'
+              ? resolveThemeColors('light').surfaceContainerHigh
               : colors.surfaceContainerHigh
         );
     });
