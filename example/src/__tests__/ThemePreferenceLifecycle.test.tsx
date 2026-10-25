@@ -17,6 +17,7 @@ import { RadialHalo } from '../../../src/components/business/Decorations/RadialH
 import { usePrefersReducedMotion } from '../../../src/theme/usePrefersReducedMotion.web';
 import { useReducedTransparency } from '../../../src/theme/useReducedTransparency';
 
+const glassSupport: { isLiquidGlassSupported: boolean } = LiquidGlass;
 const originalMatchMedia = Object.getOwnPropertyDescriptor(
   globalThis,
   'matchMedia'
@@ -98,7 +99,7 @@ test.each([
   '%s 原生玻璃支持=%s，仅目标平台使用柔雾白=%s',
   (os, supported, softWhite) => {
     jest.replaceProperty(Platform, 'OS', os);
-    jest.replaceProperty(LiquidGlass, 'isLiquidGlassSupported', supported);
+    jest.replaceProperty(glassSupport, 'isLiquidGlassSupported', supported);
     const hook = renderHook(useTheme, {
       wrapper: ({ children }) => (
         <ThemeProvider forceScheme="light" fontScale={1.35}>
@@ -124,7 +125,7 @@ test.each(['ios', 'android', 'web'] as const)(
   '%s 的深色主题不受浅色回退配色影响',
   (os) => {
     jest.replaceProperty(Platform, 'OS', os);
-    jest.replaceProperty(LiquidGlass, 'isLiquidGlassSupported', false);
+    jest.replaceProperty(glassSupport, 'isLiquidGlassSupported', false);
     const hook = renderHook(useTheme, {
       wrapper: ({ children }) => (
         <ThemeProvider forceScheme="dark">{children}</ThemeProvider>
@@ -136,7 +137,7 @@ test.each(['ios', 'android', 'web'] as const)(
 
 test('旧 iOS 既有背景只换色，stop 位置、halo 几何与透明度不变', () => {
   jest.replaceProperty(Platform, 'OS', 'ios');
-  jest.replaceProperty(LiquidGlass, 'isLiquidGlassSupported', false);
+  jest.replaceProperty(glassSupport, 'isLiquidGlassSupported', false);
   render(
     <ThemeProvider forceScheme="light">
       <ScreenBackdrop preset="warmOrange">
@@ -165,7 +166,7 @@ test('旧 iOS 既有背景只换色，stop 位置、halo 几何与透明度不�
 
 test('柔雾白不覆盖调用方的自定义背景颜色', () => {
   jest.replaceProperty(Platform, 'OS', 'android');
-  jest.replaceProperty(LiquidGlass, 'isLiquidGlassSupported', false);
+  jest.replaceProperty(glassSupport, 'isLiquidGlassSupported', false);
   const stops = {
     light: [{ offset: 0, color: lightColors.success }],
     dark: [{ offset: 0, color: darkColors.warning }],
