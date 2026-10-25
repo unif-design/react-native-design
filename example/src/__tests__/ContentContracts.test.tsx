@@ -679,7 +679,11 @@ test.each([
         return (
           style?.borderRadius === radius.pill &&
           style.borderColor ===
-            (supported ? 'transparent' : colors.outlineVariant) &&
+            (supported
+              ? 'transparent'
+              : scheme === 'light'
+                ? '#E1E1E7'
+                : colors.outlineVariant) &&
           style.backgroundColor === (supported ? 'transparent' : colors.surface)
         );
       })

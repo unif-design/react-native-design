@@ -451,7 +451,13 @@ test.each([
         StyleSheet.flatten(
           screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.style
         ).backgroundColor
-      ).toBe(supported ? 'transparent' : colors.surfaceContainerHigh)
+      ).toBe(
+        supported
+          ? 'transparent'
+          : scheme === 'light'
+            ? '#FAFAFC'
+            : colors.surfaceContainerHigh
+      )
     );
     expect(
       screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.effect
@@ -529,7 +535,7 @@ test.each([false, true])(
     const material = screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
     expect(material.props.effect).toBe(supported ? 'regular' : 'none');
     expect(StyleSheet.flatten(material.props.style).backgroundColor).toBe(
-      supported ? 'transparent' : lightColors.surfaceContainerHigh
+      supported ? 'transparent' : '#FAFAFC'
     );
   }
 );

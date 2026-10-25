@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { r, useColors, useTheme, warmOrangePalette } from '../../../theme';
 import { GradientWash } from './GradientWash';
@@ -11,8 +11,6 @@ import type {
 } from './types';
 
 type PresetConfig = {
-  light: ReadonlyArray<GradientStop>;
-  dark: ReadonlyArray<GradientStop>;
   halos: ReadonlyArray<ScreenBackdropHalo>;
 };
 
@@ -23,7 +21,7 @@ function buildStops(
   offsets: ReadonlyArray<number>
 ): ReadonlyArray<GradientStop> {
   return palette.map((color, i) => ({
-    // Both private call sites pair the four palette stops with four offsets.
+    // The preset pairs the four palette stops with four offsets.
     offset: offsets[i]!,
     color,
     opacity: 1,
@@ -37,8 +35,6 @@ const PRESETS: Record<ScreenBackdropPreset, PresetConfig> = {
   /** 暖橙沉浸 —— 名片屏 / 扫码屏 / Splash 等"整屏暖色"场景。
    *  亮 / 暗 4 stop palette 来自 theme/palettes.ts;halo 3 件套(顶/底中心 + 右上)。 */
   warmOrange: {
-    light: buildStops(warmOrangePalette.light, WARM_ORANGE_OFFSETS),
-    dark: buildStops(warmOrangePalette.dark, WARM_ORANGE_OFFSETS),
     halos: [
       // [L-88] halo 几何走 r() 对齐缩放纪律;maxOpacity / centerX 是无单位值,不缩放。
       {
@@ -90,10 +86,20 @@ export function ScreenBackdrop({
   const { scheme } = useTheme();
   const { width: winW, height: winH } = useWindowDimensions();
   const isDark = scheme === 'dark';
+  const palette = warmOrangePalette.resolve(scheme);
+  const presetStops = useMemo(
+    () => buildStops(palette, WARM_ORANGE_OFFSETS),
+    [palette]
+  );
 
   const cfg = preset ? PRESETS[preset] : undefined;
-  const resolvedStops =
-    stops ?? (cfg ? { light: cfg.light, dark: cfg.dark } : undefined);
+  const resolvedStops = stops
+    ? isDark
+      ? stops.dark
+      : stops.light
+    : cfg
+      ? presetStops
+      : undefined;
   const resolvedHalos = halos ?? cfg?.halos ?? [];
 
   return (
@@ -104,7 +110,7 @@ export function ScreenBackdrop({
       {resolvedStops ? (
         <GradientWash
           height={winH}
-          stops={isDark ? resolvedStops.dark : resolvedStops.light}
+          stops={resolvedStops}
           style={backdropStyles.gradient}
         />
       ) : null}
@@ -116,7 +122,7 @@ export function ScreenBackdrop({
             key={`halo-${i}`}
             size={h.size}
             height={h.height}
-            color={h.color ?? c.primary}
+            color={h.color ?? c.heroHalo}
             maxOpacity={h.maxOpacity}
             // [L-60] 不传 gradientId —— 让 RadialHalo 走自己的 useSvgId(useId) 默认值。
             // 实例内同名在多 ScreenBackdrop 同挂(keep-mounted 栈、导航页)时会导致

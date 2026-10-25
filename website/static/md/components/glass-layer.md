@@ -10,7 +10,9 @@ description: '随主题渲染玻璃材质，并提供明确的平台降级。'
 
 为已有内容提供装饰玻璃背景。组件读取当前主题，不接管内容、交互或布局。
 
-Android、旧 iOS 或原生支持标记为假时，采用 `fallbackColor` 或主题 `surface` 实色分组，不叠加渐变和额外描边。开启减少透明度或 iOS 偏好尚未读回时也采用此实色背景。`secondary` Button 与输入框使用 `surfaceContainerHigh`，IconButton（含确认状态）统一使用 `surfaceContainerHighest`，与白色列表和聊天背景区分；缺少 CSS 模糊的 Web 继续使用主题半透明渐变。
+Android、旧 iOS 或原生支持标记为假时，采用 `fallbackColor` 或主题 `surface` 实色分组，不叠加渐变和额外描边。开启减少透明度或 iOS 偏好尚未读回时也采用此实色背景。`secondary` Button 与 IconButton（含确认状态）使用 `surfaceContainerHigh`，独立输入表面使用 `surface`，与原有边线、阴影共同保留层次；缺少 CSS 模糊的 Web 继续使用主题半透明渐变。
+
+不支持原生玻璃的 iOS／Android 在浅色主题下采用柔雾白表面；页面、控件和既有背景装饰只调整颜色，图标、布局、圆角、阴影及交互保持。原生玻璃可用的 iOS、Web 和深色主题保留原配色。消费者通过 `useColors` 读取当前主题，自定义 `fallbackColor` 保留原值。
 
 ## 代码演示 {#实时预览}
 

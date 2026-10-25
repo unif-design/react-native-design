@@ -244,7 +244,7 @@ test('横向进度展厅保留初始、加载和完成状态及主题外观', ()
     ).toMatchObject({
       thickness: 4,
       color: lightColors.success,
-      trackColor: lightColors.outline,
+      trackColor: '#EEEEF2',
     });
   });
   coverage.prove('linear-progress.a11y-value', () => {

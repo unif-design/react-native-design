@@ -22,6 +22,8 @@ Unif Design 的颜色是 **role-based(角色化)token**:role 名固定(`primary`
 2. **静态 palettes** —— 渐变序列(`avatarGradient`、`warmOrangePalette`),塞不进单值 role 的"色组 / 渐变",见[间距·圆角·阴影](/docs/design/tokens/spacing-radii-shadows)与下文。
 3. **新增 token** —— 现有 role 都对不上时,在 `colors.ts` 给 `lightColors` 和 `darkColors` **同时**加同名 key(TS 编译期强制两套键集合对齐,少一个就报错)。
 
+`warmOrangePalette.resolve(scheme)` 返回当前平台的四段背景配色，供页面与导出图片共同使用。无原生玻璃的 iOS／Android 浅色采用柔雾白；原生玻璃、Web 和深色保留原值。已有 `light`／`dark` 数组仍是固定参考色，组件内使用 `useTheme().scheme` 调用 `resolve`；渐变位置、透明度和布局继续由原组件维护。装饰 halo 使用 `useColors().heroHalo`，品牌前景仍使用 `primary`。
+
 **永远不要内联 `#EB6E00` / `rgba(...)`。** 新硬编码颜色会被 CI 拦下。唯一例外:视觉锁定(QR 白卡、固定商标色),且必须加注释说明锁定理由。
 
 ## 品牌 / Brand {#品牌}
