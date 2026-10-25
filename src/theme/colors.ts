@@ -109,6 +109,8 @@ export const lightColors = {
   heroGradient1: '#FFF0DD',
   /** Hero 渐变第 3 段:接 background。亮色 = background hex,暗色 = 深暖灰收到 background。 */
   heroGradient2: '#F5F5F5',
+  /** 背景 halo 与品牌前景分开，便于原生回退仅减轻装饰色。 */
+  heroHalo: BRAND_ORANGE,
 
   /** 玻璃身份胶囊背景 —— ProfileCard 玻璃 pill 浮在 warmOrange 背景上。
    *  亮色半透浓白(暖橙背景);暗色半透薄白晕(深背景)。 */
@@ -215,6 +217,7 @@ export const darkColors: ColorTokens = {
   heroGradient0: 'rgba(235,110,0,0.18)',
   heroGradient1: 'rgba(235,110,0,0.06)',
   heroGradient2: '#0A0A0A',
+  heroHalo: BRAND_ORANGE,
 
   /** 玻璃身份胶囊暗色:半透薄白晕浮在深暖橙 / 深底上,比亮色弱 12 倍。 */
   glassPillBg: 'rgba(255,255,255,0.06)',

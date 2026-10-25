@@ -1,3 +1,4 @@
+import { resolveThemeColors } from '../../../src/theme/nativeFallbackColors';
 import React, { useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { fireEvent, render } from '@testing-library/react-native';
@@ -5,7 +6,6 @@ import {
   control,
   fixed,
   GlassLayer,
-  lightColors,
   darkColors,
   Search,
   ThemeProvider,
@@ -104,8 +104,10 @@ test.each(['light', 'dark'] as const)(
       width: control.xs,
       height: control.xs,
       alignSelf: 'center',
-      backgroundColor: (scheme === 'dark' ? darkColors : lightColors)
-        .surfaceContainerHigh,
+      backgroundColor:
+        scheme === 'dark'
+          ? darkColors.surfaceContainerHigh
+          : resolveThemeColors('light').surfaceContainerHigh,
     });
     expect(
       style.height + clear.props.hitSlop.top + clear.props.hitSlop.bottom

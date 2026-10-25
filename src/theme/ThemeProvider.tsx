@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
-import { lightColors, darkColors, type ColorTokens } from './colors';
+import type { ColorTokens } from './colors';
+import { resolveThemeColors } from './nativeFallbackColors';
 import { normalizeFontScale } from './fontScale';
 import { lightShadow, darkShadow, type ShadowTokens } from './shadow';
 import { ReducedTransparencyContext, ThemeContext } from './themeContext';
@@ -42,21 +43,21 @@ export function ThemeProvider({
     forceScheme ?? (sysScheme === 'dark' ? 'dark' : 'light');
   const normalizedFontScale = normalizeFontScale(fontScale);
   const reducedTransparency = useReducedTransparency();
+  const colors = resolveThemeColors(scheme);
 
   useEffect(() => {
     reportInvalidFontScale(fontScale, normalizedFontScale, isDev);
   }, [fontScale, normalizedFontScale]);
 
-  // useMemo 必须依赖 scheme,不要依赖 light/dark 对象本身 —— 这是 useThemedStyles
-  // 缓存生效的前提(每次渲染拿到稳定 colors / shadow 引用)。
+  // 调色板保持稳定引用，主题重渲染不使消费者的样式缓存失效。
   const value = useMemo<ThemeContextValue>(
     () => ({
       scheme,
-      colors: scheme === 'dark' ? darkColors : lightColors,
+      colors,
       shadow: scheme === 'dark' ? darkShadow : lightShadow,
       fontScale: normalizedFontScale,
     }),
-    [scheme, normalizedFontScale]
+    [scheme, colors, normalizedFontScale]
   );
 
   return (

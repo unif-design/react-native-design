@@ -1,7 +1,7 @@
 # Unif Design — 全文文档聚合
 
 > 可选全文。普通查询优先通过 llms.txt 定位相关单页。
-<!-- Generated from @unif/react-native-design@1.12.0; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@1.12.1; edit source documentation. -->
 
 ## 目录
 
@@ -2750,7 +2750,9 @@ Switch / Stepper 放在 Cell 行尾，必须选择 Cell 的显式 control 分支
 
 为已有内容提供装饰玻璃背景。组件读取当前主题，不接管内容、交互或布局。
 
-Android、旧 iOS 或原生支持标记为假时，采用 `fallbackColor` 或主题 `surface` 实色分组，不叠加渐变和额外描边。开启减少透明度或 iOS 偏好尚未读回时也采用此实色背景。`secondary` Button 与输入框使用 `surfaceContainerHigh`，IconButton（含确认状态）统一使用 `surfaceContainerHighest`，与白色列表和聊天背景区分；缺少 CSS 模糊的 Web 继续使用主题半透明渐变。
+Android、旧 iOS 或原生支持标记为假时，采用 `fallbackColor` 或主题 `surface` 实色分组，不叠加渐变和额外描边。开启减少透明度或 iOS 偏好尚未读回时也采用此实色背景。`secondary` Button 与 IconButton（含确认状态）使用 `surfaceContainerHigh`，独立输入表面使用 `surface`，与原有边线、阴影共同保留层次；缺少 CSS 模糊的 Web 继续使用主题半透明渐变。
+
+不支持原生玻璃的 iOS／Android 在浅色主题下采用柔雾白表面；页面、控件和既有背景装饰只调整颜色，图标、布局、圆角、阴影及交互保持。原生玻璃可用的 iOS、Web 和深色主题保留原配色。消费者通过 `useColors` 读取当前主题，自定义 `fallbackColor` 保留原值。
 
 ## 代码演示 {#实时预览}
 
@@ -7204,6 +7206,8 @@ Unif Design 的颜色是 **role-based(角色化)token**:role 名固定(`primary`
 1. **角色 token** —— `useColors()` 返回的 `c.primary` / `c.surface` / `c.foreground` 等。语义对得上就用它,自动亮 / 暗。
 2. **静态 palettes** —— 渐变序列(`avatarGradient`、`warmOrangePalette`),塞不进单值 role 的"色组 / 渐变",见[间距·圆角·阴影](md/design/tokens/spacing-radii-shadows.md)与下文。
 3. **新增 token** —— 现有 role 都对不上时,在 `colors.ts` 给 `lightColors` 和 `darkColors` **同时**加同名 key(TS 编译期强制两套键集合对齐,少一个就报错)。
+
+`warmOrangePalette.resolve(scheme)` 返回当前平台的四段背景配色，供页面与导出图片共同使用。无原生玻璃的 iOS／Android 浅色采用柔雾白；原生玻璃、Web 和深色保留原值。已有 `light`／`dark` 数组仍是固定参考色，组件内使用 `useTheme().scheme` 调用 `resolve`；渐变位置、透明度和布局继续由原组件维护。装饰 halo 使用 `useColors().heroHalo`，品牌前景仍使用 `primary`。
 
 **永远不要内联 `#EB6E00` / `rgba(...)`。** 新硬编码颜色会被 CI 拦下。唯一例外:视觉锁定(QR 白卡、固定商标色),且必须加注释说明锁定理由。
 

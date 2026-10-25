@@ -144,6 +144,9 @@ describe('Theme diagnostics effect boundary', () => {
     const { effects } = installReactHookMocks();
     const { createLogger, warnByScope } = installLoggerMock();
     jest.doMock('react-native', () => ({
+      Platform:
+        jest.requireActual<typeof import('react-native')>('react-native')
+          .Platform,
       useColorScheme: () => 'light',
     }));
     const { ThemeProvider } =
@@ -164,6 +167,9 @@ describe('Theme diagnostics effect boundary', () => {
     const { effects } = installReactHookMocks();
     const { createLogger, warnByScope } = installLoggerMock();
     jest.doMock('react-native', () => ({
+      Platform:
+        jest.requireActual<typeof import('react-native')>('react-native')
+          .Platform,
       useColorScheme: () => 'light',
     }));
     const { ThemeProvider } =

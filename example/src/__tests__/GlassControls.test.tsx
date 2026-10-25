@@ -1,3 +1,4 @@
+import { resolveThemeColors } from '../../../src/theme/nativeFallbackColors';
 import { CloseOutlined } from '@unif/react-native-icons';
 import React from 'react';
 import {
@@ -192,6 +193,14 @@ describe.each(['light', 'dark'] as const)('Chip 在 %s 聊天表面', (scheme) =
         .spyOn(AccessibilityInfo, 'isReduceTransparencyEnabled')
         .mockResolvedValue(reduced);
       const colors = scheme === 'dark' ? darkColors : lightColors;
+      const neutralSurface =
+        scheme === 'light' && !supported
+          ? resolveThemeColors('light').surfaceContainerHigh
+          : colors.surfaceContainerHigh;
+      const neutralOutline =
+        scheme === 'light' && !supported
+          ? resolveThemeColors('light').outline
+          : colors.outline;
       const press = jest.fn();
       render(
         <ThemeProvider forceScheme={scheme}>
@@ -212,7 +221,7 @@ describe.each(['light', 'dark'] as const)('Chip 在 %s 聊天表面', (scheme) =
         for (const material of materials) {
           expect(material.props.effect).toBe(native ? 'regular' : 'none');
           expect(StyleSheet.flatten(material.props.style).backgroundColor).toBe(
-            native ? 'transparent' : colors.surfaceContainerHigh
+            native ? 'transparent' : neutralSurface
           );
           expect(material.props.tintColor).toBeUndefined();
           if (!native) {
@@ -237,7 +246,7 @@ describe.each(['light', 'dark'] as const)('Chip 在 %s 聊天表面', (scheme) =
       expect(press).toHaveBeenCalledTimes(1);
       expect(screen.getByTestId('static-chip')).toHaveStyle({
         backgroundColor: colors.surface,
-        borderColor: colors.outline,
+        borderColor: neutralOutline,
       });
     }
   );
@@ -290,7 +299,9 @@ test.each(['light', 'dark'] as const)(
     );
     const layer = screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
     expect(StyleSheet.flatten(layer.props.style).backgroundColor).toBe(
-      colors.surfaceContainerHigh
+      scheme === 'light'
+        ? resolveThemeColors('light').surfaceContainerHigh
+        : colors.surfaceContainerHigh
     );
     expect(StyleSheet.flatten(layer.props.style).backgroundColor).not.toBe(
       colors.surface
@@ -349,7 +360,11 @@ describe.each(['light', 'dark'] as const)(
             ).backgroundColor
           ).toBe(native ? 'transparent' : colors.surface);
           expect(StyleSheet.flatten(surface().props.style)).toMatchObject({
-            borderColor: native ? 'transparent' : colors.outlineVariant,
+            borderColor: native
+              ? 'transparent'
+              : scheme === 'light' && !supported
+                ? resolveThemeColors('light').outlineVariant
+                : colors.outlineVariant,
           });
           if (native)
             expect(
@@ -434,7 +449,11 @@ test.each([
       expect(boxes).toHaveLength(2);
       for (const box of boxes)
         expect(StyleSheet.flatten(box.props.style).backgroundColor).toBe(
-          supported ? colors.primaryContainer : colors.surfaceContainerHigh
+          supported
+            ? colors.primaryContainer
+            : scheme === 'light'
+              ? resolveThemeColors('light').surfaceContainerHigh
+              : colors.surfaceContainerHigh
         );
     });
     const glyphs = page.UNSAFE_getAllByType(CloseOutlined);

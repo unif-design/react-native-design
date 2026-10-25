@@ -8,11 +8,14 @@
  *  ```ts
  *  import { useTheme, warmOrangePalette } from './';
  *  const { scheme } = useTheme();
- *  const stops = scheme === 'dark' ? warmOrangePalette.dark : warmOrangePalette.light;
+ *  const stops = warmOrangePalette.resolve(scheme);
  *  ```
  *
  *  新增 palette 在这里加一项 + theme/index.ts 同步 export。
  */
+
+import type { ColorScheme } from './ThemeProvider';
+import { usesNativeFallbackColors } from './nativeFallbackColors';
 
 /** 全屏沉浸暖橙 4 stop 渐变 —— ScreenBackdrop preset="warmOrange"。
  *  - light:4 stop 暖橙序列(QR / 名片 / Splash 屏沉浸亮色背景)
@@ -20,7 +23,22 @@
 export const warmOrangePalette = {
   light: ['#FFE3C8', '#FFEED7', '#FFE6CA', '#FBD9B6'] as const,
   dark: ['#1F1208', '#170D05', '#110903', '#0A0A0A'] as const,
+  /** 页面与导出图片共用实际平台配色；静态 light/dark 保留参考值。 */
+  resolve(scheme: ColorScheme): readonly string[] {
+    if (scheme === 'dark') return warmOrangePalette.dark;
+    return usesNativeFallbackColors()
+      ? nativeFallbackWarmOrangePalette
+      : warmOrangePalette.light;
+  },
 } as const;
+
+/** 沿用 warmOrange 的四段位置，仅替换无原生玻璃时的浅色背景。 */
+const nativeFallbackWarmOrangePalette = [
+  '#F9F9FB',
+  '#FFFFFF',
+  '#F8F8FA',
+  '#F6F6F9',
+] as const;
 
 /** 图片、视频和相机保持深色取景背景，不随页面主题反转。 */
 export const mediaPalette = {

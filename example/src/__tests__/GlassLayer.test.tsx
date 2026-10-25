@@ -1,3 +1,4 @@
+import { resolveThemeColors } from '../../../src/theme/nativeFallbackColors';
 import { ChevronLeftOutlined, type IconProps } from '@unif/react-native-icons';
 import React from 'react';
 import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
@@ -451,7 +452,13 @@ test.each([
         StyleSheet.flatten(
           screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.style
         ).backgroundColor
-      ).toBe(supported ? 'transparent' : colors.surfaceContainerHigh)
+      ).toBe(
+        supported
+          ? 'transparent'
+          : scheme === 'light'
+            ? resolveThemeColors('light').surfaceContainerHigh
+            : colors.surfaceContainerHigh
+      )
     );
     expect(
       screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.effect
@@ -529,7 +536,9 @@ test.each([false, true])(
     const material = screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
     expect(material.props.effect).toBe(supported ? 'regular' : 'none');
     expect(StyleSheet.flatten(material.props.style).backgroundColor).toBe(
-      supported ? 'transparent' : lightColors.surfaceContainerHigh
+      supported
+        ? 'transparent'
+        : resolveThemeColors('light').surfaceContainerHigh
     );
   }
 );
