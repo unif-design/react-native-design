@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.13.0](https://github.com/unif-design/react-native-design/compare/v1.12.1...v1.13.0) (2026-10-25)
+
+
+### Features
+
+* use soft-white colors on native fallback surfaces ([a9d2c7b](https://github.com/unif-design/react-native-design/commit/a9d2c7b907361528aba49753dbe28f794ce02db7))
+
 ## [1.12.1](https://github.com/unif-design/react-native-design/compare/v1.12.0...v1.12.1) (2026-10-24)
 
 
