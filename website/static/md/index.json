@@ -434,11 +434,11 @@
     "description": "已发布版本的变量、接口与依赖调整。"
   },
   {
-    "title": "研发技能",
+    "title": "库能力与研发技能",
     "mdPath": "md/skills.md",
     "slug": "/skills",
     "section": "概览",
-    "description": "Unif 库维护者使用的研发技能与按需读取入口。"
+    "description": "Unif Design 的公开使用、源码维护与按需资料入口。"
   },
   {
     "title": "在宿主工程里测试",
