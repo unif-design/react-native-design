@@ -14,7 +14,7 @@ import tempfile
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
-TESTS = ROOT / "__tests__/native/android"
+TESTS = ROOT / "example/android/__tests__"
 SOURCES = ROOT / "example/android/app/src/main/java"
 OUTPUT = ROOT / "coverage/native/android"
 CACHE = Path(os.environ.get("GRADLE_USER_HOME", str(Path.home() / ".gradle"))) / "caches/modules-2/files-2.1"

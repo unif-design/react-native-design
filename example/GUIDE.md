@@ -121,6 +121,8 @@ yarn workspace @unif/react-native-design-website typecheck
 yarn workspace @unif/react-native-design-website build
 ```
 
+原生宿主测试随平台放在 `android/__tests__/` 和 `ios/__tests__/`，从 repo root 执行 `yarn test:native:android`、`yarn test:native:ios`。测试编译示例原生源码；Android／UIKit 和 React Native 使用边界替身，覆盖率报告保留原始宿主源码清单。
+
 自动化覆盖 public catalog、route、Host 唯一性、主要交互与配置 contract，但不能替代屏幕
 阅读器、系统主题、真机、旋转、原生 Blur 或真实网络验收。
 
