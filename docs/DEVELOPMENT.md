@@ -2,6 +2,10 @@
 
 本仓库维护 `@unif/react-native-design`，职责为基础设计库。
 
+## 库能力技能
+
+本库使用 unif-design 定位当前版本的公开能力、接入与排障资料。修改源码时同时采用 code-development 的库开发规则；设计、测试、审查和交付按当前阶段取得依据。应用仅消费库时可直接查公开类型和文档，无需先取得维护工作区。
+
 ## 目标契约
 
 [本库新版本设计](../../unif-platform-architecture/libraries/react-native-design.md)定义职责、公共输入输出、状态和验证边界；[库版本原则](../../unif-platform-architecture/libraries/README.md)明确新旧版本独立。规范根默认是并列的 `unif-platform-architecture` 工作区，其他目录布局由任务提供实际位置。
@@ -72,6 +76,14 @@ yarn ios
 ```
 
 harness 不继承本仓 `check:runtime-peers` 的 workspace 精确 allowlist；安装输出会如实暴露这条已知的 RNRC / RNGH peer warning，等同消费端实际可见结果。
+
+## SVG Web 版本与平台支持
+
+原生库与 example 继续使用正式 `react-native-svg@15.16.0`；Website 单独固定正式 `15.15.5`，并从 Website 的依赖解析 SVG。15.16.0 的 Android 音效依赖会进入 Webpack 的 Web 模块图（[上游问题 #3086](https://github.com/software-mansion/react-native-svg/issues/3086)）；15.15.5 的 Web 实现不包含这条依赖。该选择只影响文档站，保留原生 15.16.0 的资源解析修复。
+
+不使用 Yarn 依赖补丁或 SVG IgnorePlugin，不关闭导出警告。升级 Website 的 SVG 版本前，验证完整站点构建、SVG 图形／渐变／裁剪、点击与卸载。切换版本后先执行 `yarn workspace @unif/react-native-design-website exec docusaurus clear`，再执行该 workspace 的 `build`，避免复用旧构建缓存。
+
+支持 Web 的组件继续通过真实 React Native Web 实现演示；只有没有 Web 实现的原生 SDK 能力提示到 iOS／Android 示例体验。构建或类型错误不能直接作为“不支持 Web”的判断依据。RN 整库类型改造已停止，本仓未应用 RN 源码或类型补丁。
 
 ## LLM 文档生成
 
