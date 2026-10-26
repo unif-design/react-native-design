@@ -91,7 +91,7 @@ import { GlassStats } from '@unif/react-native-design';
 | label 字号 | `t.micro`（11）· `c.foregroundMuted` · `paddingTop: space[1]`                                                                                                                                 |
 | 列间分隔   | `StyleSheet.hairlineWidth` 竖线 · `c.glassSeparator`（亮色 `rgba(0,0,0,0.08)`）                                                                                                               |
 | 容器       | 双层：外层 `glassShell` 仅 `radius['2xl']`（14）+ `s.glassBar` shadow；内层 `glass` `radius['2xl']` + `overflow:hidden` + `c.glassBorder` 边框；顶部 1px inset 高光线 `c.glassStatsHighlight` |
-| 玻璃底     | 由 `<GlassLayer effect="clear" />` 接管（原生通透材质 / 半透明主题背景 / Web CSS 近似），随 light/dark scheme 自动切                                                                          |
+| 玻璃底     | 由 `<GlassLayer effect="clear" />` 接管（原生通透材质 / 原生实色降级 / Web CSS 近似），随 light/dark scheme 自动切                                                                          |
 
 ## 使用注意
 

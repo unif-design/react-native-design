@@ -195,6 +195,9 @@
     ]
   },
   "release-it": {
+    "hooks": {
+      "after:bump": "node website/scripts/build-llms.js"
+    },
     "git": {
       "commitMessage": "chore: release ${version} [skip ci]",
       "tagName": "v${version}",

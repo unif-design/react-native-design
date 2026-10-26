@@ -1,7 +1,7 @@
 # Unif Design — 全文文档聚合
 
 > 可选全文。普通查询优先通过 llms.txt 定位相关单页。
-<!-- Generated from @unif/react-native-design@1.13.1; edit source documentation. -->
+<!-- Generated from @unif/react-native-design@1.13.2; edit source documentation. -->
 
 ## 目录
 
@@ -780,7 +780,7 @@ import { Button } from '@unif/react-native-design';
 
 `ThemeProvider fontScale` 只把 Button label 字号缩放一次。Button 高度、水平 padding、gap、圆角和左右 Icon 尺寸仍由原始 `size` token 决定，不随字号档位改变。例如 `fontScale={1.5}` 会放大文字，但 `md` 仍保持 `control.md` 的原有几何，Icon 仍使用未缩放的 `type.sm + 2`。
 
-`secondary` 的原生玻璃行为保持不变；旧 iOS 或减少透明度时使用主题 `surfaceContainerHigh` 实底；Android 保留主题半透明渐变，与普通内容表面区分。
+`secondary` 在原生玻璃可用时使用系统材质；Android、旧 iOS 或减少透明度时使用主题 `surfaceContainerHigh` 实底，与普通内容表面区分。Web 保留 CSS 近似材质；无 CSS 模糊能力且未启用减少透明度时使用主题渐变。
 
 ## Card 卡片
 
@@ -992,7 +992,7 @@ function Confirm() {
 
 - ❌ 不要叠加多层阴影——卡片只有一种阴影
 - ❌ 不要把 List 行做成 Card——List 行用 [Cell](md/components/cell.md)
-- 玻璃卡片直接选择 `glass`；旧 iOS 或减少透明度时使用清晰的主题底色，Android 保留主题渐变。不要在玻璃卡片的祖先上设置 opacity，也不要叠加重复材质。
+- 玻璃卡片直接选择 `glass`；Android、旧 iOS 或减少透明度时使用 `fallbackColor` 或主题 `surface` 实色。Web 保留 CSS 近似材质；无 CSS 模糊能力且未启用减少透明度时使用主题渐变。不要在玻璃卡片的祖先上设置 opacity，也不要叠加重复材质。
 
 ## Carousel 轮播
 
@@ -1907,7 +1907,7 @@ leading／trailing 允许任意组件，其自身状态由调用方维护；Chip
 `confirm()` 在任何路径下都会 resolve,不会悬挂 —— 包括没挂 Host、重入、Host 渲染抛错、Host 卸载和被后挂载的 Host 接管。详见下方[生命周期契约](#生命周期契约)。
 :::
 
-确认卡采用主题玻璃；旧 iOS 或减少透明度时使用清晰实色，Android 保留主题半透明渐变。显示外观不改变 owner 接管、点外取消、Promise 结算和窗口归还。
+确认卡采用主题玻璃；Android、旧 iOS 或减少透明度时使用主题 `surface` 实色。Web 保留 CSS 近似材质；无 CSS 模糊能力且未启用减少透明度时使用主题渐变。显示外观不改变 owner 接管、点外取消、Promise 结算和窗口归还。
 
 ## 用法
 
@@ -2950,7 +2950,7 @@ import { GlassStats } from '@unif/react-native-design';
 | label 字号 | `t.micro`（11）· `c.foregroundMuted` · `paddingTop: space[1]`                                                                                                                                 |
 | 列间分隔   | `StyleSheet.hairlineWidth` 竖线 · `c.glassSeparator`（亮色 `rgba(0,0,0,0.08)`）                                                                                                               |
 | 容器       | 双层：外层 `glassShell` 仅 `radius['2xl']`（14）+ `s.glassBar` shadow；内层 `glass` `radius['2xl']` + `overflow:hidden` + `c.glassBorder` 边框；顶部 1px inset 高光线 `c.glassStatsHighlight` |
-| 玻璃底     | 由 `<GlassLayer effect="clear" />` 接管（原生通透材质 / 半透明主题背景 / Web CSS 近似），随 light/dark scheme 自动切                                                                          |
+| 玻璃底     | 由 `<GlassLayer effect="clear" />` 接管（原生通透材质 / 原生实色降级 / Web CSS 近似），随 light/dark scheme 自动切                                                                          |
 
 ## 使用注意
 
@@ -3588,13 +3588,13 @@ function SearchConditionField() {
 }
 ```
 
-action slot 由库渲染 44×44pt frame。`disabled` 或 `editable={false}` 会同时禁止文本与 action；`disabled` 覆盖 caller 的 `editable` 和 `accessibilityState.disabled`。
+action slot 的 `icon`（图标组件）与 `label`（非空文字）二选一，并必须提供 `onPress` 和非空 `accessibilityLabel`。库渲染至少 44pt 宽、44pt 高的操作区域，文字操作可按内容加宽。`disabled` 或 `editable={false}` 会同时禁止文本与 action；`disabled` 覆盖 caller 的 `editable` 和 `accessibilityState.disabled`。
 
 `containerStyle` 用于外层布局，但不能设置高度、min/max 尺寸或 `overflow`。`height` 小于 44 或非法时会回退为 44 并在开发环境诊断。
 
 ## API 要点
 
-`InputProps` 基于 `TextInputProps`，但移除了 `style`、`multiline`、`numberOfLines`、`value`、`defaultValue`、`onChangeText`、`readOnly`、`role`、`aria-disabled`、`enterKeyHint`、`clearTextOnFocus` 的宽入口；严格 value union 重新提供前三项。
+`InputProps` 基于 `TextInputProps`，但移除了 `style`、`multiline`、`numberOfLines`、`value`、`defaultValue`、`onChangeText`、`readOnly`、`role`、`aria-disabled`、`enterKeyHint`、`clearTextOnFocus` 的宽入口；严格 value union 重新提供 `value`、`defaultValue` 和 `onChangeText`。
 
 - `leading` / `trailing`: `TextFieldSlot?`
 - `height`: `number?`（最小 44）
@@ -3603,9 +3603,11 @@ action slot 由库渲染 44×44pt frame。`disabled` 或 `editable={false}` 会�
 - `containerStyle`: `TextFieldContainerStyle?`
 - `ref`: `TextFieldHandle`，仅 `focus()` / `blur()`
 
-运行时会验证每个 slot 的精确 discriminant 和关键字段：icon 必须来自生成 registry，
+`icon` 接收 `ComponentType<IconProps>`，例如从 `@unif/react-native-icons` 导入的 `SearchOutlined`，不接受图标名称字符串或已创建的 React 元素。
+
+运行时会验证每个 slot 的 discriminant 和关键字段：icon 必须是有效组件，
 可选 size 必须是有限 number、color 必须是 string；text 只接受 string/number；
-action 还必须有函数 handler、非空名称和可选 boolean disabled。`undefined` 表示无
+action 验证图标或非空 label、函数 handler、非空可访问名称和可选 boolean disabled。`undefined` 表示无
 slot，其他 malformed 未类型化值都会失败关闭，并在 effect 中诊断。合法但超出
 `[1, 32]` 的数值 icon size 仍按既有规则回退 18。
 
@@ -4038,7 +4040,7 @@ function BrandImage() {
 
 # NavBar 导航栏
 
-页面顶部导航栏，提供标题与左右操作区域。默认使用无额外染色的系统玻璃表面；品牌态保持品牌色，transparent 仍完全透明。旧 iOS 或减少透明度时使用清晰实色，Android 保留主题半透明渐变。
+页面顶部导航栏，提供标题与左右操作区域。默认使用无额外染色的系统玻璃表面；品牌态保持品牌色，transparent 仍完全透明。默认表面在 Android、旧 iOS 或减少透明度时使用主题 `surface` 实色。Web 保留 CSS 近似材质；无 CSS 模糊能力且未启用减少透明度时使用主题渐变。
 
 ## 代码演示 {#实时预览}
 
@@ -4241,7 +4243,7 @@ import { ArrowLeftOutlined, MoreHOutlined } from '@unif/react-native-icons';
 
 # 组件概览
 
-按场景查找组件，进入对应页面查看示例、API 和注意事项。组件从 `@unif/react-native-design` 包根导入。
+按场景查找组件，进入对应页面查看示例、API 和注意事项。Design 公开组件从 `@unif/react-native-design` 包根导入；独立图标从 `@unif/react-native-icons` 导入。
 
 消息、聊天输入和附件展示见独立的 [Chat 库](https://github.com/unif-design/react-native-chat)。页面预览运行于 React Native Web，原生行为按各组件的平台说明验证。
 
@@ -4277,14 +4279,15 @@ import { ArrowLeftOutlined, MoreHOutlined } from '@unif/react-native-icons';
 | ------------------------------------------------ | -------------------------------------------------------------------------------- |
 | [Input](md/components/input.md)                  | 单行输入,idle / focus / filled / error                                           |
 | [PasswordInput](md/components/password-input.md) | 密码输入与显示切换                                                               |
-| [Textarea](md/components/textarea.md)            | 多行输入(复用 Input,顶对齐)                                                      |
-| [TextField](md/components/text-field.md)         | 带 label / 校验的表单字段封装                                                    |
-| [Search](md/components/search.md)                | 搜索条(Input 预设 + 清除按钮)                                                    |
+| [Textarea](md/components/textarea.md)            | 多行输入，支持内容增长与最大高度                                                 |
+| [Search](md/components/search.md)                | 搜索输入与清除操作                                                              |
 | [Checkbox](md/components/checkbox.md)            | 复选                                                                             |
-| [Radio](md/components/radio.md)                  | 单选 + RadioGroup                                                                |
+| [Radio](md/components/radio.md)                  | 单选选项与 `Radio.Group`                                                         |
 | [Switch](md/components/switch.md)                | 开关：native Reanimated / Web CSS transition                                     |
 | [Stepper](md/components/stepper.md)              | `[−] N [+]` 步进；`xs` 是横向触控 < 44pt 的紧凑档，支持 `formatValue` 文案格式化 |
 | [Form](md/components/form.md)                    | Form / FormGroup / FormRow(行间 hairline)                                        |
+
+Input、Textarea、Search 和 PasswordInput 共用内部 [TextField 内核](md/components/text-field.md)。包根不导出 `TextField` 组件，使用者应选择上表中的公开输入组件。
 
 ## 导航 {#导航}
 
@@ -4537,7 +4540,7 @@ native 走 Reanimated 4 worklet（UI 线程）；**web 走 CSS transition + `set
 
 # Radio 单选
 
-受控单选控件，可独立使用或通过 RadioGroup 组合。
+受控单选控件。`Radio` 必须放在 `Radio.Group` 内，选中值与变更回调由组统一提供。
 
 ## 代码演示 {#实时预览}
 
@@ -5535,7 +5538,7 @@ const StepperDemo = () => {
 | 圆角           | 8px（`radius.md`，外层左右两角），中间数字框无独立圆角                                                                                                                                                                        |
 | 按钮 visual    | md `r(32)²` / sm `r(28)²` / xs `r(24)²`，嵌在 side outer 内并朝中央贴边；`±` 基准字号 18px（`type.h1`），按 fontScale 缩放一次                                                                                                |
 | 数值 visual    | md `r(48) × r(32)` / sm `r(40) × r(28)` / xs `r(40) × r(24)`；1px 上下边线、无左右边线，基准字号 md 14 / sm 13 / xs 11，按 fontScale 缩放一次；`formatValue` 只替换可见文案                                                   |
-| 背景 / 描边    | 视觉区域共用无额外染色的系统玻璃，保留 1px `c.outline` 边；旧 iOS 或减少透明度时为清晰实色，Android 保留主题渐变                                                                                                              |
+| 背景 / 描边    | 视觉区域共用无额外染色的系统玻璃，保留 1px `c.outline` 边；Android、旧 iOS 或减少透明度时使用主题 `surface` 实色；Web 保留 CSS 近似材质，无 CSS 模糊能力且未启用减少透明度时使用主题渐变                                                                                                              |
 | 禁用           | 按钮前景 `opacity: 0.4`（达到 min/max 或整体 `disabled` 时；按下 0.7），材质与其祖先保持不透明                                                                                                                                |
 
 `ThemeProvider fontScale` 只改变 `±` 与中央数值的文字 metric。三个 visual wrapper、md/sm 至少 44pt 的 outer frame、xs 高 44pt 且横向小于 44pt 的 dense outer、边框、圆角和点击布局都不缩放；动态中央字号不会再经过 `useThemedStyles` 二次处理。
@@ -5866,7 +5869,7 @@ const SwitchDemo = () => {
 | 开   | 32×20 主色底 `c.primary`，16×16 系统材质滑块在右                                  |
 | 禁用 | 44×44 outer frame 保留，仅语义轨道 `opacity: 0.5`；材质滑块不淡化，handler 被移除 |
 
-滑块复用 `GlassLayer`，原生默认不额外设置染色，Web 使用 CSS 近似材质。旧 iOS 或系统减少透明度时使用清晰实色；Android 保留当前主题的半透明渐变。轨道与滑块是同一 visual frame 下的兄弟节点，禁用反馈不会降低材质及其祖先的整体透明度。
+滑块复用 `GlassLayer`，原生默认不额外设置染色；Android、旧 iOS 或系统减少透明度时使用主题 `surface` 实色。Web 使用 CSS 近似材质，无 CSS 模糊能力且未启用减少透明度时使用主题渐变。轨道与滑块是同一 visual frame 下的兄弟节点，禁用反馈不会降低材质及其祖先的整体透明度。
 
 outer RNGH `Pressable` 是透明的 44×44 真实布局 frame，尺寸直接读取
 `fixed.hitTarget`，不经过 `r()` 或 fontScale，也不再使用 `hitSlop`。32×20 visual
@@ -6517,12 +6520,12 @@ ref.current?.focus();
 
 ## slot 与可访问性
 
-`leading`/`trailing` 只能是可验证的 `TextFieldSlot`：装饰性 `{ kind: 'icon' | 'text' }`，或具备 `icon`、`onPress`、`accessibilityLabel` 的 `{ kind: 'action' }`。任意 ReactNode 和嵌套 Pressable 都不被接受。
+`leading`/`trailing` 只能是可验证的 `TextFieldSlot`：装饰性 `{ kind: 'icon' | 'text' }`，或具备 `onPress`、`accessibilityLabel` 的 `{ kind: 'action' }`。action 的 `icon` 与非空 `label` 二选一。`icon` 接收 `ComponentType<IconProps>`，例如 Icons 包的命名组件，不接受图标名称字符串或已创建的 React 元素。任意 ReactNode 和嵌套 Pressable 都不被接受。
 
 - display slot 会由本地 View/Text 从 a11y tree 隐藏；语义放在输入框 label/hint 上。
-- action slot 始终拥有真实 44×44pt Pressable frame；字段 `disabled` 或 `editable={false}` 时移除 handler，并上报 disabled state。
-- 运行时逐分支验证 `kind`、生成 icon name、有限数 size、string color、
-  string/number text value，以及 action 的函数 handler、非空名称和 boolean
+- action slot 的真实 Pressable frame 至少 44pt 宽、44pt 高，文字操作可按内容加宽；字段 `disabled` 或 `editable={false}` 时移除 handler，并上报 disabled state。
+- 运行时逐分支验证 `kind`、图标组件、有限数 size、string color、
+  string/number text value，以及 action 的图标或非空 label、函数 handler、非空可访问名称和 boolean
   disabled。只有 `undefined` 表示无 slot；其余 malformed 值在 effect 诊断并移除。
   合法配置中的越界数值 icon size 仍回退 18。
 - `A11Y_HIDDEN_PROPS` 是内部共享常量，只能应用到库内本地 RN 节点，不能透传给第三方组件。
@@ -6646,14 +6649,14 @@ iOS 使用输入框实际宽度和同一字体/缩放策略的原生文字行独
 
 `surface` 可选 `default`（缺省）或 `plain`。`default` 绘制独立输入的玻璃背景、圆角、边框及焦点／错误描边；禁用只淡化前景。`plain` 用于外层卡片已经提供表面的复合输入，不绘制这些装饰；文字、焦点事件、错误说明、禁用状态及最小触达区域保持原契约。
 
-两种表面都保留水平 `space[5]` 和垂直 `space[4]` 的文字内边距；消费者不需要再给文字区叠加内边距。`plain` 没有边框，其垂直内边距合计为 `2 * space[4]`。`minHeight`／`maxHeight` 仍包含这些间距；例如消费者按四行文字计算上限时，应将文字高度与这部分垂直间距相加。`containerStyle` 只作用于外层布局，不能用于穿透修改内部输入表面。
+`default` 使用水平 `space[5]`、垂直 `space[4]` 的文字内边距；`plain` 的水平和垂直内边距均为 `space[3]`。消费者不需要再给文字区叠加内边距。`plain` 没有边框，其垂直内边距合计为 `2 * space[3]`。`minHeight`／`maxHeight` 仍包含这些间距；例如消费者按四行文字计算 `plain` 的上限时，应将文字高度与这部分垂直间距相加。`containerStyle` 只作用于外层布局，不能用于穿透修改内部输入表面。
 
 ## 高度与 a11y
 
 - `minHeight` 默认 96，必须是有限且至少 44 的数；非法值回退 96。
 - `maxHeight` 缺省时不限制；只有有限且不小于归一化后的 min 时生效，否则回退为无上限。
 - `containerStyle` 不能覆盖高度、min/max 尺寸、min/max 宽或 `overflow`，运行时 JS 传入也会剥除。
-- `leading`/`trailing` 只接受 `TextFieldSlot`。action slot 有 44×44pt 实际 frame，字段不可编辑时 action 也不可操作。
+- `leading`/`trailing` 只接受 `TextFieldSlot`。action slot 支持图标或文字，实际 frame 至少 44pt 宽、44pt 高，字段不可编辑时 action 也不可操作。
 - ref 是 `TextFieldHandle`，只有 `focus()` / `blur()`；`readOnly` 改用 `editable={false}`。
 
 错误文字 Android 使用 polite live region；iOS 只播报挂载后的非空错误变更。请给没有可见标签的字段传 `accessibilityLabel`。
@@ -7644,9 +7647,9 @@ const makeStyles = (c: ColorTokens, s: ShadowTokens) =>
 
 颜色与暗色主题见[颜色](md/design/tokens/colors.md)。
 
-搜索与独立图标按钮共用 `control.md`（36），清除操作的可见表面使用 `control.xs`（22）和 `icon.xxs`（14）；交互命中仍不小于 `fixed.hitTarget`（44）。
+Search 的清除操作使用 `control.xs`（基准 22）的可见表面和 `icon.xxs`（基准 14）的图标；两者随屏宽缩放。交互命中仍不小于 `fixed.hitTarget`（44）。
 
-`fixed.compactControl` 为搜索胶囊及其相邻圆形操作的 36pt 可视尺寸，不随屏宽变化；`fixed.hitTarget` 继续提供至少 44pt 的触达范围。
+Search 胶囊使用 `fixed.compactControl`（36pt），不随屏宽变化；相邻圆形操作可向 IconButton 显式传入 `surfaceSize={fixed.compactControl}` 保持等高。IconButton 默认 `md` 档使用随屏宽缩放的 `control.md`（基准 36），与该固定尺寸不是同一个 token。`fixed.hitTarget` 继续提供至少 44pt 的触达范围。
 
 ## 字体
 
@@ -7724,16 +7727,20 @@ Hero 区主标题的三档(带 Logo / NavBar 的品牌大标题):
 
 `fw` 用 `as const` 声明,类型已收窄到字面量字符串,**不需要再写 `as '500'` / `as '600'` 这种 cast**。
 
-## 行高(惯例,非 token) {#行高}
+## 行高 / `leading` {#行高}
 
-:::warning 行高没有独立 token
-设计系统**没有** `lineHeight` token。行高按惯例用字号乘系数算:标题 ×1.25(紧凑)、正文 ×1.45。在 `makeStyles` 里直接写 `lineHeight: t.body * 1.45` 即可,不要去 import 不存在的 `lh` token。
-:::
+共用行高由包根导出的 `leading` 提供，各值经 `rf()` 缩放。下表为基准值；在 `makeStyles` 中使用时，`useThemedStyles` 会再按应用 `fontScale` 缩放一次。
 
-| 惯例 | 系数  | 用途                 |
-| ---- | ----- | -------------------- |
-| 紧凑 | ×1.25 | 标题                 |
-| 正文 | ×1.45 | 正文段落(约 22 / 15) |
+| Token             | 基准 px |
+| ----------------- | ------- |
+| `leading.badge`    | 12      |
+| `leading.compact`  | 16      |
+| `leading.sm`       | 20      |
+| `leading.body`     | 21      |
+| `leading.relaxed`  | 22      |
+| `leading.heading`  | 24      |
+
+特定排版仍可按字号乘系数计算行高，例如 `t.h2 * 1.25` 或 `t.body * 1.45`；库没有名为 `lh` 或 `lineHeight` 的独立导出。
 
 ## 在代码中使用 {#在代码中使用}
 
@@ -7743,6 +7750,7 @@ import {
   type as t,
   fw,
   fontMono,
+  leading,
   useThemedStyles,
 } from '@unif/react-native-design';
 import type { ColorTokens } from '@unif/react-native-design';
@@ -7751,13 +7759,13 @@ const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({
     title: {
       fontSize: t.h2, // 17
-      lineHeight: t.h2 * 1.25, // 标题用 ×1.25
+      lineHeight: leading.heading,
       fontWeight: fw.semi, // '600'(无需 cast)
       color: c.foreground,
     },
     body: {
       fontSize: t.body, // 15
-      lineHeight: t.body * 1.45, // 正文用 ×1.45
+      lineHeight: leading.relaxed,
       color: c.foreground,
     },
     meta: {
@@ -7811,11 +7819,11 @@ function DynamicLabel({ size }: { size: number }) {
 
 缺少 `ThemeProvider` 时,主题 hook 返回同一个模块级 light fallback(`lightColors` / `lightShadow` / `fontScale=1`),保证引用稳定。开发环境会在 React effect 阶段一次性记录诊断;render 期间不会写日志。
 
-## 补充档位与共用行高、字距
+## 补充档位与字距
 
 `type` 补充 `badge`（9）、`badgePlus`（9.5）、`nanoPlus`（10.5）、`xxsPlus`（12.5）、`bodyLg`（16）、`bodyLgPlus`（16.5）、`h1Plus`（19）、`titleLg`（20）、`displayPlus`（24），全部使用 `rf` 字号缩放。原有字号档位保持。
 
-`leading` 提供 badge / compact / sm / body / relaxed / heading 共用行高（12 / 16 / 20 / 21 / 22 / 24）。`tracking` 统一既有标题和标签字距；通过 `useThemedStyles` 消费，继续跟随用户字体设置。尺寸缩放 `r` 不再用来定义文字字号。
+`tracking` 统一既有标题和标签字距；通过 `useThemedStyles` 消费，继续跟随用户字体设置。共用行高见上文 `leading`。尺寸缩放 `r` 不再用来定义文字字号。
 
 ## 语调与文案
 
@@ -7954,7 +7962,7 @@ yarn add @unif/react-native-icons react-native-svg \
   @callstack/liquid-glass
 ```
 
-iOS 装完原生包后,在 `ios/` 目录执行 `bundle exec pod install` 并重新构建。Liquid Glass 需 Xcode 26+；iOS 26+ 使用原生玻璃，旧 iOS / Android 降级为半透明主题背景，Web 保留 CSS 近似效果。Expo Go 不支持此原生模块，Expo 工程需开发构建。组件契约见 [GlassLayer](md/components/glass-layer.md)。
+iOS 装完原生包后,在 `ios/` 目录执行 `bundle exec pod install` 并重新构建。Liquid Glass 需 Xcode 26+；iOS 26+ 且原生支持标记为真、未启用减少透明度时使用原生玻璃；Android、旧 iOS 或原生玻璃不可用时使用主题实色背景。Web 使用 CSS 近似效果，无 CSS 模糊能力且未启用减少透明度时保留主题渐变。Expo Go 不支持此原生模块，Expo 工程需开发构建。组件契约见 [GlassLayer](md/components/glass-layer.md)。
 :::
 
 > 版本范围见上方[环境要求](#环境要求)表格,唯一事实来源是 `package.json#peerDependencies`。
@@ -8405,11 +8413,11 @@ Jest 验证调用与合成事件后的状态。真实手势、系统动效偏好
 
 ### 症状:LiveDemo 里 Button / Cell 点击无响应 {#rngh-pressable-web-点击无响应}
 
-**原因。** `react-native-gesture-handler` 的 `Pressable` 在 `react-native-web` 运行时不触发 `onPress` —— RNGH 依赖原生手势驱动,浏览器里不存在。
+**原因。** 本站采用的 RNGH / Reanimated / React Native Web 组合中，RNGH `Pressable` 的手势事件链曾导致 `onPress` 不触发。先核对文档站的模块替换与 React Native Web 解析是否生效。
 
-**解法。** 文档站 webpack 插件(`website/src/plugins/docusaurus-rnw/index.js`)用 `NormalModuleReplacementPlugin` 把 RNGH 的 `Pressable` 替换成 `react-native-web` 原生 `Pressable`。如果你改了插件或引入新的 Pressable 来源,确保替换规则覆盖到新路径。
+**解法。** 文档站 webpack 插件(`website/src/plugins/docusaurus-rnw/index.js`)用 `NormalModuleReplacementPlugin` 将 RNGH 包内的 `./components/Pressable` 导向 `shims/RnghPressable.js`。shim 从 `react-native` 导入 `Pressable`，再由 `react-native$` alias 解析为 React Native Web 的实现。如果你改了插件或引入新的 Pressable 来源，核对这两层解析与实际点击结果。
 
-> 业务侧(真机)恰恰相反:可点区域要用 **RNGH 的 `Pressable`**,RN 原生 `Pressable` 在 web 上才不触发 `onPress`。
+> 该替换仅作用于文档站 Web bundle；原生组件继续使用各自已接线的 Pressable 与手势宿主。RN core `Pressable` 在 Web 中经 React Native Web 映射后可以正常处理点击。
 
 ---
 
@@ -8497,7 +8505,7 @@ function MyComponent() {
 **解法。** 按[快速开始 → 安装依赖](md/getting-started.md#安装依赖)逐一装齐:
 
 ```sh
-yarn add react-native-svg \
+yarn add @unif/react-native-icons react-native-svg \
   react-native-gesture-handler \
   react-native-reanimated \
   react-native-worklets \
@@ -8645,4 +8653,4 @@ cd ios && bundle exec pod install --repo-update
 
 ## 玻璃效果与平台降级
 
-`GlassLayer` 在 iOS 26+ 且上游支持标记为真时使用原生 Liquid Glass。旧 iOS 和 Android 显示半透明主题背景，Web 使用 CSS 近似效果。原生玻璃需 Xcode 26+、安装 `@callstack/liquid-glass`、执行 pod install 并重新构建；Expo Go 无法加载此模块。仅更新 JavaScript 或通过 Jest 测试不能证明原生模块已链接。详见 [GlassLayer](md/components/glass-layer.md)。
+`GlassLayer` 在 iOS 26+、上游支持标记为真且未启用减少透明度时使用原生 Liquid Glass。Android、旧 iOS、原生支持标记为假、减少透明度或 iOS 偏好尚未读回时，使用 `fallbackColor` 或主题 `surface` 实色。Web 使用 CSS 近似效果，无 CSS 模糊能力且未启用减少透明度时使用主题渐变。原生玻璃需 Xcode 26+、安装 `@callstack/liquid-glass`、在 `ios/` 目录执行 `bundle exec pod install` 并重新构建；Expo Go 无法加载此模块。仅更新 JavaScript 或通过 Jest 测试不能证明原生模块已链接。详见 [GlassLayer](md/components/glass-layer.md)。

@@ -64,13 +64,13 @@ function SearchConditionField() {
 }
 ```
 
-action slot 由库渲染 44×44pt frame。`disabled` 或 `editable={false}` 会同时禁止文本与 action；`disabled` 覆盖 caller 的 `editable` 和 `accessibilityState.disabled`。
+action slot 的 `icon`（图标组件）与 `label`（非空文字）二选一，并必须提供 `onPress` 和非空 `accessibilityLabel`。库渲染至少 44pt 宽、44pt 高的操作区域，文字操作可按内容加宽。`disabled` 或 `editable={false}` 会同时禁止文本与 action；`disabled` 覆盖 caller 的 `editable` 和 `accessibilityState.disabled`。
 
 `containerStyle` 用于外层布局，但不能设置高度、min/max 尺寸或 `overflow`。`height` 小于 44 或非法时会回退为 44 并在开发环境诊断。
 
 ## API 要点
 
-`InputProps` 基于 `TextInputProps`，但移除了 `style`、`multiline`、`numberOfLines`、`value`、`defaultValue`、`onChangeText`、`readOnly`、`role`、`aria-disabled`、`enterKeyHint`、`clearTextOnFocus` 的宽入口；严格 value union 重新提供前三项。
+`InputProps` 基于 `TextInputProps`，但移除了 `style`、`multiline`、`numberOfLines`、`value`、`defaultValue`、`onChangeText`、`readOnly`、`role`、`aria-disabled`、`enterKeyHint`、`clearTextOnFocus` 的宽入口；严格 value union 重新提供 `value`、`defaultValue` 和 `onChangeText`。
 
 - `leading` / `trailing`: `TextFieldSlot?`
 - `height`: `number?`（最小 44）
@@ -79,9 +79,11 @@ action slot 由库渲染 44×44pt frame。`disabled` 或 `editable={false}` 会�
 - `containerStyle`: `TextFieldContainerStyle?`
 - `ref`: `TextFieldHandle`，仅 `focus()` / `blur()`
 
-运行时会验证每个 slot 的精确 discriminant 和关键字段：icon 必须来自生成 registry，
+`icon` 接收 `ComponentType<IconProps>`，例如从 `@unif/react-native-icons` 导入的 `SearchOutlined`，不接受图标名称字符串或已创建的 React 元素。
+
+运行时会验证每个 slot 的 discriminant 和关键字段：icon 必须是有效组件，
 可选 size 必须是有限 number、color 必须是 string；text 只接受 string/number；
-action 还必须有函数 handler、非空名称和可选 boolean disabled。`undefined` 表示无
+action 验证图标或非空 label、函数 handler、非空可访问名称和可选 boolean disabled。`undefined` 表示无
 slot，其他 malformed 未类型化值都会失败关闭，并在 effect 中诊断。合法但超出
 `[1, 32]` 的数值 icon size 仍按既有规则回退 18。
 

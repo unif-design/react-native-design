@@ -15,11 +15,11 @@ description: '排查组件、主题、依赖和 Web 预览问题。'
 
 ### 症状:LiveDemo 里 Button / Cell 点击无响应 {#rngh-pressable-web-点击无响应}
 
-**原因。** `react-native-gesture-handler` 的 `Pressable` 在 `react-native-web` 运行时不触发 `onPress` —— RNGH 依赖原生手势驱动,浏览器里不存在。
+**原因。** 本站采用的 RNGH / Reanimated / React Native Web 组合中，RNGH `Pressable` 的手势事件链曾导致 `onPress` 不触发。先核对文档站的模块替换与 React Native Web 解析是否生效。
 
-**解法。** 文档站 webpack 插件(`website/src/plugins/docusaurus-rnw/index.js`)用 `NormalModuleReplacementPlugin` 把 RNGH 的 `Pressable` 替换成 `react-native-web` 原生 `Pressable`。如果你改了插件或引入新的 Pressable 来源,确保替换规则覆盖到新路径。
+**解法。** 文档站 webpack 插件(`website/src/plugins/docusaurus-rnw/index.js`)用 `NormalModuleReplacementPlugin` 将 RNGH 包内的 `./components/Pressable` 导向 `shims/RnghPressable.js`。shim 从 `react-native` 导入 `Pressable`，再由 `react-native$` alias 解析为 React Native Web 的实现。如果你改了插件或引入新的 Pressable 来源，核对这两层解析与实际点击结果。
 
-> 业务侧(真机)恰恰相反:可点区域要用 **RNGH 的 `Pressable`**,RN 原生 `Pressable` 在 web 上才不触发 `onPress`。
+> 该替换仅作用于文档站 Web bundle；原生组件继续使用各自已接线的 Pressable 与手势宿主。RN core `Pressable` 在 Web 中经 React Native Web 映射后可以正常处理点击。
 
 ---
 
@@ -107,7 +107,7 @@ function MyComponent() {
 **解法。** 按[快速开始 → 安装依赖](/docs/getting-started#安装依赖)逐一装齐:
 
 ```sh
-yarn add react-native-svg \
+yarn add @unif/react-native-icons react-native-svg \
   react-native-gesture-handler \
   react-native-reanimated \
   react-native-worklets \
@@ -255,4 +255,4 @@ cd ios && bundle exec pod install --repo-update
 
 ## 玻璃效果与平台降级
 
-`GlassLayer` 在 iOS 26+ 且上游支持标记为真时使用原生 Liquid Glass。旧 iOS 和 Android 显示半透明主题背景，Web 使用 CSS 近似效果。原生玻璃需 Xcode 26+、安装 `@callstack/liquid-glass`、执行 pod install 并重新构建；Expo Go 无法加载此模块。仅更新 JavaScript 或通过 Jest 测试不能证明原生模块已链接。详见 [GlassLayer](./components/glass-layer.mdx)。
+`GlassLayer` 在 iOS 26+、上游支持标记为真且未启用减少透明度时使用原生 Liquid Glass。Android、旧 iOS、原生支持标记为假、减少透明度或 iOS 偏好尚未读回时，使用 `fallbackColor` 或主题 `surface` 实色。Web 使用 CSS 近似效果，无 CSS 模糊能力且未启用减少透明度时使用主题渐变。原生玻璃需 Xcode 26+、安装 `@callstack/liquid-glass`、在 `ios/` 目录执行 `bundle exec pod install` 并重新构建；Expo Go 无法加载此模块。仅更新 JavaScript 或通过 Jest 测试不能证明原生模块已链接。详见 [GlassLayer](./components/glass-layer.mdx)。

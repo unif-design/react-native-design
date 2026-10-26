@@ -212,4 +212,4 @@ function Confirm() {
 
 - ❌ 不要叠加多层阴影——卡片只有一种阴影
 - ❌ 不要把 List 行做成 Card——List 行用 [Cell](cell.md)
-- 玻璃卡片直接选择 `glass`；旧 iOS 或减少透明度时使用清晰的主题底色，Android 保留主题渐变。不要在玻璃卡片的祖先上设置 opacity，也不要叠加重复材质。
+- 玻璃卡片直接选择 `glass`；Android、旧 iOS 或减少透明度时使用 `fallbackColor` 或主题 `surface` 实色。Web 保留 CSS 近似材质；无 CSS 模糊能力且未启用减少透明度时使用主题渐变。不要在玻璃卡片的祖先上设置 opacity，也不要叠加重复材质。

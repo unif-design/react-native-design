@@ -61,7 +61,7 @@ yarn add @unif/react-native-icons react-native-svg \
   @callstack/liquid-glass
 ```
 
-iOS 装完原生包后,在 `ios/` 目录执行 `bundle exec pod install` 并重新构建。Liquid Glass 需 Xcode 26+；iOS 26+ 使用原生玻璃，旧 iOS / Android 降级为半透明主题背景，Web 保留 CSS 近似效果。Expo Go 不支持此原生模块，Expo 工程需开发构建。组件契约见 [GlassLayer](components/glass-layer.md)。
+iOS 装完原生包后,在 `ios/` 目录执行 `bundle exec pod install` 并重新构建。Liquid Glass 需 Xcode 26+；iOS 26+ 且原生支持标记为真、未启用减少透明度时使用原生玻璃；Android、旧 iOS 或原生玻璃不可用时使用主题实色背景。Web 使用 CSS 近似效果，无 CSS 模糊能力且未启用减少透明度时保留主题渐变。Expo Go 不支持此原生模块，Expo 工程需开发构建。组件契约见 [GlassLayer](components/glass-layer.md)。
 :::
 
 > 版本范围见上方[环境要求](#环境要求)表格,唯一事实来源是 `package.json#peerDependencies`。

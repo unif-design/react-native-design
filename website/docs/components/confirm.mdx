@@ -12,7 +12,7 @@ description: '展示确认弹窗，并通过 Promise 返回用户选择。'
 `confirm()` 在任何路径下都会 resolve,不会悬挂 —— 包括没挂 Host、重入、Host 渲染抛错、Host 卸载和被后挂载的 Host 接管。详见下方[生命周期契约](#生命周期契约)。
 :::
 
-确认卡采用主题玻璃；旧 iOS 或减少透明度时使用清晰实色，Android 保留主题半透明渐变。显示外观不改变 owner 接管、点外取消、Promise 结算和窗口归还。
+确认卡采用主题玻璃；Android、旧 iOS 或减少透明度时使用主题 `surface` 实色。Web 保留 CSS 近似材质；无 CSS 模糊能力且未启用减少透明度时使用主题渐变。显示外观不改变 owner 接管、点外取消、Promise 结算和窗口归还。
 
 ## 用法
 
