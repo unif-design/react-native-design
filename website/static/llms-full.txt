@@ -3111,6 +3111,8 @@ import { MailOutlined } from '@unif/react-native-icons';
 `size` 走 `ButtonSize`（sm/md/lg = 28/36/44）。`variant` 复用 Button palette，但
 IconButton 精确排除会撕掉方形高度的 `'text'`，默认是自动适配的 `'glass'`。
 
+升级注意：此前省略 `variant` 时默认为透明底 `ghost`，现在默认自动适配材质。原场景需要继续保持透明时，显式传 `variant="ghost"` 或 `variant="neutral"`；已经明确选择实色或透明变体的调用不受默认值调整影响。
+
 浮动返回、删除或导航圆按钮直接使用默认值，可组合 `surfaceSize={36}`、`iconSize={21}`。默认胶囊圆角；保留至少 44pt 命中补偿、可访问名称、disabled 和 loading。
 
 明确需要实色时使用 `primary`、`danger` 或 `outline`，它们不会因系统支持玻璃而变透明；嵌在已有导航／输入表面中的按钮可用 `ghost` 或 `neutral` 保持透明。`color` 只控制图标和确认文字，不能用它判断背景材质。自定义实色背景通过对应实色变体的 `style.backgroundColor` 设置。

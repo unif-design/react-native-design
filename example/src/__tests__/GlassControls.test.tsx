@@ -49,10 +49,10 @@ beforeEach(() => {
 afterEach(() => jest.restoreAllMocks());
 
 test.each([
-  ['ios', true, false, '#1677FF', '#000000'],
-  ['ios', false, false, '#00875A', '#FFFFFF'],
-  ['ios', true, true, '#5B21B6', '#FDE047'],
-  ['android', false, false, '#FF9500', '#212121'],
+  ['ios', true, false, lightColors.info, lightColors.foreground],
+  ['ios', false, false, lightColors.success, lightColors.onPrimary],
+  ['ios', true, true, lightColors.error, darkColors.foreground],
+  ['android', false, false, lightColors.primary, lightColors.foreground],
 ] as const)(
   'IconButton 默认在 %s 支持=%s、减少透明度=%s 时自动适配，显式实色保留自定义配色',
   async (os, supported, reduced, backgroundColor, iconColor) => {
@@ -87,6 +87,7 @@ test.each([
     await waitFor(() => {
       const material = page.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
       expect(material.props.effect).toBe(native ? 'regular' : 'none');
+      expect(material.props.tintColor).toBeUndefined();
       expect(StyleSheet.flatten(material.props.style).backgroundColor).toBe(
         native
           ? 'transparent'
@@ -100,6 +101,35 @@ test.each([
     fireEvent.press(solid);
     fireEvent.press(page.getByRole('button', { name: '关闭浮层' }));
     expect(press).toHaveBeenCalledTimes(2);
+  }
+);
+
+test.each([
+  ['ghost', 'transparent', lightColors.primary],
+  ['neutral', 'transparent', lightColors.foreground],
+  ['danger', lightColors.error, lightColors.onError],
+  ['outline', lightColors.surface, lightColors.foreground],
+] as const)(
+  'IconButton 显式 %s 保留外观，不被默认材质覆盖',
+  async (variant, backgroundColor, color) => {
+    const page = render(
+      <ThemeProvider forceScheme="light">
+        <IconButton
+          icon={CloseOutlined}
+          variant={variant}
+          accessibilityLabel="显式外观"
+          onPress={() => {}}
+        />
+      </ThemeProvider>
+    );
+    await waitFor(() => {
+      const button = page.getByRole('button', { name: '显式外观' });
+      expect(button).toHaveStyle({ backgroundColor });
+      expect(button.findByType(CloseOutlined).props.color).toBe(color);
+    });
+    expect(
+      page.UNSAFE_queryAllByType(LiquidGlass.LiquidGlassView)
+    ).toHaveLength(0);
   }
 );
 
