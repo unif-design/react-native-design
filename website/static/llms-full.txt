@@ -2796,7 +2796,9 @@ Android、旧 iOS 或原生支持标记为假时，采用 `fallbackColor` 或主
   </div>
 ```
 
-交互 Chip、Search、secondary Button、导航和数值控件直接采用默认系统材质；状态与事件仍由调用方维护。
+IconButton、交互 Chip、Search、secondary Button、导航和数值控件直接采用默认系统材质；状态与事件仍由调用方维护。
+
+材质适配由库完成，场景仍可明确选择外观：Button 默认 primary、Card 默认正文实色；IconButton 默认玻璃／实色自动切换，primary／danger／outline 保持实色，ghost／neutral 保持透明。普通使用无需传玻璃参数，也不在页面里判断 iOS 版本。自定义底色与图标色的实色组合见 [IconButton](md/components/icon-button.md)；明确的实色外观不会被平台能力改成玻璃。
 
 ```tsx
   <DefaultGlassControlsDemo />
@@ -2832,7 +2834,7 @@ import { View, Text } from 'react-native';
 | --------------- | ---------------------- | ------------------------- | ----------------------------------------------------------- |
 | `effect`        | `'clear' \| 'regular'` | `'regular'`               | `clear` 更通透，`regular` 使用标准材质                      |
 | `tintColor`     | `ColorValue`           | 原生不额外染色            | 支持时的材质染色；实色降级使用 fallbackColor 或主题 surface |
-| `fallbackColor` | `ColorValue`           | 主题 `surface`            | Android、旧 iOS、减少透明度或 iOS 偏好读取前使用的清晰底色           |
+| `fallbackColor` | `ColorValue`           | 主题 `surface`            | Android、旧 iOS、减少透明度或 iOS 偏好读取前使用的清晰底色  |
 | `colorScheme`   | `'light' \| 'dark'`    | 继承主题                  | 固定白色前景的相机控件使用 dark                             |
 | `style`         | `StyleProp<ViewStyle>` | `StyleSheet.absoluteFill` | 布局、定位和圆角；材质颜色使用 `tintColor`                  |
 | `testID`        | `string`               | —                         | 测试定位                                                    |
@@ -2845,7 +2847,7 @@ import { View, Text } from 'react-native';
 | ------------------------------ | ------------------------------------------------------------------------------------------- |
 | iOS 26+ 且原生支持标记为真     | `@callstack/liquid-glass` 的 `LiquidGlassView`，使用 `clear/regular` 原生材质与 `tintColor` |
 | 旧 iOS 或 iOS 原生支持标记为假 | `fallbackColor` 或主题 `surface` 实色分组，无额外渐变或描边                                 |
-| Android                        | 与旧 iOS 相同的主题实色分组，不提供原生折射或背景模糊                                              |
+| Android                        | 与旧 iOS 相同的主题实色分组，不提供原生折射或背景模糊                                       |
 | Web                            | CSS `backdrop-filter` 与主题背景；`clear/regular` 分别使用 10/40px 的近似值                 |
 
 安装 `@callstack/liquid-glass`（本库 peer 范围 `>=0.8.2 <0.9.0`），iOS 执行 `bundle exec pod install` 并重新构建。上游要求 RN 0.80+、Xcode 26+；本库的 RN 要求仍以根 `package.json` 为准。当前 RN 0.86.3 的最低 iOS 版本为 15.1；玻璃能力的 iOS 26 门槛与应用最低版本是两件事，支持范围内的旧 iOS 使用主题实色分组。Expo Go 不支持此原生模块，Expo 工程需开发构建。见 [上游安装与 API](https://github.com/callstack/liquid-glass#documentation)。
@@ -3100,16 +3102,20 @@ import { MailOutlined } from '@unif/react-native-icons';
 
 # IconButton 图标按钮
 
-Android、旧 iOS 或减少透明度时，glass／secondary 图标按钮及确认状态统一采用轻中性主题 surfaceContainerHigh；原生 Liquid Glass 的透明度与材质保持系统呈现，Web 保留既有表面。
+默认自动适配系统材质，无需传玻璃参数或判断平台。Android、旧 iOS 或减少透明度时，默认图标按钮及确认状态统一采用轻中性主题 surfaceContainerHigh；原生 Liquid Glass 的透明度与材质保持系统呈现，Web 保留既有表面。
 
 用于工具栏或紧凑操作区，默认单击执行。需要提供 `accessibilityLabel`。
 
 需要二次确认时传 `confirmation={{ label: '确认删除' }}`，并用 `InlineConfirmScope` 包住可取消区域；图标在原位平滑切换为确认文字。未传配置不增加确认步骤，详见[原位确认](md/components/inline-confirm.md)。`color` 同时应用于图标和确认文字，删除操作可传错误色。
 
 `size` 走 `ButtonSize`（sm/md/lg = 28/36/44）。`variant` 复用 Button palette，但
-IconButton 精确排除会撕掉方形高度的 `'text'`，默认是透明底 `'ghost'`。
+IconButton 精确排除会撕掉方形高度的 `'text'`，默认是自动适配的 `'glass'`。
 
-浮动返回、删除或导航圆按钮使用 `variant="glass"`，可组合 `surfaceSize={36}`、`iconSize={21}`。默认胶囊圆角；保留至少 44pt 命中补偿、可访问名称、disabled 和 loading。
+升级注意：此前省略 `variant` 时默认为透明底 `ghost`，现在默认自动适配材质。原场景需要继续保持透明时，显式传 `variant="ghost"` 或 `variant="neutral"`；已经明确选择实色或透明变体的调用不受默认值调整影响。
+
+浮动返回、删除或导航圆按钮直接使用默认值，可组合 `surfaceSize={36}`、`iconSize={21}`。默认胶囊圆角；保留至少 44pt 命中补偿、可访问名称、disabled 和 loading。
+
+明确需要实色时使用 `primary`、`danger` 或 `outline`，它们不会因系统支持玻璃而变透明；嵌在已有导航／输入表面中的按钮可用 `ghost` 或 `neutral` 保持透明。`color` 只控制图标和确认文字，不能用它判断背景材质。自定义实色背景通过对应实色变体的 `style.backgroundColor` 设置。
 
 `secondary` 与 `glass` 都直接使用共享系统玻璃，前者保留尺寸对应圆角，后者为圆形；按压和不可用状态只淡化图标，材质保持可见。
 
@@ -3221,6 +3227,19 @@ import { IconButton } from '@unif/react-native-design';
 />;
 ```
 
+自定义不透明底色与图标色，各平台都保留传入的配色。两者可以使用任意有效颜色；仅传背景样式不会关闭玻璃，应同时选择实色变体：
+
+```tsx
+<IconButton
+  icon={ScanOutlined}
+  variant="primary"
+  color={iconColor}
+  style={{ backgroundColor }}
+  accessibilityLabel="扫码"
+  onPress={onScan}
+/>
+```
+
 ## API
 
 | 参数                 | 类型                                                                                      | 默认值     | 说明                                                                                         |
@@ -3230,7 +3249,7 @@ import { IconButton } from '@unif/react-native-design';
 | `size`               | `('sm' \| 'md' \| 'lg')?`                                                                 | `'md'`     | 方形边长 28 / 36 / 44                                                                        |
 | `iconSize`           | `number?`                                                                                 | 随 size    | 图标与加载指示的独立尺寸                                                                     |
 | `surfaceSize`        | `number?`                                                                                 | 随 size    | 方形表面边长，并据此计算命中补偿                                                             |
-| `variant`            | `('primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'glass' \| 'danger')?` | `'ghost'`  | 与 Button 共用 palette，但精确排除会撕掉方形高度的 `'text'`                                  |
+| `variant`            | `('primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'glass' \| 'danger')?` | `'glass'`  | 默认自动适配；实色与透明变体保留场景指定外观，排除 `'text'`                                  |
 | `color`              | `string?`                                                                                 | variant fg | icon 描色 override(仅 icon 色,bg/border 仍由 variant 决定)                                   |
 | `disabled`           | `boolean?`                                                                                | `false`    | 不响应 + opacity 0.5                                                                         |
 | `loading`            | `boolean?`                                                                                | `false`    | 以 ActivityIndicator 替代 icon，自动 disabled + busy                                         |

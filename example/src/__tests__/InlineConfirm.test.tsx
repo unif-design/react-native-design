@@ -17,7 +17,6 @@ const reanimated = jest.requireMock<typeof import('react-native-reanimated')>(
 );
 const common = {
   icon: TrashOutlined,
-  variant: 'glass' as const,
   accessibilityLabel: '删除甲',
 };
 function pressHandler(node: ReactTestInstance): () => void {

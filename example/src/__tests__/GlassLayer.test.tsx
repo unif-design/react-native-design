@@ -481,6 +481,7 @@ test.each([false, true])(
         <Card variant="glass" fallbackColor={lightColors.surfaceContainerHigh}>
           <IconButton
             icon={ChevronLeftOutlined}
+            variant="ghost"
             accessibilityLabel="选择客户"
             onPress={() => {}}
           />

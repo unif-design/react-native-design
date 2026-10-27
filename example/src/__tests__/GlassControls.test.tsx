@@ -48,6 +48,91 @@ beforeEach(() => {
 
 afterEach(() => jest.restoreAllMocks());
 
+test.each([
+  ['ios', true, false, lightColors.info, lightColors.foreground],
+  ['ios', false, false, lightColors.success, lightColors.onPrimary],
+  ['ios', true, true, lightColors.error, darkColors.foreground],
+  ['android', false, false, lightColors.primary, lightColors.foreground],
+] as const)(
+  'IconButton 默认在 %s 支持=%s、减少透明度=%s 时自动适配，显式实色保留自定义配色',
+  async (os, supported, reduced, backgroundColor, iconColor) => {
+    jest.replaceProperty(Platform, 'OS', os);
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      supported
+    );
+    jest
+      .spyOn(AccessibilityInfo, 'isReduceTransparencyEnabled')
+      .mockResolvedValue(reduced);
+    const press = jest.fn();
+    const page = render(
+      <ThemeProvider>
+        <IconButton
+          icon={CloseOutlined}
+          accessibilityLabel="关闭浮层"
+          onPress={press}
+        />
+        <IconButton
+          icon={CloseOutlined}
+          variant="primary"
+          color={iconColor}
+          style={{ backgroundColor }}
+          accessibilityLabel="自定义实色按钮"
+          onPress={press}
+        />
+      </ThemeProvider>
+    );
+    const native = supported && !reduced;
+    await waitFor(() => {
+      const material = page.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
+      expect(material.props.effect).toBe(native ? 'regular' : 'none');
+      expect(material.props.tintColor).toBeUndefined();
+      expect(StyleSheet.flatten(material.props.style).backgroundColor).toBe(
+        native
+          ? 'transparent'
+          : resolveThemeColors('light').surfaceContainerHigh
+      );
+    });
+    const solid = page.getByRole('button', { name: '自定义实色按钮' });
+    expect(solid).toHaveStyle({ backgroundColor });
+    expect(solid.findByType(CloseOutlined).props.color).toBe(iconColor);
+    expect(solid.findAllByType(LiquidGlass.LiquidGlassView)).toHaveLength(0);
+    fireEvent.press(solid);
+    fireEvent.press(page.getByRole('button', { name: '关闭浮层' }));
+    expect(press).toHaveBeenCalledTimes(2);
+  }
+);
+
+test.each([
+  ['ghost', 'transparent', lightColors.primary],
+  ['neutral', 'transparent', lightColors.foreground],
+  ['danger', lightColors.error, lightColors.onError],
+  ['outline', lightColors.surface, lightColors.foreground],
+] as const)(
+  'IconButton 显式 %s 保留外观，不被默认材质覆盖',
+  async (variant, backgroundColor, color) => {
+    const page = render(
+      <ThemeProvider forceScheme="light">
+        <IconButton
+          icon={CloseOutlined}
+          variant={variant}
+          accessibilityLabel="显式外观"
+          onPress={() => {}}
+        />
+      </ThemeProvider>
+    );
+    await waitFor(() => {
+      const button = page.getByRole('button', { name: '显式外观' });
+      expect(button).toHaveStyle({ backgroundColor });
+      expect(button.findByType(CloseOutlined).props.color).toBe(color);
+    });
+    expect(
+      page.UNSAFE_queryAllByType(LiquidGlass.LiquidGlassView)
+    ).toHaveLength(0);
+  }
+);
+
 test.each(['light', 'dark'] as const)(
   '输入、分组表单和列表在 %s 下使用独立玻璃且禁用不隐藏材质',
   async (scheme) => {

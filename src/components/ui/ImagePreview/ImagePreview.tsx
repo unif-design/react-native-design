@@ -248,7 +248,6 @@ export const ImagePreview = forwardRef<ImagePreviewHandle, ImagePreviewProps>(
           <IconButton
             icon={TrashOutlined}
             size="sm"
-            variant="glass"
             disabled={current.deleting}
             accessibilityLabel={DELETE_LABEL}
             style={styles.deleteButton}

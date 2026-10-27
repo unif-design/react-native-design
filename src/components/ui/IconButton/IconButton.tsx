@@ -23,7 +23,7 @@ export function IconButton({
   size = 'md',
   iconSize,
   surfaceSize,
-  variant = 'ghost',
+  variant = 'glass',
   color,
   disabled,
   loading,
