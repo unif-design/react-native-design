@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.3](https://github.com/unif-design/react-native-design/compare/v1.13.2...v1.13.3) (2026-10-27)
+
+
+### Bug Fixes
+
+* **docs:** align component contracts and release indexes ([de469f4](https://github.com/unif-design/react-native-design/commit/de469f4ff0c860e835146cec8e7e8639d832ba15))
+
 ## [1.13.2](https://github.com/unif-design/react-native-design/compare/v1.13.1...v1.13.2) (2026-10-26)
 
 ## [1.13.1](https://github.com/unif-design/react-native-design/compare/v1.13.0...v1.13.1) (2026-10-26)
