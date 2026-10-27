@@ -116,14 +116,14 @@ iOS 使用输入框实际宽度和同一字体/缩放策略的原生文字行独
 
 `surface` 可选 `default`（缺省）或 `plain`。`default` 绘制独立输入的玻璃背景、圆角、边框及焦点／错误描边；禁用只淡化前景。`plain` 用于外层卡片已经提供表面的复合输入，不绘制这些装饰；文字、焦点事件、错误说明、禁用状态及最小触达区域保持原契约。
 
-两种表面都保留水平 `space[5]` 和垂直 `space[4]` 的文字内边距；消费者不需要再给文字区叠加内边距。`plain` 没有边框，其垂直内边距合计为 `2 * space[4]`。`minHeight`／`maxHeight` 仍包含这些间距；例如消费者按四行文字计算上限时，应将文字高度与这部分垂直间距相加。`containerStyle` 只作用于外层布局，不能用于穿透修改内部输入表面。
+`default` 使用水平 `space[5]`、垂直 `space[4]` 的文字内边距；`plain` 的水平和垂直内边距均为 `space[3]`。消费者不需要再给文字区叠加内边距。`plain` 没有边框，其垂直内边距合计为 `2 * space[3]`。`minHeight`／`maxHeight` 仍包含这些间距；例如消费者按四行文字计算 `plain` 的上限时，应将文字高度与这部分垂直间距相加。`containerStyle` 只作用于外层布局，不能用于穿透修改内部输入表面。
 
 ## 高度与 a11y
 
 - `minHeight` 默认 96，必须是有限且至少 44 的数；非法值回退 96。
 - `maxHeight` 缺省时不限制；只有有限且不小于归一化后的 min 时生效，否则回退为无上限。
 - `containerStyle` 不能覆盖高度、min/max 尺寸、min/max 宽或 `overflow`，运行时 JS 传入也会剥除。
-- `leading`/`trailing` 只接受 `TextFieldSlot`。action slot 有 44×44pt 实际 frame，字段不可编辑时 action 也不可操作。
+- `leading`/`trailing` 只接受 `TextFieldSlot`。action slot 支持图标或文字，实际 frame 至少 44pt 宽、44pt 高，字段不可编辑时 action 也不可操作。
 - ref 是 `TextFieldHandle`，只有 `focus()` / `blur()`；`readOnly` 改用 `editable={false}`。
 
 错误文字 Android 使用 polite live region；iOS 只播报挂载后的非空错误变更。请给没有可见标签的字段传 `accessibilityLabel`。

@@ -333,7 +333,7 @@
     "mdPath": "md/components/text-field.md",
     "slug": "/components/text-field",
     "section": "components",
-    "description": "为输入内容组合标签、说明与错误展示。"
+    "description": "Input、Textarea、Search、PasswordInput 共用的内部输入实现。"
   },
   {
     "title": "Textarea 多行输入",

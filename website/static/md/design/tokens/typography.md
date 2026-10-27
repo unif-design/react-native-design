@@ -78,16 +78,20 @@ Hero 区主标题的三档(带 Logo / NavBar 的品牌大标题):
 
 `fw` 用 `as const` 声明,类型已收窄到字面量字符串,**不需要再写 `as '500'` / `as '600'` 这种 cast**。
 
-## 行高(惯例,非 token) {#行高}
+## 行高 / `leading` {#行高}
 
-:::warning 行高没有独立 token
-设计系统**没有** `lineHeight` token。行高按惯例用字号乘系数算:标题 ×1.25(紧凑)、正文 ×1.45。在 `makeStyles` 里直接写 `lineHeight: t.body * 1.45` 即可,不要去 import 不存在的 `lh` token。
-:::
+共用行高由包根导出的 `leading` 提供，各值经 `rf()` 缩放。下表为基准值；在 `makeStyles` 中使用时，`useThemedStyles` 会再按应用 `fontScale` 缩放一次。
 
-| 惯例 | 系数  | 用途                 |
-| ---- | ----- | -------------------- |
-| 紧凑 | ×1.25 | 标题                 |
-| 正文 | ×1.45 | 正文段落(约 22 / 15) |
+| Token             | 基准 px |
+| ----------------- | ------- |
+| `leading.badge`    | 12      |
+| `leading.compact`  | 16      |
+| `leading.sm`       | 20      |
+| `leading.body`     | 21      |
+| `leading.relaxed`  | 22      |
+| `leading.heading`  | 24      |
+
+特定排版仍可按字号乘系数计算行高，例如 `t.h2 * 1.25` 或 `t.body * 1.45`；库没有名为 `lh` 或 `lineHeight` 的独立导出。
 
 ## 在代码中使用 {#在代码中使用}
 
@@ -97,6 +101,7 @@ import {
   type as t,
   fw,
   fontMono,
+  leading,
   useThemedStyles,
 } from '@unif/react-native-design';
 import type { ColorTokens } from '@unif/react-native-design';
@@ -105,13 +110,13 @@ const makeStyles = (c: ColorTokens) =>
   StyleSheet.create({
     title: {
       fontSize: t.h2, // 17
-      lineHeight: t.h2 * 1.25, // 标题用 ×1.25
+      lineHeight: leading.heading,
       fontWeight: fw.semi, // '600'(无需 cast)
       color: c.foreground,
     },
     body: {
       fontSize: t.body, // 15
-      lineHeight: t.body * 1.45, // 正文用 ×1.45
+      lineHeight: leading.relaxed,
       color: c.foreground,
     },
     meta: {
@@ -165,8 +170,8 @@ function DynamicLabel({ size }: { size: number }) {
 
 缺少 `ThemeProvider` 时,主题 hook 返回同一个模块级 light fallback(`lightColors` / `lightShadow` / `fontScale=1`),保证引用稳定。开发环境会在 React effect 阶段一次性记录诊断;render 期间不会写日志。
 
-## 补充档位与共用行高、字距
+## 补充档位与字距
 
 `type` 补充 `badge`（9）、`badgePlus`（9.5）、`nanoPlus`（10.5）、`xxsPlus`（12.5）、`bodyLg`（16）、`bodyLgPlus`（16.5）、`h1Plus`（19）、`titleLg`（20）、`displayPlus`（24），全部使用 `rf` 字号缩放。原有字号档位保持。
 
-`leading` 提供 badge / compact / sm / body / relaxed / heading 共用行高（12 / 16 / 20 / 21 / 22 / 24）。`tracking` 统一既有标题和标签字距；通过 `useThemedStyles` 消费，继续跟随用户字体设置。尺寸缩放 `r` 不再用来定义文字字号。
+`tracking` 统一既有标题和标签字距；通过 `useThemedStyles` 消费，继续跟随用户字体设置。共用行高见上文 `leading`。尺寸缩放 `r` 不再用来定义文字字号。

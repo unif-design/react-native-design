@@ -2,7 +2,7 @@
 
 > Unif React Native 设计系统：基础组件、主题和字体
 
-文档构建依据：`@unif/react-native-design@1.13.1`；使用时核对实际安装版本。
+文档构建依据：`@unif/react-native-design@1.13.2`；使用时核对实际安装版本。
 
 先查找当前功能，再读取对应 API、示例或 FAQ。源码链接供查阅，应用从包根公开接口导入。
 迁移、测试和研发技能按任务读取；这些资料不自动加入产品运行时模型上下文。
@@ -61,7 +61,7 @@
 - [Tabs 标签页](md/components/tabs.md) — 切换同一层级的内容区域。
 - [Tag 标签](md/components/tag.md) — 展示简短的状态或分类标签。
 - [TextEntryContent 文字编辑内容](md/components/text-entry-content.md) — 受控文字、说明和确认按钮的组合。
-- [TextField 输入共享内核（internal）](md/components/text-field.md) — 为输入内容组合标签、说明与错误展示。
+- [TextField 输入共享内核（internal）](md/components/text-field.md) — Input、Textarea、Search、PasswordInput 共用的内部输入实现。
 - [Textarea 多行输入](md/components/textarea.md) — 多行输入，按内容和高度边界调整输入表面。
 - [Thumbnail 缩略图](md/components/thumbnail.md) — 展示缩略图，支持尺寸、加载及失败占位。
 - [Toast 轻提示](md/components/toast.md) — 显示短暂提示，并由 ToastHost 承载。

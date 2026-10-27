@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: TextField 输入共享内核（internal）
-description: '为输入内容组合标签、说明与错误展示。'
+description: 'Input、Textarea、Search、PasswordInput 共用的内部输入实现。'
 ---
 
 # TextField 输入共享内核（internal）
@@ -23,12 +23,12 @@ ref.current?.focus();
 
 ## slot 与可访问性
 
-`leading`/`trailing` 只能是可验证的 `TextFieldSlot`：装饰性 `{ kind: 'icon' | 'text' }`，或具备 `icon`、`onPress`、`accessibilityLabel` 的 `{ kind: 'action' }`。任意 ReactNode 和嵌套 Pressable 都不被接受。
+`leading`/`trailing` 只能是可验证的 `TextFieldSlot`：装饰性 `{ kind: 'icon' | 'text' }`，或具备 `onPress`、`accessibilityLabel` 的 `{ kind: 'action' }`。action 的 `icon` 与非空 `label` 二选一。`icon` 接收 `ComponentType<IconProps>`，例如 Icons 包的命名组件，不接受图标名称字符串或已创建的 React 元素。任意 ReactNode 和嵌套 Pressable 都不被接受。
 
 - display slot 会由本地 View/Text 从 a11y tree 隐藏；语义放在输入框 label/hint 上。
-- action slot 始终拥有真实 44×44pt Pressable frame；字段 `disabled` 或 `editable={false}` 时移除 handler，并上报 disabled state。
-- 运行时逐分支验证 `kind`、生成 icon name、有限数 size、string color、
-  string/number text value，以及 action 的函数 handler、非空名称和 boolean
+- action slot 的真实 Pressable frame 至少 44pt 宽、44pt 高，文字操作可按内容加宽；字段 `disabled` 或 `editable={false}` 时移除 handler，并上报 disabled state。
+- 运行时逐分支验证 `kind`、图标组件、有限数 size、string color、
+  string/number text value，以及 action 的图标或非空 label、函数 handler、非空可访问名称和 boolean
   disabled。只有 `undefined` 表示无 slot；其余 malformed 值在 effect 诊断并移除。
   合法配置中的越界数值 icon size 仍回退 18。
 - `A11Y_HIDDEN_PROPS` 是内部共享常量，只能应用到库内本地 RN 节点，不能透传给第三方组件。

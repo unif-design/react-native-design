@@ -132,6 +132,6 @@ const makeStyles = (c: ColorTokens, s: ShadowTokens) =>
 
 颜色与暗色主题见[颜色](/docs/design/tokens/colors)。
 
-搜索与独立图标按钮共用 `control.md`（36），清除操作的可见表面使用 `control.xs`（22）和 `icon.xxs`（14）；交互命中仍不小于 `fixed.hitTarget`（44）。
+Search 的清除操作使用 `control.xs`（基准 22）的可见表面和 `icon.xxs`（基准 14）的图标；两者随屏宽缩放。交互命中仍不小于 `fixed.hitTarget`（44）。
 
-`fixed.compactControl` 为搜索胶囊及其相邻圆形操作的 36pt 可视尺寸，不随屏宽变化；`fixed.hitTarget` 继续提供至少 44pt 的触达范围。
+Search 胶囊使用 `fixed.compactControl`（36pt），不随屏宽变化；相邻圆形操作可向 IconButton 显式传入 `surfaceSize={fixed.compactControl}` 保持等高。IconButton 默认 `md` 档使用随屏宽缩放的 `control.md`（基准 36），与该固定尺寸不是同一个 token。`fixed.hitTarget` 继续提供至少 44pt 的触达范围。

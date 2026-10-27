@@ -7,7 +7,7 @@ description: '按场景查找组件、代码示例与 API。'
 
 # 组件概览
 
-按场景查找组件，进入对应页面查看示例、API 和注意事项。组件从 `@unif/react-native-design` 包根导入。
+按场景查找组件，进入对应页面查看示例、API 和注意事项。Design 公开组件从 `@unif/react-native-design` 包根导入；独立图标从 `@unif/react-native-icons` 导入。
 
 消息、聊天输入和附件展示见独立的 [Chat 库](https://github.com/unif-design/react-native-chat)。页面预览运行于 React Native Web，原生行为按各组件的平台说明验证。
 
@@ -43,14 +43,15 @@ description: '按场景查找组件、代码示例与 API。'
 | ------------------------------------------------ | -------------------------------------------------------------------------------- |
 | [Input](/docs/components/input)                  | 单行输入,idle / focus / filled / error                                           |
 | [PasswordInput](/docs/components/password-input) | 密码输入与显示切换                                                               |
-| [Textarea](/docs/components/textarea)            | 多行输入(复用 Input,顶对齐)                                                      |
-| [TextField](/docs/components/text-field)         | 带 label / 校验的表单字段封装                                                    |
-| [Search](/docs/components/search)                | 搜索条(Input 预设 + 清除按钮)                                                    |
+| [Textarea](/docs/components/textarea)            | 多行输入，支持内容增长与最大高度                                                 |
+| [Search](/docs/components/search)                | 搜索输入与清除操作                                                              |
 | [Checkbox](/docs/components/checkbox)            | 复选                                                                             |
-| [Radio](/docs/components/radio)                  | 单选 + RadioGroup                                                                |
+| [Radio](/docs/components/radio)                  | 单选选项与 `Radio.Group`                                                         |
 | [Switch](/docs/components/switch)                | 开关：native Reanimated / Web CSS transition                                     |
 | [Stepper](/docs/components/stepper)              | `[−] N [+]` 步进；`xs` 是横向触控 < 44pt 的紧凑档，支持 `formatValue` 文案格式化 |
 | [Form](/docs/components/form)                    | Form / FormGroup / FormRow(行间 hairline)                                        |
+
+Input、Textarea、Search 和 PasswordInput 共用内部 [TextField 内核](/docs/components/text-field)。包根不导出 `TextField` 组件，使用者应选择上表中的公开输入组件。
 
 ## 导航 {#导航}
 
