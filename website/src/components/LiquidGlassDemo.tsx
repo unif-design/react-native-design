@@ -29,7 +29,6 @@ export function LiquidGlassDemo() {
     <View style={{ gap: 24, alignItems: 'center', paddingVertical: 16 }}>
       <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
         <IconButton
-          variant="glass"
           surfaceSize={36}
           iconSize={21}
           icon={ChevronLeftOutlined}
@@ -94,7 +93,6 @@ export function LiquidGlassDemo() {
       </View>
       <View style={{ alignItems: 'center' }}>
         <Segmented
-          surface="glass"
           value={tab}
           onChange={setTab}
           items={[
@@ -106,7 +104,6 @@ export function LiquidGlassDemo() {
       </View>
       <View style={{ width: 300, maxWidth: '100%' }}>
         <TabBar
-          surface="glass"
           active={tab}
           onChange={setTab}
           items={[

@@ -56,7 +56,9 @@ Android、旧 iOS 或原生支持标记为假时，采用 `fallbackColor` 或主
   </div>
 ```
 
-交互 Chip、Search、secondary Button、导航和数值控件直接采用默认系统材质；状态与事件仍由调用方维护。
+IconButton、交互 Chip、Search、secondary Button、导航和数值控件直接采用默认系统材质；状态与事件仍由调用方维护。
+
+材质适配由库完成，场景仍可明确选择外观：Button 默认 primary、Card 默认正文实色；IconButton 默认玻璃／实色自动切换，primary／danger／outline 保持实色，ghost／neutral 保持透明。普通使用无需传玻璃参数，也不在页面里判断 iOS 版本。自定义底色与图标色的实色组合见 [IconButton](icon-button.md)；明确的实色外观不会被平台能力改成玻璃。
 
 ```tsx
   <DefaultGlassControlsDemo />
@@ -92,7 +94,7 @@ import { View, Text } from 'react-native';
 | --------------- | ---------------------- | ------------------------- | ----------------------------------------------------------- |
 | `effect`        | `'clear' \| 'regular'` | `'regular'`               | `clear` 更通透，`regular` 使用标准材质                      |
 | `tintColor`     | `ColorValue`           | 原生不额外染色            | 支持时的材质染色；实色降级使用 fallbackColor 或主题 surface |
-| `fallbackColor` | `ColorValue`           | 主题 `surface`            | Android、旧 iOS、减少透明度或 iOS 偏好读取前使用的清晰底色           |
+| `fallbackColor` | `ColorValue`           | 主题 `surface`            | Android、旧 iOS、减少透明度或 iOS 偏好读取前使用的清晰底色  |
 | `colorScheme`   | `'light' \| 'dark'`    | 继承主题                  | 固定白色前景的相机控件使用 dark                             |
 | `style`         | `StyleProp<ViewStyle>` | `StyleSheet.absoluteFill` | 布局、定位和圆角；材质颜色使用 `tintColor`                  |
 | `testID`        | `string`               | —                         | 测试定位                                                    |
@@ -105,7 +107,7 @@ import { View, Text } from 'react-native';
 | ------------------------------ | ------------------------------------------------------------------------------------------- |
 | iOS 26+ 且原生支持标记为真     | `@callstack/liquid-glass` 的 `LiquidGlassView`，使用 `clear/regular` 原生材质与 `tintColor` |
 | 旧 iOS 或 iOS 原生支持标记为假 | `fallbackColor` 或主题 `surface` 实色分组，无额外渐变或描边                                 |
-| Android                        | 与旧 iOS 相同的主题实色分组，不提供原生折射或背景模糊                                              |
+| Android                        | 与旧 iOS 相同的主题实色分组，不提供原生折射或背景模糊                                       |
 | Web                            | CSS `backdrop-filter` 与主题背景；`clear/regular` 分别使用 10/40px 的近似值                 |
 
 安装 `@callstack/liquid-glass`（本库 peer 范围 `>=0.8.2 <0.9.0`），iOS 执行 `bundle exec pod install` 并重新构建。上游要求 RN 0.80+、Xcode 26+；本库的 RN 要求仍以根 `package.json` 为准。当前 RN 0.86.3 的最低 iOS 版本为 15.1；玻璃能力的 iOS 26 门槛与应用最低版本是两件事，支持范围内的旧 iOS 使用主题实色分组。Expo Go 不支持此原生模块，Expo 工程需开发构建。见 [上游安装与 API](https://github.com/callstack/liquid-glass#documentation)。

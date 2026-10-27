@@ -48,6 +48,61 @@ beforeEach(() => {
 
 afterEach(() => jest.restoreAllMocks());
 
+test.each([
+  ['ios', true, false, '#1677FF', '#000000'],
+  ['ios', false, false, '#00875A', '#FFFFFF'],
+  ['ios', true, true, '#5B21B6', '#FDE047'],
+  ['android', false, false, '#FF9500', '#212121'],
+] as const)(
+  'IconButton 默认在 %s 支持=%s、减少透明度=%s 时自动适配，显式实色保留自定义配色',
+  async (os, supported, reduced, backgroundColor, iconColor) => {
+    jest.replaceProperty(Platform, 'OS', os);
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      supported
+    );
+    jest
+      .spyOn(AccessibilityInfo, 'isReduceTransparencyEnabled')
+      .mockResolvedValue(reduced);
+    const press = jest.fn();
+    const page = render(
+      <ThemeProvider>
+        <IconButton
+          icon={CloseOutlined}
+          accessibilityLabel="关闭浮层"
+          onPress={press}
+        />
+        <IconButton
+          icon={CloseOutlined}
+          variant="primary"
+          color={iconColor}
+          style={{ backgroundColor }}
+          accessibilityLabel="自定义实色按钮"
+          onPress={press}
+        />
+      </ThemeProvider>
+    );
+    const native = supported && !reduced;
+    await waitFor(() => {
+      const material = page.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
+      expect(material.props.effect).toBe(native ? 'regular' : 'none');
+      expect(StyleSheet.flatten(material.props.style).backgroundColor).toBe(
+        native
+          ? 'transparent'
+          : resolveThemeColors('light').surfaceContainerHigh
+      );
+    });
+    const solid = page.getByRole('button', { name: '自定义实色按钮' });
+    expect(solid).toHaveStyle({ backgroundColor });
+    expect(solid.findByType(CloseOutlined).props.color).toBe(iconColor);
+    expect(solid.findAllByType(LiquidGlass.LiquidGlassView)).toHaveLength(0);
+    fireEvent.press(solid);
+    fireEvent.press(page.getByRole('button', { name: '关闭浮层' }));
+    expect(press).toHaveBeenCalledTimes(2);
+  }
+);
+
 test.each(['light', 'dark'] as const)(
   '输入、分组表单和列表在 %s 下使用独立玻璃且禁用不隐藏材质',
   async (scheme) => {

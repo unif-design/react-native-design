@@ -8,16 +8,18 @@ description: '只包含图标的按钮，需要提供无障碍名称。'
 
 # IconButton 图标按钮
 
-Android、旧 iOS 或减少透明度时，glass／secondary 图标按钮及确认状态统一采用轻中性主题 surfaceContainerHigh；原生 Liquid Glass 的透明度与材质保持系统呈现，Web 保留既有表面。
+默认自动适配系统材质，无需传玻璃参数或判断平台。Android、旧 iOS 或减少透明度时，默认图标按钮及确认状态统一采用轻中性主题 surfaceContainerHigh；原生 Liquid Glass 的透明度与材质保持系统呈现，Web 保留既有表面。
 
 用于工具栏或紧凑操作区，默认单击执行。需要提供 `accessibilityLabel`。
 
 需要二次确认时传 `confirmation={{ label: '确认删除' }}`，并用 `InlineConfirmScope` 包住可取消区域；图标在原位平滑切换为确认文字。未传配置不增加确认步骤，详见[原位确认](inline-confirm.md)。`color` 同时应用于图标和确认文字，删除操作可传错误色。
 
 `size` 走 `ButtonSize`（sm/md/lg = 28/36/44）。`variant` 复用 Button palette，但
-IconButton 精确排除会撕掉方形高度的 `'text'`，默认是透明底 `'ghost'`。
+IconButton 精确排除会撕掉方形高度的 `'text'`，默认是自动适配的 `'glass'`。
 
-浮动返回、删除或导航圆按钮使用 `variant="glass"`，可组合 `surfaceSize={36}`、`iconSize={21}`。默认胶囊圆角；保留至少 44pt 命中补偿、可访问名称、disabled 和 loading。
+浮动返回、删除或导航圆按钮直接使用默认值，可组合 `surfaceSize={36}`、`iconSize={21}`。默认胶囊圆角；保留至少 44pt 命中补偿、可访问名称、disabled 和 loading。
+
+明确需要实色时使用 `primary`、`danger` 或 `outline`，它们不会因系统支持玻璃而变透明；嵌在已有导航／输入表面中的按钮可用 `ghost` 或 `neutral` 保持透明。`color` 只控制图标和确认文字，不能用它判断背景材质。自定义实色背景通过对应实色变体的 `style.backgroundColor` 设置。
 
 `secondary` 与 `glass` 都直接使用共享系统玻璃，前者保留尺寸对应圆角，后者为圆形；按压和不可用状态只淡化图标，材质保持可见。
 
@@ -129,6 +131,19 @@ import { IconButton } from '@unif/react-native-design';
 />;
 ```
 
+自定义不透明底色与图标色，各平台都保留传入的配色。两者可以使用任意有效颜色；仅传背景样式不会关闭玻璃，应同时选择实色变体：
+
+```tsx
+<IconButton
+  icon={ScanOutlined}
+  variant="primary"
+  color={iconColor}
+  style={{ backgroundColor }}
+  accessibilityLabel="扫码"
+  onPress={onScan}
+/>
+```
+
 ## API
 
 | 参数                 | 类型                                                                                      | 默认值     | 说明                                                                                         |
@@ -138,7 +153,7 @@ import { IconButton } from '@unif/react-native-design';
 | `size`               | `('sm' \| 'md' \| 'lg')?`                                                                 | `'md'`     | 方形边长 28 / 36 / 44                                                                        |
 | `iconSize`           | `number?`                                                                                 | 随 size    | 图标与加载指示的独立尺寸                                                                     |
 | `surfaceSize`        | `number?`                                                                                 | 随 size    | 方形表面边长，并据此计算命中补偿                                                             |
-| `variant`            | `('primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'glass' \| 'danger')?` | `'ghost'`  | 与 Button 共用 palette，但精确排除会撕掉方形高度的 `'text'`                                  |
+| `variant`            | `('primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'glass' \| 'danger')?` | `'glass'`  | 默认自动适配；实色与透明变体保留场景指定外观，排除 `'text'`                                  |
 | `color`              | `string?`                                                                                 | variant fg | icon 描色 override(仅 icon 色,bg/border 仍由 variant 决定)                                   |
 | `disabled`           | `boolean?`                                                                                | `false`    | 不响应 + opacity 0.5                                                                         |
 | `loading`            | `boolean?`                                                                                | `false`    | 以 ActivityIndicator 替代 icon，自动 disabled + busy                                         |

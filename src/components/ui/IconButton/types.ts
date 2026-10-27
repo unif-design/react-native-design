@@ -28,7 +28,7 @@ export interface IconButtonProps {
   iconSize?: number;
   /** 方形表面边长；同时据此补足 44pt 命中区。默认沿用 size。 */
   surfaceSize?: number;
-  /** 视觉变体,默认 'ghost'(透明底,适合 header right-tray 场景)。
+  /** 默认 glass 自动适配系统材质；primary／danger／outline 保持实色，ghost／neutral 保持透明。
    *  不支持 'text'——text variant 撕除高度,与 square 方形布局冲突。 */
   variant?: IconButtonVariant;
   /** Icon 颜色 override —— 不传走 variant.palette.fg(品牌一致默认);

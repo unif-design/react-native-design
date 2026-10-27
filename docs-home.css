@@ -774,7 +774,7 @@
 
 .hp-hero-final { grid-template-columns: minmax(0, 1fr) 580px; gap: 44px; }
 .hp-combo { position: relative; height: 540px; }
-.hp-combo-code { position: absolute; top: 0; left: 0; width: 540px; z-index: 1; }
+.hp-combo-code { position: absolute; top: 0; left: 0; width: 540px; max-width: 100%; z-index: 1; }
 .hp-combo-phone { position: absolute; right: 0; bottom: 0; z-index: 3; transform: scale(.68); transform-origin: bottom right; }
 .hp-combo-badge {
   position: absolute; top: 92px; right: 18px; z-index: 4; white-space: nowrap;
@@ -978,6 +978,13 @@
 }
 
 @media (max-width: 760px) {
+  .hp-combo { display: flex; flex-direction: column; align-items: center; gap: 24px; min-width: 0; height: auto; }
+  .hp-combo-code,
+  .hp-combo-phone,
+  .hp-combo-badge { position: static; }
+  .hp-combo-phone { width: 204px; height: 408px; transform: none; }
+  .hp-combo-phone .hp-phone { margin: 0; transform: scale(.68); transform-origin: top left; }
+  .unif-home:has(.hp-hero-final) .hp-feature-grid { display: flex; flex-direction: column; }
   .pt-grid     { grid-template-columns: 1fr; }
   .pt-doc-grid { grid-template-columns: 1fr; }
 }

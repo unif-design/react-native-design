@@ -193,7 +193,6 @@ export function ActionsScene(): React.JSX.Element {
                 icon={TrashOutlined}
                 accessibilityLabel="删除第一条示例"
                 confirmation={{ label: '确认删除' }}
-                variant="glass"
                 color={colors.error}
                 testID="actions-inline-first"
                 onPress={() => record('IconButton', '删除', '已确认第一条')}
@@ -202,7 +201,6 @@ export function ActionsScene(): React.JSX.Element {
                 icon={TrashOutlined}
                 accessibilityLabel="删除第二条示例"
                 confirmation={{ label: '确认删除' }}
-                variant="glass"
                 color={colors.error}
                 onPress={() => record('IconButton', '删除', '已确认第二条')}
               />
@@ -289,7 +287,6 @@ export function ActionsScene(): React.JSX.Element {
               icon={ChevronLeftOutlined}
               surfaceSize={36}
               iconSize={21}
-              variant="glass"
               accessibilityLabel="圆形返回演示"
               style={styles.circularButton}
               onPress={() => record('IconButton', '返回', '已点击返回')}
