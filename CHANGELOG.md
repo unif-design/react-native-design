@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.4](https://github.com/unif-design/react-native-design/compare/v1.13.3...v1.13.4) (2026-10-27)
+
+
+### Bug Fixes
+
+* unify adaptive icon defaults and responsive docs layout ([#187](https://github.com/unif-design/react-native-design/issues/187)) ([c670d10](https://github.com/unif-design/react-native-design/commit/c670d106f0447be2a4d4923f3e003fe84c7d17a0))
+
 ## [1.13.3](https://github.com/unif-design/react-native-design/compare/v1.13.2...v1.13.3) (2026-10-27)
 
 
