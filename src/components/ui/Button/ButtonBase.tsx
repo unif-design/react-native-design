@@ -35,6 +35,8 @@ export type ButtonBaseProps = {
   variant?: ButtonVariant;
   disabled?: boolean;
   loading?: boolean;
+  /** 加载时保留内容；忙碌状态和禁用保护仍由 loading 控制。 */
+  showContentWhenLoading?: boolean;
   block?: boolean;
   /** 方形约束 — width=height=sizing.h,优先级高于 horizontal padding。IconButton 用。 */
   square?: boolean;
@@ -66,6 +68,7 @@ export function ButtonBase({
   variant = 'primary',
   disabled,
   loading,
+  showContentWhenLoading,
   block,
   square,
   iconButton,
@@ -117,11 +120,12 @@ export function ButtonBase({
     return { top: v, bottom: v, left: 0, right: 0 };
   }, [isText, sizing.h, square]);
 
-  const content = loading ? (
-    <ActivityIndicator size={loadingSize ?? 'small'} color={palette.fg} />
-  ) : (
-    children({ sizing, palette })
-  );
+  const content =
+    loading && !showContentWhenLoading ? (
+      <ActivityIndicator size={loadingSize ?? 'small'} color={palette.fg} />
+    ) : (
+      children({ sizing, palette })
+    );
 
   return (
     <Pressable

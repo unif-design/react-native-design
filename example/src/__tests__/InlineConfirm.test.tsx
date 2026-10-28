@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { act, fireEvent, render } from '@testing-library/react-native';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Animated,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { TrashOutlined } from '@unif/react-native-icons';
 import type { ReactTestInstance } from 'react-test-renderer';
 import {
@@ -520,3 +526,135 @@ test.each([1, 1.3])(
     }
   }
 );
+
+test('二击提交后同一按钮显示加载文字、保持文字宽度与忙碌保护，结束后恢复图标', () => {
+  jest.spyOn(reanimated, 'useReducedMotion').mockReturnValue(true);
+  const execute = jest.fn();
+  let finish!: () => void;
+  function Sample() {
+    const [loading, setLoading] = useState(false);
+    finish = () => setLoading(false);
+    return (
+      <ThemeProvider>
+        <InlineConfirmScope>
+          <IconButton
+            {...common}
+            loading={loading}
+            confirmation={{ label: '确认删除', loadingLabel: '  删除中  ' }}
+            onPress={() => {
+              execute();
+              setLoading(true);
+            }}
+          />
+          <IconButton
+            {...common}
+            accessibilityLabel="删除乙"
+            confirmation={{ label: '确认乙' }}
+            onPress={() => {}}
+          />
+        </InlineConfirmScope>
+      </ThemeProvider>
+    );
+  }
+  const page = render(<Sample />);
+  const button = page.getByRole('button', { name: '删除甲' });
+  expect(page.queryByText('删除中')).toBeNull();
+  fireEvent.press(button);
+  expect(page.getByRole('button', { name: '确认删除' })).toBe(button);
+  const confirm = pressHandler(button);
+  act(() => {
+    confirm();
+    confirm();
+  });
+  const loadingButton = page.getByRole('button', { name: '删除中' });
+  expect(loadingButton).toBe(button);
+  expect(loadingButton).toBeDisabled();
+  expect(loadingButton.props.accessibilityState).toMatchObject({
+    busy: true,
+    disabled: true,
+  });
+  expect(page.UNSAFE_queryByType(ActivityIndicator)).toBeNull();
+  expect(page.getByText('删除中')).toBeOnTheScreen();
+  const measurement = page
+    .UNSAFE_getAllByType(Text)
+    .find((node) => typeof node.props.onLayout === 'function');
+  if (!measurement) throw new Error('缺少加载文字测量');
+  fireEvent(measurement, 'layout', { nativeEvent: { layout: { width: 66 } } });
+  const content = page
+    .UNSAFE_getAllByType(Animated.View)
+    .find(
+      (node) =>
+        typeof StyleSheet.flatten(node.props.style)?.width?.__getValue ===
+        'function'
+    );
+  if (!content) throw new Error('缺少加载文字内容');
+  expect(
+    StyleSheet.flatten(content.props.style)?.width.__getValue()
+  ).toBeGreaterThan(control.md);
+  expect(StyleSheet.flatten(loadingButton.props.style).width).toBeUndefined();
+  fireEvent.press(loadingButton);
+  act(() => confirm());
+  expect(execute).toHaveBeenCalledTimes(1);
+  fireEvent.press(page.getByRole('button', { name: '删除乙' }));
+  expect(page.getByRole('button', { name: '确认乙' })).toBeOnTheScreen();
+  act(() => finish());
+  expect(page.getByRole('button', { name: '删除甲' })).toBe(button);
+  expect(button).toBeEnabled();
+  expect(button.props.accessibilityState.busy).toBe(false);
+  act(() => confirm());
+  expect(execute).toHaveBeenCalledTimes(1);
+  fireEvent.press(button);
+  expect(page.getByRole('button', { name: '确认删除' })).toBeOnTheScreen();
+});
+
+test.each([undefined, '', '  \n  '])(
+  '加载文案为 %p 时保留原方形spinner',
+  (loadingLabel) => {
+    const page = render(
+      <ThemeProvider>
+        <IconButton
+          {...common}
+          onPress={() => {}}
+          loading
+          confirmation={{ label: '确认删除', loadingLabel }}
+        />
+      </ThemeProvider>
+    );
+    const button = page.getByRole('button', { name: '删除甲' });
+    expect(button).toBeDisabled();
+    expect(button.props.accessibilityState.busy).toBe(true);
+    expect(button).toHaveStyle({ width: control.md, height: control.md });
+    expect(page.UNSAFE_getByType(ActivityIndicator)).toBeTruthy();
+  }
+);
+
+test('带加载文案的loading仍取消旧确认，恢复和旧回调不复活确认', () => {
+  const cancel = jest.fn();
+  const execute = jest.fn();
+  const view = (loading: boolean) => (
+    <ThemeProvider>
+      <InlineConfirmScope>
+        <IconButton
+          {...common}
+          loading={loading}
+          onPress={execute}
+          confirmation={{
+            label: '确认删除',
+            loadingLabel: '删除中',
+            onCancel: cancel,
+          }}
+        />
+      </InlineConfirmScope>
+    </ThemeProvider>
+  );
+  const page = render(view(false));
+  fireEvent.press(page.getByRole('button', { name: '删除甲' }));
+  const stale = pressHandler(page.getByRole('button', { name: '确认删除' }));
+  page.rerender(view(true));
+  expect(page.getByRole('button', { name: '删除中' })).toBeDisabled();
+  expect(cancel).toHaveBeenCalledTimes(1);
+  page.rerender(view(false));
+  expect(page.queryByRole('button', { name: '确认删除' })).toBeNull();
+  act(() => stale());
+  expect(execute).not.toHaveBeenCalled();
+});

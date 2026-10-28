@@ -27,7 +27,11 @@ import { InlineConfirmDemo } from '@site/src/components/InlineConfirmDemo';
 
 ```tsx
 import { TrashOutlined, RefreshOutlined } from '@unif/react-native-icons';
-import { IconButton, InlineConfirmScope, useColors } from '@unif/react-native-design';
+import {
+  IconButton,
+  InlineConfirmScope,
+  useColors,
+} from '@unif/react-native-design';
 
 const colors = useColors();
 <InlineConfirmScope style={styles.screen}>
@@ -63,6 +67,7 @@ const colors = useColors();
   color={colors.error}
   confirmation={{
     label: '确认删除',
+    loadingLabel: '删除中',
     confirmationKey: `${record.id}:${record.version}`,
     confirming: confirmation?.recordId === record.id,
     onRequest: () => requestDelete(record),
@@ -77,16 +82,19 @@ const colors = useColors();
 
 `confirmationKey` 改变或进入 disabled/loading 会取消已有确认。首次受控确认已经不可用时，也会通知宿主取消一次。卸载仅释放作用域并使旧回调失活，不调用 `onCancel`；业务对象的清理由宿主管理。旧回调不会借用新一轮确认。请求、Promise、错误反馈和业务幂等仍由调用方负责。
 
+加载时可通过 `confirmation.loadingLabel` 在同一个按钮中显示“删除中”等文字，并按文字宽度展示。只在顶层 `loading=true` 且文案非空时生效；省略或传入空白文字时保持原方形加载指示器。加载结束后回到图标态，不恢复已消费或取消的确认。加载文案仍遵守原有 `busy`／`disabled`、旧回调失效及 Scope 释放规则，不将加载文字视为一次新的确认。
+
 ## API
 
 `IconButton` 沿用图标、颜色、尺寸、样式和可访问属性，新增可选 `confirmation`：
 
-| 参数 | 说明 |
-| --- | --- |
-| `label` | 必填的非空确认文案，例如“确认删除”。 |
-| `confirmationKey` | 字符串或数字；目标或版本变化时使旧确认失效。 |
-| `confirming` | 可选的宿主确认投影，省略时管理局部显示。 |
-| `onRequest` / `onCancel` | 首次请求、取消回调；受控模式必填。 |
+| 参数                     | 说明                                                                             |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| `label`                  | 必填的非空确认文案，例如“确认删除”。                                             |
+| `loadingLabel`           | 可选加载文案；仅 `loading=true` 且非空白时替代加载指示器，使用原按钮与文字宽度。 |
+| `confirmationKey`        | 字符串或数字；目标或版本变化时使旧确认失效。                                     |
+| `confirming`             | 可选的宿主确认投影，省略时管理局部显示。                                         |
+| `onRequest` / `onCancel` | 首次请求、取消回调；受控模式必填。                                               |
 
 顶层 `onPress` 始终表示实际执行。`color` 同时作用于图标和确认文字；玻璃操作传 `variant="glass"`。相关类型 `IconButtonProps`、`IconButtonConfirmation`、`InlineConfirmScopeProps` 均从包根导入。
 
