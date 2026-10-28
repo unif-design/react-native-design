@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.5](https://github.com/unif-design/react-native-design/compare/v1.13.4...v1.13.5) (2026-10-28)
+
+
+### Bug Fixes
+
+* **inline-confirm:** preserve text feedback while loading ([#188](https://github.com/unif-design/react-native-design/issues/188)) ([64f684e](https://github.com/unif-design/react-native-design/commit/64f684ecf4e492c7df611b53c539b62d274f14a7))
+
 ## [1.13.4](https://github.com/unif-design/react-native-design/compare/v1.13.3...v1.13.4) (2026-10-27)
 
 
