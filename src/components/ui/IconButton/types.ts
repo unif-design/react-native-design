@@ -9,6 +9,8 @@ export type IconButtonVariant = Exclude<ButtonVariant, 'text'>;
 /** 传入后才启用原位二次确认；目标、版本和实际操作由调用方管理。 */
 export type IconButtonConfirmation = {
   label: string;
+  /** loading 时在原按钮显示的文字；省略或空白时沿用加载指示器。 */
+  loadingLabel?: string;
   confirmationKey?: string | number;
 } & (
   | { confirming: boolean; onRequest(): void; onCancel(): void }

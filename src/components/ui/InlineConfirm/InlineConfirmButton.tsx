@@ -30,6 +30,11 @@ export function InlineConfirmButton({
   }, []);
   const name = normalizeNonBlankText(props.accessibilityLabel);
   const label = normalizeNonBlankText(confirmation.label);
+  const loadingLabel =
+    props.loading === true
+      ? normalizeNonBlankText(confirmation.loadingLabel)
+      : undefined;
+  const showingLabel = loadingLabel !== undefined;
   const unavailable = props.disabled || !name || !label;
   const { confirming, press } = useInlineConfirmation(
     {
@@ -50,17 +55,18 @@ export function InlineConfirmButton({
       onPress={press}
       onTouchStart={(event) => event.stopPropagation()}
       onPointerDown={(event) => event.stopPropagation()}
-      square={props.loading || !confirming}
+      square={!showingLabel && (props.loading || !confirming)}
       variant={props.variant}
       size={props.size}
       surfaceSize={props.surfaceSize}
       loadingSize={props.iconSize}
       disabled={unavailable}
       loading={props.loading}
-      accessibilityLabel={confirming ? label : name}
+      showContentWhenLoading={showingLabel}
+      accessibilityLabel={loadingLabel ?? (confirming ? label : name)}
       accessibilityHint={props.accessibilityHint}
       accessibilityState={props.accessibilityState}
-      style={[!props.loading && styles.surface, props.style]}
+      style={[(!props.loading || showingLabel) && styles.surface, props.style]}
       testID={props.testID}
     >
       {({ sizing, palette }) => (
@@ -68,8 +74,8 @@ export function InlineConfirmButton({
           icon={props.icon}
           iconSize={props.iconSize ?? sizing.fs + 4}
           color={props.color ?? palette.fg}
-          label={label ?? ''}
-          confirming={confirming}
+          label={loadingLabel ?? label ?? ''}
+          confirming={showingLabel || confirming}
           sizing={sizing}
         />
       )}

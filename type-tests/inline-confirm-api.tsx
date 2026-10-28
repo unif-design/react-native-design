@@ -8,6 +8,7 @@ import {
 const noop = () => {};
 const confirmation: IconButtonConfirmation = {
   label: '确认删除',
+  loadingLabel: '删除中',
   confirmationKey: 'record:version',
 };
 const props = {
@@ -41,4 +42,13 @@ const props = {
   {...props}
   // @ts-expect-error 目标令牌不接受业务记录对象。
   confirmation={{ label: '确认删除', confirmationKey: { id: 'record' } }}
+/>;
+
+<IconButton
+  {...props}
+  confirmation={{
+    label: '确认删除',
+    // @ts-expect-error 加载文案只接受字符串。
+    loadingLabel: 1,
+  }}
 />;
