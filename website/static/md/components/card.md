@@ -34,24 +34,6 @@ description: '组合相关信息和操作的卡片容器。'
         本月订单合计 ¥12,480，主要采购统一冰红茶、阿萨姆奶茶。距离 1.2 km。
       </Text>
     </Card>
-    <span className="demo-label">
-      flat · (deprecated 等价 plain，新代码请用 plain)
-    </span>
-    <Card variant="flat">
-      <Text
-        style={{
-          fontSize: 15,
-          fontWeight: '600',
-          color: 'var(--ifm-color-emphasis-800)',
-          marginBottom: 6,
-        }}
-      >
-        说明
-      </Text>
-      <Text style={{ fontSize: 13, lineHeight: 20, color: '#666' }}>
-        历史 variant，视觉与 plain 一致。新代码改用 plain。
-      </Text>
-    </Card>
     <span className="demo-label">plain · 仅圆角，无阴影无描边（嵌套用）</span>
     <View
       style={{
@@ -123,7 +105,7 @@ description: '组合相关信息和操作的卡片容器。'
 | 圆角            | 12px (`radius.xl`)                                            |
 | Padding         | 14px (`space.6`)                                              |
 | 阴影            | `0 1px 4px rgba(0,0,0,0.08)` (`shadow.card`)                  |
-| Variant `plain` | 无阴影、无描边（嵌套场景；`flat` 已 deprecated 等价 `plain`） |
+| Variant `plain` | 无阴影、无描边，适合嵌套场景 |
 
 ## 主题键（Tokens）
 
@@ -183,8 +165,6 @@ function Confirm() {
   </Card>
 </View>;
 ```
-
-> `variant="flat"` 已 deprecated，等价 `plain`，新代码请用 `plain`。
 
 ## API
 

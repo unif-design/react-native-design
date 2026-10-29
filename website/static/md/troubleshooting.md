@@ -183,7 +183,7 @@ cd ios && bundle exec pod install --repo-update
 
 ### 症状:render 任意含动画的组件抛 `useAnimatedStyle was used without a dependency array or Babel plugin` {#jest-babel-worklets-plugin}
 
-**原因。** 真正转译 `node_modules/@unif/react-native-design/**` 的那份 babel 配置里没有 `react-native-worklets/plugin`。本库发布产物里有不带依赖数组的 `useAnimatedStyle`,靠这个插件在编译期补齐;缺了它 reanimated 4 在 **render 阶段**才抛,所以 suite 起得来、用例一条条红(某消费仓迁移时实测 106 条同型红)。**用了本库的 `jest-preset` 也不会好** —— 插件是宿主 babel 的事,jest 的 preset 够不着。
+**原因。** 真正转译 `node_modules/@unif/react-native-design/**` 的那份 babel 配置里没有 `react-native-worklets/plugin`。本库发布产物里有不带依赖数组的 `useAnimatedStyle`,靠这个插件在编译期补齐;缺了它 reanimated 4 在 **render 阶段**才抛,所以 suite 起得来、用例一条条红。**用了本库的 `jest-preset` 也不会好** —— 插件是宿主 babel 的事,jest 的 preset 够不着。
 
 **解法。** 确认 jest 实际用的那份 babel 配置带这个插件,且排在 `plugins` **最后**。RN app 的标准 `babel.config.js` 本来就带,会缺的是 jest 走了另一份配置(`BABEL_ENV` 分支 / `babel.config.test.js` / 自定义 `transform`),或给 `node_modules` 单开了一份带独立 `configFile` 的 babel-jest。逐条见[测试 → 入口管不到的一条](testing.md#babel-worklets-插件)。
 

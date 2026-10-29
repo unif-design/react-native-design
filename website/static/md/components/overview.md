@@ -79,7 +79,7 @@ Input、Textarea、Search 和 PasswordInput 共用内部 [TextField 内核](text
 | 组件                                  | 说明                                                          |
 | ------------------------------------- | ------------------------------------------------------------- |
 | [Cell · List](cell.md)  | 列表行 + List 容器,grouped(白卡 + gap)/ flush(hairline)两模式 |
-| [Card](card.md)         | 内容卡,`default` / `plain`(`flat` 已 deprecated 等价 `plain`) |
+| [Card](card.md)         | 内容卡，支持 `default`／`plain`／`glass` |
 | [Ribbon](ribbon.md)     | 包裹内容的右上缎带,`brand`/`danger` 语义色与可选读屏文案      |
 | [Grid](grid.md)         | 九宫格图标网格                                                |
 | [Carousel](carousel.md) | 轮播(包装 reanimated-carousel v5)                             |

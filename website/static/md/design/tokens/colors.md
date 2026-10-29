@@ -11,7 +11,7 @@ description: '主题颜色的语义角色、亮暗切换与取色方法。'
 Unif Design 的颜色是 **role-based(角色化)token**:role 名固定(`primary` / `surface` / `foreground`…),亮 / 暗主题切换时,改的是 role 指向哪个 hex,组件代码不动。具体值见 `src/theme/colors.ts`。
 
 :::info 取色只走 hook,不要顶层 import
-颜色跟随系统亮暗切换,**必须**在组件内用 `useColors()` / `useTheme().colors` 运行期拿。顶层 `import { colors }` 导出已删除(见[迁移 → 令牌迁移](../../migration.md#令牌迁移)）。下方所有色块的 `hex` 仅供查阅;代码里写 role 名,不写 hex。
+在组件内用 `useColors()` 或 `useTheme().colors` 读取当前主题颜色。组合颜色与阴影的样式使用 `useThemedStyles`。下方色块的 `hex` 供查阅，应用代码优先使用颜色角色。
 :::
 
 ## 取色优先级链 {#取色优先级链}
@@ -194,7 +194,7 @@ function MyView() {
 - **layered surface 替代 shadow** —— 暗色下 shadow token 的 `shadowOpacity` / `elevation` 多数置 0,深度靠 surface 5 层明度差(见[阴影](spacing-radii-shadows.md#阴影))。
 - **气泡"内角方"签名完整保留**(见[设计原则 → 气泡内角方](../principles.md#气泡内角方))。
 
-更多使用方式见[快速开始](../../getting-started.md)，旧变量调整见[版本迁移](../../migration.md)。
+主题接入与样式组合见[快速开始](../../getting-started.md)。
 
 ## 页面与媒体配色
 

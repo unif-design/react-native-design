@@ -427,13 +427,6 @@
     "description": "安装依赖，配置主题与宿主，开始使用 Design 组件。"
   },
   {
-    "title": "升级 / 迁移",
-    "mdPath": "md/migration.md",
-    "slug": "/migration",
-    "section": "概览",
-    "description": "已发布版本的变量、接口与依赖调整。"
-  },
-  {
     "title": "库能力与研发技能",
     "mdPath": "md/skills.md",
     "slug": "/skills",

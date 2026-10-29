@@ -28,7 +28,7 @@
 
 历史 spec、plan 和审查记录用于溯源，不作为当前使用文档或新需求入口。
 
-玻璃材质采用 [GlassLayer 迁移记录](migrations/2026-10-05-liquid-glass.md)：公开入口、消费者和平台降级直接升级，不保留旧接口；当前契约见组件源码与 Website 文档。
+玻璃材质的当前接口和平台回退见 [GlassLayer 文档](../website/docs/components/glass-layer.mdx)与[主题契约](../../unif-platform-architecture/libraries/react-native-design/theme.md)。
 
 全量系统材质范围与内容层边界见[54 个公开组件覆盖记录](reviews/2026-10-11-liquid-glass-coverage.md)，原生可复验场景见 [Liquid Glass 手工验证宿主](../manual-tests/liquid-glass/README.md)。
 

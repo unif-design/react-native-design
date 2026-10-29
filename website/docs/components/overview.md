@@ -77,7 +77,7 @@ Input、Textarea、Search 和 PasswordInput 共用内部 [TextField 内核](/doc
 | 组件                                  | 说明                                                          |
 | ------------------------------------- | ------------------------------------------------------------- |
 | [Cell · List](/docs/components/cell)  | 列表行 + List 容器,grouped(白卡 + gap)/ flush(hairline)两模式 |
-| [Card](/docs/components/card)         | 内容卡,`default` / `plain`(`flat` 已 deprecated 等价 `plain`) |
+| [Card](/docs/components/card)         | 内容卡，支持 `default`／`plain`／`glass` |
 | [Ribbon](/docs/components/ribbon)     | 包裹内容的右上缎带,`brand`/`danger` 语义色与可选读屏文案      |
 | [Grid](/docs/components/grid)         | 九宫格图标网格                                                |
 | [Carousel](/docs/components/carousel) | 轮播(包装 reanimated-carousel v5)                             |

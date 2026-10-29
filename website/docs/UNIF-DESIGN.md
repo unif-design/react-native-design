@@ -7,7 +7,7 @@ sidebar_label: 完整规范
 
 # Unif Design
 
-Unif 企业设计系统的 React Native 组件库，提供基础组件、主题、字体和图标。`@unif` 是 Unif 维护的包命名空间，其他项目可以按公开 API 与许可使用这些库。
+Unif 企业设计系统的 React Native 组件库，提供基础组件、主题和字体；图标由 `@unif/react-native-icons` 提供。`@unif` 是 Unif 维护的包命名空间，其他项目可以按公开 API 与许可使用这些库。
 
 ## 开始使用 {#quickstart}
 
@@ -39,7 +39,6 @@ Unif 企业设计系统的 React Native 组件库，提供基础组件、主题�
 
 - [测试接入](/docs/testing)：在宿主测试中接入公开 preset。
 - [常见问题](/docs/troubleshooting)：依赖、主题和平台问题。
-- [版本迁移](/docs/migration)：已有版本的接口调整。
 - [贡献指南](https://github.com/unif-design/react-native-design/blob/main/CONTRIBUTING.md)：参与库维护。
 
 [AI 文档索引](https://unif-design.github.io/react-native-design/llms.txt)提供按页读取入口；全文聚合由这些页面生成。

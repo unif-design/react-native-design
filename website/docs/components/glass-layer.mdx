@@ -114,7 +114,7 @@ import { View, Text } from 'react-native';
 | Android                        | 与旧 iOS 相同的主题实色分组，不提供原生折射或背景模糊                                       |
 | Web                            | CSS `backdrop-filter` 与主题背景；`clear/regular` 分别使用 10/40px 的近似值                 |
 
-安装 `@callstack/liquid-glass`（本库 peer 范围 `>=0.8.2 <0.9.0`），iOS 执行 `bundle exec pod install` 并重新构建。上游要求 RN 0.80+、Xcode 26+；本库的 RN 要求仍以根 `package.json` 为准。当前 RN 0.86.3 的最低 iOS 版本为 15.1；玻璃能力的 iOS 26 门槛与应用最低版本是两件事，支持范围内的旧 iOS 使用主题实色分组。Expo Go 不支持此原生模块，Expo 工程需开发构建。见 [上游安装与 API](https://github.com/callstack/liquid-glass#documentation)。
+安装 `@callstack/liquid-glass`（本库 peer 范围 `>=0.8.2 <0.9.0`），iOS 执行 `bundle exec pod install` 并重新构建。上游要求 RN 0.80+、Xcode 26+；本库的 RN 要求仍以根 `package.json` 为准。应用最低 iOS 版本取所采用 RN 和原生依赖的要求；玻璃能力的 iOS 26 门槛另行判断，支持范围内的旧 iOS 使用主题实色分组。Expo Go 不支持此原生模块，Expo 工程需开发构建。见 [上游安装与 API](https://github.com/callstack/liquid-glass#documentation)。
 
 是否支持原生玻璃由上游 `isLiquidGlassSupported` 判定，包括系统 API 和宿主设计兼容设置。Web 像素值属于内部近似参数，不表示原生玻璃的模糊半径，也不作为公共主题 token。
 

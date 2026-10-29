@@ -83,7 +83,6 @@
 
 ## Optional
 
-- [升级 / 迁移](md/migration.md) — 已发布版本的变量、接口与依赖调整。
 - [库能力与研发技能](md/skills.md) — Unif Design 的公开使用、源码维护与按需资料入口。
 - [在宿主工程里测试](md/testing.md) — 通过公开 Jest preset 测试 Design 组件，并排查常见接入问题。
 - [完整全文](llms-full.txt) — 仅在确需全局资料时读取；普通查询优先选择相关单页。
