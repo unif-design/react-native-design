@@ -3630,7 +3630,7 @@ test('展厅指南 按运行顺序记录 Pods、主题与未冒充 PASS 的人�
     'Toast/Confirm',
     'Carousel action/autoplay',
     'Android hardware back',
-    'Blur soft/strong/fallback',
+    'GlassLayer clear/regular/fallback',
     '@unif/react-native-design',
   ]) {
     assert.ok(readme.includes(required), `展厅指南 缺少 ${required}`);

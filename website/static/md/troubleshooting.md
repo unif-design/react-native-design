@@ -138,7 +138,7 @@ yarn add -D @babel/core @react-native/babel-preset@0.88.0 @react-native/metro-co
 
 ### 症状:安装时报 `react-native-reanimated-carousel` 与 `react-native-gesture-handler` 的 peer 冲突 {#rnrc-rngh-peer}
 
-**原因。** `react-native-reanimated-carousel@5.0.0` 发布的 RNGH peer metadata 是 `>=2.9.0 <3.0.0`,与本库要求的 `>=3.0.0 <4.0.0` **没有交集**。这是 RNRC 侧的 metadata 滞后,该组合已在本仓实测适配并通过验证。
+**原因。** `react-native-reanimated-carousel@5.0.0` 发布的 RNGH peer metadata 是 `>=2.9.0 <3.0.0`，与本库要求的 `>=3.0.0 <4.0.0` 没有交集。本仓开发组合使用两者，并通过 `check:runtime-peers` 精确校验这项已知差异；消费端仍需验证实际手势。
 
 **解法。** 只有两种被认可的处理方式:**接受这一条警告**,或加**只作用于 Carousel 的窄 override / filter**。
 
@@ -148,7 +148,7 @@ yarn add -D @babel/core @react-native/babel-preset@0.88.0 @react-native/metro-co
 
 **不要**用全局 peer 忽略、`--force`、`--legacy-peer-deps` 或无效的 `packageExtensions` / metadata patch —— 那会连同真实的 major 漂移一并吞掉。
 
-本仓 `.yarnrc.yml` 里的 `logFilters` **只影响本仓 install 日志,不随 npm 包分发**,消费端必须自行选择上述方式之一。本仓真正的门禁是 `yarn check:runtime-peers`:它按「包名 + 请求方 locator + 精确 range + provider major」四重匹配,任一维度漂移都会退出非零,与日志过滤互相独立。RNRC 发布出正确接受 RNGH 3 的版本后,升级 RNRC 并在同一次改动里删掉 filter 与 checker 的例外分支。
+本仓 `.yarnrc.yml` 没有配置 `logFilters`。`yarn check:runtime-peers` 按「包名 + 请求方 locator + 精确 range + provider major」匹配，任一维度漂移都会退出非零，与日志过滤独立。后续升级到接受 RNGH 3 的 Carousel 版本时，应重新核对并清理已失效的检查例外；本页说明不代表升级已经完成。
 
 ---
 
@@ -167,7 +167,7 @@ cd ios && bundle exec pod install --repo-update
 
 ## Jest / 单元测试 {#jest--单元测试}
 
-本库发布 `./jest-preset` 与 `./jest-setup` 两个 Jest 接线入口。下面除**前两条**与最后两条外,都是**没走入口**时的报错。完整说明见[在宿主工程里测试](testing.md);下面是照着报错反查。
+本库发布 `./jest-preset` 与 `./jest-setup` 两个 Jest 接线入口。先按[测试接入](testing.md)核对 preset、Babel 和实际依赖，再用下面的报错定位缺失或被覆盖的配置。
 
 ### 症状:`jest-preset 需要宿主工程自行安装 @react-native/jest-preset` {#jest-missing-rn-preset}
 
@@ -207,9 +207,9 @@ cd ios && bundle exec pod install --repo-update
 
 ### 症状:render Switch / Carousel / Spinner / Skeleton / Reveal 抛 `useReducedMotion is not a function` {#jest-reduced-motion}
 
-**原因。** 把 `react-native-reanimated` 映射到了它自带的 `mock.js` —— Reanimated 4.x 的便利 mock 不提供本库所需的完整运行时行为,而这些组件都经 `usePrefersReducedMotion` 读它。
+**原因。** 当前生效的 Reanimated 测试替身缺少 `useReducedMotion`，这些组件通过 `usePrefersReducedMotion` 调用它。检查实际安装版本及宿主额外的 mock／`moduleNameMapper` 是否覆盖了本库 setup。
 
-**解法。** 用 `preset: '@unif/react-native-design/jest-preset'`,入口用的是**真实 reanimated** + 官方 `setUpTests()`,并删掉你自己那条 reanimated 的 `moduleNameMapper`。手工接线时:同样别映射 reanimated,只把 `react-native-worklets` 换成官方 mock;实在要用那份 mock 就自己补上 `useReducedMotion`,见[测试 → 每一条为什么必需](testing.md#每一条为什么必需)。
+**解法。** 使用 `preset: '@unif/react-native-design/jest-preset'`。当前 setup 以 `react-native-reanimated/mock` 为基础，稳定 `useSharedValue` 的实例引用，补齐 `makeMutable` 的 shared value 形状，并调用真实模块的 `setUpTests()` 安装测试工具。不要直接换成未经核对的另一份 mock；自定义配置按[测试接入](testing.md#不使用入口时的手工等价物)对照当前 setup 源码。
 
 ---
 
@@ -247,9 +247,9 @@ cd ios && bundle exec pod install --repo-update
 
 ### 症状:控制台刷 `An update to ItemRenderer inside a test was not wrapped in act(...)` {#jest-carousel-act}
 
-**原因。** `react-native-reanimated-carousel` 5 自己的 item 渲染在 worklets mock 的回调里 setState,这条 `console.error` 来自上游,不来自本库。
+**原因。** 测试中的异步更新或计时器回调在 `act` 外触发了状态变化。Carousel 与 Worklets 的测试替身也可能参与这一过程，需按当前调用栈区分来源。
 
-**解法。** 不用处理 —— 它不是错误,不影响任何断言,用例照常绿。
+**解法。** 检查触发操作、计时器推进和异步等待是否放在 `act` 中，并核对当前 mock 组合。断言通过不能证明警告已解决；仍存在的依赖问题应随验证结果记录，不能直接忽略或屏蔽。
 
 ---
 

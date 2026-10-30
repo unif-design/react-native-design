@@ -10,6 +10,8 @@ description: '主题颜色的语义角色、亮暗切换与取色方法。'
 
 Unif Design 的颜色是 **role-based(角色化)token**:role 名固定(`primary` / `surface` / `foreground`…),亮 / 暗主题切换时,改的是 role 指向哪个 hex,组件代码不动。具体值见 `src/theme/colors.ts`。
 
+下方色块和表格展示 `lightColors`／`darkColors` 的基础值。不支持原生玻璃的 iOS／Android 浅色主题会采用 `nativeFallbackColors.ts` 中的柔雾白表面与边线；实际界面取色以 `useColors()` 的当前结果为准。
+
 :::info 取色只走 hook,不要顶层 import
 在组件内用 `useColors()` 或 `useTheme().colors` 读取当前主题颜色。组合颜色与阴影的样式使用 `useThemedStyles`。下方色块的 `hex` 供查阅，应用代码优先使用颜色角色。
 :::

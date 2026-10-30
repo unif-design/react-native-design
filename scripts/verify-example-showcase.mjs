@@ -3494,7 +3494,7 @@ function verifyDocumentation(root) {
       'Toast/Confirm',
       'Carousel action/autoplay',
       'Android hardware back',
-      'Blur soft/strong/fallback',
+      'GlassLayer clear/regular/fallback',
       '@unif/react-native-design',
       'package root',
     ],

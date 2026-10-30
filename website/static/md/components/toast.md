@@ -8,7 +8,7 @@ description: '显示短暂提示，并由 ToastHost 承载。'
 
 # Toast 轻提示
 
-非阻塞反馈——3 秒后自动消失，居中或底部出现。
+非阻塞反馈，默认停留 3 秒；可显示在顶部、居中或底部。
 
 原生和 Web 的提示表面均使用主题 GlassLayer，文字使用同主题 foreground；消息、持续时间、位置、状态点与读屏播报沿原契约。减少透明度时使用实色回退。
 
@@ -70,6 +70,8 @@ description: '显示短暂提示，并由 ToastHost 承载。'
 ```
 
 ## 用法
+
+先按[快速开始](../getting-started.md#根挂-themeprovider)接入主题与安全区 Provider，再挂载 ToastHost。
 
 ```tsx
 import { toast, ToastHost } from '@unif/react-native-design';

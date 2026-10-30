@@ -43,9 +43,13 @@ export const InputDemo = () => {
 ## slot、禁用与样式
 
 ```tsx
+import { useState } from 'react';
 import { CloseOutlined, SearchOutlined } from '@unif/react-native-icons';
+import { Input, useColors } from '@unif/react-native-design';
+
 function SearchConditionField() {
   const colors = useColors();
+  const [query, setQuery] = useState('');
   return (
     <Input
       value={query}
