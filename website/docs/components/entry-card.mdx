@@ -18,8 +18,6 @@ import { EntryCard } from '@unif/react-native-design';
 - icon tile **灰底**(`surfaceContainer`)+ `foregroundMuted` icon,语义弱化
 - **无 arrow / extra**,纯入口语义,适合放在 grid 双列里靠 caller `style={{flex:1}}` 撑等宽
 
-retail biz2 设计稿 v7:Me 屏底部"设置 / 关于"两个入口从纵向 CellList 退化成 2×1 grid 横向小卡,省纵向空间。
-
 ## 代码演示 {#实时预览}
 
 <LiveDemo>
@@ -127,4 +125,4 @@ import { SettingsOutlined } from '@unif/react-native-icons';
 
 - ❌ 不要在 EntryCard 内放 arrow —— 它的语义是"独立入口卡",不是 List 行。需要 chevron 用 [Cell](./cell)。
 - ❌ 不要把 title 拉长到换行 —— 单卡是紧凑入口,设计上只 numberOfLines=1。长文本用 [Card](./card) + 自渲。
-- ❌ 不要做超过 4 张并排 —— 4 张以上信息密度过高,改用 [Grid](./grid) + ModernAppCell。
+- 入口较多时使用 [Grid](./grid) 分行排列，避免单行卡片过密。

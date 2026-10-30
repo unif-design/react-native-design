@@ -91,5 +91,5 @@ VersionPill 是**纯展示**徽章，外层本地 `<View accessible>` 合并名�
 
 ## 使用注意
 
-- 不要硬编码 `version` —— 走 `@/config/brand` 的 `APP_VERSION`(package.json 派生),build 走 react-native-device-info `getBuildNumber()`
+- 由应用提供实际版本与构建号，例如从应用配置或已有的原生版本读取能力取得；组件不依赖特定配置路径或设备信息库。
 - 不要只用颜色表达状态；`status.label` 必须给出可见且可朗读的状态语义。需要自定义点颜色时从 `useColors()` 取角色 token，例如 `{ label: '已废', color: colors.error }`

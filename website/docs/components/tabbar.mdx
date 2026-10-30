@@ -87,13 +87,13 @@ export const TabBarDemo = () => {
 | 元素     | 规则                                                                                            |
 | -------- | ----------------------------------------------------------------------------------------------- |
 | 高度     | 50px（`fixed.tabbarH`，物理常量不缩放）                                                         |
-| 背景     | `c.surface`（亮色 `#FFFFFF`）                                                                   |
-| 顶部边线 | hairline `c.outline`（亮色 `#EDEDED`）                                                          |
+| 背景     | 默认 `glass` 为胶囊玻璃表面；`solid` 使用主题 `c.surface`                                     |
+| 顶部边线 | 仅 `solid` 使用 hairline `c.outline`；`glass` 不绘制顶部边线                                  |
 | Tab 项   | `flex: 1`，垂直居中 icon + 文字                                                                 |
-| Icon     | 22×22（`icon.sm`），`c.foregroundSubtle`（亮色 `#999`，默认）/ `c.primary`（`#EB6E00`，active） |
+| Icon     | `r(22)`，未选中使用 `c.foregroundMuted`，选中使用 `c.primary`                                 |
 | 文字     | 10px（`type.nano`）/ 500，与 icon 同色                                                          |
 | Badge    | `c.error` 底数字徽章（`number \| string`），叠在 icon 右上                                      |
-| 安全区   | bottom inset（iOS home indicator 34px）不计入 50px——外面包 `<SafeAreaView edges={['bottom']}>`  |
+| 安全区   | 实际 bottom inset 不计入 50px；宿主可用 `<SafeAreaView edges={['bottom']}>` 包裹               |
 
 ## 用法
 
@@ -129,6 +129,8 @@ import { TabBar } from '@unif/react-native-design';
 | `active`   | `string`               | —      | 当前激活 tab 的 `id`（必填）                          |
 | `onChange` | `(id: string) => void` | —      | 切换回调，回传点中 tab 的 `id`（必填）                |
 | `items`    | `TabBarItem[]`         | —      | tab 列表（必填）                                      |
+| `surface`  | `'solid' \| 'glass'` | `'glass'` | 系统玻璃或主题实色表面                             |
+| `style`    | `StyleProp<ViewStyle>` | —      | 根容器的布局与外观样式                                |
 | `testID`   | `string?`              | —      | 容器 testID；item testID 自动派生为 `${testID}-${id}` |
 
 `TabBarItem`：
@@ -145,8 +147,8 @@ import { TabBar } from '@unif/react-native-design';
 
 来源：`src/components/ui/TabBar/TabBar.tsx`、`types.ts`。
 
-- 默认 `accessibilityRole`：每个 tab 的 `<Pressable>` 上硬编码 `'tab'`。外层容器是普通 `<View>`，源码**未**设置 `tablist` role（仅作 50px 高的布局栏）。
-- a11y props：每个 tab 的 `accessibilityLabel` 取自 `item.label`，而 `label` 在 `TabBarItem` 中是**必填**的——所以每个 tab 默认都有朗读文案。`badge` 仅作视觉角标渲染，不进入 a11y 文案。
+- 默认 `accessibilityRole`：外层容器为 `'tablist'`，每个 tab 的 `<Pressable>` 为 `'tab'`。
+- a11y 名称：没有角标时使用必填的 `item.label`；`badge != null` 时组合为 `${item.label},${item.badge}条未读`，包括数值 `0`。
 - 状态语义：`accessibilityState={{ selected: on }}`——`selected` 由 `item.id === active` 派生。无 `disabled` 语义（`TabBarItem` 无 `disabled` 字段）。
 
 ```tsx

@@ -222,7 +222,7 @@ const FEATURES: Feature[] = [
   {
     Icon: IconPalette,
     title: '设计令牌',
-    desc: '颜色、间距、圆角、阴影、动效全部令牌化，一处修改全局生效，与 Figma 变量对齐。',
+    desc: '用颜色、字体、间距、圆角、阴影和动效变量保持组件样式一致。',
   },
   {
     Icon: IconType,
@@ -241,7 +241,7 @@ export default function Home(): React.JSX.Element {
   return (
     <Layout
       title="Unif Design — React Native 设计系统"
-      description="@unif/react-native-design — 一套设计令牌驱动的 React Native 组件库：Cell / Button / Tag / Card，内建亮暗双主题与无障碍支持。"
+      description="Unif React Native 设计系统，提供基础组件、主题、字体和通用 UI 组合。"
     >
       <main className="unif-home">
         {/* ── Hero ── */}
@@ -257,7 +257,7 @@ export default function Home(): React.JSX.Element {
               </h1>
               <p className="hp-tagline">
                 由 Unif 维护的 React Native
-                组件库，提供基础组件、主题和图标，可供其他项目复用。
+                组件库，提供基础组件、主题和字体，可供其他项目复用。
               </p>
               <div className="hp-cta-row">
                 <Link
@@ -301,7 +301,7 @@ export default function Home(): React.JSX.Element {
               </div>
               <span className="hp-combo-badge">
                 <span className="dot" />
-                组件实时预览
+                组件外观示意
               </span>
             </div>
           </div>

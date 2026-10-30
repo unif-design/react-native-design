@@ -71,7 +71,7 @@ scene 会卸载，可复现 draft 保存在根 Provider 中。
 | ------------- | -------------- | --------------------------------------------------------------------------------------------------- |
 | `foundation`  | 主题与基础能力 | Theme、token、logger、testID                                                                        |
 | `actions`     | 操作与状态     | Button、IconButton、Chip、Tag、StatusDot                                                            |
-| `feedback`    | 反馈与浮层     | Empty、Skeleton、Spinner、Pulse、Reveal、Blur、Toast、Confirm                                       |
+| `feedback`    | 反馈与浮层     | Empty、Skeleton、Spinner、Pulse、Reveal、GlassLayer、Toast、Confirm                                 |
 | `forms`       | 表单与输入     | Input、PasswordInput、Textarea、Search、选择控件、Stepper（xs 横向触控 < 44pt / formatValue / editable / 编辑状态）、Form |
 | `navigation`  | 导航组件       | NavBar、DrawerHeader、Tabs、Segmented、TabBar                                                       |
 | `collections` | 容器与集合     | Card、Ribbon、Cell、List、Grid、EntryCard、Carousel                                                 |
@@ -124,7 +124,7 @@ yarn workspace @unif/react-native-design-website build
 原生宿主测试随平台放在 `android/__tests__/` 和 `ios/__tests__/`，从 repo root 执行 `yarn test:native:android`、`yarn test:native:ios`。测试编译示例原生源码；Android／UIKit 和 React Native 使用边界替身，覆盖率报告保留原始宿主源码清单。
 
 自动化覆盖 public catalog、route、Host 唯一性、主要交互与配置 contract，但不能替代屏幕
-阅读器、系统主题、真机、旋转、原生 Blur 或真实网络验收。
+阅读器、系统主题、真机、旋转、原生 Liquid Glass 或真实网络验收。
 
 ## 8. 人工验收矩阵
 
@@ -146,7 +146,7 @@ yarn workspace @unif/react-native-design-website build
 | Toast/Confirm                | 位置、类型、确认/取消、连续触发后的 settled 结果                                                | 待人工执行 |
 | Carousel action/autoplay     | display/action、ref、loop、指示器与 reduced motion 停播                                         | 待人工执行 |
 | Android hardware back        | scene 回 Home；Home 将事件交还系统                                                              | 待人工执行 |
-| Blur soft/strong/fallback    | 真机 soft/strong 与不支持原生 Blur 时的边界表现                                                 | 待人工执行 |
+| GlassLayer clear/regular/fallback | 原生玻璃 clear/regular、减少透明度及不支持原生玻璃时的实色回退                              | 待人工执行 |
 
 ## 9. 复制边界
 

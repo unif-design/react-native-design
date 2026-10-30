@@ -156,7 +156,8 @@ import { IconButton } from '@unif/react-native-design';
 | `iconSize`           | `number?`                                                                                 | 随 size    | 图标与加载指示的独立尺寸                                                                     |
 | `surfaceSize`        | `number?`                                                                                 | 随 size    | 方形表面边长，并据此计算命中补偿                                                             |
 | `variant`            | `('primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'glass' \| 'danger')?` | `'glass'`  | 默认自动适配；实色与透明变体保留场景指定外观，排除 `'text'`                                  |
-| `color`              | `string?`                                                                                 | variant fg | icon 描色 override(仅 icon 色,bg/border 仍由 variant 决定)                                   |
+| `color`              | `string?`                                                                                 | variant fg | 图标与确认文字颜色；背景和边框仍由 variant 决定                                               |
+| `confirmation`       | `IconButtonConfirmation?`                                                                 | —          | 按需启用原位确认；字段与作用域要求见[原位确认](inline-confirm.md)                          |
 | `disabled`           | `boolean?`                                                                                | `false`    | 不响应 + opacity 0.5                                                                         |
 | `loading`            | `boolean?`                                                                                | `false`    | 以 ActivityIndicator 替代 icon，自动 disabled + busy                                         |
 | `accessibilityLabel` | `string`                                                                                  | —          | **必填且运行时必须非空** —— icon-only 按钮 SR 用户唯一信息源；空白值失败关闭并在 effect 诊断 |

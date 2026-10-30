@@ -109,10 +109,10 @@ const CellDemo = () => {
 
 | 元素                | 规则                                                                                                                           |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| 整组容器（grouped） | `c.background` 浅灰底（视觉分组），`padding: 8`（`space[3]`），`borderRadius: 12`（`radius.xl`），`gap: 8`                     |
+| 整组容器（grouped） | 透明容器，`padding: 8`（`space[3]`），`borderRadius: 12`（`radius.xl`），`gap: 8`；背景由单行玻璃层提供                      |
 | 单行                | 共享 GlassLayer 材质，`borderRadius: 10`（`radius.lg`），`min-height: 56`，`padding: 14`（`space[6]`，水平 + 垂直同值）        |
 | 行内布局            | 左 icon (grouped 22 / flush 28 盒) + 中 (title 15/500 + desc 13/subtle) + 右 extra (13/subtle) + arrow (grouped 20 / flush 18) |
-| **绝不**（grouped） | `border-bottom`、`hairline` 分隔（flush 模式才用 inset hairline）                                                              |
+| **绝不**（grouped） | `border-bottom`、`hairline` 分隔（flush 模式默认使用全宽 hairline）                                                            |
 
 ## 用法
 

@@ -8,7 +8,7 @@ const navbarVersion = pkg.version.split('.').slice(0, 2).join('.');
 
 const config: Config = {
   title: 'Unif Design',
-  tagline: 'Unif React Native 设计系统：基础组件、主题、字体和图标',
+  tagline: 'Unif React Native 设计系统：基础组件、主题和字体',
   favicon: 'img/logo.png',
 
   // 部署到 GitHub Pages 默认域名:https://unif-design.github.io/react-native-design/

@@ -211,7 +211,8 @@ const colors = useColors();
 
 | Token                                      | 来源                        | 作用                                                         |
 | ------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
-| `c.surface`                                | `useColors()`               | 静态标签背景色 / 系统不支持或减少透明度时的降级表面          |
+| `c.surface`                                | `useColors()`               | 静态标签背景色                                               |
+| `c.surfaceContainerHigh`                   | `useColors()`               | 交互 Chip 在系统不支持玻璃或减少透明度时的实色回退           |
 | `c.outline`                                | `useColors()`               | 静态标签边框色                                               |
 | `c.primary`                                | `useColors()`               | 选中边框 + 文本色                                            |
 | `c.primaryContainerSubtle`                 | `useColors()`               | 静态选中标签底色                                             |

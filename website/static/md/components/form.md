@@ -96,7 +96,7 @@ const FormDemo = () => {
 | 元素     | 规则                                                                                                                 |
 | -------- | -------------------------------------------------------------------------------------------------------------------- |
 | 分组标题 | `t.xs`（13）/ `fw.semi`（600）/ `c.foregroundSubtle`，全大写、`letterSpacing: 1`、`paddingHorizontal: space[1]`（4） |
-| 分组卡片 | 共享 GlassLayer 材质，`radius.lg`（10）圆角，`overflow: hidden`，组内 `gap: space[3]`（8）                           |
+| 分组卡片 | 共享 GlassLayer 材质，`radius.lg`（10）圆角，`overflow: hidden`；标题与卡片之间为 `space[3]`（8），卡片内行间用分隔线 |
 | Form Row | `minHeight: 48`，左 label + 右控件，`paddingHorizontal: space[7]`（16）/ `paddingVertical: space[5]`（12）           |
 | 行 label | `t.sm`（14）/ `fw.medium`（500）/ `c.foreground`                                                                     |
 | 行间分隔 | `StyleSheet.hairlineWidth`、`c.outline`（亮色 `#EDEDED`）（这是 form 的例外，**不**用 gap）                          |

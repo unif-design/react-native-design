@@ -2,9 +2,11 @@
 
 本仓库维护 `@unif/react-native-design`，职责为基础设计库。
 
-## 库能力技能
+## 技能与工程规范
 
-本库使用 unif-design 定位当前版本的公开能力、接入与排障资料。修改源码时同时采用 code-development 的库开发规则；设计、测试、审查和交付按当前阶段取得依据。应用仅消费库时可直接查公开类型和文档，无需先取得维护工作区。
+按任务使用通用技能：`code-organization` 处理目录、文件职责与命名，`react-native-development` 处理 React Native 实现，`react-native-library` 处理库的公开接口、运行示例与分发，`documentation` 处理文档、项目描述和文档站。这些技能独立于企业；本库的组织标准、协作和交付流程仍来自 [unif-design/.github](https://github.com/unif-design/.github)。
+
+`unif-design` 用于定位本库当前版本的公开能力、接入与排障资料。应用仅消费库时可直接查公开类型和文档，无需先取得维护工作区。
 
 ## 目标契约
 
@@ -24,7 +26,7 @@
 - [类型消费](../type-tests/)
 - [示例](../example/)
 
-命令与依赖版本以 [package.json](../package.json)、锁文件及实际安装为准，验证接线见 [.github/workflows](../.github/workflows/)。本文件不复制通用开发、测试或交付规则；按 AGENTS.md 的阶段技能取得所需规范。
+命令与依赖版本以 [package.json](../package.json)、锁文件及实际安装为准，验证接线见 [.github/workflows](../.github/workflows/)。维护入口见 [AGENTS.md](../AGENTS.md)，详细规则由对应技能与组织标准维护。
 
 历史 spec、plan 和审查记录用于溯源，不作为当前使用文档或新需求入口。
 

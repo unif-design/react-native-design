@@ -73,7 +73,9 @@ import { GlassStats } from '@unif/react-native-design';
 
 | 参数    | 类型                                            | 必填 | 说明                                                       |
 | ------- | ----------------------------------------------- | ---- | ---------------------------------------------------------- |
-| `items` | `ReadonlyArray<[count: string, label: string]>` | ✓    | 数据列,2~4 列均可。`count` 已格式化字串,`label` 是中文标签 |
+| `items` | `ReadonlyArray<readonly [count: string, label: string]>` | ✓ | 已格式化的数字与标签；建议 2～4 列，组件不强制数量 |
+| `style` | `StyleProp<ViewStyle>` | 否 | 外层布局样式 |
+| `testID` | `string` | 否 | 外层测试定位 |
 
 ## 无障碍（a11y）
 

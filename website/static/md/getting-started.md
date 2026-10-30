@@ -71,7 +71,7 @@ iOS 装完原生包后,在 `ios/` 目录执行 `bundle exec pod install` 并重�
 :::
 
 :::caution RNRC 5.0.0 与 Gesture Handler 3 的 peer 冲突
-本包要求 Gesture Handler 3.x,但 `react-native-reanimated-carousel@5.0.0` 发布的 peer 范围是 `>=2.9.0 <3.0.0` —— 与本包的 `>=3.0.0 <4.0.0` **完全没有交集**。该组合已在本仓实测适配并通过验证,包管理器仍会就此报一次 peer 警告。
+本包要求 Gesture Handler 3.x，但 `react-native-reanimated-carousel@5.0.0` 发布的 peer 范围是 `>=2.9.0 <3.0.0`，与本包的 `>=3.0.0 <4.0.0` 没有交集。本仓开发组合使用两者，`check:runtime-peers` 对这项已知差异进行精确校验；包管理器仍会报告 peer 警告，消费端还需验证实际手势。
 
 只有两种被认可的处理方式:**接受这一条警告**,或加**只作用于 Carousel 的窄 override / filter**。
 
@@ -93,7 +93,7 @@ pnpm 用 `pnpm.peerDependencyRules.allowedVersions` 精确到 `react-native-rean
 
 **禁止**全局 peer 忽略、`--force`、`--legacy-peer-deps` 或无效的 `packageExtensions` / metadata patch —— 那会连同真实的 major 漂移一起吞掉。
 
-本仓自己的 `.yarnrc.yml` `logFilters` **不随 npm 包分发**,消费端必须自行选择上述方式之一。本仓的权威门禁是 `yarn check:runtime-peers`(窄 allowlist:包名 + 请求方 locator + 精确 range + provider major,任一维度漂移即失败),与日志过滤无关。
+本仓 `.yarnrc.yml` 没有配置 `logFilters`，消费端按自己的包管理器处理这条警告。本仓使用 `yarn check:runtime-peers` 精确校验包名、请求方 locator、range 和 provider major，任一维度漂移即失败；该检查与日志过滤无关。
 :::
 
 ### 3. 配 babel(worklets 插件必须最后)

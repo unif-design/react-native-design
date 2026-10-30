@@ -101,7 +101,7 @@ description: '组合相关信息和操作的卡片容器。'
 
 | 元素            | 规则                                                          |
 | --------------- | ------------------------------------------------------------- |
-| 背景            | `#FFFFFF`                                                     |
+| 背景            | `default`／`plain` 使用主题 `c.surface`；`glass` 使用共享玻璃材质 |
 | 圆角            | 12px (`radius.xl`)                                            |
 | Padding         | 14px (`space.6`)                                              |
 | 阴影            | `0 1px 4px rgba(0,0,0,0.08)` (`shadow.card`)                  |
@@ -171,7 +171,7 @@ function Confirm() {
 | 参数           | 类型                                        | 默认值               | 说明                                                                                                              |
 | -------------- | ------------------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `children`     | `ReactNode`                                 | —                    | 卡片内容                                                                                                          |
-| `variant`      | `'default' \| 'flat' \| 'plain' \| 'glass'` | `'default'`          | 带阴影 / 仅圆角无阴影。`'flat'` 已 deprecated 等价 `'plain'`                                                      |
+| `variant`      | `'default' \| 'flat' \| 'plain' \| 'glass'` | `'default'`          | `default` 为主题实色与阴影，`plain` 为无阴影实色，`glass` 为玻璃材质；已弃用的 `flat` 等价于 `plain`              |
 | `padding`      | `number`                                    | `14`（`space['6']`） | 内边距                                                                                                            |
 | `borderRadius` | `number`                                    | `12`（`radius.xl`）  | 圆角                                                                                                              |
 | `borderColor`  | `string`                                    | —                    | 强调描边色（任意 variant 均生效;启用时默认 2px）                                                                  |

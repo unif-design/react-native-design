@@ -9,7 +9,7 @@ export type AvatarShape = 'circle' | 'square';
 /**
  * 头像配色变体（仅在显示 letter / fallback 时生效，showImage 时被覆盖）：
  * - `brand` 品牌橙底（AI 头像专用）
- * - `info` 蓝底（用户头像专用）
+ * - `info` 主题信息色（不限定用户身份）
  * - `soft` 浅橙底（次要场景）
  * - `neutral` 中性灰底（默认）
  */

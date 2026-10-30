@@ -496,9 +496,7 @@ import { AvatarWithRing } from '@unif/react-native-design';
 
 展示文字或图片头像，支持形状、尺寸和主题配色。图片加载失败时回退到文字。
 
-:::warning 蓝色规则
-`info` 变体（蓝底 `#3775F6`）**专用于用户头像**。其它头像用 `brand` / `soft` / `neutral`。
-:::
+Avatar 提供 `brand`、`info`、`soft` 和 `neutral` 四种配色。`info` 使用主题信息色，不限定用户身份；实际色值随主题变化。
 
 ## 代码演示 {#实时预览}
 
@@ -879,7 +877,7 @@ import { Button } from '@unif/react-native-design';
 
 | 元素            | 规则                                                          |
 | --------------- | ------------------------------------------------------------- |
-| 背景            | `#FFFFFF`                                                     |
+| 背景            | `default`／`plain` 使用主题 `c.surface`；`glass` 使用共享玻璃材质 |
 | 圆角            | 12px (`radius.xl`)                                            |
 | Padding         | 14px (`space.6`)                                              |
 | 阴影            | `0 1px 4px rgba(0,0,0,0.08)` (`shadow.card`)                  |
@@ -949,7 +947,7 @@ function Confirm() {
 | 参数           | 类型                                        | 默认值               | 说明                                                                                                              |
 | -------------- | ------------------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `children`     | `ReactNode`                                 | —                    | 卡片内容                                                                                                          |
-| `variant`      | `'default' \| 'flat' \| 'plain' \| 'glass'` | `'default'`          | 带阴影 / 仅圆角无阴影。`'flat'` 已 deprecated 等价 `'plain'`                                                      |
+| `variant`      | `'default' \| 'flat' \| 'plain' \| 'glass'` | `'default'`          | `default` 为主题实色与阴影，`plain` 为无阴影实色，`glass` 为玻璃材质；已弃用的 `flat` 等价于 `plain`              |
 | `padding`      | `number`                                    | `14`（`space['6']`） | 内边距                                                                                                            |
 | `borderRadius` | `number`                                    | `12`（`radius.xl`）  | 圆角                                                                                                              |
 | `borderColor`  | `string`                                    | —                    | 强调描边色（任意 variant 均生效;启用时默认 2px）                                                                  |
@@ -1274,10 +1272,10 @@ const CellDemo = () => {
 
 | 元素                | 规则                                                                                                                           |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| 整组容器（grouped） | `c.background` 浅灰底（视觉分组），`padding: 8`（`space[3]`），`borderRadius: 12`（`radius.xl`），`gap: 8`                     |
+| 整组容器（grouped） | 透明容器，`padding: 8`（`space[3]`），`borderRadius: 12`（`radius.xl`），`gap: 8`；背景由单行玻璃层提供                      |
 | 单行                | 共享 GlassLayer 材质，`borderRadius: 10`（`radius.lg`），`min-height: 56`，`padding: 14`（`space[6]`，水平 + 垂直同值）        |
 | 行内布局            | 左 icon (grouped 22 / flush 28 盒) + 中 (title 15/500 + desc 13/subtle) + 右 extra (13/subtle) + arrow (grouped 20 / flush 18) |
-| **绝不**（grouped） | `border-bottom`、`hairline` 分隔（flush 模式才用 inset hairline）                                                              |
+| **绝不**（grouped） | `border-bottom`、`hairline` 分隔（flush 模式默认使用全宽 hairline）                                                            |
 
 ## 用法
 
@@ -1838,7 +1836,8 @@ const colors = useColors();
 
 | Token                                      | 来源                        | 作用                                                         |
 | ------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
-| `c.surface`                                | `useColors()`               | 静态标签背景色 / 系统不支持或减少透明度时的降级表面          |
+| `c.surface`                                | `useColors()`               | 静态标签背景色                                               |
+| `c.surfaceContainerHigh`                   | `useColors()`               | 交互 Chip 在系统不支持玻璃或减少透明度时的实色回退           |
 | `c.outline`                                | `useColors()`               | 静态标签边框色                                               |
 | `c.primary`                                | `useColors()`               | 选中边框 + 文本色                                            |
 | `c.primaryContainerSubtle`                 | `useColors()`               | 静态选中标签底色                                             |
@@ -2416,8 +2415,6 @@ import { RefreshOutlined } from '@unif/react-native-icons';
 - icon tile **灰底**(`surfaceContainer`)+ `foregroundMuted` icon,语义弱化
 - **无 arrow / extra**,纯入口语义,适合放在 grid 双列里靠 caller `style={{flex:1}}` 撑等宽
 
-retail biz2 设计稿 v7:Me 屏底部"设置 / 关于"两个入口从纵向 CellList 退化成 2×1 grid 横向小卡,省纵向空间。
-
 ## 代码演示 {#实时预览}
 
 ```tsx
@@ -2525,7 +2522,7 @@ import { SettingsOutlined } from '@unif/react-native-icons';
 
 - ❌ 不要在 EntryCard 内放 arrow —— 它的语义是"独立入口卡",不是 List 行。需要 chevron 用 [Cell](md/components/cell.md)。
 - ❌ 不要把 title 拉长到换行 —— 单卡是紧凑入口,设计上只 numberOfLines=1。长文本用 [Card](md/components/card.md) + 自渲。
-- ❌ 不要做超过 4 张并排 —— 4 张以上信息密度过高,改用 [Grid](md/components/grid.md) + ModernAppCell。
+- 入口较多时使用 [Grid](md/components/grid.md) 分行排列，避免单行卡片过密。
 
 ## Form 表单
 
@@ -2621,7 +2618,7 @@ const FormDemo = () => {
 | 元素     | 规则                                                                                                                 |
 | -------- | -------------------------------------------------------------------------------------------------------------------- |
 | 分组标题 | `t.xs`（13）/ `fw.semi`（600）/ `c.foregroundSubtle`，全大写、`letterSpacing: 1`、`paddingHorizontal: space[1]`（4） |
-| 分组卡片 | 共享 GlassLayer 材质，`radius.lg`（10）圆角，`overflow: hidden`，组内 `gap: space[3]`（8）                           |
+| 分组卡片 | 共享 GlassLayer 材质，`radius.lg`（10）圆角，`overflow: hidden`；标题与卡片之间为 `space[3]`（8），卡片内行间用分隔线 |
 | Form Row | `minHeight: 48`，左 label + 右控件，`paddingHorizontal: space[7]`（16）/ `paddingVertical: space[5]`（12）           |
 | 行 label | `t.sm`（14）/ `fw.medium`（500）/ `c.foreground`                                                                     |
 | 行间分隔 | `StyleSheet.hairlineWidth`、`c.outline`（亮色 `#EDEDED`）（这是 form 的例外，**不**用 gap）                          |
@@ -2912,7 +2909,9 @@ import { GlassStats } from '@unif/react-native-design';
 
 | 参数    | 类型                                            | 必填 | 说明                                                       |
 | ------- | ----------------------------------------------- | ---- | ---------------------------------------------------------- |
-| `items` | `ReadonlyArray<[count: string, label: string]>` | ✓    | 数据列,2~4 列均可。`count` 已格式化字串,`label` 是中文标签 |
+| `items` | `ReadonlyArray<readonly [count: string, label: string]>` | ✓ | 已格式化的数字与标签；建议 2～4 列，组件不强制数量 |
+| `style` | `StyleProp<ViewStyle>` | 否 | 外层布局样式 |
+| `testID` | `string` | 否 | 外层测试定位 |
 
 ## 无障碍（a11y）
 
@@ -3228,7 +3227,8 @@ import { IconButton } from '@unif/react-native-design';
 | `iconSize`           | `number?`                                                                                 | 随 size    | 图标与加载指示的独立尺寸                                                                     |
 | `surfaceSize`        | `number?`                                                                                 | 随 size    | 方形表面边长，并据此计算命中补偿                                                             |
 | `variant`            | `('primary' \| 'secondary' \| 'ghost' \| 'neutral' \| 'outline' \| 'glass' \| 'danger')?` | `'glass'`  | 默认自动适配；实色与透明变体保留场景指定外观，排除 `'text'`                                  |
-| `color`              | `string?`                                                                                 | variant fg | icon 描色 override(仅 icon 色,bg/border 仍由 variant 决定)                                   |
+| `color`              | `string?`                                                                                 | variant fg | 图标与确认文字颜色；背景和边框仍由 variant 决定                                               |
+| `confirmation`       | `IconButtonConfirmation?`                                                                 | —          | 按需启用原位确认；字段与作用域要求见[原位确认](md/components/inline-confirm.md)                          |
 | `disabled`           | `boolean?`                                                                                | `false`    | 不响应 + opacity 0.5                                                                         |
 | `loading`            | `boolean?`                                                                                | `false`    | 以 ActivityIndicator 替代 icon，自动 disabled + busy                                         |
 | `accessibilityLabel` | `string`                                                                                  | —          | **必填且运行时必须非空** —— icon-only 按钮 SR 用户唯一信息源；空白值失败关闭并在 effect 诊断 |
@@ -3409,7 +3409,7 @@ import { ImagePreview } from '@unif/react-native-design';
 />;
 ```
 
-页码使用不透明主题底色和前景文字，在深浅图片背景上保持清晰；胶囊跨在图片下边缘，独立于图片裁切层；图片仍按传入的 `height` 完整显示，媒体容器另预留半个缩放26布局单位的页码高度。宿主按实际可用区域为页码和删除入口留位。
+页码使用主题玻璃和前景文字，不支持原生玻璃或开启减少透明度时使用实色回退。胶囊跨在图片下边缘，独立于图片裁切层；图片仍按传入的 `height` 完整显示，媒体容器另预留半个 `r(26)` 的页码高度。宿主按实际可用区域为页码和删除入口留位。
 
 ## API
 
@@ -3572,9 +3572,13 @@ const InputDemo = () => {
 ## slot、禁用与样式
 
 ```tsx
+import { useState } from 'react';
 import { CloseOutlined, SearchOutlined } from '@unif/react-native-icons';
+import { Input, useColors } from '@unif/react-native-design';
+
 function SearchConditionField() {
   const colors = useColors();
+  const [query, setQuery] = useState('');
   return (
     <Input
       value={query}
@@ -4027,7 +4031,9 @@ function BrandImage() {
 />
 ```
 
-## 用法规则
+## Unif 标识使用规则 {#用法规则}
+
+以下规则适用于本页展示的 Unif 品牌资源；其他品牌图片遵循各自的使用规范。
 
 - **背景色** 主橙 `#EB6E00`，**不要换其它底色**。如需放在浅色背景上，外层包一层主橙圆角容器或留 padding。
 - **不要变形** 等比缩放可以；扁平拉伸 / 改色 / 加阴影 / 加描边都不行。
@@ -4191,7 +4197,7 @@ import { NavBar } from '@unif/react-native-design';
 | `subtitle` | `string?`                               | —           | 副标题（小字号，主标题下方）                                                                                                                                                                     |
 | `left`     | `NavBarSlot`                            | —           | 左槽：严格 `NavBarAction { icon, onPress, accessibilityLabel }` 或展示用 `ReactNode`                                                                                                             |
 | `right`    | `NavBarSlot`                            | —           | 右槽，同 `left`                                                                                                                                                                                  |
-| `variant`  | `'default' \| 'brand' \| 'transparent'` | `'default'` | 视觉变体：`default` 系统玻璃 + hairline + 主题文字 / `brand` 品牌橙底 + 白字 / `transparent` 透明无边框 + **深字 `c.foreground`**（浮在浅色 hero 上；若需白字深色浮层后续加 `transparentLight`） |
+| `variant`  | `'default' \| 'brand' \| 'transparent'` | `'default'` | `default` 为系统玻璃、hairline 和主题文字；`brand` 为品牌橙底与白字；`transparent` 无背景与边框，文字使用当前主题 `c.foreground` |
 | `style`    | `StyleProp<ViewStyle>?`                 | —           | 根容器附加样式（margin / position 等布局微调）                                                                                                                                                   |
 | `testID`   | `string?`                               | —           | E2E 定位                                                                                                                                                                                         |
 
@@ -4204,13 +4210,11 @@ import { NavBar } from '@unif/react-native-design';
 ```tsx
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// 方式 A：SafeAreaView 包裹
+// 页面或自定义导航 header 中均由宿主包裹
 <SafeAreaView edges={['top']}>
   <NavBar title="首页" />
 </SafeAreaView>;
 
-// 方式 B：react-navigation Stack.Screen header 配置
-// headerStatusBarHeight 会自动注入 inset，无需手动包裹
 ```
 
 这样 NavBar 本体可在任何场景复用（modal、底部抽屉 header、全屏画中画等不需要 top inset 的场景）。
@@ -6052,13 +6056,13 @@ const TabBarDemo = () => {
 | 元素     | 规则                                                                                            |
 | -------- | ----------------------------------------------------------------------------------------------- |
 | 高度     | 50px（`fixed.tabbarH`，物理常量不缩放）                                                         |
-| 背景     | `c.surface`（亮色 `#FFFFFF`）                                                                   |
-| 顶部边线 | hairline `c.outline`（亮色 `#EDEDED`）                                                          |
+| 背景     | 默认 `glass` 为胶囊玻璃表面；`solid` 使用主题 `c.surface`                                     |
+| 顶部边线 | 仅 `solid` 使用 hairline `c.outline`；`glass` 不绘制顶部边线                                  |
 | Tab 项   | `flex: 1`，垂直居中 icon + 文字                                                                 |
-| Icon     | 22×22（`icon.sm`），`c.foregroundSubtle`（亮色 `#999`，默认）/ `c.primary`（`#EB6E00`，active） |
+| Icon     | `r(22)`，未选中使用 `c.foregroundMuted`，选中使用 `c.primary`                                 |
 | 文字     | 10px（`type.nano`）/ 500，与 icon 同色                                                          |
 | Badge    | `c.error` 底数字徽章（`number \| string`），叠在 icon 右上                                      |
-| 安全区   | bottom inset（iOS home indicator 34px）不计入 50px——外面包 `<SafeAreaView edges={['bottom']}>`  |
+| 安全区   | 实际 bottom inset 不计入 50px；宿主可用 `<SafeAreaView edges={['bottom']}>` 包裹               |
 
 ## 用法
 
@@ -6094,6 +6098,8 @@ import { TabBar } from '@unif/react-native-design';
 | `active`   | `string`               | —      | 当前激活 tab 的 `id`（必填）                          |
 | `onChange` | `(id: string) => void` | —      | 切换回调，回传点中 tab 的 `id`（必填）                |
 | `items`    | `TabBarItem[]`         | —      | tab 列表（必填）                                      |
+| `surface`  | `'solid' \| 'glass'` | `'glass'` | 系统玻璃或主题实色表面                             |
+| `style`    | `StyleProp<ViewStyle>` | —      | 根容器的布局与外观样式                                |
 | `testID`   | `string?`              | —      | 容器 testID；item testID 自动派生为 `${testID}-${id}` |
 
 `TabBarItem`：
@@ -6110,8 +6116,8 @@ import { TabBar } from '@unif/react-native-design';
 
 来源：`src/components/ui/TabBar/TabBar.tsx`、`types.ts`。
 
-- 默认 `accessibilityRole`：每个 tab 的 `<Pressable>` 上硬编码 `'tab'`。外层容器是普通 `<View>`，源码**未**设置 `tablist` role（仅作 50px 高的布局栏）。
-- a11y props：每个 tab 的 `accessibilityLabel` 取自 `item.label`，而 `label` 在 `TabBarItem` 中是**必填**的——所以每个 tab 默认都有朗读文案。`badge` 仅作视觉角标渲染，不进入 a11y 文案。
+- 默认 `accessibilityRole`：外层容器为 `'tablist'`，每个 tab 的 `<Pressable>` 为 `'tab'`。
+- a11y 名称：没有角标时使用必填的 `item.label`；`badge != null` 时组合为 `${item.label},${item.badge}条未读`，包括数值 `0`。
 - 状态语义：`accessibilityState={{ selected: on }}`——`selected` 由 `item.id === active` 派生。无 `disabled` 语义（`TabBarItem` 无 `disabled` 字段）。
 
 ```tsx
@@ -6866,7 +6872,7 @@ Thumbnail 的公开结构是 outer layout View + inner visual frame；图片与 
 
 # Toast 轻提示
 
-非阻塞反馈——3 秒后自动消失，居中或底部出现。
+非阻塞反馈，默认停留 3 秒；可显示在顶部、居中或底部。
 
 原生和 Web 的提示表面均使用主题 GlassLayer，文字使用同主题 foreground；消息、持续时间、位置、状态点与读屏播报沿原契约。减少透明度时使用实色回退。
 
@@ -6928,6 +6934,8 @@ Thumbnail 的公开结构是 outer layout View + inner visual frame；图片与 
 ```
 
 ## 用法
+
+先按[快速开始](md/getting-started.md#根挂-themeprovider)接入主题与安全区 Provider，再挂载 ToastHost。
 
 ```tsx
 import { toast, ToastHost } from '@unif/react-native-design';
@@ -7110,7 +7118,7 @@ VersionPill 是**纯展示**徽章，外层本地 `<View accessible>` 合并名�
 
 ## 使用注意
 
-- 不要硬编码 `version` —— 走 `@/config/brand` 的 `APP_VERSION`(package.json 派生),build 走 react-native-device-info `getBuildNumber()`
+- 由应用提供实际版本与构建号，例如从应用配置或已有的原生版本读取能力取得；组件不依赖特定配置路径或设备信息库。
 - 不要只用颜色表达状态；`status.label` 必须给出可见且可朗读的状态语义。需要自定义点颜色时从 `useColors()` 取角色 token，例如 `{ label: '已废', color: colors.error }`
 
 ## 使用建议
@@ -7197,6 +7205,8 @@ Design 提供通用视觉与交互。聊天消息及气泡由 [Chat](https://git
 # 颜色
 
 Unif Design 的颜色是 **role-based(角色化)token**:role 名固定(`primary` / `surface` / `foreground`…),亮 / 暗主题切换时,改的是 role 指向哪个 hex,组件代码不动。具体值见 `src/theme/colors.ts`。
+
+下方色块和表格展示 `lightColors`／`darkColors` 的基础值。不支持原生玻璃的 iOS／Android 浅色主题会采用 `nativeFallbackColors.ts` 中的柔雾白表面与边线；实际界面取色以 `useColors()` 的当前结果为准。
 
 :::info 取色只走 hook,不要顶层 import
 在组件内用 `useColors()` 或 `useTheme().colors` 读取当前主题颜色。组合颜色与阴影的样式使用 `useThemedStyles`。下方色块的 `hex` 供查阅，应用代码优先使用颜色角色。
@@ -7785,7 +7795,7 @@ function Article() {
 }
 ```
 
-> `type` 导入时常起别名 `t`(避开 JS 保留字 `type`):`import { type as t } from '@unif/react-native-design';`。
+> `type` 导入时可起别名 `t`，便于与 TypeScript 的类型声明区分：`import { type as t } from '@unif/react-native-design';`。
 
 ## 应用级字号缩放(fontScale)
 
@@ -7833,7 +7843,7 @@ function DynamicLabel({ size }: { size: number }) {
 
 以下是 Unif 默认中文界面的文案建议。应用通过组件提供的文字属性表达自己的内容，语言选择不构成使用本库的限制。
 
-简体中文为唯一交互语言。语气**冷静、直接、克制** —— 状态描述事实,不寒暄、不致歉、不夸张,不加感叹号。助手像一个已经熟悉用户业务的同事。
+默认示例采用简体中文。语气**冷静、直接、克制**：状态描述事实，不寒暄、不致歉、不夸张，不加感叹号。
 
 ## 大小写 {#大小写}
 
@@ -7902,7 +7912,7 @@ function LocationLabel() {
 }
 ```
 
-> 这些约定是[中文优先原则](md/design/principles.md#中文优先)的细化;硬性禁忌清单见[全局 Don'ts](md/design/donts.md)。
+> 这些约定是[文案清晰原则](md/design/principles.md#中文优先)的细化；组件组合与验证建议见[使用建议](md/design/donts.md)。
 
 ## 快速开始
 
@@ -7972,7 +7982,7 @@ iOS 装完原生包后,在 `ios/` 目录执行 `bundle exec pod install` 并重�
 :::
 
 :::caution RNRC 5.0.0 与 Gesture Handler 3 的 peer 冲突
-本包要求 Gesture Handler 3.x,但 `react-native-reanimated-carousel@5.0.0` 发布的 peer 范围是 `>=2.9.0 <3.0.0` —— 与本包的 `>=3.0.0 <4.0.0` **完全没有交集**。该组合已在本仓实测适配并通过验证,包管理器仍会就此报一次 peer 警告。
+本包要求 Gesture Handler 3.x，但 `react-native-reanimated-carousel@5.0.0` 发布的 peer 范围是 `>=2.9.0 <3.0.0`，与本包的 `>=3.0.0 <4.0.0` 没有交集。本仓开发组合使用两者，`check:runtime-peers` 对这项已知差异进行精确校验；包管理器仍会报告 peer 警告，消费端还需验证实际手势。
 
 只有两种被认可的处理方式:**接受这一条警告**,或加**只作用于 Carousel 的窄 override / filter**。
 
@@ -7994,7 +8004,7 @@ pnpm 用 `pnpm.peerDependencyRules.allowedVersions` 精确到 `react-native-rean
 
 **禁止**全局 peer 忽略、`--force`、`--legacy-peer-deps` 或无效的 `packageExtensions` / metadata patch —— 那会连同真实的 major 漂移一起吞掉。
 
-本仓自己的 `.yarnrc.yml` `logFilters` **不随 npm 包分发**,消费端必须自行选择上述方式之一。本仓的权威门禁是 `yarn check:runtime-peers`(窄 allowlist:包名 + 请求方 locator + 精确 range + provider major,任一维度漂移即失败),与日志过滤无关。
+本仓 `.yarnrc.yml` 没有配置 `logFilters`，消费端按自己的包管理器处理这条警告。本仓使用 `yarn check:runtime-peers` 精确校验包名、请求方 locator、range 和 provider major，任一维度漂移即失败；该检查与日志过滤无关。
 :::
 
 ### 3. 配 babel(worklets 插件必须最后)
@@ -8374,7 +8384,7 @@ yarn add -D @babel/core @react-native/babel-preset@0.88.0 @react-native/metro-co
 
 ### 症状:安装时报 `react-native-reanimated-carousel` 与 `react-native-gesture-handler` 的 peer 冲突 {#rnrc-rngh-peer}
 
-**原因。** `react-native-reanimated-carousel@5.0.0` 发布的 RNGH peer metadata 是 `>=2.9.0 <3.0.0`,与本库要求的 `>=3.0.0 <4.0.0` **没有交集**。这是 RNRC 侧的 metadata 滞后,该组合已在本仓实测适配并通过验证。
+**原因。** `react-native-reanimated-carousel@5.0.0` 发布的 RNGH peer metadata 是 `>=2.9.0 <3.0.0`，与本库要求的 `>=3.0.0 <4.0.0` 没有交集。本仓开发组合使用两者，并通过 `check:runtime-peers` 精确校验这项已知差异；消费端仍需验证实际手势。
 
 **解法。** 只有两种被认可的处理方式:**接受这一条警告**,或加**只作用于 Carousel 的窄 override / filter**。
 
@@ -8384,7 +8394,7 @@ yarn add -D @babel/core @react-native/babel-preset@0.88.0 @react-native/metro-co
 
 **不要**用全局 peer 忽略、`--force`、`--legacy-peer-deps` 或无效的 `packageExtensions` / metadata patch —— 那会连同真实的 major 漂移一并吞掉。
 
-本仓 `.yarnrc.yml` 里的 `logFilters` **只影响本仓 install 日志,不随 npm 包分发**,消费端必须自行选择上述方式之一。本仓真正的门禁是 `yarn check:runtime-peers`:它按「包名 + 请求方 locator + 精确 range + provider major」四重匹配,任一维度漂移都会退出非零,与日志过滤互相独立。RNRC 发布出正确接受 RNGH 3 的版本后,升级 RNRC 并在同一次改动里删掉 filter 与 checker 的例外分支。
+本仓 `.yarnrc.yml` 没有配置 `logFilters`。`yarn check:runtime-peers` 按「包名 + 请求方 locator + 精确 range + provider major」匹配，任一维度漂移都会退出非零，与日志过滤独立。后续升级到接受 RNGH 3 的 Carousel 版本时，应重新核对并清理已失效的检查例外；本页说明不代表升级已经完成。
 
 ---
 
@@ -8403,7 +8413,7 @@ cd ios && bundle exec pod install --repo-update
 
 ## Jest / 单元测试 {#jest--单元测试}
 
-本库发布 `./jest-preset` 与 `./jest-setup` 两个 Jest 接线入口。下面除**前两条**与最后两条外,都是**没走入口**时的报错。完整说明见[在宿主工程里测试](md/testing.md);下面是照着报错反查。
+本库发布 `./jest-preset` 与 `./jest-setup` 两个 Jest 接线入口。先按[测试接入](md/testing.md)核对 preset、Babel 和实际依赖，再用下面的报错定位缺失或被覆盖的配置。
 
 ### 症状:`jest-preset 需要宿主工程自行安装 @react-native/jest-preset` {#jest-missing-rn-preset}
 
@@ -8443,9 +8453,9 @@ cd ios && bundle exec pod install --repo-update
 
 ### 症状:render Switch / Carousel / Spinner / Skeleton / Reveal 抛 `useReducedMotion is not a function` {#jest-reduced-motion}
 
-**原因。** 把 `react-native-reanimated` 映射到了它自带的 `mock.js` —— Reanimated 4.x 的便利 mock 不提供本库所需的完整运行时行为,而这些组件都经 `usePrefersReducedMotion` 读它。
+**原因。** 当前生效的 Reanimated 测试替身缺少 `useReducedMotion`，这些组件通过 `usePrefersReducedMotion` 调用它。检查实际安装版本及宿主额外的 mock／`moduleNameMapper` 是否覆盖了本库 setup。
 
-**解法。** 用 `preset: '@unif/react-native-design/jest-preset'`,入口用的是**真实 reanimated** + 官方 `setUpTests()`,并删掉你自己那条 reanimated 的 `moduleNameMapper`。手工接线时:同样别映射 reanimated,只把 `react-native-worklets` 换成官方 mock;实在要用那份 mock 就自己补上 `useReducedMotion`,见[测试 → 每一条为什么必需](md/testing.md#每一条为什么必需)。
+**解法。** 使用 `preset: '@unif/react-native-design/jest-preset'`。当前 setup 以 `react-native-reanimated/mock` 为基础，稳定 `useSharedValue` 的实例引用，补齐 `makeMutable` 的 shared value 形状，并调用真实模块的 `setUpTests()` 安装测试工具。不要直接换成未经核对的另一份 mock；自定义配置按[测试接入](md/testing.md#不使用入口时的手工等价物)对照当前 setup 源码。
 
 ---
 
@@ -8483,9 +8493,9 @@ cd ios && bundle exec pod install --repo-update
 
 ### 症状:控制台刷 `An update to ItemRenderer inside a test was not wrapped in act(...)` {#jest-carousel-act}
 
-**原因。** `react-native-reanimated-carousel` 5 自己的 item 渲染在 worklets mock 的回调里 setState,这条 `console.error` 来自上游,不来自本库。
+**原因。** 测试中的异步更新或计时器回调在 `act` 外触发了状态变化。Carousel 与 Worklets 的测试替身也可能参与这一过程，需按当前调用栈区分来源。
 
-**解法。** 不用处理 —— 它不是错误,不影响任何断言,用例照常绿。
+**解法。** 检查触发操作、计时器推进和异步等待是否放在 `act` 中，并核对当前 mock 组合。断言通过不能证明警告已解决；仍存在的依赖问题应随验证结果记录，不能直接忽略或屏蔽。
 
 ---
 

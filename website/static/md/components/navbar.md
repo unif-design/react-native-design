@@ -154,7 +154,7 @@ import { NavBar } from '@unif/react-native-design';
 | `subtitle` | `string?`                               | —           | 副标题（小字号，主标题下方）                                                                                                                                                                     |
 | `left`     | `NavBarSlot`                            | —           | 左槽：严格 `NavBarAction { icon, onPress, accessibilityLabel }` 或展示用 `ReactNode`                                                                                                             |
 | `right`    | `NavBarSlot`                            | —           | 右槽，同 `left`                                                                                                                                                                                  |
-| `variant`  | `'default' \| 'brand' \| 'transparent'` | `'default'` | 视觉变体：`default` 系统玻璃 + hairline + 主题文字 / `brand` 品牌橙底 + 白字 / `transparent` 透明无边框 + **深字 `c.foreground`**（浮在浅色 hero 上；若需白字深色浮层后续加 `transparentLight`） |
+| `variant`  | `'default' \| 'brand' \| 'transparent'` | `'default'` | `default` 为系统玻璃、hairline 和主题文字；`brand` 为品牌橙底与白字；`transparent` 无背景与边框，文字使用当前主题 `c.foreground` |
 | `style`    | `StyleProp<ViewStyle>?`                 | —           | 根容器附加样式（margin / position 等布局微调）                                                                                                                                                   |
 | `testID`   | `string?`                               | —           | E2E 定位                                                                                                                                                                                         |
 
@@ -167,13 +167,11 @@ import { NavBar } from '@unif/react-native-design';
 ```tsx
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// 方式 A：SafeAreaView 包裹
+// 页面或自定义导航 header 中均由宿主包裹
 <SafeAreaView edges={['top']}>
   <NavBar title="首页" />
 </SafeAreaView>;
 
-// 方式 B：react-navigation Stack.Screen header 配置
-// headerStatusBarHeight 会自动注入 inset，无需手动包裹
 ```
 
 这样 NavBar 本体可在任何场景复用（modal、底部抽屉 header、全屏画中画等不需要 top inset 的场景）。
