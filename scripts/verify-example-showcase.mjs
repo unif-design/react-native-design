@@ -3395,7 +3395,7 @@ function verifyDocumentation(root) {
   );
   assertDocumentContainsAll(
     agents,
-    ['unif-portal-dev-skills:code-development', '(docs/DEVELOPMENT.md)'],
+    ['(docs/DEVELOPMENT.md)'],
     'DOCUMENTATION_LINKS',
     'AGENTS'
   );
@@ -3589,13 +3589,11 @@ function collectWorkflowRunCommands(workflow) {
 function verifyWorkflowContract(root) {
   const sharedCi = readText(root, '.github/workflows/ci.yml');
   const digest = createHash('sha256').update(sharedCi).digest('hex');
-  if (
-    digest !==
-    '4fea451faf61ff41faf088a89e9f4db3cdcd8e65f56d975be1e657d737298718'
-  ) {
+  const delivery = readJson(root, '.github/delivery.json');
+  if (digest !== delivery.files?.['.github/workflows/ci.yml']) {
     failVerification(
       'SHARED_CI_DIGEST',
-      `共享 ci.yml 必须保持组织模板 digest，实际为 ${digest}`
+      `共享 ci.yml 必须匹配交付清单 digest，实际为 ${digest}`
     );
   }
 

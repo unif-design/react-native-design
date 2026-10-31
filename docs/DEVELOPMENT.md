@@ -4,7 +4,7 @@
 
 ## 技能与工程规范
 
-按任务使用通用技能：`code-organization` 处理目录、文件职责与命名，`react-native-development` 处理 React Native 实现，`react-native-library` 处理库的公开接口、运行示例与分发，`documentation` 处理文档、项目描述和文档站。这些技能独立于企业；本库的组织标准、协作和交付流程仍来自 [unif-design/.github](https://github.com/unif-design/.github)。
+按任务使用通用技能：`code-organization` 处理目录、文件职责与命名，`react-native-development` 处理 React Native 实现，`react-native-library` 处理库的公开接口、运行示例与分发，`documentation` 处理文档、项目描述和文档站。这些技能独立使用；本库的交付来源、组织配置与检查入口见[交付配置与检查](#交付配置与检查)。
 
 `unif-design` 用于定位本库当前版本的公开能力、接入与排障资料。应用仅消费库时可直接查公开类型和文档，无需先取得维护工作区。
 
@@ -26,7 +26,7 @@
 - [类型消费](../type-tests/)
 - [示例](../example/)
 
-命令与依赖版本以 [package.json](../package.json)、锁文件及实际安装为准，验证接线见 [.github/workflows](../.github/workflows/)。维护入口见 [AGENTS.md](../AGENTS.md)，详细规则由对应技能与组织标准维护。
+命令与依赖版本以 [package.json](../package.json)、锁文件及实际安装为准，验证接线见 [.github/workflows](../.github/workflows/)。维护入口见 [AGENTS.md](../AGENTS.md)，按当前任务选择适用技能并核对本库配置。
 
 历史 spec、plan 和审查记录用于溯源，不作为当前使用文档或新需求入口。
 
@@ -89,6 +89,21 @@ harness 不继承本仓 `check:runtime-peers` 的 workspace 精确 allowlist；�
 
 ## LLM 文档生成
 
-`website/docs` 是使用文档源；运行 `node website/scripts/build-llms.js` 可单独生成。共同实现由组织 `templates/llms` 分发，维护源后使用 `sync-llms.cjs` 同步，不手改生成副本。
+`website/docs` 是使用文档源；运行 `node website/scripts/build-llms.js` 可单独生成。共同实现由 `github-delivery` 的 `templates/llms` 维护，通过该技能提供的同步工具更新本库脚本，不手改共享副本。
 
 索引按任务列出单页，全文位于 Optional；包版本取当前 package.json。`node website/scripts/build-llms.test.js` 验证公共生成契约与本库资料，文档站构建沿既有 CI 运行。
+
+## 交付配置与检查
+
+共享 CI、发布配置和检查工具由 `github-delivery` 的模板与工具维护。Unif 组织值由 `code-delivery` 的 `assets/organization.json` 维护，接入时落实为本库 `.github/organization.json`，记录组织、包名规则、Pages 地址、发布 App 身份及远端设置。工具运行时读取项目文件，不依赖其他技能的安装目录；适用技能按当前任务独立选择。
+
+在仓库根目录按阶段执行：
+
+| 命令 | 检查范围 |
+| --- | --- |
+| `node .github/scripts/check-delivery.cjs` | 离线检查受管文件、组织配置与 source 元数据。 |
+| `node .github/scripts/check-library.cjs pack` | 完成库构建后，检查当前 tarball 的导出、声明与文件清单。 |
+| `node .github/scripts/check-library.cjs release` | 发行前校验 README、许可和发布配置，不执行发布。 |
+| `node .github/scripts/check-library.cjs published` | 联网核验 npm 当前版本的元数据、下载完整性与实际 tarball。 |
+
+CI 与发布步骤见本库 `.github/workflows/`，组织配置调整以项目文件及当前授权为准。本地检查、远端 CI、npm 发布、文档部署和设备验收分别报告。
