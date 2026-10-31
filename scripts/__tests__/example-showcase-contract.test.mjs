@@ -668,6 +668,7 @@ const sourceContractFiles = [
   'CONTRIBUTING.md',
   '.gitattributes',
   'turbo.json',
+  '.github/delivery.json',
   '.github/workflows/ci.yml',
   '.github/workflows/example-showcase.yml',
   'example/package.json',
@@ -3574,20 +3575,38 @@ test('README 入口指向独立展厅指南和开发资料', () => {
   assert.match(read('README.md'), /\]\(example\/README\.md\)/u);
   assert.match(read('README.md'), /\]\(docs\/DEVELOPMENT\.md\)/u);
   assert.match(read('example/README.md'), /\]\(GUIDE\.md\)/u);
-  assert.match(read('AGENTS.md'), /unif-portal-dev-skills:code-development/u);
   assert.match(read('AGENTS.md'), /\]\(docs\/DEVELOPMENT\.md\)/u);
 });
 
-test('文档入口不能丢失展厅指南链接', () => {
+test('开发入口可按任务独立选择技能', () => {
   withFixture([...new Set(sourceContractFiles)], (fixture) => {
-    mutateFixtureFile(
-      fixture,
-      'example/README.md',
-      (source) => source.replaceAll('](GUIDE.md)', '](missing.md)'),
-      '删除指南链接'
+    writeFileSync(
+      path.join(fixture, 'AGENTS.md'),
+      '本次文档任务采用 `documentation`。\n\n[开发资料](docs/DEVELOPMENT.md)\n'
     );
-    assertVerifierCode(fixture, 'DOCUMENTATION_LINKS', '删除指南链接');
+    assert.doesNotThrow(() => showcaseVerifier.verifyExampleShowcase(fixture));
   });
+});
+
+test('文档入口不能丢失展厅指南或开发资料链接', () => {
+  for (const [file, link] of [
+    ['example/README.md', '](GUIDE.md)'],
+    ['AGENTS.md', '](docs/DEVELOPMENT.md)'],
+  ]) {
+    withFixture([...new Set(sourceContractFiles)], (fixture) => {
+      mutateFixtureFile(
+        fixture,
+        file,
+        (source) => source.replaceAll(link, '](missing.md)'),
+        `删除 ${file} 文档链接`
+      );
+      assertVerifierCode(
+        fixture,
+        'DOCUMENTATION_LINKS',
+        `删除 ${file} 文档链接`
+      );
+    });
+  }
 });
 
 test('展厅指南 按运行顺序记录 Pods、主题与未冒充 PASS 的人工矩阵', () => {
@@ -3746,11 +3765,11 @@ test('文档 verifier 拒绝任一 canonical iOS block 退回连续两次 cd', (
   }
 });
 
-test('repo-specific workflow 保留独立 example gate 且共享 CI digest 不漂移', () => {
+test('repo-specific workflow 保留独立 example gate 且共享 CI 符合交付清单', () => {
   const sharedCi = read('.github/workflows/ci.yml');
   assert.equal(
     createHash('sha256').update(sharedCi).digest('hex'),
-    '4fea451faf61ff41faf088a89e9f4db3cdcd8e65f56d975be1e657d737298718'
+    readJson('.github/delivery.json').files['.github/workflows/ci.yml']
   );
 
   const workflow = read('.github/workflows/example-showcase.yml');
@@ -4253,6 +4272,16 @@ test('workflow 与 shared CI mutation gate 返回稳定 typed code', () => {
       file: '.github/workflows/ci.yml',
       code: 'SHARED_CI_DIGEST',
       mutate: (source) => `${source}# mutation\n`,
+    },
+    {
+      label: 'delivery receipt 缺少 shared CI digest',
+      file: '.github/delivery.json',
+      code: 'SHARED_CI_DIGEST',
+      mutate(source) {
+        const receipt = JSON.parse(source);
+        delete receipt.files['.github/workflows/ci.yml'];
+        return `${JSON.stringify(receipt, null, 2)}\n`;
+      },
     },
   ];
 
