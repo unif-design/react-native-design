@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.14.0](https://github.com/unif-design/react-native-design/compare/v1.13.8...v1.14.0) (2026-11-02)
+
+
+### Features
+
+* 共用 Logger 分发器并保留现有日志接口 ([1c0820f](https://github.com/unif-design/react-native-design/commit/1c0820f2cf7612f50a203dcbdb31d11cef4cde30))
+
 ## [1.13.8](https://github.com/unif-design/react-native-design/compare/v1.13.7...v1.13.8) (2026-10-31)
 
 ## [1.13.7](https://github.com/unif-design/react-native-design/compare/v1.13.6...v1.13.7) (2026-10-30)
