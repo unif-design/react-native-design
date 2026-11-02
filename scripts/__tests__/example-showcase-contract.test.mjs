@@ -611,6 +611,7 @@ const expectedRuntimeDependencies = {
   '@callstack/liquid-glass': '0.8.2',
   '@unif/react-native-design': 'workspace:*',
   '@unif/react-native-icons': '0.4.1',
+  '@unif/react-native-logger': '^0.2.0',
   'react': '19.3.0',
   'react-native': '0.88.0',
   'react-native-gesture-handler': '3.1.0',
@@ -1280,6 +1281,35 @@ test('mutation gate 拒绝 runtime manifest 的精确版本漂移', () => {
     assert.equal(result.status, 1, output);
     assert.match(output, /5\.7\.0/u);
   });
+});
+
+test('共享 Logger 依赖仍由运行图和 peer 精确校验', () => {
+  for (const [file, field, code] of [
+    ['example/package.json', 'dependencies', 'RUNTIME_DEPENDENCIES'],
+    ['package.json', 'peerDependencies', 'ROOT_PEER_DEPENDENCIES'],
+  ]) {
+    for (const version of [undefined, '^0.1.3']) {
+      withFixture([...new Set(sourceContractFiles)], (fixture) => {
+        assert.doesNotThrow(() =>
+          showcaseVerifier.verifyExampleShowcase(fixture)
+        );
+        const label = `${file} Logger ${version ?? 'missing'}`;
+        mutateFixtureFile(
+          fixture,
+          file,
+          (source) => {
+            const manifest = JSON.parse(source);
+            if (version === undefined)
+              delete manifest[field]['@unif/react-native-logger'];
+            else manifest[field]['@unif/react-native-logger'] = version;
+            return `${JSON.stringify(manifest, null, 2)}\n`;
+          },
+          label
+        );
+        assertVerifierCode(fixture, code, label);
+      });
+    }
+  }
 });
 
 test('mutation gate 拒绝 Android namespace 的 identity 漂移', () => {

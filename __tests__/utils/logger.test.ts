@@ -10,7 +10,7 @@ import {
 /**
  * logger 单测 —— scope 前缀、level 门控、setLogLevel、addTransport / removeTransport。
  *
- * logger.ts 用模块级 `state.level` + `state.transports`,跨 test 共享,
+ * Logger 包的默认 backend 在同一运行时共享 level 和 transports,
  * 所以每个 case 用 jest.resetModules() + require 重新加载,避免污染。
  */
 describe('logger', () => {
@@ -29,6 +29,25 @@ describe('logger', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  test('公开日志操作与 Logger 默认 backend 同源，不创建第二份状态', () => {
+    const design = require('../../src/utils/logger');
+    const { defaultLogBackend } = require('@unif/react-native-logger');
+    for (const name of [
+      'createLogger',
+      'setLogLevel',
+      'getLogLevel',
+      'addTransport',
+      'removeTransport',
+      'consoleTransport',
+    ]) {
+      expect(design[name]).toBe(defaultLogBackend[name]);
+    }
+    design.setLogLevel('error');
+    expect(defaultLogBackend.getLogLevel()).toBe('error');
+    defaultLogBackend.setLogLevel('warn');
+    expect(design.getLogLevel()).toBe('warn');
   });
 
   test('createLogger 返 4 个 level method', () => {

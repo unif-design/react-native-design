@@ -6710,6 +6710,7 @@ __metadata:
     "@types/react-test-renderer": "npm:^19.1.0"
     "@unif/react-native-design": "workspace:*"
     "@unif/react-native-icons": "npm:0.4.1"
+    "@unif/react-native-logger": "npm:^0.2.0"
     eslint: "npm:^8.19.0"
     jest: "npm:^29.6.3"
     prettier: "npm:2.8.8"
@@ -6747,6 +6748,7 @@ __metadata:
     "@types/react": "npm:^19.2.0"
     "@unif/react-native-design": "workspace:*"
     "@unif/react-native-icons": "npm:0.4.1"
+    "@unif/react-native-logger": "npm:^0.2.0"
     clsx: "npm:^2.0.0"
     prism-react-renderer: "npm:^2.3.0"
     react: "npm:19.3.0"
@@ -6784,6 +6786,7 @@ __metadata:
     "@types/react": "npm:^19.2.0"
     "@types/react-is": "npm:^19.3.0"
     "@unif/react-native-icons": "npm:0.4.1"
+    "@unif/react-native-logger": "npm:^0.2.0"
     commitlint: "npm:^21.0.1"
     del-cli: "npm:^7.0.0"
     eslint: "npm:^9.39.4"
@@ -6811,6 +6814,7 @@ __metadata:
   peerDependencies:
     "@callstack/liquid-glass": ">=0.8.2 <0.9.0"
     "@unif/react-native-icons": ">=0.1.0"
+    "@unif/react-native-logger": ^0.2.0
     react: ">=19.2.3 <20.0.0"
     react-native: ">=0.86.0"
     react-native-gesture-handler: ">=3.0.0 <4.0.0"
@@ -6830,6 +6834,24 @@ __metadata:
     react-native: ">=0.86.3 <0.89"
     react-native-svg: ">=15.15.5 <16"
   checksum: 10c0/13a9dc18f25beb5a5ad9329ee411fbd4a5d521062460c90e9780167a574eb182e4806a610f00549d896483dfb6a33aeaabc746e9ac2a0505e9b4e83dd1b52238
+  languageName: node
+  linkType: hard
+
+"@unif/react-native-logger@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@unif/react-native-logger@npm:0.2.0"
+  dependencies:
+    crypto-js: "npm:^4.2.0"
+    lodash: "npm:^4.18.1"
+  peerDependencies:
+    react-native: ">=0.86.0"
+    react-native-blob-util: ^0.25.1
+  peerDependenciesMeta:
+    react-native:
+      optional: true
+    react-native-blob-util:
+      optional: true
+  checksum: 10c0/05df736ef7bbc4faf5472f38bdbbf1a7db1fe3f370adbc2abe02bbf77bf7c579425f4f237993e52fb1b3cdae1c620864827b25427fc5d71ff5e2d4521a83f347
   languageName: node
   linkType: hard
 
@@ -9277,6 +9299,13 @@ __metadata:
     shebang-command: "npm:^2.0.0"
     which: "npm:^2.0.1"
   checksum: 10c0/053ea8b2135caff68a9e81470e845613e374e7309a47731e81639de3eaeb90c3d01af0e0b44d2ab9d50b43467223b88567dfeb3262db942dc063b9976718ffc1
+  languageName: node
+  linkType: hard
+
+"crypto-js@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "crypto-js@npm:4.2.0"
+  checksum: 10c0/8fbdf9d56f47aea0794ab87b0eb9833baf80b01a7c5c1b0edc7faf25f662fb69ab18dc2199e2afcac54670ff0cd9607a9045a3f7a80336cccd18d77a55b9fdf0
   languageName: node
   linkType: hard
 
@@ -14935,7 +14964,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.20, lodash@npm:^4.17.21":
+"lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.18.1":
   version: 4.18.1
   resolution: "lodash@npm:4.18.1"
   checksum: 10c0/757228fc68805c59789e82185135cf85f05d0b2d3d54631d680ca79ec21944ec8314d4533639a14b8bcfbd97a517e78960933041a5af17ecb693ec6eecb99a27
