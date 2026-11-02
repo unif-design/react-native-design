@@ -7940,6 +7940,7 @@ function LocationLabel() {
 | `react-native-svg`                 | `>=15`             | `15.16.0`    |
 | `@callstack/liquid-glass`          | `>=0.8.2 <0.9.0`   | `0.8.2`      |
 | `@unif/react-native-icons`         | `>=0.1.0`          | `0.4.1`      |
+| `@unif/react-native-logger`        | `^0.2.0`           | 以锁文件为准 |
 
 - RN `0.88.0` 开发基线要求 Node.js `^22.13.0 || ^24.3.0 || >= 26.0.0`；本仓 `.nvmrc` 固定 `v24.13.0`，使用 Yarn 4。根 `devEngines` 与 example/website `engines` 声明此范围。
 - 公开包的 `package.json#engines` 保留 `^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0`，兼容已有 RN `0.86+` 消费者；消费者还必须满足自己安装的 RN 版本要求。
@@ -7963,7 +7964,7 @@ yarn add @unif/react-native-design
 本库**不打包**下列依赖,宿主工程必须自行安装并完成原生侧配置。缺任一,Metro 打包或运行时就会报 `Unable to resolve module` / `Cannot find module`。
 
 ```sh
-yarn add @unif/react-native-icons react-native-svg \
+yarn add @unif/react-native-icons @unif/react-native-logger@^0.2.0 react-native-svg \
   react-native-gesture-handler \
   react-native-reanimated \
   react-native-worklets \
@@ -7976,6 +7977,8 @@ iOS 装完原生包后,在 `ios/` 目录执行 `bundle exec pod install` 并重�
 :::
 
 > 版本范围见上方[环境要求](#环境要求)表格,唯一事实来源是 `package.json#peerDependencies`。
+
+Design 的既有 `createLogger`、级别与 transport 接口复用 Logger 的同一默认后端，仍接受消息和可变参数。应用需要结构化日志或文件记录时，从 `@unif/react-native-logger` 初始化一次运行时并使用其结构化 `createLogger`；库本身不初始化文件存储。仅使用 Design 不需要安装 Logger 文件入口的原生文件依赖。两种 `createLogger` 签名不同，不能互相替换。
 
 :::caution Worklets 需要宿主自备 Babel / Metro
 `react-native-worklets` 的 Babel 插件与 Metro transformer 由**宿主工程**提供,不随本库分发。宿主必须装上与自身 RN 版本匹配的 `@babel/core`、`@react-native/babel-preset` 和 `@react-native/metro-config`；本仓验证的是 RN `0.88.0` 与对应 `0.88.0` 工具链，否则 worklet 编译会静默降级或直接报错。

@@ -24,6 +24,7 @@
     "@react-native/assets-registry": "0.88.0",
     "@unif/react-native-design": "workspace:*",
     "@unif/react-native-icons": "0.4.1",
+    "@unif/react-native-logger": "^0.2.0",
     "clsx": "^2.0.0",
     "prism-react-renderer": "^2.3.0",
     "react": "19.3.0",
