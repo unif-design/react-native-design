@@ -12,9 +12,11 @@ import {
   fireEvent,
   render,
   screen,
+  userEvent,
   waitFor,
 } from '@testing-library/react-native';
 import * as LiquidGlass from '@callstack/liquid-glass';
+import * as reanimated from 'react-native-reanimated';
 import {
   Button,
   Card,
@@ -47,6 +49,101 @@ beforeEach(() => {
 });
 
 afterEach(() => jest.restoreAllMocks());
+
+test.each(['glass', 'secondary'] as const)(
+  '%s 按钮由原生交互玻璃承载前景，点击只交付一次，禁用及忙碌关闭交互',
+  async (variant) => {
+    const press = jest.fn();
+    const page = render(
+      <ThemeProvider forceScheme="dark">
+        <Button variant={variant} label="保存" onPress={press} />
+      </ThemeProvider>
+    );
+    await waitFor(() => {
+      const material = page.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
+      expect(material.props.interactive).toBe(true);
+      expect(material.props.colorScheme).toBe('dark');
+      expect(material.props.pointerEvents).not.toBe('none');
+      expect(material.findAllByType(Text)).toHaveLength(1);
+    });
+    await userEvent.press(page.getByRole('button', { name: '保存' }));
+    expect(press).toHaveBeenCalledTimes(1);
+
+    for (const state of [{ disabled: true }, { loading: true }]) {
+      page.rerender(
+        <ThemeProvider forceScheme="dark">
+          <Button variant={variant} label="保存" onPress={press} {...state} />
+        </ThemeProvider>
+      );
+      expect(
+        page.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.interactive
+      ).toBe(false);
+      const button = page.getByRole('button', { name: '保存' });
+      expect(button).toBeDisabled();
+      await userEvent.press(button);
+      expect(press).toHaveBeenCalledTimes(1);
+    }
+  }
+);
+
+test('原生玻璃图标保持小表面的命中补偿和原位确认两次点击', async () => {
+  const press = jest.fn();
+  const page = render(
+    <ThemeProvider>
+      <IconButton
+        icon={CloseOutlined}
+        accessibilityLabel="关闭"
+        surfaceSize={36}
+        confirmation={{ label: '确认关闭' }}
+        onPress={press}
+      />
+    </ThemeProvider>
+  );
+  await waitFor(() =>
+    expect(
+      page.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.interactive
+    ).toBe(true)
+  );
+  const button = page.getByRole('button', { name: '关闭' });
+  expect(button.props.hitSlop).toEqual({
+    top: 4,
+    bottom: 4,
+    left: 4,
+    right: 4,
+  });
+  expect(button).toHaveStyle({ height: 36 });
+  await userEvent.press(button);
+  expect(press).not.toHaveBeenCalled();
+  await userEvent.press(page.getByRole('button', { name: '确认关闭' }));
+  expect(press).toHaveBeenCalledTimes(1);
+});
+
+test('减少动态效果时保留玻璃与点击，但不启用原生按压形变', async () => {
+  jest.spyOn(reanimated, 'useReducedMotion').mockReturnValue(true);
+  const press = jest.fn();
+  const page = render(
+    <ThemeProvider>
+      <IconButton
+        icon={CloseOutlined}
+        accessibilityLabel="返回"
+        surfaceSize={36}
+        onPress={press}
+      />
+    </ThemeProvider>
+  );
+  await waitFor(() =>
+    expect(
+      page.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.effect
+    ).toBe('regular')
+  );
+  expect(
+    page.UNSAFE_getByType(LiquidGlass.LiquidGlassView).props.interactive
+  ).toBe(false);
+  const button = page.getByRole('button', { name: '返回' });
+  expect(button).toHaveStyle({ height: 36, width: 36 });
+  await userEvent.press(button);
+  expect(press).toHaveBeenCalledTimes(1);
+});
 
 test.each([
   ['ios', true, false, lightColors.info, lightColors.foreground],

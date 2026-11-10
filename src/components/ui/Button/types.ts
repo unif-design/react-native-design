@@ -1,6 +1,26 @@
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type { IconProps } from '@unif/react-native-icons';
-import type { AccessibilityState, StyleProp, ViewStyle } from 'react-native';
+import type {
+  AccessibilityState,
+  ColorValue,
+  StyleProp,
+  TouchableWithoutFeedbackProps,
+  ViewProps,
+  ViewStyle,
+} from 'react-native';
+
+/** 按钮族内部的原生交互材质宿主，不进入包的公共入口。 */
+export type NativeGlassButtonProps = Omit<
+  TouchableWithoutFeedbackProps,
+  'children' | 'onPressIn' | 'onPressOut'
+> & {
+  children: ReactNode;
+  style: StyleProp<ViewStyle>;
+  contentStyle: StyleProp<ViewStyle>;
+  fallbackColor: ColorValue;
+  onTouchStart?: ViewProps['onTouchStart'];
+  onPointerDown?: ViewProps['onPointerDown'];
+};
 
 /** Button 尺寸：sm=28 / md=36 / lg=44（对应 control.sm/md/lg） */
 export type ButtonSize = 'sm' | 'md' | 'lg';
