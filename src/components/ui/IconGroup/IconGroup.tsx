@@ -1,5 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
+import { useColors } from '../../../theme';
 import { GlassLayer } from '../GlassLayer';
 import { styles } from './styles';
 import type { IconGroupProps } from './types';
@@ -9,9 +10,11 @@ export function IconGroup({
   children,
   testID,
 }: IconGroupProps): React.JSX.Element {
+  const colors = useColors();
   return (
     <View style={styles.root} testID={testID}>
       <GlassLayer
+        fallbackColor={colors.surfaceContainerHigh}
         style={styles.glass}
         testID={testID ? `${testID}-glass` : undefined}
       />

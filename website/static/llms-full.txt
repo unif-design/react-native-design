@@ -2726,7 +2726,7 @@ Switch / Stepper 放在 Cell 行尾，必须选择 Cell 的显式 control 分支
 
 为已有内容提供装饰玻璃背景。组件读取当前主题，不接管内容、交互或布局。
 
-Android、旧 iOS 或原生支持标记为假时，采用 `fallbackColor` 或主题 `surface` 实色分组，不叠加渐变和额外描边。开启减少透明度或 iOS 偏好尚未读回时也采用此实色背景。`secondary` Button 与 IconButton（含确认状态）使用 `surfaceContainerHigh`，独立输入表面使用 `surface`，与原有边线、阴影共同保留层次；缺少 CSS 模糊的 Web 继续使用主题半透明渐变。
+Android、旧 iOS 或原生支持标记为假时，采用 `fallbackColor` 或主题 `surface` 实色分组，不叠加渐变和额外描边。开启减少透明度或 iOS 偏好尚未读回时也采用此实色背景。`secondary` Button、IconButton（含确认状态）与 IconGroup 使用 `surfaceContainerHigh`，独立输入表面使用 `surface`，与原有边线、阴影共同保留层次；缺少 CSS 模糊的 Web 继续使用主题半透明渐变。
 
 不支持原生玻璃的 iOS／Android 在浅色主题下采用柔雾白表面；页面、控件和既有背景装饰只调整颜色，图标、布局、圆角、阴影及交互保持。原生玻璃可用的 iOS、Web 和深色主题保留原配色。消费者通过 `useColors` 读取当前主题，自定义 `fallbackColor` 保留原值。
 
@@ -3318,7 +3318,7 @@ import { ScanOutlined } from '@unif/react-native-icons';
 | children | ReactNode | 图标按钮或其它独立操作内容 |
 | testID   | string    | 可选测试标识               |
 
-玻璃直接复用 [GlassLayer](md/components/glass-layer.md)。原生玻璃可用时采用系统材质；旧 iOS、Android、减少透明度及 Web 的处理全部沿用现有规则，组件不增加版本判断或单独的降级实现。
+玻璃直接复用 [GlassLayer](md/components/glass-layer.md)。原生玻璃可用时采用系统材质；旧 iOS、Android 或减少透明度时使用主题 `surfaceContainerHigh`，与独立 IconButton 的控件底色一致，避免在白色导航栏上失去分组轮廓。组内 `neutral` 按钮共用这一层背景。Web 继续沿用现有材质规则，组件不增加版本判断或单独的降级实现。
 
 ## 图标
 

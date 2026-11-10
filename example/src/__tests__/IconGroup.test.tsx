@@ -1,5 +1,5 @@
 import React from 'react';
-import { AccessibilityInfo } from 'react-native';
+import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
 import {
   fireEvent,
   render,
@@ -17,6 +17,45 @@ import {
 } from '@unif/react-native-design';
 
 afterEach(() => jest.restoreAllMocks());
+
+test.each(['ios', 'android'] as const)(
+  '%s 无原生玻璃时，按钮组与独立图标按钮共用清晰底色',
+  async (platform) => {
+    jest.replaceProperty(Platform, 'OS', platform);
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      false
+    );
+    render(
+      <ThemeProvider forceScheme="light">
+        <IconGroup testID="navigation">
+          <IconButton
+            icon={SearchOutlined}
+            variant="neutral"
+            accessibilityLabel="导航"
+            onPress={() => {}}
+          />
+        </IconGroup>
+        <IconButton
+          icon={PlusOutlined}
+          accessibilityLabel="新会话"
+          onPress={() => {}}
+        />
+      </ThemeProvider>
+    );
+    const group = screen.getByTestId('navigation-glass', {
+      includeHiddenElements: true,
+    });
+    const button = screen
+      .getByRole('button', { name: '新会话' })
+      .findByType(LiquidGlass.LiquidGlassView);
+    expect(group).toHaveStyle({
+      backgroundColor: StyleSheet.flatten(button.props.style).backgroundColor,
+    });
+    expect(group).toHaveStyle({ backgroundColor: '#FAFAFC' });
+  }
+);
 
 test.each([
   { supported: true, reduced: false, effect: 'regular', scheme: 'light' },
@@ -70,8 +109,10 @@ test.each([
         supported && !reduced
           ? 'transparent'
           : scheme === 'dark'
-            ? darkColors.surface
-            : lightColors.surface,
+            ? darkColors.surfaceContainerHigh
+            : supported
+              ? lightColors.surfaceContainerHigh
+              : '#FAFAFC',
     });
     expect(screen.getAllByRole('button')).toHaveLength(2);
     fireEvent.press(screen.getByRole('button', { name: '搜索' }));
