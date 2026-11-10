@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.1](https://github.com/unif-design/react-native-design/compare/v1.16.0...v1.16.1) (2026-11-10)
+
+
+### Bug Fixes
+
+* **design:** 统一图标组的非玻璃背景 ([#195](https://github.com/unif-design/react-native-design/issues/195)) ([a73e9c2](https://github.com/unif-design/react-native-design/commit/a73e9c2b4ef4c03eff1c355200b2474945939a28))
+
 # [1.16.0](https://github.com/unif-design/react-native-design/compare/v1.15.0...v1.16.0) (2026-11-10)
 
 
