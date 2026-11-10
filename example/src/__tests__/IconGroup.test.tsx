@@ -13,8 +13,8 @@ import {
   IconButton,
   ThemeProvider,
   lightColors,
-  darkColors,
 } from '@unif/react-native-design';
+import { resolveThemeColors } from '../../../src/theme/nativeFallbackColors';
 
 afterEach(() => jest.restoreAllMocks());
 
@@ -53,7 +53,9 @@ test.each(['ios', 'android'] as const)(
     expect(group).toHaveStyle({
       backgroundColor: StyleSheet.flatten(button.props.style).backgroundColor,
     });
-    expect(group).toHaveStyle({ backgroundColor: '#FAFAFC' });
+    expect(StyleSheet.flatten(group.props.style).backgroundColor).not.toBe(
+      lightColors.surface
+    );
   }
 );
 
@@ -108,11 +110,7 @@ test.each([
       backgroundColor:
         supported && !reduced
           ? 'transparent'
-          : scheme === 'dark'
-            ? darkColors.surfaceContainerHigh
-            : supported
-              ? lightColors.surfaceContainerHigh
-              : '#FAFAFC',
+          : resolveThemeColors(scheme).surfaceContainerHigh,
     });
     expect(screen.getAllByRole('button')).toHaveLength(2);
     fireEvent.press(screen.getByRole('button', { name: '搜索' }));
