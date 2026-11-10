@@ -11,6 +11,7 @@ import {
   type ViewProps,
 } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
+import { isLiquidGlassSupported } from '@callstack/liquid-glass';
 import {
   fixed,
   pressedOpacity,
@@ -19,6 +20,7 @@ import {
   useThemedStyles,
 } from '../../../theme';
 import { GlassLayer } from '../GlassLayer';
+import { NativeGlassButton } from './NativeGlassButton';
 import { makeStyles, paletteFor, sizingFor } from './styles';
 import type {
   ButtonBaseRenderContext,
@@ -127,54 +129,72 @@ export function ButtonBase({
       children({ sizing, palette })
     );
 
+  const interactionProps = {
+    'accessible': hasAccessibleName,
+    'accessibilityRole': hasAccessibleName ? accessibilityRole : undefined,
+    'accessibilityState': effectiveAccessibilityState,
+    'aria-disabled': effectiveAccessibilityState?.disabled,
+    'aria-busy': effectiveAccessibilityState?.busy,
+    'aria-selected': effectiveAccessibilityState?.selected,
+    'aria-checked': effectiveAccessibilityState?.checked,
+    'aria-expanded': effectiveAccessibilityState?.expanded,
+    accessibilityLabel,
+    accessibilityHint,
+    'disabled': unavailable,
+    'onPress': unavailable ? undefined : onPress,
+    hitSlop,
+    testID,
+  };
+  const buttonStyle = (pressed: boolean): StyleProp<ViewStyle> => [
+    styles.base,
+    {
+      // text variant 撕掉所有 chrome,只剩 inline 文字
+      height: isText ? undefined : sizing.h,
+      // square 时方形:width=height,horizontal padding=0
+      width: square ? sizing.h : undefined,
+      paddingHorizontal: isText || square ? 0 : sizing.px,
+      borderRadius: isGlass ? glassRadius : sizing.br,
+      backgroundColor: palette.bg,
+      borderColor: palette.border ?? 'transparent',
+      borderWidth: palette.border ? 1 : 0,
+      opacity: isGlass ? 1 : unavailable ? 0.5 : pressed ? pressedOpacity : 1,
+      alignSelf: block ? 'stretch' : 'flex-start',
+      gap: sizing.gap,
+    },
+    style,
+  ];
+
+  if (isGlass && isLiquidGlassSupported && Platform.OS === 'ios') {
+    return (
+      <NativeGlassButton
+        {...interactionProps}
+        onTouchStart={onTouchStart}
+        onPointerDown={onPointerDown}
+        style={buttonStyle(false)}
+        contentStyle={[styles.base, { gap: sizing.gap }]}
+        fallbackColor={
+          iconButton || variant === 'secondary'
+            ? c.surfaceContainerHigh
+            : c.surface
+        }
+      >
+        {content}
+      </NativeGlassButton>
+    );
+  }
+
   return (
     <Pressable
+      {...interactionProps}
       ref={buttonRef}
-      accessible={hasAccessibleName}
-      accessibilityRole={hasAccessibleName ? accessibilityRole : undefined}
       role={
         hasAccessibleName && accessibilityRole === 'button'
           ? 'button'
           : undefined
       }
-      accessibilityState={effectiveAccessibilityState}
-      aria-disabled={effectiveAccessibilityState?.disabled}
-      aria-busy={effectiveAccessibilityState?.busy}
-      aria-selected={effectiveAccessibilityState?.selected}
-      aria-checked={effectiveAccessibilityState?.checked}
-      aria-expanded={effectiveAccessibilityState?.expanded}
-      accessibilityLabel={accessibilityLabel}
-      accessibilityHint={accessibilityHint}
-      disabled={unavailable}
-      onPress={unavailable ? undefined : onPress}
       onTouchStart={onTouchStart}
       onPointerDown={onPointerDown}
-      hitSlop={hitSlop}
-      testID={testID}
-      style={({ pressed }) => [
-        styles.base,
-        {
-          // text variant 撕掉所有 chrome,只剩 inline 文字
-          height: isText ? undefined : sizing.h,
-          // square 时方形:width=height,horizontal padding=0
-          width: square ? sizing.h : undefined,
-          paddingHorizontal: isText || square ? 0 : sizing.px,
-          borderRadius: isGlass ? glassRadius : sizing.br,
-          backgroundColor: palette.bg,
-          borderColor: palette.border ?? 'transparent',
-          borderWidth: palette.border ? 1 : 0,
-          opacity: isGlass
-            ? 1
-            : unavailable
-              ? 0.5
-              : pressed
-                ? pressedOpacity
-                : 1,
-          alignSelf: block ? 'stretch' : 'flex-start',
-          gap: sizing.gap,
-        },
-        style,
-      ]}
+      style={({ pressed }) => buttonStyle(pressed)}
     >
       {isGlass
         ? ({ pressed }) => {
