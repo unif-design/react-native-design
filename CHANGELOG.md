@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.16.0](https://github.com/unif-design/react-native-design/compare/v1.15.0...v1.16.0) (2026-11-10)
+
+
+### Features
+
+* **button:** 启用原生玻璃按钮按压反馈 ([#194](https://github.com/unif-design/react-native-design/issues/194)) ([39030ab](https://github.com/unif-design/react-native-design/commit/39030abd904035345657b6b3d831c1f23c0a7b66))
+
 # [1.15.0](https://github.com/unif-design/react-native-design/compare/v1.14.0...v1.15.0) (2026-11-10)
 
 
