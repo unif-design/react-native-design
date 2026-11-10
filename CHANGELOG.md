@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.15.0](https://github.com/unif-design/react-native-design/compare/v1.14.0...v1.15.0) (2026-11-10)
+
+
+### Features
+
+* **design:** 新增共用玻璃背景的图标操作组 ([ca14a24](https://github.com/unif-design/react-native-design/commit/ca14a24a2f8f8d30445976df3d75b30fcd996f4a))
+
 # [1.14.0](https://github.com/unif-design/react-native-design/compare/v1.13.8...v1.14.0) (2026-11-02)
 
 
