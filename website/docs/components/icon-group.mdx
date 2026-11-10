@@ -1,0 +1,59 @@
+---
+title: IconGroup 图标组
+description: 多个独立图标操作共用一个玻璃胶囊。
+---
+
+import { IconGroup, IconButton, fixed } from '@unif/react-native-design';
+import { SearchOutlined, PlusOutlined } from '@unif/react-native-icons';
+import { LiveDemo } from '@site/src/components/LiveDemo';
+
+# IconGroup 图标组
+
+把导航栏内的多个图标操作放入同一玻璃胶囊，各按钮保持独立点击、名称与禁用状态。组件只组合展示，不接管导航或业务状态。
+
+<LiveDemo>
+  <IconGroup>
+    <IconButton
+      icon={SearchOutlined}
+      variant="neutral"
+      surfaceSize={fixed.hitTarget}
+      accessibilityLabel="搜索"
+      onPress={() => {}}
+    />
+    <IconButton
+      icon={PlusOutlined}
+      variant="neutral"
+      surfaceSize={fixed.hitTarget}
+      accessibilityLabel="新增"
+      onPress={() => {}}
+    />
+  </IconGroup>
+</LiveDemo>
+
+```tsx
+<IconGroup>
+  <IconButton
+    icon={SearchOutlined}
+    variant="neutral"
+    surfaceSize={fixed.hitTarget}
+    accessibilityLabel="搜索"
+    onPress={openSearch}
+  />
+  <IconButton
+    icon={PlusOutlined}
+    variant="neutral"
+    surfaceSize={fixed.hitTarget}
+    accessibilityLabel="新增"
+    onPress={createItem}
+  />
+</IconGroup>
+```
+
+使用 `neutral` 按钮避免每项重复绘制玻璃表面；`surfaceSize={fixed.hitTarget}` 为每个操作保留 44 逻辑点命中区。也可放入具有独立命中区的自定义内容。
+
+| 属性     | 类型      | 说明                       |
+| -------- | --------- | -------------------------- |
+| children | ReactNode | 图标按钮或其它独立操作内容 |
+| testID   | string    | 可选测试标识               |
+
+玻璃直接复用 [GlassLayer](./glass-layer.mdx)。原生玻璃可用时采用系统材质；旧 iOS、Android、减少透明度及 Web 的处理全部沿用现有规则，组件不增加版本判断或单独的降级实现。

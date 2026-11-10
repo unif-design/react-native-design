@@ -22,22 +22,23 @@ description: '按场景查找组件、代码示例与 API。'
 
 ## 通用 {#通用}
 
-| 组件                                         | 说明                                                                |
-| -------------------------------------------- | ------------------------------------------------------------------- |
-| [Button](button.md)            | 主操作按钮,8 variant × 3 size,可 block                              |
-| [IconButton](icon-button.md)   | 纯图标按钮,`accessibilityLabel` 类型必填                            |
-| [InlineConfirm](inline-confirm.md) | 图标原位切换确认文字，同一区域互斥与点外取消 |
-| [Avatar](avatar.md)            | circle/square monogram 头像,variant `brand`/`info`/`soft`/`neutral` |
-| [AvatarGroup](avatar-group.md) | 重叠头像组,统一形态与尺寸,支持 `max` 溢出及可选 action              |
-| [Tag](tag.md)                  | 状态徽章,5 语义 × 2 尺寸                                            |
-| [Chip](chip.md)                | 胶囊形可选中 pill(Suggestion 底层)                                  |
-| [Confirm](confirm.md)          | 命令式 `confirm()` + `<ConfirmHost />` 高风险二次确认               |
-| [Thumbnail](thumbnail.md)      | 缩略图，支持尺寸档位、尺寸对象和失败占位                            |
-| [Loading](loading.md)          | `Spinner` 未知时长加载；`CircularProgress` 确定进度与可选百分比     |
-| [Pulse](pulse.md)              | `usePulse` + `<Pulse>` + `<PulseDot>`,通用脉冲底座                  |
-| [ShimmerText](shimmer-text.md) | 文字每四秒一次白色扫光，支持停用与减少动态效果 |
-| [Reveal](reveal.md)            | 淡入容器：native Reanimated 入/退场 / Web CSS 入场                  |
-| [StatusDot](status-dot.md)     | `done`/`error`/`active`/`pending` 圆点,`flat`/`soft` 双 tone        |
+| 组件                                             | 说明                                                                |
+| ------------------------------------------------ | ------------------------------------------------------------------- |
+| [Button](button.md)                | 主操作按钮,8 variant × 3 size,可 block                              |
+| [IconGroup](icon-group.md)         | 多个独立图标操作共用一个玻璃胶囊                                    |
+| [IconButton](icon-button.md)       | 纯图标按钮,`accessibilityLabel` 类型必填                            |
+| [InlineConfirm](inline-confirm.md) | 图标原位切换确认文字，同一区域互斥与点外取消                        |
+| [Avatar](avatar.md)                | circle/square monogram 头像,variant `brand`/`info`/`soft`/`neutral` |
+| [AvatarGroup](avatar-group.md)     | 重叠头像组,统一形态与尺寸,支持 `max` 溢出及可选 action              |
+| [Tag](tag.md)                      | 状态徽章,5 语义 × 2 尺寸                                            |
+| [Chip](chip.md)                    | 胶囊形可选中 pill(Suggestion 底层)                                  |
+| [Confirm](confirm.md)              | 命令式 `confirm()` + `<ConfirmHost />` 高风险二次确认               |
+| [Thumbnail](thumbnail.md)          | 缩略图，支持尺寸档位、尺寸对象和失败占位                            |
+| [Loading](loading.md)              | `Spinner` 未知时长加载；`CircularProgress` 确定进度与可选百分比     |
+| [Pulse](pulse.md)                  | `usePulse` + `<Pulse>` + `<PulseDot>`,通用脉冲底座                  |
+| [ShimmerText](shimmer-text.md)     | 文字每四秒一次白色扫光，支持停用与减少动态效果                      |
+| [Reveal](reveal.md)                | 淡入容器：native Reanimated 入/退场 / Web CSS 入场                  |
+| [StatusDot](status-dot.md)         | `done`/`error`/`active`/`pending` 圆点,`flat`/`soft` 双 tone        |
 
 ## 表单 {#表单}
 
@@ -46,7 +47,7 @@ description: '按场景查找组件、代码示例与 API。'
 | [Input](input.md)                  | 单行输入,idle / focus / filled / error                                           |
 | [PasswordInput](password-input.md) | 密码输入与显示切换                                                               |
 | [Textarea](textarea.md)            | 多行输入，支持内容增长与最大高度                                                 |
-| [Search](search.md)                | 搜索输入与清除操作                                                              |
+| [Search](search.md)                | 搜索输入与清除操作                                                               |
 | [Checkbox](checkbox.md)            | 复选                                                                             |
 | [Radio](radio.md)                  | 单选选项与 `Radio.Group`                                                         |
 | [Switch](switch.md)                | 开关：native Reanimated / Web CSS transition                                     |
@@ -66,20 +67,20 @@ Input、Textarea、Search 和 PasswordInput 共用内部 [TextField 内核](text
 
 ## 反馈 {#反馈}
 
-| 组件                                         | 说明                                                   |
-| -------------------------------------------- | ------------------------------------------------------ |
-| [Toast](toast.md)              | 命令式 `toast()` + `<ToastHost />` 全局轻提示          |
-| [Empty](empty.md)              | 空状态                                                 |
-| [Skeleton](skeleton.md)        | 骨架占位,`shape='line'/'rect'/'circle'`(走 `usePulse`) |
-| [CircularProgress](loading.md) | `0..1` 确定圆形进度，可选中央百分比文字                |
-| [LinearProgress](linear-progress.md) | `0..1` 横向进度，默认 2pt，支持主题与读屏百分比 |
+| 组件                                               | 说明                                                   |
+| -------------------------------------------------- | ------------------------------------------------------ |
+| [Toast](toast.md)                    | 命令式 `toast()` + `<ToastHost />` 全局轻提示          |
+| [Empty](empty.md)                    | 空状态                                                 |
+| [Skeleton](skeleton.md)              | 骨架占位,`shape='line'/'rect'/'circle'`(走 `usePulse`) |
+| [CircularProgress](loading.md)       | `0..1` 确定圆形进度，可选中央百分比文字                |
+| [LinearProgress](linear-progress.md) | `0..1` 横向进度，默认 2pt，支持主题与读屏百分比        |
 
 ## 数据展示 {#数据展示}
 
 | 组件                                  | 说明                                                          |
 | ------------------------------------- | ------------------------------------------------------------- |
 | [Cell · List](cell.md)  | 列表行 + List 容器,grouped(白卡 + gap)/ flush(hairline)两模式 |
-| [Card](card.md)         | 内容卡，支持 `default`／`plain`／`glass` |
+| [Card](card.md)         | 内容卡，支持 `default`／`plain`／`glass`                      |
 | [Ribbon](ribbon.md)     | 包裹内容的右上缎带,`brand`/`danger` 语义色与可选读屏文案      |
 | [Grid](grid.md)         | 九宫格图标网格                                                |
 | [Carousel](carousel.md) | 轮播(包装 reanimated-carousel v5)                             |

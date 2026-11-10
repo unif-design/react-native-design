@@ -74,6 +74,7 @@ const expectedUiComponents = [
   'FormRow',
   'Grid',
   'IconButton',
+  'IconGroup',
   'InlineConfirmScope',
   'Input',
   'Logo',
@@ -115,6 +116,7 @@ const expectedComponentsByScene = {
     'ActionMenuContent',
     'Button',
     'IconButton',
+    'IconGroup',
     'InlineConfirmScope',
     'Chip',
     'Tag',
@@ -194,6 +196,7 @@ const expectedStateIdsByComponent = {
     'button.disabled',
     'button.loading',
   ],
+  IconGroup: ['icon-group.actions'],
   IconButton: [
     'icon-button.variants',
     'icon-button.sizes',

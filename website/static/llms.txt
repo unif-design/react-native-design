@@ -35,6 +35,7 @@
 - [GlassStats 玻璃数据条](md/components/glass-stats.md) — 以多列数字和标签展示统计摘要。
 - [Grid 九宫格](md/components/grid.md) — 以网格排列图标与文字入口。
 - [IconButton 图标按钮](md/components/icon-button.md) — 只包含图标的按钮，需要提供无障碍名称。
+- [IconGroup 图标组](md/components/icon-group.md) — 多个独立图标操作共用一个玻璃胶囊。
 - [图标](md/components/icons.md) — 预览常用图标，直接使用 Unif Icons 独立图标组件。
 - [ImagePreview 图片预览](md/components/image-preview.md) — 按稳定身份预览图片，交付切换和删除请求。
 - [InlineConfirm 原位确认](md/components/inline-confirm.md) — IconButton 按需启用二次确认，同一区域只保留一处确认。
