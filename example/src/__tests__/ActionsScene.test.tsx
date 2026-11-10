@@ -406,3 +406,20 @@ test('动作内容真实交付选择和二次确认', () => {
   });
   coverage.expectComplete();
 });
+
+test('IconGroup 胶囊中的按钮独立交付动作', () => {
+  render(<App />);
+  enterActions();
+  const coverage = createShowcaseStateCoverage('IconGroup');
+  coverage.prove('icon-group.actions', () => {
+    fireEvent.press(screen.getByRole('button', { name: '分组新增' }));
+    expect(
+      screen.getByText('最新结果：IconGroup · 新增 · 独立点击')
+    ).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: '分组通知' }));
+    expect(
+      screen.getByText('最新结果：IconGroup · 通知 · 独立点击')
+    ).toBeOnTheScreen();
+  });
+  coverage.expectComplete();
+});

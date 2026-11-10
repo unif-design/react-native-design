@@ -17,6 +17,8 @@ import {
   Button,
   Chip,
   IconButton,
+  IconGroup,
+  fixed,
   InlineConfirmScope,
   Segmented,
   StatusDot,
@@ -388,6 +390,25 @@ export function ActionsScene(): React.JSX.Element {
           </View>
         </SectionCard>
 
+        <SectionCard title="IconGroup 共用玻璃胶囊">
+          <IconGroup testID="actions-icon-group">
+            <IconButton
+              icon={PlusOutlined}
+              variant="neutral"
+              surfaceSize={fixed.hitTarget}
+              accessibilityLabel="分组新增"
+              testID="actions-group-add"
+              onPress={() => record('IconGroup', '新增', '独立点击')}
+            />
+            <IconButton
+              icon={BellOutlined}
+              variant="neutral"
+              surfaceSize={fixed.hitTarget}
+              accessibilityLabel="分组通知"
+              onPress={() => record('IconGroup', '通知', '独立点击')}
+            />
+          </IconGroup>
+        </SectionCard>
         <SectionCard title="IconButton 公开状态">
           <View style={styles.row}>
             {iconButtonVariants.map((variant) => (

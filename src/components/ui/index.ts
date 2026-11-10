@@ -1,3 +1,5 @@
+export { IconGroup } from './IconGroup';
+export type { IconGroupProps } from './IconGroup';
 export { Avatar } from './Avatar';
 export type {
   AvatarProps,

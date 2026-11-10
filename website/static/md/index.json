@@ -147,6 +147,13 @@
     "description": "只包含图标的按钮，需要提供无障碍名称。"
   },
   {
+    "title": "IconGroup 图标组",
+    "mdPath": "md/components/icon-group.md",
+    "slug": "/components/icon-group",
+    "section": "components",
+    "description": "多个独立图标操作共用一个玻璃胶囊。"
+  },
+  {
     "title": "图标",
     "mdPath": "md/components/icons.md",
     "slug": "/components/icons",

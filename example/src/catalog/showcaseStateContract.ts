@@ -59,6 +59,19 @@ export type ShowcaseStateContractEntry = {
 
 export const showcaseStateContract = [
   {
+    id: 'icon-group.actions',
+    component: 'IconGroup',
+    scene: 'actions',
+    label: '独立点击',
+    witness: {
+      kind: 'interaction',
+      targetComponent: 'IconButton',
+      testID: 'actions-group-add',
+      handler: 'onPress',
+      calls: ['record'],
+    },
+  },
+  {
     id: 'icon-button.confirmation',
     component: 'IconButton',
     scene: 'actions',

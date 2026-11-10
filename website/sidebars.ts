@@ -38,6 +38,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'components/button',
         'components/icon-button',
+        'components/icon-group',
         'components/inline-confirm',
         'components/action-menu-content',
         'components/avatar',
@@ -116,7 +117,7 @@ const sidebars: SidebarsConfig = {
       label: '其他',
       collapsed: true,
       items: [
-            'components/glass-layer',
+        'components/glass-layer',
         'components/entry-card',
         'components/chip',
         'components/confirm',
