@@ -1,5 +1,5 @@
 import React from 'react';
-import { AccessibilityInfo } from 'react-native';
+import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
 import {
   fireEvent,
   render,
@@ -13,10 +13,51 @@ import {
   IconButton,
   ThemeProvider,
   lightColors,
-  darkColors,
 } from '@unif/react-native-design';
+import { resolveThemeColors } from '../../../src/theme/nativeFallbackColors';
 
 afterEach(() => jest.restoreAllMocks());
+
+test.each(['ios', 'android'] as const)(
+  '%s 无原生玻璃时，按钮组与独立图标按钮共用清晰底色',
+  async (platform) => {
+    jest.replaceProperty(Platform, 'OS', platform);
+    jest.replaceProperty(
+      LiquidGlass as { isLiquidGlassSupported: boolean },
+      'isLiquidGlassSupported',
+      false
+    );
+    render(
+      <ThemeProvider forceScheme="light">
+        <IconGroup testID="navigation">
+          <IconButton
+            icon={SearchOutlined}
+            variant="neutral"
+            accessibilityLabel="导航"
+            onPress={() => {}}
+          />
+        </IconGroup>
+        <IconButton
+          icon={PlusOutlined}
+          accessibilityLabel="新会话"
+          onPress={() => {}}
+        />
+      </ThemeProvider>
+    );
+    const group = screen.getByTestId('navigation-glass', {
+      includeHiddenElements: true,
+    });
+    const button = screen
+      .getByRole('button', { name: '新会话' })
+      .findByType(LiquidGlass.LiquidGlassView);
+    expect(group).toHaveStyle({
+      backgroundColor: StyleSheet.flatten(button.props.style).backgroundColor,
+    });
+    expect(StyleSheet.flatten(group.props.style).backgroundColor).not.toBe(
+      lightColors.surface
+    );
+  }
+);
 
 test.each([
   { supported: true, reduced: false, effect: 'regular', scheme: 'light' },
@@ -69,9 +110,7 @@ test.each([
       backgroundColor:
         supported && !reduced
           ? 'transparent'
-          : scheme === 'dark'
-            ? darkColors.surface
-            : lightColors.surface,
+          : resolveThemeColors(scheme).surfaceContainerHigh,
     });
     expect(screen.getAllByRole('button')).toHaveLength(2);
     fireEvent.press(screen.getByRole('button', { name: '搜索' }));

@@ -54,4 +54,4 @@ description: 多个独立图标操作共用一个玻璃胶囊。
 | children | ReactNode | 图标按钮或其它独立操作内容 |
 | testID   | string    | 可选测试标识               |
 
-玻璃直接复用 [GlassLayer](glass-layer.md)。原生玻璃可用时采用系统材质；旧 iOS、Android、减少透明度及 Web 的处理全部沿用现有规则，组件不增加版本判断或单独的降级实现。
+玻璃直接复用 [GlassLayer](glass-layer.md)。原生玻璃可用时采用系统材质；旧 iOS、Android 或减少透明度时使用主题 `surfaceContainerHigh`，与独立 IconButton 的控件底色一致，避免在白色导航栏上失去分组轮廓。组内 `neutral` 按钮共用这一层背景。Web 继续沿用现有材质规则，组件不增加版本判断或单独的降级实现。
