@@ -17,6 +17,7 @@ import {
   pressedOpacity,
   radius,
   useColors,
+  useMotionActive,
   useThemedStyles,
 } from '../../../theme';
 import { GlassLayer } from '../GlassLayer';
@@ -29,7 +30,7 @@ import type {
 } from './types';
 
 export type ButtonBaseProps = {
-  buttonRef?: React.Ref<View>;
+  buttonRef?: React.ComponentProps<typeof Pressable>['ref'];
   onPress: () => void;
   onTouchStart?: ViewProps['onTouchStart'];
   onPointerDown?: ViewProps['onPointerDown'];
@@ -85,6 +86,7 @@ export function ButtonBase({
   children,
 }: ButtonBaseProps): React.JSX.Element {
   const c = useColors();
+  const motionActive = useMotionActive();
   const styles = useThemedStyles(makeStyles);
 
   const sizing = useMemo(() => {
@@ -124,7 +126,12 @@ export function ButtonBase({
 
   const content =
     loading && !showContentWhenLoading ? (
-      <ActivityIndicator size={loadingSize ?? 'small'} color={palette.fg} />
+      <ActivityIndicator
+        size={loadingSize ?? 'small'}
+        color={palette.fg}
+        animating={motionActive}
+        hidesWhenStopped={false}
+      />
     ) : (
       children({ sizing, palette })
     );

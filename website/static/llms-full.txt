@@ -5056,6 +5056,8 @@ import { ShimmerText } from '@unif/react-native-design';
 
 停用 `active`、系统开启减少动态效果或文案为空时呈现静态文字。平台动态色等不能用于颜色插值的输入也保持静态显示。替换文字会结束旧文案的动画并从新文案开始；卸载后释放本实例的动画资源。
 
+页面不可见时可通过 [MotionScope](md/design/tokens/motion.md#页面可见性) 暂停扫光并保留当前文字与相位；恢复底色的等待区间不请求动画帧。
+
 组件只负责视觉，不推断进度、不发出任务完成回调。屏幕阅读器读取完整文字，不逐字重复朗读；忙碌区域和额外说明由调用方按真实状态提供。
 
 ## API
@@ -7508,6 +7510,24 @@ function Blink() {
   return <Dot animated={!reduced} />;
 }
 ```
+
+## 页面可见性 / `MotionScope` {#页面可见性}
+
+`MotionScope` 接收 `active: boolean`，由宿主交付页面或窗口是否可见。嵌套范围取父范围与自身的交集；未提供范围时沿用正常播放。它只暂停循环装饰，不卸载内容、清空输入或取消业务操作，也不改变原有入退场动画。
+
+```tsx
+import { MotionScope, ShimmerText } from '@unif/react-native-design';
+
+function Page({ visible }: { visible: boolean }) {
+  return (
+    <MotionScope active={visible}>
+      <ShimmerText>思考中</ShimmerText>
+    </MotionScope>
+  );
+}
+```
+
+`ShimmerText`、`Pulse`／`Skeleton`、`Spinner`、原生加载指示与轮播自动播放消费此范围。文字扫光恢复时接续暂停的实际末帧相位；扫光颜色、速度及 4000ms 周期保持原样，底色等待区间不逐帧计算。其他循环动效可用 `useMotionActive(): boolean` 读取当前范围并收尾自身驱动；路由、应用前后台与业务执行仍归宿主维护。
 
 ## 按压态规则 {#按压态规则}
 

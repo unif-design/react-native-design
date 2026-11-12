@@ -73,13 +73,15 @@ test('公开文字组件保留文案、原生文字参数和调用方字号，�
   expect(Animated.timing).toHaveBeenCalledWith(
     expect.anything(),
     expect.objectContaining({
-      duration: 4000,
+      duration: 1240,
       useNativeDriver: false,
       isInteraction: false,
     })
   );
   page.rerender(view());
-  expect(animations).toHaveLength(1);
+  expect(
+    animations.filter((item) => item.start.mock.calls.length > 0)
+  ).toHaveLength(1);
 });
 
 test('深色默认白字扫过时改变颜色，随后恢复原色', () => {
@@ -104,15 +106,23 @@ test('文字换代、结束和卸载停止各自循环，迟到帧不会重新�
   const finish = first.start.mock.calls[0]![0];
   page.rerender(view('小U识别中'));
   expect(first.stop).toHaveBeenCalledTimes(1);
-  expect(animations[1]!.value).not.toBe(first.value);
+  const second = animations.find(
+    (item) => item.value !== first.value && item.start.mock.calls.length > 0
+  )!;
+  expect(second.value).not.toBe(first.value);
   act(() => finish({ finished: true }));
   expect(first.start).toHaveBeenCalledTimes(1);
   page.rerender(view('已思考', false));
-  expect(animations[1]!.stop).toHaveBeenCalledTimes(1);
+  expect(second.stop).toHaveBeenCalledTimes(1);
   expect(page.getByTestId('status')).toHaveTextContent('已思考');
   expect(page.UNSAFE_queryAllByType(Animated.Text)).toHaveLength(0);
   page.rerender(view());
-  const current = animations[2]!;
+  const current = animations.find(
+    (item) =>
+      item.value !== first.value &&
+      item.value !== second.value &&
+      item.start.mock.calls.length > 0
+  )!;
   page.unmount();
   expect(current.stop).toHaveBeenCalledTimes(1);
 });
@@ -120,7 +130,9 @@ test('文字换代、结束和卸载停止各自循环，迟到帧不会重新�
 test('减少动态效果和空文字保持静态，恢复后从新的循环开始', () => {
   jest.mocked(reanimated.useReducedMotion).mockReturnValue(true);
   const page = render(view());
-  expect(animations).toHaveLength(0);
+  expect(
+    animations.filter((item) => item.start.mock.calls.length > 0)
+  ).toHaveLength(0);
   expect(page.getByTestId('status')).toHaveTextContent('思考中');
   jest.mocked(reanimated.useReducedMotion).mockReturnValue(false);
   page.rerender(view());
@@ -130,7 +142,9 @@ test('减少动态效果和空文字保持静态，恢复后从新的循环开�
   expect(first.stop).toHaveBeenCalledTimes(1);
   jest.mocked(reanimated.useReducedMotion).mockReturnValue(false);
   page.rerender(view(''));
-  expect(animations).toHaveLength(1);
+  expect(
+    animations.filter((item) => item.start.mock.calls.length > 0)
+  ).toHaveLength(1);
   expect(page.getByTestId('status')).toHaveTextContent('');
 });
 

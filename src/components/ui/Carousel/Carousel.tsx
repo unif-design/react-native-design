@@ -8,6 +8,7 @@ import {
 import { useSharedValue } from 'react-native-reanimated';
 import {
   space,
+  useMotionActive,
   usePrefersReducedMotion,
   useThemedStyles,
 } from '../../../theme';
@@ -56,7 +57,9 @@ function CarouselInner<T>(
   const width = itemSize ?? screenWidth;
   const styles = useThemedStyles(makeCarouselStyles);
   const reducedMotion = usePrefersReducedMotion();
-  const effectiveAutoplay = effectiveCarouselAutoplay(autoplay, reducedMotion);
+  const active = useMotionActive();
+  const effectiveAutoplay =
+    active && effectiveCarouselAutoplay(autoplay, reducedMotion);
   const shouldRenderPagination = shouldRenderCarouselPagination(
     showIndicator,
     data.length

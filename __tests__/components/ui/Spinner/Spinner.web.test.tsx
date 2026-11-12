@@ -20,10 +20,10 @@ type ElementProps = {
   'children'?: ReactElement<ElementProps>;
 };
 
-function loadWebSpinner() {
+function loadWebSpinner(active = true) {
   const effects: Effect[] = [];
   const node = { style: {} as Record<string, string> };
-  const ringRef = { current: node };
+  const ringRef: { current: typeof node | null } = { current: node };
   const actualReact = jest.requireActual<typeof import('react')>('react');
 
   jest.doMock('react', () => ({
@@ -37,6 +37,7 @@ function loadWebSpinner() {
   jest.doMock('../../../../src/theme', () => ({
     r: (value: number) => value,
     useColors: () => ({ outline: 'outline', primary: 'primary' }),
+    useMotionActive: () => active,
   }));
 
   const Spinner = require('../../../../src/components/ui/Spinner/Spinner.web')
@@ -108,3 +109,15 @@ describe('Spinner Web structure', () => {
     );
   });
 });
+
+test.each([true, false])(
+  'Web spinner scope active=%s 控制 CSS 播放并允许 ref 清空',
+  (active) => {
+    const { Spinner, effects, node, ringRef } = loadWebSpinner(active);
+    Spinner({});
+    effects.forEach((effect) => effect());
+    expect(node.style.animationPlayState).toBe(active ? 'running' : 'paused');
+    ringRef.current = null;
+    effects.forEach((effect) => effect());
+  }
+);

@@ -10,4 +10,5 @@ export interface ShimmerTextProps extends Omit<TextProps, 'children'> {
 export interface ShimmerTextRunProps {
   text: string;
   color: string;
+  playing: boolean;
 }

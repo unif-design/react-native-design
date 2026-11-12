@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { usePrefersReducedMotion } from '../../../../theme';
+import { useMotionActive, usePrefersReducedMotion } from '../../../../theme';
 import { shouldAnimatePulse } from './normalizePulseOptions';
 import type { NormalizedPulseOptions } from './types';
 
 /** Web 由 CSS 补间，timer 只按归一化后的半周期切换透明度；每个实例独立释放。 */
 export function usePulseDriver(options: NormalizedPulseOptions) {
   const reduced = usePrefersReducedMotion();
+  const active = useMotionActive();
   const animate = shouldAnimatePulse(options, reduced);
   const { from, to, duration, delay } = options;
   const [opacity, setOpacity] = useState(animate ? from : to);
@@ -16,6 +17,7 @@ export function usePulseDriver(options: NormalizedPulseOptions) {
       setOpacity(to);
       return;
     }
+    if (!active) return;
 
     setOpacity(from);
     let timer: ReturnType<typeof setInterval> | null = null;
@@ -40,11 +42,11 @@ export function usePulseDriver(options: NormalizedPulseOptions) {
       if (delayTimer != null) clearTimeout(delayTimer);
       if (timer != null) clearInterval(timer);
     };
-  }, [animate, from, to, duration, delay]);
+  }, [active, animate, from, to, duration, delay]);
 
   return {
     opacity,
-    ...(animate
+    ...(active && animate
       ? { transition: `opacity ${duration}ms ease-in-out` }
       : undefined),
   };

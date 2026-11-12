@@ -34,6 +34,8 @@ import {
   Ribbon,
   Search,
   ShimmerText,
+  MotionScope,
+  useMotionActive,
   lightColors,
   Stepper,
   Switch,
@@ -633,3 +635,13 @@ const shimmerTextStyle = { fontSize: 14, color: lightColors.foregroundMuted };
 </ShimmerText>;
 // @ts-expect-error active 必须是布尔值
 <ShimmerText active="true">思考中</ShimmerText>;
+
+function MotionConsumer() {
+  const active: boolean = useMotionActive();
+  return (
+    <MotionScope active={active}>
+      <ShimmerText>思考中</ShimmerText>
+    </MotionScope>
+  );
+}
+<MotionConsumer />;
