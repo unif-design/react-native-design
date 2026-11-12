@@ -483,6 +483,7 @@ export function FormsScene(): React.JSX.Element {
                   switchValue ? '草稿同步已开启' : '草稿同步已关闭'
                 );
               }}
+              stateLabels={{ off: '关闭', on: '开启' }}
               accessibilityLabel="同步草稿"
               testID="forms-switch"
             />

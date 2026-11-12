@@ -152,6 +152,50 @@ describe.each([
       expect(onChange).toHaveBeenCalledTimes(1);
     }
   );
+  test.each([false, true])(
+    '轨道显示布尔值对应文案并保留独立的控件名称，value=%s',
+    async (value) => {
+      const onChange = jest.fn();
+      const label = value ? '异常' : '正常';
+      render(
+        <ThemeProvider forceScheme="light">
+          <Component
+            value={value}
+            stateLabels={{ on: '异常', off: '正常' }}
+            accessibilityLabel="异常状态"
+            onChange={onChange}
+            testID="setting"
+          />
+        </ThemeProvider>
+      );
+      const owner = screen.getByRole('switch', { name: '异常状态' });
+      expect(owner.props.accessibilityValue).toEqual({ text: label });
+      expect(owner).toHaveStyle({ minHeight: 44, minWidth: 44 });
+      expect(screen.getByText(label, hidden)).toHaveStyle({
+        color: value ? lightColors.onPrimary : lightColors.foreground,
+      });
+      expect(screen.queryByText(value ? '正常' : '异常', hidden)).toBeNull();
+      if (platform === 'native') {
+        expect(Reanimated.interpolate).toHaveBeenCalledWith(
+          value ? 1 : 0,
+          [0, 1],
+          [r(2), -r(18)]
+        );
+      } else {
+        expect(screen.getByTestId('setting-thumb', hidden)).toHaveStyle({
+          left: value ? '100%' : '0%',
+          transform: [{ translateX: value ? -r(18) : r(2) }],
+        });
+      }
+      fireEvent.press(owner);
+      expect(onChange).toHaveBeenCalledWith(!value);
+      await waitFor(() =>
+        expect(
+          screen.getByTestId('setting-thumb-glass', hidden).props.effect
+        ).toBe('regular')
+      );
+    }
+  );
   test('reduced motion keeps the settled position without starting a transition', async () => {
     setReducedMotion(true);
     render(

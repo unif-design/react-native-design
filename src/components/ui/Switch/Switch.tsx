@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import { Pressable } from 'react-native-gesture-handler';
 
 import Animated, {
@@ -21,7 +21,12 @@ import { childTestID } from '../../../utils/testID';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { normalizeNonBlankText } from '../shared/accessibilityName';
 import { GlassLayer } from '../GlassLayer';
-import { makeStyles, THUMB_OFF_X, THUMB_ON_X } from './styles';
+import {
+  makeStyles,
+  LABELED_THUMB_ON_X,
+  THUMB_OFF_X,
+  THUMB_ON_X,
+} from './styles';
 import type { SwitchProps } from './types';
 
 const log = createLogger('Switch');
@@ -37,6 +42,7 @@ export function Switch({
   onChange,
   disabled,
   accessibilityLabel,
+  stateLabels,
   testID,
 }: SwitchProps): React.JSX.Element {
   const c = useColors();
@@ -46,6 +52,8 @@ export function Switch({
   const accessibleName = normalizeNonBlankText(accessibilityLabel);
   const hasBlankLabel = accessibleName === undefined;
   const isDisabled = disabled === true || hasBlankLabel;
+  const hasLabels = stateLabels !== undefined;
+  const label = value ? stateLabels?.on : stateLabels?.off;
 
   useEffect(() => {
     if (reducedMotion) {
@@ -71,12 +79,13 @@ export function Switch({
   }));
 
   const thumbStyle = useAnimatedStyle(() => ({
+    ...(hasLabels ? { left: `${progress.value * 100}%` as const } : {}),
     transform: [
       {
         translateX: interpolate(
           progress.value,
           [0, 1],
-          [THUMB_OFF_X, THUMB_ON_X]
+          [THUMB_OFF_X, hasLabels ? LABELED_THUMB_ON_X : THUMB_ON_X]
         ),
       },
     ],
@@ -87,7 +96,7 @@ export function Switch({
       accessible={!hasBlankLabel}
       onPress={isDisabled ? undefined : () => onChange(!value)}
       disabled={isDisabled}
-      style={styles.pressable}
+      style={[styles.pressable, hasLabels && styles.labeledPressable]}
       accessibilityRole={hasBlankLabel ? undefined : 'switch'}
       role={hasBlankLabel ? undefined : 'switch'}
       aria-checked={hasBlankLabel ? undefined : value}
@@ -97,19 +106,37 @@ export function Switch({
         hasBlankLabel ? undefined : { checked: value, disabled: isDisabled }
       }
       accessibilityLabel={accessibleName}
+      accessibilityValue={hasLabels ? { text: label } : undefined}
       testID={testID}
     >
       <View
         {...A11Y_HIDDEN_PROPS}
-        style={styles.visualFrame}
+        style={[styles.visualFrame, hasLabels && styles.labeledFrame]}
         testID={childTestID(testID, 'visual')}
       >
         <Animated.View
-          style={[styles.track, trackStyle, isDisabled && styles.trackDisabled]}
+          style={[
+            styles.track,
+            hasLabels && styles.labeledTrack,
+            trackStyle,
+            isDisabled && styles.trackDisabled,
+          ]}
           testID={childTestID(testID, 'track')}
-        />
+        >
+          {hasLabels ? (
+            <Text
+              numberOfLines={1}
+              style={[
+                styles.stateLabel,
+                value ? styles.labelOn : styles.labelOff,
+              ]}
+            >
+              {label}
+            </Text>
+          ) : null}
+        </Animated.View>
         <Animated.View
-          style={[styles.thumb, thumbStyle]}
+          style={[styles.thumb, hasLabels && styles.labeledThumb, thumbStyle]}
           testID={childTestID(testID, 'thumb')}
         >
           <GlassLayer
