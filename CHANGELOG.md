@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.17.0](https://github.com/unif-design/react-native-design/compare/v1.16.1...v1.17.0) (2026-11-12)
+
+
+### Features
+
+* **switch:** 支持轨道内显示开关状态文字 ([#196](https://github.com/unif-design/react-native-design/issues/196)) ([350cc9b](https://github.com/unif-design/react-native-design/commit/350cc9befd2c1b26cec4295a29b33331807f2188))
+
 ## [1.16.1](https://github.com/unif-design/react-native-design/compare/v1.16.0...v1.16.1) (2026-11-10)
 
 
