@@ -1,5 +1,5 @@
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
-import { useColors, useThemedStyles } from '../../../theme';
+import { useColors, useMotionActive, useThemedStyles } from '../../../theme';
 
 import { normalizeNonBlankText } from '../shared/accessibilityName';
 import { useMenuMousePress } from './useMenuMousePress';
@@ -13,6 +13,7 @@ export function ActionMenuItem({
 }: ActionMenuItemProps) {
   const styles = useThemedStyles(makeStyles);
   const colors = useColors();
+  const motionActive = useMotionActive();
   const label = normalizeNonBlankText(action.label);
   const busy = action.loading === true;
   const disabled = action.disabled === true || busy || !label;
@@ -47,7 +48,12 @@ export function ActionMenuItem({
           importantForAccessibility="no-hide-descendants"
         >
           {busy ? (
-            <ActivityIndicator size="small" color={color} />
+            <ActivityIndicator
+              size="small"
+              color={color}
+              animating={motionActive}
+              hidesWhenStopped={false}
+            />
           ) : action.icon ? (
             <action.icon size={20} color={color} />
           ) : null}

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View } from 'react-native';
-import { r, useColors } from '../../../theme';
+import { r, useColors, useMotionActive } from '../../../theme';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { sanitizeSpinnerProps, SPINNER_CENTER_STYLE } from './shared';
 import type { SpinnerProps } from './types';
@@ -39,6 +39,7 @@ export function Spinner({
   testID,
 }: SpinnerProps): React.JSX.Element {
   const c = useColors();
+  const active = useMotionActive();
   // tsconfig 不带 DOM lib；Web View ref 实际拿到带 style 的 HTMLElement。
   const ref = useRef<any>(null);
   const stroke = color ?? c.primary;
@@ -55,6 +56,12 @@ export function Spinner({
       node.style.animation = 'unif-spinner-spin 900ms linear infinite';
     }
   }, []);
+
+  useEffect(() => {
+    if (ref.current?.style) {
+      ref.current.style.animationPlayState = active ? 'running' : 'paused';
+    }
+  }, [active]);
 
   return (
     <View

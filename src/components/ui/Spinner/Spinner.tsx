@@ -9,7 +9,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import { r, useColors } from '../../../theme';
+import { r, useColors, useMotionActive } from '../../../theme';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { sanitizeSpinnerProps, SPINNER_CENTER_STYLE } from './shared';
 import type { SpinnerProps } from './types';
@@ -22,11 +22,14 @@ export function Spinner({
   testID,
 }: SpinnerProps): React.JSX.Element {
   const c = useColors();
+  const active = useMotionActive();
   const angle = useSharedValue(0);
   const stroke = color ?? c.primary;
   const { safeSize, safeThickness } = sanitizeSpinnerProps(size, thickness);
 
   useEffect(() => {
+    if (!active) return;
+    angle.value = 0;
     // 加载指示属 essential motion(W3C):系统「减弱动态效果」下仍应旋转,否则会冻结成
     // 与空闲/完成不可区分的静止圆环(形似卡死)。显式 ReduceMotion.Never 覆盖 reanimated
     // 默认的 System —— 后者在 reduce-motion 下让 withTiming 跳端值、withRepeat 一轮即停。
@@ -42,7 +45,7 @@ export function Spinner({
       ReduceMotion.Never
     );
     return () => cancelAnimation(angle);
-  }, [angle]);
+  }, [active, angle]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${angle.value}deg` }],

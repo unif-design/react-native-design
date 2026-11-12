@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react';
-import { View } from 'react-native';
+import type { Pressable } from 'react-native-gesture-handler';
 import { ButtonBase } from '../Button/ButtonBase';
 import type {
   IconButtonConfirmation,
@@ -16,7 +16,7 @@ export function InlineConfirmButton({
   onPress,
   ...props
 }: IconButtonProps & { confirmation: IconButtonConfirmation }) {
-  const button = useRef<View>(null);
+  const button = useRef<React.ComponentRef<typeof Pressable>>(null);
   const containsTarget = useCallback((target: unknown) => {
     const host = button.current;
     return Boolean(

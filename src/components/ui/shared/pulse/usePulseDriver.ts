@@ -8,7 +8,7 @@ import {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { usePrefersReducedMotion } from '../../../../theme';
+import { useMotionActive, usePrefersReducedMotion } from '../../../../theme';
 import { shouldAnimatePulse } from './normalizePulseOptions';
 import type { NormalizedPulseOptions } from './types';
 
@@ -20,6 +20,7 @@ import type { NormalizedPulseOptions } from './types';
  */
 export function usePulseDriver(options: NormalizedPulseOptions) {
   const reduced = usePrefersReducedMotion();
+  const active = useMotionActive();
   const animate = shouldAnimatePulse(options, reduced);
   const { from, to, duration, delay } = options;
   const op = useSharedValue(animate ? from : to);
@@ -31,6 +32,7 @@ export function usePulseDriver(options: NormalizedPulseOptions) {
       op.value = to;
       return;
     }
+    if (!active) return;
     // from 变化时把 baseline 拉到新值,再启动循环;否则首帧会闪一下旧 baseline。
     op.value = from;
     const cycle = withRepeat(
@@ -43,7 +45,7 @@ export function usePulseDriver(options: NormalizedPulseOptions) {
     );
     op.value = delay > 0 ? withDelay(delay, cycle) : cycle;
     return () => cancelAnimation(op);
-  }, [op, animate, from, to, duration, delay]);
+  }, [op, active, animate, from, to, duration, delay]);
 
   return useAnimatedStyle(() => ({ opacity: op.value }));
 }

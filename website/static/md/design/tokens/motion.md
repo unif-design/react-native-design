@@ -55,6 +55,24 @@ function Blink() {
 }
 ```
 
+## 页面可见性 / `MotionScope` {#页面可见性}
+
+`MotionScope` 接收 `active: boolean`，由宿主交付页面或窗口是否可见。嵌套范围取父范围与自身的交集；未提供范围时沿用正常播放。它只暂停循环装饰，不卸载内容、清空输入或取消业务操作，也不改变原有入退场动画。
+
+```tsx
+import { MotionScope, ShimmerText } from '@unif/react-native-design';
+
+function Page({ visible }: { visible: boolean }) {
+  return (
+    <MotionScope active={visible}>
+      <ShimmerText>思考中</ShimmerText>
+    </MotionScope>
+  );
+}
+```
+
+`ShimmerText`、`Pulse`／`Skeleton`、`Spinner`、原生加载指示与轮播自动播放消费此范围。文字扫光恢复时接续暂停的实际末帧相位；扫光颜色、速度及 4000ms 周期保持原样，底色等待区间不逐帧计算。其他循环动效可用 `useMotionActive(): boolean` 读取当前范围并收尾自身驱动；路由、应用前后台与业务执行仍归宿主维护。
+
 ## 按压态规则 {#按压态规则}
 
 - **非品牌表面** —— 按压时 `opacity: 0.7`。

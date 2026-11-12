@@ -1,5 +1,9 @@
 import { StyleSheet, Text } from 'react-native';
-import { useColors, usePrefersReducedMotion } from '../../../theme';
+import {
+  useColors,
+  useMotionActive,
+  usePrefersReducedMotion,
+} from '../../../theme';
 import { ShimmerTextRun } from './ShimmerTextRun';
 import type { ShimmerTextProps } from './types';
 
@@ -11,6 +15,7 @@ export function ShimmerText({
 }: ShimmerTextProps) {
   const colors = useColors();
   const reducedMotion = usePrefersReducedMotion();
+  const playing = useMotionActive();
   const color = StyleSheet.flatten(style)?.color ?? colors.foreground;
   return (
     <Text {...props} style={[{ color }, style]}>
@@ -19,6 +24,7 @@ export function ShimmerText({
           key={`${color}:${children}`}
           text={children}
           color={color}
+          playing={playing}
         />
       ) : (
         children

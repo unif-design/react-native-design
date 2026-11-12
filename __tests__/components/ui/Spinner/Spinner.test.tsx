@@ -28,6 +28,7 @@ function loadNativeSpinner() {
   jest.doMock('../../../../src/theme', () => ({
     r: (value: number) => value,
     useColors: () => ({ outline: 'outline', primary: 'primary' }),
+    useMotionActive: () => true,
   }));
   jest.doMock('react-native-reanimated', () => ({
     __esModule: true,

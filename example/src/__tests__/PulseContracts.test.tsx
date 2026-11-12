@@ -2,6 +2,7 @@ import React from 'react';
 import { act, render, screen } from '@testing-library/react-native';
 import { StyleSheet, Text } from 'react-native';
 import {
+  MotionScope,
   Pulse,
   PulseDot,
   Skeleton,
@@ -106,5 +107,30 @@ test('显式参数更新、延迟、减弱动效恢复不沿用旧周期', () =>
   act(() => jest.advanceTimersByTime(200));
   expect(opacity('dot')).toBe(0.9);
   view.unmount();
+  expect(jest.getTimerCount()).toBe(0);
+});
+
+test('隐藏范围停止 Web 脉冲计时，恢复不重挂载内容', () => {
+  const content = (active: boolean) => (
+    <ThemeProvider>
+      <MotionScope active={active}>
+        <Pulse testID="hidden-pulse">
+          <Text>保留内容</Text>
+        </Pulse>
+      </MotionScope>
+    </ThemeProvider>
+  );
+  const page = render(content(true));
+  const text = page.getByText('保留内容');
+  act(() => jest.advanceTimersByTime(700));
+  expect(opacity('hidden-pulse')).toBe(1);
+  page.rerender(content(false));
+  expect(jest.getTimerCount()).toBe(0);
+  act(() => jest.advanceTimersByTime(5000));
+  expect(opacity('hidden-pulse')).toBe(1);
+  page.rerender(content(true));
+  expect(jest.getTimerCount()).toBe(1);
+  expect(page.getByText('保留内容')).toBe(text);
+  page.unmount();
   expect(jest.getTimerCount()).toBe(0);
 });
