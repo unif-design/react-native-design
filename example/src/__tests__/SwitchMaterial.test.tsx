@@ -196,7 +196,7 @@ describe.each([
       );
     }
   );
-  test('当前状态文案为空白时沿用默认轨道与布尔读屏状态', () => {
+  test('当前状态文案为空白时沿用默认轨道与布尔读屏状态', async () => {
     render(
       <ThemeProvider>
         <Component
@@ -209,7 +209,12 @@ describe.each([
       </ThemeProvider>
     );
     const owner = screen.getByRole('switch', { name: '异常状态' });
-    expect(owner.props.accessibilityValue).toBeUndefined();
+    await waitFor(() =>
+      expect(
+        screen.getByTestId('setting-thumb-glass', hidden).props.effect
+      ).toBe('regular')
+    );
+    expect(owner.props.accessibilityValue?.text).toBeUndefined();
     expect(owner).toHaveStyle({ width: 44, height: 44 });
     expect(screen.getByTestId('setting-visual', hidden)).toHaveStyle({
       width: r(32),
