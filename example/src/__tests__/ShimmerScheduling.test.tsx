@@ -1,7 +1,8 @@
 import React from 'react';
-import { Animated, StyleSheet } from 'react-native';
+import { Animated, processColor, StyleSheet } from 'react-native';
 import { act, render } from '@testing-library/react-native';
 import {
+  lightColors,
   MotionScope,
   ShimmerText,
   ThemeProvider,
@@ -32,7 +33,9 @@ afterEach(() => jest.useRealTimers());
 test('文字恢复底色后的空闲区间不再请求动画帧，下一轮仍按原周期扫光', async () => {
   const page = await render(
     <ThemeProvider>
-      <ShimmerText style={{ color: '#222222' }}>小U识别中</ShimmerText>
+      <ShimmerText style={{ color: lightColors.foreground }}>
+        小U识别中
+      </ShimmerText>
     </ThemeProvider>
   );
   await act(() => jest.advanceTimersByTime(1600));
@@ -55,7 +58,7 @@ test('保留逐字文字、布局属性与原有线性扫光颜色', async () =>
     <ThemeProvider>
       <ShimmerText
         testID="progress"
-        style={{ color: '#222222', fontSize: 16 }}
+        style={{ color: lightColors.foreground, fontSize: 16 }}
         numberOfLines={1}
         accessibilityLabel="小U识别中"
       >
@@ -71,43 +74,46 @@ test('保留逐字文字、布局属性与原有线性扫光颜色', async () =>
   expect(page.getByText('B')).toBeOnTheScreen();
   const colors = () =>
     ['A', 'B'].map(
-      (text) => StyleSheet.flatten(page.getByText(text).props.style).color
+      (text) =>
+        Number(
+          processColor(
+            StyleSheet.flatten(page.getByText(text).props.style).color
+          )
+        ) >>> 0
     );
-  expect(colors()).toEqual(['rgba(34, 34, 34, 1)', 'rgba(34, 34, 34, 1)']);
+  expect(colors()).toEqual([0xff333333, 0xff333333]);
   await act(() => jest.advanceTimersByTime(400));
-  expect(colors()).toEqual([
-    'rgba(248, 248, 248, 1)',
-    'rgba(137, 137, 137, 1)',
-  ]);
+  expect(colors()).toEqual([0xfff8f8f8, 0xff929292]);
   await act(() => jest.advanceTimersByTime(1200));
-  expect(colors()).toEqual(['rgba(34, 34, 34, 1)', 'rgba(34, 34, 34, 1)']);
+  expect(colors()).toEqual([0xff333333, 0xff333333]);
   await act(() => jest.advanceTimersByTime(2800));
-  expect(colors()).toEqual([
-    'rgba(248, 248, 248, 1)',
-    'rgba(137, 137, 137, 1)',
-  ]);
+  expect(colors()).toEqual([0xfff8f8f8, 0xff929292]);
 });
 
 test.each([
-  { pausedAt: 400, expectedColor: 'rgba(248, 248, 248, 1)' },
-  { pausedAt: 411, expectedColor: 'rgba(248, 248, 248, 1)' },
-  { pausedAt: 1800, expectedColor: 'rgba(34, 34, 34, 1)' },
-  { pausedAt: 40400, expectedColor: 'rgba(248, 248, 248, 1)' },
-  { pausedAt: 80400, expectedColor: 'rgba(248, 248, 248, 1)' },
+  { pausedAt: 400, expectedColor: 0xfff8f8f8 },
+  { pausedAt: 411, expectedColor: 0xfff8f8f8 },
+  { pausedAt: 1800, expectedColor: 0xff333333 },
+  { pausedAt: 40400, expectedColor: 0xfff8f8f8 },
+  { pausedAt: 80400, expectedColor: 0xfff8f8f8 },
 ])(
   '在第 $pausedAt ms 隐藏时停止帧与等待定时器，恢复后接续原相位',
   async ({ pausedAt, expectedColor }) => {
     const content = (active: boolean) => (
       <ThemeProvider>
         <MotionScope active={active}>
-          <ShimmerText style={{ color: '#222222' }}>AB</ShimmerText>
+          <ShimmerText style={{ color: lightColors.foreground }}>
+            AB
+          </ShimmerText>
         </MotionScope>
       </ThemeProvider>
     );
     const page = await render(content(true));
     await act(() => jest.advanceTimersByTime(pausedAt));
     const character = page.getByText('A');
-    const color = () => StyleSheet.flatten(character.props.style).color;
+    const color = () =>
+      Number(processColor(StyleSheet.flatten(character.props.style).color)) >>>
+      0;
     const before = color();
     expect(before).toBe(expectedColor);
     await page.rerender(content(false));
