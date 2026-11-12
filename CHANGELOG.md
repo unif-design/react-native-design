@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.18.0](https://github.com/unif-design/react-native-design/compare/v1.17.0...v1.18.0) (2026-11-12)
+
+
+### Features
+
+* **motion:** 支持不可见范围暂停并优化文字流光 ([#197](https://github.com/unif-design/react-native-design/issues/197)) ([a4d3f2f](https://github.com/unif-design/react-native-design/commit/a4d3f2f7be1108b76944e6a1dc6704fe6b7d4d5a))
+
 # [1.17.0](https://github.com/unif-design/react-native-design/compare/v1.16.1...v1.17.0) (2026-11-12)
 
 
