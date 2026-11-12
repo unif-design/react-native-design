@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Pressable } from 'react-native-gesture-handler';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import {
   motion,
   useColors,
@@ -12,7 +12,12 @@ import { childTestID } from '../../../utils/testID';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { normalizeNonBlankText } from '../shared/accessibilityName';
 import { GlassLayer } from '../GlassLayer';
-import { makeStyles, THUMB_OFF_X, THUMB_ON_X } from './styles';
+import {
+  makeStyles,
+  LABELED_THUMB_ON_X,
+  THUMB_OFF_X,
+  THUMB_ON_X,
+} from './styles';
 import type { SwitchProps } from './types';
 
 const log = createLogger('Switch');
@@ -32,6 +37,7 @@ export function Switch({
   onChange,
   disabled,
   accessibilityLabel,
+  stateLabels,
   testID,
 }: SwitchProps): React.JSX.Element {
   const c = useColors();
@@ -40,6 +46,10 @@ export function Switch({
   const accessibleName = normalizeNonBlankText(accessibilityLabel);
   const hasBlankLabel = accessibleName === undefined;
   const isDisabled = disabled === true || hasBlankLabel;
+  const label = normalizeNonBlankText(
+    value ? stateLabels?.on : stateLabels?.off
+  );
+  const hasLabels = label !== undefined;
 
   useEffect(() => {
     if (hasBlankLabel) {
@@ -51,6 +61,7 @@ export function Switch({
   // 都不输出，避免浏览器仍创建零时长 transition。
   const trackWebStyle = {
     ...styles.track,
+    ...(hasLabels ? styles.labeledTrack : {}),
     backgroundColor: value ? c.primary : c.surfaceContainerHighest,
     ...(reducedMotion
       ? {}
@@ -63,11 +74,22 @@ export function Switch({
   } as unknown as object;
   const thumbWebStyle = {
     ...styles.thumb,
-    transform: [{ translateX: value ? THUMB_ON_X : THUMB_OFF_X }],
+    ...(hasLabels
+      ? { ...styles.labeledThumb, left: value ? '100%' : '0%' }
+      : {}),
+    transform: [
+      {
+        translateX: value
+          ? hasLabels
+            ? LABELED_THUMB_ON_X
+            : THUMB_ON_X
+          : THUMB_OFF_X,
+      },
+    ],
     ...(reducedMotion
       ? {}
       : {
-          transitionProperty: 'transform',
+          transitionProperty: hasLabels ? 'left, transform' : 'transform',
           transitionDuration: `${motion.base}ms`,
           transitionTimingFunction: 'ease-out',
         }),
@@ -78,7 +100,7 @@ export function Switch({
       accessible={!hasBlankLabel}
       onPress={isDisabled ? undefined : () => onChange(!value)}
       disabled={isDisabled}
-      style={styles.pressable}
+      style={[styles.pressable, hasLabels && styles.labeledPressable]}
       accessibilityRole={hasBlankLabel ? undefined : 'switch'}
       role={hasBlankLabel ? undefined : 'switch'}
       aria-checked={hasBlankLabel ? undefined : value}
@@ -88,17 +110,30 @@ export function Switch({
         hasBlankLabel ? undefined : { checked: value, disabled: isDisabled }
       }
       accessibilityLabel={accessibleName}
+      accessibilityValue={hasLabels ? { text: label } : undefined}
       testID={testID}
     >
       <View
         {...A11Y_HIDDEN_PROPS}
-        style={styles.visualFrame}
+        style={[styles.visualFrame, hasLabels && styles.labeledFrame]}
         testID={childTestID(testID, 'visual')}
       >
         <View
           style={[trackWebStyle, isDisabled && styles.trackDisabled]}
           testID={childTestID(testID, 'track')}
-        />
+        >
+          {hasLabels ? (
+            <Text
+              numberOfLines={1}
+              style={[
+                styles.stateLabel,
+                value ? styles.labelOn : styles.labelOff,
+              ]}
+            >
+              {label}
+            </Text>
+          ) : null}
+        </View>
         <View style={thumbWebStyle} testID={childTestID(testID, 'thumb')}>
           <GlassLayer
             style={styles.thumbMaterial}

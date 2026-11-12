@@ -1,8 +1,10 @@
 export type SwitchProps = {
   value: boolean;
   onChange: (value: boolean) => void;
-  /** Switch 没有内置可见文字，必须显式提供读屏名称 */
+  /** 控件名称；状态文字只描述当前值。 */
   accessibilityLabel: string;
+  /** 可选的轨道内状态短文案，开启显示 on，关闭显示 off。 */
+  stateLabels?: Readonly<{ on: string; off: string }>;
   disabled?: boolean;
   testID?: string;
 };

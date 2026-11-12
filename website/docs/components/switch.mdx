@@ -60,16 +60,12 @@ export const SwitchDemo = () => {
               gap: 6,
             }}
           >
-            <Switch value={b} onChange={setB} accessibilityLabel="示例开关 B" />
-            <span
-              style={{
-                fontFamily: 'Menlo',
-                fontSize: 11,
-                color: 'var(--ifm-color-emphasis-600)',
-              }}
-            >
-              {b ? '开' : '关'}
-            </span>
+            <Switch
+              value={b}
+              onChange={setB}
+              stateLabels={{ off: '正常', on: '异常' }}
+              accessibilityLabel="异常状态"
+            />
           </div>
           <div
             style={{
@@ -149,7 +145,7 @@ export const SwitchDemo = () => {
 
 ## 状态
 
-来源：`src/components/ui/Switch/styles.ts`、`Switch.tsx`。
+默认外观取自 `src/components/ui/Switch/styles.ts` 和 `Switch.tsx`。
 
 | 状态 | 视觉                                                                              |
 | ---- | --------------------------------------------------------------------------------- |
@@ -159,11 +155,9 @@ export const SwitchDemo = () => {
 
 滑块复用 `GlassLayer`，原生默认不额外设置染色；Android、旧 iOS 或系统减少透明度时使用主题 `surface` 实色。Web 使用 CSS 近似材质，无 CSS 模糊能力且未启用减少透明度时使用主题渐变。轨道与滑块是同一 visual frame 下的兄弟节点，禁用反馈不会降低材质及其祖先的整体透明度。
 
-outer RNGH `Pressable` 是透明的 44×44 真实布局 frame，尺寸直接读取
-`fixed.hitTarget`，不经过 `r()` 或 fontScale，也不再使用 `hitSlop`。32×20 visual
-frame 始终在其中居中。
+默认开关在 44×44 的透明命中框中居中呈现 32×20 轨道。传入 `stateLabels={{ off: '正常', on: '异常' }}` 时，轨道按当前文案和字号扩展，文字始终在滑块另一侧，命中区宽高均至少为 44。空白的状态文案沿用默认轨道。保留简短的状态文字，控件用途交给 `accessibilityLabel`。
 
-切换动画：thumb 水平移动 12px（off `x=2` → on `x=14`），背景颜色插值，200ms（`motion.base`）。native 走 Reanimated；系统开启 reduced motion 时先取消旧动画，再同步写入 0/1 终值。Web 开启 reduced motion 时直接更新稳态值，并且完全不输出 `transitionProperty`、`transitionDuration` 或 `transitionTimingFunction`。
+默认滑块从 x=2 移到 x=14。带标签时滑块移到轨道另一端，动画时长沿用 `motion.base`（200ms）。native 走 Reanimated；系统开启 reduced motion 时先取消旧动画，再同步写入 0/1 终值。Web 开启 reduced motion 时直接更新稳态值，并且完全不输出 `transitionProperty`、`transitionDuration` 或 `transitionTimingFunction`。
 
 ## 用法
 
@@ -214,13 +208,14 @@ import { Switch, Cell, List } from '@unif/react-native-design';
 
 来源：`src/components/ui/Switch/types.ts`、`Switch.tsx`。
 
-| 参数                 | 类型                       | 默认值 | 说明                                                                     |
-| -------------------- | -------------------------- | ------ | ------------------------------------------------------------------------ |
-| `value`              | `boolean`                  | —      | 当前状态（受控，必填）                                                   |
-| `onChange`           | `(value: boolean) => void` | —      | 切换回调（必填）                                                         |
-| `accessibilityLabel` | `string`                   | —      | Switch 没有内置可见文字，因此 accessible name 必填                       |
-| `disabled`           | `boolean?`                 | —      | 禁用时移除 handler、上报 disabled 并半透明                               |
-| `testID`             | `string?`                  | —      | outer frame 定位；自动派生 `${testID}-visual` / `-track` / `-thumb` 后代 |
+| 参数                 | 类型                          | 默认值 | 说明                                                                     |
+| -------------------- | ----------------------------- | ------ | ------------------------------------------------------------------------ |
+| `value`              | `boolean`                     | —      | 当前状态（受控，必填）                                                   |
+| `onChange`           | `(value: boolean) => void`    | —      | 切换回调（必填）                                                         |
+| `accessibilityLabel` | `string`                      | —      | 控件名称始终必填，状态文字通过 accessibilityValue 提供                   |
+| `stateLabels`        | `{ off: string; on: string }` | —      | 在滑块旁显示当前状态的短文案，轨道随文字宽度和字号调整。                 |
+| `disabled`           | `boolean?`                    | —      | 禁用时移除 handler、上报 disabled 并半透明                               |
+| `testID`             | `string?`                     | —      | outer frame 定位；自动派生 `${testID}-visual` / `-track` / `-thumb` 后代 |
 
 ## 无障碍（a11y）
 
@@ -242,10 +237,10 @@ import { Switch, Cell, List } from '@unif/react-native-design';
 
 在 runtime harness 的选择控件区用 Inspector 测量：
 
-| 节点                 | testID                    | 预期布局                                                                                                                    |
-| -------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| outer RNGH Pressable | `selection-switch`        | 所有平台固定 44×44，透明、无 `hitSlop`                                                                                      |
-| 本地 visual wrapper  | `selection-switch-visual` | 实现为 `r(32) × r(20)`，位于 outer 正中央；Web 与 402pt RN harness 实测应为 32×20，其他 native window 按实际 `r()` 结果验证 |
+| 节点                 | testID                    | 预期布局                                                                                                                        |
+| -------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| outer RNGH Pressable | `selection-switch`        | 默认 44×44；内显文案时至少 44×44，透明、无 `hitSlop`                                                                            |
+| 本地 visual wrapper  | `selection-switch-visual` | 默认尺寸为 `r(32) × r(20)`，位于 outer 正中央；Web 与 402pt RN harness 实测应为 32×20，其他 native window 按实际 `r()` 结果验证 |
 
 打开系统 reduced motion 后反复切换：native 必须取消进行中的动画并立即到终值。Web
 展开 visual wrapper，分别检查 `selection-switch-track` 与
