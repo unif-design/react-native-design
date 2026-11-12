@@ -161,7 +161,7 @@ describe.each([
         <ThemeProvider forceScheme="light">
           <Component
             value={value}
-            stateLabels={{ on: '异常', off: '正常' }}
+            stateLabels={{ on: ' 异常 ', off: '正常' }}
             accessibilityLabel="异常状态"
             onChange={onChange}
             testID="setting"
@@ -196,6 +196,26 @@ describe.each([
       );
     }
   );
+  test('当前状态文案为空白时沿用默认轨道与布尔读屏状态', () => {
+    render(
+      <ThemeProvider>
+        <Component
+          value={false}
+          stateLabels={{ off: '   ', on: '异常' }}
+          accessibilityLabel="异常状态"
+          onChange={jest.fn()}
+          testID="setting"
+        />
+      </ThemeProvider>
+    );
+    const owner = screen.getByRole('switch', { name: '异常状态' });
+    expect(owner.props.accessibilityValue).toBeUndefined();
+    expect(owner).toHaveStyle({ width: 44, height: 44 });
+    expect(screen.getByTestId('setting-visual', hidden)).toHaveStyle({
+      width: r(32),
+      height: r(20),
+    });
+  });
   test('reduced motion keeps the settled position without starting a transition', async () => {
     setReducedMotion(true);
     render(

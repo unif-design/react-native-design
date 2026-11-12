@@ -46,8 +46,10 @@ export function Switch({
   const accessibleName = normalizeNonBlankText(accessibilityLabel);
   const hasBlankLabel = accessibleName === undefined;
   const isDisabled = disabled === true || hasBlankLabel;
-  const hasLabels = stateLabels !== undefined;
-  const label = value ? stateLabels?.on : stateLabels?.off;
+  const label = normalizeNonBlankText(
+    value ? stateLabels?.on : stateLabels?.off
+  );
+  const hasLabels = label !== undefined;
 
   useEffect(() => {
     if (hasBlankLabel) {

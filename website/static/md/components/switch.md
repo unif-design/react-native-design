@@ -153,7 +153,7 @@ const SwitchDemo = () => {
 
 滑块复用 `GlassLayer`，原生默认不额外设置染色；Android、旧 iOS 或系统减少透明度时使用主题 `surface` 实色。Web 使用 CSS 近似材质，无 CSS 模糊能力且未启用减少透明度时使用主题渐变。轨道与滑块是同一 visual frame 下的兄弟节点，禁用反馈不会降低材质及其祖先的整体透明度。
 
-默认开关在 44×44 的透明命中框中居中呈现 32×20 轨道。传入 `stateLabels={{ off: '正常', on: '异常' }}` 时，轨道按当前文案和字号扩展，文字始终在滑块另一侧，命中区宽高均至少为 44。保留简短的状态文字，控件用途交给 `accessibilityLabel`。
+默认开关在 44×44 的透明命中框中居中呈现 32×20 轨道。传入 `stateLabels={{ off: '正常', on: '异常' }}` 时，轨道按当前文案和字号扩展，文字始终在滑块另一侧，命中区宽高均至少为 44。空白的状态文案沿用默认轨道。保留简短的状态文字，控件用途交给 `accessibilityLabel`。
 
 默认滑块从 x=2 移到 x=14。带标签时滑块移到轨道另一端，动画时长沿用 `motion.base`（200ms）。native 走 Reanimated；系统开启 reduced motion 时先取消旧动画，再同步写入 0/1 终值。Web 开启 reduced motion 时直接更新稳态值，并且完全不输出 `transitionProperty`、`transitionDuration` 或 `transitionTimingFunction`。
 
