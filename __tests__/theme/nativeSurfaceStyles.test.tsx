@@ -1,6 +1,6 @@
-import React from 'react';
+import { afterEach, expect, jest, test } from '@jest/globals';
 import { Platform } from 'react-native';
-import { renderHook } from '@testing-library/react-native';
+import { renderHook } from '../../example/node_modules/@testing-library/react-native';
 import * as LiquidGlass from '@callstack/liquid-glass';
 import {
   ThemeProvider,
@@ -12,7 +12,9 @@ import {
 
 const glassSupport: { isLiquidGlassSupported: boolean } = LiquidGlass;
 
-afterEach(() => jest.restoreAllMocks());
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 test.each([
   ['ios', false, 'light', true, true],

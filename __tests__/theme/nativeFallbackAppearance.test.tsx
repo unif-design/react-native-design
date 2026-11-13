@@ -1,4 +1,4 @@
-import React from 'react';
+import { afterEach, expect, jest, test } from '@jest/globals';
 import {
   AccessibilityInfo,
   Platform,
@@ -6,7 +6,11 @@ import {
   Text,
   View,
 } from 'react-native';
-import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import {
+  fireEvent,
+  render,
+  waitFor,
+} from '../../example/node_modules/@testing-library/react-native';
 import * as LiquidGlass from '@callstack/liquid-glass';
 import {
   Button,
@@ -20,7 +24,9 @@ import {
 
 const glassSupport: { isLiquidGlassSupported: boolean } = LiquidGlass;
 
-afterEach(() => jest.restoreAllMocks());
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 test.each([
   ['ios', false, 'light', true],
@@ -48,19 +54,23 @@ test.each([
     const baseline = page.getByTestId('baseline');
     const custom = page.getByTestId('custom');
     const baselineStyle = StyleSheet.flatten(baseline.props.style);
-    expect(custom).toHaveStyle({
+    expect(StyleSheet.flatten(custom.props.style)).toMatchObject({
       height: baselineStyle.height,
       paddingHorizontal: baselineStyle.paddingHorizontal,
       borderWidth: 1,
       backgroundColor: 'transparent',
       borderColor: override ? '#54BCEF' : baselineStyle.borderColor,
     });
-    expect(page.getByText('客户类型')).toHaveStyle({
+    expect(
+      StyleSheet.flatten(page.getByText('客户类型').props.style)
+    ).toMatchObject({
       color: override
         ? '#54BCEF'
         : StyleSheet.flatten(page.getByText('原标签').props.style).color,
     });
-    expect(page.getByTestId('level')).toHaveStyle({ borderWidth: 0 });
+    expect(
+      StyleSheet.flatten(page.getByTestId('level').props.style)
+    ).toMatchObject({ borderWidth: 0 });
   }
 );
 
@@ -83,12 +93,18 @@ test('Tag 降级配色不改变 variant 边宽，显式容器样式仍优先', (
       <Tag testID="level" variant="brand" label="等级" />
     </ThemeProvider>
   );
-  expect(page.getByTestId('custom')).toHaveStyle({
+  expect(
+    StyleSheet.flatten(page.getByTestId('custom').props.style)
+  ).toMatchObject({
     backgroundColor: '#FFFFFF',
     borderWidth: 0,
   });
-  expect(page.getByText('客户状态')).toHaveStyle({ color: '#EB6E00' });
-  expect(page.getByTestId('level')).toHaveStyle({
+  expect(
+    StyleSheet.flatten(page.getByText('客户状态').props.style)
+  ).toMatchObject({ color: '#EB6E00' });
+  expect(
+    StyleSheet.flatten(page.getByTestId('level').props.style)
+  ).toMatchObject({
     backgroundColor: '#FFF5EB',
     borderWidth: 0,
   });
@@ -192,7 +208,10 @@ test('白卡阴影不被自己的裁剪层截断，bare 与显式表面/边框�
     </ThemeProvider>
   );
   const card = page.getByTestId('card');
-  expect(card).toHaveStyle({ backgroundColor: '#123456', shadowOpacity: 0.04 });
+  expect(StyleSheet.flatten(card.props.style)).toMatchObject({
+    backgroundColor: '#123456',
+    shadowOpacity: 0.04,
+  });
   expect(StyleSheet.flatten(card.props.style).overflow).not.toBe('hidden');
   const clip = card
     .findAllByType(View)
@@ -236,7 +255,9 @@ test.each(['ios', 'android'] as const)(
       borderColor: 'rgba(0,0,0,0.08)',
     });
     expect(StyleSheet.flatten(surface().props.style)?.elevation ?? 0).toBe(0);
-    expect(page.getByTestId('search')).toHaveStyle({ minHeight: 44 });
+    expect(
+      StyleSheet.flatten(page.getByTestId('search').props.style)
+    ).toMatchObject({ minHeight: 44 });
     const shadowHost = page
       .getByTestId('search')
       .findAllByType(View)
