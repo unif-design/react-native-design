@@ -12,6 +12,10 @@ import {
 } from '../../../theme';
 import { Spinner } from '../Spinner';
 import { GlassLayer } from '../GlassLayer';
+import {
+  nativeFallbackStyles,
+  useNativeFallbackLight,
+} from '../../../theme/nativeFallbackStyles';
 import { makeStyles } from './styles';
 import type { ChipProps } from './types';
 
@@ -42,6 +46,7 @@ export function Chip({
   testID,
 }: ChipProps): React.JSX.Element {
   const c = useColors();
+  const fallbackLight = useNativeFallbackLight();
   const styles = useThemedStyles(makeStyles);
   // 处理中把 spinner 放进 leading 位(有 leading 就顶掉它):label 必须留着 —— 换掉它 chip
   // 会塌成一个圆点,同排 chip 集体重排。spinner 跟随文本色,不在未选中的 chip 上凭空冒主色。
@@ -110,16 +115,24 @@ export function Chip({
               style={[
                 styles.chip,
                 styles.glass,
+                fallbackLight && nativeFallbackStyles.control,
                 selected && styles.glassOn,
                 style,
               ]}
             >
               <GlassLayer
-                fallbackColor={c.surfaceContainerHigh}
-                style={{
-                  borderRadius:
-                    StyleSheet.flatten(style)?.borderRadius ?? radius.pill,
-                }}
+                fallbackColor={
+                  fallbackLight ? c.surface : c.surfaceContainerHigh
+                }
+                style={[
+                  {
+                    borderRadius:
+                      StyleSheet.flatten(style)?.borderRadius ?? radius.pill,
+                  },
+                  fallbackLight &&
+                    !selected &&
+                    nativeFallbackStyles.controlBorder,
+                ]}
               />
               <View collapsable={false} style={styles.content}>
                 {renderContent(opacity)}

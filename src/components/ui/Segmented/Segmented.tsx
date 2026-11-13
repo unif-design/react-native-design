@@ -10,6 +10,10 @@ import {
   useThemedStyles,
 } from '../../../theme';
 import { childTestID } from '../../../utils/testID';
+import {
+  nativeFallbackStyles,
+  useNativeFallbackLight,
+} from '../../../theme/nativeFallbackStyles';
 import { makeStyles, sizingFor } from './styles';
 import type { SegmentedProps } from './types';
 
@@ -28,6 +32,7 @@ export function Segmented({
   testID,
 }: SegmentedProps): React.JSX.Element {
   const { colors: c, scheme, shadow } = useTheme();
+  const fallbackLight = useNativeFallbackLight();
   const styles = useThemedStyles(makeStyles);
   const fontScale = useFontScale();
   const sizing = useMemo(() => sizingFor(size), [size]);
@@ -43,12 +48,23 @@ export function Segmented({
   return (
     // [L-34] accessibilityRole="tablist" —— SR 宣读"标签列表"
     <View
-      style={[styles.seg, surface === 'glass' && styles.glass]}
+      style={[
+        styles.seg,
+        isGlass && styles.glass,
+        isGlass && fallbackLight && nativeFallbackStyles.control,
+      ]}
       testID={testID}
       accessibilityRole="tablist"
       role="tablist"
     >
-      {surface === 'glass' ? <GlassLayer style={styles.material} /> : null}
+      {isGlass ? (
+        <GlassLayer
+          style={[
+            styles.material,
+            fallbackLight && nativeFallbackStyles.controlBorder,
+          ]}
+        />
+      ) : null}
       {items.map((it) => {
         const on = it.id === value;
         const itemTestID = childTestID(testID, it.id, it.testID);

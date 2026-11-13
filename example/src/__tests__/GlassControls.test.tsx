@@ -188,7 +188,9 @@ test.each([
       expect(StyleSheet.flatten(material.props.style).backgroundColor).toBe(
         native
           ? 'transparent'
-          : resolveThemeColors('light').surfaceContainerHigh
+          : !supported
+            ? lightColors.surface
+            : lightColors.surfaceContainerHigh
       );
     });
     const solid = page.getByRole('button', { name: '自定义实色按钮' });
@@ -377,7 +379,7 @@ describe.each(['light', 'dark'] as const)('Chip 在 %s 聊天表面', (scheme) =
       const colors = scheme === 'dark' ? darkColors : lightColors;
       const neutralSurface =
         scheme === 'light' && !supported
-          ? resolveThemeColors('light').surfaceContainerHigh
+          ? colors.surface
           : colors.surfaceContainerHigh;
       const neutralOutline =
         scheme === 'light' && !supported
@@ -406,7 +408,7 @@ describe.each(['light', 'dark'] as const)('Chip 在 %s 聊天表面', (scheme) =
             native ? 'transparent' : neutralSurface
           );
           expect(material.props.tintColor).toBeUndefined();
-          if (!native) {
+          if (!native && !(scheme === 'light' && !supported)) {
             expect(
               StyleSheet.flatten(material.props.style).backgroundColor
             ).not.toBe(colors.chatBackground);
@@ -481,12 +483,7 @@ test.each(['light', 'dark'] as const)(
     );
     const layer = screen.UNSAFE_getByType(LiquidGlass.LiquidGlassView);
     expect(StyleSheet.flatten(layer.props.style).backgroundColor).toBe(
-      scheme === 'light'
-        ? resolveThemeColors('light').surfaceContainerHigh
-        : colors.surfaceContainerHigh
-    );
-    expect(StyleSheet.flatten(layer.props.style).backgroundColor).not.toBe(
-      colors.surface
+      scheme === 'light' ? colors.surface : colors.surfaceContainerHigh
     );
     fireEvent.press(screen.getByRole('button', { name: 'AI识别' }));
     expect(press).toHaveBeenCalledTimes(1);
@@ -606,7 +603,7 @@ test.each([
   ['light', true],
   ['dark', true],
 ] as const)(
-  'flush Cell 在 %s 原生玻璃=%s 时保留图标语义并区分中性降级底',
+  'flush Cell 在 %s 原生玻璃=%s 时保留图标语义并使用确认的浅色品牌降级底',
   async (scheme, supported) => {
     jest.replaceProperty(
       LiquidGlass as { isLiquidGlassSupported: boolean },
@@ -634,7 +631,7 @@ test.each([
           supported
             ? colors.primaryContainer
             : scheme === 'light'
-              ? resolveThemeColors('light').surfaceContainerHigh
+              ? colors.brandTint10
               : colors.surfaceContainerHigh
         );
     });

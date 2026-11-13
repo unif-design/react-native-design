@@ -80,6 +80,8 @@ export const makeStyles = (c: ColorTokens, shadows: ShadowTokens) =>
       fontWeight: fw.semi,
     },
     pointer: { position: 'absolute', overflow: 'hidden' },
+    // 实色箭头盖住卡片接边，不给旋转菱形重复描边。
+    pointerFallback: { zIndex: 1 },
     dialogRoot: {
       flex: 1,
       justifyContent: 'center',

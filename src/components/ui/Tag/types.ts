@@ -1,4 +1,4 @@
-import type { StyleProp, ViewStyle } from 'react-native';
+import type { ColorValue, StyleProp, ViewStyle } from 'react-native';
 
 /**
  * Tag 配色变体：
@@ -24,6 +24,12 @@ export type TagProps = {
   variant?: TagVariant;
   /** 尺寸，默认 'md' */
   size?: TagSize;
+  /** 仅无原生玻璃的浅色 iOS／Android 覆盖配色；省略字段沿用 variant，尺寸和边宽不变。 */
+  fallbackPalette?: {
+    backgroundColor?: ColorValue;
+    color?: ColorValue;
+    borderColor?: ColorValue;
+  };
   /** 额外样式覆盖 */
   style?: StyleProp<ViewStyle>;
   /**

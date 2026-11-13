@@ -2,6 +2,10 @@ import React from 'react';
 import { View } from 'react-native';
 import { useColors } from '../../../theme';
 import { GlassLayer } from '../GlassLayer';
+import {
+  nativeFallbackStyles,
+  useNativeFallbackLight,
+} from '../../../theme/nativeFallbackStyles';
 import { styles } from './styles';
 import type { IconGroupProps } from './types';
 
@@ -11,11 +15,20 @@ export function IconGroup({
   testID,
 }: IconGroupProps): React.JSX.Element {
   const colors = useColors();
+  const fallbackLight = useNativeFallbackLight();
   return (
-    <View style={styles.root} testID={testID}>
+    <View
+      style={[styles.root, fallbackLight && nativeFallbackStyles.control]}
+      testID={testID}
+    >
       <GlassLayer
-        fallbackColor={colors.surfaceContainerHigh}
-        style={styles.glass}
+        fallbackColor={
+          fallbackLight ? colors.surface : colors.surfaceContainerHigh
+        }
+        style={[
+          styles.glass,
+          fallbackLight && nativeFallbackStyles.controlBorder,
+        ]}
         testID={testID ? `${testID}-glass` : undefined}
       />
       {children}

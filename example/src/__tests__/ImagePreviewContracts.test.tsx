@@ -313,7 +313,7 @@ test('媒体尺寸 contain、主题/大字仅缩放文字，序号与操作在�
     StyleSheet.flatten(counter.parent?.props.style).height
   ).toBeUndefined();
   expect(page.getByRole('button', { name: '删除当前照片' })).toHaveStyle({
-    backgroundColor: 'transparent',
+    backgroundColor: lightColors.surface,
     height: control.sm,
     width: control.sm,
   });

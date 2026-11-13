@@ -22,6 +22,7 @@ export { ThemeProvider } from './ThemeProvider';
 export type { ColorScheme, ThemeContextValue } from './ThemeProvider';
 
 export { useTheme, useColors, useShadow } from './useTheme';
+export { useNativeSurfaceStyles } from './nativeFallbackStyles';
 export { normalizeFontScale, scaleFontMetric, useFontScale } from './fontScale';
 export { useThemedStyles } from './useThemedStyles';
 export type { StylesMaker } from './useThemedStyles';

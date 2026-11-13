@@ -53,7 +53,7 @@ test.each(['ios', 'android'] as const)(
     expect(group).toHaveStyle({
       backgroundColor: StyleSheet.flatten(button.props.style).backgroundColor,
     });
-    expect(StyleSheet.flatten(group.props.style).backgroundColor).not.toBe(
+    expect(StyleSheet.flatten(group.props.style).backgroundColor).toBe(
       lightColors.surface
     );
   }
@@ -110,7 +110,9 @@ test.each([
       backgroundColor:
         supported && !reduced
           ? 'transparent'
-          : resolveThemeColors(scheme).surfaceContainerHigh,
+          : !supported && scheme === 'light'
+            ? lightColors.surface
+            : resolveThemeColors(scheme).surfaceContainerHigh,
     });
     expect(screen.getAllByRole('button')).toHaveLength(2);
     fireEvent.press(screen.getByRole('button', { name: '搜索' }));

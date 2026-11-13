@@ -10,6 +10,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useColors, useThemedStyles, motion, space } from '../../../theme';
 import { childTestID } from '../../../utils/testID';
+import {
+  nativeFallbackStyles,
+  useNativeFallbackLight,
+} from '../../../theme/nativeFallbackStyles';
 import { dotColorFor, makeStyles } from './styles';
 import {
   completeToast,
@@ -45,6 +49,7 @@ export function ToastHost({
   testID,
 }: ToastHostProps): React.JSX.Element | null {
   const c = useColors();
+  const fallbackLight = useNativeFallbackLight();
   const styles = useThemedStyles(makeStyles);
   const insets = useSafeAreaInsets();
   const [delivery, setDelivery] = useState<ToastDelivery | null>(null);
@@ -198,8 +203,19 @@ export function ToastHost({
 
   return (
     <View style={[styles.host, posStyle]} pointerEvents="none" testID={testID}>
-      <Animated.View style={[styles.toast, animatedStyle]}>
-        <GlassLayer style={styles.material} />
+      <Animated.View
+        style={[
+          styles.toast,
+          fallbackLight && nativeFallbackStyles.floating,
+          animatedStyle,
+        ]}
+      >
+        <GlassLayer
+          style={[
+            styles.material,
+            fallbackLight && nativeFallbackStyles.floatingBorder,
+          ]}
+        />
         {/* 原生材质的祖先必须保持 alpha=1，只淡化文字与状态点。 */}
         <Animated.View
           collapsable={false}

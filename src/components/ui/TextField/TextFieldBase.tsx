@@ -10,6 +10,11 @@ import type { TextInputProps } from 'react-native';
 import { fixed, radius, useColors, useThemedStyles } from '../../../theme';
 import { GlassLayer } from '../GlassLayer';
 import { useGlassFallback } from '../GlassLayer/useGlassFallback';
+import {
+  nativeFallbackStyles,
+  useNativeFallbackLight,
+} from '../../../theme/nativeFallbackStyles';
+
 import { childTestID } from '../../../utils/testID';
 import { createLogger } from '../../../utils/logger';
 import {
@@ -87,6 +92,7 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
       .map(([name]) => name)
       .join(',');
     const glassFallback = useGlassFallback();
+    const fallbackLight = useNativeFallbackLight();
     const colors = useColors();
     const styles = useThemedStyles(makeStyles);
     const [focused, setFocused] = useState(false);
@@ -284,6 +290,11 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
               glassFallback &&
               styles.wrapFallbackSurface,
             searchLayout !== undefined && styles.searchInteractiveRow,
+            searchLayout !== undefined &&
+              fallbackLight && [
+                nativeFallbackStyles.control,
+                styles.searchFallbackRow,
+              ],
             plain && styles.wrapPlain,
             !multiline && insetSurface && styles.wrapInset,
             multiline
@@ -331,7 +342,9 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
                     ? colors.error
                     : focused
                       ? colors.primary
-                      : 'transparent',
+                      : fallbackLight
+                        ? 'rgba(0,0,0,0.08)'
+                        : 'transparent',
                 },
                 {
                   top: searchLayout.verticalInset,

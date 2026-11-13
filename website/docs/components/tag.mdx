@@ -11,6 +11,8 @@ import { Tag } from '@unif/react-native-design';
 
 纯展示状态标签 · 6 种配色变体 · 2 种尺寸。
 
+需要为不支持原生玻璃的浅色 iOS／Android 指定标签配色时，可传 `fallbackPalette={{ backgroundColor, color, borderColor }}`。字段均可省略，未指定的颜色沿用 `variant`；Web、深色与支持原生玻璃的 iOS（含减少透明度）保留原配色。该参数不改变尺寸或边宽，`outline` 仍有 1pt 边框，其他变体仍无边框；显式容器 `style` 继续优先。
+
 ## 代码演示 {#实时预览}
 
 <LiveDemo>
@@ -65,6 +67,7 @@ import { Tag } from '@unif/react-native-design';
 | `label`         | `string`                                                              | —           | 标签文字（必填）          |
 | `variant`       | `'neutral' \| 'brand' \| 'success' \| 'error' \| 'info' \| 'outline'` | `'neutral'` | 配色变体                  |
 | `size`          | `'md' \| 'lg'`                                                        | `'md'`      | 高度 22 / 26              |
+| `fallbackPalette` | `{ backgroundColor?: ColorValue; color?: ColorValue; borderColor?: ColorValue }` | — | 仅浅色原生无玻璃时覆盖颜色；不改变边宽或尺寸 |
 | `numberOfLines` | `number?`                                                             | `1`         | 文本行数（超长 ellipsis） |
 | `style`         | `StyleProp<ViewStyle>?`                                               | —           | 额外样式覆盖              |
 | `testID`        | `string?`                                                             | —           | E2E / 测试定位            |
