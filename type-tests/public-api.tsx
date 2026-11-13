@@ -14,7 +14,7 @@ import {
  * 那样的 fixture 通过了也证明不了什么。
  */
 import { createRef } from 'react';
-import { Pressable, Text } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import {
   Avatar,
   AvatarGroup,
@@ -36,6 +36,7 @@ import {
   ShimmerText,
   MotionScope,
   useMotionActive,
+  useNativeSurfaceStyles,
   lightColors,
   Stepper,
   Switch,
@@ -65,6 +66,20 @@ import {
   type ThumbnailImageStyle,
   type VersionStatus,
 } from '../src';
+
+export function NativeSurfaceStyleFixture() {
+  const surfaces = useNativeSurfaceStyles();
+  return (
+    <View
+      style={[
+        surfaces.card,
+        { ...surfaces.input },
+        // @ts-expect-error 未定义的表面角色不公开
+        surfaces.panel,
+      ]}
+    />
+  );
+}
 
 const setText = (_value: string) => {};
 const noop = () => {};

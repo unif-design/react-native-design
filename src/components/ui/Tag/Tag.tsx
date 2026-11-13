@@ -1,5 +1,6 @@
 import { Text, View } from 'react-native';
 import { scaleFontMetric, useColors, useFontScale } from '../../../theme';
+import { useNativeFallbackLight } from '../../../theme/nativeFallbackStyles';
 import { paletteFor, sizingFor, styles } from './styles';
 import type { TagProps } from './types';
 
@@ -7,6 +8,7 @@ export function Tag({
   label,
   variant = 'neutral',
   size = 'md',
+  fallbackPalette,
   style,
   numberOfLines = 1,
   testID,
@@ -14,17 +16,18 @@ export function Tag({
   const c = useColors();
   const fontScale = useFontScale();
   const palette = paletteFor(variant, c);
+  const fallback = useNativeFallbackLight() ? fallbackPalette : undefined;
   const sizing = sizingFor(size);
 
   const dynamicStyle = {
     height: sizing.h,
     paddingHorizontal: sizing.px,
-    backgroundColor: palette.bg,
-    borderColor: palette.border ?? 'transparent',
+    backgroundColor: fallback?.backgroundColor ?? palette.bg,
+    borderColor: fallback?.borderColor ?? palette.border ?? 'transparent',
     borderWidth: palette.border ? 1 : 0,
   };
   const dynamicTextStyle = {
-    color: palette.fg,
+    color: fallback?.color ?? palette.fg,
     fontSize: scaleFontMetric(sizing.fs, fontScale),
   };
 

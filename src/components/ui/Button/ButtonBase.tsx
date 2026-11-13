@@ -20,6 +20,10 @@ import {
   useMotionActive,
   useThemedStyles,
 } from '../../../theme';
+import {
+  nativeFallbackStyles,
+  useNativeFallbackLight,
+} from '../../../theme/nativeFallbackStyles';
 import { GlassLayer } from '../GlassLayer';
 import { NativeGlassButton } from './NativeGlassButton';
 import { makeStyles, paletteFor, sizingFor } from './styles';
@@ -86,6 +90,7 @@ export function ButtonBase({
   children,
 }: ButtonBaseProps): React.JSX.Element {
   const c = useColors();
+  const fallbackLight = useNativeFallbackLight();
   const motionActive = useMotionActive();
   const styles = useThemedStyles(makeStyles);
 
@@ -168,6 +173,7 @@ export function ButtonBase({
       alignSelf: block ? 'stretch' : 'flex-start',
       gap: sizing.gap,
     },
+    isGlass && fallbackLight && nativeFallbackStyles.control,
     style,
   ];
 
@@ -209,15 +215,20 @@ export function ButtonBase({
             return (
               <>
                 <GlassLayer
-                  style={{ borderRadius: glassRadius }}
+                  style={[
+                    { borderRadius: glassRadius },
+                    fallbackLight && nativeFallbackStyles.controlBorder,
+                  ]}
                   fallbackColor={
-                    iconButton
-                      ? Platform.OS === 'web'
-                        ? c.surfaceContainerHighest
-                        : c.surfaceContainerHigh
-                      : variant === 'secondary'
-                        ? c.surfaceContainerHigh
-                        : undefined
+                    fallbackLight
+                      ? c.surface
+                      : iconButton
+                        ? Platform.OS === 'web'
+                          ? c.surfaceContainerHighest
+                          : c.surfaceContainerHigh
+                        : variant === 'secondary'
+                          ? c.surfaceContainerHigh
+                          : undefined
                   }
                 />
                 {/* 原生材质的祖先不能降低 alpha，只淡化按钮前景。 */}

@@ -26,7 +26,8 @@ test.each([
     expect(colors).toEqual({
       ...lightColors,
       background: '#F5F5F7',
-      surfaceContainer: '#F7F7F9',
+      surfaceContainer: '#F5F5F7',
+      foregroundSubtle: '#86868B',
       surfaceContainerHigh: '#FAFAFC',
       surfaceContainerHighest: '#E8E8EC',
       outline: '#EEEEF2',

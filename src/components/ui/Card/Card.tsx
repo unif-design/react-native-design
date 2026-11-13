@@ -1,6 +1,10 @@
 import React from 'react';
 import { View } from 'react-native';
 import { radius, space, useShadow, useThemedStyles } from '../../../theme';
+import {
+  nativeFallbackStyles,
+  useNativeFallbackLight,
+} from '../../../theme/nativeFallbackStyles';
 import { GlassLayer } from '../GlassLayer';
 import { makeStyles, variantToStyle } from './styles';
 import type { CardProps } from './types';
@@ -19,6 +23,7 @@ export function Card({
   testID,
 }: CardProps): React.JSX.Element {
   const styles = useThemedStyles(makeStyles);
+  const fallbackLight = useNativeFallbackLight() && variant === 'glass';
   const shadow = useShadow();
   const br = borderRadius ?? radius.xl;
 
@@ -31,6 +36,9 @@ export function Card({
         styles.base,
         { borderRadius: br },
         variantToStyle(variant, shadow, styles),
+        fallbackLight && nativeFallbackStyles.card,
+        fallbackLight &&
+          fallbackColor != null && { backgroundColor: fallbackColor },
         fill && styles.fill,
         style,
       ]}
@@ -49,7 +57,12 @@ export function Card({
       >
         {variant === 'glass' ? (
           <GlassLayer
-            style={{ borderRadius: br }}
+            style={[
+              { borderRadius: br },
+              fallbackLight &&
+                borderColor == null &&
+                nativeFallbackStyles.cardBorder,
+            ]}
             fallbackColor={fallbackColor}
           />
         ) : null}

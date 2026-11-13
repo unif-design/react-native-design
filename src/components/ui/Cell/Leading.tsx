@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { r, useColors } from '../../../theme';
 import { useGlassFallback } from '../GlassLayer/useGlassFallback';
+import { useNativeFallbackLight } from '../../../theme/nativeFallbackStyles';
 import { isIconComponent } from '../shared/isIconComponent';
 import { A11Y_HIDDEN_PROPS } from '../shared/a11y';
 import { useListVariant } from './context';
@@ -27,6 +28,7 @@ export function Leading({
   danger?: boolean;
 }) {
   const glassFallback = useGlassFallback();
+  const fallbackLight = useNativeFallbackLight();
   const c = useColors();
   const variant = useListVariant();
 
@@ -40,9 +42,11 @@ export function Leading({
           style={[
             sharedStyles.flushBox,
             {
-              backgroundColor: glassFallback
-                ? c.surfaceContainerHigh
-                : c.primaryContainer,
+              backgroundColor: fallbackLight
+                ? c.brandTint10
+                : glassFallback
+                  ? c.surfaceContainerHigh
+                  : c.primaryContainer,
             },
           ]}
         >

@@ -3,6 +3,10 @@ import { Platform, StyleSheet, View } from 'react-native';
 import { r, radius, useThemedStyles } from '../../../theme';
 import { GlassLayer } from '../GlassLayer';
 import { GlassGroup } from '../GlassLayer/GlassGroup';
+import {
+  nativeFallbackStyles,
+  useNativeFallbackLight,
+} from '../../../theme/nativeFallbackStyles';
 import { makeStyles } from './styles';
 import type { ActionMenuPopoverCardProps } from './types';
 
@@ -14,6 +18,7 @@ export function ActionMenuPopoverCard({
   testID,
 }: ActionMenuPopoverCardProps) {
   const styles = useThemedStyles(makeStyles);
+  const fallbackLight = useNativeFallbackLight();
   const [width, setWidth] = useState(0);
   const pointerWidth = Math.min(r(26), width);
   const pointerHeight = (pointerWidth * 14) / 26;
@@ -28,7 +33,11 @@ export function ActionMenuPopoverCard({
   return (
     <View
       testID={testID}
-      style={[styles.popoverRoot, style]}
+      style={[
+        styles.popoverRoot,
+        fallbackLight && nativeFallbackStyles.floating,
+        style,
+      ]}
       onLayout={(event) => setWidth(event.nativeEvent.layout.width)}
     >
       <GlassGroup
@@ -47,6 +56,7 @@ export function ActionMenuPopoverCard({
             importantForAccessibility="no-hide-descendants"
             style={[
               styles.pointer,
+              fallbackLight && styles.pointerFallback,
               {
                 left: offset - half,
                 width: pointerWidth,
@@ -74,7 +84,12 @@ export function ActionMenuPopoverCard({
             />
           </View>
         ) : null}
-        <GlassLayer style={styles.popoverMaterial} />
+        <GlassLayer
+          style={[
+            styles.popoverMaterial,
+            fallbackLight && nativeFallbackStyles.floatingBorder,
+          ]}
+        />
       </GlassGroup>
       <View
         testID={`${testID}-card`}

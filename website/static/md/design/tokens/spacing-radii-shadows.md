@@ -134,6 +134,22 @@ const makeStyles = (c: ColorTokens, s: ShadowTokens) =>
 
 颜色与暗色主题见[颜色](colors.md)。
 
+### 原生降级表面
+
+组合仍使用普通 `View` 时，通过包根导出的 `useNativeSurfaceStyles()` 取得平台装饰，不在业务页面重复判断系统支持或定义同义阴影。优先使用已有 Card、按钮等组件；这个 hook 只交接外观，不改变调用方布局、尺寸、圆角、内容或交互。
+
+返回对象稳定，包含可选的 `control` / `controlBorder`、`card` / `cardBorder`、`floatingBorder`、`input` / `inputBorder` 与 `welcomeIcon`，以及始终存在的 `floating` 和 `icon`。容器样式放不裁剪的外壳，边线放调用方现有的绝对装饰层；值可以直接用于 `style` 数组，也可以展开进样式对象。
+
+不支持原生玻璃的浅色 iOS／Android 返回四组实体白色表面。其他外观的 `floating` 保留透明底及已有浮层阴影：`shadowColor: colors.scrim`、`shadowOpacity: 0.2`、`shadowRadius: 18`、`shadowOffset: { width: 0, height: 6 }`、`elevation: 8`，不返回 `floatingBorder`。Web 和支持原生玻璃的 iOS 不返回其他容器及边线装饰，减少透明度不会切换到这组新装饰；不支持原生玻璃的暗色另保留已有输入外观（`surfaceContainerHigh`、`shadow.subtle` 与 `outlineVariant`）。浅色输入角色使用 `0 4` 偏移、`0.08` 不透明度、`8` 阴影半径与 Android `elevation: 4`，输入边线为 `0.5` 宽、8% 黑色。
+
+`icon.backgroundColor` 供应用图标交给 `GlassLayer.fallbackColor`：目标浅色原生降级为 `#FDF1E6`，Web 保留 `primaryContainer`，其他原生外观保留 `surfaceContainerHigh`。它只选择图标的回退颜色，不要求任意容器改为灰底。`welcomeIcon` 仅目标浅色原生降级返回 `#FDF1E6` 背景，其他外观继续使用调用方既有欢迎图标底色。
+
+```tsx
+const surfaces = useNativeSurfaceStyles();
+// layout.card 只保留当前组件原有布局；其他平台得到 undefined，不新增表面。
+<View style={[layout.card, surfaces.card]} />;
+```
+
 Search 的清除操作使用 `control.xs`（基准 22）的可见表面和 `icon.xxs`（基准 14）的图标；两者随屏宽缩放。交互命中仍不小于 `fixed.hitTarget`（44）。
 
 Search 胶囊使用 `fixed.compactControl`（36pt），不随屏宽变化；相邻圆形操作可向 IconButton 显式传入 `surfaceSize={fixed.compactControl}` 保持等高。IconButton 默认 `md` 档使用随屏宽缩放的 `control.md`（基准 36），与该固定尺寸不是同一个 token。`fixed.hitTarget` 继续提供至少 44pt 的触达范围。

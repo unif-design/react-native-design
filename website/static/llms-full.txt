@@ -785,7 +785,7 @@ import { Button } from '@unif/react-native-design';
 
 # Card 卡片
 
-容纳相关信息和操作的卡片。`variant="glass"` 使用共享玻璃材质，保持原圆角、内边距、边框和内容布局。各业务卡片自己选择材质，外层组合不再叠加背景。
+容纳相关信息和操作的卡片。`variant="glass"` 使用共享玻璃材质，保持原圆角、内边距和内容布局；不支持原生玻璃的浅色 iOS／Android 使用白底、细边和轻阴影，显式表面和边框优先。各业务卡片自己选择材质，外层组合不再叠加背景。
 
 ## 代码演示 {#实时预览}
 
@@ -2726,9 +2726,9 @@ Switch / Stepper 放在 Cell 行尾，必须选择 Cell 的显式 control 分支
 
 为已有内容提供装饰玻璃背景。组件读取当前主题，不接管内容、交互或布局。
 
-Android、旧 iOS 或原生支持标记为假时，采用 `fallbackColor` 或主题 `surface` 实色分组，不叠加渐变和额外描边。开启减少透明度或 iOS 偏好尚未读回时也采用此实色背景。`secondary` Button、IconButton（含确认状态）与 IconGroup 使用 `surfaceContainerHigh`，独立输入表面使用 `surface`，与原有边线、阴影共同保留层次；缺少 CSS 模糊的 Web 继续使用主题半透明渐变。
+Android、旧 iOS 或原生支持标记为假时，采用 `fallbackColor` 或主题 `surface` 实色分组，不叠加渐变和额外描边。开启减少透明度或 iOS 偏好尚未读回时也采用此实色背景。不支持原生玻璃的浅色 iOS／Android 中，玻璃按钮、IconGroup、可点击 Chip 与分段控件采用白色表面、细边和轻阴影；搜索框补空闲细边与轻阴影。独立输入表面继续使用 `surface` 与原有边线、阴影。支持原生玻璃时的减少透明度回退及深色外观保持原有配色；缺少 CSS 模糊的 Web 继续使用主题半透明渐变。
 
-不支持原生玻璃的 iOS／Android 在浅色主题下采用柔雾白表面；页面、控件和既有背景装饰只调整颜色，图标、布局、圆角、阴影及交互保持。原生玻璃可用的 iOS、Web 和深色主题保留原配色。消费者通过 `useColors` 读取当前主题，自定义 `fallbackColor` 保留原值。
+不支持原生玻璃的 iOS／Android 在浅色主题下采用柔雾白表面；页面背景和次要文字读取该配色。玻璃卡片采用白底、细边和轻阴影，提示与浮动菜单采用细边和浮起阴影，flush Cell 的默认图标底使用品牌浅橙。尺寸、布局、圆角和交互保持，显式表面及边框继续优先。原生玻璃可用的 iOS、Web 和深色主题保留原配色。消费者通过 `useColors` 读取当前主题，自定义 `fallbackColor` 保留原值。
 
 ## 代码演示 {#实时预览}
 
@@ -6376,6 +6376,8 @@ import { Tabs, Segmented } from '@unif/react-native-design';
 
 纯展示状态标签 · 6 种配色变体 · 2 种尺寸。
 
+需要为不支持原生玻璃的浅色 iOS／Android 指定标签配色时，可传 `fallbackPalette={{ backgroundColor, color, borderColor }}`。字段均可省略，未指定的颜色沿用 `variant`；Web、深色与支持原生玻璃的 iOS（含减少透明度）保留原配色。该参数不改变尺寸或边宽，`outline` 仍有 1pt 边框，其他变体仍无边框；显式容器 `style` 继续优先。
+
 ## 代码演示 {#实时预览}
 
 ```tsx
@@ -6430,6 +6432,7 @@ import { Tag } from '@unif/react-native-design';
 | `label`         | `string`                                                              | —           | 标签文字（必填）          |
 | `variant`       | `'neutral' \| 'brand' \| 'success' \| 'error' \| 'info' \| 'outline'` | `'neutral'` | 配色变体                  |
 | `size`          | `'md' \| 'lg'`                                                        | `'md'`      | 高度 22 / 26              |
+| `fallbackPalette` | `{ backgroundColor?: ColorValue; color?: ColorValue; borderColor?: ColorValue }` | — | 仅浅色原生无玻璃时覆盖颜色；不改变边宽或尺寸 |
 | `numberOfLines` | `number?`                                                             | `1`         | 文本行数（超长 ellipsis） |
 | `style`         | `StyleProp<ViewStyle>?`                                               | —           | 额外样式覆盖              |
 | `testID`        | `string?`                                                             | —           | E2E / 测试定位            |
@@ -7728,6 +7731,22 @@ const makeStyles = (c: ColorTokens, s: ShadowTokens) =>
 ```
 
 颜色与暗色主题见[颜色](md/design/tokens/colors.md)。
+
+### 原生降级表面
+
+组合仍使用普通 `View` 时，通过包根导出的 `useNativeSurfaceStyles()` 取得平台装饰，不在业务页面重复判断系统支持或定义同义阴影。优先使用已有 Card、按钮等组件；这个 hook 只交接外观，不改变调用方布局、尺寸、圆角、内容或交互。
+
+返回对象稳定，包含可选的 `control` / `controlBorder`、`card` / `cardBorder`、`floatingBorder`、`input` / `inputBorder` 与 `welcomeIcon`，以及始终存在的 `floating` 和 `icon`。容器样式放不裁剪的外壳，边线放调用方现有的绝对装饰层；值可以直接用于 `style` 数组，也可以展开进样式对象。
+
+不支持原生玻璃的浅色 iOS／Android 返回四组实体白色表面。其他外观的 `floating` 保留透明底及已有浮层阴影：`shadowColor: colors.scrim`、`shadowOpacity: 0.2`、`shadowRadius: 18`、`shadowOffset: { width: 0, height: 6 }`、`elevation: 8`，不返回 `floatingBorder`。Web 和支持原生玻璃的 iOS 不返回其他容器及边线装饰，减少透明度不会切换到这组新装饰；不支持原生玻璃的暗色另保留已有输入外观（`surfaceContainerHigh`、`shadow.subtle` 与 `outlineVariant`）。浅色输入角色使用 `0 4` 偏移、`0.08` 不透明度、`8` 阴影半径与 Android `elevation: 4`，输入边线为 `0.5` 宽、8% 黑色。
+
+`icon.backgroundColor` 供应用图标交给 `GlassLayer.fallbackColor`：目标浅色原生降级为 `#FDF1E6`，Web 保留 `primaryContainer`，其他原生外观保留 `surfaceContainerHigh`。它只选择图标的回退颜色，不要求任意容器改为灰底。`welcomeIcon` 仅目标浅色原生降级返回 `#FDF1E6` 背景，其他外观继续使用调用方既有欢迎图标底色。
+
+```tsx
+const surfaces = useNativeSurfaceStyles();
+// layout.card 只保留当前组件原有布局；其他平台得到 undefined，不新增表面。
+<View style={[layout.card, surfaces.card]} />;
+```
 
 Search 的清除操作使用 `control.xs`（基准 22）的可见表面和 `icon.xxs`（基准 14）的图标；两者随屏宽缩放。交互命中仍不小于 `fixed.hitTarget`（44）。
 
