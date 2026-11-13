@@ -4,7 +4,7 @@
 
 ## 技能与工程规范
 
-按任务使用通用技能：`code-organization` 处理目录、文件职责与命名，`react-native-development` 处理 React Native 实现，`react-native-library` 处理库的公开接口、运行示例与分发，`documentation` 处理文档、项目描述和文档站。这些技能独立使用；本库的交付来源、组织配置与检查入口见[交付配置与检查](#交付配置与检查)。
+按任务使用通用技能：`uni-code-organization` 处理目录、文件职责与命名，`uni-rn-dev` 处理 React Native 实现，`uni-rn-library` 处理库的公开接口、运行示例与分发，`uni-documentation` 处理文档、项目描述和文档站。这些技能独立使用；本库的交付来源、组织配置与检查入口见[交付配置与检查](#交付配置与检查)。
 
 `unif-design` 用于定位本库当前版本的公开能力、接入与排障资料。应用仅消费库时可直接查公开类型和文档，无需先取得维护工作区。
 
@@ -91,13 +91,13 @@ harness 不继承本仓 `check:runtime-peers` 的 workspace 精确 allowlist；�
 
 ## LLM 文档生成
 
-`website/docs` 是使用文档源；运行 `node website/scripts/build-llms.js` 可单独生成。共同实现由 `github-delivery` 的 `templates/llms` 维护，通过该技能提供的同步工具更新本库脚本，不手改共享副本。
+`website/docs` 是使用文档源；运行 `node website/scripts/build-llms.js` 可单独生成。共同实现由 `uni-github-delivery` 的 `templates/llms` 维护，通过该技能提供的同步工具更新本库脚本，不手改共享副本。
 
 索引按任务列出单页，全文位于 Optional；包版本取当前 package.json。`node website/scripts/build-llms.test.js` 验证公共生成契约与本库资料，文档站构建沿既有 CI 运行。
 
 ## 交付配置与检查
 
-共享 CI、发布配置和检查工具由 `github-delivery` 的模板与工具维护。Unif 组织值由 `code-delivery` 的 `assets/organization.json` 维护，接入时落实为本库 `.github/organization.json`，记录组织、包名规则、Pages 地址、发布 App 身份及远端设置。工具运行时读取项目文件，不依赖其他技能的安装目录；适用技能按当前任务独立选择。
+共享 CI、发布配置和检查工具由 `uni-github-delivery` 的模板与工具维护。Unif 组织值由 `unif-code-delivery` 的 `assets/organization.json` 维护，接入时落实为本库 `.github/organization.json`，记录组织、包名规则、Pages 地址、发布 App 身份及远端设置。工具运行时读取项目文件，不依赖其他技能的安装目录；适用技能按当前任务独立选择。
 
 在仓库根目录按阶段执行：
 

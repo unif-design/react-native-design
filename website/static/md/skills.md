@@ -7,7 +7,7 @@ description: 'Unif Design 的公开使用、源码维护与按需资料入口。
 
 # 库能力与研发技能
 
-`unif-design` 可单独安装，用于本库能力的使用、维护和排障，无需安装整个 `unif-portal-dev-skills` 插件或其他技能。安装 npm 包无需安装技能；技能也不进入产品运行时模型上下文。
+`unif-design` 可单独安装，用于本库能力的使用、维护和排障。安装 npm 包无需安装技能；技能也不进入产品运行时模型上下文。
 
 按需选择一种分发方式：
 
@@ -18,7 +18,7 @@ description: 'Unif Design 的公开使用、源码维护与按需资料入口。
    ```
 
    按提示选择目标工具。也可将获授权分发的 `skills/unif-design/` 完整复制到目标工具的技能目录，保留 `SKILL.md`、`references/`、`agents/` 及已有文件，不要只复制入口文件。
-2. **完整插件（可选）**：需要共用研发规范和多个库能力时，按[技能仓安装说明](https://github.com/unif-skill/unif-portal-dev-skills#安装与使用)安装 `unif-portal-dev-skills`。
+2. 在 Codex 中同时使用多个库能力时，从 `unif-portal-dev-skills` 市场安装 `unif-library-skills` 插件。阶段技能按任务另选。[技能仓安装说明](https://github.com/unif-skill/unif-portal-dev-skills#安装与使用)
 
 技能源仓目前为私有仓库；直接从源仓获取技能需要访问权限及 Git 认证。已获授权分发的完整单技能目录可以独立使用；安装位置与识别方式以目标工具文档为准。
 
