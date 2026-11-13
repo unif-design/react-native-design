@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.19.0](https://github.com/unif-design/react-native-design/compare/v1.18.0...v1.19.0) (2026-11-13)
+
+
+### Features
+
+* 统一低版本原生表面并提供样式复用入口 ([#198](https://github.com/unif-design/react-native-design/issues/198)) ([eb3a346](https://github.com/unif-design/react-native-design/commit/eb3a346ae2b86a82e50ddd7d4bf68ea4419442fb))
+
 # [1.18.0](https://github.com/unif-design/react-native-design/compare/v1.17.0...v1.18.0) (2026-11-12)
 
 
