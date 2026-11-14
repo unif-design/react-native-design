@@ -280,7 +280,7 @@ test.each(['ios', 'android', 'web'] as const)(
               offsetX: 0,
               offsetY: 1,
               blurRadius: 8,
-              color: 'rgba(0, 0, 0, 0.08)',
+              color: expect.stringMatching(/^rgba\(0, 0, 0, 0\.08\)$/u),
             },
           ]);
         } else {
@@ -335,7 +335,7 @@ test.each(['ios', 'android', 'web'] as const)(
           nativeFallbackStyles,
         } = require('../../../src/theme/nativeFallbackStyles');
         const style = native.StyleSheet.flatten(nativeFallbackStyles.floating);
-        expect(style.backgroundColor).toBe('#FFFFFF');
+        expect(style.backgroundColor).toMatch(/^#FFFFFF$/u);
         expect(style.shadowOpacity).toBe(0.12);
         if (platform === 'ios') expect(style.boxShadow).toEqual([]);
         else expect(style).not.toHaveProperty('boxShadow');
