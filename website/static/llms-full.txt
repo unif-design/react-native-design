@@ -8220,7 +8220,7 @@ toast.success('已保存');
 
 `unif-design` 用于本库的使用、维护和排障。技能在开发工具中使用，应用通过 npm 接入本库。
 
-在 Codex 的 `unif-portal-dev-skills` 市场，安装公共规范插件 `unif-platform-rules` 和提供 `unif-design` 的库能力插件 `unif-library-skills`。需要 Unif 的 React Native 开发、测试或审查规则时，再安装 `unif-react-native-skills`。读取私有技能仓需要相应权限和 Git 认证。[技能仓安装说明](https://github.com/unif-skill/unif-portal-dev-skills#安装与使用)
+在 Codex 的 `unif-portal-dev-skills` 市场安装本库插件 `unif-design`，并确认默认公共插件 `unif-platform-rules` 已启用。需要 Unif 的 React Native 开发、测试或审查规则时，再安装 `unif-react-native-skills`。读取私有技能仓需要相应权限和 Git 认证。[技能仓安装说明](https://github.com/unif-skill/unif-portal-dev-skills#安装与使用)
 
 - **使用本库**：从 `unif-design` 定位公开 API、示例和必要的接入/生命周期约束，核对应用实际采用版本。
 - **修改库源码**：采用工程指定的规范，按本仓开发资料定位源码、契约和真实消费者。
