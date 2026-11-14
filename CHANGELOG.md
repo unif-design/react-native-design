@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.1](https://github.com/unif-design/react-native-design/compare/v1.19.0...v1.19.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* **theme:** 修复 iOS 透明卡片阴影计算警告 ([96dbba1](https://github.com/unif-design/react-native-design/commit/96dbba1067b16caaf0efb209e2dc5534b2f52bab))
+
 # [1.19.0](https://github.com/unif-design/react-native-design/compare/v1.18.0...v1.19.0) (2026-11-13)
 
 
