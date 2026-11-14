@@ -35,6 +35,8 @@ export const nativeFallbackStyles = StyleSheet.create({
     borderColor: '#ECECF0',
   },
   floating: {
+    // 实体浮层覆盖 card 阴影时，同时清除其 iOS boxShadow。
+    ...(Platform.OS === 'ios' ? { boxShadow: [] } : {}),
     backgroundColor: '#FFFFFF',
     overflow: 'visible',
     shadowColor: '#000000',
