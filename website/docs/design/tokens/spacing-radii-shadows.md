@@ -91,6 +91,8 @@ const userBubble = {
 
 > `{w,h}` 是 `shadowOffset`;橙 = `shadowColor: '#EB6E00'`(其余为黑)。完整 5 件套数值见 `src/theme/shadow.ts`。
 
+iOS 的 `card` 使用 `boxShadow` 按容器圆角投影，透明玻璃表面也不需要遍历子树像素；浅色视觉参数仍为黑色 8%、偏移 `0 1`、原生模糊半径 `4`（`boxShadow.blurRadius: 8`），暗色保持无阴影。Android／Web 继续使用原有阴影。请完整使用 `shadow.card`；iOS 的传统 `shadowOpacity` 为 `0`，实际透明度在 `boxShadow.color` 中。覆盖为其他传统阴影时，同时清空 `boxShadow`。去阴影继续直接使用 `shadow.none`，例如 `style={[shadow.card, shadow.none]}`。
+
 :::note 暗色例外项
 暗色下 `subtle` / `card` / `brand*` 多数置零,但 **`floating` / `glassBar`(黑色 drop shadow)与 `brandAvatar`(橙光晕)在暗色不置零** —— 否则浮岛 / 数据条 / 头像在暗底上贴平、看不出层级。每个例外在源码里都注释了原因。
 :::

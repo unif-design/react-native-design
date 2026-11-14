@@ -4,10 +4,42 @@
 // 暗色下中性阴影 shadowOpacity / elevation 全部置 0:视觉层次靠 surface 5 层
 // 明度差表达(layered surface 替代 shadow)。
 
+import { Platform, type ViewStyle } from 'react-native';
 import { BRAND_ORANGE } from './colors';
 
 // 模块级别名保持历史可读性,同时指向 colors.ts 单一来源。
 const BRAND = BRAND_ORANGE;
+
+// iOS 透明卡片按自身圆角投影，不再依赖子树像素计算；参数保持单一来源。
+const LIGHT_CARD_SHADOW = {
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.08,
+  shadowRadius: 4,
+  elevation: 2,
+} as const;
+const IOS_LIGHT_CARD_SHADOW = {
+  ...LIGHT_CARD_SHADOW,
+  shadowOpacity: 0,
+  boxShadow: [
+    {
+      offsetX: LIGHT_CARD_SHADOW.shadowOffset.width,
+      offsetY: LIGHT_CARD_SHADOW.shadowOffset.height,
+      // RN 将 boxShadow.blurRadius 除以 2 后交给 CALayer。
+      blurRadius: LIGHT_CARD_SHADOW.shadowRadius * 2,
+      color: `rgba(0, 0, 0, ${LIGHT_CARD_SHADOW.shadowOpacity})`,
+    },
+  ],
+} satisfies ViewStyle;
+
+const NONE_SHADOW = {
+  shadowColor: 'transparent',
+  shadowOffset: { width: 0, height: 0 },
+  shadowOpacity: 0,
+  shadowRadius: 0,
+  elevation: 0,
+} as const;
+const IOS_NONE_SHADOW = { ...NONE_SHADOW, boxShadow: [] } satisfies ViewStyle;
 
 export const lightShadow = {
   /** 轻提示浮起 —— Segmented active 段 */
@@ -19,12 +51,8 @@ export const lightShadow = {
     elevation: 1,
   },
   /** 标准卡片下沉 —— Card 默认 variant */
-  card: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+  get card() {
+    return Platform.OS === 'ios' ? IOS_LIGHT_CARD_SHADOW : LIGHT_CARD_SHADOW;
   },
   /** 中性浮岛 —— TabBar 玻璃胶囊等贴底浮起,大半径柔散。 */
   floating: {
@@ -100,12 +128,8 @@ export const lightShadow = {
     shadowRadius: 24,
     elevation: 12,
   },
-  none: {
-    shadowColor: 'transparent',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    elevation: 0,
+  get none() {
+    return Platform.OS === 'ios' ? IOS_NONE_SHADOW : NONE_SHADOW;
   },
 } as const;
 
@@ -119,6 +143,7 @@ export type ShadowTokens = {
     readonly shadowOpacity: number;
     readonly shadowRadius: number;
     readonly elevation: number;
+    readonly boxShadow?: ViewStyle['boxShadow'];
   };
 };
 
@@ -169,5 +194,7 @@ export const darkShadow: ShadowTokens = {
     shadowRadius: 18,
     elevation: 6,
   },
-  none: darkZero('transparent'),
+  get none() {
+    return Platform.OS === 'ios' ? IOS_NONE_SHADOW : NONE_SHADOW;
+  },
 };
