@@ -291,10 +291,8 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
               styles.wrapFallbackSurface,
             searchLayout !== undefined && styles.searchInteractiveRow,
             searchLayout !== undefined &&
-              fallbackLight && [
-                nativeFallbackStyles.control,
-                styles.searchFallbackRow,
-              ],
+              fallbackLight &&
+              styles.searchFallbackRow,
             plain && styles.wrapPlain,
             !multiline && insetSurface && styles.wrapInset,
             multiline
@@ -337,6 +335,9 @@ export const TextFieldBase = forwardRef<TextFieldHandle, TextFieldBaseProps>(
               pointerEvents="none"
               style={[
                 styles.searchVisibleSurface,
+                fallbackLight && nativeFallbackStyles.card,
+                fallbackLight && styles.searchFallbackSurface,
+                fallbackLight && nativeFallbackStyles.controlBorder,
                 {
                   borderColor: error
                     ? colors.error

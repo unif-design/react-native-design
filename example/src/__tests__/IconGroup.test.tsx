@@ -56,6 +56,13 @@ test.each(['ios', 'android'] as const)(
     expect(StyleSheet.flatten(group.props.style).backgroundColor).toBe(
       lightColors.surface
     );
+    expect(
+      StyleSheet.flatten(screen.getByTestId('navigation').props.style)
+    ).toMatchObject({
+      shadowOffset: { width: 0, height: platform === 'android' ? 1 : 2 },
+      shadowOpacity: platform === 'android' ? 0.04 : 0.06,
+      shadowRadius: platform === 'android' ? 1.5 : 4,
+    });
   }
 );
 

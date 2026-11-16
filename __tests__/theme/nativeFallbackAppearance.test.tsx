@@ -248,28 +248,40 @@ test.each(['ios', 'android'] as const)(
         .find(
           (node) =>
             StyleSheet.flatten(node.props.style)?.borderRadius &&
-            StyleSheet.flatten(node.props.style)?.position === 'absolute' &&
-            StyleSheet.flatten(node.props.style)?.borderWidth === 1
+            StyleSheet.flatten(node.props.style)?.position === 'absolute'
         )!;
     expect(StyleSheet.flatten(surface().props.style)).toMatchObject({
       borderColor: 'rgba(0,0,0,0.08)',
+      borderWidth: StyleSheet.hairlineWidth,
+      shadowOpacity: 0.04,
+      shadowRadius: 1.5,
+      top: 4,
+      bottom: 4,
     });
+    expect(surface().props.pointerEvents).toBe('none');
     expect(StyleSheet.flatten(surface().props.style)?.elevation ?? 0).toBe(0);
     expect(
       StyleSheet.flatten(page.getByTestId('search').props.style)
     ).toMatchObject({ minHeight: 44 });
-    const shadowHost = page
+    const interactiveRow = page
       .getByTestId('search')
       .findAllByType(View)
-      .find((node) => StyleSheet.flatten(node.props.style)?.elevation === 2)!;
-    expect(StyleSheet.flatten(shadowHost.props.style)).toMatchObject({
+      .find((node) => StyleSheet.flatten(node.props.style)?.height === 44)!;
+    expect(StyleSheet.flatten(interactiveRow.props.style)).toMatchObject({
       height: 44,
-      elevation: 2,
-      shadowOpacity: 0.06,
       backgroundColor: 'transparent',
     });
+    expect(StyleSheet.flatten(interactiveRow.props.style).elevation ?? 0).toBe(
+      0
+    );
+    expect(
+      StyleSheet.flatten(interactiveRow.props.style).shadowOpacity ?? 0
+    ).toBe(0);
+    expect(
+      StyleSheet.flatten(interactiveRow.props.style).boxShadow
+    ).toBeUndefined();
     const input = page.getByTestId('search-input');
-    expect(shadowHost.findAll((node) => node === input)).toHaveLength(1);
+    expect(interactiveRow.findAll((node) => node === input)).toHaveLength(1);
     fireEvent(input, 'focus');
     expect(StyleSheet.flatten(surface().props.style)).toMatchObject({
       borderColor: '#EB6E00',
