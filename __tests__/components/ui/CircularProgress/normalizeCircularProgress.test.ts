@@ -1,5 +1,9 @@
-import { describe, expect, test } from '@jest/globals';
+import { afterEach, describe, expect, test } from '@jest/globals';
 import { normalizeCircularProgress } from '../../../../src/components/ui/CircularProgress/normalizeCircularProgress';
+
+afterEach(async () => {
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
+});
 
 describe('normalizeCircularProgress', () => {
   test('按 0..1 归一化进度并生成确定圆环几何', () => {

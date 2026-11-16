@@ -28,6 +28,8 @@
 
 `src/utils/logger` 保留 Design 的已公开消息／可变参数接口，直接转导 `@unif/react-native-logger` 的 `defaultLogBackend`，不维护独立级别、transport 或控制台实现。库内部诊断和展厅沿用原有 scope 与消息；应用安装 Logger 默认运行时即可采集该后端，不能把结构化 `createLogger` 再注入底层 backend。
 
+本仓开发、示例与文档站使用正式 Logger `0.3.0`，日志通过该包的异步队列投递；组件行为不等待控制台或 transport。对 transport 的测试需等待日志投递，界面卸载后应忽略已提交日志的延迟回调。公开 peer 保留 Logger `0.2.x` 的已有兼容范围，并允许 `0.3.x`。
+
 命令与依赖版本以 [package.json](../package.json)、锁文件及实际安装为准，验证接线见 [.github/workflows](../.github/workflows/)。维护入口见 [AGENTS.md](../AGENTS.md)，按当前任务选择适用技能并核对本库配置。
 
 历史 spec、plan 和审查记录用于溯源，不作为当前使用文档或新需求入口。

@@ -27,6 +27,7 @@ export { normalizeFontScale, scaleFontMetric, useFontScale } from './fontScale';
 export { useThemedStyles } from './useThemedStyles';
 export type { StylesMaker } from './useThemedStyles';
 export { usePrefersReducedMotion } from './usePrefersReducedMotion';
+export { useReducedTransparency } from './useReducedTransparency';
 export { MotionScope, useMotionActive } from './MotionScope';
 
 export {

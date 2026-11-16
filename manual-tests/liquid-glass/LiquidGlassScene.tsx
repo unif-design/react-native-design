@@ -231,6 +231,7 @@ function Scene() {
           <View style={styles.controls}>
             <NavBar
               title="项目导航"
+              variant="default"
               left={{
                 icon: ChevronLeftOutlined,
                 accessibilityLabel: '返回项目',

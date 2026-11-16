@@ -21,13 +21,16 @@ describe('logger', () => {
 
   beforeEach(() => {
     jest.resetModules();
+    jest.useFakeTimers();
     consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation(() => {});
     consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
     consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    await jest.runAllTimersAsync();
+    jest.useRealTimers();
     jest.restoreAllMocks();
   });
 
@@ -59,20 +62,24 @@ describe('logger', () => {
     expect(typeof log.error).toBe('function');
   });
 
-  test('warn 输出带 [Scope] 前缀,业务消息单独传', () => {
+  test('warn 输出带 [Scope] 前缀,业务消息单独传', async () => {
     const { createLogger } = require('../../src/utils/logger');
     const log = createLogger('TestScope');
-    log.warn('msg');
+    expect(log.warn('msg')).toBeUndefined();
+    expect(consoleWarnSpy).not.toHaveBeenCalled();
+    await jest.runAllTimersAsync();
     expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
     const args = consoleWarnSpy.mock.calls[0];
     expect(args[0]).toBe('[TestScope]');
     expect(args[1]).toBe('msg');
   });
 
-  test('error 走 console.error 且带 scope 前缀', () => {
+  test('error 走 console.error 且带 scope 前缀', async () => {
     const { createLogger } = require('../../src/utils/logger');
     const log = createLogger('TestScope');
     log.error('boom', { code: 500 });
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+    await jest.runAllTimersAsync();
     expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
     const args = consoleErrorSpy.mock.calls[0];
     expect(args[0]).toBe('[TestScope]');
@@ -80,18 +87,21 @@ describe('logger', () => {
     expect(args[2]).toEqual({ code: 500 });
   });
 
-  test('__DEV__ 下默认 level=debug,debug/info 都输出', () => {
+  test('__DEV__ 下默认 level=debug,debug/info 都输出', async () => {
     // jest preset 默认 __DEV__ = true
     const { createLogger, getLogLevel } = require('../../src/utils/logger');
     expect(getLogLevel()).toBe('debug');
     const log = createLogger('TestScope');
     log.debug('d');
     log.info('i');
+    expect(consoleDebugSpy).not.toHaveBeenCalled();
+    expect(consoleInfoSpy).not.toHaveBeenCalled();
+    await jest.runAllTimersAsync();
     expect(consoleDebugSpy).toHaveBeenCalledTimes(1);
     expect(consoleInfoSpy).toHaveBeenCalledTimes(1);
   });
 
-  test('setLogLevel("warn") 之后 debug/info 不再输出,warn/error 仍输出', () => {
+  test('setLogLevel("warn") 之后 debug/info 不再输出,warn/error 仍输出', async () => {
     const { createLogger, setLogLevel } = require('../../src/utils/logger');
     setLogLevel('warn');
     const log = createLogger('TestScope');
@@ -99,13 +109,14 @@ describe('logger', () => {
     log.info('i');
     log.warn('w');
     log.error('e');
+    await jest.runAllTimersAsync();
     expect(consoleDebugSpy).not.toHaveBeenCalled();
     expect(consoleInfoSpy).not.toHaveBeenCalled();
     expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
     expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
   });
 
-  test('addTransport 同 id 自动去重 + removeTransport 删除', () => {
+  test('addTransport 同 id 自动去重 + removeTransport 删除', async () => {
     const {
       createLogger,
       addTransport,
@@ -122,13 +133,16 @@ describe('logger', () => {
     addTransport(t); // 同 id 应去重
     const log = createLogger('TestScope');
     log.warn('hello');
+    expect(records).toEqual([]);
+    await jest.runAllTimersAsync();
     expect(records).toEqual([{ scope: 'TestScope', message: 'hello' }]);
     removeTransport('memory');
     log.warn('after-remove');
+    await jest.runAllTimersAsync();
     expect(records).toHaveLength(1); // 移除后不再追加
   });
 
-  test('transport 抛错被隔离,不影响其他 transport / 业务调用', () => {
+  test('transport 抛错被隔离,不影响其他 transport / 业务调用', async () => {
     const { createLogger, addTransport } = require('../../src/utils/logger');
     const calls: string[] = [];
     addTransport({
@@ -145,6 +159,8 @@ describe('logger', () => {
     });
     const log = createLogger('TestScope');
     expect(() => log.warn('ok')).not.toThrow();
+    expect(calls).toEqual([]);
+    await jest.runAllTimersAsync();
     expect(calls).toEqual(['ok']);
   });
 });

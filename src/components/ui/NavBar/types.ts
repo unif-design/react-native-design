@@ -12,17 +12,30 @@ export type NavBarAction = {
 
 export type NavBarSlot = NavBarAction | ReactNode;
 
-export type NavBarProps = {
-  /** 主标题 */
-  title: string;
-  /** 副标题（可选，主标题下方一行） */
-  subtitle?: string;
-  /** 左侧槽位：传 NavBarAction 自动用 IconButton 渲染 / 传 ReactNode 自定义 */
-  left?: NavBarSlot;
-  /** 右侧槽位：同 left */
-  right?: NavBarSlot;
+type NavBarContentProps =
+  | {
+      /** 主标题 */
+      title: string;
+      /** 副标题（可选，主标题下方一行） */
+      subtitle?: string;
+      /** 左侧槽位：传 NavBarAction 自动用 IconButton 渲染 / 传 ReactNode 自定义 */
+      left?: NavBarSlot;
+      /** 右侧槽位：同 left */
+      right?: NavBarSlot;
+      children?: never;
+    }
+  | {
+      /** 替换整条内容；保留节点的交互、ref 和无障碍语义。 */
+      children: Exclude<ReactNode, undefined>;
+      title?: never;
+      subtitle?: never;
+      left?: never;
+      right?: never;
+    };
+
+export type NavBarProps = NavBarContentProps & {
   /**
-   * 视觉变体，默认 'default'：
+   * 视觉变体，默认 'transparent'：
    * - `default`：系统玻璃表面 + hairline 底边
    * - `brand`：品牌橙底 + 白字（登录 / 启动场景）
    * - `transparent`：完全透明 + 深字(c.foreground)+ 无 border —— 浮在浅色 hero

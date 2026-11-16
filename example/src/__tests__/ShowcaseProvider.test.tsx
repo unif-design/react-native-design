@@ -32,7 +32,8 @@ beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 });
 
-afterEach(() => {
+afterEach(async () => {
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   jest.restoreAllMocks();
 });
 
@@ -96,7 +97,7 @@ test('重复导航到当前 scene 保持 state identity 且不触发 Consumer re
   expect(probeRenderCount).toBe(rendersAfterFirstNavigation);
 });
 
-test('custom logger transport 只映射白名单安全摘要并在 unmount 恢复', () => {
+test('custom logger transport 只映射白名单安全摘要并在 unmount 恢复', async () => {
   const originalLevel = getLogLevel();
   setLogLevel('error');
   const mounted = render(
@@ -109,12 +110,13 @@ test('custom logger transport 只映射白名单安全摘要并在 unmount 恢�
   const imageUri = 'file:///private/logger-photo.jpg';
 
   expect(getLogLevel()).toBe('info');
-  act(() => {
+  await act(async () => {
     buttonLog.warn(
       'Button label 不能为空白，当前 action 已禁用。',
       { password, uri: imageUri },
       password
     );
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
   });
   expect(showcase?.state.results).toEqual([
     {
@@ -128,7 +130,7 @@ test('custom logger transport 只映射白名单安全摘要并在 unmount 恢�
   expect(JSON.stringify(showcase?.state)).not.toContain(password);
   expect(JSON.stringify(showcase?.state)).not.toContain(imageUri);
 
-  act(() => {
+  await act(async () => {
     createLogger('FoundationScene').info(
       '主题诊断示例已记录',
       { password, uri: imageUri },
@@ -139,6 +141,7 @@ test('custom logger transport 只映射白名单安全摘要并在 unmount 恢�
       password
     );
     createLogger('Button').warn('未知消息', password);
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
   });
   expect(showcase?.state.results).toEqual([
     {
@@ -165,7 +168,7 @@ test('custom logger transport 只映射白名单安全摘要并在 unmount 恢�
   setLogLevel(originalLevel);
 });
 
-test('logger cleanup 先移除 active transport 再恢复旧 level', () => {
+test('logger cleanup 先移除 active transport 再恢复旧 level', async () => {
   const originalLevel = getLogLevel();
   setLogLevel('error');
   const events: string[] = [];
@@ -194,6 +197,7 @@ test('logger cleanup 先移除 active transport 再恢复旧 level', () => {
     createLogger('FoundationScene').info('主题诊断示例已记录', {
       password: 'ignored-before-cleanup',
     });
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
     expect(appendResult).toHaveBeenCalledTimes(1);
 
     const cleanupEventStart = events.length;
@@ -208,9 +212,24 @@ test('logger cleanup 先移除 active transport 再恢复旧 level', () => {
       'Button label 不能为空白，当前 action 已禁用。',
       'must-not-reach-removed-transport'
     );
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
     expect(appendResult).toHaveBeenCalledTimes(1);
   } finally {
     if (!cleanedUp) cleanup();
     setLogLevel(originalLevel);
+  }
+});
+
+test('移除展厅transport后，已提交的异步日志不再追加旧界面结果', async () => {
+  const appendResult = jest.fn();
+  const release = installShowcaseLoggerTransport(appendResult);
+  try {
+    createLogger('FoundationScene').info('主题诊断示例已记录');
+    expect(appendResult).not.toHaveBeenCalled();
+    release();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    expect(appendResult).not.toHaveBeenCalled();
+  } finally {
+    release();
   }
 });

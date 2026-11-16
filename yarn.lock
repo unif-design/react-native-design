@@ -6710,7 +6710,7 @@ __metadata:
     "@types/react-test-renderer": "npm:^19.1.0"
     "@unif/react-native-design": "workspace:*"
     "@unif/react-native-icons": "npm:0.4.1"
-    "@unif/react-native-logger": "npm:^0.2.0"
+    "@unif/react-native-logger": "npm:^0.3.0"
     eslint: "npm:^8.19.0"
     jest: "npm:^29.6.3"
     prettier: "npm:2.8.8"
@@ -6748,7 +6748,7 @@ __metadata:
     "@types/react": "npm:^19.2.0"
     "@unif/react-native-design": "workspace:*"
     "@unif/react-native-icons": "npm:0.4.1"
-    "@unif/react-native-logger": "npm:^0.2.0"
+    "@unif/react-native-logger": "npm:^0.3.0"
     clsx: "npm:^2.0.0"
     prism-react-renderer: "npm:^2.3.0"
     react: "npm:19.3.0"
@@ -6786,7 +6786,7 @@ __metadata:
     "@types/react": "npm:^19.2.0"
     "@types/react-is": "npm:^19.3.0"
     "@unif/react-native-icons": "npm:0.4.1"
-    "@unif/react-native-logger": "npm:^0.2.0"
+    "@unif/react-native-logger": "npm:^0.3.0"
     commitlint: "npm:^21.0.1"
     del-cli: "npm:^7.0.0"
     eslint: "npm:^9.39.4"
@@ -6814,7 +6814,7 @@ __metadata:
   peerDependencies:
     "@callstack/liquid-glass": ">=0.8.2 <0.9.0"
     "@unif/react-native-icons": ">=0.1.0"
-    "@unif/react-native-logger": ^0.2.0
+    "@unif/react-native-logger": ^0.2.0 || ^0.3.0
     react: ">=19.2.3 <20.0.0"
     react-native: ">=0.86.0"
     react-native-gesture-handler: ">=3.0.0 <4.0.0"
@@ -6837,21 +6837,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@unif/react-native-logger@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "@unif/react-native-logger@npm:0.2.0"
+"@unif/react-native-logger@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@unif/react-native-logger@npm:0.3.0"
   dependencies:
     crypto-js: "npm:^4.2.0"
     lodash: "npm:^4.18.1"
   peerDependencies:
     react-native: ">=0.86.0"
-    react-native-blob-util: ^0.25.1
+    react-native-blob-util: 1.1.1
   peerDependenciesMeta:
     react-native:
       optional: true
     react-native-blob-util:
       optional: true
-  checksum: 10c0/05df736ef7bbc4faf5472f38bdbbf1a7db1fe3f370adbc2abe02bbf77bf7c579425f4f237993e52fb1b3cdae1c620864827b25427fc5d71ff5e2d4521a83f347
+  checksum: 10c0/286ecd97099382796a11cbac8d1f4dc437003350d41dbd49e7f79d7391ff160e9c5af2a272a827bc306abcd79cdaf7397b6d681e670868772a787bf4522097cb
   languageName: node
   linkType: hard
 

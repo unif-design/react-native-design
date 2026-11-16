@@ -6,7 +6,7 @@ import { makeAvatarStyles } from '../../../../src/components/business/AvatarWith
 describe('AvatarWithRing makeAvatarStyles', () => {
   test.each([true, false])(
     '非法尺寸在开发模式=%s 都保持可见圆心',
-    (development) => {
+    async (development) => {
       const original = Reflect.get(globalThis, '__DEV__');
       const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
       Reflect.set(globalThis, '__DEV__', development);
@@ -15,6 +15,7 @@ describe('AvatarWithRing makeAvatarStyles', () => {
         const minimum = makeAvatarStyles(5, 'red', {}, lightColors, 1);
         expect(invalid).toEqual(minimum);
         expect(invalid.inner).toBeGreaterThan(0);
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
         expect(warn).toHaveBeenCalledTimes(development ? 1 : 0);
       } finally {
         Reflect.set(globalThis, '__DEV__', original);

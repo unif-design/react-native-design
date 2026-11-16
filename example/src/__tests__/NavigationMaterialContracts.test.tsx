@@ -5,10 +5,12 @@ import type { ReactTestInstance } from 'react-test-renderer';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import * as LiquidGlass from '@callstack/liquid-glass';
 import {
+  Button,
   Carousel,
   EntryCard,
   GlassLayer,
   NavBar,
+  Search,
   Stepper,
   Tabs,
   ThemeProvider,
@@ -66,7 +68,7 @@ function expectMaterialAncestorsOpaque(layer: ReactTestInstance) {
 }
 
 test.each(['light', 'dark'] as const)(
-  'NavBar %s 默认材质保持操作，brand和transparent继续原语义',
+  'NavBar %s 显式玻璃保持操作，brand和transparent继续原语义',
   (scheme) => {
     const onPress = jest.fn();
     const content = (variant: 'default' | 'brand' | 'transparent') => (
@@ -100,6 +102,100 @@ test.each(['light', 'dark'] as const)(
     expect(page.UNSAFE_queryAllByType(GlassLayer)).toHaveLength(0);
   }
 );
+
+test.each(['light', 'dark'] as const)(
+  'NavBar %s 不传 variant 时透明无底线并保留标题与操作',
+  (scheme) => {
+    const onPress = jest.fn();
+    const page = render(
+      <ThemeProvider forceScheme={scheme}>
+        <NavBar
+          title="当前页面"
+          testID="transparent-navbar"
+          left={{
+            icon: ArrowLeftOutlined,
+            accessibilityLabel: '返回',
+            onPress,
+          }}
+        />
+      </ThemeProvider>
+    );
+    expect(page.UNSAFE_queryAllByType(GlassLayer)).toHaveLength(0);
+    expect(page.getByTestId('transparent-navbar')).toHaveStyle({
+      backgroundColor: 'transparent',
+      borderBottomWidth: 0,
+    });
+    expect(page.getByRole('header', { name: '当前页面' })).toBeOnTheScreen();
+    fireEvent.press(page.getByRole('button', { name: '返回' }));
+    expect(onPress).toHaveBeenCalledTimes(1);
+  }
+);
+
+test('NavBar 自定义内容保留输入、取消、ref和状态，材质切换不重挂载', () => {
+  const input = React.createRef<React.ComponentRef<typeof Search>>();
+  const mounted = jest.fn();
+  const unmounted = jest.fn();
+  const cancel = jest.fn();
+  function SearchContent() {
+    const [value, setValue] = React.useState('');
+    React.useEffect(() => {
+      mounted();
+      return unmounted;
+    }, []);
+    return (
+      <>
+        <Search
+          ref={input}
+          value={value}
+          onChangeText={setValue}
+          placeholder="搜索会话"
+        />
+        <Button
+          label="取消"
+          variant="text"
+          accessibilityHint="返回当前聊天"
+          onPress={cancel}
+        />
+      </>
+    );
+  }
+  const content = (variant?: 'default' | 'transparent') => (
+    <Theme>
+      <NavBar
+        variant={variant}
+        style={{ height: 'auto' }}
+        testID="custom-navbar"
+      >
+        <SearchContent />
+      </NavBar>
+    </Theme>
+  );
+  const page = render(content());
+  expect(page.queryAllByRole('header')).toHaveLength(0);
+  expect(page.getByTestId('custom-navbar')).toHaveStyle({ height: 'auto' });
+  fireEvent.changeText(page.getByPlaceholderText('搜索会话'), '客户');
+  expect(page.getByDisplayValue('客户')).toBeOnTheScreen();
+  const field = input.current;
+  expect(field).not.toBeNull();
+  fireEvent.press(page.getByRole('button', { name: '取消' }));
+  expect(cancel).toHaveBeenCalledTimes(1);
+  for (const variant of ['default', 'transparent'] as const) {
+    page.rerender(content(variant));
+    expect(input.current).toBe(field);
+    expect(page.getByDisplayValue('客户')).toBeOnTheScreen();
+    expect(page.queryAllByRole('header')).toHaveLength(0);
+  }
+  expect(mounted).toHaveBeenCalledTimes(1);
+  expect(unmounted).not.toHaveBeenCalled();
+  page.unmount();
+  expect(unmounted).toHaveBeenCalledTimes(1);
+});
+
+test('NavBar 自定义文字内容使用原生 Text 且不附加标题语义', () => {
+  const page = render(<NavBar>自定义导航内容</NavBar>, { wrapper: Theme });
+  expect(page.getByText('自定义导航内容')).toBeOnTheScreen();
+  expect(page.queryAllByRole('header')).toHaveLength(0);
+});
 
 test('Tabs 默认材质保留选中和禁用，不把前景透明度应用到玻璃', () => {
   const onChange = jest.fn();

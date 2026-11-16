@@ -109,9 +109,11 @@ export function installShowcaseLoggerTransport(
   lifecycle: ShowcaseLoggerLifecycle = defaultShowcaseLoggerLifecycle
 ): () => void {
   const previousLevel = lifecycle.getLogLevel();
+  let active = true;
   const transport: LogTransport = {
     id: SHOWCASE_LOG_TRANSPORT_ID,
     log(record) {
+      if (!active) return;
       const safeResult = safeResultForLog(record);
       if (safeResult) appendResult(safeResult);
     },
@@ -120,6 +122,7 @@ export function installShowcaseLoggerTransport(
   lifecycle.setLogLevel('info');
   lifecycle.addTransport(transport);
   return () => {
+    active = false;
     lifecycle.removeTransport(SHOWCASE_LOG_TRANSPORT_ID);
     lifecycle.setLogLevel(previousLevel);
   };

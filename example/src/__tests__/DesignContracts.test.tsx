@@ -180,7 +180,7 @@ describe('Design 独立消费契约', () => {
     }
   );
 
-  test('Thumbnail 无有效 source 时显示有名称的占位，不挂载图片', () => {
+  test('Thumbnail 无有效 source 时显示有名称的占位，不挂载图片', async () => {
     const warning = jest.spyOn(console, 'warn').mockImplementation(() => {});
     try {
       render(
@@ -195,6 +195,7 @@ describe('Design 独立消费契约', () => {
       expect(screen.getByRole('image', { name: '附件占位' })).toBeTruthy();
       expect(screen.getByText('文件占位')).toBeTruthy();
       expect(screen.UNSAFE_queryByType(Image)).toBeNull();
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
       expect(
         warning.mock.calls.some((call) => String(call[1]).includes('(source)'))
       ).toBe(true);

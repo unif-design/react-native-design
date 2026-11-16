@@ -98,18 +98,9 @@ const makeStyles = (colors: ColorTokens) =>
 
 function runLoggerDiagnostic(): void {
   const previousLevel = getLogLevel();
-  let delivered = false;
   const transport: LogTransport = {
     id: ONE_SHOT_TRANSPORT_ID,
-    log(record) {
-      if (delivered) return;
-      if (
-        record.scope === 'FoundationScene' &&
-        record.message === SAFE_LOG_MESSAGE
-      ) {
-        delivered = true;
-      }
-    },
+    log() {},
   };
 
   try {

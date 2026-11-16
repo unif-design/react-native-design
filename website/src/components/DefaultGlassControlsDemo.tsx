@@ -35,6 +35,7 @@ export function DefaultGlassControlsDemo() {
       <View style={styles.column}>
         <NavBar
           title="项目导航"
+          variant="default"
           left={{
             icon: ChevronLeftOutlined,
             accessibilityLabel: '返回项目',

@@ -2834,6 +2834,8 @@ import { View, Text } from 'react-native';
 
 玻璃层不拦截触摸，隐藏自身无障碍子树，内容语义由其旁边的真实内容提供。材质更新不播放动画。原生监听减少透明度偏好，Web 监听 `prefers-reduced-transparency`；开启时使用 `fallbackColor` 或实色 `surface`。Web 无 `backdrop-filter` 支持时使用相同主题渐变。原生系统偏好由应用根部稳定的 ThemeProvider 统一读取和订阅。首次查询尚未返回时先使用实色；之后新导航、新按钮和弹层直接使用已知状态，嵌套 ThemeProvider 也继承该系统偏好，不再重复从实色切换为玻璃。独立使用且没有主题宿主的 GlassLayer 仍自行读取和监听系统偏好。迟到查询不会覆盖新的偏好事件。
 
+自定义原生表面可从包根导入 `useReducedTransparency(): boolean`，在 ThemeProvider 内复用同一偏好状态，无需另建系统监听。iOS 首次查询前返回 `true`，Android 不读取 iOS 专属偏好；Web 玻璃继续按 CSS 媒体偏好处理。
+
 父容器应限定尺寸并提供相对定位。圆角通过 `style` 传给玻璃层；父容器负责内容裁切，外层按需承载阴影。组件只提供背景，不接受 `children`。
 
 原生玻璃层及其祖先不要设置小于 1 的 opacity。按压、禁用和淡入淡出只淡化前景内容，避免 UIKit 原生效果消失；整个表面仍可做位移。见 [UIVisualEffectView 的 alpha 约束](https://developer.apple.com/documentation/uikit/uivisualeffectview/)。
@@ -4107,7 +4109,7 @@ function BrandImage() {
 
 # NavBar 导航栏
 
-页面顶部导航栏，提供标题与左右操作区域。默认使用无额外染色的系统玻璃表面；品牌态保持品牌色，transparent 仍完全透明。默认表面在 Android、旧 iOS 或减少透明度时使用主题 `surface` 实色。Web 保留 CSS 近似材质；无 CSS 模糊能力且未启用减少透明度时使用主题渐变。
+页面顶部导航栏，提供标准标题与左右操作区域，也可通过 `children` 提供整条自定义内容。默认透明且无底边线，背景由所在页面或容器承担。需要玻璃表面时显式设置 `variant="default"`；该表面在 Android、旧 iOS 或减少透明度时使用主题 `surface` 实色。Web 保留 CSS 近似材质；无 CSS 模糊能力且未启用减少透明度时使用主题渐变。品牌态保持品牌色。
 
 ## 代码演示 {#实时预览}
 
@@ -4117,7 +4119,7 @@ const NavBarDemo = () => {
   return (
     <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <span className="demo-label">默认 · 含副标题</span>
+        <span className="demo-label">显式玻璃 · 含副标题</span>
         <View
           style={{
             borderWidth: 1,
@@ -4129,6 +4131,7 @@ const NavBarDemo = () => {
           <NavBar
             title="AI 助手"
             subtitle="在线 · 已同步"
+            variant="default"
             left={{
               icon: MenuOutlined,
               onPress: () => setAction('打开抽屉'),
@@ -4243,19 +4246,50 @@ import { NavBar } from '@unif/react-native-design';
 />;
 ```
 
-标题统一使用 `type.h2`（基础 17）与 `fw.semi`（600），并跟随 ThemeProvider 字号缩放。
+标准标题统一使用 `type.h2`（基础 17）与 `fw.semi`（600），并跟随 ThemeProvider 字号缩放。从旧版本升级后，需要保留玻璃背景的消费者应显式设置 `variant="default"`。
+
+### 自定义整条内容
+
+工作台问候、日期与操作组，或搜索输入与取消按钮，可直接作为 `children`。自定义模式不创建左右槽位、居中标题或空的标题读屏节点；已有控件的事件、ref、焦点和无障碍语义由原节点保留。`children` 与 `title`、`subtitle`、`left`、`right` 在类型上互斥。
+
+```tsx
+import { useRef, useState } from 'react';
+import { View } from 'react-native';
+import { Button, NavBar, Search } from '@unif/react-native-design';
+
+function SearchHeader({ onCancel }: { onCancel: () => void }) {
+  const [keyword, setKeyword] = useState('');
+  const input = useRef<React.ComponentRef<typeof Search>>(null);
+  return (
+    <NavBar style={{ height: 'auto', paddingVertical: 12, gap: 8 }}>
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Search
+          ref={input}
+          value={keyword}
+          onChangeText={setKeyword}
+          placeholder="搜索会话"
+        />
+      </View>
+      <Button label="取消" variant="text" onPress={onCancel} />
+    </NavBar>
+  );
+}
+```
+
+根容器保留横向布局与默认 44pt 高度；内容需要更高空间时使用 `style={{ height: 'auto' }}`，并按实际场景设置间距。NavBar 不替业务决定输入聚焦、取消或返回行为；更换 `variant` 不重挂载自定义内容。
 
 ## API
 
-| 参数       | 类型                                    | 默认值      | 说明                                                                                                                                                                                             |
-| ---------- | --------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `title`    | `string`                                | —           | 居中标题                                                                                                                                                                                         |
-| `subtitle` | `string?`                               | —           | 副标题（小字号，主标题下方）                                                                                                                                                                     |
-| `left`     | `NavBarSlot`                            | —           | 左槽：严格 `NavBarAction { icon, onPress, accessibilityLabel }` 或展示用 `ReactNode`                                                                                                             |
-| `right`    | `NavBarSlot`                            | —           | 右槽，同 `left`                                                                                                                                                                                  |
-| `variant`  | `'default' \| 'brand' \| 'transparent'` | `'default'` | `default` 为系统玻璃、hairline 和主题文字；`brand` 为品牌橙底与白字；`transparent` 无背景与边框，文字使用当前主题 `c.foreground` |
-| `style`    | `StyleProp<ViewStyle>?`                 | —           | 根容器附加样式（margin / position 等布局微调）                                                                                                                                                   |
-| `testID`   | `string?`                               | —           | E2E 定位                                                                                                                                                                                         |
+| 参数       | 类型                                    | 默认值          | 说明                                                                                                                                         |
+| ---------- | --------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title`    | `string`                                | —               | 标准模式必填的居中标题，与 `children` 互斥                                                                                                   |
+| `subtitle` | `string?`                               | —               | 副标题（小字号，主标题下方）                                                                                                                 |
+| `left`     | `NavBarSlot`                            | —               | 左槽：严格 `NavBarAction { icon, onPress, accessibilityLabel }` 或展示用 `ReactNode`                                                         |
+| `right`    | `NavBarSlot`                            | —               | 右槽，同 `left`                                                                                                                              |
+| `children` | `ReactNode`（不含 `undefined`）         | —               | 自定义整条内容，与标准标题、副标题及左右槽位互斥；可传 `null`，不生成占位标题                                                                |
+| `variant`  | `'default' \| 'brand' \| 'transparent'` | `'transparent'` | `transparent` 无背景与边框；显式 `default` 为系统玻璃与 hairline；`brand` 为品牌橙底。标准模式文字跟随主题与变体，自定义内容自行选择文字样式 |
+| `style`    | `StyleProp<ViewStyle>?`                 | —               | 根容器附加样式（margin / position 等布局微调）                                                                                               |
+| `testID`   | `string?`                               | —               | E2E 定位                                                                                                                                     |
 
 > `left` / `right` 传完整 `NavBarAction` 时渲染为内部 `IconButton`（`variant='ghost'`，icon 使用从 Icons 导入的 `ComponentType<IconProps>`）。展示节点中的 `string` / `number` / `bigint`（包括 Fragment、nested collection 与 thenable resolved value 内的 primitive）会递归包装为本地 `Text`；非 Fragment element / portal 保持原有语义。thenable 映射按稳定源对象缓存，拒绝原因保持不变，非法 resolved value 失败关闭。缺字段、非法 icon 或 malformed node 会在 effect 中诊断并渲染为空。
 
@@ -4270,7 +4304,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 <SafeAreaView edges={['top']}>
   <NavBar title="首页" />
 </SafeAreaView>;
-
 ```
 
 这样 NavBar 本体可在任何场景复用（modal、底部抽屉 header、全屏画中画等不需要 top inset 的场景）。
@@ -4280,6 +4313,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 来源：`src/components/ui/NavBar/NavBar.tsx`、`isSlot.ts`、`types.ts`。
 
 - 主标题 `title` 的 `<Text>` 使用 `accessibilityRole="header"`，可由屏幕阅读器按标题定位；根 `<View>` 不合并左右动作，`subtitle` 保留普通文本语义。
+- 自定义 `children` 不附加标题或合并语义，调用方保留原控件的名称、角色、提示与焦点行为。
 - a11y props：`left` / `right` 槽的 `NavBarAction.accessibilityLabel` **必填且非空**；action 同时必须有函数 `onPress`。若传展示用 `ReactNode`，React element 自行负责 a11y，primitive 文本由库内本地 `Text` 自然朗读。
 - 状态语义：NavBar 自身无可切换状态，不附加 `accessibilityState`。
 
