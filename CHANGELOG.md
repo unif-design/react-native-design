@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.2](https://github.com/unif-design/react-native-design/compare/v1.19.1...v1.19.2) (2026-11-16)
+
+
+### Bug Fixes
+
+* 减轻 Android 降级阴影并修复搜索框双层灰圈 ([#205](https://github.com/unif-design/react-native-design/issues/205)) ([d9335c6](https://github.com/unif-design/react-native-design/commit/d9335c667376bb4493c5c2408f0be2b3b22a9138))
+
 ## [1.19.1](https://github.com/unif-design/react-native-design/compare/v1.19.0...v1.19.1) (2026-11-14)
 
 
