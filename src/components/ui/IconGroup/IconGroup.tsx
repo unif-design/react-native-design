@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { useColors } from '../../../theme';
 import { GlassLayer } from '../GlassLayer';
 import {
@@ -18,7 +18,13 @@ export function IconGroup({
   const fallbackLight = useNativeFallbackLight();
   return (
     <View
-      style={[styles.root, fallbackLight && nativeFallbackStyles.control]}
+      style={[
+        styles.root,
+        fallbackLight &&
+          (Platform.OS === 'android'
+            ? nativeFallbackStyles.card
+            : nativeFallbackStyles.control),
+      ]}
       testID={testID}
     >
       <GlassLayer

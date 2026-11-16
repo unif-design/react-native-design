@@ -8,6 +8,10 @@ export function useNativeFallbackLight(): boolean {
   return useTheme().scheme === 'light' && usesNativeFallbackColors();
 }
 
+// Android 原生 elevation 不采用阴影透明度，支持时按原型绘制轻投影。
+const SUPPORTS_ANDROID_BOX_SHADOW =
+  Platform.OS === 'android' && Number(Platform.Version) >= 28;
+
 /** 共用装饰，阴影放外壳、边线放绝对背景层，避免改变内容尺寸。 */
 export const nativeFallbackStyles = StyleSheet.create({
   control: {
@@ -16,7 +20,20 @@ export const nativeFallbackStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: Platform.OS === 'android' ? 1 : 2,
+    ...(SUPPORTS_ANDROID_BOX_SHADOW
+      ? {
+          elevation: 0,
+          boxShadow: [
+            {
+              offsetX: 0,
+              offsetY: 2,
+              blurRadius: 8,
+              color: 'rgba(0,0,0,0.06)',
+            },
+          ],
+        }
+      : {}),
   },
   controlBorder: {
     borderWidth: StyleSheet.hairlineWidth,
@@ -29,6 +46,19 @@ export const nativeFallbackStyles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 1.5,
     elevation: 1,
+    ...(SUPPORTS_ANDROID_BOX_SHADOW
+      ? {
+          elevation: 0,
+          boxShadow: [
+            {
+              offsetX: 0,
+              offsetY: 1,
+              blurRadius: 3,
+              color: 'rgba(0,0,0,0.04)',
+            },
+          ],
+        }
+      : {}),
   },
   cardBorder: {
     borderWidth: StyleSheet.hairlineWidth,
@@ -47,7 +77,7 @@ export const nativeFallbackStyles = StyleSheet.create({
   },
   floatingBorder: {
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D8D8DD',
+    borderColor: 'rgba(0,0,0,0.06)',
   },
   input: {
     backgroundColor: '#FFFFFF',
@@ -55,7 +85,20 @@ export const nativeFallbackStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: Platform.OS === 'android' ? 1 : 4,
+    ...(SUPPORTS_ANDROID_BOX_SHADOW
+      ? {
+          elevation: 0,
+          boxShadow: [
+            {
+              offsetX: 0,
+              offsetY: 4,
+              blurRadius: 16,
+              color: 'rgba(0,0,0,0.08)',
+            },
+          ],
+        }
+      : {}),
   },
   inputBorder: {
     borderWidth: 0.5,

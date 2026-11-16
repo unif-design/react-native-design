@@ -38,11 +38,12 @@ export const makeStyles = (c: ColorTokens, shadow: ShadowTokens) =>
     searchInteractiveRow: {
       borderWidth: 0,
     },
-    // 阴影与输入共用44pt外壳；38pt实色背景不能凭 elevation 盖住前景。
+    // 44pt 命中外壳不投影，避免在可见表面外形成双层灰圈。
     searchFallbackRow: {
       borderRadius: radius.pill,
       backgroundColor: 'transparent',
     },
+    searchFallbackSurface: { elevation: 0 },
     searchContent: {
       flex: 1,
       flexDirection: 'row',

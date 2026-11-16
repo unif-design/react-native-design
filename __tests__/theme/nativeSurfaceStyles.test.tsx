@@ -1,5 +1,5 @@
 import { afterEach, expect, jest, test } from '@jest/globals';
-import { Platform } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { renderHook } from '../../example/node_modules/@testing-library/react-native';
 import * as LiquidGlass from '@callstack/liquid-glass';
 import {
@@ -100,4 +100,53 @@ test('输入装饰保留两种主题的既有外观', () => {
     borderWidth: 0.5,
     borderColor: darkColors.outlineVariant,
   });
+});
+
+test.each([
+  ['android', 28, true],
+  ['android', 30, true],
+  ['android', 27, false],
+  ['ios', '16.7', false],
+  ['web', undefined, false],
+] as const)('阴影能力按平台/API 选择：%s/%s', (os, version, boxShadow) => {
+  // 装饰在加载模块时确定平台；隔离加载以核对真实 API 边界。
+  jest.isolateModules(() => {
+    jest.doMock('react-native', () => ({
+      Platform: { OS: os, Version: version },
+      StyleSheet,
+    }));
+    jest.doMock('../../src/theme/useTheme', () => ({ useTheme: jest.fn() }));
+    const { nativeFallbackStyles: styles } =
+      require('../../src/theme/nativeFallbackStyles') as typeof import('../../src/theme/nativeFallbackStyles');
+    for (const [role, y, blur, opacity, iosElevation] of [
+      ['control', 2, 8, 0.06, 2],
+      ['card', 1, 3, 0.04, 1],
+      ['input', 4, 16, 0.08, 4],
+    ] as const) {
+      const style = styles[role];
+      expect(style.elevation).toBe(
+        boxShadow ? 0 : os === 'android' ? 1 : iosElevation
+      );
+      expect(style.boxShadow).toEqual(
+        boxShadow
+          ? [
+              {
+                offsetX: 0,
+                offsetY: y,
+                blurRadius: blur,
+                color: `rgba(0,0,0,${opacity})`,
+              },
+            ]
+          : undefined
+      );
+    }
+    expect(styles.controlBorder).toMatchObject({
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: 'rgba(0,0,0,0.08)',
+    });
+    expect(styles.cardBorder.borderColor).toBe('#ECECF0');
+    expect(styles.floatingBorder.borderColor).toBe('rgba(0,0,0,0.06)');
+  });
+  jest.dontMock('react-native');
+  jest.dontMock('../../src/theme/useTheme');
 });
