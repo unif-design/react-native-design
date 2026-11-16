@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.20.0](https://github.com/unif-design/react-native-design/compare/v1.19.2...v1.20.0) (2026-11-16)
+
+
+### Features
+
+* **design:** 支持 NavBar 内容插槽并适配异步 Logger ([#206](https://github.com/unif-design/react-native-design/issues/206)) ([44c0808](https://github.com/unif-design/react-native-design/commit/44c0808831de4b8d5f8d14daf8f1a936ecdad580))
+
 ## [1.19.2](https://github.com/unif-design/react-native-design/compare/v1.19.1...v1.19.2) (2026-11-16)
 
 
