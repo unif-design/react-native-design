@@ -20,7 +20,10 @@ import {
 } from '@unif/react-native-design';
 import { colWidth } from '../../../src/components/ui/Grid/styles';
 
-afterEach(() => jest.restoreAllMocks());
+afterEach(async () => {
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
+  jest.restoreAllMocks();
+});
 
 function pressHandler(node: ReactTestInstance): () => void {
   if (typeof node.props.onPress === 'function') return node.props.onPress;
@@ -42,6 +45,7 @@ test('复选框名称缺失时不提交，补上独立名称后可提交并处�
   expect(page.getByTestId('checkbox').props.accessible).toBe(false);
   fireEvent.press(page.getByTestId('checkbox'));
   expect(change).not.toHaveBeenCalled();
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(warn).toHaveBeenCalledWith(
     '[Checkbox]',
     expect.stringContaining('需要非空')
@@ -58,12 +62,13 @@ test('复选框名称缺失时不提交，补上独立名称后可提交并处�
   expect(change).toHaveBeenCalledWith(true);
 });
 
-test('Radio 没有 Group 时诊断去重，缺少名称时拒绝选择', () => {
+test('Radio 没有 Group 时诊断去重，缺少名称时拒绝选择', async () => {
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   const first = render(<Radio value="orphan-boundary" label="未接入分组" />);
   expect(first.queryByRole('radio')).toBeNull();
   first.unmount();
   const second = render(<Radio value="orphan-boundary" label="未接入分组" />);
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(warn).toHaveBeenCalledTimes(1);
   second.unmount();
   const change = jest.fn();
@@ -79,6 +84,7 @@ test('Radio 没有 Group 时诊断去重，缺少名称时拒绝选择', () => {
   expect(group.getByTestId('unnamed-radio').props.accessible).toBe(false);
   fireEvent.press(group.getByTestId('unnamed-radio'));
   expect(change).not.toHaveBeenCalled();
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(warn).toHaveBeenCalledTimes(3);
 });
 
@@ -128,7 +134,7 @@ test.each([
   expect(StyleSheet.flatten(colWidth(columns))).toEqual({ width });
 });
 
-test('Grid 非法列数回退且诊断去重，缺名项保留为展示内容', () => {
+test('Grid 非法列数回退且诊断去重，缺名项保留为展示内容', async () => {
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   const press = jest.fn();
   const item = { id: 'missing-name', label: '', icon: SendOutlined };
@@ -145,9 +151,11 @@ test('Grid 非法列数回退且诊断去重，缺名项保留为展示内容', 
   expect(first.queryByRole('button')).toBeNull();
   expect(first.getByTestId('grid-missing-name').props.onPress).toBeUndefined();
   expect(press).not.toHaveBeenCalled();
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(warn).toHaveBeenCalledTimes(2);
   first.unmount();
   render(<Grid items={[]} columns={0 as never} />);
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(warn).toHaveBeenCalledTimes(2);
 });
 
@@ -181,7 +189,7 @@ test.each([false, true])(
   }
 );
 
-test('Stepper 无名称时禁止操作，非法步长与倒置范围诊断只记录一次', () => {
+test('Stepper 无名称时禁止操作，非法步长与倒置范围诊断只记录一次', async () => {
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   const change = jest.fn();
   const content = () => (
@@ -201,11 +209,13 @@ test('Stepper 无名称时禁止操作，非法步长与倒置范围诊断只记
   expect(first.queryByRole('button')).toBeNull();
   fireEvent.press(first.getByTestId('stepper-increment'));
   expect(change).not.toHaveBeenCalled();
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(
     warn.mock.calls.filter(([scope]) => scope === '[Stepper]')
   ).toHaveLength(3);
   first.unmount();
   render(content());
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(
     warn.mock.calls.filter(([scope]) => scope === '[Stepper]')
   ).toHaveLength(4);
@@ -261,6 +271,7 @@ test('Cell 显式静态名称合并读屏状态，禁用和缺名 action 都不�
   fireEvent.press(page.getByRole('button', { name: '禁用项' }));
   expect(page.getByTestId('unnamed-cell').props.onPress).toBeUndefined();
   expect(press).not.toHaveBeenCalled();
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(warn).toHaveBeenCalledWith(
     '[Cell]',
     expect.stringContaining('缺少非空业务名称')

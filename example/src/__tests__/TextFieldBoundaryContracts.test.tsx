@@ -13,13 +13,17 @@ import { useErrorAnnouncement } from '../../../src/components/ui/TextField/useEr
 import { TextFieldSlot } from '../../../src/components/ui/TextField/TextFieldSlot';
 import type { TextFieldHandle } from '../../../src/components/ui/TextField/types';
 
+let fakeTimersEnabled = false;
 beforeEach(() => jest.clearAllMocks());
-afterEach(() => {
+afterEach(async () => {
+  if (fakeTimersEnabled) await jest.runAllTimersAsync();
+  else await new Promise<void>((resolve) => setTimeout(resolve, 0));
   jest.restoreAllMocks();
   jest.useRealTimers();
+  fakeTimersEnabled = false;
 });
 
-test('输入控制模式锁定并报告非法切换，缺回调的受控输入保持原值', () => {
+test('输入控制模式锁定并报告非法切换，缺回调的受控输入保持原值', async () => {
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   const change = jest.fn();
   const hook = renderHook(
@@ -29,12 +33,14 @@ test('输入控制模式锁定并报告非法切换，缺回调的受控输入�
   );
   hook.rerender({ value: undefined, onChangeText: change });
   expect(hook.result.current.value).toBe('original');
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(warn).toHaveBeenCalledWith(
     '[TextField]',
     expect.stringContaining('value 变成了 undefined')
   );
   hook.rerender({ value: 1, onChangeText: change });
   expect(hook.result.current.value).toBe('original');
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(warn).toHaveBeenCalledWith(
     '[TextField]',
     expect.stringContaining('必须是字符串')
@@ -43,6 +49,7 @@ test('输入控制模式锁定并报告非法切换，缺回调的受控输入�
   act(() => hook.result.current.onChangeText('ignored'));
   expect(hook.result.current.value).toBe('locked');
   expect(change).not.toHaveBeenCalled();
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(warn).toHaveBeenCalledWith(
     '[TextField]',
     expect.stringContaining('缺少 onChangeText')
@@ -56,13 +63,14 @@ test('输入控制模式锁定并报告非法切换，缺回调的受控输入�
   expect(uncontrolled.result.current.value).toBe('first');
   act(() => uncontrolled.result.current.onChangeText('typed'));
   expect(uncontrolled.result.current.value).toBe('typed');
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(warn).toHaveBeenCalledWith(
     '[TextField]',
     expect.stringContaining('后来收到了 value')
   );
 });
 
-test('非法布局和受管原生别名不会进入真实 TextInput，ref 与布局事件仍交付', () => {
+test('非法布局和受管原生别名不会进入真实 TextInput，ref 与布局事件仍交付', async () => {
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   const ref = React.createRef<TextFieldHandle>();
   const layout = jest.fn();
@@ -96,17 +104,19 @@ test('非法布局和受管原生别名不会进入真实 TextInput，ref 与布
   fireEvent(page.getByTestId('input-input'), 'layout', event);
   expect(layout).toHaveBeenCalledWith(event);
   expect(input.props.numberOfLines).toBeUndefined();
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(warn).toHaveBeenCalledWith(
     '[TextField]',
     expect.stringContaining('非法布局值')
   );
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(warn).toHaveBeenCalledWith(
     '[TextField]',
     expect.stringContaining('受管原生 props')
   );
 });
 
-test('非法 slot 与图标尺寸分别诊断，合法图标保留默认安全尺寸', () => {
+test('非法 slot 与图标尺寸分别诊断，合法图标保留默认安全尺寸', async () => {
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   const page = render(
     <ThemeProvider>
@@ -117,6 +127,7 @@ test('非法 slot 与图标尺寸分别诊断，合法图标保留默认安全�
     </ThemeProvider>
   );
   expect(page.UNSAFE_getByType(SearchOutlined).props.size).toBe(18);
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(warn).toHaveBeenCalledWith(
     '[TextFieldSlot]',
     expect.stringContaining('size 非法')
@@ -127,6 +138,7 @@ test('非法 slot 与图标尺寸分别诊断，合法图标保留默认安全�
     </ThemeProvider>
   );
   expect(page.queryByTestId('slot')).toBeNull();
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(warn).toHaveBeenCalledWith(
     '[TextFieldSlot]',
     expect.stringContaining('非法 TextField slot')
@@ -137,6 +149,7 @@ test.each(['ios', 'android'] as const)(
   '%s 搜索的焦点、错误和后续错误播报保持平台语义',
   (os) => {
     jest.useFakeTimers();
+    fakeTimersEnabled = true;
     jest.replaceProperty(Platform, 'OS', os);
     const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
     const page = render(
@@ -171,6 +184,7 @@ test.each(['ios', 'android'] as const)(
 
 test('错误清除不播报，已相同的值不重复触发', () => {
   jest.useFakeTimers();
+  fakeTimersEnabled = true;
   const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
   const hook = renderHook(useErrorAnnouncement, {
     initialProps: '已有错误' as string | undefined,

@@ -16,7 +16,8 @@ import {
 } from '../src/components/ui/Toast/toast';
 import { resolveImageSource } from '../src/utils/imageSource';
 
-afterEach(() => {
+afterEach(async () => {
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   jest.restoreAllMocks();
 });
 

@@ -45,7 +45,8 @@ export function NavBar({
   subtitle,
   left,
   right,
-  variant = 'default',
+  children,
+  variant = 'transparent',
   style,
   testID,
 }: NavBarProps) {
@@ -55,9 +56,12 @@ export function NavBar({
   const isTransparent = variant === 'transparent';
   const leftSlot = classifyNavBarSlot(left);
   const rightSlot = classifyNavBarSlot(right);
+  const contentSlot = classifyNavBarSlot(children);
   const warnedInvalidSlot = useRef(false);
   const hasInvalidSlot =
-    leftSlot.kind === 'invalid' || rightSlot.kind === 'invalid';
+    leftSlot.kind === 'invalid' ||
+    rightSlot.kind === 'invalid' ||
+    contentSlot.kind === 'invalid';
   useEffect(() => {
     if (hasInvalidSlot && !warnedInvalidSlot.current) {
       warnedInvalidSlot.current = true;
@@ -80,24 +84,33 @@ export function NavBar({
       testID={testID}
     >
       {!isBrand && !isTransparent ? <GlassLayer /> : null}
-      <View style={styles.side}>{resolveSlot(leftSlot, tint)}</View>
-      <View style={styles.center}>
-        <Text
-          style={[styles.title, { color: tint }]}
-          numberOfLines={1}
-          accessibilityRole="header"
-        >
-          {title}
-        </Text>
-        {subtitle ? (
-          <Text style={[styles.subtitle, { color: subtint }]} numberOfLines={1}>
-            {subtitle}
-          </Text>
-        ) : null}
-      </View>
-      <View style={[styles.side, styles.sideRight]}>
-        {resolveSlot(rightSlot, tint)}
-      </View>
+      {children !== undefined ? (
+        resolveSlot(contentSlot, tint)
+      ) : (
+        <>
+          <View style={styles.side}>{resolveSlot(leftSlot, tint)}</View>
+          <View style={styles.center}>
+            <Text
+              style={[styles.title, { color: tint }]}
+              numberOfLines={1}
+              accessibilityRole="header"
+            >
+              {title}
+            </Text>
+            {subtitle ? (
+              <Text
+                style={[styles.subtitle, { color: subtint }]}
+                numberOfLines={1}
+              >
+                {subtitle}
+              </Text>
+            ) : null}
+          </View>
+          <View style={[styles.side, styles.sideRight]}>
+            {resolveSlot(rightSlot, tint)}
+          </View>
+        </>
+      )}
     </View>
   );
 }

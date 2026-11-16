@@ -59,7 +59,8 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-afterEach(() => {
+afterEach(async () => {
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   restoreNativeMocks();
   jest.restoreAllMocks();
 });
@@ -309,7 +310,7 @@ test('GlassStats 覆盖 2/3/4 列，AvatarWithRing 使用受控尺寸与 token r
   avatarCoverage.expectComplete();
 });
 
-test('VersionPill 覆盖 build、默认/自定义/空白 fallback，并使用中文构建前缀', () => {
+test('VersionPill 覆盖 build、默认/自定义/空白 fallback，并使用中文构建前缀', async () => {
   render(<App />);
   enterBusiness();
   const stateCoverage = createShowcaseStateCoverage('VersionPill');
@@ -332,6 +333,7 @@ test('VersionPill 覆盖 build、默认/自定义/空白 fallback，并使用中
   expect(
     screen.getByLabelText('版本 0.20.0，构建 20260803，状态未知')
   ).toBeOnTheScreen();
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   expect(warnSpy).toHaveBeenCalledWith(
     '[VersionPill]',
     'VersionPill status.label 不能为空白，已回退为“状态未知”。'

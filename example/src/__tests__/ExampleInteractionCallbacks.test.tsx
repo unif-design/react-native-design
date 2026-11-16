@@ -16,8 +16,11 @@ jest.mock(
 );
 
 beforeEach(() => jest.useFakeTimers());
-afterEach(() => {
+afterEach(async () => {
   cleanup();
+  await act(async () => {
+    await jest.runAllTimersAsync();
+  });
   jest.restoreAllMocks();
   jest.useRealTimers();
 });
@@ -232,7 +235,7 @@ test('导航场景拒绝未知 id，边界回调保留原始选择摘要', () =>
   expect(page.getByText(/最新结果：TabBar · 选择/)).toBeTruthy();
 });
 
-test('基础与业务场景拒绝非法配置，logger 重入不会丢失安全结果', () => {
+test('基础与业务场景拒绝非法配置，logger 重入不会丢失安全结果', async () => {
   const page = enter(/主题与基础能力/);
   for (const node of page.UNSAFE_getAllByType(Design.Segmented))
     act(() => node.props.onChange('invalid'));
@@ -249,6 +252,9 @@ test('基础与业务场景拒绝非法配置，logger 重入不会丢失安全�
   });
   try {
     fireEvent.press(page.getByRole('button', { name: '记录主题诊断' }));
+    await act(async () => {
+      await jest.runAllTimersAsync();
+    });
     expect(page.getByText(/主题诊断示例已记录/)).toBeTruthy();
   } finally {
     Design.removeTransport('boundary-reentrant');

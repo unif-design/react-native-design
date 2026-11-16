@@ -1,5 +1,10 @@
 import React from 'react';
-import { fireEvent, render, userEvent } from '@testing-library/react-native';
+import {
+  fireEvent,
+  render,
+  userEvent,
+  waitFor,
+} from '@testing-library/react-native';
 import { Image, StyleSheet, Text } from 'react-native';
 import { SearchOutlined } from '@unif/react-native-icons';
 import {
@@ -29,33 +34,41 @@ import { GradientWash } from '../../../src/components/business/Decorations/Gradi
 import { selectImageAttemptSource } from '../../../src/components/ui/shared/selectImageAttemptSource.web';
 
 beforeEach(() => jest.clearAllMocks());
-afterEach(() => jest.restoreAllMocks());
+afterEach(async () => {
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
+  jest.restoreAllMocks();
+});
 
 test.each([
   ['native', Switch],
   ['web', WebSwitch],
-] as const)('%s 无名称开关无法提交且不暴露虚假名称', (_platform, Toggle) => {
-  const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-  const change = jest.fn();
-  const page = render(
-    <ThemeProvider>
-      <Toggle
-        value={false}
-        onChange={change}
-        accessibilityLabel=" "
-        testID="switch"
-      />
-    </ThemeProvider>
-  );
-  expect(page.queryByRole('switch')).toBeNull();
-  expect(page.getByTestId('switch').props.accessible).toBe(false);
-  fireEvent.press(page.getByTestId('switch'));
-  expect(change).not.toHaveBeenCalled();
-  expect(warn).toHaveBeenCalledWith(
-    '[Switch]',
-    expect.stringContaining('不能为空白')
-  );
-});
+] as const)(
+  '%s 无名称开关无法提交且不暴露虚假名称',
+  async (_platform, Toggle) => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const change = jest.fn();
+    const page = render(
+      <ThemeProvider>
+        <Toggle
+          value={false}
+          onChange={change}
+          accessibilityLabel=" "
+          testID="switch"
+        />
+      </ThemeProvider>
+    );
+    expect(page.queryByRole('switch')).toBeNull();
+    expect(page.getByTestId('switch').props.accessible).toBe(false);
+    fireEvent.press(page.getByTestId('switch'));
+    expect(change).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(warn).toHaveBeenCalledWith(
+        '[Switch]',
+        expect.stringContaining('不能为空白')
+      )
+    );
+  }
+);
 
 test('无名称按钮被禁用，合法玻璃和实色按钮保持真实按压回调', async () => {
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -73,13 +86,17 @@ test('无名称按钮被禁用，合法玻璃和实色按钮保持真实按压�
   expect(page.queryByRole('button')).toBeNull();
   fireEvent.press(page.getByTestId('blank'));
   expect(press).not.toHaveBeenCalled();
-  expect(warn).toHaveBeenCalledWith(
-    '[Button]',
-    expect.stringContaining('不能为空白')
+  await waitFor(() =>
+    expect(warn).toHaveBeenCalledWith(
+      '[Button]',
+      expect.stringContaining('不能为空白')
+    )
   );
-  expect(warn).toHaveBeenCalledWith(
-    '[IconButton]',
-    expect.stringContaining('不能为空白')
+  await waitFor(() =>
+    expect(warn).toHaveBeenCalledWith(
+      '[IconButton]',
+      expect.stringContaining('不能为空白')
+    )
   );
   page.rerender(
     <ThemeProvider>
@@ -106,9 +123,11 @@ test('Tabs 缺项诊断，合法 tab 与 Chip/AvatarGroup overflow 的按压只�
       <Tabs items={[]} value="a" onChange={change} />
     </ThemeProvider>
   );
-  expect(warn).toHaveBeenCalledWith(
-    '[Tabs]',
-    expect.stringContaining('至少需要 2 项')
+  await waitFor(() =>
+    expect(warn).toHaveBeenCalledWith(
+      '[Tabs]',
+      expect.stringContaining('至少需要 2 项')
+    )
   );
   page.rerender(
     <ThemeProvider>
@@ -143,7 +162,7 @@ test('Tabs 缺项诊断，合法 tab 与 Chip/AvatarGroup overflow 的按压只�
   expect(page.getByText('已选')).toBeTruthy();
 });
 
-test('生产 AvatarGroup 不写开发诊断，内容和溢出仍正常呈现', () => {
+test('生产 AvatarGroup 不写开发诊断，内容和溢出仍正常呈现', async () => {
   const dev = Reflect.get(globalThis, '__DEV__');
   Reflect.set(globalThis, '__DEV__', false);
   try {
@@ -154,6 +173,7 @@ test('生产 AvatarGroup 不写开发诊断，内容和溢出仍正常呈现', (
       </ThemeProvider>
     );
     expect(page.getByText('甲')).toBeTruthy();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
     expect(warn).not.toHaveBeenCalled();
   } finally {
     Reflect.set(globalThis, '__DEV__', dev);
@@ -241,7 +261,7 @@ test('Cell display extra 单独提供读屏文本，静态名称可不传选择�
   ).toBeUndefined();
 });
 
-test('Logo 缺少名称诊断去重，默认尺寸与 AvatarWithRing 缺省主题环保留', () => {
+test('Logo 缺少名称诊断去重，默认尺寸与 AvatarWithRing 缺省主题环保留', async () => {
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   const page = render(
     <ThemeProvider>
@@ -256,13 +276,15 @@ test('Logo 缺少名称诊断去重，默认尺寸与 AvatarWithRing 缺省主�
       <AvatarWithRing label="头像" />
     </ThemeProvider>
   );
-  expect(warn.mock.calls.filter(([scope]) => scope === '[Logo]')).toHaveLength(
-    1
+  await waitFor(() =>
+    expect(
+      warn.mock.calls.filter(([scope]) => scope === '[Logo]')
+    ).toHaveLength(1)
   );
   expect(page.getByText('头像')).toBeTruthy();
 });
 
-test('无效 NavBar slot 诊断去重且不进入可点击树', () => {
+test('无效 NavBar slot 诊断去重且不进入可点击树', async () => {
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   const props = { title: '标题', left: { invalid: true } as never };
   const page = render(
@@ -276,16 +298,20 @@ test('无效 NavBar slot 诊断去重且不进入可点击树', () => {
     </ThemeProvider>
   );
   expect(page.queryByRole('button')).toBeNull();
-  expect(warn).toHaveBeenCalledWith(
-    '[NavBar]',
-    expect.stringContaining('忽略无效')
+  await waitFor(() =>
+    expect(warn).toHaveBeenCalledWith(
+      '[NavBar]',
+      expect.stringContaining('忽略无效')
+    )
   );
-  expect(
-    warn.mock.calls.filter(([scope]) => scope === '[NavBar]')
-  ).toHaveLength(1);
+  await waitFor(() =>
+    expect(
+      warn.mock.calls.filter(([scope]) => scope === '[NavBar]')
+    ).toHaveLength(1)
+  );
 });
 
-test('轮播缺 action 配对或名称时保留纯展示内容并给出诊断', () => {
+test('轮播缺 action 配对或名称时保留纯展示内容并给出诊断', async () => {
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   const props = {
     data: ['甲'],
@@ -302,9 +328,11 @@ test('轮播缺 action 配对或名称时保留纯展示内容并给出诊断', 
       />
     </ThemeProvider>
   );
-  expect(warn).toHaveBeenCalledWith(
-    '[Carousel]',
-    expect.stringContaining('同时提供')
+  await waitFor(() =>
+    expect(warn).toHaveBeenCalledWith(
+      '[Carousel]',
+      expect.stringContaining('同时提供')
+    )
   );
   page.rerender(
     <ThemeProvider>
@@ -315,14 +343,16 @@ test('轮播缺 action 配对或名称时保留纯展示内容并给出诊断', 
       />
     </ThemeProvider>
   );
-  expect(warn).toHaveBeenCalledWith(
-    '[Carousel]',
-    expect.stringContaining('名称无效')
+  await waitFor(() =>
+    expect(warn).toHaveBeenCalledWith(
+      '[Carousel]',
+      expect.stringContaining('名称无效')
+    )
   );
   expect(page.queryByRole('button')).toBeNull();
 });
 
-test('PasswordInput 和 Search 拒绝调用方覆盖自管别名', () => {
+test('PasswordInput 和 Search 拒绝调用方覆盖自管别名', async () => {
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   const password = {
     value: 1,
@@ -346,13 +376,17 @@ test('PasswordInput 和 Search 拒绝调用方覆盖自管别名', () => {
   );
   expect(page.getByTestId('password-input').props.value).toBe('');
   expect(page.getByTestId('password-input').props.placeholder).toBe('输入口令');
-  expect(warn).toHaveBeenCalledWith(
-    '[PasswordInput]',
-    expect.stringContaining('自管 props')
+  await waitFor(() =>
+    expect(warn).toHaveBeenCalledWith(
+      '[PasswordInput]',
+      expect.stringContaining('自管 props')
+    )
   );
-  expect(warn).toHaveBeenCalledWith(
-    '[Search]',
-    expect.stringContaining('自管 props')
+  await waitFor(() =>
+    expect(warn).toHaveBeenCalledWith(
+      '[Search]',
+      expect.stringContaining('自管 props')
+    )
   );
   fireEvent(page.getByTestId('search-input'), 'submitEditing', {});
 });
@@ -383,7 +417,7 @@ test('未配置背景只保留内容，暗色自定义渐变和默认 Tag 保持
   ]);
 });
 
-test('Thumbnail 无效 source 保留占位，受管和非法 imageStyle 保持诊断且 Web source 选择使用实际实现', () => {
+test('Thumbnail 无效 source 保留占位，受管和非法 imageStyle 保持诊断且 Web source 选择使用实际实现', async () => {
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   const page = render(
     <ThemeProvider>
@@ -395,9 +429,11 @@ test('Thumbnail 无效 source 保留占位，受管和非法 imageStyle 保持�
     </ThemeProvider>
   );
   expect(page.UNSAFE_queryByType(Image)).toBeNull();
-  expect(warn).toHaveBeenCalledWith(
-    '[Thumbnail]',
-    expect.stringContaining('imageStyle.width')
+  await waitFor(() =>
+    expect(warn).toHaveBeenCalledWith(
+      '[Thumbnail]',
+      expect.stringContaining('imageStyle.width')
+    )
   );
   page.rerender(
     <ThemeProvider>
@@ -408,9 +444,11 @@ test('Thumbnail 无效 source 保留占位，受管和非法 imageStyle 保持�
       />
     </ThemeProvider>
   );
-  expect(warn).toHaveBeenCalledWith(
-    '[Thumbnail]',
-    expect.stringContaining('imageStyle')
+  await waitFor(() =>
+    expect(warn).toHaveBeenCalledWith(
+      '[Thumbnail]',
+      expect.stringContaining('imageStyle')
+    )
   );
   expect(selectImageAttemptSource({ source: { uri: 'a' }, key: 'a' })).toEqual({
     uri: 'a',

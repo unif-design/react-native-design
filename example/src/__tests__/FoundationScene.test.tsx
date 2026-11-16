@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import {
   BRAND_ORANGE,
   avatar,
@@ -146,11 +146,12 @@ function enterFoundation(): void {
 function escapeRegExp(value: string | number): string {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
-afterEach(() => {
+afterEach(async () => {
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
   restoreNativeMocks();
   jest.restoreAllMocks();
 });
-test('Foundation 展示真实 theme、token、palette、scale 与尺寸令牌事实', () => {
+test('Foundation 展示真实 theme、token、palette、scale 与尺寸令牌事实', async () => {
   render(<App />);
   const callableMocks = [
     DesignRuntime.childTestID,
@@ -370,11 +371,10 @@ test('Foundation 展示真实 theme、token、palette、scale 与尺寸令牌事
   getLogLevel.mockClear();
   removeTransport.mockClear();
   setLogLevel.mockClear();
-  fireEvent.press(
-    screen.getByRole('button', {
-      name: '记录主题诊断',
-    })
-  );
+  await act(async () => {
+    fireEvent.press(screen.getByRole('button', { name: '记录主题诊断' }));
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+  });
   runtimeCoverage.prove(
     'setLogLevel',
     'getLogLevel',
@@ -400,7 +400,7 @@ test('Foundation 展示真实 theme、token、palette、scale 与尺寸令牌事
   );
   runtimeCoverage.expectComplete();
 });
-test('logger action 通过真实 transport 进入最新结果，历史默认不展开且按需限制详情', () => {
+test('logger action 通过真实 transport 进入最新结果，历史默认不展开且按需限制详情', async () => {
   render(<App />);
   enterFoundation();
   DesignRuntime.setLogLevel('error');
@@ -413,11 +413,10 @@ test('logger action 通过真实 transport 进入最新结果，历史默认不�
   removeTransport.mockClear();
   setLogLevel.mockClear();
   expect(screen.queryByTestId('result-latest')).not.toBeOnTheScreen();
-  fireEvent.press(
-    screen.getByRole('button', {
-      name: '记录主题诊断',
-    })
-  );
+  await act(async () => {
+    fireEvent.press(screen.getByRole('button', { name: '记录主题诊断' }));
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+  });
   expect(addTransport).toHaveBeenCalledWith(
     expect.objectContaining({
       id: 'foundation-scene-one-shot',
@@ -444,6 +443,9 @@ test('logger action 通过真实 transport 进入最新结果，历史默认不�
       })
     );
   }
+  await act(async () => {
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+  });
   expect(screen.queryByTestId(/^result-history-/)).not.toBeOnTheScreen();
   fireEvent.press(
     screen.getByRole('button', {

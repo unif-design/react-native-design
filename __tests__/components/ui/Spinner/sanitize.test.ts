@@ -1,6 +1,15 @@
-import { expect, jest, test } from '@jest/globals';
+import { afterEach, beforeEach, expect, jest, test } from '@jest/globals';
 import { sanitizeSpinnerProps } from '../../../../src/components/ui/Spinner/shared';
 import { normalizeCircularProgress } from '../../../../src/components/ui/CircularProgress/normalizeCircularProgress';
+
+beforeEach(() => {
+  jest.useFakeTimers();
+});
+afterEach(async () => {
+  await jest.runAllTimersAsync();
+  jest.restoreAllMocks();
+  jest.useRealTimers();
+});
 
 test.each([NaN, Infinity, -Infinity, -4, 0, 7])(
   'Spinner 非法 size %p 保留有限可见圆环',
@@ -22,10 +31,11 @@ test.each([NaN, Infinity, -Infinity, -4, 0])(
   }
 );
 
-test('重复非法输入只诊断一次，合法边界保持不变', () => {
+test('重复非法输入只诊断一次，合法边界保持不变', async () => {
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   sanitizeSpinnerProps(6.25, -2.5);
   sanitizeSpinnerProps(6.25, -2.5);
+  await jest.runAllTimersAsync();
   expect(warn).toHaveBeenCalledTimes(2);
   expect(sanitizeSpinnerProps(8, 0.25)).toEqual({
     safeSize: 8,
@@ -34,11 +44,12 @@ test('重复非法输入只诊断一次，合法边界保持不变', () => {
   warn.mockRestore();
 });
 
-test('CircularProgress 同一异常值重复出现不刷屏', () => {
+test('CircularProgress 同一异常值重复出现不刷屏', async () => {
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
   const input = { value: -3.25, size: 24, thickness: 2 };
   expect(normalizeCircularProgress(input).safeValue).toBe(0);
   expect(normalizeCircularProgress(input).safeValue).toBe(0);
+  await jest.runAllTimersAsync();
   expect(warn).toHaveBeenCalledTimes(1);
   warn.mockRestore();
 });

@@ -96,7 +96,7 @@
     "@types/react": "^19.2.0",
     "@types/react-is": "^19.3.0",
     "@unif/react-native-icons": "0.4.1",
-    "@unif/react-native-logger": "^0.2.0",
+    "@unif/react-native-logger": "^0.3.0",
     "commitlint": "^21.0.1",
     "del-cli": "^7.0.0",
     "eslint": "^9.39.4",

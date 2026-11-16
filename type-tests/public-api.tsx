@@ -37,6 +37,7 @@ import {
   MotionScope,
   useMotionActive,
   useNativeSurfaceStyles,
+  useReducedTransparency,
   lightColors,
   Stepper,
   Switch,
@@ -69,6 +70,7 @@ import {
 
 export function NativeSurfaceStyleFixture() {
   const surfaces = useNativeSurfaceStyles();
+  useReducedTransparency() satisfies boolean;
   return (
     <View
       style={[
@@ -190,6 +192,29 @@ const navBarAction: NavBarAction = {
 const navBarDisplaySlot: NavBarSlot = <Text>只读</Text>;
 <NavBar title="标题" left={navBarAction} right={navBarDisplaySlot} />;
 <NavBar title="标题" right={<Text>只读</Text>} />;
+<NavBar>
+  <Text>自定义导航内容</Text>
+</NavBar>;
+// @ts-expect-error 自定义内容与标准标题互斥
+<NavBar title="标题">
+  <Text>自定义导航内容</Text>
+</NavBar>;
+// @ts-expect-error 自定义内容与左侧槽位互斥
+<NavBar left={navBarAction}>
+  <Text>自定义导航内容</Text>
+</NavBar>;
+// @ts-expect-error 自定义内容与右侧槽位互斥
+<NavBar right={navBarAction}>
+  <Text>自定义导航内容</Text>
+</NavBar>;
+// @ts-expect-error 自定义内容与副标题互斥
+<NavBar subtitle="副标题">
+  <Text>自定义导航内容</Text>
+</NavBar>;
+// @ts-expect-error 标准导航必须提供标题
+<NavBar left={navBarAction} />;
+// @ts-expect-error 自定义内容必须明确提供节点或 null
+<NavBar children={undefined} />;
 
 // --- Checkbox / Radio / Switch:每个选择控件都有 accessible name ----------
 
