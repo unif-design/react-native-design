@@ -110,6 +110,56 @@ test.each(['glass', 'transparent'] as const)(
   }
 );
 
+test.each(['transparent', 'glass'] as const)(
+  '悬浮标题滚动后使用调用方底色，回顶部恢复 %s',
+  async (headerSurface) => {
+    const renderSheet = (
+      color: string,
+      contentMode: 'scroll' | 'fixed' = 'scroll'
+    ) => (
+      <ThemeProvider>
+        <Sheet
+          headerMode="overlay"
+          headerSurface={headerSurface}
+          scrolledHeaderBackgroundColor={color}
+          contentMode={contentMode}
+          header={<Text>浮动标题</Text>}
+        >
+          <Text>正文</Text>
+        </Sheet>
+      </ThemeProvider>
+    );
+    const page = await render(renderSheet('#eee1d1'));
+    const headerColor = () =>
+      viewStyles(page).find((style) => style?.zIndex === 1)?.backgroundColor;
+    const scrollTo = (y: number) =>
+      fireEvent.scroll(
+        page.UNSAFE_root.findAll(
+          (node) => String(node.type) === 'RCTScrollView'
+        )[0],
+        { nativeEvent: { contentOffset: { x: 0, y } } }
+      );
+
+    expect(headerColor()).toBeUndefined();
+    await scrollTo(-8);
+    expect(headerColor()).toBeUndefined();
+    await scrollTo(20);
+    expect(headerColor()).toBe('#eee1d1');
+    expect(page.UNSAFE_queryAllByType(GlassLayer)).toHaveLength(0);
+    await page.rerender(renderSheet('#283038'));
+    expect(headerColor()).toBe('#283038');
+    await scrollTo(0);
+    expect(headerColor()).toBeUndefined();
+    expect(page.UNSAFE_queryAllByType(GlassLayer)).toHaveLength(
+      headerSurface === 'glass' ? 1 : 0
+    );
+    await scrollTo(25);
+    await page.rerender(renderSheet('#283038', 'fixed'));
+    await page.rerender(renderSheet('#283038'));
+    expect(headerColor()).toBeUndefined();
+  }
+);
+
 test('悬浮标题保留百分比顶部留白并跟随实际内容宽度', async () => {
   const page = await render(
     <ThemeProvider>

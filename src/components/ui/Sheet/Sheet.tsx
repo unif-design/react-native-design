@@ -1,5 +1,5 @@
 import { GlassLayer } from '../GlassLayer';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useThemedStyles } from '../../../theme';
 import { makeStyles } from './styles';
@@ -10,6 +10,7 @@ export function Sheet({
   header,
   headerMode = 'fixed',
   headerSurface = 'glass',
+  scrolledHeaderBackgroundColor,
   footer,
   footerSurface = 'glass',
   contentMode = 'fixed',
@@ -21,7 +22,18 @@ export function Sheet({
   const styles = useThemedStyles(makeStyles);
   const [headerHeight, setHeaderHeight] = useState(0);
   const [contentWidth, setContentWidth] = useState(0);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
   const overlayHeader = headerMode === 'overlay' && contentMode === 'scroll';
+  const trackHeaderScroll =
+    overlayHeader &&
+    header != null &&
+    scrolledHeaderBackgroundColor !== undefined;
+  const showScrolledBackground = trackHeaderScroll && headerScrolled;
+  useEffect(() => {
+    if (!trackHeaderScroll) {
+      setHeaderScrolled(false);
+    }
+  }, [trackHeaderScroll]);
   const contentStyle = StyleSheet.flatten([
     styles.content,
     contentContainerStyle,
@@ -38,7 +50,12 @@ export function Sheet({
     <View style={[styles.root, style]} testID={testID}>
       {header != null ? (
         <View
-          style={overlayHeader && styles.overlayHeader}
+          style={[
+            overlayHeader && styles.overlayHeader,
+            showScrolledBackground && {
+              backgroundColor: scrolledHeaderBackgroundColor,
+            },
+          ]}
           pointerEvents={overlayHeader ? 'box-none' : undefined}
           onLayout={
             overlayHeader
@@ -46,7 +63,9 @@ export function Sheet({
               : undefined
           }
         >
-          {overlayHeader && headerSurface === 'glass' ? (
+          {overlayHeader &&
+          headerSurface === 'glass' &&
+          !showScrolledBackground ? (
             <GlassLayer effect="clear" />
           ) : null}
           {header}
@@ -64,6 +83,13 @@ export function Sheet({
               ? (event) => setContentWidth(event.nativeEvent.layout.width)
               : undefined
           }
+          onScroll={
+            trackHeaderScroll
+              ? (event) =>
+                  setHeaderScrolled(event.nativeEvent.contentOffset.y > 0)
+              : undefined
+          }
+          scrollEventThrottle={trackHeaderScroll ? 16 : undefined}
           contentContainerStyle={[
             styles.content,
             contentContainerStyle,
