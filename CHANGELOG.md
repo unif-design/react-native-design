@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.21.0](https://github.com/unif-design/react-native-design/compare/v1.20.0...v1.21.0) (2026-11-20)
+
+
+### Features
+
+* **sheet:** 支持悬浮标题滚动背景色 ([#207](https://github.com/unif-design/react-native-design/issues/207)) ([ac6723a](https://github.com/unif-design/react-native-design/commit/ac6723ae33ff3d57cc8039c1607c94c733e9b931))
+
 # [1.20.0](https://github.com/unif-design/react-native-design/compare/v1.19.2...v1.20.0) (2026-11-16)
 
 
