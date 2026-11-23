@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.1](https://github.com/unif-design/react-native-design/compare/v1.21.0...v1.21.1) (2026-11-23)
+
+
+### Bug Fixes
+
+* **toast:** 跨窗口保留提示的剩余显示时间 ([#209](https://github.com/unif-design/react-native-design/issues/209)) ([68e1289](https://github.com/unif-design/react-native-design/commit/68e12896a3f5da5ffedf4d5cb60cdf3b703f7bd0))
+
 # [1.21.0](https://github.com/unif-design/react-native-design/compare/v1.20.0...v1.21.0) (2026-11-20)
 
 
