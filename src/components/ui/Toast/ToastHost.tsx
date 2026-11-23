@@ -1,5 +1,11 @@
 import { GlassLayer } from '../GlassLayer';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { AccessibilityInfo, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
@@ -19,6 +25,7 @@ import {
   completeToast,
   isCurrentToastDelivery,
   registerToastHost,
+  startToastPresentation,
 } from './toast';
 import type { ToastDelivery } from './store';
 import type { ToastHostProps } from './types';
@@ -80,7 +87,7 @@ export function ToastHost({
       };
       setDelivery(next);
     };
-    // 被后挂载的 Host 接管:立刻收起当前 toast。store 已丢弃这次投递,自身的退场
+    // 被后挂载的 Host 接管:立刻收起当前 toast。store 已将消息交给新窗口,自身的退场
     // timer 从此过不了 CAS —— 不主动清,这条 toast 会冻在屏幕上直到本 Host 卸载。
     const clearOnSuspend = () => {
       currentDeliveryRef.current = null;
@@ -104,18 +111,8 @@ export function ToastHost({
       return;
     }
     return () => {
-      // 顺序固定:先清身份 ref(让所有在途回调立刻失效)→ 撤销 timer/动画 → 最后释放 owner。
+      // 布局 effect 已撤回动画和计时器，最后归还窗口。
       currentDeliveryRef.current = null;
-      if (dismissTimer.current) {
-        clearTimeout(dismissTimer.current);
-        dismissTimer.current = null;
-      }
-      if (exitTimer.current) {
-        clearTimeout(exitTimer.current);
-        exitTimer.current = null;
-      }
-      cancelAnimation(op);
-      cancelAnimation(ty);
       lease.release();
     };
   }, [op, ty]);
@@ -139,20 +136,35 @@ export function ToastHost({
     setDelivery(null);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!delivery) return;
+    const presentation = startToastPresentation(delivery);
+    if (!presentation) {
+      setDelivery((current) => (current === delivery ? null : current));
+      return;
+    }
+    if (presentation.remainingMs === 0) {
+      finishIfCurrent(delivery);
+      return;
+    }
     const entry = delivery.entry;
     // [M-15] toast 出现时主动播报 —— 容器 pointerEvents="none" + 3s 自动消失,
     // SR 用户对一闪而过的反馈本无任何感知通道。
-    AccessibilityInfo.announceForAccessibility(entry.message);
+    if (presentation.first)
+      AccessibilityInfo.announceForAccessibility(entry.message);
     // 进入方向:top 从上(-8)滑入,bottom / center 从下(8)滑入
     const from = entry.position === 'top' ? -8 : 8;
     cancelAnimation(op);
     cancelAnimation(ty);
-    op.value = 0;
-    ty.value = from;
-    op.value = withTiming(1, { duration: motion.base });
-    ty.value = withTiming(0, { duration: motion.base });
+    if (presentation.first) {
+      op.value = 0;
+      ty.value = from;
+      op.value = withTiming(1, { duration: motion.base });
+      ty.value = withTiming(0, { duration: motion.base });
+    } else {
+      op.value = 1;
+      ty.value = 0;
+    }
 
     dismissTimer.current = setTimeout(() => {
       // 定时器触发时可能早已不是当前投递(新 toast 抢先)—— 先自证再播退场动画。
@@ -164,7 +176,7 @@ export function ToastHost({
         () => finishIfCurrent(delivery),
         motion.base
       );
-    }, entry.duration);
+    }, presentation.remainingMs);
 
     return () => {
       if (dismissTimer.current) {

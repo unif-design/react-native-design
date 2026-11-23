@@ -1,5 +1,11 @@
 import { GlassLayer } from '../GlassLayer';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { AccessibilityInfo, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -15,6 +21,7 @@ import {
   completeToast,
   isCurrentToastDelivery,
   registerToastHost,
+  startToastPresentation,
 } from './toast';
 import type { ToastDelivery } from './store';
 import type { ToastHostProps } from './types';
@@ -79,9 +86,10 @@ export function ToastHost({
         leaseId: next.leaseId,
         entryId: next.entry.id,
       };
+      setVisible(next.continuing);
       setDelivery(next);
     };
-    // 被后挂载的 Host 接管:立刻收起当前 toast。store 已丢弃这次投递,自身的退场
+    // 被后挂载的 Host 接管:立刻收起当前 toast。store 已将消息交给新窗口,自身的退场
     // timer/RAF 从此过不了 CAS —— 不主动清,这条 toast 会冻在屏幕上直到本 Host 卸载。
     const clearOnSuspend = () => {
       currentDeliveryRef.current = null;
@@ -122,31 +130,43 @@ export function ToastHost({
     setDelivery(null);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     // delivery=null:上一轮 effect 的 cleanup 已清 timer/RAF,这里无需重复。
     if (!delivery) return;
+    const presentation = startToastPresentation(delivery);
+    if (!presentation) {
+      setDelivery((current) => (current === delivery ? null : current));
+      return;
+    }
+    if (presentation.remainingMs === 0) {
+      finishIfCurrent(delivery);
+      return;
+    }
     const entry = delivery.entry;
     // [M-15] web 同样主动播报(RN-Web announceForAccessibility 注入 aria-live region)。
-    AccessibilityInfo.announceForAccessibility(entry.message);
+    if (presentation.first)
+      AccessibilityInfo.announceForAccessibility(entry.message);
 
     // cancelled 标志:delivery 快速连续切换 / 组件卸载时,cleanup 置 true。RAF 与
     // timer 回调执行前都检查它 —— cancelAnimationFrame 在部分浏览器不保证取消
     // 已排队回调,且双 RAF 的外层回调可能在 cleanup 后仍跑并 queue 内层,光靠
     // cancel 防不住。cancelled 兜底,杜绝 unmount 后 setState 警告 + 状态错位。
     let cancelled = false;
-    // 进场:每次切换都从 visible=false 开始,确保 CSS transition 有起点
-    setVisible(false);
-    // 双 RAF 才能稳过 React commit/paint 一帧 —— 否则同一 microtask 内 visible
-    // 还是 true(未刷),CSS transition 没起点。
-    enterRafRef.current = requestAnimationFrame(() => {
-      if (cancelled) return;
+    if (presentation.first) {
+      // 双 RAF 为新提示建立 CSS 入场起点。
+      setVisible(false);
       enterRafRef.current = requestAnimationFrame(() => {
-        if (cancelled || !isCurrentToastDelivery(delivery)) return;
-        enterRafRef.current = null;
-        setVisible(true);
+        if (cancelled) return;
+        enterRafRef.current = requestAnimationFrame(() => {
+          if (cancelled || !isCurrentToastDelivery(delivery)) return;
+          enterRafRef.current = null;
+          setVisible(true);
+        });
       });
-    });
-    // 停留时长:从投递到关闭 = entry.duration ms。
+    } else {
+      setVisible(true);
+    }
+    // 新窗口沿用首次显示确定的到期时间。
     dismissTimerRef.current = setTimeout(() => {
       if (cancelled || !isCurrentToastDelivery(delivery)) return;
       setVisible(false);
@@ -154,7 +174,7 @@ export function ToastHost({
         if (cancelled) return;
         finishIfCurrent(delivery);
       }, motion.base);
-    }, entry.duration);
+    }, presentation.remainingMs);
 
     return () => {
       cancelled = true;
@@ -179,9 +199,10 @@ export function ToastHost({
   const animatedWebStyle: React.CSSProperties = {
     opacity: visible ? 1 : 0,
     transform: visible ? 'translateY(0px)' : 'translateY(8px)',
-    transition: reduced
-      ? 'none'
-      : `opacity ${motion.base}ms ease-out, transform ${motion.base}ms ease-out`,
+    transition:
+      reduced || (delivery.continuing && visible)
+        ? 'none'
+        : `opacity ${motion.base}ms ease-out, transform ${motion.base}ms ease-out`,
   };
 
   return (
