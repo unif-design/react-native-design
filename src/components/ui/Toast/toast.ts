@@ -4,7 +4,7 @@
  * 文件名故意小写 `toast.ts`,host 组件叫 `ToastHost.tsx`,避免 APFS 大小写冲突。
  *
  * 本文件只做公共入参归一化(kind / duration / position),投递与身份仲裁全部在
- * `store.ts`。下面三个内部导出只给两个 Host 用,**不进公共 barrel**。
+ * `store.ts`。内部投递接口只给两个 Host 用,**不进公共 barrel**。
  */
 import { createLogger } from '../../../utils/logger';
 import { createToastStore } from './store';
@@ -72,6 +72,9 @@ export const toast = Object.assign((input: ToastInput) => emit(input, 'info'), {
 
 /** 内部:ToastHost 挂载时接管 owner;前任入栈挂起,本 lease 释放时归还。 */
 export const registerToastHost = store.registerHost;
+
+/** 内部：Host 提交画面后取得本条提示的显示时长和首次播报资格。 */
+export const startToastPresentation = store.startPresentation;
 
 /** 内部:三重身份 CAS —— owner token + leaseId + entry id 全对才算完成。 */
 export const completeToast = store.complete;

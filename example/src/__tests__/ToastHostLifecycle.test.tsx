@@ -86,6 +86,106 @@ describe.each([
     act(() => jest.runOnlyPendingTimers());
   });
 
+  test('新提示即时替换旧提示，开关窗口共享剩余时间，只播报一次', () => {
+    const announce = jest
+      .spyOn(AccessibilityInfo, 'announceForAccessibility')
+      .mockClear();
+    const root = render(
+      <ThemeProvider>
+        <Host testID="root-toast" />
+      </ThemeProvider>
+    );
+    act(() => toast('旧提示'));
+    act(() => jest.advanceTimersByTime(100));
+    act(() => toast({ message: '商品目录已更新', duration: 3000 }));
+    act(() => jest.advanceTimersByTime(1000));
+    const modal = render(
+      <ThemeProvider>
+        <Host testID="modal-toast" />
+      </ThemeProvider>
+    );
+    expect(root.queryByText('商品目录已更新')).toBeNull();
+    expect(modal.getByText('商品目录已更新')).toBeTruthy();
+    act(() => jest.advanceTimersByTime(1000));
+    modal.unmount();
+    expect(root.getByText('商品目录已更新')).toBeTruthy();
+    expect(announce.mock.calls.map(([message]) => message)).toEqual([
+      '旧提示',
+      '商品目录已更新',
+    ]);
+    act(() => jest.advanceTimersByTime(999));
+    expect(root.getByText('商品目录已更新')).toBeTruthy();
+    act(() => jest.advanceTimersByTime(1 + motion.base));
+    expect(root.queryByTestId('root-toast')).toBeNull();
+    root.unmount();
+  });
+
+  test('末个窗口关闭后计时仍继续，过期提示不会在下一窗口复活', () => {
+    const announce = jest
+      .spyOn(AccessibilityInfo, 'announceForAccessibility')
+      .mockClear();
+    const original = render(
+      <ThemeProvider>
+        <Host />
+      </ThemeProvider>
+    );
+    act(() => toast({ message: '已读提示', duration: 3000 }));
+    act(() => jest.advanceTimersByTime(2000));
+    original.unmount();
+    act(() => jest.advanceTimersByTime(1500));
+    const next = render(
+      <ThemeProvider>
+        <Host />
+      </ThemeProvider>
+    );
+    expect(next.queryByText('已读提示')).toBeNull();
+    expect(announce).toHaveBeenCalledTimes(1);
+    next.unmount();
+  });
+
+  test('消息交回后若已在本次布局前到期，当前窗口不重放', () => {
+    const runtime: typeof import('../../../src/components/ui/Toast/toast') = require('../../../src/components/ui/Toast/toast');
+    const root = render(
+      <ThemeProvider>
+        <Host />
+      </ThemeProvider>
+    );
+    const lease = runtime.registerToastHost((d) =>
+      runtime.startToastPresentation(d)
+    );
+    act(() => toast({ message: '即将到期', duration: 400 }));
+    act(() => {
+      lease!.release();
+      jest.setSystemTime(Date.now() + 401);
+    });
+    expect(root.queryByText('即将到期')).toBeNull();
+    root.unmount();
+  });
+
+  test.each([false, true])(
+    '提交画面之前投递已失效，保留同时到达的新消息=%s',
+    (replace) => {
+      const runtime: typeof import('../../../src/components/ui/Toast/toast') = require('../../../src/components/ui/Toast/toast');
+      const original = runtime.startToastPresentation;
+      jest
+        .spyOn(runtime, 'startToastPresentation')
+        .mockImplementationOnce((d) => {
+          runtime.completeToast(d.ownerToken, d.leaseId, d.entry.id);
+          if (replace) toast('后来的提示');
+          return original(d);
+        });
+      const page = render(
+        <ThemeProvider>
+          <Host />
+        </ThemeProvider>
+      );
+      act(() => toast('已结束的提示'));
+      expect(page.queryByText('已结束的提示')).toBeNull();
+      if (replace) expect(page.getByText('后来的提示')).toBeTruthy();
+      page.unmount();
+    }
+  );
+
   test('内层接管清除外层提示，卸载后外层接收后续提示', async () => {
     const outer = render(
       <ThemeProvider>

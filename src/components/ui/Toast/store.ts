@@ -23,18 +23,15 @@ import type { ToastEntry } from './types';
  * Modal 物理盖住,只有「Modal 内自挂一个 Host」能显示 —— 旧的 first-wins 把这条唯一
  * 正解判成恒惰性死码。
  *
- * 两个方向对在途 toast 的处理**刻意不同**:
- * - **接管**(有人挂到我上面)→ 在途 toast **丢弃**。它属于「已经被盖住的过去」,
- *   搬到接管者身上重放没有意义。
- * - **归还**(接管者卸载、我恢复)→ 在途 toast **整条交回、立即重投**。
- *   「Modal 内操作成功 → toast → 关窗」是最常见的一条路径,那条 toast 刚发出、用户
- *   一眼都还没看到;丢掉的话比不挂内层 Host 还糟。不追剩余时长,重投 = 完整重播一遍。
+ * 首个呈现消息的 Host 确定到期时间。接管和归还只切换绘制它的窗口，
+ * 后续 Host 共享剩余时长，已过期的消息在交接时清除。
  */
 
 export type ToastDelivery = {
   entry: ToastEntry;
   ownerToken: symbol;
   leaseId: number;
+  continuing: boolean;
 };
 
 export type ToastSubscriber = (delivery: ToastDelivery) => void;
@@ -63,6 +60,9 @@ export type ToastStore = {
     subscriber: ToastSubscriber,
     onClear?: ToastClearSubscriber
   ): ToastHostLease | null;
+  startPresentation(
+    delivery: ToastDelivery
+  ): { first: boolean; remainingMs: number } | null;
   complete(ownerToken: symbol, leaseId: number, entryId: number): boolean;
   isCurrent(delivery: ToastDelivery): boolean;
   pendingEntry(): ToastEntry | null;
@@ -80,18 +80,21 @@ export function createToastStore(log: Logger): ToastStore {
   let delivered: ToastDelivery | null = null;
   let owner: Owner | null = null;
   let leaseCounter = 0;
+  let expiresAt: number | null = null;
   /** 被接管而挂起的前任,栈顶 = 最近一个。当前 owner 卸载时从这里恢复。 */
   const suspended: Owner[] = [];
 
   function beginDelivery(entry: ToastEntry, capturedOwner: Owner): void {
+    pending = null;
+    if (expiresAt !== null && expiresAt <= Date.now()) return;
     const delivery: ToastDelivery = {
       entry,
       ownerToken: capturedOwner.token,
       leaseId: ++leaseCounter,
+      continuing: expiresAt !== null,
     };
     // 先原子地把 pending 取走并落 delivered,再调 subscriber:subscriber 内同步
     // 再 publish 时看到的必须是「已投递」而不是「还在 pending」的半状态。
-    pending = null;
     delivered = delivery;
     try {
       capturedOwner.subscriber?.(delivery);
@@ -110,6 +113,7 @@ export function createToastStore(log: Logger): ToastStore {
   }
 
   function publish(entry: ToastEntry): void {
+    expiresAt = null;
     const current = owner;
     // 未挂 Host 是**受支持路径**,不告警:启动早期的 toast 应当在 Host 挂上后补投。
     if (!current?.subscriber) {
@@ -119,10 +123,12 @@ export function createToastStore(log: Logger): ToastStore {
     beginDelivery(entry, current);
   }
 
-  /** 把前任降为挂起态:丢弃它的在途投递,并通知它收起屏幕上那条 toast。 */
+  /** 交出当前消息，再通知旧窗口撤下画面。回调中新发布的提示可以正常替换它。 */
   function suspendOwner(target: Owner): void {
-    // 不回退到 pending —— 否则接管者一挂上就把前任那条补投一遍(跨 owner 重放)。
-    if (delivered?.ownerToken === target.token) delivered = null;
+    if (delivered?.ownerToken === target.token) {
+      pending = delivered.entry;
+      delivered = null;
+    }
     const notify = target.onClear;
     if (!notify) return;
     try {
@@ -174,7 +180,7 @@ export function createToastStore(log: Logger): ToastStore {
       release(): void {
         const index = suspended.indexOf(self);
         if (index >= 0) {
-          // 乱序卸载(父 Modal 先于内层 Host 卸载):挂起者的在途投递在被接管时已丢弃,
+          // 父 Modal 先于内层 Host 卸载时，消息已经交给当前窗口，
           // 这里只把它摘出栈,绝不能碰当前 owner。
           suspended.splice(index, 1);
           self.subscriber = null;
@@ -187,12 +193,6 @@ export function createToastStore(log: Logger): ToastStore {
         owner = null;
         const mine = delivered?.ownerToken === token ? delivered : null;
         if (mine) delivered = null;
-        // 归还方向**不丢**在途 toast —— 与接管方向相反,这条区分是有实证的:
-        // 「Modal 内操作成功 → toast → setVisible(false)」是最常见的一条路径,
-        // 内层 Host 跟着 Modal 一起卸载,这条 toast 刚发出、用户一眼都没看到。
-        // 接管方向丢弃是因为前任那条属于「已经被盖住的过去」;归还方向是把刚发生的
-        // 事情**交回上一层**,不是跨 owner 重放。整条交回、不追剩余时长 —— 这正是
-        // 既有的「owner A 卸载后 B 拿到同一 entry、新 leaseId」形态。
         if (mine && !pending) pending = mine.entry;
         const successor = popSuspended();
         if (!successor) return;
@@ -203,6 +203,15 @@ export function createToastStore(log: Logger): ToastStore {
         if (owner?.token !== successor.token) resumeAfterFailedInstall();
       },
     };
+  }
+
+  /** 第一次在窗口呈现时开始计时，后续窗口只读取同一条提示的剩余时长。 */
+  function startPresentation(delivery: ToastDelivery) {
+    if (!isCurrent(delivery)) return null;
+    const now = Date.now();
+    const first = expiresAt === null;
+    expiresAt ??= now + delivery.entry.duration;
+    return { first, remainingMs: Math.max(0, expiresAt - now) };
   }
 
   function complete(
@@ -232,6 +241,7 @@ export function createToastStore(log: Logger): ToastStore {
   return {
     publish,
     registerHost,
+    startPresentation,
     complete,
     isCurrent,
     pendingEntry: () => pending,

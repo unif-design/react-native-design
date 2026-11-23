@@ -119,7 +119,7 @@ describe('ToastStore — 栈式 lease(后挂载者接管)', () => {
     expect(outer).toHaveLength(0);
   });
 
-  test('接管时原 owner 收到 clear,在途投递被丢弃', () => {
+  test('接管时原 owner 收到 clear，同一条提示转交新窗口', () => {
     const store = createToastStore(testLog);
     let outerCleared = 0;
     const outer: ToastDelivery[] = [];
@@ -134,8 +134,7 @@ describe('ToastStore — 栈式 lease(后挂载者接管)', () => {
 
     store.registerHost(() => {});
     expect(outerCleared).toBe(1);
-    // 在途 toast 是瞬态消息:接管瞬间丢弃,不回 pending、不跨 owner 重放
-    expect(store.currentDelivery()).toBeNull();
+    expect(store.currentDelivery()?.entry.message).toBe('A');
     expect(store.pendingEntry()).toBeNull();
   });
 
@@ -199,17 +198,19 @@ describe('ToastStore — 栈式 lease(后挂载者接管)', () => {
     expect(store.pendingEntry()).toBeNull();
   });
 
-  test('接管方向仍丢弃 —— 接管者不会收到前任的在途 toast', () => {
+  test('旧窗口未呈现的提示由新窗口首次显示，旧窗口无权开始计时', () => {
     const store = createToastStore(testLog);
-    store.registerHost(() => {});
-    store.publish(entry(1, 'A'));
-
+    const outer: ToastDelivery[] = [];
     const inner: ToastDelivery[] = [];
+    store.registerHost((d) => outer.push(d));
+    store.publish(entry(1, 'A'));
     store.registerHost((d) => inner.push(d));
-    // 接管 = 前任被盖住,它那条属于「过去」;只有归还方向才交回重投
-    expect(inner).toHaveLength(0);
-    expect(store.currentDelivery()).toBeNull();
-    expect(store.pendingEntry()).toBeNull();
+    expect(store.startPresentation(outer[0]!)).toBeNull();
+    expect(inner[0]?.continuing).toBe(false);
+    expect(store.startPresentation(inner[0]!)).toEqual({
+      first: true,
+      remainingMs: 3000,
+    });
   });
 
   test('归还重投后 latest-wins 依旧 —— 后来的 toast 正常替换', () => {
