@@ -129,7 +129,7 @@ test.each(['transparent', 'glass'] as const)(
         </Sheet>
       </ThemeProvider>
     );
-    const page = await render(renderSheet('#eee1d1'));
+    const page = await render(renderSheet(lightColors.primaryContainer));
     const headerColor = () =>
       viewStyles(page).find((style) => style?.zIndex === 1)?.backgroundColor;
     const scrollTo = (y: number) =>
@@ -144,18 +144,18 @@ test.each(['transparent', 'glass'] as const)(
     await scrollTo(-8);
     expect(headerColor()).toBeUndefined();
     await scrollTo(20);
-    expect(headerColor()).toBe('#eee1d1');
+    expect(headerColor()).toBe(lightColors.primaryContainer);
     expect(page.UNSAFE_queryAllByType(GlassLayer)).toHaveLength(0);
-    await page.rerender(renderSheet('#283038'));
-    expect(headerColor()).toBe('#283038');
+    await page.rerender(renderSheet(darkColors.primaryContainer));
+    expect(headerColor()).toBe(darkColors.primaryContainer);
     await scrollTo(0);
     expect(headerColor()).toBeUndefined();
     expect(page.UNSAFE_queryAllByType(GlassLayer)).toHaveLength(
       headerSurface === 'glass' ? 1 : 0
     );
     await scrollTo(25);
-    await page.rerender(renderSheet('#283038', 'fixed'));
-    await page.rerender(renderSheet('#283038'));
+    await page.rerender(renderSheet(darkColors.primaryContainer, 'fixed'));
+    await page.rerender(renderSheet(darkColors.primaryContainer));
     expect(headerColor()).toBeUndefined();
   }
 );
