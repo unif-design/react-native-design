@@ -17,7 +17,7 @@
 
 ## 目标契约
 
-[本库新版本设计](../../unif-platform-architecture/libraries/react-native-design.md)定义职责、公共输入输出、状态和验证边界；[库版本原则](../../unif-platform-architecture/libraries/README.md)明确新旧版本独立。规范根默认是并列的 `unif-platform-architecture` 工作区，其他目录布局由任务提供实际位置。
+[本库新版本设计](https://github.com/unif-design/unif-platform-architecture/blob/main/libraries/react-native-design.md)定义职责、公共输入输出、状态和验证边界；[库版本原则](https://github.com/unif-design/unif-platform-architecture/blob/main/libraries/README.md)明确新旧版本独立。本地可在同级的 `unif-platform-architecture` 仓库查阅这些文件。
 
 目标契约用于新版本开发；当前可用接口以实际源码和发布版本为准。版本采用原则在上述库设计索引维护。
 
@@ -41,7 +41,7 @@
 
 历史 spec、plan 和审查记录用于溯源，不作为当前使用文档或新需求入口。
 
-玻璃材质的当前接口和平台回退见 [GlassLayer 文档](../website/docs/components/glass-layer.mdx)与[主题契约](../../unif-platform-architecture/libraries/react-native-design/theme.md)。
+玻璃材质的当前接口和平台回退见 [GlassLayer 文档](../website/docs/components/glass-layer.mdx)与[主题契约](https://github.com/unif-design/unif-platform-architecture/blob/main/libraries/react-native-design/theme.md)。
 
 全量系统材质范围与内容层边界见[54 个公开组件覆盖记录](reviews/2026-10-11-liquid-glass-coverage.md)，原生可复验场景见 [Liquid Glass 手工验证宿主](../manual-tests/liquid-glass/README.md)。
 
